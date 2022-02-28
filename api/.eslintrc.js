@@ -6,6 +6,12 @@ module.exports = {
     tsconfigRootDir: __dirname
   },
   plugins: ['@typescript-eslint/eslint-plugin'],
+  'prettier/prettier': [
+    'error',
+    {
+      'endOfLine': 'auto',
+    }
+  ],  
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',

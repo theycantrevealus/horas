@@ -8,7 +8,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 
-@Entity({ name: 'user' })
+@Entity({ name: 'account' })
 export class AccountModel {
   @PrimaryColumn()
   @Generated('uuid')
