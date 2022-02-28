@@ -21,7 +21,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new SentryInterceptor());
 
   const options = new DocumentBuilder()
-    .setTitle('SIMRS v3.0.0')
+    .setTitle('HORAS v3.0.0')
     .addTag('user')
     .setVersion('0.0.9')
     .addBearerAuth(
