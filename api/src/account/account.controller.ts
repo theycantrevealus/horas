@@ -1,18 +1,17 @@
 import * as bcrypt from 'bcrypt';
-import { Controller, Body, Post } from '@nestjs/common';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Body, Post, UseGuards } from '@nestjs/common';
+import { ApiCreatedResponse, ApiTags, ApiBearerAuth, ApiBadRequestResponse } from '@nestjs/swagger';
 import { AccountModel } from '../model/account.model';
 import { AccountService } from './account.service';
-import { AccountLoginDTO, LoginResponseDTO } from './dto/account';
+import { AccountLoginDTO, AccountLoginResponseDTO } from './dto/account';
 import { AccountAddDTO, AccountAddDTOResponseSuccess, AccountAddDTOResponseFailed } from './dto/account.add.dto';
 import { getConnection, Repository } from 'typeorm';
+import { Authorization } from '../decorator/auth.decorator';
 import { AccountAuthorityAddDTO, AccountAuthorityAddDTOResponseFailed, AccountAuthorityAddDTOResponseSuccess } from './dto/account.authority.add.dto';
+import { JwtAuthGuard } from '../guard/jwt.guard';
 
 @Controller('account')
 @ApiTags('account')
-@ApiCreatedResponse({
-  type: LoginResponseDTO,
-})
 export class AccountController {
   constructor(
     private accountService: AccountService
@@ -22,7 +21,18 @@ export class AccountController {
     return this.accountService.account_login(data);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
   @Post('account_add')
+  @ApiCreatedResponse({
+    description: 'Account created successfully. \nNow you can logged in using this new account. It will created default password (123)',
+    type: AccountAddDTOResponseSuccess,
+  })
+  @ApiBadRequestResponse({
+    description: 'Account failed to created.',
+    type: AccountAddDTOResponseFailed
+  })
   async account_add(@Body() data: AccountAddDTO) {
     const saltOrRounds = 10;
     const password = data.password;
@@ -35,7 +45,9 @@ export class AccountController {
     }
   }
 
-
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
   @Post('authority_add')
   async authority_add(@Body() data: AccountAuthorityAddDTO) {
     const result = await this.accountService.create_authority(data);

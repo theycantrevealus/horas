@@ -36,7 +36,7 @@ export class AccountAddDTO {
 }
 
 export class AccountAddDTOResponseSuccess {
-    @ApiProperty({ example: 200 })
+    @ApiProperty({ example: 201 })
     @IsNumber()
     status: number;
 
@@ -46,7 +46,7 @@ export class AccountAddDTOResponseSuccess {
 }
 
 export class AccountAddDTOResponseFailed {
-    @ApiProperty({ example: 201 })
+    @ApiProperty({ example: 400 })
     @IsNumber()
     status: number;
 

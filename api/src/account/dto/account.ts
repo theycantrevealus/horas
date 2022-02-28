@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber } from 'class-validator';
+import { AccountModel } from '../../model/account.model';
 
 export class AccountLoginDTO {
   @ApiProperty({
@@ -17,7 +18,7 @@ export class AccountLoginDTO {
   password: string;
 }
 
-export class LoginResponseDTO {
+export class AccountLoginResponseDTO {
   @ApiProperty({ example: 200 })
   @IsNumber()
   status: number;
@@ -35,7 +36,7 @@ export class LoginResponseDTO {
     },
     nullable: true,
   })
-  user: InterfaceAccount;
+  user: AccountModel;
 
   @ApiProperty({ example: 'ey...' })
   @IsString()
