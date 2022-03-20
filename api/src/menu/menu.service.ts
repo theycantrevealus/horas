@@ -6,7 +6,7 @@ import { MenuAddDTO } from './dto/menu.add.dto';
 @Injectable()
 export class MenuService {
     constructor(
-        private menuRepo: Repository<MenuModel>
+
     ) { }
 
 }
