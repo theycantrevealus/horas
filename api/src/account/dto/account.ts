@@ -5,14 +5,14 @@ import { AccountModel } from '../../model/account.model';
 export class AccountLoginDTO {
   @ApiProperty({
     uniqueItems: true,
-    example: 'takashitanaka@pondokcoder.com',
+    example: 'takashitanaka@horas.com',
   })
   @IsString()
   email: string;
 
   @ApiProperty({
     minLength: 6,
-    example: '123',
+    example: '123456',
   })
   @IsString()
   password: string;

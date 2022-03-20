@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber } from 'class-validator';
+import { AccountAuthorityModel } from '../../model/account.authority.model';
 
 export class AccountAddDTO {
     @ApiProperty({
@@ -25,7 +26,7 @@ export class AccountAddDTO {
         example: 'From Authority UID'
     })
     @IsString()
-    authority: string;
+    authority: AccountAuthorityModel;
 
     @ApiProperty({
         minLength: 6,
@@ -35,22 +36,12 @@ export class AccountAddDTO {
     password: string;
 }
 
-export class AccountAddDTOResponseSuccess {
+export class AccountAddDTOResponse {
     @ApiProperty({ example: 201 })
     @IsNumber()
     status: number;
 
     @ApiProperty({ example: 'Account Created Successfully' })
-    @IsString()
-    message: string;
-}
-
-export class AccountAddDTOResponseFailed {
-    @ApiProperty({ example: 400 })
-    @IsNumber()
-    status: number;
-
-    @ApiProperty({ example: 'Account Failed to Created' })
     @IsString()
     message: string;
 }

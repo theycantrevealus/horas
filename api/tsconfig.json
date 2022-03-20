@@ -3,6 +3,7 @@
     "*.ts",
     "**/*.ts"
   ],
+  "types": ["jest", "node"],
   "exclude": [
     "./index.ts",
     "./index.d.ts",

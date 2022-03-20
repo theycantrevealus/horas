@@ -1,60 +1,75 @@
-import * as bcrypt from 'bcrypt';
-import { Controller, Body, Post, UseGuards } from '@nestjs/common';
-import { ApiCreatedResponse, ApiTags, ApiBearerAuth, ApiBadRequestResponse } from '@nestjs/swagger';
-import { AccountModel } from '../model/account.model';
+import { Controller, Body, Post, UseGuards, Get, HttpStatus, Param, Put } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { AccountService } from './account.service';
-import { AccountLoginDTO, AccountLoginResponseDTO } from './dto/account';
-import { AccountAddDTO, AccountAddDTOResponseSuccess, AccountAddDTOResponseFailed } from './dto/account.add.dto';
-import { getConnection, Repository } from 'typeorm';
+import { AccountLoginDTO } from './dto/account';
+import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto';
 import { Authorization } from '../decorator/auth.decorator';
-import { AccountAuthorityAddDTO, AccountAuthorityAddDTOResponseFailed, AccountAuthorityAddDTOResponseSuccess } from './dto/account.authority.add.dto';
 import { JwtAuthGuard } from '../guard/jwt.guard';
+import { AccountEditDTOResponse } from './dto/account.edit.dto';
+import { AuthorityService } from './authority.service';
 
 @Controller('account')
 @ApiTags('account')
 export class AccountController {
   constructor(
-    private accountService: AccountService
+    private accountService: AccountService,
+    private authorityService: AuthorityService
   ) { }
+
+  //=========================================================================================== CREDENTIAL   SECTION
   @Post('login')
-  async login(@Body() data: AccountLoginDTO) {
-    return this.accountService.account_login(data);
+  async login (@Body() data: AccountLoginDTO) {
+    return this.accountService.login(data);
+  }
+
+  //=========================================================================================== ACCOUNT SECTION
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @Get()
+  async list () {
+    return this.accountService.all()
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
-  @Post('account_add')
-  @ApiCreatedResponse({
-    description: 'Account created successfully. \nNow you can logged in using this new account. It will created default password (123)',
-    type: AccountAddDTOResponseSuccess,
+  @ApiParam({
+    name: 'uid'
   })
-  @ApiBadRequestResponse({
-    description: 'Account failed to created.',
-    type: AccountAddDTOResponseFailed
-  })
-  async account_add(@Body() data: AccountAddDTO) {
-    const saltOrRounds = 10;
-    const password = data.password;
-    data.password = await bcrypt.hash(password, saltOrRounds);
-    const result = await this.accountService.create_account(data);
-    if (result) {
-      return AccountAddDTOResponseSuccess;
-    } else {
-      return AccountAddDTOResponseFailed;
-    }
+  @Get('detail/:uid')
+  async detail (@Param() param) {
+    return await this.accountService.detail(param.uid)
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
-  @Post('authority_add')
-  async authority_add(@Body() data: AccountAuthorityAddDTO) {
-    const result = await this.accountService.create_authority(data);
+  @Post('add')
+  async add (@Body() data) {
+    //return data
+    let result = new AccountAddDTOResponse()
+    const authority = await this.authorityService.detail(data.authority)
+    result = await this.accountService.add(data)
+    return result
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @Put('edit')
+  async edit (@Body() data) {
+    const response = new AccountEditDTOResponse();
+
+    const result = await this.accountService.edit(data);
     if (result) {
-      return AccountAuthorityAddDTOResponseSuccess;
+      response.message = 'Account added successfully'
+      response.status = HttpStatus.OK
     } else {
-      return AccountAuthorityAddDTOResponseFailed;
+      response.message = 'Account failed to add'
+      response.status = HttpStatus.BAD_REQUEST
     }
+    return response
   }
 }

@@ -1,12 +1,13 @@
-import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import * as Sentry from '@sentry/node';
-import { BrowserTracing } from '@sentry/tracing';
-import { SentryInterceptor } from './interceptor/sentry';
-import 'dotenv/config';
+import { NestFactory } from '@nestjs/core'
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+import { AppModule } from './app.module'
+import * as Sentry from '@sentry/node'
+import { BrowserTracing } from '@sentry/tracing'
+import { SentryInterceptor } from './interceptor/sentry'
+import 'dotenv/config'
+declare const module: any
 
-async function bootstrap() {
+async function bootstrap () {
   Sentry.init({
     dsn: `${process.env.SENTRY_DSN}`,
     integrations: [
@@ -15,28 +16,32 @@ async function bootstrap() {
       }),
     ],
     tracesSampleRate: 1.0,
-  });
+  })
 
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalInterceptors(new SentryInterceptor());
+  const app = await NestFactory.create(AppModule)
+  app.useGlobalInterceptors(new SentryInterceptor())
 
   const options = new DocumentBuilder()
     .setTitle('HORAS v3.0.0')
-    .addTag('user')
     .setVersion('0.0.9')
     .addBearerAuth(
       { type: 'http', scheme: 'Bearer', bearerFormat: 'JWT' },
       'JWT',
     )
-    .build();
+    .build()
 
-  const document = SwaggerModule.createDocument(app, options);
+  const document = SwaggerModule.createDocument(app, options)
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
       tagsSorter: 'alpha',
       operationsSorter: 'alpha',
+      persistAuthorization: true,
     },
-  });
-  await app.listen(3000);
+  })
+  await app.listen(3000)
+  if (module.hot) {
+    module.hot.accept()
+    module.hot.dispose(() => app.close())
+  }
 }
-bootstrap();
+bootstrap()

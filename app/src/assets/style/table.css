@@ -1,0 +1,129 @@
+table thead tr th{
+    font-size: 10pt !important;
+    padding: 10pt 1.5rem !important;
+}
+
+th.p-filter-column input.p-inputtext {
+    padding: 8px !important;
+    font-size: 8pt !important;
+}
+
+tbody.p-treetable-tbody tr td {
+    font-size: 8pt !important;
+    padding: 10px !important;
+    -webkit-transition-duration: .3s;
+    -moz-transition-duration: .3s;
+    -o-transition-duration: .3s;
+    transition-duration: .3s;
+}
+
+tbody.p-treetable-tbody tr:hover td {
+    background: #DCFFD6;
+}
+
+tbody.p-treetable-tbody tr td .p-treetable-toggler {
+    width: 1rem; height: 1rem;
+    background: #fafafa !important;
+}
+
+tbody.p-treetable-tbody tr td .p-treetable-toggler-icon {
+    font-size: 8pt !important;
+}
+
+tbody.p-treetable-tbody tr td .p-buttonset button.p-button.p-button-sm {
+    margin-right:  0 !important;
+    font-size: 10pt !important;
+    padding: 8px !important;
+}
+
+tbody.p-treetable-tbody tr td:last-child {
+    white-space: nowrap;
+}
+
+tbody.p-treetable-tbody tr td .p-buttonset {
+    display: inline-flex;
+}
+
+tbody.p-treetable-tbody tr td .p-buttonset button {
+    padding: 10px !important;
+}
+
+tbody.p-treetable-tbody tr td .p-buttonset .p-button.p-button-icon-only {
+    width: auto !important;
+    margin-right: 0 !important;
+}
+
+tbody.p-treetable-tbody tr td .p-buttonset button span {
+    font-size: 8pt !important;
+
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last,
+.p-paginator .p-paginator-page {
+    width: auto !important;
+    min-width: 1px !important;
+    height: auto !important;
+    padding: 10px !important;
+}
+
+.p-paginator .p-paginator-icon,
+.p-paginator .p-paginator-page {
+    font-size: 8pt !important;
+}
+
+
+
+
+
+
+/*=================================== DATATABLE =====================================*/
+.p-datatable-table {
+    font-family: Karla, SansSerif, Arial, serif !important;
+}
+
+.p-datatable-table thead tr th, .p-datatable-table thead tr th.p-filter-column {
+    padding: 7px 1.5rem !important;
+    font-size: 10pt !important;
+}
+
+.p-column-filter-menu-button {
+    width: 20px !important; height: 20px !important;
+}
+
+.p-datatable-table thead tr th.p-filter-column .p-column-filter {
+    padding: 0 !important;
+}
+
+.p-datatable-table thead tr th.p-filter-column .p-column-filter input {
+    padding: 5px 10px !important;
+}
+
+.p-datatable-table thead tr th.p-filter-column .p-column-filter .p-link {
+    padding: 0 !important;
+}
+
+.p-datatable-table thead tr th.p-filter-column .p-column-filter .p-link .pi {
+    font-size: 6pt !important;
+}
+
+.p-datatable-table thead tr th .p-sortable-column-icon {
+    font-size: 6pt !important;
+}
+
+.p-datatable-table tbody tr td {
+    padding: 5px 1.5rem !important;
+    font-size: 10pt !important;
+}
+
+.p-datatable-table tbody tr td button.p-button {
+    font-size: 7pt !important;
+    padding: 5px !important;
+}
+
+.p-datatable-table tbody tr td button.p-button span.material-icons {
+    font-size: 8pt !important;
+    margin: 0 4px;
+}
