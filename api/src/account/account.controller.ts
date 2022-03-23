@@ -1,15 +1,17 @@
-import { Controller, Body, Post, UseGuards, Get, HttpStatus, Param, Put } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
-import { AccountService } from './account.service';
-import { AccountLoginDTO } from './dto/account';
-import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto';
-import { Authorization } from '../decorator/auth.decorator';
-import { JwtAuthGuard } from '../guard/jwt.guard';
-import { AccountEditDTOResponse } from './dto/account.edit.dto';
-import { AuthorityService } from './authority.service';
+import { Controller, Body, Post, UseGuards, Get, HttpStatus, Param, Put, UseInterceptors, Delete } from '@nestjs/common'
+import { ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger'
+import { AccountService } from './account.service'
+import { AccountLoginDTO } from './dto/account'
+import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto'
+import { Authorization } from '../decorator/auth.decorator'
+import { JwtAuthGuard } from '../guard/jwt.guard'
+import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
+import { AuthorityService } from './authority.service'
+import { LoggingInterceptor } from '../interceptor/logging'
 
 @Controller('account')
 @ApiTags('account')
+@UseInterceptors(LoggingInterceptor)
 export class AccountController {
   constructor(
     private accountService: AccountService,
@@ -19,7 +21,7 @@ export class AccountController {
   //=========================================================================================== CREDENTIAL   SECTION
   @Post('login')
   async login (@Body() data: AccountLoginDTO) {
-    return this.accountService.login(data);
+    return this.accountService.login(data)
   }
 
   //=========================================================================================== ACCOUNT SECTION
@@ -38,7 +40,7 @@ export class AccountController {
   @ApiParam({
     name: 'uid'
   })
-  @Get('detail/:uid')
+  @Get(':uid/detail')
   async detail (@Param() param) {
     return await this.accountService.detail(param.uid)
   }
@@ -46,30 +48,30 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
-  @Post('add')
-  async add (@Body() data) {
-    //return data
-    let result = new AccountAddDTOResponse()
-    const authority = await this.authorityService.detail(data.authority)
-    result = await this.accountService.add(data)
-    return result
+  @ApiParam({
+    name: 'uid'
+  })
+  @Delete(':uid/delete')
+  async delete_soft (@Param() param) {
+    return await this.accountService.delete_soft(param.uid)
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
-  @Put('edit')
-  async edit (@Body() data) {
-    const response = new AccountEditDTOResponse();
+  @Post('add')
+  async add (@Body() data: AccountAddDTO) {
+    return await this.accountService.add(data)
+  }
 
-    const result = await this.accountService.edit(data);
-    if (result) {
-      response.message = 'Account added successfully'
-      response.status = HttpStatus.OK
-    } else {
-      response.message = 'Account failed to add'
-      response.status = HttpStatus.BAD_REQUEST
-    }
-    return response
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @ApiParam({
+    name: 'uid'
+  })
+  @Put(':uid/edit')
+  async edit (@Body() data: AccountEditDTO, @Param() param) {
+    return await this.accountService.edit(data, param.uid)
   }
 }

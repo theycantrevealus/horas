@@ -4,7 +4,7 @@ import { MenuService } from './menu.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { configService } from '../config/orm'
 import { MenuModel } from '../model/menu.model'
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   controllers: [MenuController],

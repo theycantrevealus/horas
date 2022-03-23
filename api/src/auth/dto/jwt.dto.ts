@@ -1,4 +1,4 @@
-import { LogLoginModel } from "src/model/log.login.model";
+import { LogLoginModel } from "src/model/log.login.model"
 
 export interface JWTTokenResponse {
     status: number

@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { AccountModel } from "./account.model";
-import { LogLoginModel } from "./log.login.model";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm"
+import { AccountModel } from "./account.model"
+import { LogLoginModel } from "./log.login.model"
 
+@Entity('log_activity')
 export class LogActivityModel {
     @PrimaryGeneratedColumn('increment')
     id: number

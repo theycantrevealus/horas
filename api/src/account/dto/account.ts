@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber } from 'class-validator';
-import { AccountModel } from '../../model/account.model';
+import { ApiProperty } from '@nestjs/swagger'
+import { IsString, IsNumber } from 'class-validator'
+import { AccountModel } from '../../model/account.model'
 
 export class AccountLoginDTO {
   @ApiProperty({
@@ -8,24 +8,24 @@ export class AccountLoginDTO {
     example: 'takashitanaka@horas.com',
   })
   @IsString()
-  email: string;
+  email: string
 
   @ApiProperty({
     minLength: 6,
     example: '123456',
   })
   @IsString()
-  password: string;
+  password: string
 }
 
 export class AccountLoginResponseDTO {
   @ApiProperty({ example: 200 })
   @IsNumber()
-  status: number;
+  status: number
 
   @ApiProperty({ example: 'user_login_success' })
   @IsString()
-  message: string;
+  message: string
 
   @ApiProperty({
     example: {
@@ -36,23 +36,23 @@ export class AccountLoginResponseDTO {
     },
     nullable: true,
   })
-  user: AccountModel;
+  user: AccountModel
 
   @ApiProperty({ example: 'ey...' })
   @IsString()
-  token: string;
+  token: string
 
   @ApiProperty({ example: null, nullable: true })
-  errors: { [key: string]: any };
+  errors: { [key: string]: any }
 }
 
 export interface InterfaceAccount {
-  uid: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  password: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
+  uid: string
+  email: string
+  first_name: string
+  last_name: string
+  password: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
 }

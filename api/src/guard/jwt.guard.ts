@@ -3,11 +3,11 @@ import {
     HttpException,
     Injectable,
     UnauthorizedException,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Reflector } from '@nestjs/core';
-import { JWTTokenDecodeResponse, JWTTokenResponse } from '../auth/dto/jwt.dto';
-import { AuthService } from '../auth/auth.service';
+} from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import { Reflector } from '@nestjs/core'
+import { JWTTokenDecodeResponse, JWTTokenResponse } from '../auth/dto/jwt.dto'
+import { AuthService } from '../auth/auth.service'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -15,34 +15,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         private readonly reflector: Reflector,
         private authService: AuthService
     ) {
-        super();
+        super()
     }
-    handleRequest(err, account, info) {
+    handleRequest (err, account, info) {
         if (err || !account) {
-            throw err || new UnauthorizedException();
+            throw err || new UnauthorizedException()
         }
-        return account;
+        return account
     }
 
-    public async canActivate(context: ExecutionContext): Promise<boolean> {
+    public async canActivate (context: ExecutionContext): Promise<boolean> {
         const secured = this.reflector.get<string[]>(
             'secured',
             context.getHandler(),
-        );
+        )
 
         if (!secured) {
-            return true;
+            return true
         }
-        const request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest()
 
         if (!request.headers.authorization) {
-            new UnauthorizedException();
-            return false;
+            new UnauthorizedException()
+            return false
         }
 
         const decodeTokenResponse: JWTTokenResponse = await this.authService.validate_token({
             token: request.headers.authorization,
-        });
+        })
 
         if (!decodeTokenResponse.user) {
             throw new HttpException(
@@ -52,7 +52,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                     errors: null,
                 },
                 decodeTokenResponse.status,
-            );
+            )
         }
         if (
             !decodeTokenResponse ||
@@ -66,9 +66,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                     errors: null,
                 },
                 decodeTokenResponse.status,
-            );
+            )
         }
 
-        return true;
+        return true
     }
 }

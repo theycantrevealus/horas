@@ -35,9 +35,9 @@ export class AuthorityService {
         })
     }
 
-    async edit (data: AccountAuthorityEditDTO) {
+    async edit (data, uid: string) {
         let response = new AccountAuthorityEditDTOResponse()
-        const authRes = this.accountAuthorityRepo.update(data.uid, data)
+        const authRes = this.accountAuthorityRepo.update(uid, data)
         if (authRes) {
             response.message = 'Authority updated succesfully'
             response.status = HttpStatus.OK

@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, IsNumber } from 'class-validator'
-import { AccountAuthorityModel } from '../../model/account.authority.model'
 
-export class AccountAddDTO {
+export class LogActivityAddDTO {
     @ApiProperty({
         uniqueItems: true,
         example: 'takashitanaka@pondokcoder.com',

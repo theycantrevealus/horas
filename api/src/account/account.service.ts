@@ -13,6 +13,7 @@ import { AuthService } from '../auth/auth.service'
 import { Http } from '@sentry/node/dist/integrations'
 import { AccountAuthorityDeleteDTOResponse } from './dto/account.authority.delete.dto'
 import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
+import { AuthorityService } from './authority.service'
 
 @Injectable()
 export class AccountService {
@@ -23,7 +24,9 @@ export class AccountService {
         @InjectRepository(AccountAuthorityModel)
         private readonly accountAuthorityRepo: Repository<AccountAuthorityModel>,
 
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+
+        private readonly accountAuthorityService: AuthorityService
     ) { }
 
     async login (account: AccountLoginDTO) {
@@ -58,12 +61,16 @@ export class AccountService {
         return this.accountRepo.createQueryBuilder('account').innerJoinAndSelect('account.authority', 'authority').where('account.uid = :uid', { uid }).getOne()
     }
 
-    async edit (account: AccountEditDTO) {
+    async delete_soft (uid: string) {
+        return this.accountRepo.softDelete({ uid })
+    }
+
+    async edit (account, uid: string) {
         let response = new AccountEditDTOResponse()
-        const saltOrRounds = 10;
+        const saltOrRounds = 10
         const password = account.password
         account.password = await bcrypt.hash(password, saltOrRounds)
-        const accountRes = this.accountRepo.update(account.uid, account)
+        const accountRes = this.accountRepo.update(uid, account)
         if (accountRes) {
             response.message = 'Account updated successfully'
             response.status = HttpStatus.OK
@@ -74,9 +81,9 @@ export class AccountService {
         return response
     }
 
-    async add (account: AccountAddDTO) {
+    async add (account) {
         let response = new AccountAddDTOResponse()
-        const saltOrRounds = 10;
+        const saltOrRounds = 10
         const password = account.password
         account.password = await bcrypt.hash(password, saltOrRounds)
         const accountRes = this.accountRepo.save(account)

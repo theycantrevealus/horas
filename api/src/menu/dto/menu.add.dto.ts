@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsNumber } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger"
+import { IsString, IsNumber } from "class-validator"
 
 export class MenuAddDTO {
     @ApiProperty({
@@ -13,9 +13,9 @@ export class MenuAddDTO {
 export class MenuAddResponseDTO {
     @ApiProperty({ example: 201 })
     @IsNumber()
-    status: number;
+    status: number
 
     @ApiProperty({ example: 'Menu Created Successfully' })
     @IsString()
-    message: string;
+    message: string
 }
