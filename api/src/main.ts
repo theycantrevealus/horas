@@ -22,7 +22,7 @@ async function bootstrap () {
   app.useGlobalInterceptors(new SentryInterceptor())
 
   const options = new DocumentBuilder()
-    .setTitle('HORAS v3.0.0')
+    .setTitle('HORAS (Hospital Responsive Assistant System) v3.0.0')
     .setVersion('0.0.9')
     .addBearerAuth(
       { type: 'http', scheme: 'Bearer', bearerFormat: 'JWT' },

@@ -7,10 +7,13 @@ export class LogLoginModel {
     id: number
 
     @ManyToOne(() => AccountModel, account => account.uid)
-    user: AccountModel
+    account: AccountModel
 
     @Column({ type: 'text' })
     log_meta: string
+
+    @Column({ type: 'text' })
+    token: string
 
     @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
     logged_at: Date

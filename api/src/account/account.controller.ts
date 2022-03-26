@@ -11,7 +11,6 @@ import { LoggingInterceptor } from '../interceptor/logging'
 
 @Controller('account')
 @ApiTags('account')
-@UseInterceptors(LoggingInterceptor)
 export class AccountController {
   constructor(
     private accountService: AccountService,
@@ -20,6 +19,7 @@ export class AccountController {
 
   //=========================================================================================== CREDENTIAL   SECTION
   @Post('login')
+  @UseInterceptors(LoggingInterceptor)
   async login (@Body() data: AccountLoginDTO) {
     return this.accountService.login(data)
   }

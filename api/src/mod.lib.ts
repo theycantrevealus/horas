@@ -6,4 +6,9 @@ const idenClass: any = {
     'log': LogService
 }
 
-export { idenClass }
+const colCodeName: any = {
+    'id': 'iden',
+    'uid': 'iden'
+}
+
+export { idenClass, colCodeName }

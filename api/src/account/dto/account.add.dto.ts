@@ -26,7 +26,7 @@ export class AccountAddDTO {
         example: 'From Authority UID'
     })
     @IsString()
-    authority: string
+    authority: any
 
     @ApiProperty({
         minLength: 6,

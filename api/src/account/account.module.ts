@@ -9,6 +9,8 @@ import { AccountAuthorityModel } from '../model/account.authority.model'
 import { AuthService } from '../auth/auth.service'
 import { JwtModule } from '@nestjs/jwt'
 import { AuthorityService } from './authority.service'
+import { LogActivityModel } from '../model/log.activity.model'
+import { LogLoginModel } from '../model/log.login.model'
 
 @Module({
     imports: [
@@ -16,7 +18,7 @@ import { AuthorityService } from './authority.service'
             secret: `${process.env.JWT_SECRET}`
         }),
         TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel], 'default')
+        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel, LogActivityModel, LogLoginModel], 'default')
     ],
     controllers: [AccountController, AuthorityController],
     providers: [AccountService, AuthorityService, AuthService],

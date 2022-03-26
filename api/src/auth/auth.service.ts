@@ -23,8 +23,6 @@ export class AuthService implements JwtOptionsFactory {
                     expiresIn: 30 * 24 * 60 * 60,
                 })
 
-                //Sign log id
-
                 result = {
                     user: data.uid,
                     status: HttpStatus.CREATED,

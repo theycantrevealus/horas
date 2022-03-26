@@ -21,7 +21,7 @@ describe('Account Login Test', () => {
     let accountService: AccountService
     let accountRepo: Repository<AccountModel>
     let authorityRepo: Repository<AccountAuthorityModel>
-    let app: INestApplication;
+    let app: INestApplication
 
     beforeAll(async () => {
         const accountModule: TestingModule = await Test.createTestingModule({
@@ -51,9 +51,9 @@ describe('Account Login Test', () => {
 
         it('should logged in succesfully with correct credential', async () => {
             let result
-            const testRC = jest.spyOn(accountService, 'account_login').mockResolvedValueOnce(result)
+            //const testRC = jest.spyOn(accountService, 'account_login').mockResolvedValueOnce(result)
 
-            console.log(testRC.mock.results)
+            //console.log(testRC.mock.results)
 
             // const proc = await accountService.account_login(accountMockLoginSuccess)
             // console.log(proc)

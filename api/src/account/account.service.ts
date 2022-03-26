@@ -14,6 +14,8 @@ import { Http } from '@sentry/node/dist/integrations'
 import { AccountAuthorityDeleteDTOResponse } from './dto/account.authority.delete.dto'
 import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
 import { AuthorityService } from './authority.service'
+import { LogLoginModel } from '../model/log.login.model'
+import { LogLoginDTO } from '../auth/dto/log.login.dto'
 
 @Injectable()
 export class AccountService {
@@ -24,9 +26,14 @@ export class AccountService {
         @InjectRepository(AccountAuthorityModel)
         private readonly accountAuthorityRepo: Repository<AccountAuthorityModel>,
 
+        @InjectRepository(LogLoginModel)
+        private readonly logLoginRepo: Repository<LogLoginModel>,
+
         private readonly authService: AuthService,
 
-        private readonly accountAuthorityService: AuthorityService
+        private readonly accountAuthorityService: AuthorityService,
+
+
     ) { }
 
     async login (account: AccountLoginDTO) {
@@ -43,10 +50,22 @@ export class AccountService {
                 uid: accountResp.uid
             })
 
+            const tokenSet = (await token).token
+
             loginResp.message = 'Logged In Successfully'
             loginResp.user = accountResp
-            loginResp.token = (await token).token
+            loginResp.token = tokenSet
             loginResp.status = HttpStatus.OK
+
+
+            //Log login
+            const loginData: LogLoginDTO = {
+                account: accountResp.uid,
+                log_meta: '',
+                token: tokenSet
+            }
+            const logLogin = await this.logLoginRepo.save(loginData)
+
         } else {
             loginResp.message = 'Login Failed'
             loginResp.user = accountResp
@@ -81,7 +100,7 @@ export class AccountService {
         return response
     }
 
-    async add (account) {
+    async add (account: AccountAddDTO) {
         let response = new AccountAddDTOResponse()
         const saltOrRounds = 10
         const password = account.password
