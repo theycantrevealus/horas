@@ -8,7 +8,7 @@ export class LogActivityModel {
     id: number
 
     @ManyToOne(() => AccountModel, account => account.uid)
-    user: AccountModel
+    account: AccountModel
 
     @Column({ type: 'character varying' })
     table_target: string
@@ -27,9 +27,6 @@ export class LogActivityModel {
 
     @Column({ type: 'text' })
     new_meta: string
-
-    @ManyToOne(() => LogLoginModel, logLogin => logLogin.id)
-    login_id: LogLoginModel
 
     @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
     logged_at: Date

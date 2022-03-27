@@ -21,8 +21,8 @@ export interface Response<T> {
 @Injectable()
 export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     constructor(
-        // @InjectRepository(LogActivityModel)
-        // private readonly logActivityRepo: Repository<LogActivityModel>,
+        @InjectRepository(LogActivityModel)
+        private readonly logActivityRepo: Repository<LogActivityModel>,
 
         private readonly authService: AuthService,
         private readonly accountService: AccountService
@@ -34,59 +34,42 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
         const http = context.switchToHttp()
         const request = http.getRequest()
-        const auth = request.header.authorization
+        const { url } = request
+        const auth = request.headers['authorization']
         const method = request.method
         const body = request.body
-        // const requestParsed = JSON.stringify(request.body)
-        // const { url, method } = request.raw
-        // const { params, query, body, headers, user } = request
-        // this.logger.log('url : ', url)
-        // this.logger.log('method : ', method)
-        // this.logger.log('params : ', params)
-        // this.logger.log('query : ', query)
-        // this.logger.log('body : ', body)
-        // this.logger.log('headers : ', headers)
 
-        //this.logActivityRepo.save()
-        let logDataModel = new LogActivityAddDTO()
-        if (auth != undefined) {
-            const userUID: JWTTokenResponse = await this.authService.validate_token({
-                token: auth
-            })
-
-            //const account = await this.accountService.detail(userUID.user)
-            this.logger.log(request.header.authorization)
-        }
-
-        // const requestClassification: any = {
-        //     'PUT': 'U',
-        //     'POST': 'I',
-        //     'DELETE': 'D'
-        // }
-
-        // logDataModel.account = account
-        // logDataModel.action = requestClassification[method]
-        // logDataModel.log_meta = ''
-        // logDataModel.old_meta = ''
-        // logDataModel.new_meta = JSON.stringify(body)
-        // logDataModel.table_identifier = ''
-        // logDataModel.table_target = ''
-
-
-        if (method == 'PUT' || method == 'DELETE') {
-            const idenID = colCodeName[body.id]
-        } else if (method == 'POST') {
-            //
-        } else {
-            //
+        const requestClassification: any = {
+            'PUT': 'U',
+            'POST': 'I',
+            'DELETE': 'D'
         }
 
         return next
             .handle()
             .pipe(
-                map(data => {
-                    const responseParsed = JSON.stringify(data)
-                    return data
+                map(async response => {
+                    const responseParsed = JSON.stringify(response)
+                    if (auth != undefined) {
+                        const userUID: JWTTokenResponse = await this.authService.validate_token({
+                            token: auth
+                        })
+
+                        const account = await this.accountService.detail(userUID.user)
+
+                        const logDataModel: LogActivityAddDTO = {
+                            account: account,
+                            action: requestClassification[method],
+                            log_meta: '',
+                            old_meta: (response.returning != undefined) ? response.returning : '',
+                            new_meta: JSON.stringify(body),
+                            table_identifier: (response.returning != undefined) ? response.returning.uid : '',
+                            table_target: url,
+                        }
+
+                        this.logActivityRepo.save(logDataModel)
+                    }
+                    return response
                 })
             )
     }

@@ -19,7 +19,6 @@ export class AccountController {
 
   //=========================================================================================== CREDENTIAL   SECTION
   @Post('login')
-  @UseInterceptors(LoggingInterceptor)
   async login (@Body() data: AccountLoginDTO) {
     return this.accountService.login(data)
   }
@@ -51,6 +50,7 @@ export class AccountController {
   @ApiParam({
     name: 'uid'
   })
+  @UseInterceptors(LoggingInterceptor)
   @Delete(':uid/delete')
   async delete_soft (@Param() param) {
     return await this.accountService.delete_soft(param.uid)
@@ -60,6 +60,7 @@ export class AccountController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @Post('add')
+  @UseInterceptors(LoggingInterceptor)
   async add (@Body() data: AccountAddDTO) {
     return await this.accountService.add(data)
   }
@@ -70,6 +71,7 @@ export class AccountController {
   @ApiParam({
     name: 'uid'
   })
+  @UseInterceptors(LoggingInterceptor)
   @Put(':uid/edit')
   async edit (@Body() data: AccountEditDTO, @Param() param) {
     return await this.accountService.edit(data, param.uid)

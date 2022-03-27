@@ -9,4 +9,6 @@ export class AccountAuthorityDeleteDTOResponse {
     @ApiProperty({ example: 'Authority Created Successfully' })
     @IsString()
     message: string
+
+    returning: any
 }

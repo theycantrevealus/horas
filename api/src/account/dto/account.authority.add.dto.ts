@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, IsNumber } from 'class-validator'
+import { AccountAuthorityModel } from '../../model/account.authority.model'
 
 export class AccountAuthorityAddDTO {
     @ApiProperty({
@@ -17,4 +18,7 @@ export class AccountAuthorityAddDTOResponse {
     @ApiProperty({ example: 'Authority Created Successfully' })
     @IsString()
     message: string
+
+    @ApiProperty({ example: 'Authority Created Successfully' })
+    returning: any
 }

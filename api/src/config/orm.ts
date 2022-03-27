@@ -30,6 +30,7 @@ class ConfigService {
   }
 
   public getTypeOrmConfig (): TypeOrmModuleOptions {
+    const loggerOption: any = this.getValue('POSTGRES_LOGGING').split(',')
     return {
       type: 'postgres',
       name: 'default',
@@ -39,7 +40,7 @@ class ConfigService {
       username: this.getValue('POSTGRES_USER'),
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
-
+      logging: loggerOption, //For Loggin Query and Error Only
       entities: ['src/model/*{.ts,.js}'],
 
       migrationsTableName: 'migration',
@@ -61,6 +62,7 @@ const configService = new ConfigService(process.env).ensureValues([
   'POSTGRES_USER',
   'POSTGRES_PASSWORD',
   'POSTGRES_DATABASE',
+  'POSTGRES_LOGGING',
 ])
 
 export { configService }

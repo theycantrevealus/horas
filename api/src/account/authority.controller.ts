@@ -1,10 +1,11 @@
-import { Controller, Body, Post, UseGuards, Get, Param, Put, Delete } from '@nestjs/common'
+import { Controller, Body, Post, UseGuards, Get, Param, Put, Delete, UseInterceptors } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiParam, ApiOkResponse, ApiProperty, ApiResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiBadRequestResponse } from '@nestjs/swagger'
 import { Authorization } from '../decorator/auth.decorator'
 import { AccountAuthorityAddDTO, AccountAuthorityAddDTOResponse } from './dto/account.authority.add.dto'
 import { JwtAuthGuard } from '../guard/jwt.guard'
 import { AuthorityService } from './authority.service'
 import { AccountAuthorityEditDTO } from './dto/account.authority.edit.dto'
+import { LoggingInterceptor } from '../interceptor/logging'
 
 @Controller('authority')
 @ApiTags('authority')
@@ -56,6 +57,7 @@ export class AuthorityController {
     @ApiBadRequestResponse({
         description: 'Failed to add'
     })
+    @UseInterceptors(LoggingInterceptor)
     @Post('add')
     async add (@Body() data: AccountAuthorityAddDTO) {
         return await this.authorityService.add(data)
@@ -79,6 +81,7 @@ export class AuthorityController {
     @ApiParam({
         name: 'uid'
     })
+    @UseInterceptors(LoggingInterceptor)
     @Put(':uid/edit')
     async edit (@Body() data: AccountAuthorityEditDTO, @Param() param) {
         return await this.authorityService.edit(data, param.uid)
@@ -90,6 +93,7 @@ export class AuthorityController {
     @ApiParam({
         name: 'uid'
     })
+    @UseInterceptors(LoggingInterceptor)
     @Delete(':uid/delete')
     async delete (@Param() param) {
         return await this.authorityService.delete_soft(param.uid)

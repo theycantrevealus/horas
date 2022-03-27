@@ -6,7 +6,7 @@ export class LogActivityAddDTO {
     @ApiProperty({
         example: 'account uid'
     })
-    account: AccountModel
+    account: any
 
     @ApiProperty({
         example: 'model target from mod lib'
@@ -44,12 +44,6 @@ export class LogActivityAddDTO {
     })
     @IsString()
     new_meta: string
-
-    @ApiProperty({
-        example: 'From login header meta',
-    })
-    @IsNumber()
-    login_id: string
 }
 
 export class LogActivityAddDTOResponse {

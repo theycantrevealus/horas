@@ -26,7 +26,7 @@ import { LogLoginModel } from './model/log.login.model'
     MenuModule,
     LogModule,
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([LogLoginModel], 'default')
+    TypeOrmModule.forFeature([LogLoginModel, LogActivityModel], 'default')
   ],
   controllers: [
     AccountController,

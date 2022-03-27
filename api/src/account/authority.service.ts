@@ -37,10 +37,13 @@ export class AuthorityService {
 
     async edit (data, uid: string) {
         let response = new AccountAuthorityEditDTOResponse()
-        const authRes = this.accountAuthorityRepo.update(uid, data)
+        const authRes = this.accountAuthorityRepo.update(uid, data).then(async returning => {
+            return await this.detail(uid)
+        })
         if (authRes) {
             response.message = 'Authority updated succesfully'
             response.status = HttpStatus.OK
+            response.returning = await authRes
         } else {
             response.message = 'Authority failed to add'
             response.status = HttpStatus.BAD_REQUEST
@@ -50,10 +53,12 @@ export class AuthorityService {
 
     async delete_soft (uid: string) {
         let response = new AccountAuthorityDeleteDTOResponse()
+        const oldMeta = await this.detail(uid)
         const proc = this.accountAuthorityRepo.softDelete(uid)
         if (proc) {
             response.message = 'Authority deleted successfully'
             response.status = HttpStatus.OK
+            response.returning = oldMeta
         } else {
             response.message = 'Authority failed to delete'
             response.status = HttpStatus.BAD_REQUEST
@@ -63,10 +68,12 @@ export class AuthorityService {
 
     async delete_hard (uid: string) {
         let response = new AccountAuthorityDeleteDTOResponse()
+        const oldMeta = await this.detail(uid)
         const proc = this.accountAuthorityRepo.delete(uid)
         if (proc) {
             response.message = 'Authority deleted successfully'
             response.status = HttpStatus.OK
+            response.returning = oldMeta
         } else {
             response.message = 'Authority failed to delete'
             response.status = HttpStatus.BAD_REQUEST
@@ -80,14 +87,19 @@ export class AuthorityService {
 
     async add (data: AccountAuthorityAddDTO) {
         let response = new AccountAuthorityAddDTOResponse()
-        const authRes = this.accountAuthorityRepo.save(data)
+        const authRes = this.accountAuthorityRepo.save(data).then(returning => {
+            return this.detail(returning.uid)
+        })
+
         if (authRes) {
             response.message = 'Authority added succesfully'
             response.status = HttpStatus.OK
+            response.returning = await authRes
         } else {
             response.message = 'Authority failed to add'
             response.status = HttpStatus.BAD_REQUEST
         }
+
         return response
     }
 }
