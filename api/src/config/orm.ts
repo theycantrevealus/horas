@@ -41,11 +41,11 @@ class ConfigService {
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
       logging: loggerOption, //For Loggin Query and Error Only
-      entities: ['src/model/*{.ts,.js}'],
+      entities: ['src/model/**/*{.ts,.js}'],
 
       migrationsTableName: 'migration',
 
-      migrations: ['src/migration/*.ts'],
+      migrations: ['src/migration/**/*.ts'],
 
       cli: {
         migrationsDir: 'src/migration',
