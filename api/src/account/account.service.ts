@@ -11,7 +11,7 @@ import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto'
 import { AccountAuthorityAddDTO, AccountAuthorityAddDTOResponse } from './dto/account.authority.add.dto'
 import { AuthService } from '../auth/auth.service'
 import { Http } from '@sentry/node/dist/integrations'
-import { AccountAuthorityDeleteDTOResponse } from './dto/account.authority.delete.dto'
+import { AccountDeleteDTOResponse } from './dto/account.delete.dto'
 import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
 import { AuthorityService } from './authority.service'
 import { LogLoginModel } from '../model/log.login.model'
@@ -81,7 +81,18 @@ export class AccountService {
     }
 
     async delete_soft (uid: string) {
-        return this.accountRepo.softDelete({ uid })
+        let response = new AccountDeleteDTOResponse()
+        const oldMeta = await this.detail(uid)
+        var accountRes = this.accountRepo.softDelete({ uid })
+        if (accountRes) {
+            response.message = 'Account deleted successfully'
+            response.status = HttpStatus.OK
+            response.returning = oldMeta
+        } else {
+            response.message = 'Account failed to delete'
+            response.status = HttpStatus.BAD_REQUEST
+        }
+        return response
     }
 
     async edit (account, uid: string) {
@@ -89,10 +100,13 @@ export class AccountService {
         const saltOrRounds = 10
         const password = account.password
         account.password = await bcrypt.hash(password, saltOrRounds)
-        const accountRes = this.accountRepo.update(uid, account)
+        const accountRes = this.accountRepo.update(uid, account).then(async returning => {
+            return await this.detail(uid)
+        })
         if (accountRes) {
             response.message = 'Account updated successfully'
             response.status = HttpStatus.OK
+            response.returning = await accountRes
         } else {
             response.message = 'Account failed to update'
             response.status = HttpStatus.BAD_REQUEST
@@ -105,10 +119,13 @@ export class AccountService {
         const saltOrRounds = 10
         const password = account.password
         account.password = await bcrypt.hash(password, saltOrRounds)
-        const accountRes = this.accountRepo.save(account)
+        const accountRes = this.accountRepo.save(account).then(async returning => {
+            return await this.detail(returning.uid)
+        })
         if (accountRes) {
             response.message = 'Account added successfully'
             response.status = HttpStatus.OK
+            response.returning = await accountRes
         } else {
             response.message = 'Account failed to add'
             response.status = HttpStatus.BAD_REQUEST

@@ -54,8 +54,8 @@ export class AuthorityService {
     async delete_soft (uid: string) {
         let response = new AccountAuthorityDeleteDTOResponse()
         const oldMeta = await this.detail(uid)
-        const proc = this.accountAuthorityRepo.softDelete(uid)
-        if (proc) {
+        const authRes = this.accountAuthorityRepo.softDelete(uid)
+        if (authRes) {
             response.message = 'Authority deleted successfully'
             response.status = HttpStatus.OK
             response.returning = oldMeta
@@ -69,8 +69,8 @@ export class AuthorityService {
     async delete_hard (uid: string) {
         let response = new AccountAuthorityDeleteDTOResponse()
         const oldMeta = await this.detail(uid)
-        const proc = this.accountAuthorityRepo.delete(uid)
-        if (proc) {
+        const authRes = this.accountAuthorityRepo.delete(uid)
+        if (authRes) {
             response.message = 'Authority deleted successfully'
             response.status = HttpStatus.OK
             response.returning = oldMeta

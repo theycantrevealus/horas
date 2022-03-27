@@ -44,4 +44,6 @@ export class AccountEditDTOResponse {
     @ApiProperty({ example: 'Account Updated Successfully' })
     @IsString()
     message: string
+
+    returning: any
 }
