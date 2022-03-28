@@ -53,7 +53,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             token: request.headers.authorization,
         })
 
-        if (!decodeTokenResponse.user) {
+        request.credential = decodeTokenResponse.account
+
+        if (!decodeTokenResponse.account) {
             throw new HttpException(
                 {
                     message: decodeTokenResponse.message,
@@ -68,7 +70,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         if (
             !decodeTokenResponse ||
             !decodeTokenResponse.token ||
-            !decodeTokenResponse.user
+            !decodeTokenResponse.account
         ) {
             throw new HttpException(
                 {

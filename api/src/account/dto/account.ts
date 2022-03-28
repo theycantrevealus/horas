@@ -44,6 +44,8 @@ export class AccountLoginResponseDTO {
 
   @ApiProperty({ example: null, nullable: true })
   errors: { [key: string]: any }
+
+  account: any
 }
 
 export interface InterfaceAccount {

@@ -1,4 +1,4 @@
-import { HttpCode, HttpStatus, Injectable } from '@nestjs/common'
+import { HttpCode, HttpStatus, Injectable, Logger } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
 import { AccountModel } from '../model/account.model'
 import { AccountAuthorityModel } from '../model/account.authority.model'
@@ -16,6 +16,7 @@ import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
 import { AuthorityService } from './authority.service'
 import { LogLoginModel } from '../model/log.login.model'
 import { LogLoginDTO } from '../auth/dto/log.login.dto'
+import { MenuService } from '../menu/menu.service'
 
 @Injectable()
 export class AccountService {
@@ -23,18 +24,16 @@ export class AccountService {
         @InjectRepository(AccountModel)
         private readonly accountRepo: Repository<AccountModel>,
 
-        @InjectRepository(AccountAuthorityModel)
-        private readonly accountAuthorityRepo: Repository<AccountAuthorityModel>,
-
         @InjectRepository(LogLoginModel)
         private readonly logLoginRepo: Repository<LogLoginModel>,
 
         private readonly authService: AuthService,
-
-        private readonly accountAuthorityService: AuthorityService,
+        private readonly menuService: MenuService
 
 
     ) { }
+
+    private logger = new Logger('HTTP')
 
     async login (account: AccountLoginDTO) {
         let loginResp = new AccountLoginResponseDTO()
@@ -46,14 +45,20 @@ export class AccountService {
             .getOne()
 
         if (accountResp) {
+
+            //Load Permission
+
             const token = this.authService.create_token({
-                uid: accountResp.uid
+                uid: accountResp.uid,
+                email: accountResp.email,
+                first_name: accountResp.first_name,
+                last_name: accountResp.last_name
             })
 
             const tokenSet = (await token).token
 
             loginResp.message = 'Logged In Successfully'
-            loginResp.user = accountResp
+            loginResp.account = accountResp
             loginResp.token = tokenSet
             loginResp.status = HttpStatus.OK
 
@@ -68,12 +73,17 @@ export class AccountService {
 
         } else {
             loginResp.message = 'Login Failed'
-            loginResp.user = accountResp
+            loginResp.account = accountResp
             loginResp.token = ''
             loginResp.status = HttpStatus.BAD_REQUEST
         }
 
         return loginResp
+    }
+
+    async grant_access (data: any, granted_by: any) {
+        const accountTarget = await this.accountRepo.findOne({ where: { uid: data.account } })
+        return await this.menuService.grant_menu_access({ account: accountTarget, menu: data.menu, granted_by: granted_by })
     }
 
     async detail (uid: string) {

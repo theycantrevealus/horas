@@ -2,7 +2,7 @@ import { LogLoginModel } from "src/model/log.login.model"
 
 export interface JWTTokenResponse {
     status: number
-    user: string
+    account: any
     token: string | null
     message: string
 }
@@ -10,6 +10,6 @@ export interface JWTTokenResponse {
 export interface JWTTokenDecodeResponse {
     status: number
     token: string | null
-    user: string
+    account: any
     message: string
 }

@@ -11,6 +11,9 @@ import { JwtModule } from '@nestjs/jwt'
 import { AuthorityService } from './authority.service'
 import { LogActivityModel } from '../model/log.activity.model'
 import { LogLoginModel } from '../model/log.login.model'
+import { MenuService } from '../menu/menu.service'
+import { AccountPrivilegesModel } from '../model/account.privileges.model'
+import { MenuModel } from '../model/menu.model'
 
 @Module({
     imports: [
@@ -18,10 +21,10 @@ import { LogLoginModel } from '../model/log.login.model'
             secret: `${process.env.JWT_SECRET}`
         }),
         TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel, LogActivityModel, LogLoginModel], 'default')
+        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel, LogActivityModel, LogLoginModel, AccountPrivilegesModel, MenuModel], 'default')
     ],
     controllers: [AccountController, AuthorityController],
-    providers: [AccountService, AuthorityService, AuthService],
-    exports: [AccountService, AuthorityService]
+    providers: [AccountService, AuthorityService, AuthService, MenuService],
+    exports: [AccountService, AuthorityService, MenuService]
 })
 export class AccountModule { }

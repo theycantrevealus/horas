@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { configService } from '../config/orm'
 import { MenuModel } from '../model/menu.model'
 import { JwtModule } from '@nestjs/jwt'
+import { AuthService } from '../auth/auth.service'
+import { AccountPrivilegesModel } from '../model/account.privileges.model'
 
 @Module({
   controllers: [MenuController],
@@ -13,9 +15,9 @@ import { JwtModule } from '@nestjs/jwt'
       secret: `${process.env.JWT_SECRET}`
     }),
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([MenuModel], 'default')
+    TypeOrmModule.forFeature([MenuModel, AccountPrivilegesModel], 'default')
   ],
-  providers: [MenuService],
-  exports: [MenuService]
+  providers: [MenuService, AuthService],
+  exports: [MenuService, AuthService]
 })
 export class MenuModule { }

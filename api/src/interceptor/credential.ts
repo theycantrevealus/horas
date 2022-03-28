@@ -21,7 +21,7 @@ export interface Response<T> {
 }
 
 @Injectable()
-export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
+export class CredentialInterceptor<T> implements NestInterceptor<T, Response<T>> {
     constructor(
         @InjectRepository(LogActivityModel)
         private readonly logActivityRepo: Repository<LogActivityModel>,
@@ -58,20 +58,9 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
                             token: auth
                         })
                         const account = userUID.account
-
-                        const determiningID: string = (response.returning != undefined) ? ((response.returning.uid != undefined) ? response.returning.uid : response.returning.id) : ''
-
-                        const logDataModel: LogActivityAddDTO = {
-                            account: account,
-                            action: requestClassification[method],
-                            log_meta: '',
-                            old_meta: (response.returning != undefined) ? response.returning : '',
-                            new_meta: JSON.stringify(body),
-                            table_identifier: determiningID,
-                            table_target: url,
+                        if (!request.headers['credential']) {
+                            request.headers['credential'] = account
                         }
-
-                        this.logActivityRepo.save(logDataModel)
                     }
 
 

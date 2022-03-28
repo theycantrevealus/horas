@@ -20,6 +20,7 @@ async function bootstrap () {
 
   const app = await NestFactory.create(AppModule)
   app.useGlobalInterceptors(new SentryInterceptor())
+  app.enableCors()
 
   const options = new DocumentBuilder()
     .setTitle('HORAS (Hospital Responsive Assistant System) v3.0.0')

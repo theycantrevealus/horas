@@ -1,19 +1,23 @@
 import { Strategy } from 'passport-local'
 import { PassportStrategy } from '@nestjs/passport'
-import { Injectable, UnauthorizedException } from '@nestjs/common'
-// import { AuthService } from './auth.service' private authService: AuthService
+import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { ExtractJwt } from 'passport-jwt'
+import 'dotenv/config'
+import { AuthService } from '../auth/auth.service'
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
-    constructor() {
-        super()
-    }
+export class LocalGuard implements CanActivate {
+    constructor(private authService: AuthService) { }
+    private logger = new Logger('HTTP')
 
-    async validate (username: string, password: string): Promise<any> {
-        /*const user = await this.authService.validateUser(username, password)
-        if (!user) {
-          throw new UnauthorizedException()
-        }
-        return user*/
+    async canActivate (context: ExecutionContext): Promise<boolean> {
+        const request = context.switchToHttp().getRequest()
+        const bearerToken = request.headers['authorization']
+        const credential = await this.authService.validate_token({
+            token: bearerToken
+        })
+
+        request.credential = credential.account
+        return !!credential.account
     }
 }

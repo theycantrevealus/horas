@@ -1,21 +1,25 @@
-import { Controller, Body, Post, UseGuards, Get, HttpStatus, Param, Put, UseInterceptors, Delete } from '@nestjs/common'
-import { ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger'
+import { Controller, Body, Post, UseGuards, Get, HttpStatus, Param, Put, UseInterceptors, Delete, Req, Logger, Request } from '@nestjs/common'
+import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { AccountService } from './account.service'
 import { AccountLoginDTO } from './dto/account'
 import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto'
-import { Authorization } from '../decorator/auth.decorator'
+import { CredentialAccount, Authorization } from '../decorator/auth.decorator'
 import { JwtAuthGuard } from '../guard/jwt.guard'
 import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
 import { AuthorityService } from './authority.service'
 import { LoggingInterceptor } from '../interceptor/logging'
+import { GrantAccessDTO } from '../menu/dto/menu.grant.privileges.dto'
+import { CredentialInterceptor } from '../interceptor/credential'
+import { LocalGuard } from '../guard/local.guard'
 
 @Controller('account')
 @ApiTags('account')
 export class AccountController {
   constructor(
-    private accountService: AccountService,
-    private authorityService: AuthorityService
+    private accountService: AccountService
   ) { }
+
+  private logger = new Logger('HTTP')
 
   //=========================================================================================== CREDENTIAL   SECTION
   @Post('login')
@@ -27,6 +31,7 @@ export class AccountController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: 'List all user' })
   @Authorization(true)
   @Get()
   async list () {
@@ -63,6 +68,15 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   async add (@Body() data: AccountAddDTO) {
     return await this.accountService.add(data)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @Post('grant_access')
+  @UseInterceptors(LoggingInterceptor)
+  async grant_access (@Body() data: GrantAccessDTO, @CredentialAccount() credential) {
+    return await this.accountService.grant_access(data, credential)
   }
 
   @UseGuards(JwtAuthGuard)

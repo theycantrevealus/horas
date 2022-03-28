@@ -28,12 +28,12 @@ const store = createStore({
     }
   })],
   actions: {
-    LOGIN: ({ commit }, accountRequestData : TAccountLogin) => {
-      return AccountService.login(accountRequestData).then((response:any) => {
+    LOGIN: ({ commit }, accountRequestData: TAccountLogin) => {
+      return AccountService.login(accountRequestData).then((response: any) => {
         response = response.data
-        if (response.response_result > 0) {
-          commit('UPDATE_TOKEN', response.response_token)
-          commit('LOGIN_SUCCESS', response.response_data[0])
+        if (response.status === 200) {
+          commit('UPDATE_TOKEN', response.token)
+          commit('LOGIN_SUCCESS', response.account)
         }
         return response
       })
@@ -44,7 +44,7 @@ const store = createStore({
         commit('UPDATE_MENU', response)
       })
     },
-    LOGOUT: ({ commit }: {commit: Function}) => {
+    LOGOUT: ({ commit }: { commit: Function }) => {
       commit('CLEAR_SESSION')
     }
   },
@@ -62,7 +62,7 @@ const store = createStore({
     UPDATE_MENU (state: any, menu) {
       state.sidemenu = menu
     },
-    LOGIN_SUCCESS (state:any, credentialData) {
+    LOGIN_SUCCESS (state: any, credentialData) {
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
       const grantedPage = credentialData.roleandperm

@@ -15,7 +15,7 @@ export class AuthService implements JwtOptionsFactory {
         }
     }
 
-    async create_token (data: { uid: string }): Promise<JWTTokenResponse> {
+    async create_token (data: any): Promise<JWTTokenResponse> {
         let result: JWTTokenResponse
         if (data && data.uid) {
             try {
@@ -24,14 +24,14 @@ export class AuthService implements JwtOptionsFactory {
                 })
 
                 result = {
-                    user: data.uid,
+                    account: data.uid,
                     status: HttpStatus.CREATED,
                     message: 'token_create_success',
                     token: token,
                 }
             } catch (e) {
                 result = {
-                    user: data.uid,
+                    account: data.uid,
                     status: HttpStatus.BAD_REQUEST,
                     message: 'token_create_bad_request',
                     token: null,
@@ -39,7 +39,7 @@ export class AuthService implements JwtOptionsFactory {
             }
         } else {
             result = {
-                user: data.uid,
+                account: data.uid,
                 status: HttpStatus.BAD_REQUEST,
                 message: 'token_create_bad_request',
                 token: null,
@@ -61,14 +61,14 @@ export class AuthService implements JwtOptionsFactory {
                     result = {
                         status: HttpStatus.OK,
                         message: 'token_decoded_success',
-                        user: decodedData.uid,
+                        account: decodedData,
                         token: data.token,
                     }
                 } else {
                     result = {
                         status: HttpStatus.FORBIDDEN,
                         message: 'token_unauthorized',
-                        user: '',
+                        account: null,
                         token: data.token,
                     }
                 }
@@ -76,7 +76,7 @@ export class AuthService implements JwtOptionsFactory {
                 result = {
                     status: HttpStatus.BAD_REQUEST,
                     message: 'token malformed',
-                    user: '',
+                    account: null,
                     token: data.token,
                 }
             }
@@ -84,7 +84,7 @@ export class AuthService implements JwtOptionsFactory {
             result = {
                 status: HttpStatus.BAD_REQUEST,
                 message: 'undefined token',
-                user: '',
+                account: null,
                 token: data.token,
             }
         }
