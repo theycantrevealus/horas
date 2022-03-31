@@ -4,8 +4,10 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     DeleteDateColumn,
-    PrimaryGeneratedColumn
+    PrimaryGeneratedColumn,
+    ManyToOne
 } from 'typeorm'
+import { MenuGroupModel } from './menu.group.model'
 
 @Entity({ name: 'menu' })
 export class MenuModel {
@@ -21,6 +23,9 @@ export class MenuModel {
     @Column({ type: 'integer' })
     parent: number
 
+    @ManyToOne(() => MenuGroupModel, menu => menu.id)
+    menu_group: MenuGroupModel
+
     @Column({ nullable: false, type: 'character varying' })
     icon: string
 
@@ -30,13 +35,10 @@ export class MenuModel {
     @Column({ type: 'integer' })
     show_order: number
 
-    @Column({ type: 'integer' })
-    menu_group: number
-
-    @Column({ type: 'integer' })
+    @Column({ type: 'integer', nullable: true })
     level: number
 
-    @Column({ type: 'character varying' })
+    @Column({ type: 'character varying', nullable: true })
     group_color: string
 
     @Column({ type: 'text' })
