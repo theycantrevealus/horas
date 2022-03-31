@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsString, IsNumber } from "class-validator"
 
-export class MenuAddDTO {
+export class MenuEditDTO {
     @ApiProperty({
         uniqueItems: true,
         example: 'Menu Dashboard',
@@ -74,12 +74,12 @@ export class MenuAddDTO {
     group_color: string
 }
 
-export class MenuAddResponseDTO {
+export class MenuEditResponseDTO {
     @ApiProperty({ example: 201 })
     @IsNumber()
     status: number
 
-    @ApiProperty({ example: 'Menu Created Successfully' })
+    @ApiProperty({ example: 'Menu updated Successfully' })
     @IsString()
     message: string
 

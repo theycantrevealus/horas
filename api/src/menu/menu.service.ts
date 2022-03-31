@@ -2,10 +2,13 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { MenuModel } from '../model/menu.model'
 import { Repository } from 'typeorm'
-import { MenuAddDTO } from './dto/menu.add.dto'
+import { MenuAddDTO, MenuAddResponseDTO } from './dto/menu.add.dto'
 import { AccountPrivilegesModel } from '../model/account.privileges.model'
 
 import { GrantAccessDTO, GrantAccessResponseDTO } from './dto/menu.grant.privileges.dto'
+import { MenuEditDTO, MenuEditResponseDTO } from './dto/menu.edit.dto'
+import { throws } from 'assert'
+import { MenuDeleteDTOResponse } from './dto/menu.delete.dto'
 
 @Injectable()
 export class MenuService {
@@ -30,6 +33,57 @@ export class MenuService {
                 id: id
             }
         })
+    }
+
+    async edit (data: MenuEditDTO, id: number) {
+        const menuResp = new MenuEditResponseDTO()
+        const menuRes = await this.menuRepo.update(id, data).then(async returning => {
+            return await this.detail(id)
+        })
+
+        if (menuRes) {
+            menuResp.message = ''
+            menuResp.status = HttpStatus.OK
+            menuResp.returning = await menuRes
+        } else {
+            menuResp.message = ''
+            menuResp.status = HttpStatus.BAD_REQUEST
+        }
+
+        return menuResp
+    }
+
+    async delete_soft (id: number) {
+        let response = new MenuDeleteDTOResponse()
+        const oldMeta = await this.detail(id)
+        var accountRes = this.menuRepo.softDelete({ id })
+        if (accountRes) {
+            response.message = 'Menu deleted successfully'
+            response.status = HttpStatus.OK
+            response.returning = oldMeta
+        } else {
+            response.message = 'Menu failed to delete'
+            response.status = HttpStatus.BAD_REQUEST
+        }
+        return response
+    }
+
+    async add (data: MenuAddDTO) {
+        const menuResp = new MenuAddResponseDTO()
+        const menuRes = await this.menuRepo.save(data).then(async returning => {
+            return await this.detail(returning.id)
+        })
+
+        if (menuRes) {
+            menuResp.message = ''
+            menuResp.status = HttpStatus.OK
+            menuResp.returning = await menuRes
+        } else {
+            menuResp.message = ''
+            menuResp.status = HttpStatus.BAD_REQUEST
+        }
+
+        return menuResp
     }
 
     async grant_menu_access (privileges): Promise<GrantAccessResponseDTO> {

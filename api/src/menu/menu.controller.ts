@@ -1,8 +1,11 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { MenuService } from './menu.service'
 import { Authorization } from '../decorator/auth.decorator'
 import { JwtAuthGuard } from '../guard/jwt.guard'
+import { MenuAddDTO } from './dto/menu.add.dto'
+import { LoggingInterceptor } from '../interceptor/logging'
+import { MenuEditDTO } from './dto/menu.edit.dto'
 
 @Controller('menu')
 @ApiTags('menu')
@@ -40,4 +43,38 @@ export class MenuController {
     async detail (@Param() param) {
         return await this.menuService.detail(param.id)
     }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT')
+    @Authorization(true)
+    @UseInterceptors(LoggingInterceptor)
+    @Post('add')
+    async add (@Query() data: MenuAddDTO) {
+        return await this.menuService.add(data)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT')
+    @Authorization(true)
+    @UseInterceptors(LoggingInterceptor)
+    @ApiParam({
+        name: 'id'
+    })
+    @Put(':id/edit')
+    async edit (@Query() data: MenuEditDTO, @Param() param) {
+        return await this.menuService.edit(data, param.id)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT')
+    @Authorization(true)
+    @ApiParam({
+        name: 'id'
+    })
+    @UseInterceptors(LoggingInterceptor)
+    @Delete(':id/delete')
+    async delete_soft (@Param() param) {
+        return await this.menuService.delete_soft(param.id)
+    }
+
 }
