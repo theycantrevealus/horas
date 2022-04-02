@@ -25,12 +25,17 @@ export class MenuController {
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT')
     @Authorization(true)
-    @ApiParam({
-        name: 'group'
-    })
-    @Get(':group/tree')
-    async tree (@Param() param) {
-        return await this.menuService.tree(0, param.group)
+    @Get('tree')
+    async tree () {
+        return await this.menuService.tree_grouper()
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT')
+    @Authorization(true)
+    @Get('tree/manager')
+    async tree_manager () {
+        return await this.menuService.tree_manager()
     }
 
     @UseGuards(JwtAuthGuard)
@@ -49,7 +54,7 @@ export class MenuController {
     @Authorization(true)
     @UseInterceptors(LoggingInterceptor)
     @Post('add')
-    async add (@Query() data: MenuAddDTO) {
+    async add (@Body() data: MenuAddDTO) {
         return await this.menuService.add(data)
     }
 

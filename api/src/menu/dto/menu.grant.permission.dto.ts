@@ -1,21 +1,21 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsString, IsNumber } from "class-validator"
 
-export class GrantAccessDTO {
+export class GrantPermissionDTO {
     @ApiProperty({
         example: 'From Account UID',
     })
     account: any
 
     @ApiProperty({
-        example: 'From Menu UID',
+        example: 'From Permission ID',
     })
-    menu: any
+    permission: any
 
     granted_by: any
 }
 
-export class GrantAccessResponseDTO {
+export class GrantPermissionResponseDTO {
     @ApiProperty({ example: 201 })
     @IsNumber()
     status: number

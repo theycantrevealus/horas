@@ -11,17 +11,21 @@ import { LogActivityModel } from '../model/log.activity.model'
 import { MenuGroupController } from './menu.group.controller'
 import { MenuGroupModel } from '../model/menu.group.model'
 import { MenuGroupService } from './menu.group.service'
+import { AccountPermissionModel } from '../model/account.permission.model'
+import { MenuPermissionController } from './menu.permission.controller'
+import { MenuPermissionModel } from '../model/menu.permission.model'
+import { MenuPermissionService } from './menu.permission.service'
 
 @Module({
-  controllers: [MenuController, MenuGroupController],
+  controllers: [MenuController, MenuGroupController, MenuPermissionController],
   imports: [
     JwtModule.register({
       secret: `${process.env.JWT_SECRET}`
     }),
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([MenuModel, AccountPrivilegesModel, LogActivityModel, MenuGroupModel], 'default')
+    TypeOrmModule.forFeature([MenuModel, AccountPrivilegesModel, AccountPermissionModel, LogActivityModel, MenuGroupModel, MenuPermissionModel], 'default')
   ],
-  providers: [MenuService, MenuGroupService, AuthService],
-  exports: [MenuService, MenuGroupService, AuthService]
+  providers: [MenuService, MenuGroupService, MenuPermissionService, AuthService],
+  exports: [MenuService, MenuGroupService, MenuPermissionService, AuthService]
 })
 export class MenuModule { }

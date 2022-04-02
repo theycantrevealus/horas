@@ -88,7 +88,7 @@ export class MenuGroupService {
     }
 
     async all () {
-        return await this.menuGroupRepo.find()
+        return await this.menuGroupRepo.find({ order: { id: 'ASC' } })
     }
 
     async detail (id: number) {
