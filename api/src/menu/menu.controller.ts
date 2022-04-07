@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { MenuService } from './menu.service'
 import { Authorization } from '../decorator/auth.decorator'
@@ -13,6 +13,8 @@ export class MenuController {
     constructor(
         private menuService: MenuService
     ) { }
+
+    private logger = new Logger('HTTP')
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT')
@@ -66,7 +68,7 @@ export class MenuController {
         name: 'id'
     })
     @Put(':id/edit')
-    async edit (@Query() data: MenuEditDTO, @Param() param) {
+    async edit (@Body() data: MenuEditDTO, @Param() param) {
         return await this.menuService.edit(data, param.id)
     }
 

@@ -40,12 +40,6 @@ export class MenuAddDTO {
     show_order: number
 
     @ApiProperty({
-        example: 'Menu Grouping Req[0-9]',
-    })
-    @IsString()
-    assdasdmenu_group: string
-
-    @ApiProperty({
         uniqueItems: true,
         required: false,
         example: 'Menu Remark',

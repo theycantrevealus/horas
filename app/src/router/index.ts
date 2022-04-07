@@ -83,12 +83,23 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+  scrollBehavior (to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+    if (to.hash) {
+      return { el: to.hash, behavior: 'smooth' }
+    } else {
+      return { el: '#content-loader', top: 0 }
+    }
+  }
 })
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
   if (!to.matched.length) {
+    console.log(to.fullPath)
     next('/404')
   } else {
     const isAuthed = ((<any>store.state).credential.token !== '' && (<any>store.state).credential.token !== null && (<any>store.state).credential.token !== undefined)
@@ -101,7 +112,14 @@ router.beforeEach((to, from, next) => {
         //   return
         // }
         // next('/403')
-        next()
+        // next()
+        if ((<any>store.state).credential.routes.indexOf(to.name) < 0) {
+          console.log(to.name)
+          console.log(store.state.credential)
+          next('/403')
+        } else {
+          next()
+        }
         return
       }
       next('/login')

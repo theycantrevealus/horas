@@ -30,7 +30,7 @@ import VueGoogleMaps from '@fawmi/vue-google-maps'
 
 // Modular
 import { registerModules } from '@/modules/register'
-import User from '@/modules/user'
+import Account from '@/modules/setting/account'
 import Service from '@/modules/service'
 import MasterItem from '@/modules/master_item'
 import MasterDocumentation from '@/modules/master_documentation'
@@ -39,7 +39,7 @@ import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 
 registerModules({
-  accountModule: User,
+  accountModule: Account,
   serviceModule: Service,
   masterItemModule: MasterItem,
   masterTourModule: MasterDocumentation,

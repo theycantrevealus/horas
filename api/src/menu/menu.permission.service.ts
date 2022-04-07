@@ -85,6 +85,10 @@ export class MenuPermissionService {
         return await this.menuPermissionRepo.findOne({ where: { id: id } })
     }
 
+    async menu_permission (id: number) {
+        return await this.menuPermissionRepo.find({ where: { menu: id } })
+    }
+
     async all () {
         return await this.menuPermissionRepo.find()
     }

@@ -115,11 +115,10 @@ export default {
         email: this.email,
         password: this.password
       }).then((response) => {
-        if (response.response_result > 0) {
+        if (response.status === 200) {
           this.$router.push('/dashboard')
         } else {
-          this.response.type = 'error'
-          this.response.message = response.response_message
+          this.response.message = response.message
         }
       })
     }

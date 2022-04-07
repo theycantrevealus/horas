@@ -6,12 +6,12 @@ export const coreMenu = {
     menuData: {}
   },
   getters: {
-    getData: (state:any) => { return state.menuData }
+    getData: (state: any) => { return state.menuData }
   },
   actions: {
-    get_all_menu: ({ commit, rootState }:{ commit: Function, rootState: any }) => {
+    get_all_menu: ({ commit, rootState }: { commit: Function, rootState: any }) => {
       return CoreService.generateMenuManager(rootState.credential.token).then((response: any) => {
-        commit('SET_DATA', response.data.response_package)
+        commit('SET_DATA', response.data)
         return response
       })
     }

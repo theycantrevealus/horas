@@ -16,6 +16,8 @@ const store = createStore({
       first_name: '',
       last_name: '',
       permission: {},
+      pages: {},
+      routes: [],
       token: null
     },
     sidemenu: []
@@ -40,7 +42,7 @@ const store = createStore({
     },
     UPDATE_MENU: ({ commit, getters }) => {
       return CoreService.generateMenu(getters.getToken).then((response: any) => {
-        response = response.data.response_package
+        response = response.data
         commit('UPDATE_MENU', response)
       })
     },
@@ -65,16 +67,30 @@ const store = createStore({
     LOGIN_SUCCESS (state: any, credentialData) {
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
-      const grantedPage = credentialData.roleandperm
+
+      const grantedPerm = credentialData.grantedPerm
       const buildPermission = {}
-      for (const a in grantedPage) {
-        if (buildPermission[grantedPage[a].detail.domiden]) {
-          buildPermission[grantedPage[a].detail.domiden] = ''
+      for (const a in grantedPerm) {
+        if (buildPermission[grantedPerm[a].domiden]) {
+          buildPermission[grantedPerm[a].domiden] = {}
         }
 
-        buildPermission[grantedPage[a].detail.domiden] = grantedPage[a].detail.dispatchname
+        buildPermission[grantedPerm[a].domiden] = grantedPerm[a]
       }
       state.credential.permission = buildPermission
+
+      const grantedPage = credentialData.grantedPage
+      const buildPage = {}
+      state.credential.routes.push('/login')
+      for (const a in grantedPage) {
+        if (buildPage[`page_${grantedPage[a].id}`]) {
+          buildPage[`page_${grantedPage[a].id}`] = {}
+        }
+        buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
+
+        state.credential.routes.push(grantedPage[a].identifier)
+      }
+      state.credential.pages = buildPage
     },
     CLEAR_SESSION (state: any) {
       state.credential.token = null

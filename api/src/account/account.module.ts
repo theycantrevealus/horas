@@ -14,6 +14,11 @@ import { LogLoginModel } from '../model/log.login.model'
 import { MenuService } from '../menu/menu.service'
 import { AccountPrivilegesModel } from '../model/account.privileges.model'
 import { MenuModel } from '../model/menu.model'
+import { MenuGroupModel } from '../model/menu.group.model'
+import { MenuGroupService } from '../menu/menu.group.service'
+import { AccountPermissionModel } from '../model/account.permission.model'
+import { MenuPermissionService } from '../menu/menu.permission.service'
+import { MenuPermissionModel } from '../model/menu.permission.model'
 
 @Module({
     imports: [
@@ -21,10 +26,10 @@ import { MenuModel } from '../model/menu.model'
             secret: `${process.env.JWT_SECRET}`
         }),
         TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel, LogActivityModel, LogLoginModel, AccountPrivilegesModel, MenuModel], 'default')
+        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel, LogActivityModel, LogLoginModel, AccountPrivilegesModel, MenuModel, MenuGroupModel, MenuPermissionModel, AccountPrivilegesModel, AccountPermissionModel], 'default')
     ],
     controllers: [AccountController, AuthorityController],
-    providers: [AccountService, AuthorityService, AuthService, MenuService],
-    exports: [AccountService, AuthorityService, MenuService]
+    providers: [AccountService, AuthorityService, AuthService, MenuService, MenuPermissionService, MenuGroupService],
+    exports: [AccountService, AuthorityService, MenuService, MenuPermissionService, MenuGroupService]
 })
 export class AccountModule { }

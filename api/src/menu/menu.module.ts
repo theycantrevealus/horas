@@ -25,7 +25,7 @@ import { MenuPermissionService } from './menu.permission.service'
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
     TypeOrmModule.forFeature([MenuModel, AccountPrivilegesModel, AccountPermissionModel, LogActivityModel, MenuGroupModel, MenuPermissionModel], 'default')
   ],
-  providers: [MenuService, MenuGroupService, MenuPermissionService, AuthService],
-  exports: [MenuService, MenuGroupService, MenuPermissionService, AuthService]
+  providers: [MenuService, MenuGroupService, MenuPermissionService, MenuPermissionService, AuthService],
+  exports: [MenuService, MenuGroupService, MenuPermissionService, MenuPermissionService, AuthService]
 })
 export class MenuModule { }

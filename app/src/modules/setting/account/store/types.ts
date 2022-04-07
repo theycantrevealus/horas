@@ -1,0 +1,3 @@
+export const ACCOUNT_LIST = 'ACCOUNT_LIST'
+export const ACCOUNT_ADD = 'ACCOUNT_ADD'
+export const ACCOUNT_REMOVE = 'ACCOUNT_REMOVE'

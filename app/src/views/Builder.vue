@@ -14,16 +14,18 @@
       </perfect-scrollbar>
     </div>
     <div class="loadpanel">
-      <perfect-scrollbar>
+      <perfect-scrollbar ref="scrollLoader">
         <div class="wrapper">
           <div class="breadcrumb-container">
             <BreadCrumb :items="breadcrumb" :pageName="pageName" />
           </div>
-          <router-view v-slot="{ Component }">
-            <transition name="scale" mode="out-in">
-              <component :is="Component" />
-            </transition>
-          </router-view>
+          <div class="content-loader" id="content-loader">
+            <router-view v-slot="{ Component }">
+              <transition name="scale" mode="out-in">
+                <component :is="Component" />
+              </transition>
+            </router-view>
+          </div>
         </div>
       </perfect-scrollbar>
     </div>
@@ -41,6 +43,7 @@ export default {
     '$route' () {
       this.breadcrumb = this.$route.meta.breadcrumb
       this.pageName = this.$route.meta.pageTitle
+      this.$refs.scrollLoader.$el.scrollTop = 0
     }
   },
   mounted () {

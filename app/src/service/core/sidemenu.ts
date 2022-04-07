@@ -3,7 +3,7 @@ import axios from 'axios'
 class CoreService {
   generateMenu (token: String) {
     axios.defaults.headers.common.Authorization = `Bearer ${token}`
-    return axios.get(`${process.env.VUE_APP_APIGATEWAY}Core/menu`)
+    return axios.get(`${process.env.VUE_APP_APIGATEWAY}menu/tree`)
       .then(response => {
         return Promise.resolve(response)
       })
@@ -11,7 +11,7 @@ class CoreService {
 
   generateMenuManager (token: String) {
     axios.defaults.headers.common.Authorization = `Bearer ${token}`
-    return axios.get(`${process.env.VUE_APP_APIGATEWAY}Core/menu_manager`)
+    return axios.get(`${process.env.VUE_APP_APIGATEWAY}menu/tree/manager`)
       .then(response => {
         return Promise.resolve(response)
       })

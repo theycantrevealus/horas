@@ -2,45 +2,69 @@
   <div class="p-grid">
     <div class="p-col-12">
       <Card>
-        <template #title>
-          Menu Management
-        </template>
+        <template #title>Menu Management</template>
         <template #content>
           <TreeTable
             class="p-treetable-sm"
             filterMode="strict"
             :value="nodes"
             :paginator="true"
-            :rows="20" :filters="filtersNode"
+            :rows="20"
+            :filters="filtersNode"
           >
             <Column field="label" header="Label" :expander="true">
               <template #filter>
-                <InputText type="text" v-model="filtersNode['label']" class="p-column-filter" placeholder="Filter by label" />
+                <InputText
+                  type="text"
+                  v-model="filtersNode['label']"
+                  class="p-column-filter"
+                  placeholder="Filter by label"
+                />
               </template>
             </Column>
             <Column field="to" header="Link">
               <template #filter>
-                <InputText type="text" v-model="filtersNode['to']" class="p-column-filter" placeholder="Filter by link" />
+                <InputText
+                  type="text"
+                  v-model="filtersNode['to']"
+                  class="p-column-filter"
+                  placeholder="Filter by link"
+                />
               </template>
             </Column>
             <Column field="show_on_menu" header="Visibility">
               <template #filter>
-                <InputText type="text" v-model="filtersNode['show_on_menu']" class="p-column-filter" placeholder="Filter by visibility" />
+                <InputText
+                  type="text"
+                  v-model="filtersNode['show_on_menu']"
+                  class="p-column-filter"
+                  placeholder="Filter by visibility"
+                />
               </template>
             </Column>
-            <Column headerStyle="width: auto" bodyStyle="text-align: center">
-              <template #header>
-                Action
-              </template>
-              <template #body="slotProps">
+            <Column :headerStyle="{ 'width': 'auto' }" :bodyStyle="{ 'text-align': 'center' }">
+              <template #header>Action</template>
+              <template #body="slotProps: any">
                 <span class="p-buttonset">
-                  <Button @click="onNodeAdd({ id: slotProps.node.data.id, label: slotProps.node.data.label, key: slotProps.node.key }, 'Add Child Menu')" type="button" class="p-button-success p-button-raised p-button-sm">
+                  <Button
+                    @click="onNodeAdd(slotProps.node, 'Add Child Menu')"
+                    type="button"
+                    class="p-button-success p-button-raised p-button-sm"
+                  >
                     <span class="material-icons">add</span>
                   </Button>
-                  <Button @click="onNodeEdit(slotProps.node, 'Edit Child Menu')" type="button" class="p-button-info p-button-raised p-button-sm">
+                  <Button
+                    @click="onNodeEdit(slotProps.node, 'Edit Child Menu')"
+                    type="button"
+                    class="p-button-info p-button-raised p-button-sm"
+                  >
                     <span class="material-icons">edit</span>
                   </Button>
-                  <Button @click="onNodeDelete($event, slotProps.node.data.id)" type="button" class="p-button-danger p-button-raised p-button-sm">
+                  <Button
+                    @click="onNodeDelete($event, slotProps.node.data.id)"
+                    type="button"
+                    class="p-button-danger p-button-raised p-button-sm"
+                  >
                     <span class="material-icons">delete</span>
                   </Button>
                   <Button type="button" class="p-button-success p-button-raised p-button-sm">
@@ -55,36 +79,49 @@
           </TreeTable>
         </template>
       </Card>
-      <Dialog :header="ui.modal.manageMenu.title" v-model:visible="ui.modal.manageMenu.state" :style="{width: '80vw'}" :modal="true" :position="ui.modal.manageMenu.position">
+      <Dialog
+        :header="ui.modal.manageMenu.title"
+        v-model:visible="ui.modal.manageMenu.state"
+        :style="{ width: '80vw' }"
+        :modal="true"
+        :position="ui.modal.manageMenu.position"
+      >
         <div class="p-fluid p-formgrid p-grid">
           <div class="p-field p-col-12 p-md-4">
             <label for="managelabel">Label</label>
             <InputText id="managelabel" type="text" v-model="form.txt_label" />
           </div>
           <div class="p-field p-col-12 p-md-8">
-            <label for="manageroute">Route</label>
+            <label for="manageroute">Route Name</label>
             <InputText id="manageroute" type="text" v-model="form.txt_route" />
+          </div>
+          <div class="p-field p-col-12 p-md-8">
+            <label for="manageroute">Route URL</label>
+            <InputText id="managerouteurl" type="text" v-model="form.txt_route_url" />
           </div>
           <div class="p-field p-col-12 p-md-10">
             <label for="manageicon">Icon</label>
             <div class="p-inputgroup">
               <InputText id="manageicon" type="text" v-model="form.txt_icon" />
               <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">{{ form.txt_icon }}</span>
+                <span class="material-icons-outlined">{{ form.txt_icon }}</span>
               </span>
             </div>
           </div>
           <div class="p-field p-col-12 p-md-2">
             <label for="managecheck">Show on Menu</label>
-            <ToggleButton v-model="form.showMenu" onLabel="Show it!" offLabel="No, thanks" onIcon="pi pi-check" offIcon="pi pi-times" />
+            <ToggleButton
+              v-model="form.showMenu"
+              onLabel="Show it!"
+              offLabel="No, thanks"
+              onIcon="pi pi-check"
+              offIcon="pi pi-times"
+            />
           </div>
         </div>
         <div class="p-grid">
           <div class="p-col-12">
-            <DataTable
-              :value="setterPermission"
-              dataKey="id"
-              responsiveLayout="scroll">
+            <DataTable :value="setterPermission" data-key="id" responsiveLayout="scroll">
               <template #header>
                 <div class="table-header-container">
                   <Button class="p-button-info p-button-sm" @click="addFeatureForm">
@@ -93,14 +130,10 @@
                 </div>
               </template>
               <Column field="domiden" header="DOM" sortable>
-                <template #body="slotProps">
-                  {{ slotProps.data.domiden }}
-                </template>
+                <template #body="slotProps">{{ slotProps.data.domiden }}</template>
               </Column>
               <Column field="dispatchname" header="Dispatch" sortable>
-                <template #body="slotProps">
-                  {{ slotProps.data.dispatchname }}
-                </template>
+                <template #body="slotProps">{{ slotProps.data.dispatchname }}</template>
               </Column>
             </DataTable>
           </div>
@@ -114,10 +147,19 @@
           </Button>
         </template>
       </Dialog>
-      <Dialog :modal="true" :header="ui.modal.manageFeature.title" v-model:visible="ui.modal.manageFeature.state" :position="ui.modal.manageFeature.position" :style="{width: '50vw'}">
+      <Dialog
+        :modal="true"
+        :header="ui.modal.manageFeature.title"
+        v-model:visible="ui.modal.manageFeature.state"
+        :position="ui.modal.manageFeature.position"
+        :style="{ width: '50vw' }"
+      >
         <div class="p-fluid p-formgrid p-grid">
           <div class="p-field p-col-12 p-md-12">
-            <label for="manageFeatureDOM">DOM Identity <code>(class)</code></label>
+            <label for="manageFeatureDOM">
+              DOM Identity
+              <code>(class)</code>
+            </label>
             <InputText id="manageFeatureDOM" type="text" v-model="form.feature.dom" />
           </div>
           <div class="p-field p-col-12 p-md-12">
@@ -170,9 +212,11 @@ export default defineComponent({
       }>(),
       form: {
         targetGroup: 0,
+        targetParent: 0,
         targetID: 0,
         txt_label: '',
         txt_route: '',
+        txt_route_url: '',
         txt_icon: '',
         showMenu: false,
         showFeature: false,
@@ -198,9 +242,7 @@ export default defineComponent({
       selectedNode: {},
       filtersNode: {},
       expandedKeys: {},
-      nodes: {
-        data: []
-      },
+      nodes: null,
       columns: [
         { field: 'label', header: 'Label', expander: true },
         { field: 'to', header: 'To' },
@@ -224,9 +266,11 @@ export default defineComponent({
     clearForm () {
       this.form = {
         targetGroup: 0,
+        targetParent: 0,
         targetID: 0,
         txt_label: '',
         txt_route: '',
+        txt_route_url: '',
         txt_icon: '',
         showMenu: false,
         showFeature: false,
@@ -238,7 +282,7 @@ export default defineComponent({
     },
     reloadMenu () {
       this.getMenu().then((data: any) => {
-        this.nodes = data.data.response_package.root
+        this.nodes = data.data.root
       })
     },
     toggleModal () {
@@ -256,13 +300,10 @@ export default defineComponent({
         acceptLabel: 'Yes. Delete it!',
         rejectLabel: 'Cancel',
         accept: () => {
-          return CoreService.menuDelete({
-            request: 'menu',
-            id: target
-          }).then((response: any) => {
-            response = response.data.response_package
-            if (response.response_result > 0) {
-              this.$toast.add({ severity: 'success', summary: 'Menu Manager', detail: response.response_message, life: 3000 })
+          return CoreService.menuDelete(target).then((response: any) => {
+            response = response.data
+            if (response.status === 200) {
+              this.$toast.add({ severity: 'success', summary: 'Menu Manager', detail: response.message, life: 3000 })
               this.reloadMenu()
               this.rebuildMenu()
             }
@@ -273,36 +314,49 @@ export default defineComponent({
         }
       })
     },
-    onNodeEdit (target:any, mode: string) {
+    onNodeEdit (target: any, mode: string) {
       const data = target.data
+      console.log(data)
       this.form.targetID = data.id
       this.form.txt_label = data.label
-      this.form.txt_route = data.to
+      this.form.txt_route = data.identifier
+      this.form.txt_route_url = data.to
       this.form.txt_icon = data.icon
       this.form.showMenu = (target.show_on_menu === 'Y')
       this.formMode = 'edit'
       this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
+
+      const checkLevel = target.key.split('-')
+      this.form.targetGroup = checkLevel[0]
+      // if (checkLevel.length > 1) {
+      //   this.form.targetParent = data.id
+      // } else {
+      //   this.form.targetParent = checkLevel[0]
+      // }
+      this.form.targetParent = data.parent
+
       CoreService.menuDetail(data.id).then(response => {
-        const dataSelected = response.data.response_package.response_data[0]
+        const dataSelected = response.data
         if (dataSelected.permission !== null) {
           this.setterPermission = dataSelected.permission
         }
       })
       this.toggleModal()
     },
-    onNodeAdd (target:any, mode: string) {
+    onNodeAdd (target: any, mode: string) {
+      const data = target.data
       this.clearForm()
-      const checkLevel = target.key.split('-')
       this.formMode = 'add'
+
+      const checkLevel = target.key.split('-')
+      this.form.targetGroup = checkLevel[0]
       if (checkLevel.length > 1) {
-        this.form.targetGroup = checkLevel[0]
-        this.form.targetID = target.id
+        this.form.targetParent = data.id
       } else {
-        this.form.targetID = 0
-        this.form.targetGroup = target.id
+        this.form.targetParent = checkLevel[0]
       }
 
-      this.ui.modal.manageMenu.title = `${mode}  ${target.label}`
+      this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
       this.toggleModal()
     },
     addFeatureForm () {
@@ -312,28 +366,30 @@ export default defineComponent({
     editMenu () {
       const label = this.form.txt_label
       const routeTo = this.form.txt_route
+      const routeToUrl = this.form.txt_route_url
       const icon = this.form.txt_icon
       const showMenu = (this.form.showMenu) ? 'Y' : 'N'
 
-      return CoreService.menuEdit({
-        request: 'update_menu',
-        id: this.form.targetID,
-        caption: label,
-        grouper: this.form.targetGroup,
-        targetLink: routeTo,
+      return CoreService.menuEdit(this.form.targetID, {
+        name: label,
+        menu_group: this.form.targetGroup,
+        identifier: routeTo,
+        url: routeToUrl,
         remark: '',
-        parent: this.form.targetID,
-        setterPermission: this.setterPermission,
+        parent: this.form.targetParent,
         icon: icon,
-        showOnMenu: showMenu
+        show_order: 1,
+        level: 2,
+        group_color: '',
+        show_on_menu: showMenu
       }).then((response: any) => {
-        response = response.data.response_package
-        if (response.response_result > 0) {
+        response = response.data
+        if (response.status === 200) {
           this.reloadMenu()
           this.rebuildMenu()
           this.clearForm()
           this.ui.modal.manageMenu.state = false
-          this.$toast.add({ severity: 'success', summary: 'Menu Manager', detail: response.response_message, life: 3000 })
+          this.$toast.add({ severity: 'success', summary: 'Menu Manager', detail: response.message, life: 3000 })
         }
       })
     },
@@ -363,27 +419,46 @@ export default defineComponent({
     addMenu () {
       const label = this.form.txt_label
       const routeTo = this.form.txt_route
+      const routeToUrl = this.form.txt_route_url
       const icon = this.form.txt_icon
       const showMenu = (this.form.showMenu) ? 'Y' : 'N'
 
       return CoreService.menuAdd({
-        request: 'add_menu',
-        caption: label,
-        grouper: this.form.targetGroup,
-        targetLink: routeTo,
+        name: label,
+        menu_group: this.form.targetGroup,
+        identifier: routeTo,
+        url: routeToUrl,
         remark: '',
-        parent: this.form.targetID,
-        setterPermission: this.setterPermission,
+        parent: this.form.targetParent,
         icon: icon,
-        showOnMenu: showMenu
-      }).then((response: any) => {
-        response = response.data.response_package
-        if (response.response_result > 0) {
-          this.reloadMenu()
-          this.rebuildMenu()
-          this.clearForm()
-          this.ui.modal.manageMenu.state = false
-          this.$toast.add({ severity: 'success', summary: 'Menu Manager', detail: response.response_message, life: 3000 })
+        show_order: 1,
+        show_on_menu: showMenu
+      }).then(async (response: any) => {
+        response = response.data
+        if (response.status === 200) {
+          // Add Menu Permission
+          const mimicSetterPermission = this.setterPermission
+          let succeedPermission = 0
+          for (const a in mimicSetterPermission) {
+            const permissionAdd = await CoreService.menuPermissionAdd({
+              menu: response.returning.id,
+              servicegroup: '',
+              dispatchname: mimicSetterPermission[a].dispatchname,
+              domiden: mimicSetterPermission[a].domiden
+            }).then(async (response: any) => {
+              return response
+            })
+
+            succeedPermission += (permissionAdd.data.status === 200) ? 1 : 0
+          }
+
+          if (succeedPermission === this.setterPermission.length) {
+            this.reloadMenu()
+            this.rebuildMenu()
+            this.clearForm()
+            this.ui.modal.manageMenu.state = false
+            this.$toast.add({ severity: 'success', summary: 'Menu Manager', detail: response.message, life: 3000 })
+          }
         }
       })
     }
