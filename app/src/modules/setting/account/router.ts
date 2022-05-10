@@ -37,7 +37,7 @@ const moduleRoute = [{
         breadcrumb: [
           {
             label: 'Account',
-            to: '/account/list'
+            to: '/account'
           }
         ]
       },

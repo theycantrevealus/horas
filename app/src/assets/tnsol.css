@@ -4,13 +4,23 @@
 }
 
 @font-face {
+  font-family: GreyCliff;
+  src: url("./font/greycliff/GreycliffCF-Bold.ttf");
+}
+
+@font-face {
     font-family: Karla;
     src: url("./font/karla/static/Karla-Regular.ttf");
 }
 
 @font-face {
     font-family: 'Visby Round';
-    src: url("./font/visby/VisbyRoundCF-Bold.otf");
+    src: url("./font/visby/VisbyRoundCF-Medium.otf");
+}
+
+@font-face {
+  font-family: 'Visby Round Bold';
+  src: url("./font/visby/VisbyRoundCF-Bold.otf");
 }
 
 body {
@@ -18,7 +28,7 @@ body {
     background: #fff !important;
     padding: 0 !important;
     margin: 0 !important;
-    font-family: 'Visby Round', SansSerif, Arial, serif !important;
+    font-family: 'GreyCliff', SansSerif, Arial, serif !important;
 }
 
 table {
@@ -118,8 +128,8 @@ input::-moz-focus-inner,
     background: #fff;
     z-index: 1000;
     position: fixed;
-    width: 80%;
-    left: 20%;
+    width: 88%;
+    left: 12%;
     height: 60px;
     /*background: #C7DEE1 !important;*/
 }
@@ -177,11 +187,11 @@ input::-moz-focus-inner,
 
 .loadpanel {
     font-family: Karla, SansSerif, Arial, serif !important;
-    overflow: hidden;
+    overflow: hidden !important;
     position: fixed;
     z-index: 998;
-    width: 80%;
-    left: 20%;
+    width: 88%;
+    left: 12%;
     height: 100%;
 }
 
@@ -227,26 +237,27 @@ input::-moz-focus-inner,
     font-weight: bolder;
     border-right: solid 1px #394141;
     padding: 0 20px !important;
-    color: #39959d;
+    color: #4e6cf8;
 }
 
 .breadcrumb-container .pageName span {
-    color: #42b883;
+    color: #4e6cf8;
     font-size: .7rem !important;
 }
 
 .sidepanel {
     z-index: 1000;
     position: absolute;
-    width: 20%;
+    width: 12%;
     left: 0;
     height: 100%;
     overflow-y: hidden;
+    background: #4e6cf8;
     box-shadow: 0 0 0 1px #dadfea;
 }
 
 .sidepanel .wrapper {
-    padding: 1rem;
+    padding: 0;
 }
 
 .layout-menu-container {
@@ -258,33 +269,37 @@ input::-moz-focus-inner,
     /* -webkit-filter: drop-shadow(0px 0px 7px rgba(240, 240, 240, 0.7));
     filter: drop-shadow(0px 0px 7px rgba(240, 240, 240, 0.7)); */
     position: relative;
-    width: 80%;
-    margin: 15px 10% 0 5%;
+    width: 90%;
+    margin: 20px 5% 0px;
 }
 
 .sidepanel-container {
-    padding-bottom: 10px
+  padding: 0 .5rem;
 }
 
 .sidepanel .layout-menu li a {
-    font-family: Visby Round !important;
+    font-family: 'Visby Round Bold' !important;
     font-weight: bolder;
     border-radius: 5px !important;
-    color: #3393ff !important;
+    color: #fff !important;
+}
+
+.material-icons-outlined {
+    font-size: 1rem;
 }
 
 .sidepanel .layout-menu li a .material-icons,
-.material-icons-outlined {
+.sidepanel .material-icons-outlined {
     margin-top: 1px;
-    color: #3393ff !important;
+    color: #fff !important;
 }
 
 .sidepanel .layout-menu li .layout-menuitem-root-text {
-    font-family: Visby Round, SansSerif, Arial, serif !important;
+    font-family: 'Visby Round Bold', SansSerif, Arial, serif !important;
     font-weight: bolder !important;
-    color: #6f7d95 !important;
+    color: #fff !important;
     letter-spacing: 2px;
-    font-size: 6pt !important;
+    font-size: .5rem !important;
 }
 
 .sidepanel hr {
@@ -315,29 +330,25 @@ input::-moz-focus-inner,
     background: transparent;
 }
 
-.layout-menuitem-root-text {
-    font-size: 8pt !important;
-}
-
 .layout-menu li span {
-    font-size: .7rem !important;
+    font-size: .6rem !important;
     letter-spacing: 1px
 }
 
 .layout-menu li span.material-icons-outlined {
-    font-size: 1rem !important;
+    font-size: .8rem !important;
 }
 
-.layout-menu li a.router-link-exact-active {
+.layout-menu li a.router-link-exact-active, .layout-menu li a.router-link-active {
     font-weight: bolder !important;
     /* background: #dbffca; */
-    background: #3393ff;
+    background: #fff;
     /* color: #28B67E !important; */
-    color: #fff !important
+    color: #8ca0fa !important
 }
 
-.layout-menu li a.router-link-exact-active .material-icons-outlined {
-    color: #fff !important;
+.layout-menu li a.router-link-exact-active .material-icons-outlined, .layout-menu li a.router-link-active .material-icons-outlined {
+    color: #8ca0fa !important;
 }
 
 .p-panelmenu .p-panelmenu-content {
@@ -521,6 +532,16 @@ input::-moz-focus-inner,
     padding: .5rem 1.25rem !important
 }
 
+.p-button-sm {
+    font-size: .8rem !important;
+    padding: .5rem !important;
+}
+
+.p-button-sm .material-icons {
+    font-size: .8rem !important;
+    margin: 2px 5px;
+}
+
 .p-picklist-buttons .p-button {
     padding: .5rem .2rem !important;
     font-size: .7rem;
@@ -649,31 +670,6 @@ input::-moz-focus-inner,
     min-height: 300px !important;
 }
 
-
-
-
-.p-datatable-table thead tr th {
-    background: #39959d !important;
-    color: #fff !important;
-}
-
-.p-datatable-table thead tr th .pi {
-    color: #fff !important;
-}
-
-.p-datatable-table thead tr th .p-column-filter-menu-button-active {
-    background: #50e4a2 !important;
-
-}
-
-.p-datatable-table thead tr th .p-column-filter-menu-button-active .pi {
-    color: #fff !important;
-}
-
-.p-datatable-table tbody tr:nth-child(even) td {
-    background: #bdfff7 !important;
-}
-
 .p-paginator .p-dropdown {
     height: auto !important;
 }
@@ -698,4 +694,21 @@ input::-moz-focus-inner,
 
 .p-buttonset .p-button {
     margin: 0 5px;
+}
+
+
+.form-mode .p-inputgroup {
+    margin-bottom: 10px;
+}
+
+.form-mode .p-dropdown-label.p-inputtext.p-placeholder {
+    margin-top: 4px;
+}
+
+.p-chip.sm {
+  font-size: .8rem !important;
+}
+
+.p-chip.sm span {
+  font-size: .8rem !important;
 }

@@ -114,17 +114,31 @@ export class MenuService {
 
   async grant_menu_permission (permission: GrantPermissionDTO) {
     const menuResp = new GrantPermissionResponseDTO()
-    const menuRes = await this.accountPermissionRepo.save(permission).then(async returning => {
-      return returning
+
+    const checkExist = await this.accountPermissionRepo.findOne({
+      where: {
+        account: permission.account,
+        permission: permission.permission
+      }
     })
 
-    if (menuRes) {
+    if (checkExist) {
       menuResp.message = 'Permission Granted Successfully'
       menuResp.status = HttpStatus.OK
-      menuResp.returning = menuRes
+      menuResp.returning = checkExist
     } else {
-      menuResp.message = 'Permission Granted Failed'
-      menuResp.status = HttpStatus.BAD_REQUEST
+      const menuRes = await this.accountPermissionRepo.save(permission).then(async returning => {
+        return returning
+      })
+
+      if (menuRes) {
+        menuResp.message = 'Permission Granted Successfully'
+        menuResp.status = HttpStatus.OK
+        menuResp.returning = menuRes
+      } else {
+        menuResp.message = 'Permission Granted Failed'
+        menuResp.status = HttpStatus.BAD_REQUEST
+      }
     }
 
     return menuResp
@@ -132,17 +146,29 @@ export class MenuService {
 
   async grant_menu_access (privileges: GrantAccessDTO) {
     let grantResp = new GrantAccessResponseDTO()
-    const menuRes = await this.accountPrivilegesRepo.save(privileges).then(async returning => {
-      return returning
+    const checkExist = await this.accountPrivilegesRepo.findOne({
+      where: {
+        account: privileges.account,
+        menu: privileges.menu
+      }
     })
-
-    if (menuRes) {
+    if (checkExist) {
       grantResp.message = 'Access Granted Successfully'
       grantResp.status = HttpStatus.OK
-      grantResp.returning = menuRes
+      grantResp.returning = checkExist
     } else {
-      grantResp.message = 'Access Granted Failed'
-      grantResp.status = HttpStatus.BAD_REQUEST
+      const menuRes = await this.accountPrivilegesRepo.save(privileges).then(async returning => {
+        return returning
+      })
+
+      if (menuRes) {
+        grantResp.message = 'Access Granted Successfully'
+        grantResp.status = HttpStatus.OK
+        grantResp.returning = menuRes
+      } else {
+        grantResp.message = 'Access Granted Failed'
+        grantResp.status = HttpStatus.BAD_REQUEST
+      }
     }
 
     return grantResp
@@ -185,6 +211,26 @@ export class MenuService {
     return { root: menuGroupSet }
   }
 
+  async tree_manager_paginate (param: any) {
+    const menuGroupSet = []
+    const grouper = await this.menuGroupService.paginate(param)
+
+    for (const a in grouper) {
+      menuGroupSet.push({
+        show_on_menu: 'Y',
+        key: `${grouper[a].id}`,
+        data: {
+          id: grouper[a].id,
+          label: grouper[a].name
+        },
+        level: 1,
+        children: await this.tree_manager_child(grouper[a].id, `${grouper[a].id}`),
+      })
+    }
+
+    return { root: menuGroupSet }
+  }
+
   async tree_manager_child (parent: number, key: string) {
     let currentKey = key.split('-')
     let menuSet = []
@@ -198,6 +244,7 @@ export class MenuService {
     })
 
     for (const a in menuList) {
+      const permissionData = await this.menuPermissionService.menu_permission(menuList[a].id)
       const menuItem = menuList[a]
       currentKey = [key]
       currentKey.push(`${menuList[a].id}`)
@@ -211,6 +258,7 @@ export class MenuService {
           label: menuItem.name,
           identifier: menuItem.identifier,
           icon: menuItem.icon,
+          permission: permissionData || [],
           to: `${menuItem.url}`
         },
         children: menuChild,

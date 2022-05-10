@@ -31,19 +31,19 @@ import VueGoogleMaps from '@fawmi/vue-google-maps'
 // Modular
 import { registerModules } from '@/modules/register'
 import Account from '@/modules/setting/account'
+import Authority from '@/modules/setting/authority'
 import Service from '@/modules/service'
 import MasterItem from '@/modules/master_item'
 import MasterDocumentation from '@/modules/master_documentation'
-import GMap from '@/modules/gmap'
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 
 registerModules({
   accountModule: Account,
+  authorityModule: Authority,
   serviceModule: Service,
   masterItemModule: MasterItem,
-  masterTourModule: MasterDocumentation,
-  gMapModule: GMap
+  masterTourModule: MasterDocumentation
 })
 
 setupInterceptors()

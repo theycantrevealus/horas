@@ -5,14 +5,8 @@
         <div style="width: 100%; height: 400px; background: red;">
           <GMapMap :center="center" :zoom="7" @click="mapClick">
             <GMapCluster>
-              <GMapMarker
-                :key="index"
-                v-for="(m, index) in markers"
-                :position="m.position"
-                :clickable="true"
-                :draggable="true"
-                @click="center = m.position"
-              />
+              <GMapMarker :key="index" v-for="(m, index) in markers" :position="m.position" :clickable="true"
+                :draggable="true" @click="center = m.position" />
             </GMapCluster>
           </GMapMap>
         </div>
@@ -30,7 +24,6 @@ export default {
   methods: {
     mapClick (event) {
       console.clear()
-      console.log(event.latLng.toJSON())
     }
   },
   data () {

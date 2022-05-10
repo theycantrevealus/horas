@@ -99,7 +99,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   NProgress.start()
   if (!to.matched.length) {
-    console.log(to.fullPath)
     next('/404')
   } else {
     const isAuthed = ((<any>store.state).credential.token !== '' && (<any>store.state).credential.token !== null && (<any>store.state).credential.token !== undefined)
@@ -114,8 +113,6 @@ router.beforeEach((to, from, next) => {
         // next('/403')
         // next()
         if ((<any>store.state).credential.routes.indexOf(to.name) < 0) {
-          console.log(to.name)
-          console.log(store.state.credential)
           next('/403')
         } else {
           next()

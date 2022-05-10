@@ -1,3 +1,4 @@
+import { ServeStaticModule } from '@nestjs/serve-static'
 import { AuthModule } from './auth/auth.module'
 import { AccountModule } from './account/account.module'
 import { AccountController } from './account/account.controller'
@@ -18,6 +19,7 @@ import { AccountModel } from './model/account.model'
 import { LogActivityModel } from './model/log.activity.model'
 import { AccountService } from './account/account.service'
 import { LogLoginModel } from './model/log.login.model'
+import { join } from 'path'
 
 @Module({
   imports: [
@@ -26,7 +28,12 @@ import { LogLoginModel } from './model/log.login.model'
     MenuModule,
     LogModule,
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([LogLoginModel, LogActivityModel], 'default')
+    TypeOrmModule.forFeature([LogLoginModel, LogActivityModel], 'default'),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'avatar'),
+      exclude: ['/api*'],
+      serveRoot: '/avatar'
+    })
   ],
   controllers: [
     AccountController,

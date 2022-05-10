@@ -20,6 +20,8 @@ import { MenuService } from '../menu/menu.service'
 import { AccountPrivilegesModel } from '../model/account.privileges.model'
 import { AccountPermissionModel } from '../model/account.permission.model'
 import { filterSetDT } from '../mod.lib'
+import { fstat } from 'fs'
+import { logger } from '@sentry/utils'
 
 @Injectable()
 export class AccountService {
@@ -123,7 +125,31 @@ export class AccountService {
   }
 
   async detail (uid: string) {
-    return this.accountRepo.createQueryBuilder('account').innerJoinAndSelect('account.authority', 'authority').where('account.uid = :uid', { uid }).getOne()
+    let data = {
+      account: {},
+      access: [],
+      permission: []
+    }
+    data.account = await this.accountRepo.createQueryBuilder('account').innerJoinAndSelect('account.authority', 'authority').where('account.uid = :uid', { uid }).getOne()
+    //LOAD PAGE PERMISSION
+    const Page = await this.accountPrivileges.createQueryBuilder('account_privileges')
+      .innerJoinAndSelect('account_privileges.menu', 'menu')
+      .where('account_privileges.account = :account', { account: uid })
+      .getMany()
+    for (const a in Page) {
+      data.access.push(Page[a].menu)
+    }
+
+    //LOAD ACCESS PERMISSION
+    const Permission = await this.accountPermission.createQueryBuilder('account_permission')
+      .innerJoinAndSelect('account_permission.permission', 'menu_permission')
+      .where('account_permission.account = :account', { account: uid })
+      .getMany()
+    for (const a in Permission) {
+      data.permission.push(Permission[a].permission)
+    }
+
+    return data
   }
 
   async delete_soft (uid: string) {
@@ -143,16 +169,34 @@ export class AccountService {
 
   async edit (account, uid: string) {
     let response = new AccountEditDTOResponse()
-    const saltOrRounds = 10
-    const password = account.password
-    account.password = await bcrypt.hash(password, saltOrRounds)
+    if (account.password !== undefined) {
+      const saltOrRounds = 10
+      const password = account.password
+      account.password = await bcrypt.hash(password, saltOrRounds)
+    }
+
+    const logger = this.logger
+
+    var buff = Buffer.from(await account.image.replace(/^data:image\/\w+;base64,/, ''), 'base64')
+    const fs = require('fs')
+    const path = `avatar/${uid}.png`
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync('avatar', { recursive: true });
+    }
+
+    fs.writeFile(path, buff, function (err) {
+      logger.log(account.image)
+    })
+
+    delete account.image
+
     const accountRes = this.accountRepo.update(uid, account).then(async returning => {
       return await this.detail(uid)
     })
     if (accountRes) {
       response.message = 'Account updated successfully'
       response.status = HttpStatus.OK
-      response.returning = await accountRes
+      response.returning = await (await accountRes).account
     } else {
       response.message = 'Account failed to update'
       response.status = HttpStatus.BAD_REQUEST

@@ -4,67 +4,40 @@
       <Card>
         <template #title>Menu Management</template>
         <template #content>
-          <TreeTable
-            class="p-treetable-sm"
-            filterMode="strict"
-            :value="nodes"
-            :paginator="true"
-            :rows="20"
-            :filters="filtersNode"
-          >
+          <TreeTable class="p-treetable-sm" filterMode="strict" :value="nodes" :paginator="true" :rows="20"
+            :filters="filtersNode">
             <Column field="label" header="Label" :expander="true">
               <template #filter>
-                <InputText
-                  type="text"
-                  v-model="filtersNode['label']"
-                  class="p-column-filter"
-                  placeholder="Filter by label"
-                />
+                <InputText type="text" v-model="filtersNode['label']" class="p-column-filter"
+                  placeholder="Filter by label" />
               </template>
             </Column>
             <Column field="to" header="Link">
               <template #filter>
-                <InputText
-                  type="text"
-                  v-model="filtersNode['to']"
-                  class="p-column-filter"
-                  placeholder="Filter by link"
-                />
+                <InputText type="text" v-model="filtersNode['to']" class="p-column-filter"
+                  placeholder="Filter by link" />
               </template>
             </Column>
             <Column field="show_on_menu" header="Visibility">
               <template #filter>
-                <InputText
-                  type="text"
-                  v-model="filtersNode['show_on_menu']"
-                  class="p-column-filter"
-                  placeholder="Filter by visibility"
-                />
+                <InputText type="text" v-model="filtersNode['show_on_menu']" class="p-column-filter"
+                  placeholder="Filter by visibility" />
               </template>
             </Column>
             <Column :headerStyle="{ 'width': 'auto' }" :bodyStyle="{ 'text-align': 'center' }">
               <template #header>Action</template>
               <template #body="slotProps: any">
                 <span class="p-buttonset">
-                  <Button
-                    @click="onNodeAdd(slotProps.node, 'Add Child Menu')"
-                    type="button"
-                    class="p-button-success p-button-raised p-button-sm"
-                  >
+                  <Button @click="onNodeAdd(slotProps.node, 'Add Child Menu')" type="button"
+                    class="p-button-success p-button-raised p-button-sm">
                     <span class="material-icons">add</span>
                   </Button>
-                  <Button
-                    @click="onNodeEdit(slotProps.node, 'Edit Child Menu')"
-                    type="button"
-                    class="p-button-info p-button-raised p-button-sm"
-                  >
+                  <Button @click="onNodeEdit(slotProps.node, 'Edit Child Menu')" type="button"
+                    class="p-button-info p-button-raised p-button-sm">
                     <span class="material-icons">edit</span>
                   </Button>
-                  <Button
-                    @click="onNodeDelete($event, slotProps.node.data.id)"
-                    type="button"
-                    class="p-button-danger p-button-raised p-button-sm"
-                  >
+                  <Button @click="onNodeDelete($event, slotProps.node.data.id)" type="button"
+                    class="p-button-danger p-button-raised p-button-sm">
                     <span class="material-icons">delete</span>
                   </Button>
                   <Button type="button" class="p-button-success p-button-raised p-button-sm">
@@ -79,13 +52,8 @@
           </TreeTable>
         </template>
       </Card>
-      <Dialog
-        :header="ui.modal.manageMenu.title"
-        v-model:visible="ui.modal.manageMenu.state"
-        :style="{ width: '80vw' }"
-        :modal="true"
-        :position="ui.modal.manageMenu.position"
-      >
+      <Dialog :header="ui.modal.manageMenu.title" v-model:visible="ui.modal.manageMenu.state" :style="{ width: '80vw' }"
+        :modal="true" :position="ui.modal.manageMenu.position">
         <div class="p-fluid p-formgrid p-grid">
           <div class="p-field p-col-12 p-md-4">
             <label for="managelabel">Label</label>
@@ -110,13 +78,8 @@
           </div>
           <div class="p-field p-col-12 p-md-2">
             <label for="managecheck">Show on Menu</label>
-            <ToggleButton
-              v-model="form.showMenu"
-              onLabel="Show it!"
-              offLabel="No, thanks"
-              onIcon="pi pi-check"
-              offIcon="pi pi-times"
-            />
+            <ToggleButton v-model="form.showMenu" onLabel="Show it!" offLabel="No, thanks" onIcon="pi pi-check"
+              offIcon="pi pi-times" />
           </div>
         </div>
         <div class="p-grid">
@@ -147,13 +110,8 @@
           </Button>
         </template>
       </Dialog>
-      <Dialog
-        :modal="true"
-        :header="ui.modal.manageFeature.title"
-        v-model:visible="ui.modal.manageFeature.state"
-        :position="ui.modal.manageFeature.position"
-        :style="{ width: '50vw' }"
-      >
+      <Dialog :modal="true" :header="ui.modal.manageFeature.title" v-model:visible="ui.modal.manageFeature.state"
+        :position="ui.modal.manageFeature.position" :style="{ width: '50vw' }">
         <div class="p-fluid p-formgrid p-grid">
           <div class="p-field p-col-12 p-md-12">
             <label for="manageFeatureDOM">
@@ -316,7 +274,6 @@ export default defineComponent({
     },
     onNodeEdit (target: any, mode: string) {
       const data = target.data
-      console.log(data)
       this.form.targetID = data.id
       this.form.txt_label = data.label
       this.form.txt_route = data.identifier

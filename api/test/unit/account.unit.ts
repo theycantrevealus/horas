@@ -17,97 +17,95 @@ import { AccountAddDTO } from "../../src/account/dto/account.add.dto"
 import { sample } from "rxjs"
 
 describe('Account Login Test', () => {
-    let accountController: AccountController
-    let accountService: AccountService
-    let accountRepo: Repository<AccountModel>
-    let authorityRepo: Repository<AccountAuthorityModel>
-    let app: INestApplication
+  let accountController: AccountController
+  let accountService: AccountService
+  let accountRepo: Repository<AccountModel>
+  let authorityRepo: Repository<AccountAuthorityModel>
+  let app: INestApplication
 
-    beforeAll(async () => {
-        const accountModule: TestingModule = await Test.createTestingModule({
-            imports: [
-                JwtModule.register({
-                    secret: `${process.env.JWT_SECRET}`
-                }),
-                TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-                TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel], 'default')
-            ],
-            controllers: [AccountController],
-            providers: [AccountService, AuthService]
-        }).compile()
+  beforeAll(async () => {
+    const accountModule: TestingModule = await Test.createTestingModule({
+      imports: [
+        JwtModule.register({
+          secret: `${process.env.JWT_SECRET}`
+        }),
+        TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
+        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel], 'default')
+      ],
+      controllers: [AccountController],
+      providers: [AccountService, AuthService]
+    }).compile()
 
-        app = accountModule.createNestApplication()
+    app = accountModule.createNestApplication()
 
-        accountService = accountModule.get<AccountService>(AccountService)
-        accountController = accountModule.get<AccountController>(AccountController)
-        accountRepo = accountModule.get<Repository<AccountModel>>(getRepositoryToken(AccountModel))
-        authorityRepo = accountModule.get<Repository<AccountAuthorityModel>>(getRepositoryToken(AccountAuthorityModel))
+    accountService = accountModule.get<AccountService>(AccountService)
+    accountController = accountModule.get<AccountController>(AccountController)
+    accountRepo = accountModule.get<Repository<AccountModel>>(getRepositoryToken(AccountModel))
+    authorityRepo = accountModule.get<Repository<AccountAuthorityModel>>(getRepositoryToken(AccountAuthorityModel))
+  })
+
+  describe('Login test', () => {
+    it('should check if service is running well', () => {
+      expect(accountService).toBeDefined()
     })
 
-    describe('Login test', () => {
-        it('should check if service is running well', () => {
-            expect(accountService).toBeDefined()
-        })
+    it('should logged in succesfully with correct credential', async () => {
+      let result
+      //const testRC = jest.spyOn(accountService, 'account_login').mockResolvedValueOnce(result)
 
-        it('should logged in succesfully with correct credential', async () => {
-            let result
-            //const testRC = jest.spyOn(accountService, 'account_login').mockResolvedValueOnce(result)
 
-            //console.log(testRC.mock.results)
-
-            // const proc = await accountService.account_login(accountMockLoginSuccess)
-            // console.log(proc)
-            // expect(proc.status).toBe(HttpStatus.OK)
-        })
-
-        // it('should prevent log in if the credential is incorrect', async () => {
-        //     const proc = await accountService.account_login(accountMockLoginFailed)
-        //     expect(proc.status).toBe(HttpStatus.BAD_REQUEST)
-        // })
+      // const proc = await accountService.account_login(accountMockLoginSuccess)
+      // expect(proc.status).toBe(HttpStatus.OK)
     })
 
-    // describe('Authority Data Test', () => {
-    //     it('should add new authority successfully', async () => {
-    //         let dto: AccountAuthorityAddDTO = new AccountAuthorityAddDTO()
-    //         dto = authorityMockAdd
-    //         const proc = await accountService.create_authority(dto)
-    //         expect(proc.status).toBe(HttpStatus.OK)
-    //     })
-
-    //     it('should delete recent added authority', async () => {
-    //         let dto: AccountAuthorityAddDTO = new AccountAuthorityAddDTO()
-    //         dto = authorityMockAdd
-    //         const proc = await accountService.create_authority(dto)
-    //         expect(proc.status).toBe(HttpStatus.OK)
-    //     })
+    // it('should prevent log in if the credential is incorrect', async () => {
+    //     const proc = await accountService.account_login(accountMockLoginFailed)
+    //     expect(proc.status).toBe(HttpStatus.BAD_REQUEST)
     // })
+  })
 
-    // describe('Account Data Test', () => {
-    //     it('should add new account successfully', async () => {
-    //         let dto: AccountAddDTO = new AccountAddDTO()
-    //         dto.email = accountMockAdd.email
-    //         dto.first_name = accountMockAdd.first_name
-    //         dto.last_name = accountMockAdd.last_name
-    //         dto.password = accountMockAdd.password
+  // describe('Authority Data Test', () => {
+  //     it('should add new authority successfully', async () => {
+  //         let dto: AccountAuthorityAddDTO = new AccountAuthorityAddDTO()
+  //         dto = authorityMockAdd
+  //         const proc = await accountService.create_authority(dto)
+  //         expect(proc.status).toBe(HttpStatus.OK)
+  //     })
 
-    //         const sampleAuth: AccountAuthorityModel = await authorityRepo.findOne({
-    //             where: {
-    //                 name: 'God'
-    //             }
-    //         })
-    //         expect(sampleAuth).not.toEqual(null)
+  //     it('should delete recent added authority', async () => {
+  //         let dto: AccountAuthorityAddDTO = new AccountAuthorityAddDTO()
+  //         dto = authorityMockAdd
+  //         const proc = await accountService.create_authority(dto)
+  //         expect(proc.status).toBe(HttpStatus.OK)
+  //     })
+  // })
 
-    //         dto.authority = sampleAuth
+  // describe('Account Data Test', () => {
+  //     it('should add new account successfully', async () => {
+  //         let dto: AccountAddDTO = new AccountAddDTO()
+  //         dto.email = accountMockAdd.email
+  //         dto.first_name = accountMockAdd.first_name
+  //         dto.last_name = accountMockAdd.last_name
+  //         dto.password = accountMockAdd.password
 
-    //         const proc = await accountService.create_account(dto)
-    //         expect(proc.status).toBe(HttpStatus.OK)
-    //     })
-    // })
+  //         const sampleAuth: AccountAuthorityModel = await authorityRepo.findOne({
+  //             where: {
+  //                 name: 'God'
+  //             }
+  //         })
+  //         expect(sampleAuth).not.toEqual(null)
 
-    //After Test Delete All Mock Data
+  //         dto.authority = sampleAuth
+
+  //         const proc = await accountService.create_account(dto)
+  //         expect(proc.status).toBe(HttpStatus.OK)
+  //     })
+  // })
+
+  //After Test Delete All Mock Data
 
 
-    afterAll(async () => {
-        await app.close()
-    })
+  afterAll(async () => {
+    await app.close()
+  })
 })

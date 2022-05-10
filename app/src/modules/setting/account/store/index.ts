@@ -6,5 +6,16 @@ export default {
   namespaced: true,
   state,
   mutations,
-  actions
+  actions,
+  getters: {
+    getMenuTree: (state) => {
+      return state.menu_tree
+    },
+    getAccountDetail: (state) => {
+      return state.account_detail
+    },
+    getAuthorityList: (state) => {
+      return state.authority_list
+    }
+  }
 }

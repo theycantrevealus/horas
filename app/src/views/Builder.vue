@@ -5,7 +5,7 @@
     </div>
     <div class="sidepanel">
       <div class="wrapper">
-        <img class="panelLogo" :src="require('../assets/logo.png')" alt="horas" />
+        <img class="panelLogo" :src="require('../assets/logo-white.png')" alt="horas" />
       </div>
       <perfect-scrollbar>
         <div class="wrapper">

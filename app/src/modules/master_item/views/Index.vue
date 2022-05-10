@@ -4,13 +4,8 @@
       <template #header>
         <Toolbar>
           <template #left>
-            <Button
-              v-if="permission.btnAddItem !== undefined"
-              @click="itemAddForm"
-              label="New"
-              icon="pi pi-plus"
-              class="p-mr-2 p-button-rounded"
-            />
+            <Button v-if="permission.btnAddItem !== undefined" @click="itemAddForm" label="New" icon="pi pi-plus"
+              class="p-mr-2 p-button-rounded" />
           </template>
 
           <template #right>
@@ -19,37 +14,19 @@
         </Toolbar>
       </template>
       <template #content>
-        <DataTable
-          :value="items"
-          :lazy="true"
-          :paginator="true"
-          :rows="20"
-          v-model:filters="filters"
-          ref="dt"
-          :totalRecords="totalRecords"
-          :loading="loading"
-          @page="onPage($event)"
-          @sort="onSort($event)"
-          @filter="onFilter($event)"
-          filterDisplay="row"
-          :globalFilterFields="['first_name', 'last_name', 'email']"
-          responsiveLayout="scroll"
-        >
+        <DataTable :value="items" :lazy="true" :paginator="true" :rows="20" v-model:filters="filters" ref="dt"
+          :totalRecords="totalRecords" :loading="loading" @page="onPage($event)" @sort="onSort($event)"
+          @filter="onFilter($event)" filterDisplay="row" :globalFilterFields="['first_name', 'last_name', 'email']"
+          responsiveLayout="scroll">
           <Column header="Action">
             <template #body="slotProps">
               <span class="p-buttonset wrap_content">
-                <Button
-                  v-if="permission.btnEditItem !== undefined"
-                  @click="itemEditForm(slotProps.data.uid)"
-                  class="p-button p-button-info p-button-sm p-button-raised"
-                >
+                <Button v-if="permission.btnEditItem !== undefined" @click="itemEditForm(slotProps.data.uid)"
+                  class="p-button p-button-info p-button-sm p-button-raised">
                   <span class="material-icons">edit</span>
                 </Button>
-                <Button
-                  v-if="permission.btnDeleteItem !== undefined"
-                  @click="itemDelete($event, slotProps.data.uid)"
-                  class="p-button p-button-danger p-button-sm p-button-raised"
-                >
+                <Button v-if="permission.btnDeleteItem !== undefined" @click="itemDelete($event, slotProps.data.uid)"
+                  class="p-button p-button-danger p-button-sm p-button-raised">
                   <span class="material-icons">delete</span>
                 </Button>
               </span>
@@ -58,48 +35,21 @@
           <Column header="#" class="p-align-right">
             <template #body="slotProps">{{ slotProps.data.autonum }}</template>
           </Column>
-          <Column
-            field="code"
-            header="Code"
-            filterMatchMode="startsWith"
-            ref="first_name"
-            :sortable="true"
-          >
+          <Column field="code" header="Code" filterMatchMode="startsWith" ref="first_name" :sortable="true">
             <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                type="text"
-                v-model="filterModel.value"
-                @keydown.enter="filterCallback()"
-                class="p-column-filter"
-                placeholder="Search by code"
-              />
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
+                class="p-column-filter" placeholder="Search by code" />
             </template>
           </Column>
-          <Column
-            field="name"
-            header="Name"
-            filterField="name"
-            filterMatchMode="contains"
-            ref="last_name"
-            :sortable="true"
-          >
+          <Column field="name" header="Name" filterField="name" filterMatchMode="contains" ref="last_name"
+            :sortable="true">
             <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                type="text"
-                v-model="filterModel.value"
-                @keydown.enter="filterCallback()"
-                class="p-column-filter"
-                placeholder="Search by name"
-              />
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
+                class="p-column-filter" placeholder="Search by name" />
             </template>
           </Column>
-          <Column
-            field="created_at"
-            header="Created Date"
-            ref="created_at"
-            :sortable="true"
-            class="wrap_content p-text-right"
-          >
+          <Column field="created_at" header="Created Date" ref="created_at" :sortable="true"
+            class="wrap_content p-text-right">
             <template #body="slotProps">
               <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
             </template>
@@ -168,7 +118,6 @@ export default {
       this.$router.push(`/master/item/edit/${uid}`)
     },
     itemDelete (event, uid) {
-      console.log(uid)
       this.$confirm.require({
         target: event.currentTarget,
         message: 'Are you sure to delete this item?',
@@ -197,8 +146,6 @@ export default {
 
       MasterItemService.getItemList(this.lazyParams)
         .then(data => {
-          console.clear()
-          console.log(data)
           this.items = data.response_data
           this.totalRecords = data.totalRecords
           this.loading = false

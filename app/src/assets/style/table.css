@@ -1,6 +1,32 @@
-table thead tr th{
-    font-size: 10pt !important;
-    padding: 10pt 1.5rem !important;
+table tbody tr td {
+  font-family: 'Visby Round', SansSerif, Arial, serif !important;
+}
+table thead tr th {
+  font-family: 'Visby Round Bold', SansSerif, Arial, serif !important;
+  font-size: 10pt !important;
+  padding: 10pt 1.5rem !important;
+}
+
+.p-datatable-table thead tr th {
+  background: #4e6cf8 !important;
+  color: #fff !important;
+}
+
+.p-datatable-table thead tr th .pi {
+  color: #fff !important;
+}
+
+.p-datatable-table thead tr th .p-column-filter-menu-button-active {
+  background: #8ca0fa !important;
+
+}
+
+.p-datatable-table thead tr th .p-column-filter-menu-button-active .pi {
+  color: #fff !important;
+}
+
+tbody tr:nth-child(even) td {
+  background: #eff2fe !important;
 }
 
 th.p-filter-column input.p-inputtext {
@@ -8,7 +34,7 @@ th.p-filter-column input.p-inputtext {
     font-size: 8pt !important;
 }
 
-tbody.p-treetable-tbody tr td {
+tbody tr td {
     font-size: 8pt !important;
     padding: 10px !important;
     -webkit-transition-duration: .3s;
@@ -17,8 +43,8 @@ tbody.p-treetable-tbody tr td {
     transition-duration: .3s;
 }
 
-tbody.p-treetable-tbody tr:hover td {
-    background: #DCFFD6;
+tbody tr:hover td {
+    background: #dde3ff !important;
 }
 
 tbody.p-treetable-tbody tr td .p-treetable-toggler {
@@ -88,13 +114,12 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     padding: 7px 1.5rem !important;
     font-size: 10pt !important;
 }
+.p-datatable-table thead tr th.p-filter-column > div.p-column-filter {
+  padding: 0 !important;
+}
 
 .p-column-filter-menu-button {
     width: 20px !important; height: 20px !important;
-}
-
-.p-datatable-table thead tr th.p-filter-column .p-column-filter {
-    padding: 0 !important;
 }
 
 .p-datatable-table thead tr th.p-filter-column .p-column-filter input {
@@ -126,4 +151,12 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
 .p-datatable-table tbody tr td button.p-button span.material-icons {
     font-size: 8pt !important;
     margin: 0 4px;
+}
+
+.p-datatable-table tbody tr td .checkbox-custom {
+  margin: 10px;
+}
+
+.vert-top tr td{
+  vertical-align: top !important;
 }
