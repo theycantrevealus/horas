@@ -14,20 +14,20 @@
       </perfect-scrollbar>
     </div>
     <div class="loadpanel">
-      <perfect-scrollbar ref="scrollLoader">
-        <div class="wrapper">
-          <div class="breadcrumb-container">
-            <BreadCrumb :items="breadcrumb" :pageName="pageName" />
-          </div>
-          <div class="content-loader" id="content-loader">
-            <router-view v-slot="{ Component }">
-              <transition name="scale" mode="out-in">
-                <component :is="Component" />
-              </transition>
-            </router-view>
-          </div>
+      <div class="wrapper">
+        <div class="breadcrumb-container">
+          <BreadCrumb :items="breadcrumb" :pageName="pageName" />
         </div>
-      </perfect-scrollbar>
+        <div class="content-loader" id="content-loader">
+          <router-view v-slot="{ Component }">
+            <transition name="scale" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </div>
+      </div>
+      <!-- <perfect-scrollbar ref="scrollLoader">
+      </perfect-scrollbar> -->
     </div>
   </div>
 </template>

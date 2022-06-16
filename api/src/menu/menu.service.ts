@@ -112,20 +112,39 @@ export class MenuService {
     return menuResp
   }
 
+  async resetPermission (account: string) {
+    return await this.accountPermissionRepo.createQueryBuilder('account_permission').where({
+      account: account
+    }).softDelete()
+  }
+
+  async resetPrivileges (account: string) {
+    return await this.accountPrivilegesRepo.createQueryBuilder('account_privileges').where({
+      account: account
+    }).softDelete()
+  }
+
   async grant_menu_permission (permission: GrantPermissionDTO) {
     const menuResp = new GrantPermissionResponseDTO()
 
-    const checkExist = await this.accountPermissionRepo.findOne({
-      where: {
-        account: permission.account,
-        permission: permission.permission
-      }
-    })
+    const checkExist = await this.accountPermissionRepo.createQueryBuilder('account_permission').withDeleted().where({
+      account: permission.account,
+      permission: permission.permission
+    }).getOne()
 
     if (checkExist) {
-      menuResp.message = 'Permission Granted Successfully'
-      menuResp.status = HttpStatus.OK
-      menuResp.returning = checkExist
+      const restore = await this.accountPermissionRepo.update(checkExist.id, {
+        deleted_at: null
+      })
+
+      if (restore) {
+        menuResp.message = 'Permission Granted Successfully'
+        menuResp.status = HttpStatus.OK
+        menuResp.returning = checkExist
+      } else {
+        menuResp.message = 'Permission Granted Failed'
+        menuResp.status = HttpStatus.BAD_REQUEST
+      }
     } else {
       const menuRes = await this.accountPermissionRepo.save(permission).then(async returning => {
         return returning
@@ -146,16 +165,24 @@ export class MenuService {
 
   async grant_menu_access (privileges: GrantAccessDTO) {
     let grantResp = new GrantAccessResponseDTO()
-    const checkExist = await this.accountPrivilegesRepo.findOne({
-      where: {
-        account: privileges.account,
-        menu: privileges.menu
-      }
-    })
+
+    const checkExist = await this.accountPrivilegesRepo.createQueryBuilder('account_privileges').withDeleted().where({
+      account: privileges.account,
+      menu: privileges.menu
+    }).getOne()
     if (checkExist) {
-      grantResp.message = 'Access Granted Successfully'
-      grantResp.status = HttpStatus.OK
-      grantResp.returning = checkExist
+      const restore = await this.accountPrivilegesRepo.update(checkExist.id, {
+        deleted_at: null
+      })
+
+      if (restore) {
+        grantResp.message = 'Access Granted Successfully'
+        grantResp.status = HttpStatus.OK
+        grantResp.returning = checkExist
+      } else {
+        grantResp.message = 'Access Granted Failed'
+        grantResp.status = HttpStatus.BAD_REQUEST
+      }
     } else {
       const menuRes = await this.accountPrivilegesRepo.save(privileges).then(async returning => {
         return returning

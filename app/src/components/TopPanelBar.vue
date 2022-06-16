@@ -2,7 +2,7 @@
   <div class="head_wrapper">
     <Menubar :model="items">
       <template #start>
-        <Chip :label="first_name + ' ' + last_name" :image="require('@/assets/images/profile.png')" />
+        <Chip :label="first_name + ' ' + last_name" :image="profile_photo" />
       </template>
       <template #end>
         <Button @click="logout" icon="pi pi-power-off" class="p-button-link p-button-sm" />
@@ -21,6 +21,9 @@ export default {
     Menubar, Button, Chip
   },
   computed: {
+    profile_photo () {
+      return `${process.env.VUE_APP_APIGATEWAY}avatar/${this.$store.state.credential.uid}.png?d=${Date.now()}`
+    },
     first_name () {
       return this.$store.state.credential.first_name
     },

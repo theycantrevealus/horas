@@ -19,12 +19,7 @@ const moduleRoute = [{
       meta: {
         pageTitle: 'Account Management',
         requiresAuth: true,
-        breadcrumb: [
-          {
-            label: 'Account',
-            to: '/account'
-          }
-        ]
+        breadcrumb: []
       },
       component: () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/views/Index.vue')
     },

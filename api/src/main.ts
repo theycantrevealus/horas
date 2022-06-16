@@ -3,6 +3,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 import * as Sentry from '@sentry/node'
 import { BrowserTracing } from '@sentry/tracing'
+import { json } from 'body-parser'
 import { SentryInterceptor } from './interceptor/sentry'
 import 'dotenv/config'
 declare const module: any
@@ -19,6 +20,7 @@ async function bootstrap () {
   })
 
   const app = await NestFactory.create(AppModule)
+  app.use(json({ limit: '5mb' }))
   app.useGlobalInterceptors(new SentryInterceptor())
   app.enableCors()
 

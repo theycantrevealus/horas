@@ -34,7 +34,8 @@ class AccountService {
       first_name: parsedData.first_name,
       last_name: parsedData.last_name,
       authority: parsedData.authority,
-      image: parsedData.image
+      image: parsedData.image,
+      image_edit: parsedData.image_edit
     })
       .then((response: any) => {
         return Promise.resolve(response)

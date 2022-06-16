@@ -13,6 +13,7 @@ const store = createStore({
   state: {
     loading: 0,
     credential: {
+      uid: '',
       first_name: '',
       last_name: '',
       permission: {},
@@ -65,6 +66,7 @@ const store = createStore({
       state.sidemenu = menu
     },
     LOGIN_SUCCESS (state: any, credentialData) {
+      state.credential.uid = credentialData.uid
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
 

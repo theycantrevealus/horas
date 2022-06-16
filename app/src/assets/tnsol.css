@@ -25,7 +25,7 @@
 
 body {
     overflow: hidden;
-    background: #fff !important;
+    background: #eff2fe !important;
     padding: 0 !important;
     margin: 0 !important;
     font-family: 'GreyCliff', SansSerif, Arial, serif !important;
@@ -131,7 +131,6 @@ input::-moz-focus-inner,
     width: 88%;
     left: 12%;
     height: 60px;
-    /*background: #C7DEE1 !important;*/
 }
 
 .topbar .head_wrapper {
@@ -187,7 +186,7 @@ input::-moz-focus-inner,
 
 .loadpanel {
     font-family: Karla, SansSerif, Arial, serif !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
     position: fixed;
     z-index: 998;
     width: 88%;
@@ -196,7 +195,7 @@ input::-moz-focus-inner,
 }
 
 .content-loader {
-    padding: 10px;
+    padding: 2rem;
 }
 
 .loadpanel .wrapper {
@@ -209,12 +208,12 @@ input::-moz-focus-inner,
 }
 
 .breadcrumb-container {
-    margin-top: 10px;
-    box-shadow: 0 0 0 1px #dadfea;
+  margin-top: 10px;
 }
 
 .breadcrumb-container .p-breadcrumb {
     margin: .25rem 0;
+    background: transparent;
     border: none !important;
     padding: .3rem !important
 }
@@ -253,7 +252,7 @@ input::-moz-focus-inner,
     height: 100%;
     overflow-y: hidden;
     background: #4e6cf8;
-    box-shadow: 0 0 0 1px #dadfea;
+    box-shadow: 1px 0 5px 5px rgba(0, 0, 0, .2);
 }
 
 .sidepanel .wrapper {
@@ -351,6 +350,22 @@ input::-moz-focus-inner,
     color: #8ca0fa !important;
 }
 
+.p-panel {
+  font-size: .7rem !important;
+}
+
+.p-panel-content {
+  padding: 0 !important;
+}
+
+.p-panel-header {
+  padding: .5rem !important;
+}
+
+.p-panel-title {
+  padding: 0 .5rem;
+}
+
 .p-panelmenu .p-panelmenu-content {
     background: #003F49;
     border: none !important;
@@ -405,9 +420,10 @@ input::-moz-focus-inner,
 }
 
 .p-card {
-    border-radius: 20px !important;
-    box-shadow: 0px 0px 5px 5px rgba(240, 240, 240, .5) !important;
-    box-shadow: none !important;
+  padding: 1rem 1.5rem;
+  border-radius: 20px !important;
+  box-shadow: 0px 0px 5px 5px rgba(240, 240, 240, .5) !important;
+  box-shadow: none !important;
 }
 
 .p-card-header {
@@ -701,6 +717,10 @@ input::-moz-focus-inner,
     margin-bottom: 10px;
 }
 
+.p-dropdown-label.p-inputtext {
+  padding: 10px !important;
+}
+
 .form-mode .p-dropdown-label.p-inputtext.p-placeholder {
     margin-top: 4px;
 }
@@ -711,4 +731,9 @@ input::-moz-focus-inner,
 
 .p-chip.sm span {
   font-size: .8rem !important;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  color:#4e6cf8 !important;
+  border-color: #4e6cf8 !important;
 }

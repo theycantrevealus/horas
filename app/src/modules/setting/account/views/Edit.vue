@@ -4,79 +4,89 @@
       <Card>
         <template #title>Edit Account</template>
         <template #content>
-          <div class="p-grid">
-            <div class="p-col-4">
-              <div class="profile-display">
-                <img :src="formData.image" />
-              </div><Button class="p-button p-button-info p-button-sm p-button-raised" label="Avatar"
-                icon="pi pi-external-link" @click="toggleEditImageWindow" />
-            </div>
-            <div class="p-col-8 form-mode">
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">mail</span>
-                </span>
-                <!-- <InputText class="p-inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
+          <TabView>
+            <TabPanel header="Main Info">
+              <div class="p-grid">
+                <div class="p-col-4">
+                  <div class="profile-display">
+                    <img :src="formData.image" />
+                  </div><Button class="p-button p-button-info p-button-sm p-button-raised" label="Avatar"
+                    icon="pi pi-external-link" @click="toggleEditImageWindow" />
+                </div>
+                <div class="p-col-8 form-mode">
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
+                      <span class="material-icons-outlined">mail</span>
+                    </span>
+                    <!-- <InputText class="p-inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
                   placeholder="Email" /> -->
-                <InputText class="p-inputtext-sm" v-model="formData.email" placeholder="Email" />
+                    <InputText class="p-inputtext-sm" v-model="formData.email" placeholder="Email" />
+                  </div>
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
+                      <span class="material-icons-outlined">person</span>
+                    </span>
+                    <InputText class="p-inputtext-sm" v-model="formData.first_name" placeholder="First Name" />
+                    <InputText class="p-inputtext-sm" v-model="formData.last_name" placeholder="Last Name" />
+                  </div>
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
+                      <span class="material-icons-outlined">supervised_user_circle</span>
+                    </span>
+                    <Dropdown v-model="formData.authority" :options="authorityData" optionLabel="name" optionValue="uid"
+                      placeholder="Select authority" />
+                  </div>
+                  <Button @click="updateAccountData" class="p-button p-button-info p-button-sm p-button-raised">
+                    <span class="material-icons">fact_check</span> Apply from authority
+                  </Button>
+                </div>
               </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">person</span>
-                </span>
-                <InputText class="p-inputtext-sm" v-model="formData.first_name" placeholder="First Name" />
-                <InputText class="p-inputtext-sm" v-model="formData.last_name" placeholder="Last Name" />
+            </TabPanel>
+            <TabPanel header="Permission and Privileges">
+              <div class="p-grid">
+                <div class="p-col-12">
+                  <TreeTable v-if="formData.menuTree" class="p-treetable-sm p-datatable-table vert-top"
+                    filterMode="strict" :value="formData.menuTree" :lazy="true" :paginator="true" :rows="20"
+                    :filters="filtersNode">
+                    <Column field="label" header="Label" :expander="true">
+                      <template #filter>
+                        <InputText type="text" v-model="filtersNode.label.value" class="p-column-filter"
+                          placeholder="Filter by label" />
+                      </template>
+                      <template #body="slotProps">
+                        <Checkbox @change="check_menu($event, slotProps.node)" name="menus"
+                          :value="slotProps.node.data.id" v-model="selectedPage" /> {{ slotProps.node.data.label }}
+                      </template>
+                    </Column>
+                    <Column field="to" header="Link">
+                      <template #filter>
+                        <InputText type="text" v-model="filtersNode.to.value" class="p-column-filter"
+                          placeholder="Filter by link" />
+                      </template>
+                    </Column>
+                    <Column field="to" header="Link">
+                      <template #body="slotProps">
+                        <div v-if="slotProps.node.data.permission !== undefined">
+                          <div class="checkbox-custom" v-for="indexPerm in slotProps.node.data.permission"
+                            :key="indexPerm">
+                            <Checkbox @change="set_permission($event, indexPerm.id)" name="perms" :value="indexPerm.id"
+                              v-model="selectedPerm" />
+                            {{
+                                indexPerm.domiden
+                            }}
+                          </div>
+                        </div>
+                      </template>
+                    </Column>
+                  </TreeTable>
+                </div>
               </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">supervised_user_circle</span>
-                </span>
-                <Dropdown v-model="formData.authority" :options="authorityData" optionLabel="name" optionValue="uid"
-                  placeholder="Select authority" />
-              </div>
-              <Button @click="updateAccountData" class="p-button p-button-info p-button-sm p-button-raised">
-                <span class="material-icons">fact_check</span> Apply from authority
-              </Button>
-              <!-- <Button @click="accountEdit(slotProps.data.uid)"
-                class="p-button p-button-info p-button-sm p-button-raised">
-                <span class="material-icons">fact_check</span> Apply from authority
-              </Button> -->
-            </div>
-            <div class="p-col-12">
-              <h4>Permission List</h4>
-              <TreeTable v-if="formData.menuTree" class="p-treetable-sm p-datatable-table vert-top" filterMode="strict"
-                :value="formData.menuTree" :lazy="true" :paginator="true" :rows="20" :filters="filtersNode">
-                <Column field="label" header="Label" :expander="true">
-                  <template #filter>
-                    <InputText type="text" v-model="filtersNode.label.value" class="p-column-filter"
-                      placeholder="Filter by label" />
-                  </template>
-                  <template #body="slotProps">
-                    <Checkbox @change="check_menu($event, slotProps.node)" name="menus" :value="slotProps.node.data.id"
-                      v-model="selectedPage" /> {{ slotProps.node.data.label }}
-                  </template>
-                </Column>
-                <Column field="to" header="Link">
-                  <template #filter>
-                    <InputText type="text" v-model="filtersNode.to.value" class="p-column-filter"
-                      placeholder="Filter by link" />
-                  </template>
-                </Column>
-                <Column field="to" header="Link">
-                  <template #body="slotProps">
-                    <div v-if="slotProps.node.data.permission !== undefined">
-                      <div class="checkbox-custom" v-for="indexPerm in slotProps.node.data.permission" :key="indexPerm">
-                        <Checkbox @change="set_permission($event, indexPerm.id)" name="perms" :value="indexPerm.id"
-                          v-model="selectedPerm" />
-                        {{
-                            indexPerm.domiden
-                        }}
-                      </div>
-                    </div>
-                  </template>
-                </Column>
-              </TreeTable>
-            </div>
+            </TabPanel>
+            <TabPanel header="Activities">
+              Content III
+            </TabPanel>
+          </TabView>
+          <div class="p-grid">
             <div class="p-col-12">
               <div class="p-d-flex p-jc-between">
                 <div>
@@ -117,6 +127,8 @@ import TreeTable from 'primevue/treetable'
 import Column from 'primevue/column'
 import ConfirmPopup from 'primevue/confirmpopup'
 import Dialog from 'primevue/dialog'
+import TabView from 'primevue/tabview'
+import TabPanel from 'primevue/tabpanel'
 import Cropper from '@/components/Cropper.vue'
 import { getCurrentTimestamp } from '@/util/time'
 
@@ -124,7 +136,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'AccountEdit',
   components: {
-    Card, InputText, Button, Dropdown, ConfirmPopup, Checkbox, TreeTable, Column, Cropper, Dialog
+    Card, InputText, Button, Dropdown, ConfirmPopup, Checkbox, TreeTable, Column, Cropper, Dialog, TabView, TabPanel
   },
   data () {
     return {
@@ -136,6 +148,7 @@ export default {
         first_name: '',
         last_name: '',
         image: '',
+        image_edit: false,
         menuTree: []
       },
       allowSave: false,
@@ -204,7 +217,8 @@ export default {
           this.formData.first_name = getDetail.account.first_name
           this.formData.last_name = getDetail.account.last_name
 
-          this.setImageData(`${process.env.VUE_APP_APIGATEWAY}avatar/${getDetail.account.uid}.png?d=${Date.now()}`)
+          this.formData.image = `${process.env.VUE_APP_APIGATEWAY}avatar/${getDetail.account.uid}.png?d=${Date.now()}`
+          this.formData.image_edit = false
 
           for (const a in getDetail.access) {
             if (this.selectedPage.indexOf(getDetail.access[a].id) < 0) {
@@ -234,6 +248,7 @@ export default {
       this.$router.push('/account')
     },
     setImageData (value) {
+      this.formData.image_edit = true
       this.formData.image = value
     },
     toggleEditImageWindow () {
@@ -246,7 +261,6 @@ export default {
           if (response.status === 200) {
             const responseAccess = []
             const responsePermission = []
-            // // Update Access and Permission if exists
             for (const a in this.selectedMenu) {
               this.updateAccess({
                 account: this.$route.query.uid,
@@ -264,6 +278,10 @@ export default {
                 responsePermission.push(response)
               })
             }
+
+            console.clear()
+            console.log(responseAccess)
+            console.log(responsePermission)
 
             this.$store.dispatch('accountModule/fetchMenuTree', this.lazyParams)
             this.$confirm.require({

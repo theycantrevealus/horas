@@ -175,22 +175,47 @@ export class AccountService {
       account.password = await bcrypt.hash(password, saltOrRounds)
     }
 
-    const logger = this.logger
 
-    var buff = Buffer.from(await account.image.replace(/^data:image\/\w+;base64,/, ''), 'base64')
-    const fs = require('fs')
-    const path = `avatar/${uid}.png`
-    if (!fs.existsSync(path)) {
-      fs.mkdirSync('avatar', { recursive: true });
+    if (account.image_edit) {
+      delete account.image_edit
+      const logger = this.logger
+
+      var buff = Buffer.from(await account.image.replace(/^data:image\/\w+;base64,/, ''), 'base64')
+      const fs = require('fs')
+      const path = `avatar/${uid}.png`
+      if (!fs.existsSync(path)) {
+        fs.mkdirSync('avatar', { recursive: true });
+      }
+
+      fs.writeFile(path, buff, function (err) {
+        // logger.log(account.image)
+      })
+
+      delete account.image
     }
 
-    fs.writeFile(path, buff, function (err) {
-      logger.log(account.image)
-    })
+    const resetPrivileges = await this.accountPrivileges.createQueryBuilder('account_privileges').where({
+      account: uid
+    }).getMany()
 
-    delete account.image
+    for (const a in resetPrivileges) {
+      const setResetPriv = await this.accountPrivileges.softDelete({ id: resetPrivileges[a].id })
+    }
 
-    const accountRes = this.accountRepo.update(uid, account).then(async returning => {
+    const resetPermission = await this.accountPermission.createQueryBuilder('account_permission').where({
+      account: uid
+    }).getMany()
+
+    for (const a in resetPermission) {
+      const setResetPerm = await this.accountPermission.softDelete({ id: resetPermission[a].id })
+    }
+
+    const accountRes = this.accountRepo.update(uid, {
+      email: account.email,
+      first_name: account.first_name,
+      last_name: account.last_name,
+      authority: account.authority
+    }).then(async returning => {
       return await this.detail(uid)
     })
     if (accountRes) {
@@ -254,6 +279,8 @@ export class AccountService {
 
     if (param.sortField && param.sortField !== '') {
       dataRaw.orderBy(`account.${param.sortField}`, ((param.sortOrder > 0) ? 'ASC' : 'DESC'))
+    } else {
+      dataRaw.orderBy('account.created_at', 'DESC')
     }
 
     for (const b in param.filter) {
