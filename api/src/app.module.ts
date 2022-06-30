@@ -20,6 +20,8 @@ import { LogActivityModel } from './model/log.activity.model'
 import { AccountService } from './account/account.service'
 import { LogLoginModel } from './model/log.login.model'
 import { join } from 'path'
+import { LicenseModule } from './license/license.module'
+import { LicenseController } from './license/license.controller'
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { join } from 'path'
     AccountModule,
     MenuModule,
     LogModule,
+    LicenseModule,
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
     TypeOrmModule.forFeature([LogLoginModel, LogActivityModel], 'default'),
     ServeStaticModule.forRoot({
@@ -40,6 +43,7 @@ import { join } from 'path'
     MenuController,
     LogController,
     AuthController,
+    LicenseController,
     AppController
   ],
   providers: [
