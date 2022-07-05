@@ -40,6 +40,7 @@
     "@types/passport-jwt": "^3.0.6",
     "bcrypt": "^5.0.1",
     "dotenv": "^16.0.0",
+    "execa": "^6.1.0",
     "fs": "^0.0.1-security",
     "i": "^0.3.7",
     "nodemon": "^2.0.15",
