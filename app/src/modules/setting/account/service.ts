@@ -11,7 +11,7 @@ class AccountService {
       })
   }
 
-  updatePermission (parsedData) {
+  async updatePermission (parsedData) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios.post(`${process.env.VUE_APP_APIGATEWAY}account/grant_permission`, parsedData)
       .then((response: any) => {
@@ -19,7 +19,7 @@ class AccountService {
       })
   }
 
-  updateAccess (parsedData) {
+  async updateAccess (parsedData) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios.post(`${process.env.VUE_APP_APIGATEWAY}account/grant_access`, parsedData)
       .then((response: any) => {
@@ -27,7 +27,7 @@ class AccountService {
       })
   }
 
-  updateAccount (parsedData) {
+  async updateAccount (parsedData) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios.put(`${process.env.VUE_APP_APIGATEWAY}account/${parsedData.uid}/edit`, {
       email: parsedData.email,
@@ -42,7 +42,7 @@ class AccountService {
       })
   }
 
-  getAccountDetail (uid) {
+  async getAccountDetail (uid) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios.get(`${process.env.VUE_APP_APIGATEWAY}account/${uid}/detail`)
       .then((response: any) => {
@@ -50,7 +50,11 @@ class AccountService {
       })
   }
 
-  getMenu () {
+  async getAccountActivity (uid: string, from: string, to: string) {
+    return []
+  }
+
+  async getMenu () {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios.get(`${process.env.VUE_APP_APIGATEWAY}menu`)
       .then(response => {
@@ -58,7 +62,7 @@ class AccountService {
       })
   }
 
-  getAuthorityList () {
+  async getAuthorityList () {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios.get(`${process.env.VUE_APP_APIGATEWAY}authority`)
       .then(response => {
@@ -66,7 +70,7 @@ class AccountService {
       })
   }
 
-  menuTree () {
+  async menuTree () {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios.get(`${process.env.VUE_APP_APIGATEWAY}menu/tree/manager`)
       .then(response => {

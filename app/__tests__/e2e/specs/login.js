@@ -14,7 +14,7 @@ describe('Login Page', () => {
         credentialToken.should('equal', null)
         cy.contains('h1', 'Login')
         cy.get('button#submitButton').should('be.disabled')
-        cy.get('input#loginEmail').type('takashitanaka@tnsol.com')
+        cy.get('input#loginEmail').type('takashitanaka@horas.com')
         cy.get('input#loginPassword').type('123456')
         cy.get('button#submitButton').should('be.enabled')
         cy.get('button#submitButton').click()

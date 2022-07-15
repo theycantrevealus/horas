@@ -71,9 +71,7 @@
                             :key="indexPerm">
                             <Checkbox @change="set_permission($event, indexPerm.id)" name="perms" :value="indexPerm.id"
                               v-model="selectedPerm" />
-                            {{
-                                indexPerm.domiden
-                            }}
+                            {{ indexPerm.domiden }}
                           </div>
                         </div>
                       </template>
@@ -83,7 +81,50 @@
               </div>
             </TabPanel>
             <TabPanel header="Activities">
-              Content III
+              <div class="p-grid">
+                <div class="p-col-3">
+                  <div class="field">
+                    <label for="filter-from">From</label>
+                    <br />
+                    <Calendar id="filter-from" v-model="logFrom" dateFormat="dd/mm/yy" :showTime="true" :showSeconds="true" />
+                  </div>
+                </div>
+                <div class="p-col-3">
+                  <div class="field">
+                    <label for="filter-to">To</label>
+                    <br />
+                    <Calendar id="filter-to" v-model="logTo" dateFormat="dd/mm/yy" :showTime="true" :showSeconds="true" />
+                  </div>
+                </div>
+                <div class="p-col-3">
+                  <br />
+                  <Button type="button" class="p-button-raised p-button-sm p-button-info px-3"
+                    @click="cariLogActivity($event)">
+                    <span class="material-icons-outlined">search</span> Cari Activity
+                  </Button>
+                </div>
+              </div>
+              <Timeline :value="events" class="customized-timeline no-left">
+                <template #marker="slotProps">
+                  <span class="custom-marker shadow-2" :style="{backgroundColor: slotProps.item.color}">
+                    <i :class="slotProps.item.icon"></i>
+                  </span>
+                </template>
+                <template #content="slotProps">
+                  <Card>
+                    <template #title>
+                      <h3>{{slotProps.item.status}}</h3>
+                    </template>
+                    <template #subtitle>
+                      {{slotProps.item.date}}
+                    </template>
+                    <template #content>
+                      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed consequuntur error repudiandae numquam deserunt quisquam repellat libero asperiores earum nam nobis, culpa ratione quam perferendis esse, cupiditate neque quas!</p>
+                      <Button label="Read more" class="p-button-text"></Button>
+                    </template>
+                  </Card>
+                </template>
+              </Timeline>
             </TabPanel>
           </TabView>
           <div class="p-grid">
@@ -130,13 +171,15 @@ import Dialog from 'primevue/dialog'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import Cropper from '@/components/Cropper.vue'
+import Timeline from 'primevue/timeline'
+import Calendar from 'primevue/calendar'
 import { getCurrentTimestamp } from '@/util/time'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'AccountEdit',
   components: {
-    Card, InputText, Button, Dropdown, ConfirmPopup, Checkbox, TreeTable, Column, Cropper, Dialog, TabView, TabPanel
+    Card, InputText, Button, Dropdown, ConfirmPopup, Checkbox, TreeTable, Column, Cropper, Dialog, TabView, TabPanel, Timeline, Calendar
   },
   data () {
     return {
@@ -151,6 +194,14 @@ export default {
         image_edit: false,
         menuTree: []
       },
+      logFrom: null,
+      logTo: null,
+      events: [
+        { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-shopping-cart', color: '#9C27B0', image: 'game-controller.jpg' },
+        { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-cog', color: '#673AB7' },
+        { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-shopping-cart', color: '#FF9800' },
+        { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-check', color: '#22c55e' }
+      ],
       allowSave: false,
       authorityData: [],
       selectedParent: {},
@@ -175,6 +226,11 @@ export default {
     this.allowSave = false
     // this.$store.dispatch('accountModule/fetchMenu')
     this.$store.dispatch('accountModule/fetchAccountDetail', this.$route.query.uid)
+    this.$store.dispatch('accountModule/fetchAccountActivity', {
+      uid: this.$route.query.uid,
+      from: '123',
+      to: '333'
+    })
     this.$store.dispatch('accountModule/fetchMenuTree')
     this.$store.dispatch('accountModule/fetchAuthority')
     this.displayEditorImage = false
@@ -270,6 +326,16 @@ export default {
               })
             }
 
+            for (const a in this.selectedParent) {
+              const parsedIDParent = a.split('_')
+              this.updateAccess({
+                account: this.$route.query.uid,
+                menu: parsedIDParent[parsedIDParent.length - 1]
+              }).then((response) => {
+                responseAccess.push(response)
+              })
+            }
+
             for (const a in this.selectedPerm) {
               this.updatePermission({
                 account: this.$route.query.uid,
@@ -278,10 +344,6 @@ export default {
                 responsePermission.push(response)
               })
             }
-
-            console.clear()
-            console.log(responseAccess)
-            console.log(responsePermission)
 
             this.$store.dispatch('accountModule/fetchMenuTree', this.lazyParams)
             this.$confirm.require({

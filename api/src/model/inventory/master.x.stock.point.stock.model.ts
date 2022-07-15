@@ -8,17 +8,18 @@ import {
   DeleteDateColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  ManyToMany,
 } from 'typeorm'
 import { MasterItemModel } from './master.item.model'
 import { MasterItemBatchModel } from './master.item.batch.model'
 import { MasterStockItemModel } from './master.stock.point.model'
 
-@Entity({ name: 'master_x_item_alias' })
+@Entity({ name: 'master_x_stock_point_stock' })
 export class MasterXStockPointStockModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => MasterStockItemModel, item => item.uid)
+  @ManyToOne(() => MasterStockItemModel, stock_point => stock_point.uid)
   stock_point: MasterStockItemModel
 
   @ManyToOne(() => MasterItemModel, item => item.uid)

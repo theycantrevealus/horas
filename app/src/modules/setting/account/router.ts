@@ -1,7 +1,7 @@
 const moduleRoute = [{
   path: '/account',
   name: 'Account',
-  component: () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/Module.vue'),
+  component: async () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/Module.vue'),
   meta: {
     pageTitle: 'Account Management Builder',
     requiresAuth: true,
@@ -21,7 +21,7 @@ const moduleRoute = [{
         requiresAuth: true,
         breadcrumb: []
       },
-      component: () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/views/Index.vue')
+      component: async () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/views/Index.vue')
     },
     {
       path: 'add',
@@ -36,7 +36,7 @@ const moduleRoute = [{
           }
         ]
       },
-      component: () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/views/Add.vue')
+      component: async () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/views/Add.vue')
     },
     {
       path: 'edit/:uid',
@@ -51,7 +51,7 @@ const moduleRoute = [{
           }
         ]
       },
-      component: () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/views/Edit.vue')
+      component: async () => import(/* webpackChunkName: "account" */ '@/modules/setting/account/views/Edit.vue')
     }
   ]
 }]
