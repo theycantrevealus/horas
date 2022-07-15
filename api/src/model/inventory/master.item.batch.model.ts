@@ -11,7 +11,7 @@ import {
 } from 'typeorm'
 import { MasterItemModel } from './master.item.model'
 
-@Entity({ name: 'master_x_item_alias' })
+@Entity({ name: 'master_item_batch' })
 export class MasterItemBatchModel {
   @PrimaryColumn()
   @Generated('uuid')

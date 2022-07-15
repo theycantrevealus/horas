@@ -737,3 +737,39 @@ input::-moz-focus-inner,
   color:#4e6cf8 !important;
   border-color: #4e6cf8 !important;
 }
+
+.customized-timeline {
+  margin-top: 50px;
+}
+
+.customized-timeline.no-left .p-timeline-event-opposite {
+  flex: 0 !important;
+}
+
+.customized-timeline .custom-marker {
+  padding: .5rem !important;
+  border-radius: 100%;
+  color: #fff !important;
+  display: flex;
+  width: 2rem;
+  height: 2rem;
+}
+
+.customized-timeline .p-card {
+  margin: -25px 0 50px 0;
+  border-radius: 20px !important;
+  padding: 20px 40px !important;
+  box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12) !important;
+}
+
+.customized-timeline .p-card-title {
+  padding: 0 !important;
+}
+
+.shadow-2 {
+  box-shadow: 0 4px 10px rgba(0,0,0,.03),0 0 2px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.12) !important;
+}
+
+.p-datepicker {
+  min-width: 0 !important;
+}

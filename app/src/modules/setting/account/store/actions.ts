@@ -27,21 +27,28 @@ export default {
     })
   },
 
-  fetchAuthority ({ commit }) {
+  async fetchAuthority ({ commit }) {
     AccountService.getAuthorityList().then((response: any) => {
       const data = response.data
       commit(types.AUTHORITY_SET, data)
     })
   },
 
-  fetchAccountDetail ({ commit }, uid) {
+  async fetchAccountActivity ({ commit }, param: any) {
+    AccountService.getAccountActivity(param.uid, param.from, param.to).then((response: any) => {
+      const data = response.data
+      commit(types.ACCOUNT_ACTIVITY, data)
+    })
+  },
+
+  async fetchAccountDetail ({ commit }, uid) {
     AccountService.getAccountDetail(uid).then((response: any) => {
       const data = response.data
       commit(types.ACCOUNT_DETAIL, data)
     })
   },
 
-  fetchMenuTree ({ commit }) {
+  async fetchMenuTree ({ commit }) {
     AccountService.menuTree().then((response: any) => {
       const data = response.data.root
       commit(types.MENU_TREE_SET, data)

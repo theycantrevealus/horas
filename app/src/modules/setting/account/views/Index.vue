@@ -7,7 +7,7 @@
             <template #icons>
               <Button @click="accountAdd" class="p-button p-button-info p-button-sm p-button-raised"><span
                   class="material-icons">add</span>
-                Add</Button>
+                Add Account</Button>
             </template>
             <DataTable :value="items" :lazy="true" :paginator="true" :rows="20" v-model:filters="filters" ref="dt"
               stripedRows

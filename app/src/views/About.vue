@@ -25,6 +25,24 @@ export default {
   name: 'About',
   mounted () {
     //
+  },
+  methods: {
+    checkKey: function () {
+      try {
+        const checker = require('keys/*.pem')
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    uploadKey: function () {
+      const data = JSON.stringify(this.arr)
+      const fs = require('fs')
+      try {
+        fs.writeFileSync('myfile.txt', data, 'utf-8')
+      } catch (e) {
+        alert('Failed to save the file !')
+      }
+    }
   }
 }
 </script>
