@@ -10,7 +10,8 @@
     "node_modules",
     "./**/*.spec.ts",
     "examples",
-    "src/__tests__"
+    "src/__tests__",
+    "dist"
   ],
   "compilerOptions": {
     "module": "commonjs",
@@ -21,6 +22,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,
+    "allowJs": false,
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
