@@ -22,10 +22,13 @@ import { LogLoginModel } from './model/log.login.model'
 import { join } from 'path'
 import { LicenseModule } from './license/license.module'
 import { LicenseController } from './license/license.controller'
+import { MasterItemModule } from './master/item/master.item.module'
+import { MasterItemController } from './master/item/master.item.controller'
 
 @Module({
   imports: [
     AuthModule,
+    MasterItemModule,
     AccountModule,
     MenuModule,
     LogModule,
@@ -40,6 +43,7 @@ import { LicenseController } from './license/license.controller'
   ],
   controllers: [
     AccountController,
+    MasterItemController,
     MenuController,
     LogController,
     AuthController,
