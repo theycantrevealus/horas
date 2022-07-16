@@ -175,7 +175,7 @@ API default run on port 3000. You can access Open API at `<hostname>:3000/api`
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the APACHE 2.0 License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
