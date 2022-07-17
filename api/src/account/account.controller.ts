@@ -34,7 +34,7 @@ export class AccountController {
   @Authorization(true)
   @Get()
   async list () {
-    return this.accountService.all()
+    return await this.accountService.all()
   }
 
   @UseGuards(JwtAuthGuard)
