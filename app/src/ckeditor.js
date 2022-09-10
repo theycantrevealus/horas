@@ -34,7 +34,7 @@ ClassicEditor.builtinPlugins = [
     ImageUploadPlugin,
     LinkPlugin,
     ListPlugin,
-    ParagraphPlugin
+    ParagraphPlugin,
 ];
 
 ClassicEditor.defaultConfig = {
@@ -50,8 +50,8 @@ ClassicEditor.defaultConfig = {
             'uploadImage',
             'blockQuote',
             'undo',
-            'redo'
-        ]
+            'redo',
+        ],
     },
     image: {
         toolbar: [
@@ -60,8 +60,8 @@ ClassicEditor.defaultConfig = {
             'imageStyle:side',
             '|',
             'toggleImageCaption',
-            'imageTextAlternative'
-        ]
+            'imageTextAlternative',
+        ],
     },
-    language: 'en'
+    language: 'en',
 };

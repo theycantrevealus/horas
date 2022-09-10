@@ -5,11 +5,11 @@
         <Toolbar>
           <template #left>
             <Button v-if="permission.btnAddItem !== undefined" @click="itemAddForm" label="New" icon="pi pi-plus"
-              class="p-mr-2 p-button-rounded" />
+              class="mr-2 button-rounded" />
           </template>
 
           <template #right>
-            <Button label="Upload" icon="pi pi-upload" class="p-button-success p-button-rounded" />
+            <Button label="Upload" icon="pi pi-upload" class="button-success button-rounded" />
           </template>
         </Toolbar>
       </template>
@@ -20,36 +20,36 @@
           responsiveLayout="scroll">
           <Column header="Action">
             <template #body="slotProps">
-              <span class="p-buttonset wrap_content">
+              <span class="buttonset wrap_content">
                 <Button v-if="permission.btnEditItem !== undefined" @click="itemEditForm(slotProps.data.uid)"
-                  class="p-button p-button-info p-button-sm p-button-raised">
+                  class="button button-info button-sm button-raised">
                   <span class="material-icons">edit</span>
                 </Button>
                 <Button v-if="permission.btnDeleteItem !== undefined" @click="itemDelete($event, slotProps.data.uid)"
-                  class="p-button p-button-danger p-button-sm p-button-raised">
+                  class="button button-danger button-sm button-raised">
                   <span class="material-icons">delete</span>
                 </Button>
               </span>
             </template>
           </Column>
-          <Column header="#" class="p-align-right">
+          <Column header="#" class="align-right">
             <template #body="slotProps">{{ slotProps.data.autonum }}</template>
           </Column>
           <Column field="code" header="Code" filterMatchMode="startsWith" ref="first_name" :sortable="true">
             <template #filter="{ filterModel, filterCallback }">
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
-                class="p-column-filter" placeholder="Search by code" />
+                class="column-filter" placeholder="Search by code" />
             </template>
           </Column>
           <Column field="name" header="Name" filterField="name" filterMatchMode="contains" ref="last_name"
             :sortable="true">
             <template #filter="{ filterModel, filterCallback }">
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
-                class="p-column-filter" placeholder="Search by name" />
+                class="column-filter" placeholder="Search by name" />
             </template>
           </Column>
           <Column field="created_at" header="Created Date" ref="created_at" :sortable="true"
-            class="wrap_content p-text-right">
+            class="wrap_content text-right">
             <template #body="slotProps">
               <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
             </template>
@@ -122,7 +122,7 @@ export default {
         target: event.currentTarget,
         message: 'Are you sure to delete this item?',
         icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'p-button-danger',
+        acceptClass: 'button-danger',
         acceptLabel: 'Yes. Delete it!',
         rejectLabel: 'Cancel',
         accept: () => {

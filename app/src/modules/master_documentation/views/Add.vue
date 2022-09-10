@@ -12,8 +12,8 @@
                                 <span class="material-icons-outlined">info</span>
                                 <span>Basic Information</span>
                             </template>
-                            <div class="p-fluid p-formgrid p-grid">
-                                <div class="p-field p-col-12 p-md-12">
+                            <div class="fluid formgrid grid">
+                                <div class="field col-12 md-12">
                                     <label for="itemFormTitle">Title</label>
                                     <InputText
                                         placeholder="Documentation Title"
@@ -33,7 +33,7 @@
                                         >{{ error.$message }}</div>
                                     </Message>
                                 </div>
-                                <div class="p-field p-col-12 p-md-12">
+                                <div class="field col-12 md-12">
                                     <label for="itemFormContent">Content</label>
                                     <ckeditor
                                         id="itemFormContent"

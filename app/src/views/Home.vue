@@ -1,10 +1,10 @@
 <template>
-  <div class="p-grid">
-    <div class="p-col-4">
+  <div class="grid">
+    <div class="col-4">
       Tol
       <Card />
     </div>
-    <div class="p-col-8">
+    <div class="col-8">
       <Card />
     </div>
   </div>

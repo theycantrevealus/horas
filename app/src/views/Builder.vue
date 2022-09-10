@@ -18,7 +18,7 @@
         <div class="breadcrumb-container">
           <BreadCrumb :items="breadcrumb" :pageName="pageName" />
         </div>
-        <div class="content-loader" id="content-loader">
+        <div id="content-loader" class="content-loader">
           <router-view v-slot="{ Component }">
             <transition name="scale" mode="out-in">
               <component :is="Component" />
@@ -39,15 +39,10 @@ import BreadCrumb from '@/components/BreadCrumb'
 
 export default {
   name: 'Builder',
-  watch: {
-    '$route' () {
-      this.breadcrumb = this.$route.meta.breadcrumb
-      this.pageName = this.$route.meta.pageTitle
-      this.$refs.scrollLoader.$el.scrollTop = 0
-    }
-  },
-  mounted () {
-    this.updatePageInfo()
+  components: {
+    TopPanelBar,
+    SidePanelBar,
+    BreadCrumb
   },
   data () {
     return {
@@ -59,6 +54,40 @@ export default {
       menu: [],
       breadcrumb: [],
       pageName: ''
+    }
+  },
+  computed: {
+    containerClass () {
+      return ['layout-wrapper', {
+        'layout-overlay': this.layoutMode === 'overlay',
+        'layout-static': this.layoutMode === 'static',
+        'layout-static-sidebar-inactive': this.staticMenuInactive && this.layoutMode === 'static',
+        'layout-overlay-sidebar-active': this.overlayMenuActive && this.layoutMode === 'overlay',
+        'layout-mobile-sidebar-active': this.mobileMenuActive,
+        'input-filled': this.$primevue.config.inputStyle === 'filled',
+        'ripple-disabled': this.$primevue.config.ripple === false,
+        'layout-theme-light': this.$appState.theme.startsWith('saga')
+      }]
+    },
+    logo () {
+      return (this.layoutColorMode === 'dark') ? 'images/logo-white.svg' : 'images/logo.svg'
+    }
+  },
+  watch: {
+    '$route' () {
+      this.breadcrumb = this.$route.meta.breadcrumb
+      this.pageName = this.$route.meta.pageTitle
+      this.$refs.scrollLoader.$el.scrollTop = 0
+    }
+  },
+  mounted () {
+    this.updatePageInfo()
+  },
+  beforeUpdate () {
+    if (this.mobileMenuActive) {
+      this.addClass(document.body, 'body-overflow-hidden')
+    } else {
+      this.removeClass(document.body, 'body-overflow-hidden')
     }
   },
   methods: {
@@ -137,35 +166,6 @@ export default {
 
       return true
     }
-  },
-  computed: {
-    containerClass () {
-      return ['layout-wrapper', {
-        'layout-overlay': this.layoutMode === 'overlay',
-        'layout-static': this.layoutMode === 'static',
-        'layout-static-sidebar-inactive': this.staticMenuInactive && this.layoutMode === 'static',
-        'layout-overlay-sidebar-active': this.overlayMenuActive && this.layoutMode === 'overlay',
-        'layout-mobile-sidebar-active': this.mobileMenuActive,
-        'p-input-filled': this.$primevue.config.inputStyle === 'filled',
-        'p-ripple-disabled': this.$primevue.config.ripple === false,
-        'layout-theme-light': this.$appState.theme.startsWith('saga')
-      }]
-    },
-    logo () {
-      return (this.layoutColorMode === 'dark') ? 'images/logo-white.svg' : 'images/logo.svg'
-    }
-  },
-  beforeUpdate () {
-    if (this.mobileMenuActive) {
-      this.addClass(document.body, 'body-overflow-hidden')
-    } else {
-      this.removeClass(document.body, 'body-overflow-hidden')
-    }
-  },
-  components: {
-    TopPanelBar,
-    SidePanelBar,
-    BreadCrumb
   }
 
 }

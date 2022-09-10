@@ -12,8 +12,8 @@
                 <span class="material-icons-outlined">account_circle</span>
                 <span>Basic Information</span>
               </template>
-              <div class="p-fluid p-formgrid p-grid">
-                <div class="p-field p-col-12 p-md-4">
+              <div class="fluid formgrid grid">
+                <div class="field col-12 md-4">
                   <label for="userFormEmail">Email</label>
                   <InputText
                     placeholder="example@domain.com"
@@ -29,7 +29,7 @@
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
-                <div class="p-field p-col-12 p-md-4">
+                <div class="field col-12 md-4">
                   <label for="userFormFirstName">Firstname</label>
                   <InputText
                     placeholder="Jhonny"
@@ -49,7 +49,7 @@
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
-                <div class="p-field p-col-12 p-md-4">
+                <div class="field col-12 md-4">
                   <label for="userFormLastName">Lastname</label>
                   <InputText
                     placeholder="Sins"
@@ -69,7 +69,7 @@
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
-                <div class="p-field p-col-12">
+                <div class="field col-12">
                   <label for="userFormAddress">Address</label>
                   <Textarea
                     v-model.trim="$v.address.$model"
@@ -78,7 +78,7 @@
                     rows="4"
                   />
                 </div>
-                <div class="p-field p-col-12 p-md-6">
+                <div class="field col-12 md-6">
                   <label for="userFormContact">Contact</label>
                   <InputText
                     v-model.trim="$v.contact.$model"
@@ -120,12 +120,12 @@
                   </template>
                 </Column>
                 <template #expansion="slotProps">
-                  <div class="p-grid">
-                    <div class="p-col-2"></div>
-                    <div class="p-col-10">
+                  <div class="grid">
+                    <div class="col-2"></div>
+                    <div class="col-10">
                       <div v-if="slotProps.data.permission !== undefined">
                         <div
-                          class="p-field-checkbox"
+                          class="field-checkbox"
                           v-for="perPermission in slotProps.data.permission"
                           :key="perPermission"
                         >
@@ -147,7 +147,7 @@
                 id="userFormSubmit"
                 label="Cancel"
                 icon="pi pi-angle-left"
-                class="p-button-danger p-button-rounded"
+                class="button-danger button-rounded"
                 @click="backToUser"
               />
             </template>
@@ -159,7 +159,7 @@
                 type="submit"
                 :disabled="$v.$invalid"
                 icon="pi pi-save"
-                class="p-mr-2 p-button-success p-button-rounded"
+                class="mr-2 button-success button-rounded"
               />
             </template>
           </Toolbar>

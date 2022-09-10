@@ -11,7 +11,7 @@
         </template>
         <template v-else>
           <router-link v-if="item.to && this.credential.pages[`page_${item.id}`] !== undefined" :to="item.to"
-            :class="[item.class, { 'p-disabled': item.disabled }]" :style="item.style"
+            :class="[item.class, { 'disabled': item.disabled }]" :style="item.style"
             @click="onMenuItemClick($event, item, i)" :target="item.target" role="menuitem">
             <!--i :class="item.icon"></i-->
             <span class="material-icons-outlined">{{ item.icon }}</span>
@@ -21,7 +21,7 @@
             <span v-if="item.badge" class="menuitem-badge">{{ item.badge }}</span>
           </router-link>
           <a v-if="!item.to" :href="item.url || '#'" :style="item.style"
-            :class="[item.class, { 'p-disabled': item.disabled }]" @click="onMenuItemClick($event, item, i)"
+            :class="[item.class, { 'disabled': item.disabled }]" @click="onMenuItemClick($event, item, i)"
             :target="item.target" role="menuitem">
             <span class="material-icons-outlined">{{ item.icon }}</span>
             <span>{{ item.label }}</span>
@@ -34,7 +34,7 @@
           </transition>
         </template>
       </li>
-      <li class="p-menu-separator" :style="item.style" v-if="visible(item) && item.separator" :key="'separator' + i"
+      <li class="menu-separator" :style="item.style" v-if="visible(item) && item.separator" :key="'separator' + i"
         role="separator"></li>
     </template>
   </ul>

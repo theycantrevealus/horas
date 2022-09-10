@@ -1,6 +1,6 @@
 <template>
-  <div class="p-grid">
-    <div class="p-col-12">
+  <div class="grid">
+    <div class="col-12">
       <Card>
         <template #title>Page Sample</template>
         <template #content>

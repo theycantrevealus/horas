@@ -8,56 +8,56 @@
           <vue-cropper ref="cropper" :aspect-ratio="1 / 1" :src="imgSrc" preview=".preview" />
         </div>
         <div class="actions">
-          <a href="#" class="p-button p-button-info p-button-sm p-button-raised" role="button"
+          <a href="#" class="button button-info button-sm button-raised" role="button"
             @click.prevent="showFileChooser">
             <span class="material-icons">
               file_upload
             </span>
           </a>
-          <a v-if="imgSrc !== null" href="#" class="p-button p-button-warning p-button-sm p-button-raised" role="button"
+          <a v-if="imgSrc !== null" href="#" class="button button-warning button-sm button-raised" role="button"
             @click.prevent="reset">
             <span class="material-icons">
               restart_alt
             </span>
           </a>
-          <a v-if="imgSrc !== null" href="#" class="p-button p-button-success p-button-sm p-button-raised" role="button"
+          <a v-if="imgSrc !== null" href="#" class="button button-success button-sm button-raised" role="button"
             @click.prevent="cropImage">
             <span class="material-icons">
               done
             </span>
           </a>
           <div v-if="imgSrc !== null">
-            <a href="#" class="p-button p-button-info p-button-sm p-button-raised" role="button"
+            <a href="#" class="button button-info button-sm button-raised" role="button"
               @click.prevent="zoom(0.2)">
               <span class="material-icons">
                 zoom_in
               </span>
             </a>
-            <a href="#" class="p-button p-button-info p-button-sm p-button-raised" role="button"
+            <a href="#" class="button button-info button-sm button-raised" role="button"
               @click.prevent="zoom(-0.2)">
               <span class="material-icons">
                 zoom_out
               </span>
             </a>
-            <a href="#" class="p-button p-button-info p-button-sm p-button-raised" role="button"
+            <a href="#" class="button button-info button-sm button-raised" role="button"
               @click.prevent="rotate(90)">
               <span class="material-icons">
                 rotate_90_degrees_cw
               </span>
             </a>
-            <a href="#" class="p-button p-button-info p-button-sm p-button-raised" role="button"
+            <a href="#" class="button button-info button-sm button-raised" role="button"
               @click.prevent="rotate(-90)">
               <span class="material-icons">
                 rotate_90_degrees_ccw
               </span>
             </a>
-            <a ref="flipX" class="p-button p-button-info p-button-sm p-button-raised" href="#" role="button"
+            <a ref="flipX" class="button button-info button-sm button-raised" href="#" role="button"
               @click.prevent="flipX">
               <span class="material-icons">
                 flip
               </span>
             </a>
-            <a ref="flipY" class="p-button p-button-info p-button-sm p-button-raised" href="#" role="button"
+            <a ref="flipY" class="button button-info button-sm button-raised" href="#" role="button"
               @click.prevent="flipY">
               <span class="material-icons" style="transform: rotate(90deg);">
                 flip

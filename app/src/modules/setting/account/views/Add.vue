@@ -1,54 +1,54 @@
 <template>
-  <div class="p-grid">
-    <div class="p-col-12">
+  <div class="grid">
+    <div class="col-12">
       <Card>
         <template #title>Add Account</template>
         <template #content>
-          <div class="p-grid">
-            <div class="p-col-4">
+          <div class="grid">
+            <div class="col-4">
               <div class="profile-display">
                 <img :src="formData.image" />
-              </div><Button class="p-button p-button-info p-button-sm p-button-raised" label="Avatar"
+              </div><Button class="button button-info button-sm button-raised" label="Avatar"
                 icon="pi pi-external-link" @click="toggleEditImageWindow" />
             </div>
-            <div class="p-col-8 form-mode">
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
+            <div class="col-8 form-mode">
+              <div class="inputgroup">
+                <span class="inputgroup-addon">
                   <span class="material-icons-outlined">mail</span>
                 </span>
-                <!-- <InputText class="p-inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
+                <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
                   placeholder="Email" /> -->
-                <InputText class="p-inputtext-sm" v-model="formData.email" placeholder="Email" />
+                <InputText class="inputtext-sm" v-model="formData.email" placeholder="Email" />
               </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
+              <div class="inputgroup">
+                <span class="inputgroup-addon">
                   <span class="material-icons-outlined">person</span>
                 </span>
-                <InputText class="p-inputtext-sm" v-model="formData.first_name" placeholder="First Name" />
-                <InputText class="p-inputtext-sm" v-model="formData.last_name" placeholder="Last Name" />
+                <InputText class="inputtext-sm" v-model="formData.first_name" placeholder="First Name" />
+                <InputText class="inputtext-sm" v-model="formData.last_name" placeholder="Last Name" />
               </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
+              <div class="inputgroup">
+                <span class="inputgroup-addon">
                   <span class="material-icons-outlined">supervised_user_circle</span>
                 </span>
                 <Dropdown v-model="formData.authority" :options="authorityData" optionLabel="name" optionValue="uid"
                   placeholder="Select authority" />
               </div>
-              <Button @click="updateAccountData" class="p-button p-button-info p-button-sm p-button-raised">
+              <Button @click="updateAccountData" class="button button-info button-sm button-raised">
                 <span class="material-icons">fact_check</span> Apply from authority
               </Button>
               <!-- <Button @click="accountEdit(slotProps.data.uid)"
-                class="p-button p-button-info p-button-sm p-button-raised">
+                class="button button-info button-sm button-raised">
                 <span class="material-icons">fact_check</span> Apply from authority
               </Button> -->
             </div>
-            <div class="p-col-12">
+            <div class="col-12">
               <h4>Permission List</h4>
-              <TreeTable v-if="formData.menuTree" class="p-treetable-sm p-datatable-table vert-top" filterMode="strict"
+              <TreeTable v-if="formData.menuTree" class="treetable-sm p-datatable-table vert-top" filterMode="strict"
                 :value="formData.menuTree" :lazy="true" :paginator="true" :rows="20" :filters="filtersNode">
                 <Column field="label" header="Label" :expander="true">
                   <template #filter>
-                    <InputText type="text" v-model="filtersNode.label.value" class="p-column-filter"
+                    <InputText type="text" v-model="filtersNode.label.value" class="column-filter"
                       placeholder="Filter by label" />
                   </template>
                   <template #body="slotProps">
@@ -58,7 +58,7 @@
                 </Column>
                 <Column field="to" header="Link">
                   <template #filter>
-                    <InputText type="text" v-model="filtersNode.to.value" class="p-column-filter"
+                    <InputText type="text" v-model="filtersNode.to.value" class="column-filter"
                       placeholder="Filter by link" />
                   </template>
                 </Column>
@@ -77,15 +77,15 @@
                 </Column>
               </TreeTable>
             </div>
-            <div class="p-col-12">
-              <div class="p-d-flex p-jc-between">
+            <div class="col-12">
+              <div class="d-flex jc-between">
                 <div>
-                  <Button @click="back()" type="button" class="p-button-raised p-button-sm p-button-danger px-3">
+                  <Button @click="back()" type="button" class="button-raised button-sm button-danger px-3">
                     <span class="material-icons-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div v-if="allowSave === true">
-                  <Button type="button" class="p-button-raised p-button-sm p-button-info px-3"
+                  <Button type="button" class="button-raised button-sm button-info px-3"
                     @click="updateAccountData($event)">
                     <span class="material-icons-outlined">check_circle</span> Save Data
                   </Button>
@@ -102,7 +102,7 @@
         <Cropper @cropImage="setImageData" />
       </p>
       <template #footer>
-        <Button label="Close" icon="pi pi-times" @click="toggleEditImageWindow" class="p-button-text" />
+        <Button label="Close" icon="pi pi-times" @click="toggleEditImageWindow" class="button-text" />
       </template>
     </Dialog>
   </div>
@@ -270,7 +270,7 @@ export default {
               target: event.target,
               message: `${response.data.message}. Back to account list?`,
               icon: 'pi pi-exclamation-triangle',
-              acceptClass: 'p-button-success',
+              acceptClass: 'button-success',
               acceptLabel: 'Yes',
               rejectLabel: 'Keep Editing',
               accept: () => {

@@ -1,11 +1,11 @@
 <template>
-  <div class="p-grid">
-    <div class="p-col-fixed" style="width:auto">
-      <h6 class="p-text-right pageName">
+  <div class="grid">
+    <div class="col-fixed" style="width:auto">
+      <h6 class="text-right pageName">
         <span class="material-icons">hashtag</span> {{ pageName }}
       </h6>
     </div>
-    <div class="p-col">
+    <div class="col">
       <Breadcrumb :home="home" :model="items" />
     </div>
   </div>
@@ -14,6 +14,9 @@
 import Breadcrumb from 'primevue/breadcrumb'
 export default {
   name: 'BreadCrumb',
+  components: {
+    Breadcrumb
+  },
   props: {
     items: Array,
     pageName: String
@@ -22,9 +25,6 @@ export default {
     return {
       home: { icon: 'pi pi-home', to: '/dashboard' }
     }
-  },
-  components: {
-    Breadcrumb
   }
 }
 </script>

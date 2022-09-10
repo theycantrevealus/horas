@@ -21,20 +21,6 @@ module.exports = {
             .test(/ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/)
             .use('raw-loader')
             .loader('raw-loader')
-
-        config.module
-            .rule('cke-css')
-            .test(/ckeditor5-[^/\\]+[/\\].+\.css$/)
-            .use('postcss-loader')
-            .loader('postcss-loader')
-            .tap(() => {
-                return styles.getPostCssConfig({
-                    themeImporter: {
-                        themePath: require.resolve('@ckeditor/ckeditor5-theme-lark')
-                    },
-                    minify: true
-                })
-            })
     }
 
 }

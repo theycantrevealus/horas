@@ -8,7 +8,7 @@
                             v-if="permission.btnAddAuthority !== undefined"
                             label="New"
                             icon="pi pi-plus"
-                            class="p-mr-2 p-button-rounded"
+                            class="mr-2 button-rounded"
                         />
                     </template>
 
@@ -16,7 +16,7 @@
                         <Button
                             label="Upload"
                             icon="pi pi-upload"
-                            class="p-button-success p-button-rounded"
+                            class="button-success button-rounded"
                         />
                     </template>
                 </Toolbar>

@@ -1,24 +1,15 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const webpack = require('webpack')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const dotenv = require('dotenv')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
     VueLoaderPlugin
 } = require('vue-loader')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
     CleanWebpackPlugin
 } = require('clean-webpack-plugin')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
     .BundleAnalyzerPlugin
-
-const CKEditorWebpackPlugin = require('@ckeditor/ckeditor5-dev-webpack-plugin')
 
 module.exports = {
     devServer: {
@@ -71,6 +62,36 @@ module.exports = {
                 use: [{
                     loader: 'url-loader?limit=100000'
                 }]
+            },
+            {
+                test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+                use: [ 'raw-loader' ]
+            },
+            {
+                test: /ckeditor5-[^/\\]+[/\\]theme[/\\].+\.css$/,
+                use: [
+                    {
+                        loader: 'style-loader',
+                        options: {
+                            injectType: 'singletonStyleTag',
+                            attributes: {
+                                'data-cke': true
+                            }
+                        }
+                    },
+                    'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            postcssOptions: styles.getPostCssConfig( {
+                                themeImporter: {
+                                    themePath: require.resolve( '@ckeditor/ckeditor5-theme-lark' )
+                                },
+                                minify: true
+                            } )
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -88,10 +109,6 @@ module.exports = {
             analyzerMode: 'static',
             reportFilename: 'webpack_bundle_analyser_report.html',
             defaultSizes: 'gzip'
-        }),
-        new CKEditorWebpackPlugin({
-            language: 'en',
-            translationsOutputFile: /app/
         })
     ],
     resolve: {

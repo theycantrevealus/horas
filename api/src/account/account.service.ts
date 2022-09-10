@@ -1,27 +1,21 @@
-import { HttpCode, HttpStatus, Injectable, Logger } from '@nestjs/common'
+import { HttpStatus, Injectable, Logger } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
 import { AccountModel } from '../model/account.model'
-import { AccountAuthorityModel } from '../model/account.authority.model'
 
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AccountLoginDTO, AccountLoginResponseDTO } from './dto/account'
 import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto'
 
-import { AccountAuthorityAddDTO, AccountAuthorityAddDTOResponse } from './dto/account.authority.add.dto'
 import { AuthService } from '../auth/auth.service'
-import { Http } from '@sentry/node/dist/integrations'
 import { AccountDeleteDTOResponse } from './dto/account.delete.dto'
-import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
-import { AuthorityService } from './authority.service'
+import { AccountEditDTOResponse } from './dto/account.edit.dto'
 import { LogLoginModel } from '../model/log.login.model'
 import { LogLoginDTO } from '../auth/dto/log.login.dto'
 import { MenuService } from '../menu/menu.service'
 import { AccountPrivilegesModel } from '../model/account.privileges.model'
 import { AccountPermissionModel } from '../model/account.permission.model'
 import { filterSetDT } from '../mod.lib'
-import { fstat } from 'fs'
-import { logger } from '@sentry/utils'
 
 @Injectable()
 export class AccountService {

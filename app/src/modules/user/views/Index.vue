@@ -9,12 +9,12 @@
               @click="userAddForm"
               label="New"
               icon="pi pi-plus"
-              class="p-mr-2 p-button-rounded"
+              class="mr-2 button-rounded"
             />
           </template>
 
           <template #right>
-            <Button label="Upload" icon="pi pi-upload" class="p-button-success p-button-rounded" />
+            <Button label="Upload" icon="pi pi-upload" class="button-success button-rounded" />
           </template>
         </Toolbar>
       </template>
@@ -37,24 +37,24 @@
         >
           <Column header="Action">
             <template #body="slotProps">
-              <span class="p-buttonset wrap_content">
+              <span class="buttonset wrap_content">
                 <Button
                   v-if="permission.btnEditUser !== undefined"
                   @click="userEditForm(slotProps.data.uid)"
-                  class="p-button p-button-info p-button-sm p-button-raised"
+                  class="button button-info button-sm button-raised"
                 >
                   <span class="material-icons">edit</span>
                 </Button>
                 <Button
                   @click="userResetPass(slotProps.data.uid)"
-                  class="p-button p-button-warning p-button-sm p-button-raised"
+                  class="button button-warning button-sm button-raised"
                 >
                   <span class="material-icons">refresh</span>
                 </Button>
                 <Button
                   v-if="permission.btnDeleteUser !== undefined"
                   @click="userDelete($event, slotProps.data.uid)"
-                  class="p-button p-button-danger p-button-sm p-button-raised"
+                  class="button button-danger button-sm button-raised"
                 >
                   <span class="material-icons">delete</span>
                 </Button>
@@ -76,7 +76,7 @@
                 type="text"
                 v-model="filterModel.value"
                 @keydown.enter="filterCallback()"
-                class="p-column-filter"
+                class="column-filter"
                 placeholder="Search by first name"
               />
             </template>
@@ -94,7 +94,7 @@
                 type="text"
                 v-model="filterModel.value"
                 @keydown.enter="filterCallback()"
-                class="p-column-filter"
+                class="column-filter"
                 placeholder="Search by last name"
               />
             </template>
@@ -111,12 +111,12 @@
                 type="text"
                 v-model="filterModel.value"
                 @keydown.enter="filterCallback()"
-                class="p-column-filter"
+                class="column-filter"
                 placeholder="Search by email"
               />
             </template>
             <template #body="slotProps">
-              <Button class="p-button-link">
+              <Button class="button-link">
                 <span class="material-icons">email</span>
                 {{ slotProps.data.email }}
               </Button>
@@ -127,7 +127,7 @@
             header="Join Date"
             ref="created_at"
             :sortable="true"
-            class="wrap_content p-text-right"
+            class="wrap_content text-right"
           >
             <template #body="slotProps">
               <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
@@ -203,7 +203,7 @@ export default {
         target: event.currentTarget,
         message: 'Are you sure to delete this user?',
         icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'p-button-danger',
+        acceptClass: 'button-danger',
         acceptLabel: 'Yes. Delete it!',
         rejectLabel: 'Cancel',
         accept: () => {

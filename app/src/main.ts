@@ -6,16 +6,14 @@ import PrimeVue from 'primevue/config'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
-import PerfectScrollbar from 'vue3-perfect-scrollbar'
 import setupInterceptors from '@/service/core/interceptor'
-import 'vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css'
 
 import 'primevue/resources/themes/tailwind-light/theme.css'
 import 'primevue/resources/primevue.min.css'
 
 import 'primeicons/primeicons.css'
 import 'primeflex/primeflex.css'
-import 'primeng/resources/primeng.min.css'
+// import 'primeng/resources/primeng.min.css'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import 'material-icons/iconfont/material-icons.css'
@@ -67,7 +65,6 @@ app.use(PrimeVue)
   .use(router)
   .use(ToastService)
   .use(ConfirmationService)
-  .use(PerfectScrollbar)
   .use(CKEditor)
 
 app.mount('#app')

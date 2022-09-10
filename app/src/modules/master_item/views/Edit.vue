@@ -12,8 +12,8 @@
                 <span class="material-icons-outlined">info</span>
                 <span>Basic Information</span>
               </template>
-              <div class="p-fluid p-formgrid p-grid">
-                <div class="p-field p-col-12 p-md-4">
+              <div class="fluid formgrid grid">
+                <div class="field col-12 md-4">
                   <label for="itemFormCode">Code</label>
                   <InputText
                     placeholder="xxxxxxxx"
@@ -29,7 +29,7 @@
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
-                <div class="p-field p-col-12 p-md-4">
+                <div class="field col-12 md-4">
                   <label for="itemFormName">Name</label>
                   <InputText
                     placeholder="Item Name"
@@ -45,7 +45,7 @@
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
-                <div class="p-field p-col-12 p-md-12">
+                <div class="field col-12 md-12">
                   <label for="itemFormRemark">Remark</label>
                   <ckeditor
                     id="itemFormRemark"
@@ -61,16 +61,16 @@
                 <span class="material-icons-outlined">medication</span>
                 <span>Drug Info</span>
               </template>
-              <div class="p-fluid p-formgrid p-grid chemicalContainer">
-                <div class="p-field p-col-12 p-md-8">
+              <div class="fluid formgrid grid chemicalContainer">
+                <div class="field col-12 md-8">
                   <Card>
                     <template #title>
                       <Tag severity="info">{{ code }}</Tag>
                       - {{ name }}
                     </template>
                     <template #content>
-                      <div class="p-fluid p-formgrid p-grid">
-                        <div class="p-field p-col-12 p-md-12">
+                      <div class="fluid formgrid grid">
+                        <div class="field col-12 md-12">
                           <table class="largeDataType">
                             <tbody>
                               <tr>
@@ -148,7 +148,7 @@
                     </template>
                   </Card>
                 </div>
-                <div class="p-field p-col-12 p-md-4">
+                <div class="field col-12 md-4">
                   <div
                     id="chemViewer"
                     class="chemicalViewer"
@@ -157,7 +157,7 @@
                     <h5>Molecular View</h5>
                   </div>
                 </div>
-                <div class="p-field p-col-12 p-md-12">
+                <div class="field col-12 md-12">
                   <TabView class="tabview-custom" ref="tabviewDrugDetail">
                     <TabPanel>
                       <template #header>
@@ -178,10 +178,10 @@
                         <Column field="snomed_full_name" header="Snomed Full Name"></Column>
                         <Column field="cui_semantic_type" header="CUI Semantic Type"></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="p-button-text" />
+                          <Button type="button" icon="pi pi-refresh" class="button-text" />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="p-button-text" />
+                          <Button type="button" icon="pi pi-cloud" class="button-text" />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -206,10 +206,10 @@
                         <Column field="exp_method" header="Exp Method"></Column>
                         <Column field="deposition_date" header="Deposition Date"></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="p-button-text" />
+                          <Button type="button" icon="pi pi-refresh" class="button-text" />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="p-button-text" />
+                          <Button type="button" icon="pi pi-cloud" class="button-text" />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -232,10 +232,10 @@
                         <Column field="name" header="Name"></Column>
                         <Column field="source" header="Source"></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="p-button-text" />
+                          <Button type="button" icon="pi pi-refresh" class="button-text" />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="p-button-text" />
+                          <Button type="button" icon="pi pi-cloud" class="button-text" />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -260,10 +260,10 @@
                         <Column field="value" header="Value"></Column>
                         <Column field="pka_type" header="Type"></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="p-button-text" />
+                          <Button type="button" icon="pi pi-refresh" class="button-text" />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="p-button-text" />
+                          <Button type="button" icon="pi pi-cloud" class="button-text" />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -285,10 +285,10 @@
                         <Column field="id_type" header="Type"></Column>
                         <Column field="parent_match" header="Parent Match"></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="p-button-text" />
+                          <Button type="button" icon="pi pi-refresh" class="button-text" />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="p-button-text" />
+                          <Button type="button" icon="pi pi-cloud" class="button-text" />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -305,7 +305,7 @@
                 id="userFormSubmit"
                 label="Cancel"
                 icon="pi pi-angle-left"
-                class="p-button-danger p-button-rounded"
+                class="button-danger button-rounded"
                 @click="backToUser"
               />
             </template>
@@ -317,7 +317,7 @@
                 type="submit"
                 :disabled="$v.$invalid"
                 icon="pi pi-save"
-                class="p-mr-2 p-button-success p-button-rounded"
+                class="mr-2 button-success button-rounded"
               />
             </template>
           </Toolbar>

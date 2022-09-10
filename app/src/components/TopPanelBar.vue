@@ -5,7 +5,7 @@
         <Chip :label="first_name + ' ' + last_name" :image="profile_photo" />
       </template>
       <template #end>
-        <Button @click="logout" icon="pi pi-power-off" class="p-button-link p-button-sm" />
+        <Button @click="logout" icon="pi pi-power-off" class="button-link button-sm" />
       </template>
     </Menubar>
   </div>

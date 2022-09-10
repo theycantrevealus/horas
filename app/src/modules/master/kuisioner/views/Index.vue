@@ -1,6 +1,6 @@
 <template>
-  <div class="p-grid">
-    <div class="p-col-12">
+  <div class="grid">
+    <div class="col-12">
       <Card>
         <template #title>Account Authority Management</template>
         <template #content>
@@ -25,23 +25,23 @@
             :globalFilterFields="['name', 'created_at']"
             responsiveLayout="scroll"
           >
-            <Column header="#" class="p-align-right">
+            <Column header="#" class="align-right">
               <template #body="slotProps">{{ slotProps.data.autonum }}</template>
             </Column>
             <Column header="Action">
               <template #body="slotProps">
-                <span class="p-buttonset wrap_content">
+                <span class="buttonset wrap_content">
                   <Button
                     v-if="permission.btnAccountAuthorityEdit !== undefined"
                     @click="accountAuthorityEdit(slotProps.data.uid)"
-                    class="p-button p-button-info p-button-sm p-button-raised"
+                    class="button button-info button-sm button-raised"
                   >
                     <span class="material-icons">edit</span> Edit
                   </Button>
                   <Button
                     v-if="permission.btnAccountAuthorityDelete !== undefined"
                     @click="accountAuthorityDelete(slotProps.data.uid)"
-                    class="p-button p-button-danger p-button-sm p-button-raised"
+                    class="button button-danger button-sm button-raised"
                   >
                     <span class="material-icons">delete</span>
                   </Button>
@@ -60,7 +60,7 @@
                   type="text"
                   v-model="filterModel.value"
                   @keydown.enter="filterCallback()"
-                  class="p-column-filter"
+                  class="column-filter"
                   placeholder="Search by name"
                 />
               </template>
@@ -70,7 +70,7 @@
               header="Join Date"
               ref="created_at"
               :sortable="true"
-              class="wrap_content p-text-right"
+              class="wrap_content text-right"
             >
               <template #body="slotProps">
                 <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>

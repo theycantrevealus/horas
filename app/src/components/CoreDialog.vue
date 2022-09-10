@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Dialog title="{{ title }}" header="{{ title }}" :style="{width: '80vw'}" footer="Footer" v-model:visible="display">
+    <Dialog v-model:visible="display" title="{{ title }}" header="{{ title }}" :style="{width: '80vw'}" footer="Footer">
       <slot></slot>
     </Dialog>
   </div>

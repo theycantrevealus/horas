@@ -1,37 +1,37 @@
 <template>
-  <div class="p-grid">
-    <div class="p-col-4 p-offset-4" style="margin-top: 50px">
+  <div class="grid">
+    <div class="col-4 offset-4" style="margin-top: 50px">
       <form autocomplete="off" @submit.prevent="login">
         <Card>
           <template #header>
             <h1 style="padding: 20px">Login</h1>
           </template>
           <template #content>
-            <div class="p-fluid">
-              <div class="p-field">
+            <div class="fluid">
+              <div class="field">
                 <label for="loginEmail">Email</label>
-                <InputText autocomplete="off" id="loginEmail" v-model.trim="$v.email.$model" />
-                <Message severity="error" v-if="$v.email.$errors.length > 0" :closable="false">
+                <InputText id="loginEmail" v-model.trim="$v.email.$model" autocomplete="off" />
+                <Message v-if="$v.email.$errors.length > 0" severity="error" :closable="false">
                   <div
-                    class="error-msg"
                     v-for="(error, index) of $v.email.$errors"
                     :key="index"
+                    class="error-msg"
                   >{{ error.$message }}</div>
                 </Message>
               </div>
-              <div class="p-field">
+              <div class="field">
                 <label for="loginPassword">Password</label>
                 <Password
-                  type="password"
                   id="loginPassword"
-                  placeholder="Password"
                   v-model="$v.password.$model"
+                  type="password"
+                  placeholder="Password"
                 />
-                <Message severity="error" v-if="$v.password.$errors.length > 0" :closable="false">
+                <Message v-if="$v.password.$errors.length > 0" severity="error" :closable="false">
                   <div
-                    class="error-msg"
                     v-for="(error, index) of $v.password.$errors"
                     :key="index"
+                    class="error-msg"
                   >{{ error.$message }}</div>
                 </Message>
               </div>
@@ -39,9 +39,9 @@
           </template>
           <template #footer>
             <Message
+              v-if="response.message !== ''"
               :severity="response.type"
               :closable="false"
-              v-if="response.message !== ''"
             >{{ response.message }}</Message>
             <Button
               id="submitButton"
