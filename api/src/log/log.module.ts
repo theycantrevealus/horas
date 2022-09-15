@@ -10,6 +10,6 @@ import { LogActivityModel } from '../model/log.activity.model'
 @Module({
   controllers: [LogController],
   providers: [LogService],
-  exports: [LogService]
+  exports: [LogService],
 })
-export class LogModule { }
+export class LogModule {}

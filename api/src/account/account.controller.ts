@@ -1,28 +1,38 @@
-import { Controller, Body, Post, UseGuards, Get, HttpStatus, Param, Put, UseInterceptors, Delete, Req, Logger, Request, Query } from '@nestjs/common'
+import { Authorization, CredentialAccount } from '@/decorator/auth.decorator'
+import { JwtAuthGuard } from '@/guard/jwt.guard'
+import { LoggingInterceptor } from '@/interceptor/logging'
+import { GrantPermissionDTO } from '@/menu/dto/menu.grant.permission.dto'
+import { GrantAccessDTO } from '@/menu/dto/menu.grant.privileges.dto'
+import { isJsonString } from '@/mod.lib'
+import {
+  Controller,
+  Body,
+  Post,
+  UseGuards,
+  Get,
+  Param,
+  Put,
+  UseInterceptors,
+  Delete,
+  Logger,
+  Query,
+} from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { AccountService } from './account.service'
 import { AccountLoginDTO } from './dto/account'
-import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto'
-import { CredentialAccount, Authorization } from '../decorator/auth.decorator'
-import { JwtAuthGuard } from '../guard/jwt.guard'
-import { AccountEditDTO, AccountEditDTOResponse } from './dto/account.edit.dto'
-import { LoggingInterceptor } from '../interceptor/logging'
-import { GrantAccessDTO } from '../menu/dto/menu.grant.privileges.dto'
-import { GrantPermissionDTO } from '../menu/dto/menu.grant.permission.dto'
-import { isJsonString } from '../mod.lib'
+import { AccountAddDTO } from './dto/account.add.dto'
+import { AccountEditDTO } from './dto/account.edit.dto'
 
 @Controller('account')
 @ApiTags('account')
 export class AccountController {
-  constructor(
-    private accountService: AccountService
-  ) { }
+  constructor(private accountService: AccountService) {}
 
   private logger = new Logger('HTTP')
 
   //=========================================================================================== CREDENTIAL   SECTION
   @Post('login')
-  async login (@Body() data: AccountLoginDTO) {
+  async login(@Body() data: AccountLoginDTO) {
     return this.accountService.login(data)
   }
 
@@ -33,7 +43,7 @@ export class AccountController {
   @ApiOperation({ summary: 'List all user' })
   @Authorization(true)
   @Get()
-  async list () {
+  async list() {
     return await this.accountService.all()
   }
 
@@ -42,15 +52,14 @@ export class AccountController {
   @ApiOperation({ summary: 'List all user (Paginate)' })
   @Authorization(true)
   @Get('paginate')
-  async paginate (
+  async paginate(
     @Query('first') first: number,
     @Query('rows') rows: number,
     @Query('sortOrder') sortOrder: number,
     @Query('sortField') sortField: string,
-    @Query('filters') filters: any
+    @Query('filters') filters: any,
   ) {
-
-    const filterSet = (isJsonString(filters)) ? JSON.parse(filters) : {}
+    const filterSet = isJsonString(filters) ? JSON.parse(filters) : {}
 
     // this.logger.log({
     //   rows: rows,
@@ -69,7 +78,7 @@ export class AccountController {
       first: first,
       sortOrder: sortOrder,
       sortField: sortField,
-      filter: filterSet
+      filter: filterSet,
     })
 
     // this.logger.log(data)
@@ -81,10 +90,10 @@ export class AccountController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiParam({
-    name: 'uid'
+    name: 'uid',
   })
   @Get(':uid/detail')
-  async detail (@Param() param) {
+  async detail(@Param() param) {
     return await this.accountService.detail(param.uid)
   }
 
@@ -92,11 +101,11 @@ export class AccountController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiParam({
-    name: 'uid'
+    name: 'uid',
   })
   @UseInterceptors(LoggingInterceptor)
   @Delete(':uid/delete')
-  async delete_soft (@Param() param) {
+  async delete_soft(@Param() param) {
     return await this.accountService.delete_soft(param.uid)
   }
 
@@ -105,7 +114,7 @@ export class AccountController {
   @Authorization(true)
   @Post('add')
   @UseInterceptors(LoggingInterceptor)
-  async add (@Body() data: AccountAddDTO) {
+  async add(@Body() data: AccountAddDTO) {
     return await this.accountService.add(data)
   }
 
@@ -114,7 +123,10 @@ export class AccountController {
   @Authorization(true)
   @Post('grant_access')
   @UseInterceptors(LoggingInterceptor)
-  async grant_access (@Body() data: GrantAccessDTO, @CredentialAccount() credential) {
+  async grant_access(
+    @Body() data: GrantAccessDTO,
+    @CredentialAccount() credential,
+  ) {
     return await this.accountService.grant_access(data, credential)
   }
 
@@ -123,7 +135,10 @@ export class AccountController {
   @Authorization(true)
   @Post('grant_permission')
   @UseInterceptors(LoggingInterceptor)
-  async grant_permission (@Body() data: GrantPermissionDTO, @CredentialAccount() credential) {
+  async grant_permission(
+    @Body() data: GrantPermissionDTO,
+    @CredentialAccount() credential,
+  ) {
     return await this.accountService.grant_permission(data, credential)
   }
 
@@ -131,11 +146,11 @@ export class AccountController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiParam({
-    name: 'uid'
+    name: 'uid',
   })
   @UseInterceptors(LoggingInterceptor)
   @Put(':uid/edit')
-  async edit (@Body() data: AccountEditDTO, @Param() param) {
+  async edit(@Body() data: AccountEditDTO, @Param() param) {
     return await this.accountService.edit(data, param.uid)
   }
 }

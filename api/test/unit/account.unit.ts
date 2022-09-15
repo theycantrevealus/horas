@@ -1,20 +1,14 @@
-import { AccountService } from "../../src/account/account.service"
-import { AccountController } from "../../src/account/account.controller"
-import { AccountLoginResponseDTO } from "../../src/account/dto/account"
-import { accountMockAdd, accountMockLoginFailed, accountMockLoginSuccess, authorityMockAdd } from "../../test/mocks/account.mock"
-import { AccountAuthorityModel } from "../../src/model/account.authority.model"
-import { AuthService } from "../../src/auth/auth.service"
-import { AccountModel } from "../../src/model/account.model"
-import { AccountModule } from "../../src/account/account.module"
-import { Test, TestingModule } from "@nestjs/testing"
+import { AccountService } from '../../src/account/account.service'
+import { AccountController } from '../../src/account/account.controller'
+import { AccountAuthorityModel } from '../../src/model/account.authority.model'
+import { AuthService } from '../../src/auth/auth.service'
+import { AccountModel } from '../../src/model/account.model'
+import { Test, TestingModule } from '@nestjs/testing'
 import { JwtModule } from '@nestjs/jwt'
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm'
 import { configService } from '../../src/config/orm'
-import { Repository } from "typeorm"
-import { HttpStatus, INestApplication } from "@nestjs/common"
-import { AccountAuthorityAddDTO } from "../../src/account/dto/account.authority.add.dto"
-import { AccountAddDTO } from "../../src/account/dto/account.add.dto"
-import { sample } from "rxjs"
+import { Repository } from 'typeorm'
+import { INestApplication } from '@nestjs/common'
 
 describe('Account Login Test', () => {
   let accountController: AccountController
@@ -27,21 +21,28 @@ describe('Account Login Test', () => {
     const accountModule: TestingModule = await Test.createTestingModule({
       imports: [
         JwtModule.register({
-          secret: `${process.env.JWT_SECRET}`
+          secret: `${process.env.JWT_SECRET}`,
         }),
         TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-        TypeOrmModule.forFeature([AccountAuthorityModel, AccountModel], 'default')
+        TypeOrmModule.forFeature(
+          [AccountAuthorityModel, AccountModel],
+          'default',
+        ),
       ],
       controllers: [AccountController],
-      providers: [AccountService, AuthService]
+      providers: [AccountService, AuthService],
     }).compile()
 
     app = accountModule.createNestApplication()
 
     accountService = accountModule.get<AccountService>(AccountService)
     accountController = accountModule.get<AccountController>(AccountController)
-    accountRepo = accountModule.get<Repository<AccountModel>>(getRepositoryToken(AccountModel))
-    authorityRepo = accountModule.get<Repository<AccountAuthorityModel>>(getRepositoryToken(AccountAuthorityModel))
+    accountRepo = accountModule.get<Repository<AccountModel>>(
+      getRepositoryToken(AccountModel),
+    )
+    authorityRepo = accountModule.get<Repository<AccountAuthorityModel>>(
+      getRepositoryToken(AccountAuthorityModel),
+    )
   })
 
   describe('Login test', () => {
@@ -52,7 +53,6 @@ describe('Account Login Test', () => {
     it('should logged in succesfully with correct credential', async () => {
       let result
       //const testRC = jest.spyOn(accountService, 'account_login').mockResolvedValueOnce(result)
-
 
       // const proc = await accountService.account_login(accountMockLoginSuccess)
       // expect(proc.status).toBe(HttpStatus.OK)
@@ -103,7 +103,6 @@ describe('Account Login Test', () => {
   // })
 
   //After Test Delete All Mock Data
-
 
   afterAll(async () => {
     await app.close()

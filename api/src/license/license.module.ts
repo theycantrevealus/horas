@@ -12,13 +12,16 @@ import { LicenseModel } from '../model/license.model'
 @Module({
   imports: [
     JwtModule.register({
-      secret: `${process.env.JWT_SECRET}`
+      secret: `${process.env.JWT_SECRET}`,
     }),
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([LicenseModel, LogActivityModel, LogLoginModel], 'default')
+    TypeOrmModule.forFeature(
+      [LicenseModel, LogActivityModel, LogLoginModel],
+      'default',
+    ),
   ],
   controllers: [LicenseController],
   providers: [LicenseService, AuthService],
-  exports: [LicenseService]
+  exports: [LicenseService],
 })
-export class LicenseModule { }
+export class LicenseModule {}

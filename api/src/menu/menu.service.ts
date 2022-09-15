@@ -5,15 +5,20 @@ import { Repository } from 'typeorm'
 import { MenuAddDTO, MenuAddResponseDTO } from './dto/menu.add.dto'
 import { AccountPrivilegesModel } from '../model/account.privileges.model'
 
-import { GrantAccessDTO, GrantAccessResponseDTO } from './dto/menu.grant.privileges.dto'
+import {
+  GrantAccessDTO,
+  GrantAccessResponseDTO,
+} from './dto/menu.grant.privileges.dto'
 import { MenuEditDTO, MenuEditResponseDTO } from './dto/menu.edit.dto'
-import { throws } from 'assert'
 import { MenuDeleteDTOResponse } from './dto/menu.delete.dto'
 import { MenuGroupService } from './menu.group.service'
-import { group } from 'console'
-import { GrantPermissionDTO, GrantPermissionResponseDTO } from './dto/menu.grant.permission.dto'
+import {
+  GrantPermissionDTO,
+  GrantPermissionResponseDTO,
+} from './dto/menu.grant.permission.dto'
 import { AccountPermissionModel } from '../model/account.permission.model'
 import { MenuPermissionService } from './menu.permission.service'
+import { MenuGroupModel } from 'src/model/menu.group.model'
 
 @Injectable()
 export class MenuService {
@@ -21,36 +26,35 @@ export class MenuService {
     @InjectRepository(MenuModel)
     private readonly menuRepo: Repository<MenuModel>,
 
-    @InjectRepository(AccountPrivilegesModel)
-    private readonly accountPrivilegesRepo: Repository<AccountPrivilegesModel>,
-
-    @InjectRepository(AccountPermissionModel)
-    private readonly accountPermissionRepo: Repository<AccountPermissionModel>,
+    @InjectRepository(MenuGroupModel)
+    private readonly menuGroupRepo: Repository<MenuGroupModel>,
 
     private readonly menuGroupService: MenuGroupService,
-    private readonly menuPermissionService: MenuPermissionService
-  ) { }
+    private readonly menuPermissionService: MenuPermissionService,
+  ) {}
 
   private logger = new Logger('HTTP')
 
-
-  async all () {
+  async all() {
     return await this.menuRepo.find()
   }
 
-  async detail (id: number) {
+  async detail(id: number) {
     let responseBuilder: any = {}
     const dataSet = await this.menuRepo.findOne({
       where: {
-        id: id
-      }
+        id: id,
+      },
     })
 
     if (dataSet) {
       responseBuilder = dataSet
       const permissionSet = []
-      if (responseBuilder.permission === undefined) responseBuilder.permission = []
-      const permissionData = await this.menuPermissionService.menu_permission(id)
+      if (responseBuilder.permission === undefined)
+        responseBuilder.permission = []
+      const permissionData = await this.menuPermissionService.menu_permission(
+        id,
+      )
 
       for (const a in permissionData) {
         permissionSet.push(permissionData[a])
@@ -61,9 +65,9 @@ export class MenuService {
     return responseBuilder
   }
 
-  async edit (data: MenuEditDTO, id: number) {
+  async edit(data: MenuEditDTO, id: number) {
     const menuResp = new MenuEditResponseDTO()
-    const menuRes = await this.menuRepo.update(id, data).then(async returning => {
+    const menuRes = await this.menuRepo.update(id, data).then(async () => {
       return await this.detail(id)
     })
 
@@ -79,10 +83,10 @@ export class MenuService {
     return menuResp
   }
 
-  async delete_soft (id: number) {
-    let response = new MenuDeleteDTOResponse()
+  async delete_soft(id: number) {
+    const response = new MenuDeleteDTOResponse()
     const oldMeta = await this.detail(id)
-    var accountRes = this.menuRepo.softDelete({ id })
+    const accountRes = this.menuRepo.softDelete({ id })
     if (accountRes) {
       response.message = 'Menu deleted successfully'
       response.status = HttpStatus.OK
@@ -94,9 +98,9 @@ export class MenuService {
     return response
   }
 
-  async add (data: MenuAddDTO) {
+  async add(data: MenuAddDTO) {
     const menuResp = new MenuAddResponseDTO()
-    const menuRes = await this.menuRepo.save(data).then(async returning => {
+    const menuRes = await this.menuRepo.save(data).then(async (returning) => {
       return await this.detail(returning.id)
     })
 
@@ -112,96 +116,7 @@ export class MenuService {
     return menuResp
   }
 
-  async resetPermission (account: string) {
-    return await this.accountPermissionRepo.createQueryBuilder('account_permission').where({
-      account: account
-    }).softDelete()
-  }
-
-  async resetPrivileges (account: string) {
-    return await this.accountPrivilegesRepo.createQueryBuilder('account_privileges').where({
-      account: account
-    }).softDelete()
-  }
-
-  async grant_menu_permission (permission: GrantPermissionDTO) {
-    const menuResp = new GrantPermissionResponseDTO()
-
-    const checkExist = await this.accountPermissionRepo.createQueryBuilder('account_permission').withDeleted().where({
-      account: permission.account,
-      permission: permission.permission
-    }).getOne()
-
-    if (checkExist) {
-      const restore = await this.accountPermissionRepo.update(checkExist.id, {
-        deleted_at: null
-      })
-
-      if (restore) {
-        menuResp.message = 'Permission Granted Successfully'
-        menuResp.status = HttpStatus.OK
-        menuResp.returning = checkExist
-      } else {
-        menuResp.message = 'Permission Granted Failed'
-        menuResp.status = HttpStatus.BAD_REQUEST
-      }
-    } else {
-      const menuRes = await this.accountPermissionRepo.save(permission).then(async returning => {
-        return returning
-      })
-
-      if (menuRes) {
-        menuResp.message = 'Permission Granted Successfully'
-        menuResp.status = HttpStatus.OK
-        menuResp.returning = menuRes
-      } else {
-        menuResp.message = 'Permission Granted Failed'
-        menuResp.status = HttpStatus.BAD_REQUEST
-      }
-    }
-
-    return menuResp
-  }
-
-  async grant_menu_access (privileges: GrantAccessDTO) {
-    let grantResp = new GrantAccessResponseDTO()
-
-    const checkExist = await this.accountPrivilegesRepo.createQueryBuilder('account_privileges').withDeleted().where({
-      account: privileges.account,
-      menu: privileges.menu
-    }).getOne()
-    if (checkExist) {
-      const restore = await this.accountPrivilegesRepo.update(checkExist.id, {
-        deleted_at: null
-      })
-
-      if (restore) {
-        grantResp.message = 'Access Granted Successfully'
-        grantResp.status = HttpStatus.OK
-        grantResp.returning = checkExist
-      } else {
-        grantResp.message = 'Access Granted Failed'
-        grantResp.status = HttpStatus.BAD_REQUEST
-      }
-    } else {
-      const menuRes = await this.accountPrivilegesRepo.save(privileges).then(async returning => {
-        return returning
-      })
-
-      if (menuRes) {
-        grantResp.message = 'Access Granted Successfully'
-        grantResp.status = HttpStatus.OK
-        grantResp.returning = menuRes
-      } else {
-        grantResp.message = 'Access Granted Failed'
-        grantResp.status = HttpStatus.BAD_REQUEST
-      }
-    }
-
-    return grantResp
-  }
-
-  async tree_grouper () {
+  async tree_grouper() {
     const menuGroupSet = []
     const grouper = await this.menuGroupService.all()
 
@@ -218,7 +133,7 @@ export class MenuService {
     return menuGroupSet
   }
 
-  async tree_manager () {
+  async tree_manager() {
     const menuGroupSet = []
     const grouper = await this.menuGroupService.all()
 
@@ -228,17 +143,20 @@ export class MenuService {
         key: `${grouper[a].id}`,
         data: {
           id: grouper[a].id,
-          label: grouper[a].name
+          label: grouper[a].name,
         },
         level: 1,
-        children: await this.tree_manager_child(grouper[a].id, `${grouper[a].id}`),
+        children: await this.tree_manager_child(
+          grouper[a].id,
+          `${grouper[a].id}`,
+        ),
       })
     }
 
     return { root: menuGroupSet }
   }
 
-  async tree_manager_paginate (param: any) {
+  async tree_manager_paginate(param: any) {
     const menuGroupSet = []
     const grouper = await this.menuGroupService.paginate(param)
 
@@ -248,35 +166,44 @@ export class MenuService {
         key: `${grouper[a].id}`,
         data: {
           id: grouper[a].id,
-          label: grouper[a].name
+          label: grouper[a].name,
         },
         level: 1,
-        children: await this.tree_manager_child(grouper[a].id, `${grouper[a].id}`),
+        children: await this.tree_manager_child(
+          grouper[a].id,
+          `${grouper[a].id}`,
+        ),
       })
     }
 
     return { root: menuGroupSet }
   }
 
-  async tree_manager_child (parent: number, key: string) {
+  async tree_manager_child(parent: number, key: string) {
     let currentKey = key.split('-')
-    let menuSet = []
-    let menuList = await this.menuRepo.find({
+    const menuSet = []
+    const menuList = await this.menuRepo.find({
       where: {
-        parent: parent
-      }, order: {
+        parent: parent,
+      },
+      order: {
         created_at: 'ASC',
-        show_order: 'DESC'
-      }
+        show_order: 'DESC',
+      },
     })
 
     for (const a in menuList) {
-      const permissionData = await this.menuPermissionService.menu_permission(menuList[a].id)
+      const permissionData = await this.menuPermissionService.menu_permission(
+        menuList[a].id,
+      )
       const menuItem = menuList[a]
       currentKey = [key]
       currentKey.push(`${menuList[a].id}`)
       const currentSetKey = currentKey.join('-')
-      const menuChild = await this.tree_manager_child(menuItem.id, currentSetKey)
+      const menuChild = await this.tree_manager_child(
+        menuItem.id,
+        currentSetKey,
+      )
 
       menuSet.push({
         key: currentSetKey,
@@ -286,27 +213,44 @@ export class MenuService {
           identifier: menuItem.identifier,
           icon: menuItem.icon,
           permission: permissionData || [],
-          to: `${menuItem.url}`
+          to: `${menuItem.url}`,
         },
         children: menuChild,
-        show_on_menu: menuItem.show_on_menu
+        show_on_menu: menuItem.show_on_menu,
       })
     }
 
     return menuSet
   }
 
-  async tree (parent: number, group: number) {
-    let menuSet = []
-    let menuList = await this.menuRepo.find({
-      where: {
+  async tree(parent: number, group: number) {
+    const menuSet = []
+    const menuList = this.menuRepo
+      .createQueryBuilder(this.menuRepo.metadata.name)
+      .leftJoin(
+        `${this.menuRepo.metadata.name}.group`,
+        this.menuGroupRepo.metadata.name,
+      )
+      .where(`${this.menuRepo.metadata.name}.parent = :parent`, {
         parent: parent,
+      })
+      .andWhere(`${this.menuRepo.metadata.name}.show_on_menu = :show_on_menu`, {
         show_on_menu: 'Y',
-        menu_group: group
-      }, order: {
-        show_order: 'DESC'
-      }
-    })
+      })
+      .andWhere(`${this.menuRepo.metadata.name}.menu_group = :group`, {
+        group: group,
+      })
+      .orderBy(`${this.menuRepo.metadata.name}.show_order`, 'DESC')
+    // const menuList = await this.menuRepo.find({
+    //   where: {
+    //     parent: parent,
+    //     show_on_menu: 'Y',
+    //     menu_group: group,
+    //   },
+    //   order: {
+    //     show_order: 'DESC',
+    //   },
+    // })
 
     for (const a in menuList) {
       const menuItem = menuList[a]
@@ -324,7 +268,7 @@ export class MenuService {
           color: menuItem.group_color,
           icon: menuItem.icon,
           to: `${menuItem.url}`,
-          level: menuItem.level
+          level: menuItem.level,
         })
       } else {
         menuSet.push({
@@ -338,7 +282,7 @@ export class MenuService {
           color: menuItem.group_color,
           icon: menuItem.icon,
           to: `${menuItem.url}`,
-          level: menuItem.level
+          level: menuItem.level,
         })
       }
     }
@@ -346,8 +290,7 @@ export class MenuService {
     return menuSet
   }
 
-  async checkChild (parent: number) {
+  async checkChild(parent: number) {
     return await this.menuRepo.find({ where: { parent: parent } })
   }
-
 }

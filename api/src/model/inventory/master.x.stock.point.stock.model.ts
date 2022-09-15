@@ -19,13 +19,13 @@ export class MasterXStockPointStockModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => MasterStockItemModel, stock_point => stock_point.uid)
+  @ManyToOne(() => MasterStockItemModel, (stock_point) => stock_point.uid)
   stock_point: MasterStockItemModel
 
-  @ManyToOne(() => MasterItemModel, item => item.uid)
+  @ManyToOne(() => MasterItemModel, (item) => item.uid)
   item: MasterItemModel
 
-  @ManyToOne(() => MasterItemBatchModel, item => item.uid)
+  @ManyToOne(() => MasterItemBatchModel, (item) => item.uid)
   batch: MasterItemBatchModel
 
   @Column({ nullable: false, type: 'decimal' })

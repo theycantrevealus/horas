@@ -1,13 +1,12 @@
-import { AccountModel } from '../../model/account.model'
 import { IsString } from 'class-validator'
 
 export class LogLoginDTO {
-    @IsString()
-    account: any
+  @IsString()
+  account: any
 
-    @IsString()
-    log_meta: string
+  @IsString()
+  log_meta: string
 
-    @IsString()
-    token: string
+  @IsString()
+  token: string
 }

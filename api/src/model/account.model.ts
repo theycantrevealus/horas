@@ -26,7 +26,7 @@ export class AccountModel {
   @Column({ nullable: false, type: 'character varying' })
   last_name: string
 
-  @ManyToOne(() => AccountAuthorityModel, authority => authority.uid)
+  @ManyToOne(() => AccountAuthorityModel, (authority) => authority.uid)
   authority: AccountAuthorityModel
 
   @Column({ nullable: false, type: 'character varying' })

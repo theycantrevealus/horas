@@ -5,13 +5,7 @@ module.exports = {
     sourceType: 'module',
     tsconfigRootDir: __dirname
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
-  'prettier/prettier': [
-    'error',
-    {
-      'endOfLine': 'auto',
-    }
-  ],  
+  plugins: ['@typescript-eslint/eslint-plugin', 'simple-import-sort'],
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
@@ -23,6 +17,7 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
+    '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',

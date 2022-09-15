@@ -5,7 +5,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   PrimaryGeneratedColumn,
-  ManyToOne
+  ManyToOne,
 } from 'typeorm'
 import { MenuGroupModel } from './menu.group.model'
 
@@ -26,7 +26,7 @@ export class MenuModel {
   @Column({ type: 'integer' })
   parent: number
 
-  @ManyToOne(() => MenuGroupModel, menu => menu.id)
+  @ManyToOne(() => MenuGroupModel, (menu) => menu.id)
   menu_group: MenuGroupModel
 
   @Column({ nullable: false, type: 'character varying' })

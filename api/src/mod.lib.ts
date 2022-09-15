@@ -1,61 +1,61 @@
-import { AccountService } from "./account/account.service"
-import { LogService } from "./log/log.service"
+import { AccountService } from './account/account.service'
+import { LogService } from './log/log.service'
 
 const idenClass: any = {
-  'account': AccountService,
-  'log': LogService
+  account: AccountService,
+  log: LogService,
 }
 
 const colCodeName: any = {
-  'id': 'iden',
-  'uid': 'iden'
+  id: 'iden',
+  uid: 'iden',
 }
 
-function isJsonString (str) {
+function isJsonString(str) {
   try {
-    JSON.parse(str);
+    JSON.parse(str)
   } catch (e) {
-    return false;
+    return false
   }
-  return true;
+  return true
 }
 
-function filterSetDT (str, target) {
-  target = (target === null) ? '' : target
+function filterSetDT(str, target) {
+  target = target === null ? '' : target
   if (str === 'startsWith') {
     return {
       protocol: 'ilike',
-      res: `${target}%`
+      res: `${target}%`,
     }
   } else if (str === 'endsWith') {
     return {
       protocol: 'ilike',
-      res: `%${target}`
+      res: `%${target}`,
     }
   } else if (str === 'contains') {
     return {
       protocol: 'ilike',
-      res: `%${target}%`
+      res: `%${target}%`,
     }
   } else if (str === 'notContains') {
     return {
       protocol: 'not like',
-      res: `%${target}%`
+      res: `%${target}%`,
     }
   } else if (str === 'equals') {
     return {
       protocol: '=',
-      res: `${target}`
+      res: `${target}`,
     }
   } else if (str === 'notEquals') {
     return {
       protocol: '!=',
-      res: `${target}`
+      res: `${target}`,
     }
   } else {
     return {
       protocol: 'ilike',
-      res: `%${target}%`
+      res: `%${target}%`,
     }
   }
 }

@@ -8,7 +8,7 @@ import { SentryInterceptor } from './interceptor/sentry'
 import 'dotenv/config'
 declare const module: any
 
-async function bootstrap () {
+async function bootstrap() {
   Sentry.init({
     dsn: `${process.env.SENTRY_DSN}`,
     integrations: [

@@ -16,7 +16,7 @@ export class MasterXItemAliasModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => MasterItemModel, item => item.uid)
+  @ManyToOne(() => MasterItemModel, (item) => item.uid)
   item: MasterItemModel
 
   @Column({ nullable: false, type: 'character varying' })

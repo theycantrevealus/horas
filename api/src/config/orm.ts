@@ -1,12 +1,13 @@
 // src/config/config.service.ts
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config()
 
 class ConfigService {
-  constructor(private env: { [k: string]: string | undefined }) { }
+  constructor(private env: { [k: string]: string | undefined }) {
+    const ormConf = this.getTypeOrmConfig()
+  }
 
-  private getValue (key: string, throwOnMissing = true): string {
+  private getValue(key: string, throwOnMissing = true): string {
     const value = this.env[key]
     if (!value && throwOnMissing) {
       throw new Error(`config error - missing env.${key}`)
@@ -15,24 +16,24 @@ class ConfigService {
     return value
   }
 
-  public ensureValues (keys: string[]) {
+  public ensureValues(keys: string[]) {
     keys.forEach((k) => this.getValue(k, true))
     return this
   }
 
-  public getPort () {
+  public getPort() {
     return this.getValue('PORT', true)
   }
 
-  public isProduction () {
+  public isProduction() {
     const mode = this.getValue('MODE', false)
     return mode != 'DEV'
   }
 
-  public getTypeOrmConfig (): TypeOrmModuleOptions {
+  public getTypeOrmConfig(): TypeOrmModuleOptions {
     const loggerOption: any = this.getValue('POSTGRES_LOGGING').split(',')
     return {
-      type: 'postgres',
+      type: 'postgres' as const,
       name: 'default',
 
       host: this.getValue('POSTGRES_HOST'),
@@ -41,16 +42,10 @@ class ConfigService {
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
       logging: loggerOption, //For Loggin Query and Error Only
-      entities: ['src/model/**/*{.ts,.js}'],
-
+      entities: ['src/model/**/*.model{.ts,.js}'],
       migrationsTableName: 'migration',
-
       migrations: ['src/migration/**/*.ts'],
-
-      cli: {
-        migrationsDir: 'src/migration',
-      },
-
+      migrationsRun: true,
       ssl: this.isProduction(),
     }
   }

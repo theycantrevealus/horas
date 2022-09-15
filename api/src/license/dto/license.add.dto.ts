@@ -10,13 +10,13 @@ export class LicenseAddDTO {
   email: string
 
   @ApiProperty({
-    example: 'John'
+    example: 'John',
   })
   @IsString()
   first_name: string
 
   @ApiProperty({
-    example: 'Doe'
+    example: 'Doe',
   })
   @IsString()
   last_name: string
@@ -24,43 +24,43 @@ export class LicenseAddDTO {
   @ApiProperty({
     example: 'ID',
     minLength: 2,
-    maxLength: 2
+    maxLength: 2,
   })
   @IsString()
   country: string
 
   @ApiProperty({
-    example: 'Sumatera Utara'
+    example: 'Sumatera Utara',
   })
   @IsString()
   province: string
 
   @ApiProperty({
-    example: 'Medan'
+    example: 'Medan',
   })
   @IsString()
   city: string
 
   @ApiProperty({
-    example: 'From Company UID'
+    example: 'From Company UID',
   })
   @IsString()
   company: any
 
   @ApiProperty({
-    example: 'From Company Unit UID'
+    example: 'From Company Unit UID',
   })
   @IsString()
   company_unit: any
 
   @ApiProperty({
-    example: 'YYYY/mm/dd'
+    example: 'YYYY/mm/dd',
   })
   @IsString()
   valid_from: string
 
   @ApiProperty({
-    example: 'YYYY/mm/dd'
+    example: 'YYYY/mm/dd',
   })
   @IsString()
   valid_until: string

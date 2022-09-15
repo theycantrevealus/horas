@@ -1,25 +1,43 @@
-import { Controller, Body, Post, UseGuards, Get, Param, Put, Delete, UseInterceptors, Query } from '@nestjs/common'
-import { ApiTags, ApiBearerAuth, ApiParam, ApiOkResponse, ApiProperty, ApiResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiBadRequestResponse, ApiOperation } from '@nestjs/swagger'
-import { Authorization } from '../decorator/auth.decorator'
-import { AccountAuthorityAddDTO, AccountAuthorityAddDTOResponse } from './dto/account.authority.add.dto'
-import { JwtAuthGuard } from '../guard/jwt.guard'
+import { Authorization } from '@/decorator/auth.decorator'
+import { JwtAuthGuard } from '@/guard/jwt.guard'
+import { LoggingInterceptor } from '@/interceptor/logging'
+import { isJsonString } from '@/mod.lib'
+import {
+  Controller,
+  UseGuards,
+  Get,
+  Query,
+  Param,
+  UseInterceptors,
+  Post,
+  Body,
+  Put,
+  Delete,
+} from '@nestjs/common'
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger'
 import { AuthorityService } from './authority.service'
+import { AccountAuthorityAddDTO } from './dto/account.authority.add.dto'
 import { AccountAuthorityEditDTO } from './dto/account.authority.edit.dto'
-import { LoggingInterceptor } from '../interceptor/logging'
-import { isJsonString } from '../mod.lib'
 
 @Controller('authority')
 @ApiTags('authority')
 export class AuthorityController {
-  constructor(
-    private authorityService: AuthorityService
-  ) { }
+  constructor(private authorityService: AuthorityService) {}
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @Get()
-  async all () {
+  async all() {
     return await this.authorityService.all()
   }
 
@@ -28,20 +46,20 @@ export class AuthorityController {
   @ApiOperation({ summary: 'List all account authority (Paginate)' })
   @Authorization(true)
   @Get('paginate')
-  async paginate (
+  async paginate(
     @Query('first') first: number,
     @Query('rows') rows: number,
     @Query('sortOrder') sortOrder: number,
     @Query('sortField') sortField: string,
-    @Query('filters') filters: any
+    @Query('filters') filters: any,
   ) {
-    const filterSet = (isJsonString(filters)) ? JSON.parse(filters) : {}
+    const filterSet = isJsonString(filters) ? JSON.parse(filters) : {}
     const data = await this.authorityService.paginate({
       rows: rows,
       first: first,
       sortOrder: sortOrder,
       sortField: sortField,
-      filter: filterSet
+      filter: filterSet,
     })
 
     return data
@@ -51,19 +69,19 @@ export class AuthorityController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiParam({
-    name: 'uid'
+    name: 'uid',
   })
   @ApiOkResponse({
-    description: 'Response Success'
+    description: 'Response Success',
   })
   @ApiCreatedResponse({
-    description: 'Created Successfully'
+    description: 'Created Successfully',
   })
   @ApiForbiddenResponse({
-    description: 'Need Credential'
+    description: 'Need Credential',
   })
   @Get(':uid/detail')
-  async detail (@Param() param) {
+  async detail(@Param() param) {
     return await this.authorityService.detail(param.uid)
   }
 
@@ -71,20 +89,20 @@ export class AuthorityController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiOkResponse({
-    description: 'Response Success'
+    description: 'Response Success',
   })
   @ApiCreatedResponse({
-    description: 'Created Successfully'
+    description: 'Created Successfully',
   })
   @ApiForbiddenResponse({
-    description: 'Need Credential'
+    description: 'Need Credential',
   })
   @ApiBadRequestResponse({
-    description: 'Failed to add'
+    description: 'Failed to add',
   })
   @UseInterceptors(LoggingInterceptor)
   @Post('add')
-  async add (@Body() data: AccountAuthorityAddDTO) {
+  async add(@Body() data: AccountAuthorityAddDTO) {
     return await this.authorityService.add(data)
   }
 
@@ -92,23 +110,23 @@ export class AuthorityController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiOkResponse({
-    description: 'Response Success'
+    description: 'Response Success',
   })
   @ApiCreatedResponse({
-    description: 'Created Successfully'
+    description: 'Created Successfully',
   })
   @ApiForbiddenResponse({
-    description: 'Need Credential'
+    description: 'Need Credential',
   })
   @ApiBadRequestResponse({
-    description: 'Failed to edit'
+    description: 'Failed to edit',
   })
   @ApiParam({
-    name: 'uid'
+    name: 'uid',
   })
   @UseInterceptors(LoggingInterceptor)
   @Put(':uid/edit')
-  async edit (@Body() data: AccountAuthorityEditDTO, @Param() param) {
+  async edit(@Body() data: AccountAuthorityEditDTO, @Param() param) {
     return await this.authorityService.edit(data, param.uid)
   }
 
@@ -116,11 +134,11 @@ export class AuthorityController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiParam({
-    name: 'uid'
+    name: 'uid',
   })
   @UseInterceptors(LoggingInterceptor)
   @Delete(':uid/delete')
-  async delete (@Param() param) {
+  async delete(@Param() param) {
     return await this.authorityService.delete_soft(param.uid)
   }
 }
