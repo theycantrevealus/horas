@@ -1,6 +1,12 @@
 <template>
   <div>
-    <Dialog v-model:visible="display" title="{{ title }}" header="{{ title }}" :style="{width: '80vw'}" footer="Footer">
+    <Dialog
+      v-model:visible="displayDialog"
+      title="{{ title }}"
+      header="{{ title }}"
+      :style="{width: '80vw'}"
+      footer="Footer"
+    >
       <slot></slot>
     </Dialog>
   </div>
@@ -10,13 +16,24 @@ import Dialog from 'primevue/dialog'
 export default {
   name: 'CoreDialog',
   components: {
-    Dialog
+    Dialog,
   },
   props: {
     title: {
-      required: true
+      type: String,
+      default: '',
+      required: true,
     },
-    display: false
-  }
+    display: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ['display'],
+  data() {
+    return {
+      displayDialog: this.display,
+    }
+  },
 }
 </script>

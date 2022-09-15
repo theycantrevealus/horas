@@ -5,18 +5,19 @@
         <template #content>
           <Panel header="Account Management" :toggleable="false">
             <template #icons>
-              <Button @click="accountAdd" class="button button-info button-sm button-raised"><span
+              <Button class="button button-info button-sm button-raised" @click="accountAdd"><span
                   class="material-icons">add</span>
                 Add Account</Button>
             </template>
-            <DataTable :value="items" :lazy="true" :paginator="true" :rows="20" v-model:filters="filters" ref="dt"
+            <DataTable
+ref="dt" v-model:filters="filters" :value="items" :lazy="true" :paginator="true" :rows="20"
               stripedRows
               paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
               :rowsPerPageOptions="[20, 50, 100]"
               currentPageReportTemplate="Showing {first} to {last} of {totalRecords}" :totalRecords="totalRecords"
-              :loading="loading" @page="onPage($event)" @sort="onSort($event)" @filter="onFilter($event)"
-              filterDisplay="row" :globalFilterFields="['email', 'first_name', 'last_name', 'created_at']"
-              responsiveLayout="scroll">
+              :loading="loading" filterDisplay="row" :globalFilterFields="['email', 'first_name', 'last_name', 'created_at']" responsiveLayout="scroll"
+              @page="onPage($event)" @sort="onSort($event)"
+              @filter="onFilter($event)">
               <Column header="#" class="align-right">
                 <template #body="slotProps">
                   <h6 class="d-inline-flex">#{{ slotProps.data.autonum
@@ -26,42 +27,50 @@
               <Column header="Action">
                 <template #body="slotProps">
                   <span class="buttonset wrap_content">
-                    <Button v-if="permission.btnAccountEdit !== undefined" @click="accountEdit(slotProps.data.uid)"
-                      class="button button-info button-sm button-raised">
+                    <Button
+v-if="permission.btnAccountEdit !== undefined" class="button button-info button-sm button-raised"
+                      @click="accountEdit(slotProps.data.uid)">
                       <span class="material-icons">edit</span> Edit
                     </Button>
-                    <Button v-if="permission.btnAccountDelete !== undefined"
-                      @click="accountDelete($event, slotProps.data.uid)"
-                      class="button button-danger button-sm button-raised">
+                    <Button
+v-if="permission.btnAccountDelete !== undefined"
+                      class="button button-danger button-sm button-raised"
+                      @click="accountDelete($event, slotProps.data.uid)">
                       <span class="material-icons">delete</span>
                     </Button>
                   </span>
                 </template>
               </Column>
-              <Column field="email" header="Email" filterMatchMode="startsWith" ref="email" :sortable="true">
+              <Column ref="email" field="email" header="Email" filterMatchMode="startsWith" :sortable="true">
                 <template #filter="{ filterModel, filterCallback }">
-                  <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
-                    class="column-filter" placeholder="Search by email" />
+                  <InputText
+v-model="filterModel.value" type="text" class="column-filter"
+                    placeholder="Search by email" @keydown.enter="filterCallback()" />
                 </template>
               </Column>
-              <Column field="first_name" header="First Name" filterMatchMode="startsWith" ref="first_name"
+              <Column
+ref="first_name" field="first_name" header="First Name" filterMatchMode="startsWith"
                 :sortable="true">
                 <template #filter="{ filterModel, filterCallback }">
-                  <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
-                    class="column-filter" placeholder="Search by first name" />
+                  <InputText
+v-model="filterModel.value" type="text" class="column-filter"
+                    placeholder="Search by first name" @keydown.enter="filterCallback()" />
                 </template>
               </Column>
-              <Column field="last_name" header="Last Name" filterMatchMode="startsWith" ref="last_name"
+              <Column
+ref="last_name" field="last_name" header="Last Name" filterMatchMode="startsWith"
                 :sortable="true">
                 <template #filter="{ filterModel, filterCallback }">
-                  <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
-                    class="column-filter" placeholder="Search by last name" />
+                  <InputText
+v-model="filterModel.value" type="text" class="column-filter"
+                    placeholder="Search by last name" @keydown.enter="filterCallback()" />
                 </template>
               </Column>
-              <Column field="created_at" header="Join Date" ref="created_at" :sortable="true"
+              <Column
+ref="created_at" field="created_at" header="Join Date" :sortable="true"
                 class="wrap_content text-right">
                 <template #body="slotProps">
-                  <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+                  <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
                 </template>
               </Column>
             </DataTable>
@@ -88,22 +97,6 @@ export default {
   components: {
     Card, DataTable, Column, InputText, Button, Panel
   },
-  computed: {
-    permission () {
-      return this.$store.state.credential.permission
-    }
-  },
-  mounted () {
-    this.lazyParams = {
-      first: 0,
-      rows: this.$refs.dt.rows,
-      sortField: '',
-      sortOrder: '',
-      filters: this.filters ? this.filters : {}
-    }
-    this.loading = false
-    this.loadLazyData()
-  },
   data () {
     return {
       loading: false,
@@ -122,6 +115,22 @@ export default {
         { field: 'created_at', header: 'Join Date' }
       ]
     }
+  },
+  computed: {
+    permission () {
+      return this.$store.state.credential.permission
+    }
+  },
+  mounted () {
+    this.lazyParams = {
+      first: 0,
+      rows: this.$refs.dt.rows,
+      sortField: '',
+      sortOrder: '',
+      filters: this.filters ? this.filters : {}
+    }
+    this.loading = false
+    this.loadLazyData()
   },
   methods: {
     loadLazyData () {

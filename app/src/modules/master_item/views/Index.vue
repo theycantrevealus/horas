@@ -4,8 +4,9 @@
       <template #header>
         <Toolbar>
           <template #left>
-            <Button v-if="permission.btnAddItem !== undefined" @click="itemAddForm" label="New" icon="pi pi-plus"
-              class="mr-2 button-rounded" />
+            <Button
+              v-if="permission.btnAddItem !== undefined" label="New" icon="pi pi-plus" class="mr-2 button-rounded"
+              @click="itemAddForm" />
           </template>
 
           <template #right>
@@ -14,19 +15,22 @@
         </Toolbar>
       </template>
       <template #content>
-        <DataTable :value="items" :lazy="true" :paginator="true" :rows="20" v-model:filters="filters" ref="dt"
-          :totalRecords="totalRecords" :loading="loading" @page="onPage($event)" @sort="onSort($event)"
-          @filter="onFilter($event)" filterDisplay="row" :globalFilterFields="['first_name', 'last_name', 'email']"
-          responsiveLayout="scroll">
+        <DataTable
+          ref="dt" v-model:filters="filters" :value="items" :lazy="true" :paginator="true" :rows="20"
+          :totalRecords="totalRecords" :loading="loading" filterDisplay="row" :globalFilterFields="['first_name', 'last_name', 'email']"
+          responsiveLayout="scroll" @page="onPage($event)" @sort="onSort($event)"
+          @filter="onFilter($event)">
           <Column header="Action">
             <template #body="slotProps">
               <span class="buttonset wrap_content">
-                <Button v-if="permission.btnEditItem !== undefined" @click="itemEditForm(slotProps.data.uid)"
-                  class="button button-info button-sm button-raised">
+                <Button
+                  v-if="permission.btnEditItem !== undefined" class="button button-info button-sm button-raised"
+                  @click="itemEditForm(slotProps.data.uid)">
                   <span class="material-icons">edit</span>
                 </Button>
-                <Button v-if="permission.btnDeleteItem !== undefined" @click="itemDelete($event, slotProps.data.uid)"
-                  class="button button-danger button-sm button-raised">
+                <Button
+                  v-if="permission.btnDeleteItem !== undefined" class="button button-danger button-sm button-raised"
+                  @click="itemDelete($event, slotProps.data.uid)">
                   <span class="material-icons">delete</span>
                 </Button>
               </span>
@@ -35,23 +39,27 @@
           <Column header="#" class="align-right">
             <template #body="slotProps">{{ slotProps.data.autonum }}</template>
           </Column>
-          <Column field="code" header="Code" filterMatchMode="startsWith" ref="first_name" :sortable="true">
+          <Column ref="first_name" field="code" header="Code" filterMatchMode="startsWith" :sortable="true">
             <template #filter="{ filterModel, filterCallback }">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
-                class="column-filter" placeholder="Search by code" />
+              <InputText
+v-model="filterModel.value" type="text" class="column-filter"
+                placeholder="Search by code" @keydown.enter="filterCallback()" />
             </template>
           </Column>
-          <Column field="name" header="Name" filterField="name" filterMatchMode="contains" ref="last_name"
+          <Column
+ref="last_name" field="name" header="Name" filterField="name" filterMatchMode="contains"
             :sortable="true">
             <template #filter="{ filterModel, filterCallback }">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()"
-                class="column-filter" placeholder="Search by name" />
+              <InputText
+v-model="filterModel.value" type="text" class="column-filter"
+                placeholder="Search by name" @keydown.enter="filterCallback()" />
             </template>
           </Column>
-          <Column field="created_at" header="Created Date" ref="created_at" :sortable="true"
+          <Column
+ref="created_at" field="created_at" header="Created Date" :sortable="true"
             class="wrap_content text-right">
             <template #body="slotProps">
-              <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+              <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
             </template>
           </Column>
         </DataTable>
@@ -77,11 +85,6 @@ export default {
   components: {
     DataTable, Column, InputText, Button, Card, Toolbar, ConfirmPopup
   },
-  computed: {
-    permission () {
-      return this.$store.state.credential.permission
-    }
-  },
   data () {
     return {
       loading: false,
@@ -97,6 +100,11 @@ export default {
         { field: 'name', header: 'Name' },
         { field: 'created_at', header: 'Join Date' }
       ]
+    }
+  },
+  computed: {
+    permission () {
+      return this.$store.state.credential.permission
     }
   },
   mounted () {

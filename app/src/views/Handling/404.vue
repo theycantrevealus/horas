@@ -1,7 +1,7 @@
 <template>
   <div class="grid ai-start vertical-container">
     <div class="col">
-      <div class="col-6 offset-3">
+      <div class="col-6 col-offset-3">
         <center>
           <image
             class-name="handling_image"
@@ -20,5 +20,5 @@
 export default {
   name: 'PageNotFound',
   components: {},
-};
+}
 </script>

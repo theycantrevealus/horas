@@ -14,31 +14,13 @@ export default {
   components: {
     SideMenuAutoGen
   },
-  mounted () {
-    this.rebuildMenu()
-  },
   props: {
-    model: Array
-  },
-  computed: {
-    ...mapGetters({
-      getSideMenu: 'getSideMenu'
-    })
-  },
-  methods: {
-    ...mapActions({
-      sLogout: 'LOGOUT',
-      rebuildMenu: 'UPDATE_MENU'
-    }),
-    logout () {
-      this.sLogout().then(() => {
-        this.$router.push('/login')
-      })
-    },
-    onMenuItemClick (event) {
-      this.$emit('menuitem-click', event)
+    model: {
+      type:Array,
+      default:[]
     }
   },
+  emits:['menuitem-click'],
   data () {
     return {
       sidemenu3: [
@@ -105,6 +87,28 @@ export default {
         }
       ]
     }
-  }
+  },
+  computed: {
+    ...mapGetters({
+      getSideMenu: 'getSideMenu'
+    })
+  },
+  mounted () {
+    this.rebuildMenu()
+  },
+  methods: {
+    ...mapActions({
+      sLogout: 'LOGOUT',
+      rebuildMenu: 'UPDATE_MENU'
+    }),
+    logout () {
+      this.sLogout().then(() => {
+        this.$router.push('/login')
+      })
+    },
+    onMenuItemClick (event) {
+      this.$emit('menuitem-click', event)
+    }
+  },
 }
 </script>

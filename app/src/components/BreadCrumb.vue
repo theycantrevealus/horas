@@ -1,12 +1,18 @@
 <template>
   <div class="grid">
-    <div class="col-fixed" style="width:auto">
+    <div
+      class="col-fixed"
+      style="width:auto"
+    >
       <h6 class="text-right pageName">
         <span class="material-icons">hashtag</span> {{ pageName }}
       </h6>
     </div>
     <div class="col">
-      <Breadcrumb :home="home" :model="items" />
+      <Breadcrumb
+        :home="home"
+        :model="items"
+      />
     </div>
   </div>
 </template>
@@ -15,16 +21,22 @@ import Breadcrumb from 'primevue/breadcrumb'
 export default {
   name: 'BreadCrumb',
   components: {
-    Breadcrumb
+    Breadcrumb,
   },
   props: {
-    items: Array,
-    pageName: String
+    items: {
+      type: Array,
+      default: [],
+    },
+    pageName: {
+      type: String,
+      default: '',
+    },
   },
-  data () {
+  data() {
     return {
-      home: { icon: 'pi pi-home', to: '/dashboard' }
+      home: { icon: 'pi pi-home', to: '/dashboard' },
     }
-  }
+  },
 }
 </script>

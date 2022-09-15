@@ -1,18 +1,24 @@
 <template>
   <div>
-    <form autocomplete="off" @submit.prevent="editUser">
+    <form
+      autocomplete="off"
+      @submit.prevent="editUser"
+    >
       <Card class="card-fluid">
         <template #title>
           <h5>Edit User</h5>
         </template>
         <template #content>
-          <TabView class="tabview-custom" ref="tabview4">
+          <TabView
+            class="tabview-custom"
+            ref="tabview4"
+          >
             <TabPanel>
               <template #header>
                 <span class="material-icons-outlined">account_circle</span>
                 <span>Basic Information</span>
               </template>
-              <div class="fluid formgrid grid">
+              <div class="p-fluid formgrid grid">
                 <div class="field col-12 md-4">
                   <label for="userFormEmail">Email</label>
                   <InputText
@@ -21,7 +27,11 @@
                     type="text"
                     v-model.trim="$v.email.$model"
                   />
-                  <Message severity="error" v-if="$v.email.$errors.length > 0" :closable="false">
+                  <Message
+                    severity="error"
+                    v-if="$v.email.$errors.length > 0"
+                    :closable="false"
+                  >
                     <div
                       class="error-msg"
                       v-for="(error, index) of $v.email.$errors"
@@ -90,7 +100,10 @@
               </div>
             </TabPanel>
             <TabPanel v-if="permission.tabManageRolePerm !== undefined">
-              <template #header v-if="permission.tabManageRolePerm !== undefined">
+              <template
+                #header
+                v-if="permission.tabManageRolePerm !== undefined"
+              >
                 <span class="material-icons-outlined">vpn_key</span>
                 <span>Role and Permission</span>
               </template>
@@ -101,15 +114,24 @@
                 v-model:expandedRows="expandedRows"
               >
                 <template #header>All Permission</template>
-                <Column :expander="true" headerStyle="width: 3rem" />
-                <Column field="group" header="Group" sortable>
+                <Column
+                  :expander="true"
+                  headerStyle="width: 3rem"
+                />
+                <Column
+                  field="group"
+                  header="Group"
+                  sortable
+                >
                   <template #body="slotProps">
-                    <span
-                      :style="setBackGroundGroup(slotProps.data.group.toString().toLowerCase())"
-                    >{{ slotProps.data.group }}</span>
+                    <span :style="setBackGroundGroup(slotProps.data.group.toString().toLowerCase())">{{ slotProps.data.group }}</span>
                   </template>
                 </Column>
-                <Column field="label" header="Label" sortable>
+                <Column
+                  field="label"
+                  header="Label"
+                  sortable
+                >
                   <template #body="slotProps">
                     {{ slotProps.data.label }}
                     <Badge
@@ -192,17 +214,28 @@ import UserService from '@/modules/user/service'
 export default {
   name: 'UserEdit',
   components: {
-    Card, Toolbar, Button, InputText, Textarea, TabView, TabPanel, Message, DataTable, Column, Badge, InputSwitch
+    Card,
+    Toolbar,
+    Button,
+    InputText,
+    Textarea,
+    TabView,
+    TabPanel,
+    Message,
+    DataTable,
+    Column,
+    Badge,
+    InputSwitch,
   },
-  setup () {
+  setup() {
     return { $v: useVuelidate() }
   },
   computed: {
-    permission () {
+    permission() {
       return this.$store.state.credential.permission
-    }
+    },
   },
-  data () {
+  data() {
     return {
       expandedRows: [],
       permissionList: [],
@@ -221,8 +254,8 @@ export default {
       roleGranted: [],
       response: {
         type: 'errors',
-        message: ''
-      }
+        message: '',
+      },
     }
   },
   validations: {
@@ -230,30 +263,30 @@ export default {
       required,
       name_validation: {
         $validator: validateEmail,
-        $message: 'Invalid Email Format'
+        $message: 'Invalid Email Format',
       },
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
     first_name: {
       required,
       name_validation: {
         $validator: validateName,
-        $message: 'Invalid Name Format'
+        $message: 'Invalid Name Format',
       },
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
     last_name: {
       required,
       name_validation: {
         $validator: validateName,
-        $message: 'Invalid Name Format'
+        $message: 'Invalid Name Format',
       },
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
     address: {},
-    contact: {}
+    contact: {},
   },
-  mounted () {
+  mounted() {
     UserService.getDetail(this.$route.params.uid).then((response) => {
       this.email = response.email
       this.first_name = response.first_name
@@ -266,16 +299,28 @@ export default {
       for (const a in allPermission) {
         if (allPermission[a].permission.length > 0) {
           for (const b in allPermission[a].permission) {
-            if (this.checkedPermission[`menu_${allPermission[a].permission[b].id}`] === undefined) {
-              this.checkedPermission[`menu_${allPermission[a].permission[b].id}`] = false
+            if (
+              this.checkedPermission[
+                `menu_${allPermission[a].permission[b].id}`
+              ] === undefined
+            ) {
+              this.checkedPermission[
+                `menu_${allPermission[a].permission[b].id}`
+              ] = false
             }
-            this.checkedPermission[`menu_${allPermission[a].permission[b].id}`] = false
+            this.checkedPermission[
+              `menu_${allPermission[a].permission[b].id}`
+            ] = false
             permissionList.push(allPermission[a].permission[b])
           }
         }
 
-        if (this.permissionGroupColor[allPermission[a].group.toLowerCase()] === undefined) {
-          this.permissionGroupColor[allPermission[a].group.toLowerCase()] = randomColorText(randomColor(), 0)
+        if (
+          this.permissionGroupColor[allPermission[a].group.toLowerCase()] ===
+          undefined
+        ) {
+          this.permissionGroupColor[allPermission[a].group.toLowerCase()] =
+            randomColorText(randomColor(), 0)
         }
 
         this.permissionList.push(allPermission[a])
@@ -289,13 +334,13 @@ export default {
     })
   },
   methods: {
-    setBackGroundGroup (grouper) {
+    setBackGroundGroup(grouper) {
       return `color: ${this.permissionGroupColor[grouper]}`
     },
-    backToUser () {
+    backToUser() {
       this.$router.push('/user/list')
     },
-    editUser () {
+    editUser() {
       UserService.editUser({
         request: 'edit_user',
         email: this.email,
@@ -304,14 +349,14 @@ export default {
         address: this.address,
         contact: this.contact,
         rolenperm: this.checkedPermission,
-        uid: this.$route.params.uid
+        uid: this.$route.params.uid,
       }).then((response) => {
         var result = response.data.response_package.response_result
         if (result > 0) {
           this.$router.push('/user/list')
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>

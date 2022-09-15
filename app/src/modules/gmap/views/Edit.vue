@@ -1,18 +1,24 @@
 <template>
   <div>
-    <form autocomplete="off" @submit.prevent="editItem">
+    <form
+      autocomplete="off"
+      @submit.prevent="editItem"
+    >
       <Card class="card-fluid">
         <template #title>
           <h5>Edit Master Item</h5>
         </template>
         <template #content>
-          <TabView class="tabview-custom" ref="tabview4">
+          <TabView
+            class="tabview-custom"
+            ref="tabview4"
+          >
             <TabPanel>
               <template #header>
                 <span class="material-icons-outlined">info</span>
                 <span>Basic Information</span>
               </template>
-              <div class="fluid formgrid grid">
+              <div class="p-fluid formgrid grid">
                 <div class="field col-12 md-4">
                   <label for="itemFormCode">Code</label>
                   <InputText
@@ -21,7 +27,11 @@
                     type="text"
                     v-model.trim="$v.code.$model"
                   />
-                  <Message severity="error" v-if="$v.code.$errors.length > 0" :closable="false">
+                  <Message
+                    severity="error"
+                    v-if="$v.code.$errors.length > 0"
+                    :closable="false"
+                  >
                     <div
                       class="error-msg"
                       v-for="(error, index) of $v.code.$errors"
@@ -37,7 +47,11 @@
                     type="text"
                     v-model.trim="$v.name.$model"
                   />
-                  <Message severity="error" v-if="$v.name.$errors.length > 0" :closable="false">
+                  <Message
+                    severity="error"
+                    v-if="$v.name.$errors.length > 0"
+                    :closable="false"
+                  >
                     <div
                       class="error-msg"
                       v-for="(error, index) of $v.name.$errors"
@@ -61,7 +75,7 @@
                 <span class="material-icons-outlined">medication</span>
                 <span>Drug Info</span>
               </template>
-              <div class="fluid formgrid grid chemicalContainer">
+              <div class="p-fluid formgrid grid chemicalContainer">
                 <div class="field col-12 md-8">
                   <Card>
                     <template #title>
@@ -69,7 +83,7 @@
                       - {{ name }}
                     </template>
                     <template #content>
-                      <div class="fluid formgrid grid">
+                      <div class="p-fluid formgrid grid">
                         <div class="field col-12 md-12">
                           <table class="largeDataType">
                             <tbody>
@@ -158,7 +172,10 @@
                   </div>
                 </div>
                 <div class="field col-12 md-12">
-                  <TabView class="tabview-custom" ref="tabviewDrugDetail">
+                  <TabView
+                    class="tabview-custom"
+                    ref="tabviewDrugDetail"
+                  >
                     <TabPanel>
                       <template #header>
                         <span class="material-icons-outlined">science</span>
@@ -173,15 +190,35 @@
                         responsiveLayout="scroll"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                       >
-                        <Column field="relationship_name" header="Relationship"></Column>
-                        <Column field="umls_cui" header="UMLS-CUI"></Column>
-                        <Column field="snomed_full_name" header="Snomed Full Name"></Column>
-                        <Column field="cui_semantic_type" header="CUI Semantic Type"></Column>
+                        <Column
+                          field="relationship_name"
+                          header="Relationship"
+                        ></Column>
+                        <Column
+                          field="umls_cui"
+                          header="UMLS-CUI"
+                        ></Column>
+                        <Column
+                          field="snomed_full_name"
+                          header="Snomed Full Name"
+                        ></Column>
+                        <Column
+                          field="cui_semantic_type"
+                          header="CUI Semantic Type"
+                        ></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-refresh"
+                            class="button-text"
+                          />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-cloud"
+                            class="button-text"
+                          />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -199,17 +236,43 @@
                         responsiveLayout="scroll"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                       >
-                        <Column field="pdb" header="PDB"></Column>
-                        <Column field="chain_id" header="Chain"></Column>
-                        <Column field="accession" header="Accession"></Column>
-                        <Column field="title" header="Title"></Column>
-                        <Column field="exp_method" header="Exp Method"></Column>
-                        <Column field="deposition_date" header="Deposition Date"></Column>
+                        <Column
+                          field="pdb"
+                          header="PDB"
+                        ></Column>
+                        <Column
+                          field="chain_id"
+                          header="Chain"
+                        ></Column>
+                        <Column
+                          field="accession"
+                          header="Accession"
+                        ></Column>
+                        <Column
+                          field="title"
+                          header="Title"
+                        ></Column>
+                        <Column
+                          field="exp_method"
+                          header="Exp Method"
+                        ></Column>
+                        <Column
+                          field="deposition_date"
+                          header="Deposition Date"
+                        ></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-refresh"
+                            class="button-text"
+                          />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-cloud"
+                            class="button-text"
+                          />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -227,15 +290,35 @@
                         responsiveLayout="scroll"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                       >
-                        <Column field="type" header="Type"></Column>
-                        <Column field="class_code" header="Code"></Column>
-                        <Column field="name" header="Name"></Column>
-                        <Column field="source" header="Source"></Column>
+                        <Column
+                          field="type"
+                          header="Type"
+                        ></Column>
+                        <Column
+                          field="class_code"
+                          header="Code"
+                        ></Column>
+                        <Column
+                          field="name"
+                          header="Name"
+                        ></Column>
+                        <Column
+                          field="source"
+                          header="Source"
+                        ></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-refresh"
+                            class="button-text"
+                          />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-cloud"
+                            class="button-text"
+                          />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -256,14 +339,31 @@
                         responsiveLayout="scroll"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                       >
-                        <Column field="pka_level" header="Level"></Column>
-                        <Column field="value" header="Value"></Column>
-                        <Column field="pka_type" header="Type"></Column>
+                        <Column
+                          field="pka_level"
+                          header="Level"
+                        ></Column>
+                        <Column
+                          field="value"
+                          header="Value"
+                        ></Column>
+                        <Column
+                          field="pka_type"
+                          header="Type"
+                        ></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-refresh"
+                            class="button-text"
+                          />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-cloud"
+                            class="button-text"
+                          />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -281,14 +381,31 @@
                         responsiveLayout="scroll"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                       >
-                        <Column field="identifier" header="Identifier"></Column>
-                        <Column field="id_type" header="Type"></Column>
-                        <Column field="parent_match" header="Parent Match"></Column>
+                        <Column
+                          field="identifier"
+                          header="Identifier"
+                        ></Column>
+                        <Column
+                          field="id_type"
+                          header="Type"
+                        ></Column>
+                        <Column
+                          field="parent_match"
+                          header="Parent Match"
+                        ></Column>
                         <template #paginatorstart>
-                          <Button type="button" icon="pi pi-refresh" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-refresh"
+                            class="button-text"
+                          />
                         </template>
                         <template #paginatorend>
-                          <Button type="button" icon="pi pi-cloud" class="button-text" />
+                          <Button
+                            type="button"
+                            icon="pi pi-cloud"
+                            class="button-text"
+                          />
                         </template>
                       </DataTable>
                     </TabPanel>
@@ -356,17 +473,26 @@ import MasterItemService from '@/modules/master_item/service'
 export default {
   name: 'MasterItemEdit',
   components: {
-    Card, Toolbar, Button, InputText, TabView, TabPanel, Message, Tag, DataTable, Column
+    Card,
+    Toolbar,
+    Button,
+    InputText,
+    TabView,
+    TabPanel,
+    Message,
+    Tag,
+    DataTable,
+    Column,
   },
-  setup () {
+  setup() {
     return { $v: useVuelidate() }
   },
   computed: {
-    permission () {
+    permission() {
       return this.$store.state.credential.permission
-    }
+    },
   },
-  data () {
+  data() {
     return {
       expandedRows: [],
       permissionList: [],
@@ -385,7 +511,7 @@ export default {
       roleGranted: [],
       response: {
         type: 'errors',
-        message: ''
+        message: '',
       },
       editor: ClassicEditor,
       editorData: '', // HTML Format String
@@ -396,33 +522,26 @@ export default {
           ItalicPlugin,
           LinkPlugin,
           ParagraphPlugin,
-          Alignment
+          Alignment,
         ],
 
         toolbar: {
-          items: [
-            'bold',
-            'italic',
-            'link',
-            'undo',
-            'redo',
-            'alignment'
-          ]
-        }
-      }
+          items: ['bold', 'italic', 'link', 'undo', 'redo', 'alignment'],
+        },
+      },
     }
   },
   validations: {
     code: {
-      required
+      required,
     },
     name: {
       required,
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
-    remark: {}
+    remark: {},
   },
-  mounted () {
+  mounted() {
     MasterItemService.getItemDetail(this.$route.params.uid).then((response) => {
       const data = response.response_data[0]
 
@@ -433,7 +552,9 @@ export default {
       this.ingredientData = data.drug.ingredient[0]
       this.drugData = this.ingredientData.structures[0]
 
-      const chemViewer = new Kekule.ChemWidget.Viewer(document.getElementById('chemViewer'))
+      const chemViewer = new Kekule.ChemWidget.Viewer(
+        document.getElementById('chemViewer')
+      )
       const myMolecule = Kekule.IO.loadFormatData(this.drugData.molfile, 'mol')
       chemViewer
         .setEnableToolbar(true)
@@ -443,13 +564,13 @@ export default {
     })
   },
   methods: {
-    setBackGroundGroup (grouper) {
+    setBackGroundGroup(grouper) {
       return `color: ${this.permissionGroupColor[grouper]}`
     },
-    backToUser () {
+    backToUser() {
       this.$router.push('/master/item')
     },
-    editUser () {
+    editUser() {
       UserService.editUser({
         request: 'edit_user',
         email: this.email,
@@ -458,14 +579,14 @@ export default {
         address: this.address,
         contact: this.contact,
         rolenperm: this.checkedPermission,
-        uid: this.$route.params.uid
+        uid: this.$route.params.uid,
       }).then((response) => {
         var result = response.data.response_package.response_result
         if (result > 0) {
           this.$router.push('/user/list')
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>

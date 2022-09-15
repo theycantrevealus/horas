@@ -8,7 +8,8 @@
             <div class="col-4">
               <div class="profile-display">
                 <img :src="formData.image" />
-              </div><Button class="button button-info button-sm button-raised" label="Avatar"
+              </div><Button
+                class="button button-info button-sm button-raised" label="Avatar"
                 icon="pi pi-external-link" @click="toggleEditImageWindow" />
             </div>
             <div class="col-8 form-mode">
@@ -18,23 +19,24 @@
                 </span>
                 <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
                   placeholder="Email" /> -->
-                <InputText class="inputtext-sm" v-model="formData.email" placeholder="Email" />
+                <InputText v-model="formData.email" class="inputtext-sm" placeholder="Email" />
               </div>
               <div class="inputgroup">
                 <span class="inputgroup-addon">
                   <span class="material-icons-outlined">person</span>
                 </span>
-                <InputText class="inputtext-sm" v-model="formData.first_name" placeholder="First Name" />
-                <InputText class="inputtext-sm" v-model="formData.last_name" placeholder="Last Name" />
+                <InputText v-model="formData.first_name" class="inputtext-sm" placeholder="First Name" />
+                <InputText v-model="formData.last_name" class="inputtext-sm" placeholder="Last Name" />
               </div>
               <div class="inputgroup">
                 <span class="inputgroup-addon">
                   <span class="material-icons-outlined">supervised_user_circle</span>
                 </span>
-                <Dropdown v-model="formData.authority" :options="authorityData" optionLabel="name" optionValue="uid"
+                <Dropdown
+                  v-model="formData.authority" :options="authorityData" optionLabel="name" optionValue="uid"
                   placeholder="Select authority" />
               </div>
-              <Button @click="updateAccountData" class="button button-info button-sm button-raised">
+              <Button class="button button-info button-sm button-raised" @click="updateAccountData">
                 <span class="material-icons">fact_check</span> Apply from authority
               </Button>
               <!-- <Button @click="accountEdit(slotProps.data.uid)"
@@ -44,30 +46,35 @@
             </div>
             <div class="col-12">
               <h4>Permission List</h4>
-              <TreeTable v-if="formData.menuTree" class="treetable-sm p-datatable-table vert-top" filterMode="strict"
+              <TreeTable
+                v-if="formData.menuTree" class="treetable-sm p-datatable-table vert-top" filterMode="strict"
                 :value="formData.menuTree" :lazy="true" :paginator="true" :rows="20" :filters="filtersNode">
                 <Column field="label" header="Label" :expander="true">
                   <template #filter>
-                    <InputText type="text" v-model="filtersNode.label.value" class="column-filter"
+                    <InputText
+                      v-model="filtersNode.label.value" type="text" class="column-filter"
                       placeholder="Filter by label" />
                   </template>
                   <template #body="slotProps">
-                    <Checkbox @change="check_menu($event, slotProps.node)" name="menus" :value="slotProps.node.data.id"
-                      v-model="selectedPage" /> {{ slotProps.node.data.label }}
+                    <Checkbox
+                      v-model="selectedPage" name="menus" :value="slotProps.node.data.id"
+                      @change="check_menu($event, slotProps.node)" /> {{ slotProps.node.data.label }}
                   </template>
                 </Column>
                 <Column field="to" header="Link">
                   <template #filter>
-                    <InputText type="text" v-model="filtersNode.to.value" class="column-filter"
+                    <InputText
+                      v-model="filtersNode.to.value" type="text" class="column-filter"
                       placeholder="Filter by link" />
                   </template>
                 </Column>
                 <Column field="to" header="Link">
                   <template #body="slotProps">
                     <div v-if="slotProps.node.data.permission !== undefined">
-                      <div class="checkbox-custom" v-for="indexPerm in slotProps.node.data.permission" :key="indexPerm">
-                        <Checkbox @change="set_permission($event, indexPerm.id)" name="perms" :value="indexPerm.id"
-                          v-model="selectedPerm" />
+                      <div v-for="indexPerm in slotProps.node.data.permission" :key="indexPerm" class="checkbox-custom">
+                        <Checkbox
+                          v-model="selectedPerm" name="perms" :value="indexPerm.id"
+                          @change="set_permission($event, indexPerm.id)" />
                         {{
                             indexPerm.domiden
                         }}
@@ -80,12 +87,13 @@
             <div class="col-12">
               <div class="d-flex jc-between">
                 <div>
-                  <Button @click="back()" type="button" class="button-raised button-sm button-danger px-3">
+                  <Button type="button" class="button-raised button-sm button-danger px-3" @click="back()">
                     <span class="material-icons-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div v-if="allowSave === true">
-                  <Button type="button" class="button-raised button-sm button-info px-3"
+                  <Button
+                    type="button" class="button-raised button-sm button-info px-3"
                     @click="updateAccountData($event)">
                     <span class="material-icons-outlined">check_circle</span> Save Data
                   </Button>
@@ -97,12 +105,12 @@
       </Card>
       <ConfirmPopup></ConfirmPopup>
     </div>
-    <Dialog header="Avatar Editor" v-model:visible="displayEditorImage" :style="{ width: '50vw' }" :modal="true">
+    <Dialog v-model:visible="displayEditorImage" header="Avatar Editor" :style="{ width: '50vw' }" :modal="true">
       <p class="m-0">
         <Cropper @cropImage="setImageData" />
       </p>
       <template #footer>
-        <Button label="Close" icon="pi pi-times" @click="toggleEditImageWindow" class="button-text" />
+        <Button label="Close" icon="pi pi-times" class="button-text" @click="toggleEditImageWindow" />
       </template>
     </Dialog>
   </div>
@@ -157,14 +165,6 @@ export default {
         { field: 'to', header: 'To' }
       ]
     }
-  },
-  mounted () {
-    this.allowSave = false
-    // this.$store.dispatch('accountModule/fetchMenu')
-    this.$store.dispatch('accountModule/fetchAccountDetail', this.$route.query.uid)
-    this.$store.dispatch('accountModule/fetchMenuTree')
-    this.$store.dispatch('accountModule/fetchAuthority')
-    this.displayEditorImage = false
   },
   computed: {
     ...mapState('accountModule', ['menu_list', 'menu_tree']),
@@ -227,6 +227,14 @@ export default {
       },
       immediate: true
     }
+  },
+  mounted () {
+    this.allowSave = false
+    // this.$store.dispatch('accountModule/fetchMenu')
+    this.$store.dispatch('accountModule/fetchAccountDetail', this.$route.query.uid)
+    this.$store.dispatch('accountModule/fetchMenuTree')
+    this.$store.dispatch('accountModule/fetchAuthority')
+    this.displayEditorImage = false
   },
   methods: {
     ...mapActions('accountModule', ['updateAccount', 'updatePermission', 'updateAccess']),

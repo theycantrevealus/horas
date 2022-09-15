@@ -6,24 +6,24 @@
         <template #content>
           <DataTable
             v-if="authorityListRaw.length > 0 && filters != undefined && DTTotalRecord != undefined"
+            ref="dt"
+            v-model:filters="filters"
             :value="authorityListRaw"
             :lazy="true"
             :paginator="true"
             :rows="20"
-            v-model:filters="filters"
-            ref="dt"
             stripedRows
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             :rowsPerPageOptions="[20, 50, 100]"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
             :totalRecords="DTTotalRecord"
             :loading="DTLoading"
-            @page="onPage($event)"
-            @sort="onSort($event)"
-            @filter="onFilter($event)"
             filterDisplay="row"
             :globalFilterFields="['name', 'created_at']"
             responsiveLayout="scroll"
+            @page="onPage($event)"
+            @sort="onSort($event)"
+            @filter="onFilter($event)"
           >
             <Column header="#" class="align-right">
               <template #body="slotProps">{{ slotProps.data.autonum }}</template>
@@ -33,15 +33,15 @@
                 <span class="buttonset wrap_content">
                   <Button
                     v-if="permission.btnAccountAuthorityEdit !== undefined"
-                    @click="accountAuthorityEdit(slotProps.data.uid)"
                     class="button button-info button-sm button-raised"
+                    @click="accountAuthorityEdit(slotProps.data.uid)"
                   >
                     <span class="material-icons">edit</span> Edit
                   </Button>
                   <Button
                     v-if="permission.btnAccountAuthorityDelete !== undefined"
-                    @click="accountAuthorityDelete(slotProps.data.uid)"
                     class="button button-danger button-sm button-raised"
+                    @click="accountAuthorityDelete(slotProps.data.uid)"
                   >
                     <span class="material-icons">delete</span>
                   </Button>
@@ -49,31 +49,31 @@
               </template>
             </Column>
             <Column
+              ref="name"
               field="name"
               header="Name"
               filterMatchMode="startsWith"
-              ref="name"
               :sortable="true"
             >
               <template #filter="{ filterModel, filterCallback }">
                 <InputText
-                  type="text"
                   v-model="filterModel.value"
-                  @keydown.enter="filterCallback()"
+                  type="text"
                   class="column-filter"
                   placeholder="Search by name"
+                  @keydown.enter="filterCallback()"
                 />
               </template>
             </Column>
             <Column
+              ref="created_at"
               field="created_at"
               header="Join Date"
-              ref="created_at"
               :sortable="true"
               class="wrap_content text-right"
             >
               <template #body="slotProps">
-                <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+                <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
               </template>
             </Column>
           </DataTable>
@@ -109,6 +109,15 @@ export default {
       ]
     }
   },
+  computed: {
+    permission () {
+      return this.$store.state.credential.permission
+    },
+    ...mapState('authorityModule', ['DTLoading', 'DTTotalRecord', 'items']),
+    ...mapGetters({
+      authorityListRaw: 'authorityModule/getAuthority'
+    })
+  },
   mounted () {
     this.lazyParams = {
       first: 0,
@@ -119,15 +128,7 @@ export default {
     }
     this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
   },
-  computed: {
-    permission () {
-      return this.$store.state.credential.permission
-    },
-    ...mapState('authorityModule', ['DTLoading', 'DTTotalRecord', 'items']),
-    ...mapGetters({
-      authorityListRaw: 'authorityModule/getAuthority'
-    })
-  },
+  
   methods: {
     formatDate (date, format) {
       return DateManagement.formatDate(date, format)

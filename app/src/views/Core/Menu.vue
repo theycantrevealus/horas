@@ -103,9 +103,9 @@
         :header="ui.modal.manageMenu.title"
         :style="{ width: '80vw' }"
         :modal="true"
-        :position="ui.modal.manageMenu.position ?? 'top'"
+        :position="ui.modal.manageMenu.position"
       >
-        <div class="fluid formgrid grid">
+        <div class="p-fluid formgrid grid">
           <div class="field col-12 md-4">
             <label for="managelabel">Label</label>
             <InputText
@@ -211,7 +211,7 @@
         :position="ui.modal.manageFeature.position"
         :style="{ width: '50vw' }"
       >
-        <div class="fluid formgrid grid">
+        <div class="p-fluid formgrid grid">
           <div class="field col-12 md-12">
             <label for="manageFeatureDOM">
               DOM Identity
@@ -255,21 +255,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import Card from 'primevue/card';
-import TreeTable from 'primevue/treetable';
-import Column from 'primevue/column';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
-import Toast from 'primevue/toast';
-import InputText from 'primevue/inputtext';
-import ToggleButton from 'primevue/togglebutton';
-import DataTable from 'primevue/datatable';
-import ConfirmPopup from 'primevue/confirmpopup';
-
-import { mapActions, mapGetters } from 'vuex';
-import CoreService from '@/service/core/menu';
-
+import { defineComponent } from 'vue'
+import Card from 'primevue/card'
+import TreeTable from 'primevue/treetable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import Toast from 'primevue/toast'
+import InputText from 'primevue/inputtext'
+import ToggleButton from 'primevue/togglebutton'
+import DataTable from 'primevue/datatable'
+import ConfirmPopup from 'primevue/confirmpopup'
+import { mapActions, mapGetters } from 'vuex'
+import CoreService from '@/service/core/menu'
+import { ref } from 'vue'
 export default defineComponent({
   name: 'Module',
   components: {
@@ -284,15 +283,13 @@ export default defineComponent({
     DataTable,
     ConfirmPopup,
   },
-  setup() {
-    //
-  },
+  setup() {},
   data() {
     return {
       formMode: 'add',
       setterPermission: Array<{
-        domiden: string;
-        dispatchname: string;
+        domiden: string
+        dispatchname: string
       }>(),
       form: {
         targetGroup: 0,
@@ -309,6 +306,7 @@ export default defineComponent({
           dispatch: '',
         },
       },
+      position: 'center',
       ui: {
         modal: {
           manageMenu: {
@@ -332,7 +330,7 @@ export default defineComponent({
         { field: 'to', header: 'To' },
         { field: 'icon', header: 'Icon' },
       ],
-    };
+    }
   },
   computed: {
     ...mapGetters({
@@ -340,9 +338,8 @@ export default defineComponent({
     }),
   },
   mounted() {
-    this.reloadMenu();
+    this.reloadMenu()
   },
-  
   methods: {
     ...mapActions({
       getMenu: 'mCoreMenu/get_all_menu',
@@ -363,18 +360,18 @@ export default defineComponent({
           dom: '',
           dispatch: '',
         },
-      };
+      }
     },
     reloadMenu() {
       this.getMenu().then((data: any) => {
-        this.nodes = data.data.root;
-      });
+        this.nodes = data.data.root
+      })
     },
     toggleModal() {
-      this.ui.modal.manageMenu.state = !this.ui.modal.manageMenu.state;
+      this.ui.modal.manageMenu.state = !this.ui.modal.manageMenu.state
     },
     toggleFeature() {
-      this.ui.modal.manageFeature.state = !this.ui.modal.manageFeature.state;
+      this.ui.modal.manageFeature.state = !this.ui.modal.manageFeature.state
     },
     onNodeDelete(event, target: Number) {
       this.$confirm.require({
@@ -386,78 +383,78 @@ export default defineComponent({
         rejectLabel: 'Cancel',
         accept: () => {
           return CoreService.menuDelete(target).then((response: any) => {
-            response = response.data;
+            response = response.data
             if (response.status === 200) {
               this.$toast.add({
                 severity: 'success',
                 summary: 'Menu Manager',
                 detail: response.message,
                 life: 3000,
-              });
-              this.reloadMenu();
-              this.rebuildMenu();
+              })
+              this.reloadMenu()
+              this.rebuildMenu()
             }
-          });
+          })
         },
         reject: () => {
           // callback to execute when user rejects the action
         },
-      });
+      })
     },
     onNodeEdit(target: any, mode: string) {
-      const data = target.data;
-      this.form.targetID = data.id;
-      this.form.txt_label = data.label;
-      this.form.txt_route = data.identifier;
-      this.form.txt_route_url = data.to;
-      this.form.txt_icon = data.icon;
-      this.form.showMenu = target.show_on_menu === 'Y';
-      this.formMode = 'edit';
-      this.ui.modal.manageMenu.title = `${mode}  ${data.label}`;
+      const data = target.data
+      this.form.targetID = data.id
+      this.form.txt_label = data.label
+      this.form.txt_route = data.identifier
+      this.form.txt_route_url = data.to
+      this.form.txt_icon = data.icon
+      this.form.showMenu = target.show_on_menu === 'Y'
+      this.formMode = 'edit'
+      this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
 
-      const checkLevel = target.key.split('-');
-      this.form.targetGroup = checkLevel[0];
+      const checkLevel = target.key.split('-')
+      this.form.targetGroup = checkLevel[0]
       // if (checkLevel.length > 1) {
       //   this.form.targetParent = data.id
       // } else {
       //   this.form.targetParent = checkLevel[0]
       // }
-      this.form.targetParent = data.parent;
+      this.form.targetParent = data.parent
 
       CoreService.menuDetail(data.id).then((response) => {
-        const dataSelected = response.data;
+        const dataSelected = response.data
         if (dataSelected.permission !== null) {
-          this.setterPermission = dataSelected.permission;
+          this.setterPermission = dataSelected.permission
         }
-      });
-      this.toggleModal();
+      })
+      this.toggleModal()
     },
     onNodeAdd(target: any, mode: string) {
-      const data = target.data;
-      this.clearForm();
-      this.formMode = 'add';
+      const data = target.data
+      this.clearForm()
+      this.formMode = 'add'
 
-      const checkLevel = target.key.split('-');
-      this.form.targetGroup = checkLevel[0];
+      const checkLevel = target.key.split('-')
+      this.form.targetGroup = checkLevel[0]
       if (checkLevel.length > 1) {
-        this.form.targetParent = data.id;
+        this.form.targetParent = data.id
       } else {
-        this.form.targetParent = checkLevel[0];
+        this.form.targetParent = checkLevel[0]
       }
 
-      this.ui.modal.manageMenu.title = `${mode}  ${data.label}`;
-      this.toggleModal();
+      this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
+      this.toggleModal()
     },
     addFeatureForm() {
-      this.ui.modal.manageFeature.title = 'Feature';
-      this.toggleFeature();
+      this.ui.modal.manageFeature.title = 'Feature'
+      this.toggleFeature()
     },
     editMenu() {
-      const label = this.form.txt_label;
-      const routeTo = this.form.txt_route;
-      const routeToUrl = this.form.txt_route_url;
-      const icon = this.form.txt_icon;
-      const showMenu = this.form.showMenu ? 'Y' : 'N';
+      const label = this.form.txt_label
+      const routeTo = this.form.txt_route
+      const routeToUrl = this.form.txt_route_url
+      const icon = this.form.txt_icon
+      const showMenu = this.form.showMenu ? 'Y' : 'N'
 
       return CoreService.menuEdit(this.form.targetID, {
         name: label,
@@ -472,50 +469,50 @@ export default defineComponent({
         group_color: '',
         show_on_menu: showMenu,
       }).then((response: any) => {
-        response = response.data;
+        response = response.data
         if (response.status === 200) {
-          this.reloadMenu();
-          this.rebuildMenu();
-          this.clearForm();
-          this.ui.modal.manageMenu.state = false;
+          this.reloadMenu()
+          this.rebuildMenu()
+          this.clearForm()
+          this.ui.modal.manageMenu.state = false
           this.$toast.add({
             severity: 'success',
             summary: 'Menu Manager',
             detail: response.message,
             life: 3000,
-          });
+          })
         }
-      });
+      })
     },
     processForm() {
       if (this.formMode === 'add') {
-        this.addMenu();
+        this.addMenu()
       } else {
-        this.editMenu();
+        this.editMenu()
       }
     },
     autoFeature(featureData) {
-      this.setterPermission.push(featureData);
+      this.setterPermission.push(featureData)
     },
     processFeature() {
       this.autoFeature({
         domiden: this.form.feature.dom,
         dispatchname: this.form.feature.dispatch,
-      });
+      })
 
       this.form.feature = {
         dom: '',
         dispatch: '',
-      };
+      }
 
-      this.toggleFeature();
+      this.toggleFeature()
     },
     addMenu() {
-      const label = this.form.txt_label;
-      const routeTo = this.form.txt_route;
-      const routeToUrl = this.form.txt_route_url;
-      const icon = this.form.txt_icon;
-      const showMenu = this.form.showMenu ? 'Y' : 'N';
+      const label = this.form.txt_label
+      const routeTo = this.form.txt_route
+      const routeToUrl = this.form.txt_route_url
+      const icon = this.form.txt_icon
+      const showMenu = this.form.showMenu ? 'Y' : 'N'
 
       return CoreService.menuAdd({
         name: label,
@@ -528,11 +525,11 @@ export default defineComponent({
         show_order: 1,
         show_on_menu: showMenu,
       }).then(async (response: any) => {
-        response = response.data;
+        response = response.data
         if (response.status === 200) {
           // Add Menu Permission
-          const mimicSetterPermission = this.setterPermission;
-          let succeedPermission = 0;
+          const mimicSetterPermission = this.setterPermission
+          let succeedPermission = 0
           for (const a in mimicSetterPermission) {
             const permissionAdd = await CoreService.menuPermissionAdd({
               menu: response.returning.id,
@@ -540,27 +537,27 @@ export default defineComponent({
               dispatchname: mimicSetterPermission[a].dispatchname,
               domiden: mimicSetterPermission[a].domiden,
             }).then(async (response: any) => {
-              return response;
-            });
+              return response
+            })
 
-            succeedPermission += permissionAdd.data.status === 200 ? 1 : 0;
+            succeedPermission += permissionAdd.data.status === 200 ? 1 : 0
           }
 
           if (succeedPermission === this.setterPermission.length) {
-            this.reloadMenu();
-            this.rebuildMenu();
-            this.clearForm();
-            this.ui.modal.manageMenu.state = false;
+            this.reloadMenu()
+            this.rebuildMenu()
+            this.clearForm()
+            this.ui.modal.manageMenu.state = false
             this.$toast.add({
               severity: 'success',
               summary: 'Menu Manager',
               detail: response.message,
               life: 3000,
-            });
+            })
           }
         }
-      });
+      })
     },
   },
-});
+})
 </script>

@@ -5,7 +5,7 @@
         <Chip :label="first_name + ' ' + last_name" :image="profile_photo" />
       </template>
       <template #end>
-        <Button @click="logout" icon="pi pi-power-off" class="button-link button-sm" />
+        <Button icon="pi pi-power-off" class="button-link button-sm" @click="logout" />
       </template>
     </Menubar>
   </div>
@@ -19,27 +19,6 @@ export default {
   name: 'TopPanelMenu',
   components: {
     Menubar, Button, Chip
-  },
-  computed: {
-    profile_photo () {
-      return `${process.env.VUE_APP_APIGATEWAY}avatar/${this.$store.state.credential.uid}.png?d=${Date.now()}`
-    },
-    first_name () {
-      return this.$store.state.credential.first_name
-    },
-    last_name () {
-      return this.$store.state.credential.last_name
-    }
-  },
-  methods: {
-    ...mapActions({
-      sLogout: 'LOGOUT'
-    }),
-    logout () {
-      this.sLogout().then(() => {
-        this.$router.push('/login')
-      })
-    }
   },
   data () {
     return {
@@ -203,6 +182,27 @@ export default {
           ]
         }
       ]
+    }
+  },
+  computed: {
+    profile_photo () {
+      return `${process.env.VUE_APP_APIGATEWAY}avatar/${this.$store.state.credential.uid}.png?d=${Date.now()}`
+    },
+    first_name () {
+      return this.$store.state.credential.first_name
+    },
+    last_name () {
+      return this.$store.state.credential.last_name
+    }
+  },
+  methods: {
+    ...mapActions({
+      sLogout: 'LOGOUT'
+    }),
+    logout () {
+      this.sLogout().then(() => {
+        this.$router.push('/login')
+      })
     }
   }
 }

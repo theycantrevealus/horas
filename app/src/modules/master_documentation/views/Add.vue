@@ -1,60 +1,66 @@
 <template>
-    <div>
-        <form autocomplete="off" @submit.prevent="editItem">
-            <Card class="card-fluid">
-                <template #title>
-                    <h5>Edit Master Item</h5>
-                </template>
-                <template #content>
-                    <TabView class="tabview-custom" ref="tabview4">
-                        <TabPanel>
-                            <template #header>
-                                <span class="material-icons-outlined">info</span>
-                                <span>Basic Information</span>
-                            </template>
-                            <div class="fluid formgrid grid">
-                                <div class="field col-12 md-12">
-                                    <label for="itemFormTitle">Title</label>
-                                    <InputText
-                                        placeholder="Documentation Title"
-                                        id="itemFormTitle"
-                                        type="text"
-                                        v-model.trim="$v.code.$model"
-                                    />
-                                    <Message
-                                        severity="error"
-                                        v-if="$v.title.$errors.length > 0"
-                                        :closable="false"
-                                    >
-                                        <div
-                                            class="error-msg"
-                                            v-for="(error, index) of $v.title.$errors"
-                                            :key="index"
-                                        >{{ error.$message }}</div>
-                                    </Message>
-                                </div>
-                                <div class="field col-12 md-12">
-                                    <label for="itemFormContent">Content</label>
-                                    <ckeditor
-                                        id="itemFormContent"
-                                        :editor="editor"
-                                        v-model="$v.content.$model"
-                                        :config="editorConfig"
-                                    ></ckeditor>
-                                </div>
-                            </div>
-                        </TabPanel>
-                        <TabPanel>
-                            <template #header>
-                                <span class="material-icons-outlined">medication</span>
-                                <span>Drug Info</span>
-                            </template>
-                        </TabPanel>
-                    </TabView>
-                </template>
-            </Card>
-        </form>
-    </div>
+  <div>
+    <form
+      autocomplete="off"
+      @submit.prevent="editItem"
+    >
+      <Card class="card-fluid">
+        <template #title>
+          <h5>Edit Master Item</h5>
+        </template>
+        <template #content>
+          <TabView
+            ref="tabview4"
+            class="tabview-custom"
+          >
+            <TabPanel>
+              <template #header>
+                <span class="material-icons-outlined">info</span>
+                <span>Basic Information</span>
+              </template>
+              <div class="p-fluid formgrid grid">
+                <div class="field col-12 md-12">
+                  <label for="itemFormTitle">Title</label>
+                  <InputText
+                    id="itemFormTitle"
+                    v-model.trim="$v.code.$model"
+                    placeholder="Documentation Title"
+                    type="text"
+                  />
+                  <Message
+                    v-if="$v.title.$errors.length > 0"
+                    severity="error"
+                    :closable="false"
+                  >
+                    <div
+                      v-for="(error, index) of $v.title.$errors"
+                      :key="index"
+                      class="error-msg"
+                    >{{ error.$message }}</div>
+                  </Message>
+                </div>
+                <div class="field col-12 md-12">
+                  <label for="itemFormContent">Content</label>
+                  <ckeditor
+                    id="itemFormContent"
+                    v-model="$v.content.$model"
+                    :editor="editor"
+                    :config="editorConfig"
+                  ></ckeditor>
+                </div>
+              </div>
+            </TabPanel>
+            <TabPanel>
+              <template #header>
+                <span class="material-icons-outlined">medication</span>
+                <span>Drug Info</span>
+              </template>
+            </TabPanel>
+          </TabView>
+        </template>
+      </Card>
+    </form>
+  </div>
 </template>
 <script>
 import Card from 'primevue/card'
@@ -78,12 +84,16 @@ import { required, minLength } from '@vuelidate/validators'
 export default {
   name: 'MasterDocumentationEdit',
   components: {
-    Card, InputText, TabView, TabPanel, Message
+    Card,
+    InputText,
+    TabView,
+    TabPanel,
+    Message,
   },
-  setup () {
+  setup() {
     return { $v: useVuelidate() }
   },
-  data () {
+  data() {
     return {
       editor: ClassicEditor,
       editorData: '', // HTML Format String
@@ -94,30 +104,23 @@ export default {
           ItalicPlugin,
           LinkPlugin,
           ParagraphPlugin,
-          Alignment
+          Alignment,
         ],
 
         toolbar: {
-          items: [
-            'bold',
-            'italic',
-            'link',
-            'undo',
-            'redo',
-            'alignment'
-          ]
-        }
-      }
+          items: ['bold', 'italic', 'link', 'undo', 'redo', 'alignment'],
+        },
+      },
     }
   },
   validations: {
     title: {
-      required
+      required,
     },
     remark: {
       required,
-      minLength: minLength(8)
-    }
-  }
+      minLength: minLength(8),
+    },
+  },
 }
 </script>

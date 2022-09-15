@@ -1,18 +1,24 @@
 <template>
   <div>
-    <form autocomplete="off" @submit.prevent="addUser">
+    <form
+      autocomplete="off"
+      @submit.prevent="addUser"
+    >
       <Card class="card-fluid">
         <template #title>
           <h5>Add User</h5>
         </template>
         <template #content>
-          <TabView class="tabview-custom" ref="tabview4">
+          <TabView
+            class="tabview-custom"
+            ref="tabview4"
+          >
             <TabPanel>
               <template #header>
                 <span class="material-icons-outlined">account_circle</span>
                 <span>Basic Information</span>
               </template>
-              <div class="fluid formgrid grid">
+              <div class="p-fluid formgrid grid">
                 <div class="field col-12 md-4">
                   <label for="userFormEmail">Email</label>
                   <InputText
@@ -21,7 +27,11 @@
                     type="text"
                     v-model.trim="$v.email.$model"
                   />
-                  <Message severity="error" v-if="$v.email.$errors.length > 0" :closable="false">
+                  <Message
+                    severity="error"
+                    v-if="$v.email.$errors.length > 0"
+                    :closable="false"
+                  >
                     <div
                       class="error-msg"
                       v-for="(error, index) of $v.email.$errors"
@@ -101,9 +111,20 @@
                 v-model:expandedRows="expandedRows"
               >
                 <template #header>All Permission</template>
-                <Column :expander="true" headerStyle="width: 3rem" />
-                <Column field="group" header="Group" sortable></Column>
-                <Column field="label" header="Label" sortable>
+                <Column
+                  :expander="true"
+                  headerStyle="width: 3rem"
+                />
+                <Column
+                  field="group"
+                  header="Group"
+                  sortable
+                ></Column>
+                <Column
+                  field="label"
+                  header="Label"
+                  sortable
+                >
                   <template #body="slotProps">
                     {{ slotProps.data.label }}
                     <Badge
@@ -184,17 +205,28 @@ import CoreService from '@/service/core/menu'
 export default {
   name: 'UserAdd',
   components: {
-    Card, Toolbar, Button, InputText, Textarea, TabView, TabPanel, Message, DataTable, Column, InputSwitch, Badge
+    Card,
+    Toolbar,
+    Button,
+    InputText,
+    Textarea,
+    TabView,
+    TabPanel,
+    Message,
+    DataTable,
+    Column,
+    InputSwitch,
+    Badge,
   },
-  setup () {
+  setup() {
     return { $v: useVuelidate() }
   },
-  mounted () {
-    CoreService.menuPermission().then(response => {
+  mounted() {
+    CoreService.menuPermission().then((response) => {
       this.permissionList = response.data.response_package
     })
   },
-  data () {
+  data() {
     return {
       expandedRows: [],
       permissionList: [],
@@ -212,8 +244,8 @@ export default {
       roleGranted: [],
       response: {
         type: 'errors',
-        message: ''
-      }
+        message: '',
+      },
     }
   },
   validations: {
@@ -221,43 +253,43 @@ export default {
       required,
       name_validation: {
         $validator: validateEmail,
-        $message: 'Invalid Email Format'
+        $message: 'Invalid Email Format',
       },
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
     first_name: {
       required,
       name_validation: {
         $validator: validateName,
-        $message: 'Invalid Name Format'
+        $message: 'Invalid Name Format',
       },
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
     last_name: {
       required,
       name_validation: {
         $validator: validateName,
-        $message: 'Invalid Name Format'
+        $message: 'Invalid Name Format',
       },
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
     address: {},
-    contact: {}
+    contact: {},
   },
   methods: {
-    backToUser () {
+    backToUser() {
       this.$router.push('/user/list')
     },
-    checkPerm (target) {
+    checkPerm(target) {
       if (this.checkedPerm[target] === undefined) {
         this.checkedPerm[target] = {
           value: true,
           disabled: true,
-          checked: true
+          checked: true,
         }
       }
     },
-    moveAllItemGranted () {
+    moveAllItemGranted() {
       for (var a in this.checkedPerm) {
         this.checkedPerm[a].disabled = false
         let id = a.split('_')
@@ -266,12 +298,12 @@ export default {
           this.grantedItem[`menu_${id}`] = {
             delete: false,
             edit: false,
-            add: false
+            add: false,
           }
         }
       }
     },
-    removeAllItemGranted () {
+    removeAllItemGranted() {
       for (var a in this.checkedPerm) {
         this.checkedPerm[a].disabled = true
         let id = a.split('_')
@@ -279,7 +311,7 @@ export default {
         delete this.grantedItem[`menu_${id}`]
       }
     },
-    moveGranted (event) {
+    moveGranted(event) {
       const selectedData = event.items[0]
       this.checkedPerm[`add_perm_${selectedData.id}`].disabled = false
       this.checkedPerm[`edit_perm_${selectedData.id}`].disabled = false
@@ -289,16 +321,16 @@ export default {
         this.grantedItem[`menu_${selectedData.id}`] = {
           delete: false,
           edit: false,
-          add: false
+          add: false,
         }
       }
       this.grantedItem[`menu_${selectedData.id}`] = {
         delete: false,
         edit: false,
-        add: false
+        add: false,
       }
     },
-    removeGranted (event) {
+    removeGranted(event) {
       const selectedData = event.items[0]
       this.checkedPerm[`add_perm_${selectedData.id}`].disabled = true
       this.checkedPerm[`edit_perm_${selectedData.id}`].disabled = true
@@ -306,7 +338,7 @@ export default {
 
       delete this.grantedItem[`menu_${selectedData.id}`]
     },
-    addUser () {
+    addUser() {
       UserService.addUser({
         request: 'add_user',
         email: this.email,
@@ -314,14 +346,14 @@ export default {
         last_name: this.last_name,
         address: this.address,
         contact: this.contact,
-        rolenperm: this.checkedPermission
+        rolenperm: this.checkedPermission,
       }).then((response) => {
         var result = response.data.response_package.response_result
         if (result > 0) {
           this.$router.push('/user/list')
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>

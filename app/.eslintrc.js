@@ -17,6 +17,7 @@ module.exports = {
   rules: {
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/no-var-requires': 'off',
+    'space-before-function-paren': 'off',
     'eslint-disable-next-line': 'off',
     'simple-import-sort/imports': 'off',
     'comma-dangle': 'off',
@@ -29,6 +30,15 @@ module.exports = {
     'vue/no-reserved-component-names': 'off',
     'vue/no-v-model-argument': 'off',
     'vue/attribute-hyphenation': 0,
+    'vue/v-on-event-hyphenation': 0,
+    'vue/require-valid-default-prop': 0,
+    'vue/require-explicit-emits': ['error', {
+      "allowProps": false
+    }],
+    'vue/first-attribute-linebreak': ['error', {
+      'singleline': 'ignore',
+      'multiline': 'below'
+    }],
     'vue/no-parsing-error': [
       'error',
       {

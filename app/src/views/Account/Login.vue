@@ -1,17 +1,31 @@
 <template>
   <div class="grid">
-    <div class="col-4 offset-4" style="margin-top: 50px">
-      <form autocomplete="off" @submit.prevent="login">
+    <div
+      class="col-4 col-offset-4"
+      style="margin-top: 50px"
+    >
+      <form
+        autocomplete="off"
+        @submit.prevent="login"
+      >
         <Card>
           <template #header>
             <h1 style="padding: 20px">Login</h1>
           </template>
           <template #content>
-            <div class="fluid">
+            <div class="grid p-fluid">
               <div class="field">
                 <label for="loginEmail">Email</label>
-                <InputText id="loginEmail" v-model.trim="$v.email.$model" autocomplete="off" />
-                <Message v-if="$v.email.$errors.length > 0" severity="error" :closable="false">
+                <InputText
+                  id="loginEmail"
+                  v-model.trim="$v.email.$model"
+                  autocomplete="off"
+                />
+                <Message
+                  v-if="$v.email.$errors.length > 0"
+                  severity="error"
+                  :closable="false"
+                >
                   <div
                     v-for="(error, index) of $v.email.$errors"
                     :key="index"
@@ -19,6 +33,8 @@
                   >{{ error.$message }}</div>
                 </Message>
               </div>
+            </div>
+            <div class="grid p-fluid">
               <div class="field">
                 <label for="loginPassword">Password</label>
                 <Password
@@ -27,7 +43,11 @@
                   type="password"
                   placeholder="Password"
                 />
-                <Message v-if="$v.password.$errors.length > 0" severity="error" :closable="false">
+                <Message
+                  v-if="$v.password.$errors.length > 0"
+                  severity="error"
+                  :closable="false"
+                >
                   <div
                     v-for="(error, index) of $v.password.$errors"
                     :key="index"
@@ -76,19 +96,23 @@ import { mapActions } from 'vuex'
 export default {
   name: 'Login',
   components: {
-    Card, InputText, Password, Button, Message
+    Card,
+    InputText,
+    Password,
+    Button,
+    Message,
   },
-  setup () {
+  setup() {
     return { $v: useVuelidate() }
   },
-  data () {
+  data() {
     return {
       email: '',
       password: '',
       response: {
         type: 'errors',
-        message: ''
-      }
+        message: '',
+      },
     }
   },
   validations: {
@@ -96,24 +120,24 @@ export default {
       required,
       name_validation: {
         $validator: validateEmail,
-        $message: 'Invalid Email Format'
+        $message: 'Invalid Email Format',
       },
-      minLength: minLength(4)
+      minLength: minLength(4),
     },
     password: {
       required,
-      minLength: minLength(4)
-    }
+      minLength: minLength(4),
+    },
   },
   methods: {
     ...mapActions({
-      sLogin: 'LOGIN'
+      sLogin: 'LOGIN',
     }),
-    login () {
+    login() {
       return this.sLogin({
         request: 'login',
         email: this.email,
-        password: this.password
+        password: this.password,
       }).then((response) => {
         if (response.status === 200) {
           this.$router.push('/dashboard')
@@ -121,7 +145,7 @@ export default {
           this.response.message = response.message
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>
