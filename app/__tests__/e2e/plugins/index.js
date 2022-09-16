@@ -17,7 +17,6 @@ module.exports = (on, config) => {
 
   return Object.assign({}, config, {
     fixturesFolder: '__tests__/e2e/fixtures',
-    integrationFolder: '__tests__/e2e/specs',
     screenshotsFolder: '__tests__/e2e/screenshots',
     videosFolder: '__tests__/e2e/videos',
     supportFile: '__tests__/e2e/support/index.js'

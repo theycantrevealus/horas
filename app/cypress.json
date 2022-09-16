@@ -1,8 +1,0 @@
-{
-  "pluginsFile": "__tests__/e2e/plugins/index.js",
-  "chromeWebSecurity":false,
-  "compontent": {
-    "componentFolder": "src",
-    "testFiles": "**/*.spec.ts"
-  }
-}
