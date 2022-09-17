@@ -5,4 +5,4 @@ import { LogLoginModel } from 'src/model/log.login.model'
 import { Repository } from 'typeorm'
 
 @Injectable()
-export class LogService {}
+export class LogService { }

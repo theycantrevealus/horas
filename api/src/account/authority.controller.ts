@@ -1,32 +1,32 @@
-import { Authorization } from '@/decorator/auth.decorator'
-import { JwtAuthGuard } from '@/guard/jwt.guard'
-import { LoggingInterceptor } from '@/interceptor/logging'
-import { isJsonString } from '@/mod.lib'
 import {
   Controller,
+  Body,
+  Post,
   UseGuards,
   Get,
-  Query,
   Param,
-  UseInterceptors,
-  Post,
-  Body,
   Put,
   Delete,
+  UseInterceptors,
+  Query,
 } from '@nestjs/common'
 import {
   ApiTags,
   ApiBearerAuth,
-  ApiOperation,
   ApiParam,
   ApiOkResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiBadRequestResponse,
+  ApiOperation,
 } from '@nestjs/swagger'
-import { AuthorityService } from './authority.service'
+import { Authorization } from '../decorator/auth.decorator'
 import { AccountAuthorityAddDTO } from './dto/account.authority.add.dto'
+import { JwtAuthGuard } from '../guard/jwt.guard'
+import { AuthorityService } from './authority.service'
 import { AccountAuthorityEditDTO } from './dto/account.authority.edit.dto'
+import { LoggingInterceptor } from '../interceptor/logging'
+import { isJsonString } from '../mod.lib'
 
 @Controller('authority')
 @ApiTags('authority')

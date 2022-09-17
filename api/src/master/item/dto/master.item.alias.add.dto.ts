@@ -3,13 +3,13 @@ import { IsString, IsNumber } from 'class-validator'
 
 export class MasterItemAliasAddDTO {
   @ApiProperty({
-    example: 'Paracetamol',
+    example: 'Paracetamol'
   })
   @IsString()
   name: string
 
   @ApiProperty({
-    example: 'Item UID',
+    example: 'Item UID'
   })
   @IsString()
   item: any

@@ -18,7 +18,7 @@ export class MasterItemBatchModel {
   @Column({ nullable: false, type: 'uuid', primary: true })
   uid: string
 
-  @ManyToOne(() => MasterItemModel, (item) => item.uid)
+  @ManyToOne(() => MasterItemModel, item => item.uid)
   item: MasterItemModel
 
   @Column({ nullable: false, type: 'character varying' })

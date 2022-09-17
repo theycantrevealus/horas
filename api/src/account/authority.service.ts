@@ -1,15 +1,16 @@
-import { AuthService } from '@/auth/auth.service'
-import { filterSetDT } from '@/mod.lib'
-import { AccountAuthorityModel } from '@/model/account.authority.model'
-import { AccountModel } from '@/model/account.model'
-import { AccountPrivilegesModel } from '@/model/account.privileges.model'
-import { Injectable, HttpStatus } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { AccountModel } from '../model/account.model'
+import { AccountAuthorityModel } from '../model/account.authority.model'
+
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+
 import {
   AccountAuthorityAddDTO,
   AccountAuthorityAddDTOResponse,
 } from './dto/account.authority.add.dto'
+import { AuthService } from '../auth/auth.service'
+import { filterSetDT } from '../mod.lib'
 import { AccountAuthorityDeleteDTOResponse } from './dto/account.authority.delete.dto'
 import { AccountAuthorityEditDTOResponse } from './dto/account.authority.edit.dto'
 

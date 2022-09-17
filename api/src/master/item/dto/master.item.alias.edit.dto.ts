@@ -3,7 +3,7 @@ import { IsString, IsNumber } from 'class-validator'
 
 export class MasterItemAliasEditDTO {
   @ApiProperty({
-    example: 'Paracetamol',
+    example: 'Paracetamol'
   })
   @IsString()
   name: string

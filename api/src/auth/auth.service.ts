@@ -1,90 +1,93 @@
-import { Injectable, HttpStatus } from '@nestjs/common'
-import { JwtOptionsFactory, JwtService, JwtModuleOptions } from '@nestjs/jwt'
-import 'dotenv/config'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { JwtModuleOptions, JwtOptionsFactory, JwtService } from '@nestjs/jwt'
 import { JWTTokenResponse, JWTTokenDecodeResponse } from './dto/jwt.dto'
+import 'dotenv/config'
+
 
 @Injectable()
 export class AuthService implements JwtOptionsFactory {
-  constructor(private readonly jwtService: JwtService) {}
-  createJwtOptions(): JwtModuleOptions {
-    return {
-      secret: process.env.JWT_SECRET,
-    }
-  }
-
-  async create_token(data: any): Promise<JWTTokenResponse> {
-    let result: JWTTokenResponse
-    if (data && data.uid) {
-      try {
-        const token = this.jwtService.sign(data, {
-          expiresIn: 30 * 24 * 60 * 60,
-        })
-
-        result = {
-          account: data.uid,
-          status: HttpStatus.CREATED,
-          message: 'token_create_success',
-          token: token,
+    constructor(
+        private readonly jwtService: JwtService
+    ) { }
+    createJwtOptions (): JwtModuleOptions {
+        return {
+            secret: process.env.JWT_SECRET
         }
-      } catch (e) {
-        result = {
-          account: data.uid,
-          status: HttpStatus.BAD_REQUEST,
-          message: 'token_create_bad_request',
-          token: null,
-        }
-      }
-    } else {
-      result = {
-        account: data.uid,
-        status: HttpStatus.BAD_REQUEST,
-        message: 'token_create_bad_request',
-        token: null,
-      }
     }
-    return result
-  }
 
-  async validate_token(data: { token: string }): Promise<JWTTokenResponse> {
-    let result: JWTTokenDecodeResponse
-    if (data && data.token) {
-      try {
-        const cleanToken = data.token.split('Bearer')[1].trim()
-        const decoded = await this.jwtService.decode(cleanToken, {
-          complete: true,
-        })
-        const decodedData = (decoded as any).payload
-        if (decoded) {
-          result = {
-            status: HttpStatus.OK,
-            message: 'token_decoded_success',
-            account: decodedData,
-            token: data.token,
-          }
+    async create_token (data: any): Promise<JWTTokenResponse> {
+        let result: JWTTokenResponse
+        if (data && data.uid) {
+            try {
+                const token = this.jwtService.sign(data, {
+                    expiresIn: 30 * 24 * 60 * 60,
+                })
+
+                result = {
+                    account: data.uid,
+                    status: HttpStatus.CREATED,
+                    message: 'token_create_success',
+                    token: token,
+                }
+            } catch (e) {
+                result = {
+                    account: data.uid,
+                    status: HttpStatus.BAD_REQUEST,
+                    message: 'token_create_bad_request',
+                    token: null,
+                }
+            }
         } else {
-          result = {
-            status: HttpStatus.FORBIDDEN,
-            message: 'token_unauthorized',
-            account: null,
-            token: data.token,
-          }
+            result = {
+                account: data.uid,
+                status: HttpStatus.BAD_REQUEST,
+                message: 'token_create_bad_request',
+                token: null,
+            }
         }
-      } catch (e) {
-        result = {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'token malformed',
-          account: null,
-          token: data.token,
-        }
-      }
-    } else {
-      result = {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'undefined token',
-        account: null,
-        token: data.token,
-      }
+        return result
     }
-    return result
-  }
+
+    async validate_token (data: { token: string }): Promise<JWTTokenResponse> {
+        let result: JWTTokenDecodeResponse
+        if (data && data.token) {
+            try {
+                const cleanToken = data.token.split('Bearer')[1].trim()
+                const decoded = await this.jwtService.decode(cleanToken, {
+                    complete: true,
+                })
+                const decodedData = (decoded as any).payload
+                if (decoded) {
+                    result = {
+                        status: HttpStatus.OK,
+                        message: 'token_decoded_success',
+                        account: decodedData,
+                        token: data.token,
+                    }
+                } else {
+                    result = {
+                        status: HttpStatus.FORBIDDEN,
+                        message: 'token_unauthorized',
+                        account: null,
+                        token: data.token,
+                    }
+                }
+            } catch (e) {
+                result = {
+                    status: HttpStatus.BAD_REQUEST,
+                    message: 'token malformed',
+                    account: null,
+                    token: data.token,
+                }
+            }
+        } else {
+            result = {
+                status: HttpStatus.BAD_REQUEST,
+                message: 'undefined token',
+                account: null,
+                token: data.token,
+            }
+        }
+        return result
+    }
 }

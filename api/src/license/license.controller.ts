@@ -1,19 +1,4 @@
-import {
-  Controller,
-  Body,
-  Post,
-  UseGuards,
-  Get,
-  HttpStatus,
-  Param,
-  Put,
-  UseInterceptors,
-  Delete,
-  Req,
-  Logger,
-  Request,
-  Query,
-} from '@nestjs/common'
+import { Controller, Body, Post, UseGuards, Get, HttpStatus, Param, Put, UseInterceptors, Delete, Req, Logger, Request, Query } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { LicenseService } from './license.service'
 import { LoggingInterceptor } from '../interceptor/logging'
@@ -25,9 +10,12 @@ import { LicenseAddDTO } from './dto/license.add.dto'
 @Controller('license')
 @ApiTags('license')
 export class LicenseController {
-  constructor(private licenseService: LicenseService) {}
+  constructor(
+    private licenseService: LicenseService
+  ) { }
 
   private logger = new Logger('HTTP')
+
 
   //=========================================================================================== ADD DATA
   @UseGuards(JwtAuthGuard)
@@ -35,7 +23,7 @@ export class LicenseController {
   @Authorization(true)
   @Post('add')
   @UseInterceptors(LoggingInterceptor)
-  async add(@Body() data: LicenseAddDTO) {
+  async add (@Body() data: LicenseAddDTO) {
     return await this.licenseService.add(data)
   }
 
@@ -46,7 +34,7 @@ export class LicenseController {
   @ApiOperation({ summary: 'List all user' })
   @Authorization(true)
   @Get()
-  async list() {
+  async list () {
     return this.licenseService.all()
   }
 
@@ -55,23 +43,25 @@ export class LicenseController {
   @ApiOperation({ summary: 'List all license (Paginate)' })
   @Authorization(true)
   @Get('paginate')
-  async paginate(
+  async paginate (
     @Query('first') first: number,
     @Query('rows') rows: number,
     @Query('sortOrder') sortOrder: number,
     @Query('sortField') sortField: string,
-    @Query('filters') filters: any,
+    @Query('filters') filters: any
   ) {
-    const filterSet = isJsonString(filters) ? JSON.parse(filters) : {}
+
+    const filterSet = (isJsonString(filters)) ? JSON.parse(filters) : {}
 
     const data = await this.licenseService.paginate({
       rows: rows,
       first: first,
       sortOrder: sortOrder,
       sortField: sortField,
-      filter: filterSet,
+      filter: filterSet
     })
 
     return data
   }
+
 }

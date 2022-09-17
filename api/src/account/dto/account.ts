@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, IsNumber } from 'class-validator'
-import { AccountModel } from '@/model/account.model'
+import { AccountModel } from '../../model/account.model'
 
 export class AccountLoginDTO {
   @ApiProperty({

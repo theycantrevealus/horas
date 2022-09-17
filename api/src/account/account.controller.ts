@@ -1,9 +1,3 @@
-import { Authorization, CredentialAccount } from '@/decorator/auth.decorator'
-import { JwtAuthGuard } from '@/guard/jwt.guard'
-import { LoggingInterceptor } from '@/interceptor/logging'
-import { GrantPermissionDTO } from '@/menu/dto/menu.grant.permission.dto'
-import { GrantAccessDTO } from '@/menu/dto/menu.grant.privileges.dto'
-import { isJsonString } from '@/mod.lib'
 import {
   Controller,
   Body,
@@ -21,7 +15,11 @@ import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { AccountService } from './account.service'
 import { AccountLoginDTO } from './dto/account'
 import { AccountAddDTO } from './dto/account.add.dto'
+import { Authorization } from '../decorator/auth.decorator'
+import { JwtAuthGuard } from '../guard/jwt.guard'
 import { AccountEditDTO } from './dto/account.edit.dto'
+import { LoggingInterceptor } from '../interceptor/logging'
+import { isJsonString } from '../mod.lib'
 
 @Controller('account')
 @ApiTags('account')
@@ -116,30 +114,6 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   async add(@Body() data: AccountAddDTO) {
     return await this.accountService.add(data)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT')
-  @Authorization(true)
-  @Post('grant_access')
-  @UseInterceptors(LoggingInterceptor)
-  async grant_access(
-    @Body() data: GrantAccessDTO,
-    @CredentialAccount() credential,
-  ) {
-    return await this.accountService.grant_access(data, credential)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT')
-  @Authorization(true)
-  @Post('grant_permission')
-  @UseInterceptors(LoggingInterceptor)
-  async grant_permission(
-    @Body() data: GrantPermissionDTO,
-    @CredentialAccount() credential,
-  ) {
-    return await this.accountService.grant_permission(data, credential)
   }
 
   @UseGuards(JwtAuthGuard)

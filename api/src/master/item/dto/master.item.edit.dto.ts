@@ -10,13 +10,13 @@ export class MasterItemEditDTO {
   code: string
 
   @ApiProperty({
-    example: 'Paracetamol',
+    example: 'Paracetamol'
   })
   @IsString()
   name: string
 
   @ApiProperty({
-    example: 'Item detailed description',
+    example: 'Item detailed description'
   })
   @IsString()
   remark: string

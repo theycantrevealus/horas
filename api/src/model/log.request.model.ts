@@ -1,21 +1,16 @@
-import { AccountModel } from './account.model'
-import {
-  Column,
-  CreateDateColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { AccountModel } from "./account.model"
+import { Column, CreateDateColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm"
 
 export class LogRequestModel {
-  @PrimaryGeneratedColumn('increment')
-  id: number
+    @PrimaryGeneratedColumn('increment')
+    id: number
 
-  @ManyToOne(() => AccountModel, (account) => account.uid)
-  user: AccountModel
+    @ManyToOne(() => AccountModel, account => account.uid)
+    user: AccountModel
 
-  @Column({ type: 'text' })
-  log_meta: string
+    @Column({ type: 'text' })
+    log_meta: string
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
-  logged_at: Date
+    @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+    logged_at: Date
 }

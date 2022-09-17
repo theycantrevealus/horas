@@ -1,27 +1,21 @@
-import { AuthService } from '@/auth/auth.service'
-import { LogLoginDTO } from '@/auth/dto/log.login.dto'
-import { MenuService } from '@/menu/menu.service'
-import { filterSetDT } from '@/mod.lib'
-import { AccountModel } from '@/model/account.model'
-import { AccountPermissionModel } from '@/model/account.permission.model'
-import { AccountPrivilegesModel } from '@/model/account.privileges.model'
-import { LogLoginModel } from '@/model/log.login.model'
-import { Injectable, Logger, HttpStatus } from '@nestjs/common'
+import { HttpStatus, Injectable, Logger } from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
+import { AccountModel } from '../model/account.model'
+
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AccountLoginDTO, AccountLoginResponseDTO } from './dto/account'
 import { AccountAddDTO, AccountAddDTOResponse } from './dto/account.add.dto'
+
+import { AuthService } from '../auth/auth.service'
 import { AccountDeleteDTOResponse } from './dto/account.delete.dto'
 import { AccountEditDTOResponse } from './dto/account.edit.dto'
-import * as bcrypt from 'bcrypt'
-import {
-  GrantAccessDTO,
-  GrantAccessResponseDTO,
-} from '@/menu/dto/menu.grant.privileges.dto'
-import {
-  GrantPermissionDTO,
-  GrantPermissionResponseDTO,
-} from '@/menu/dto/menu.grant.permission.dto'
+import { LogLoginModel } from '../model/log.login.model'
+import { LogLoginDTO } from '../auth/dto/log.login.dto'
+import { MenuService } from '../menu/menu.service'
+import { AccountPrivilegesModel } from '../model/account.privileges.model'
+import { AccountPermissionModel } from '../model/account.permission.model'
+import { filterSetDT } from '../mod.lib'
 
 @Injectable()
 export class AccountService {
@@ -38,70 +32,11 @@ export class AccountService {
     @InjectRepository(AccountPermissionModel)
     private readonly accountPermission: Repository<AccountPermissionModel>,
 
-    @InjectRepository(AccountPrivilegesModel)
-    private readonly accountPrivilegesRepo: Repository<AccountPrivilegesModel>,
-
-    @InjectRepository(AccountPermissionModel)
-    private readonly accountPermissionRepo: Repository<AccountPermissionModel>,
-
     private readonly authService: AuthService,
+    private readonly menuService: MenuService,
   ) {}
 
   private logger = new Logger('HTTP')
-
-  async resetPrivileges(account: string) {
-    return await this.accountPrivilegesRepo
-      .createQueryBuilder('account_privileges')
-      .where({
-        account: account,
-      })
-      .softDelete()
-  }
-
-  async grant_menu_permission(permission: GrantPermissionDTO) {
-    const menuResp = new GrantPermissionResponseDTO()
-
-    const checkExist = await this.accountPermissionRepo
-      .createQueryBuilder('account_permission')
-      .withDeleted()
-      .where({
-        account: permission.account,
-        permission: permission.permission,
-      })
-      .getOne()
-
-    if (checkExist) {
-      const restore = await this.accountPermissionRepo.update(checkExist.id, {
-        deleted_at: null,
-      })
-
-      if (restore) {
-        menuResp.message = 'Permission Granted Successfully'
-        menuResp.status = HttpStatus.OK
-        menuResp.returning = checkExist
-      } else {
-        menuResp.message = 'Permission Granted Failed'
-        menuResp.status = HttpStatus.BAD_REQUEST
-      }
-    } else {
-      const menuRes = await this.accountPermissionRepo
-        .save(permission)
-        .then(async (returning) => {
-          return returning
-        })
-
-      if (menuRes) {
-        menuResp.message = 'Permission Granted Successfully'
-        menuResp.status = HttpStatus.OK
-        menuResp.returning = menuRes
-      } else {
-        menuResp.message = 'Permission Granted Failed'
-        menuResp.status = HttpStatus.BAD_REQUEST
-      }
-    }
-
-    return menuResp
-  }
 
   async login(account: AccountLoginDTO) {
     const loginResp = new AccountLoginResponseDTO()
@@ -176,31 +111,6 @@ export class AccountService {
     return loginResp
   }
 
-  async grant_access(data: any, granted_by: any) {
-    return await this.grant_menu_access({
-      account: data.account,
-      menu: data.menu,
-      granted_by: granted_by,
-    })
-  }
-
-  async resetPermission(account: string) {
-    return await this.accountPermissionRepo
-      .createQueryBuilder('account_permission')
-      .where({
-        account: account,
-      })
-      .softDelete()
-  }
-
-  async grant_permission(data: any, granted_by: any) {
-    return await this.grant_menu_permission({
-      account: data.account,
-      permission: data.permission,
-      granted_by: granted_by,
-    })
-  }
-
   async detail(uid: string) {
     const data = {
       account: {},
@@ -233,50 +143,6 @@ export class AccountService {
     }
 
     return data
-  }
-
-  async grant_menu_access(privileges: GrantAccessDTO) {
-    const grantResp = new GrantAccessResponseDTO()
-
-    const checkExist = await this.accountPrivilegesRepo
-      .createQueryBuilder('account_privileges')
-      .withDeleted()
-      .where({
-        account: privileges.account,
-        menu: privileges.menu,
-      })
-      .getOne()
-    if (checkExist) {
-      const restore = await this.accountPrivilegesRepo.update(checkExist.id, {
-        deleted_at: null,
-      })
-
-      if (restore) {
-        grantResp.message = 'Access Granted Successfully'
-        grantResp.status = HttpStatus.OK
-        grantResp.returning = checkExist
-      } else {
-        grantResp.message = 'Access Granted Failed'
-        grantResp.status = HttpStatus.BAD_REQUEST
-      }
-    } else {
-      const menuRes = await this.accountPrivilegesRepo
-        .save(privileges)
-        .then(async (returning) => {
-          return returning
-        })
-
-      if (menuRes) {
-        grantResp.message = 'Access Granted Successfully'
-        grantResp.status = HttpStatus.OK
-        grantResp.returning = menuRes
-      } else {
-        grantResp.message = 'Access Granted Failed'
-        grantResp.status = HttpStatus.BAD_REQUEST
-      }
-    }
-
-    return grantResp
   }
 
   async delete_soft(uid: string) {

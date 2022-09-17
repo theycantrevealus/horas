@@ -6,10 +6,12 @@ import { configService } from '../config/orm'
 import { MenuModel } from '../model/menu.model'
 import { JwtModule } from '@nestjs/jwt'
 import { AuthService } from '../auth/auth.service'
+import { AccountPrivilegesModel } from '../model/account.privileges.model'
 import { LogActivityModel } from '../model/log.activity.model'
 import { MenuGroupController } from './menu.group.controller'
 import { MenuGroupModel } from '../model/menu.group.model'
 import { MenuGroupService } from './menu.group.service'
+import { AccountPermissionModel } from '../model/account.permission.model'
 import { MenuPermissionController } from './menu.permission.controller'
 import { MenuPermissionModel } from '../model/menu.permission.model'
 import { MenuPermissionService } from './menu.permission.service'
@@ -22,7 +24,14 @@ import { MenuPermissionService } from './menu.permission.service'
     }),
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
     TypeOrmModule.forFeature(
-      [MenuModel, LogActivityModel, MenuGroupModel, MenuPermissionModel],
+      [
+        MenuModel,
+        AccountPrivilegesModel,
+        AccountPermissionModel,
+        LogActivityModel,
+        MenuGroupModel,
+        MenuPermissionModel,
+      ],
       'default',
     ),
   ],
