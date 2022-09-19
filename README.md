@@ -4,6 +4,7 @@
 <div align="center">
   <a href="https://github.com/theycantrevealus/horas">
     <img src="https://cdn.dribbble.com/users/1086141/screenshots/14132966/media/2c34d8bc90feecbe5282fed84f3ff227.png?compress=0&resize=800x800" alt="Logo" width="100" height="100">
+    ![alt text](https://github.com/theycantrevealus/horas/blob/main/logo.png?raw=true)
   </a>
 
   <h3 align="center">HORAS Boilerplate</h3>
