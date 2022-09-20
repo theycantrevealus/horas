@@ -9,8 +9,11 @@
               <div class="profile-display">
                 <img :src="formData.image" />
               </div><Button
-                class="button button-info button-sm button-raised" label="Avatar"
-                icon="pi pi-external-link" @click="toggleEditImageWindow" />
+                class="button button-info button-sm button-raised"
+                label="Avatar"
+                icon="pi pi-external-link"
+                @click="toggleEditImageWindow"
+              />
             </div>
             <div class="col-8 form-mode">
               <div class="inputgroup">
@@ -19,24 +22,43 @@
                 </span>
                 <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
                   placeholder="Email" /> -->
-                <InputText v-model="formData.email" class="inputtext-sm" placeholder="Email" />
+                <InputText
+                  v-model="formData.email"
+                  class="inputtext-sm"
+                  placeholder="Email"
+                />
               </div>
               <div class="inputgroup">
                 <span class="inputgroup-addon">
                   <span class="material-icons-outlined">person</span>
                 </span>
-                <InputText v-model="formData.first_name" class="inputtext-sm" placeholder="First Name" />
-                <InputText v-model="formData.last_name" class="inputtext-sm" placeholder="Last Name" />
+                <InputText
+                  v-model="formData.first_name"
+                  class="inputtext-sm"
+                  placeholder="First Name"
+                />
+                <InputText
+                  v-model="formData.last_name"
+                  class="inputtext-sm"
+                  placeholder="Last Name"
+                />
               </div>
               <div class="inputgroup">
                 <span class="inputgroup-addon">
                   <span class="material-icons-outlined">supervised_user_circle</span>
                 </span>
                 <Dropdown
-                  v-model="formData.authority" :options="authorityData" optionLabel="name" optionValue="uid"
-                  placeholder="Select authority" />
+                  v-model="formData.authority"
+                  :options="authorityData"
+                  optionLabel="name"
+                  optionValue="uid"
+                  placeholder="Select authority"
+                />
               </div>
-              <Button class="button button-info button-sm button-raised" @click="updateAccountData">
+              <Button
+                class="button button-info button-sm button-raised"
+                @click="updateAccountData"
+              >
                 <span class="material-icons">fact_check</span> Apply from authority
               </Button>
               <!-- <Button @click="accountEdit(slotProps.data.uid)"
@@ -47,34 +69,67 @@
             <div class="col-12">
               <h4>Permission List</h4>
               <TreeTable
-                v-if="formData.menuTree" class="treetable-sm p-datatable-table vert-top" filterMode="strict"
-                :value="formData.menuTree" :lazy="true" :paginator="true" :rows="20" :filters="filtersNode">
-                <Column field="label" header="Label" :expander="true">
+                v-if="formData.menuTree"
+                class="treetable-sm p-datatable-table vert-top"
+                filterMode="strict"
+                :value="formData.menuTree"
+                :lazy="true"
+                :paginator="true"
+                :rows="20"
+                :filters="filtersNode"
+              >
+                <Column
+                  field="label"
+                  header="Label"
+                  :expander="true"
+                >
                   <template #filter>
                     <InputText
-                      v-model="filtersNode.label.value" type="text" class="column-filter"
-                      placeholder="Filter by label" />
+                      v-model="filtersNode.label.value"
+                      type="text"
+                      class="column-filter"
+                      placeholder="Filter by label"
+                    />
                   </template>
                   <template #body="slotProps">
                     <Checkbox
-                      v-model="selectedPage" name="menus" :value="slotProps.node.data.id"
-                      @change="check_menu($event, slotProps.node)" /> {{ slotProps.node.data.label }}
+                      v-model="selectedPage"
+                      name="menus"
+                      :value="slotProps.node.data.id"
+                      @change="check_menu($event, slotProps.node)"
+                    /> {{ slotProps.node.data.label }}
                   </template>
                 </Column>
-                <Column field="to" header="Link">
+                <Column
+                  field="to"
+                  header="Link"
+                >
                   <template #filter>
                     <InputText
-                      v-model="filtersNode.to.value" type="text" class="column-filter"
-                      placeholder="Filter by link" />
+                      v-model="filtersNode.to.value"
+                      type="text"
+                      class="column-filter"
+                      placeholder="Filter by link"
+                    />
                   </template>
                 </Column>
-                <Column field="to" header="Link">
+                <Column
+                  field="to"
+                  header="Link"
+                >
                   <template #body="slotProps">
                     <div v-if="slotProps.node.data.permission !== undefined">
-                      <div v-for="indexPerm in slotProps.node.data.permission" :key="indexPerm" class="checkbox-custom">
+                      <div
+                        v-for="indexPerm in slotProps.node.data.permission"
+                        :key="indexPerm"
+                        class="checkbox-custom"
+                      >
                         <Checkbox
-                          v-model="selectedPerm" name="perms" :value="indexPerm.id"
-                          @change="set_permission($event, indexPerm.id)" />
+                          v-model="selectedPerm"
+                          name="perms"
+                          :value="indexPerm.id"
+                          @change="set_permission($event, indexPerm.id)"
+                        />
                         {{
                             indexPerm.domiden
                         }}
@@ -87,14 +142,20 @@
             <div class="col-12">
               <div class="d-flex jc-between">
                 <div>
-                  <Button type="button" class="button-raised button-sm button-danger px-3" @click="back()">
+                  <Button
+                    type="button"
+                    class="button-raised button-sm button-danger px-3"
+                    @click="back()"
+                  >
                     <span class="material-icons-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div v-if="allowSave === true">
                   <Button
-                    type="button" class="button-raised button-sm button-info px-3"
-                    @click="updateAccountData($event)">
+                    type="button"
+                    class="button-raised button-sm button-info px-3"
+                    @click="updateAccountData($event)"
+                  >
                     <span class="material-icons-outlined">check_circle</span> Save Data
                   </Button>
                 </div>
@@ -105,12 +166,22 @@
       </Card>
       <ConfirmPopup></ConfirmPopup>
     </div>
-    <Dialog v-model:visible="displayEditorImage" header="Avatar Editor" :style="{ width: '50vw' }" :modal="true">
+    <Dialog
+      v-model:visible="displayEditorImage"
+      header="Avatar Editor"
+      :style="{ width: '50vw' }"
+      :modal="true"
+    >
       <p class="m-0">
         <Cropper @cropImage="setImageData" />
       </p>
       <template #footer>
-        <Button label="Close" icon="pi pi-times" class="button-text" @click="toggleEditImageWindow" />
+        <Button
+          label="Close"
+          icon="pi pi-times"
+          class="button-text"
+          @click="toggleEditImageWindow"
+        />
       </template>
     </Dialog>
   </div>
@@ -132,9 +203,18 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'AccountAdd',
   components: {
-    Card, InputText, Button, Dropdown, ConfirmPopup, Checkbox, TreeTable, Column, Cropper, Dialog
+    Card,
+    InputText,
+    Button,
+    Dropdown,
+    ConfirmPopup,
+    Checkbox,
+    TreeTable,
+    Column,
+    Cropper,
+    Dialog,
   },
-  data () {
+  data() {
     return {
       displayEditorImage: false,
       formData: {
@@ -144,7 +224,7 @@ export default {
         first_name: '',
         last_name: '',
         image: '',
-        menuTree: []
+        menuTree: [],
       },
       allowSave: false,
       authorityData: [],
@@ -156,14 +236,14 @@ export default {
       selectedNode: {},
       filtersNode: {
         label: { value: '', matchMode: 'contains' },
-        to: { value: '', matchMode: 'contains' }
+        to: { value: '', matchMode: 'contains' },
       },
       expandedKeys: {},
       nodes: null,
       columns: [
         { field: 'label', header: 'Label', expander: true },
-        { field: 'to', header: 'To' }
-      ]
+        { field: 'to', header: 'To' },
+      ],
     }
   },
   computed: {
@@ -171,26 +251,26 @@ export default {
     ...mapGetters({
       menuTree: 'accountModule/getMenuTree',
       accountDetail: 'accountModule/getAccountDetail',
-      authorityList: 'accountModule/getAuthorityList'
-    })
+      authorityList: 'accountModule/getAuthorityList',
+    }),
   },
   watch: {
     menuTree: {
-      handler (getData) {
+      handler(getData) {
         if (getData) {
           this.formData.menuTree = getData
         }
-      }
+      },
     },
     authorityList: {
-      handler (getAuthorityList) {
+      handler(getAuthorityList) {
         if (getAuthorityList) {
           this.authorityData = getAuthorityList
         }
-      }
+      },
     },
     accountDetail: {
-      handler (getDetail) {
+      handler(getDetail) {
         if (getDetail) {
           if (getDetail.account.uid !== undefined) {
             this.allowSave = true
@@ -204,7 +284,11 @@ export default {
           this.formData.first_name = getDetail.account.first_name
           this.formData.last_name = getDetail.account.last_name
 
-          this.setImageData(`${process.env.VUE_APP_APIGATEWAY}avatar/${getDetail.account.uid}.png?d=${Date.now()}`)
+          this.setImageData(
+            `${process.env.VUE_APP_APIGATEWAY}avatar/${
+              getDetail.account.uid
+            }.png?d=${Date.now()}`
+          )
 
           for (const a in getDetail.access) {
             if (this.selectedPage.indexOf(getDetail.access[a].id) < 0) {
@@ -225,26 +309,33 @@ export default {
           this.allowSave = false
         }
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
-  mounted () {
+  async mounted() {
     this.allowSave = false
     // this.$store.dispatch('accountModule/fetchMenu')
-    this.$store.dispatch('accountModule/fetchAccountDetail', this.$route.query.uid)
-    this.$store.dispatch('accountModule/fetchMenuTree')
-    this.$store.dispatch('accountModule/fetchAuthority')
+    await this.$store.dispatch(
+      'accountModule/fetchAccountDetail',
+      this.$route.query.uid
+    )
+    await this.$store.dispatch('accountModule/fetchMenuTree')
+    await this.$store.dispatch('accountModule/fetchAuthority')
     this.displayEditorImage = false
   },
   methods: {
-    ...mapActions('accountModule', ['updateAccount', 'updatePermission', 'updateAccess']),
-    back () {
+    ...mapActions('accountModule', [
+      'updateAccount',
+      'updatePermission',
+      'updateAccess',
+    ]),
+    back() {
       this.$router.push('/account')
     },
-    setImageData (value) {
+    setImageData(value) {
       this.formData.image = value
     },
-    toggleEditImageWindow () {
+    toggleEditImageWindow() {
       this.displayEditorImage = !this.displayEditorImage
     },
     updateAccountData: function (event) {
@@ -258,7 +349,7 @@ export default {
             for (const a in this.selectedMenu) {
               this.updateAccess({
                 account: this.$route.query.uid,
-                menu: this.selectedMenu[a]
+                menu: this.selectedMenu[a],
               }).then((response) => {
                 responseAccess.push(response)
               })
@@ -267,7 +358,7 @@ export default {
             for (const a in this.selectedPerm) {
               this.updatePermission({
                 account: this.$route.query.uid,
-                permission: this.selectedPerm[a]
+                permission: this.selectedPerm[a],
               }).then((response) => {
                 responsePermission.push(response)
               })
@@ -286,16 +377,16 @@ export default {
               },
               reject: () => {
                 // callback to execute when user rejects the action
-              }
+              },
             })
           }
         })
       }
     },
-    set_permission (event, target) {
+    set_permission(event, target) {
       // console.log(this.selectedPerm)
     },
-    check_child (children, isDelete) {
+    check_child(children, isDelete) {
       for (const a in children) {
         const dataSet = parseInt(children[a].data.id)
         if (isDelete) {
@@ -318,12 +409,12 @@ export default {
         }
       }
     },
-    check_parent (parentSplitRaw, pageDeleteMode) {
+    check_parent(parentSplitRaw, pageDeleteMode) {
       const parentSplit = parentSplitRaw.split('-')
       for (let a = 0; a < parentSplit.length; a++) {
         const getVal = parseInt(parentSplit[a])
 
-        if (a < (parentSplit.length - 1)) {
+        if (a < parentSplit.length - 1) {
           // Is Parent
           if (this.selectedParent[`parent_${getVal}`] === undefined) {
             this.selectedParent[`parent_${getVal}`] = 0
@@ -360,16 +451,16 @@ export default {
         }
       }
     },
-    check_menu (event, target) {
+    check_menu(event, target) {
       const children = target.children
-      const pageDeleteMode = (this.selectedPage.indexOf(target.data.id) < 0)
+      const pageDeleteMode = this.selectedPage.indexOf(target.data.id) < 0
       if (children.length > 0) {
         this.check_child(children, pageDeleteMode)
       } else {
         this.check_parent(target.key, pageDeleteMode)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style>

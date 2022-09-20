@@ -9,6 +9,8 @@ import { AccountPrivilegesModel } from '@/models/account.privileges.model'
 import { CoreLogActivityModel } from '@/models/core.logging.activity.model'
 import { CoreLogLoginModel } from '@/models/core.logging.login.model'
 import { AuthModule } from '@/auth/auth.module'
+import { DataSource } from 'typeorm'
+import { LoggingInterceptor } from '@/interceptors/logging.interceptor'
 
 @Module({
   imports: [
@@ -28,7 +30,11 @@ import { AuthModule } from '@/auth/auth.module'
     AuthModule,
   ],
   controllers: [AccountController],
-  providers: [AccountService],
+  providers: [AccountService, LoggingInterceptor],
   exports: [AccountService],
 })
-export class AccountModule {}
+export class AccountModule {
+  constructor(private dataSource: DataSource) {
+    //
+  }
+}

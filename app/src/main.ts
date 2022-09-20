@@ -41,27 +41,23 @@ registerModules({
   authorityModule: Authority,
   serviceModule: Service,
   masterItemModule: MasterItem,
-  masterTourModule: MasterDocumentation
+  masterTourModule: MasterDocumentation,
 })
 
 setupInterceptors()
 declare global {
   interface Window {
-    Cypress?: any;
-    __app__?: any;
-    __store__?: any;
+    Cypress?: any
+    app?: any
+    store?: any
   }
 }
 
 const app = createApp(App)
 
-app.use(PrimeVue)
+app
+  .use(PrimeVue)
   .use(store)
-  .use(VueGoogleMaps, {
-    load: {
-      key: 'AIzaSyDQCDEFysw0Bi8mvdWiADAPQ4RbtL8CLzQ'
-    }
-  })
   .use(router)
   .use(ToastService)
   .use(ConfirmationService)
@@ -75,13 +71,13 @@ Sentry.init({
   integrations: [
     new Integrations.BrowserTracing({
       routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: ['localhost', 'my-site-url.com', /^\//]
-    })
+      tracingOrigins: ['localhost', 'my-site-url.com', /^\//],
+    }),
   ],
-  tracesSampleRate: 1.0
+  tracesSampleRate: 1.0,
 })
 
-if (window.Cypress) {
-  window.__app__ = app
-  window.__store__ = store
+if (window.parent.Cypress) {
+  window.store = store
+  window.app = app
 }

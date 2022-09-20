@@ -19,7 +19,7 @@ import { AccountAuthorityModel } from './account.authority.model'
 export class AccountModel {
   @PrimaryColumn()
   @Generated('uuid')
-  @Column({ nullable: false, type: 'uuid', primary: true })
+  @Column({ nullable: false, type: 'uuid', primary: true, unique: true })
   uid: string
 
   @ApiProperty({

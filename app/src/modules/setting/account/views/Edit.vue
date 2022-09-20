@@ -295,17 +295,17 @@ export default {
       immediate: true
     }
   },
-  mounted () {
+  async mounted () {
     this.allowSave = false
     // this.$store.dispatch('accountModule/fetchMenu')
-    this.$store.dispatch('accountModule/fetchAccountDetail', this.$route.query.uid)
-    this.$store.dispatch('accountModule/fetchAccountActivity', {
+    await this.$store.dispatch('accountModule/fetchAccountDetail', this.$route.query.uid)
+    await this.$store.dispatch('accountModule/fetchAccountActivity', {
       uid: this.$route.query.uid,
       from: '123',
       to: '333'
     })
-    this.$store.dispatch('accountModule/fetchMenuTree')
-    this.$store.dispatch('accountModule/fetchAuthority')
+    await this.$store.dispatch('accountModule/fetchMenuTree')
+    await this.$store.dispatch('accountModule/fetchAuthority')
     this.displayEditorImage = false
   },
   methods: {

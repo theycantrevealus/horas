@@ -10,6 +10,11 @@
       >
         <Card>
           <template #header>
+            <img
+              :src="require('../../assets/logo.png')"
+              width="200"
+              alt="horas"
+            />
             <h1 style="padding: 20px">Login</h1>
           </template>
           <template #content>

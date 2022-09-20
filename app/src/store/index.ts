@@ -19,17 +19,19 @@ const store = createStore({
       permission: {},
       pages: {},
       routes: [],
-      token: null
+      token: null,
     },
-    sidemenu: []
+    sidemenu: [],
   },
-  plugins: [PersistedState({
-    storage: {
-      getItem: (key) => ls.get(key),
-      setItem: (key, value) => ls.set(key, value),
-      removeItem: (key) => ls.remove(key)
-    }
-  })],
+  plugins: [
+    PersistedState({
+      storage: {
+        getItem: (key) => ls.get(key),
+        setItem: (key, value) => ls.set(key, value),
+        removeItem: (key) => ls.remove(key),
+      },
+    }),
+  ],
   actions: {
     LOGIN: ({ commit }, accountRequestData: TAccountLogin) => {
       return AccountService.login(accountRequestData).then((response: any) => {
@@ -42,30 +44,36 @@ const store = createStore({
       })
     },
     UPDATE_MENU: ({ commit, getters }) => {
-      return CoreService.generateMenu(getters.getToken).then((response: any) => {
-        response = response.data
-        commit('UPDATE_MENU', response)
-      })
+      return CoreService.generateMenu(getters.getToken).then(
+        (response: any) => {
+          response = response.data
+          commit('UPDATE_MENU', response)
+        }
+      )
     },
     LOGOUT: ({ commit }: { commit: Function }) => {
       commit('CLEAR_SESSION')
-    }
+    },
   },
   getters: {
-    getToken: (state) => { return state.credential.token },
-    getSideMenu: (state) => { return state.sidemenu }
+    getToken: (state) => {
+      return state.credential.token
+    },
+    getSideMenu: (state) => {
+      return state.sidemenu
+    },
   },
   mutations: {
-    START_LOADING: state => state.loading++,
-    FINISH_LOADING: state => state.loading--,
+    START_LOADING: (state) => state.loading++,
+    FINISH_LOADING: (state) => state.loading--,
     GET_TOKEN: (state) => state.credential.token,
-    UPDATE_TOKEN (state: any, token: string) {
+    UPDATE_TOKEN(state: any, token: string) {
       state.credential.token = token
     },
-    UPDATE_MENU (state: any, menu) {
+    UPDATE_MENU(state: any, menu) {
       state.sidemenu = menu
     },
-    LOGIN_SUCCESS (state: any, credentialData) {
+    LOGIN_SUCCESS(state: any, credentialData) {
       state.credential.uid = credentialData.uid
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
@@ -94,14 +102,14 @@ const store = createStore({
       }
       state.credential.pages = buildPage
     },
-    CLEAR_SESSION (state: any) {
+    CLEAR_SESSION(state: any) {
       state.credential.token = null
-    }
+    },
   },
   modules: {
     mAccount: account,
-    mCoreMenu: coreMenu
-  }
+    mCoreMenu: coreMenu,
+  },
 })
 
 export default store

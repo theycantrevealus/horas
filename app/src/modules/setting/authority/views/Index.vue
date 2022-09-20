@@ -25,7 +25,10 @@
             @sort="onSort($event)"
             @filter="onFilter($event)"
           >
-            <Column header="#" class="align-right">
+            <Column
+              header="#"
+              class="align-right"
+            >
               <template #body="slotProps">{{ slotProps.data.autonum }}</template>
             </Column>
             <Column header="Action">
@@ -95,59 +98,75 @@ import { mapGetters, mapState } from 'vuex'
 export default {
   name: 'AccountAuthorityList',
   components: {
-    Card, DataTable, Column, Button, InputText
+    Card,
+    DataTable,
+    Column,
+    Button,
+    InputText,
   },
-  data () {
+  data() {
     return {
       filters: {
-        name: { value: '', matchMode: 'contains' }
+        name: { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
       columns: [
         { field: 'name', header: 'Name' },
-        { field: 'created_at', header: 'Created Date' }
-      ]
+        { field: 'created_at', header: 'Created Date' },
+      ],
     }
   },
   computed: {
-    permission () {
+    permission() {
       return this.$store.state.credential.permission
     },
     ...mapState('authorityModule', ['DTLoading', 'DTTotalRecord', 'items']),
     ...mapGetters({
-      authorityListRaw: 'authorityModule/getAuthority'
-    })
+      authorityListRaw: 'authorityModule/getAuthority',
+    }),
   },
-  mounted () {
+  async mounted() {
     this.lazyParams = {
       first: 0,
       rows: 10,
       sortField: 'created_at',
       sortOrder: 1,
-      filters: this.filters
+      filters: this.filters,
     }
-    this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+    await this.$store.dispatch(
+      'authorityModule/fetchAuthority',
+      this.lazyParams
+    )
   },
-  
+
   methods: {
-    formatDate (date, format) {
+    formatDate(date, format) {
       return DateManagement.formatDate(date, format)
     },
-    onPage (event) {
+    async onPage(event) {
       this.lazyParams = event
-      this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+      await this.$store.dispatch(
+        'authorityModule/fetchAuthority',
+        this.lazyParams
+      )
     },
-    onSort (event) {
+    async onSort(event) {
       this.lazyParams = event
-      this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+      await this.$store.dispatch(
+        'authorityModule/fetchAuthority',
+        this.lazyParams
+      )
     },
-    onFilter (event) {
+    async onFilter(event) {
       this.lazyParams = event
-      this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+      await this.$store.dispatch(
+        'authorityModule/fetchAuthority',
+        this.lazyParams
+      )
     },
-    accountAuthorityEdit (uid) {
+    accountAuthorityEdit(uid) {
       this.$router.push(`/authority/edit/:${uid}`)
-    }
-  }
+    },
+  },
 }
 </script>

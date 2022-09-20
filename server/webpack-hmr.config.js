@@ -48,6 +48,7 @@ module.exports = {
   },
   mode: 'development',
   resolve: {
+    roots: [path.resolve('./src')],
     alias: {
       '@': path.resolve(__dirname, 'src'),
       '@configs': path.resolve(__dirname, 'src/configs'),
@@ -72,6 +73,9 @@ module.exports = {
   ],
   output: {
     path: path.join(__dirname, 'dist'),
+    publicPath: '/dist/',
     filename: 'server.js',
+    hotUpdateChunkFilename: 'hot/hot-update.js',
+    hotUpdateMainFilename: 'hot/hot-update.json',
   },
 }

@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm'
+import entities from './entities'
 require('dotenv').config()
 const isProduction = process.env.MODE != 'development'
 let databaseHost,
@@ -32,7 +33,7 @@ const AppDataSource = new DataSource({
   password: databasePassword,
   database: databaseName,
   logging: loggingOption,
-  entities: ['src/models/**/*{.ts,.js}'],
+  entities: entities,
   migrationsTransactionMode: 'each',
   migrationsTableName: 'migrations',
   migrations: ['src/migrations/**/*{.ts,.js}'],

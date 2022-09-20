@@ -9,6 +9,7 @@ import postgresql from '@configs/postgresql'
 import redis from '@configs/redis'
 import { AccountModule } from './account/account.module'
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
+import entities from '@configs/entities'
 
 @Module({
   imports: [
@@ -47,11 +48,8 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
         database: configService.get<string>(
           `${configService.get<string>('mode')}.database`
         ),
-        logging: [].concat(
-          configService
-            .get<string>(`${configService.get<string[]>('mode')}.logging`)
-            .split(',')
-        ),
+        entities: entities,
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),

@@ -44,14 +44,14 @@ export class CoreLogActivityModel {
   logged_at: Date
 
   constructor(data?: any) {
-    this.account = data.account
-    this.login_id = data.login_id
-    this.table_target = data.table_target
-    this.table_identifier = data.table_identifier
-    this.log_meta = data.log_meta
-    this.action = data.action
-    this.old_meta = data.old_meta
-    this.new_meta = data.new_meta
-    this.new_meta = data.new_meta
+    this.account = data?.account
+    this.login_id = data?.login_id
+    this.table_target = data?.table_target
+    this.table_identifier = data?.table_identifier
+    this.log_meta = data?.log_meta
+    this.action = data?.action
+    this.old_meta = data?.old_meta
+    this.new_meta = data?.new_meta
+    this.new_meta = data?.new_meta
   }
 }

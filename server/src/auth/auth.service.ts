@@ -21,7 +21,7 @@ export class AuthService implements JwtOptionsFactory {
         })
 
         result = {
-          account: data.uid,
+          account: data,
           login_id: data.id,
           status: HttpStatus.CREATED,
           message: 'token_create_success',
@@ -29,7 +29,7 @@ export class AuthService implements JwtOptionsFactory {
         }
       } catch (e) {
         result = {
-          account: data.uid,
+          account: data,
           login_id: 0,
           status: HttpStatus.BAD_REQUEST,
           message: 'token_create_bad_request',
@@ -38,7 +38,7 @@ export class AuthService implements JwtOptionsFactory {
       }
     } else {
       result = {
-        account: data.uid,
+        account: data,
         login_id: 0,
         status: HttpStatus.BAD_REQUEST,
         message: 'token_create_bad_request',

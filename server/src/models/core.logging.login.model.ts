@@ -12,15 +12,16 @@ export class CoreLogLoginModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => AccountModel, (account) => account.uid)
+  @ManyToOne(() => AccountModel, (account) => account.uid, { cascade: true })
   account: AccountModel
 
   @Column({ type: 'text' })
   log_meta: string
 
-  @Column({ type: 'text' })
-  token: string
-
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn({
+    nullable: false,
+    type: 'timestamp without time zone',
+    default: new Date().toISOString(),
+  })
   logged_at: Date
 }

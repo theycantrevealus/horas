@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { CoreLogActivityModel } from '@/models/core.logging.activity.model'
 import { CoreLogLoginModel } from '@/models/core.logging.login.model'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { AccountModel } from '@/models/account.model'
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature(
-      [CoreLogLoginModel, CoreLogActivityModel],
+      [AccountModel, CoreLogLoginModel, CoreLogActivityModel],
       'default'
     ),
   ],

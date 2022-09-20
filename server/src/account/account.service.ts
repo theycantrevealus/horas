@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
 
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 
 import { AuthService } from '../auth/auth.service'
 import { filterSetDT } from '@utilities/mod.lib'
@@ -14,10 +14,14 @@ import {
   AccountLoginDTO,
   AccountLoginResponseDTO,
 } from '@/account/dtos/account.login.dto'
+import { CoreLogLoginModel } from '@/models/core.logging.login.model'
 
 @Injectable()
 export class AccountService {
   constructor(
+    @InjectRepository(CoreLogLoginModel)
+    private readonly coreLogLoginRepo: Repository<CoreLogLoginModel>,
+
     @InjectRepository(AccountModel)
     private readonly accountRepo: Repository<AccountModel>,
 
@@ -27,7 +31,9 @@ export class AccountService {
     @InjectRepository(AccountPermissionModel)
     private readonly accountPermission: Repository<AccountPermissionModel>,
 
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+
+    private dataSource: DataSource
   ) {}
 
   private logger = new Logger('HTTP')
@@ -35,65 +41,73 @@ export class AccountService {
   async login(account: AccountLoginDTO) {
     const loginResp = new AccountLoginResponseDTO()
 
-    const accountResp = await this.accountRepo
+    return await this.dataSource
+      .getRepository(AccountModel)
       .createQueryBuilder('account')
       .where('deleted_at IS NULL')
       .orderBy('created_at', 'DESC')
       .andWhere('email = :email')
       .setParameters({ email: account.email })
       .getOne()
+      .then(async (accountResp) => {
+        const loginLog = this.coreLogLoginRepo.create({
+          log_meta: JSON.stringify(account),
+          account: accountResp,
+        })
 
-    if (accountResp) {
-      //Load Permission
-      const token = this.authService.create_token({
-        uid: accountResp.uid,
-        email: accountResp.email,
-        first_name: accountResp.first_name,
-        last_name: accountResp.last_name,
+        return await this.coreLogLoginRepo
+          .save(loginLog)
+          .then(async (logID) => {
+            const tokenSet = await this.authService.create_token({
+              login_id: logID.id,
+              uid: accountResp.uid,
+              email: accountResp.email,
+              first_name: accountResp.first_name,
+              last_name: accountResp.last_name,
+            })
+            const grantedPageSet = []
+            const Page = await this.dataSource
+              .getRepository(AccountPrivilegesModel)
+              .createQueryBuilder('account_privileges')
+              .innerJoinAndSelect('account_privileges.menu', 'menu')
+              .where('account_privileges.account = :account', {
+                account: accountResp.uid,
+              })
+              .getMany()
+            for (const a in Page) {
+              grantedPageSet.push(Page[a].menu)
+            }
+            const grantedPermSet = []
+            const Permission = await this.accountPermission
+              .createQueryBuilder('account_permission')
+              .innerJoinAndSelect(
+                'account_permission.permission',
+                'menu_permission'
+              )
+              .where('account_permission.account = :account', {
+                account: accountResp.uid,
+              })
+              .getMany()
+            for (const a in Permission) {
+              grantedPermSet.push(Permission[a].permission)
+            }
+            loginResp.message = 'Logged In Successfully'
+            loginResp.account = accountResp
+            loginResp.account.grantedPerm = grantedPermSet
+            loginResp.account.grantedPage = grantedPageSet
+            loginResp.token = tokenSet.token
+            loginResp.status = HttpStatus.OK
+            return loginResp
+          })
+          .catch((err) => {
+            throw new Error(err.message)
+          })
+        return loginResp
       })
-
-      const tokenSet = (await token).token
-
-      //LOAD PAGE PERMISSION
-      const grantedPageSet = []
-      const Page = await this.accountPrivileges
-        .createQueryBuilder('account_privileges')
-        .innerJoinAndSelect('account_privileges.menu', 'menu')
-        .where('account_privileges.account = :account', {
-          account: accountResp.uid,
-        })
-        .getMany()
-      for (const a in Page) {
-        grantedPageSet.push(Page[a].menu)
-      }
-
-      //LOAD ACCESS PERMISSION
-      const grantedPermSet = []
-      const Permission = await this.accountPermission
-        .createQueryBuilder('account_permission')
-        .innerJoinAndSelect('account_permission.permission', 'menu_permission')
-        .where('account_permission.account = :account', {
-          account: accountResp.uid,
-        })
-        .getMany()
-      for (const a in Permission) {
-        grantedPermSet.push(Permission[a].permission)
-      }
-
-      loginResp.message = 'Logged In Successfully'
-      loginResp.account = accountResp
-      loginResp.account.grantedPerm = grantedPermSet
-      loginResp.account.grantedPage = grantedPageSet
-      loginResp.token = tokenSet
-      loginResp.status = HttpStatus.OK
-    } else {
-      loginResp.message = 'Login Failed'
-      loginResp.account = accountResp
-      loginResp.token = ''
-      loginResp.status = HttpStatus.BAD_REQUEST
-    }
-
-    return loginResp
+      .catch((e: Error) => {
+        console.log('error')
+        throw new Error(e.message)
+      })
   }
 
   async detail(uid: string) {

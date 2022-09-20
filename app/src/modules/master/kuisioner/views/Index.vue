@@ -6,26 +6,29 @@
         <template #content>
           <DataTable
             v-if="authorityListRaw.length > 0 && filters != undefined && DTTotalRecord != undefined"
+            ref="dt"
+            v-model:filters="filters"
             :value="authorityListRaw"
             :lazy="true"
             :paginator="true"
             :rows="20"
-            v-model:filters="filters"
-            ref="dt"
             stripedRows
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             :rowsPerPageOptions="[20, 50, 100]"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
             :totalRecords="DTTotalRecord"
             :loading="DTLoading"
-            @page="onPage($event)"
-            @sort="onSort($event)"
-            @filter="onFilter($event)"
             filterDisplay="row"
             :globalFilterFields="['name', 'created_at']"
             responsiveLayout="scroll"
+            @page="onPage($event)"
+            @sort="onSort($event)"
+            @filter="onFilter($event)"
           >
-            <Column header="#" class="align-right">
+            <Column
+              header="#"
+              class="align-right"
+            >
               <template #body="slotProps">{{ slotProps.data.autonum }}</template>
             </Column>
             <Column header="Action">
@@ -33,15 +36,15 @@
                 <span class="buttonset wrap_content">
                   <Button
                     v-if="permission.btnAccountAuthorityEdit !== undefined"
-                    @click="accountAuthorityEdit(slotProps.data.uid)"
                     class="button button-info button-sm button-raised"
+                    @click="accountAuthorityEdit(slotProps.data.uid)"
                   >
                     <span class="material-icons">edit</span> Edit
                   </Button>
                   <Button
                     v-if="permission.btnAccountAuthorityDelete !== undefined"
-                    @click="accountAuthorityDelete(slotProps.data.uid)"
                     class="button button-danger button-sm button-raised"
+                    @click="accountAuthorityDelete(slotProps.data.uid)"
                   >
                     <span class="material-icons">delete</span>
                   </Button>
@@ -49,31 +52,31 @@
               </template>
             </Column>
             <Column
+              ref="name"
               field="name"
               header="Name"
               filterMatchMode="startsWith"
-              ref="name"
               :sortable="true"
             >
               <template #filter="{ filterModel, filterCallback }">
                 <InputText
-                  type="text"
                   v-model="filterModel.value"
-                  @keydown.enter="filterCallback()"
+                  type="text"
                   class="column-filter"
                   placeholder="Search by name"
+                  @keydown.enter="filterCallback()"
                 />
               </template>
             </Column>
             <Column
+              ref="created_at"
               field="created_at"
               header="Join Date"
-              ref="created_at"
               :sortable="true"
               class="wrap_content text-right"
             >
               <template #body="slotProps">
-                <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+                <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
               </template>
             </Column>
           </DataTable>
@@ -95,58 +98,76 @@ import { mapGetters, mapState } from 'vuex'
 export default {
   name: 'AccountAuthorityList',
   components: {
-    Card, DataTable, Column, Button, InputText
+    Card,
+    DataTable,
+    Column,
+    Button,
+    InputText,
   },
-  data () {
+
+  data() {
     return {
       filters: {
-        name: { value: '', matchMode: 'contains' }
+        name: { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
       columns: [
         { field: 'name', header: 'Name' },
-        { field: 'created_at', header: 'Created Date' }
-      ]
+        { field: 'created_at', header: 'Created Date' },
+      ],
     }
   },
-  mounted () {
+  computed: {
+    permission() {
+      return this.$store.state.credential.permission
+    },
+    ...mapState('authorityModule', ['DTLoading', 'DTTotalRecord', 'items']),
+    ...mapGetters({
+      authorityListRaw: 'authorityModule/getAuthority',
+    }),
+  },
+  async mounted() {
     this.lazyParams = {
       first: 0,
       rows: 10,
       sortField: 'created_at',
       sortOrder: 1,
-      filters: this.filters
+      filters: this.filters,
     }
-    this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+    await this.$store.dispatch(
+      'authorityModule/fetchAuthority',
+      this.lazyParams
+    )
   },
-  computed: {
-    permission () {
-      return this.$store.state.credential.permission
-    },
-    ...mapState('authorityModule', ['DTLoading', 'DTTotalRecord', 'items']),
-    ...mapGetters({
-      authorityListRaw: 'authorityModule/getAuthority'
-    })
-  },
+
   methods: {
-    formatDate (date, format) {
+    formatDate(date, format) {
       return DateManagement.formatDate(date, format)
     },
-    onPage (event) {
+    async onPage(event) {
       this.lazyParams = event
-      this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+      await this.$store.dispatch(
+        'authorityModule/fetchAuthority',
+        this.lazyParams
+      )
     },
-    onSort (event) {
+    async onSort(event) {
       this.lazyParams = event
-      this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+      await this.$store.dispatch(
+        'authorityModule/fetchAuthority',
+        this.lazyParams
+      )
     },
-    onFilter (event) {
+    async onFilter(event) {
       this.lazyParams = event
-      this.$store.dispatch('authorityModule/fetchAuthority', this.lazyParams)
+      await this.$store.dispatch(
+        'authorityModule/fetchAuthority',
+        this.lazyParams
+      )
     },
-    accountAuthorityEdit (uid) {
+    accountAuthorityEdit(uid) {
       this.$router.push(`/authority/edit/:${uid}`)
-    }
-  }
+    },
+  },
 }
 </script>

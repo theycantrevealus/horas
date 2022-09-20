@@ -1,23 +1,39 @@
+const visit = () => cy.visit('/')
+const app = () => cy.window()
+const getStore = () => app().its('store')
 describe('Login Page', () => {
-    it('State should be', () => {
-        cy.visit('/')
-        cy.window().should('have.property', '__store__')
-        const getStore = () => cy.window().its('__store__')
-        getStore().its('state').its('loading').should('equal', 0)
-        const credentialToken = getStore().its('state').its('credential').its('token')
-        credentialToken.should('equal', null)
-    })
+  beforeEach(visit)
+  it('Apps load', () => {
+    app()
+      .its('app')
+      .then((app) => {})
+  })
 
-    it('Visits the app root url', () => {
-        const getStore = () => cy.window().its('__store__')
-        const credentialToken = getStore().its('state').its('credential').its('token')
-        credentialToken.should('equal', null)
-        cy.contains('h1', 'Login')
-        cy.get('button#submitButton').should('be.disabled')
-        cy.get('input#loginEmail').type('takashitanaka@horas.com')
-        cy.get('input#loginPassword').type('123456')
-        cy.get('button#submitButton').should('be.enabled')
-        cy.get('button#submitButton').click()
-        cy.url().should("include", "dashboard")
-    })
+  it('Cypress is loaded', () => {
+    app().its('parent.Cypress').should('be.an', 'object')
+  })
+
+  it('Visits the app root url', () => {
+    cy.contains('h1', 'Login')
+    cy.get('button#submitButton').as('btnLogin')
+    cy.contains('Email').get('#loginEmail').as('emailInput')
+    cy.contains('Password').get('#loginPassword').as('passwordInput')
+
+    cy.get('@btnLogin').should('be.visible')
+    cy.get('@emailInput').should('be.visible')
+    cy.get('@passwordInput').should('be.visible')
+
+    cy.get('@emailInput').type('takashitanaka@horas.com')
+    cy.get('@passwordInput').type('123456')
+    cy.get('button#submitButton').should('be.enabled')
+    cy.get('button#submitButton')
+      .click()
+      .then(() => {
+        console.clear()
+        const credential = getStore().its('state.credential.token')
+        console.log(credential)
+      })
+
+    // cy.url().should('include', 'dashboard')
+  })
 })

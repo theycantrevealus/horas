@@ -9,6 +9,7 @@ import { join } from 'path'
 import { json } from 'body-parser'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { NestExpressApplication } from '@nestjs/platform-express'
+import * as CopyPlugin from 'copy-webpack-plugin'
 declare const module: any
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
@@ -30,12 +31,28 @@ async function bootstrap() {
     type: VersioningType.URI,
   })
 
+  app.use(json({ limit: '5mb' }))
+  app.enableCors()
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      skipMissingProperties: true,
+    })
+  )
+
   const options = new DocumentBuilder()
     .setTitle('vuenatic-horas')
     .setVersion('1')
     .addBearerAuth(
-      { type: 'http', scheme: 'Bearer', bearerFormat: 'JWT' },
-      'access-token'
+      {
+        name: 'JWT Bearer',
+        description: 'Basic JWT Beader ey{xxxxxxxx}',
+        type: 'http',
+        scheme: 'Bearer',
+        bearerFormat: 'JWT',
+        in: 'Header',
+      },
+      'JWT'
     )
     .build()
 
@@ -57,10 +74,10 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document, {
     customCss: `
     @import url(https://fonts.googleapis.com/css?family=Handlee);
-    body { padding-top: 218px !important; background: url(\'./body.jpg\') no-repeat; background-attachment: fixed; background-size: cover; }
-    .topbar { box-shadow: 0 -30px 30px 30px #f6f3f3 inset; width: 100%; margin: 0 auto; position:fixed; top: 0; left: 0; z-index: 100; background: url(\'./mbi.png\')no-repeat !important; background-size: 130px 25px !important; background-color: #fff !important; background-position: 1430px 30px !important; }
+    body { padding-top: 218px !important; background: url(\'./body.jpg\') no-repeat; background-attachment: fixed; background-size: cover; background-color: #f !important; }
+    .topbar { box-shadow: 0 -10px 10px 10px #f6f3f3 inset; width: 100%; margin: -20px auto; position:fixed; top: 0; left: 0; z-index: 100; background: url(\'./mbi.png\')no-repeat !important; background-size: 130px 25px !important; background-color: #fff !important; background-position: 1430px 30px !important; }
     .topbar-wrapper img {content:url(\'./index.png\'); width:137px; height:auto; margin: 24px}
-    .swagger-ui .topbar { background-color: #fff; z-index: 100; }
+    .swagger-ui .topbar { background-color: #fff !important; z-index: 100; }
     .scheme-container { position: fixed; top: 100px; width: 100%; padding: 15px 0 !important; z-index: 200; box-shadow: 0 2px 4px 0 rgba(0,0,0,.15) !important; }
     .information-container { position: fixed; right: 250px; top: 0; padding: 0 !important; z-index: 100; }
     .information-container.wrapper { max-width: 800px; }
@@ -131,19 +148,22 @@ async function bootstrap() {
       filter: true,
       tagsSorter: 'alpha',
       operationsSorter: 'alpha',
-      plugins: [CaseInsensitiveFilterPlugin],
-      persistAuthorization: true,
+      plugins: [
+        CaseInsensitiveFilterPlugin,
+        new CopyPlugin({
+          patterns: [
+            './node_modules/swagger-ui-dist/swagger-ui.css',
+            './node_modules/swagger-ui-dist/swagger-ui-bundle.js',
+            './node_modules/swagger-ui-dist/swagger-ui-standalone-preset.js',
+            './node_modules/swagger-ui-dist/favicon-16x16.png',
+            './node_modules/swagger-ui-dist/favicon-32x32.png',
+          ],
+        }),
+      ],
+      persistAuthorization: false,
     },
   })
 
-  app.use(json({ limit: '5mb' }))
-  app.enableCors()
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      skipMissingProperties: true,
-    })
-  )
   await app.listen(parseInt(configService.get<string>('application.port')))
   if (module.hot) {
     module.hot.accept()
