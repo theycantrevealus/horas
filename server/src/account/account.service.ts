@@ -60,6 +60,7 @@ export class AccountService {
           .then(async (logID) => {
             const tokenSet = await this.authService.create_token({
               login_id: logID.id,
+              account: accountResp,
               uid: accountResp.uid,
               email: accountResp.email,
               first_name: accountResp.first_name,

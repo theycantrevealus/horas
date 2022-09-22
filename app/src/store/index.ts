@@ -33,18 +33,20 @@ const store = createStore({
     }),
   ],
   actions: {
-    LOGIN: ({ commit }, accountRequestData: TAccountLogin) => {
-      return AccountService.login(accountRequestData).then((response: any) => {
-        response = response.data
-        if (response.status === 200) {
-          commit('UPDATE_TOKEN', response.token)
-          commit('LOGIN_SUCCESS', response.account)
+    LOGIN: async ({ commit }, accountRequestData: TAccountLogin) => {
+      return await AccountService.login(accountRequestData).then(
+        (response: any) => {
+          response = response.data
+          if (response.status === 200) {
+            commit('UPDATE_TOKEN', response.token)
+            commit('LOGIN_SUCCESS', response.account)
+          }
+          return response
         }
-        return response
-      })
+      )
     },
-    UPDATE_MENU: ({ commit, getters }) => {
-      return CoreService.generateMenu(getters.getToken).then(
+    UPDATE_MENU: async ({ commit, getters }) => {
+      return await CoreService.generateMenu(getters.getToken).then(
         (response: any) => {
           response = response.data
           commit('UPDATE_MENU', response)
@@ -77,22 +79,24 @@ const store = createStore({
       state.credential.uid = credentialData.uid
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
+      console.log(state.credential)
 
       const grantedPerm = credentialData.grantedPerm
       const buildPermission = {}
-      for (const a in grantedPerm) {
+      for (let a in grantedPerm) {
         if (buildPermission[grantedPerm[a].domiden]) {
           buildPermission[grantedPerm[a].domiden] = {}
         }
 
         buildPermission[grantedPerm[a].domiden] = grantedPerm[a]
       }
+
       state.credential.permission = buildPermission
 
       const grantedPage = credentialData.grantedPage
       const buildPage = {}
       state.credential.routes.push('/login')
-      for (const a in grantedPage) {
+      for (let a in grantedPage) {
         if (buildPage[`page_${grantedPage[a].id}`]) {
           buildPage[`page_${grantedPage[a].id}`] = {}
         }
@@ -100,6 +104,7 @@ const store = createStore({
 
         state.credential.routes.push(grantedPage[a].identifier)
       }
+      console.log(buildPage)
       state.credential.pages = buildPage
     },
     CLEAR_SESSION(state: any) {

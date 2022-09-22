@@ -78,7 +78,7 @@
   </ul>
 </template>
 <script>
-import { mapState } from 'vuex';
+import { mapState } from 'vuex'
 
 export default {
   name: 'SideMenuAutoGen',
@@ -96,41 +96,44 @@ export default {
   data() {
     return {
       activeIndex: null,
-    };
+    }
   },
   computed: {
     ...mapState(['credential']),
   },
+  created() {
+    console.log(this.items)
+  },
   methods: {
     onMenuItemClick(event, item, index) {
       if (item.disabled) {
-        event.preventDefault();
-        return;
+        event.preventDefault()
+        return
       }
 
       if (!item.to && !item.url) {
-        event.preventDefault();
+        event.preventDefault()
       }
 
       // execute command
       if (item.command) {
-        item.command({ originalEvent: event, item: item });
+        item.command({ originalEvent: event, item: item })
       }
 
-      this.activeIndex = index === this.activeIndex ? null : index;
+      this.activeIndex = index === this.activeIndex ? null : index
 
       this.$emit('menuitem-click', {
         originalEvent: event,
         item: item,
-      });
+      })
     },
     visible(item) {
       return typeof item.visible === 'function'
         ? item.visible()
-        : item.visible !== false;
+        : item.visible !== false
     },
   },
-};
+}
 </script>
 
 <style scoped>

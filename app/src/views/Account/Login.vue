@@ -12,7 +12,7 @@
           <template #header>
             <img
               :src="require('../../assets/logo.png')"
-              width="200"
+              class="login-logo"
               alt="horas"
             />
             <h1 style="padding: 20px">Login</h1>

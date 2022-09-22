@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger'
+import { IsString } from 'class-validator'
 import {
   Entity,
   Column,
@@ -13,6 +15,10 @@ export class CoreMenuGroupModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
+  @ApiProperty({
+    example: 'Menu Group Name',
+  })
+  @IsString()
   @Column({ nullable: false, type: 'character varying' })
   name: string
 

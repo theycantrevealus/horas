@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Builder',
     component: Builder,
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
     },
     redirect: '/dashboard',
     children: [
@@ -21,9 +21,10 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Dashboard',
         meta: {
           pageTitle: 'Dashboard',
-          requiresAuth: true
+          requiresAuth: true,
         },
-        component: () => import(/* webpackChunkName: "dashboard" */ '../views/Dashboard.vue')
+        component: () =>
+          import(/* webpackChunkName: "dashboard" */ '../views/Dashboard.vue'),
       },
       {
         path: 'about',
@@ -34,11 +35,12 @@ const routes: Array<RouteRecordRaw> = [
           breadcrumb: [
             {
               label: 'About',
-              to: '/about'
-            }
-          ]
+              to: '/about',
+            },
+          ],
         },
-        component: () => import(/* webpackChunkName: "about" */ '@/views/About.vue')
+        component: () =>
+          import(/* webpackChunkName: "about" */ '@/views/About.vue'),
       },
       {
         path: '/core',
@@ -53,38 +55,51 @@ const routes: Array<RouteRecordRaw> = [
               breadcrumb: [
                 {
                   label: 'Menu',
-                  to: 'menu'
-                }
-              ]
+                  to: 'menu',
+                },
+              ],
             },
-            component: () => import(/* webpackChunkName: "menu.list" */ '@/views/Core/Menu.vue')
-          }
+            component: () =>
+              import(
+                /* webpackChunkName: "menu.list" */ '@/views/Core/Menu.vue'
+              ),
+          },
         ],
-        component: () => import(/* webpackChunkName: "menu" */ '@/views/Core/Index.vue')
-      }
-    ]
+        component: () =>
+          import(/* webpackChunkName: "menu" */ '@/views/Core/Index.vue'),
+      },
+    ],
   },
   {
     path: '/login',
     name: 'Login',
-    component: Login
+    meta: {
+      requiresAuth: false,
+    },
+    component: Login,
   },
   {
     path: '/404',
     name: 'PageNotFound',
-    component: PageNotFound
+    meta: {
+      requiresAuth: false,
+    },
+    component: PageNotFound,
   },
   {
     path: '/403',
     name: 'PageUnauthorized',
-    component: PageUnauthorized
-  }
+    meta: {
+      requiresAuth: true,
+    },
+    component: PageUnauthorized,
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
-  scrollBehavior (to, from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
     }
@@ -93,41 +108,64 @@ const router = createRouter({
     } else {
       return { el: '#content-loader', top: 0 }
     }
-  }
+  },
 })
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
-  if (!to.matched.length) {
-    next('/404')
-  } else {
-    const isAuthed = ((<any>store.state).credential.token !== '' && (<any>store.state).credential.token !== null && (<any>store.state).credential.token !== undefined)
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-      if (isAuthed) {
-        // Check If authorized Page
-        // const authorized: string[] = store.state.credential.grantedPage
-        // if (authorized.indexOf(to.fullPath) >= 0) {
-        //   next()
-        //   return
-        // }
-        // next('/403')
-        // next()
-        if ((<any>store.state).credential.routes.indexOf(to.name) < 0) {
-          next('/403')
-        } else {
-          next()
-        }
-        return
-      }
-      next('/login')
-    } else {
-      if (isAuthed && to.matched.some(record => record.path === '/login')) {
-        next('/dashboard')
+
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    const isAuthed =
+      (<any>store.state).credential.token !== '' &&
+      (<any>store.state).credential.token !== null &&
+      (<any>store.state).credential.token !== undefined
+
+    if (isAuthed) {
+      if (!to.matched.length) {
+        next('/404')
       } else {
         next()
+        return
       }
+    } else {
+      next('/login')
+      return
+    }
+  } else {
+    if (!to.matched.length) {
+      next('/404')
+    } else {
+      next()
     }
   }
+
+  // if (!to.matched.length) {
+  //   alert('Not match')
+  //   next('/404')
+  // } else {
+  //   if (to.matched.some((record) => record.meta.requiresAuth)) {
+  //     if (isAuthed) {
+  //       if ((<any>store.state).credential.routes.indexOf(to.name) < 0) {
+  //         alert('Not auth')
+  //         next('/403')
+  //       } else {
+  //         alert('Allowed')
+  //         // alert()
+  //         next()
+  //       }
+  //       return
+  //     }
+  //     if (to.name !== 'Login') next('/login')
+  //   } else {
+  //     if (isAuthed && to.matched.some((record) => record.path === '/login')) {
+  //       // next('/dashboard')
+  //       next
+  //     } else {
+  //       alert('Where')
+  //       next()
+  //     }
+  //   }
+  // }
 })
 
 router.afterEach(() => {

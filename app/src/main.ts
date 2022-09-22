@@ -24,15 +24,12 @@ import '@/assets/style/table.css'
 import '@/assets/style/modal.css'
 import 'nprogress/nprogress.css'
 import CKEditor from '@ckeditor/ckeditor5-vue'
-import VueGoogleMaps from '@fawmi/vue-google-maps'
 
 // Modular
 import { registerModules } from '@/modules/register'
 import Account from '@/modules/setting/account'
 import Authority from '@/modules/setting/authority'
 import Service from '@/modules/service'
-import MasterItem from '@/modules/master_item'
-import MasterDocumentation from '@/modules/master_documentation'
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 
@@ -40,10 +37,8 @@ registerModules({
   accountModule: Account,
   authorityModule: Authority,
   serviceModule: Service,
-  masterItemModule: MasterItem,
-  masterTourModule: MasterDocumentation,
 })
-
+localStorage.clear()
 setupInterceptors()
 declare global {
   interface Window {
@@ -71,7 +66,7 @@ Sentry.init({
   integrations: [
     new Integrations.BrowserTracing({
       routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: ['localhost', 'my-site-url.com', /^\//],
+      tracingOrigins: ['localhost', 'horas.com', /^\//],
     }),
   ],
   tracesSampleRate: 1.0,

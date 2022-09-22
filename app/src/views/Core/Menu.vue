@@ -61,34 +61,34 @@
                 <span class="buttonset">
                   <Button
                     type="button"
-                    class="button-success button-raised button-sm"
+                    class="p-button-success button-raised button-sm"
                     @click="onNodeAdd(slotProps.node, 'Add Child Menu')"
                   >
                     <span class="material-icons">add</span>
                   </Button>
                   <Button
                     type="button"
-                    class="button-info button-raised button-sm"
+                    class="p-button-info button-raised button-sm"
                     @click="onNodeEdit(slotProps.node, 'Edit Child Menu')"
                   >
                     <span class="material-icons">edit</span>
                   </Button>
                   <Button
                     type="button"
-                    class="button-danger button-raised button-sm"
+                    class="p-button-danger button-raised button-sm"
                     @click="onNodeDelete($event, slotProps.node.data.id)"
                   >
                     <span class="material-icons">delete</span>
                   </Button>
                   <Button
                     type="button"
-                    class="button-success button-raised button-sm"
+                    class="p-button-warning button-raised button-sm"
                   >
                     <span class="material-icons">arrow_upward</span>
                   </Button>
                   <Button
                     type="button"
-                    class="button-success button-raised button-sm"
+                    class="p-button-warning button-raised button-sm"
                   >
                     <span class="material-icons">arrow_downward</span>
                   </Button>

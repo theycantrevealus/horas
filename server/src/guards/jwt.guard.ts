@@ -1,6 +1,7 @@
 import {
   ExecutionContext,
   HttpException,
+  HttpStatus,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -40,8 +41,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest()
 
     if (!request.headers.authorization) {
-      new UnauthorizedException()
-      return false
+      throw new UnauthorizedException('Not authorized request')
     }
 
     const decodeTokenResponse: JWTTokenResponse =

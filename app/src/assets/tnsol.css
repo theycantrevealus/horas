@@ -25,7 +25,7 @@
 
 body {
     overflow: hidden;
-    background: #eff2fe !important;
+    background: #fff !important;
     padding: 0 !important;
     margin: 0 !important;
     font-family: 'GreyCliff', SansSerif, Arial, serif !important;
@@ -50,6 +50,13 @@ table {
 
 .largeDataType tbody tr:nth-child(even) td {
     background: #eeffe1 !important;
+}
+
+img.login-logo {
+    position: relative;
+    display: flex;
+    width: 200px !important;
+    margin: 0 auto !important
 }
 
 a:focus,
@@ -185,7 +192,6 @@ input::-moz-focus-inner,
 }
 
 .loadpanel {
-    font-family: Karla, SansSerif, Arial, serif !important;
     overflow-x: hidden !important;
     position: fixed;
     z-index: 998;
@@ -208,7 +214,14 @@ input::-moz-focus-inner,
 }
 
 .breadcrumb-container {
-  margin-top: 10px;
+    font-family: 'Visby Round Bold' !important;
+    margin-top: 10px;
+}
+
+.breadcrumb-container .grid{
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    margin: 10px;
+    border-radius: 10px;
 }
 
 .breadcrumb-container .p-breadcrumb {
@@ -231,16 +244,15 @@ input::-moz-focus-inner,
 
 .breadcrumb-container .pageName {
     margin: .5rem 0;
-    font-family: Karla, SansSerif, Arial, serif !important;
     font-size: 1rem !important;
     font-weight: bolder;
     border-right: solid 1px #394141;
     padding: 0 20px !important;
-    color: #4e6cf8;
+    color: #42b883;
 }
 
 .breadcrumb-container .pageName span {
-    color: #4e6cf8;
+    color: #42b883;
     font-size: .7rem !important;
 }
 
@@ -251,8 +263,7 @@ input::-moz-focus-inner,
     left: 0;
     height: 100%;
     overflow-y: hidden;
-    background: #4e6cf8;
-    box-shadow: 1px 0 5px 5px rgba(0, 0, 0, .2);
+    background: #f2f9f9;
 }
 
 .sidepanel .wrapper {
@@ -268,8 +279,8 @@ input::-moz-focus-inner,
     /* -webkit-filter: drop-shadow(0px 0px 7px rgba(240, 240, 240, 0.7));
     filter: drop-shadow(0px 0px 7px rgba(240, 240, 240, 0.7)); */
     position: relative;
-    width: 90%;
-    margin: 20px 5% 0px;
+    width: 50%;
+    margin: 20px 25% 0px;
 }
 
 .sidepanel-container {
@@ -277,10 +288,11 @@ input::-moz-focus-inner,
 }
 
 .sidepanel .layout-menu li a {
-    font-family: 'Visby Round Bold' !important;
     font-weight: bolder;
-    border-radius: 5px !important;
-    color: #fff !important;
+    padding: 10px;
+    margin: 0 10px;
+    border-radius: 10px !important;
+    color: #a2a2a2 !important;
 }
 
 .material-icons-outlined {
@@ -290,15 +302,15 @@ input::-moz-focus-inner,
 .sidepanel .layout-menu li a .material-icons,
 .sidepanel .material-icons-outlined {
     margin-top: 1px;
-    color: #fff !important;
+    color: #a2a2a2 !important;
 }
 
 .sidepanel .layout-menu li .layout-menuitem-root-text {
-    font-family: 'Visby Round Bold', SansSerif, Arial, serif !important;
     font-weight: bolder !important;
-    color: #fff !important;
+    padding: 0 22px;
+    color: #454545 !important;
     letter-spacing: 2px;
-    font-size: .5rem !important;
+    font-size: .6rem !important;
 }
 
 .sidepanel hr {
@@ -312,7 +324,6 @@ input::-moz-focus-inner,
 
 .sidepanel .p-component {
     background: #003F49;
-    font-family: Poppins, SansSerif, Arial, serif !important;
     font-size: 10pt !important;
 }
 
@@ -330,7 +341,7 @@ input::-moz-focus-inner,
 }
 
 .layout-menu li span {
-    font-size: .6rem !important;
+    font-size: .65rem !important;
     letter-spacing: 1px
 }
 
@@ -340,14 +351,12 @@ input::-moz-focus-inner,
 
 .layout-menu li a.router-link-exact-active, .layout-menu li a.router-link-active {
     font-weight: bolder !important;
-    /* background: #dbffca; */
-    background: #fff;
-    /* color: #28B67E !important; */
-    color: #8ca0fa !important
+    background: #def3ee;
+    color: rgb(59, 59, 59) !important
 }
 
 .layout-menu li a.router-link-exact-active .material-icons-outlined, .layout-menu li a.router-link-active .material-icons-outlined {
-    color: #8ca0fa !important;
+    color: #00b23e !important;
 }
 
 .p-panel {
@@ -427,7 +436,7 @@ input::-moz-focus-inner,
 }
 
 .p-card-header {
-    background: #dcffdd !important;
+    background: #fff !important;
 }
 
 .p-card.card-fluid {
@@ -444,14 +453,12 @@ input::-moz-focus-inner,
 
 .p-card-title {
     padding: 10px 10px 0 10px;
-    font-family: Karla, SansSerif, Arial, serif !important;
     font-size: 11pt !important;
 }
 
 .p-card .p-card-body {
     border-radius: 0 !important;
     padding: 5px 10px;
-    font-family: Karla, SansSerif, Arial, serif !important;
 }
 
 
@@ -478,7 +485,6 @@ input::-moz-focus-inner,
 }
 
 .p-toast-message-text {
-    font-family: Karla, SansSerif, Arial, serif !important;
     font-size: 10pt !important;
 }
 
@@ -548,12 +554,12 @@ input::-moz-focus-inner,
     padding: .5rem 1.25rem !important
 }
 
-.p-button-sm {
+.button-sm {
     font-size: .8rem !important;
     padding: .5rem !important;
 }
 
-.p-button-sm .material-icons {
+.button-sm .material-icons {
     font-size: .8rem !important;
     margin: 2px 5px;
 }
@@ -608,7 +614,6 @@ input::-moz-focus-inner,
 
 .p-badge {
     font-size: .6rem !important;
-    font-family: 'Visby Round', SansSerif, Arial, serif !important;
     min-width: 1rem !important;
     min-height: 1rem !important;
     width: 1.2rem !important;
@@ -616,22 +621,22 @@ input::-moz-focus-inner,
     line-height: 1.2rem !important;
 }
 
-.p-badge-success {
+.badge-success {
     background: #b7f59f !important;
     color: #08b500 !important;
 }
 
-.p-badge-info {
+.badge-info {
     background: #c5e0ff !important;
     color: #006dea !important
 }
 
-.p-badge-danger {
+.badge-danger {
     background: #ffd6d6 !important;
     color: #ff0000 !important
 }
 
-.p-badge-warning {
+.badge-warning {
     background: #fffcbc !important;
     color: #c8b000 !important
 }

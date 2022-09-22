@@ -5,22 +5,36 @@
     </div>
     <div class="sidepanel">
       <div class="wrapper">
-        <img class="panelLogo" :src="require('../assets/logo-white.png')" alt="horas" />
+        <img
+          class="panelLogo"
+          :src="require('../assets/logo-white.png')"
+          alt="horas"
+        />
       </div>
-      <perfect-scrollbar>
-        <div class="wrapper">
-          <SidePanelBar />
-        </div>
-      </perfect-scrollbar>
+      <div class="wrapper">
+        <SidePanelBar />
+      </div>
+      <!-- <perfect-scrollbar>
+        
+      </perfect-scrollbar> -->
     </div>
     <div class="loadpanel">
       <div class="wrapper">
         <div class="breadcrumb-container">
-          <BreadCrumb :items="breadcrumb" :pageName="pageName" />
+          <BreadCrumb
+            :items="breadcrumb"
+            :pageName="pageName"
+          />
         </div>
-        <div id="content-loader" class="content-loader">
+        <div
+          id="content-loader"
+          class="content-loader"
+        >
           <router-view v-slot="{ Component }">
-            <transition name="scale" mode="out-in">
+            <transition
+              name="scale"
+              mode="out-in"
+            >
               <component :is="Component" />
             </transition>
           </router-view>
@@ -42,9 +56,9 @@ export default {
   components: {
     TopPanelBar,
     SidePanelBar,
-    BreadCrumb
+    BreadCrumb,
   },
-  data () {
+  data() {
     return {
       layoutMode: 'static',
       layoutColorMode: 'light',
@@ -53,37 +67,44 @@ export default {
       mobileMenuActive: false,
       menu: [],
       breadcrumb: [],
-      pageName: ''
+      pageName: '',
     }
   },
   computed: {
-    containerClass () {
-      return ['layout-wrapper', {
-        'layout-overlay': this.layoutMode === 'overlay',
-        'layout-static': this.layoutMode === 'static',
-        'layout-static-sidebar-inactive': this.staticMenuInactive && this.layoutMode === 'static',
-        'layout-overlay-sidebar-active': this.overlayMenuActive && this.layoutMode === 'overlay',
-        'layout-mobile-sidebar-active': this.mobileMenuActive,
-        'input-filled': this.$primevue.config.inputStyle === 'filled',
-        'ripple-disabled': this.$primevue.config.ripple === false,
-        'layout-theme-light': this.$appState.theme.startsWith('saga')
-      }]
+    containerClass() {
+      return [
+        'layout-wrapper',
+        {
+          'layout-overlay': this.layoutMode === 'overlay',
+          'layout-static': this.layoutMode === 'static',
+          'layout-static-sidebar-inactive':
+            this.staticMenuInactive && this.layoutMode === 'static',
+          'layout-overlay-sidebar-active':
+            this.overlayMenuActive && this.layoutMode === 'overlay',
+          'layout-mobile-sidebar-active': this.mobileMenuActive,
+          'input-filled': this.$primevue.config.inputStyle === 'filled',
+          'ripple-disabled': this.$primevue.config.ripple === false,
+          'layout-theme-light': this.$appState.theme.startsWith('saga'),
+        },
+      ]
     },
-    logo () {
-      return (this.layoutColorMode === 'dark') ? 'images/logo-white.svg' : 'images/logo.svg'
-    }
+    logo() {
+      return this.layoutColorMode === 'dark'
+        ? 'images/logo-white.svg'
+        : 'images/logo.svg'
+    },
   },
   watch: {
-    '$route' () {
+    $route() {
       this.breadcrumb = this.$route.meta.breadcrumb
       this.pageName = this.$route.meta.pageTitle
       this.$refs.scrollLoader.$el.scrollTop = 0
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.updatePageInfo()
   },
-  beforeUpdate () {
+  beforeUpdate() {
     if (this.mobileMenuActive) {
       this.addClass(document.body, 'body-overflow-hidden')
     } else {
@@ -91,11 +112,11 @@ export default {
     }
   },
   methods: {
-    updatePageInfo () {
+    updatePageInfo() {
       this.breadcrumb = this.$route.meta.breadcrumb
       this.pageName = this.$route.name
     },
-    onWrapperClick () {
+    onWrapperClick() {
       if (!this.menuClick) {
         this.overlayMenuActive = false
         this.mobileMenuActive = false
@@ -103,7 +124,7 @@ export default {
 
       this.menuClick = false
     },
-    onMenuToggle () {
+    onMenuToggle() {
       this.menuClick = true
 
       if (this.isDesktop()) {
@@ -123,39 +144,45 @@ export default {
 
       event.preventDefault()
     },
-    onSidebarClick () {
+    onSidebarClick() {
       this.menuClick = true
     },
-    onMenuItemClick (event) {
+    onMenuItemClick(event) {
       if (event.item && !event.item.items) {
         this.overlayMenuActive = false
         this.mobileMenuActive = false
       }
     },
-    onLayoutChange (layoutMode) {
+    onLayoutChange(layoutMode) {
       this.layoutMode = layoutMode
     },
-    onLayoutColorChange (layoutColorMode) {
+    onLayoutColorChange(layoutColorMode) {
       this.layoutColorMode = layoutColorMode
     },
-    addClass (element, className) {
+    addClass(element, className) {
       if (element.classList) {
         element.classList.add(className)
       } else {
         element.className += ' ' + className
       }
     },
-    removeClass (element, className) {
+    removeClass(element, className) {
       if (element.classList) {
         element.classList.remove(className)
       } else {
-        element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ')
+        element.className = element.className.replace(
+          new RegExp(
+            '(^|\\b)' + className.split(' ').join('|') + '(\\b|$)',
+            'gi'
+          ),
+          ' '
+        )
       }
     },
-    isDesktop () {
+    isDesktop() {
       return window.innerWidth >= 992
     },
-    isSidebarVisible () {
+    isSidebarVisible() {
       if (this.isDesktop()) {
         if (this.layoutMode === 'static') {
           return !this.staticMenuInactive
@@ -165,8 +192,7 @@ export default {
       }
 
       return true
-    }
-  }
-
+    },
+  },
 }
 </script>

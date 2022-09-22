@@ -1,23 +1,23 @@
-import axios from 'axios';
+import axios from 'axios'
 
 class CoreService {
-  generateMenu(token: String) {
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-    return axios
-      .get(`${process.env.VUE_APP_APIGATEWAY}menu/tree`)
+  async generateMenu(token: String) {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`
+    return await axios
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree`)
       .then((response) => {
-        return Promise.resolve(response);
-      });
+        return Promise.resolve(response)
+      })
   }
 
-  generateMenuManager(token: String) {
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-    return axios
-      .get(`${process.env.VUE_APP_APIGATEWAY}menu/tree/manager`)
+  async generateMenuManager(token: String) {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`
+    return await axios
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree/manager`)
       .then((response) => {
-        return Promise.resolve(response);
-      });
+        return Promise.resolve(response)
+      })
   }
 }
 
-export default new CoreService();
+export default new CoreService()

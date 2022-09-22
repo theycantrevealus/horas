@@ -1,7 +1,12 @@
 <template>
   <div class="sidepanel-container">
     <div class="layout-menu-container">
-      <SideMenuAutoGen :items="getSideMenu" class="layout-menu" :root="true" @menuitem-click="onMenuItemClick" />
+      <SideMenuAutoGen
+        :items="getSideMenu"
+        class="layout-menu"
+        :root="true"
+        @menuitem-click="onMenuItemClick"
+      />
     </div>
   </div>
 </template>
@@ -12,32 +17,39 @@ import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'SidePanelMenu',
   components: {
-    SideMenuAutoGen
+    SideMenuAutoGen,
   },
   props: {
     model: {
-      type:Array,
-      default:[]
-    }
+      type: Array,
+      default: [],
+    },
   },
-  emits:['menuitem-click'],
-  data () {
+  emits: ['menuitem-click'],
+  data() {
     return {
       sidemenu3: [
         {
           label: 'Home',
-          items: [{
-            label: 'Dashboard', icon: 'home', to: '/dashboard'
-          }, {
-            label: 'About', icon: 'info', to: '/about'
-          }]
+          items: [
+            {
+              label: 'Dashboard',
+              icon: 'home',
+              to: '/dashboard',
+            },
+            {
+              label: 'About',
+              icon: 'info',
+              to: '/about',
+            },
+          ],
         },
         {
           label: 'Master Data',
           items: [
             { label: 'Form Layout', icon: 'api', to: '/form' },
-            { label: 'Message', icon: 'api', to: '/message' }
-          ]
+            { label: 'Message', icon: 'api', to: '/message' },
+          ],
         },
         {
           label: 'Setting',
@@ -45,7 +57,7 @@ export default {
             {
               label: 'Module',
               icon: 'view_in_ar',
-              to: '/core/menu'
+              to: '/core/menu',
             },
             {
               label: 'Module',
@@ -57,58 +69,58 @@ export default {
                   items: [
                     { label: 'Submenu 1.1.1', icon: 'api' },
                     { label: 'Submenu 1.1.2', icon: 'api' },
-                    { label: 'Submenu 1.1.3', icon: 'api' }
-                  ]
+                    { label: 'Submenu 1.1.3', icon: 'api' },
+                  ],
                 },
                 {
                   label: 'Submenu 1.2',
                   icon: 'api',
                   items: [
                     { label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 1.2.2', icon: 'pi pi-fw pi-bookmark' }
-                  ]
-                }
-              ]
-            }
-          ]
+                    { label: 'Submenu 1.2.2', icon: 'pi pi-fw pi-bookmark' },
+                  ],
+                },
+              ],
+            },
+          ],
         },
         {
           label: 'Get Started',
           items: [
             {
               label: 'Documentation',
-              icon: 'help_outline'
+              icon: 'help_outline',
             },
             {
               label: 'Source',
-              icon: 'code'
-            }
-          ]
-        }
-      ]
+              icon: 'code',
+            },
+          ],
+        },
+      ],
     }
   },
   computed: {
     ...mapGetters({
-      getSideMenu: 'getSideMenu'
-    })
+      getSideMenu: 'getSideMenu',
+    }),
   },
-  mounted () {
+  mounted() {
     this.rebuildMenu()
   },
   methods: {
     ...mapActions({
       sLogout: 'LOGOUT',
-      rebuildMenu: 'UPDATE_MENU'
+      rebuildMenu: 'UPDATE_MENU',
     }),
-    logout () {
+    logout() {
       this.sLogout().then(() => {
         this.$router.push('/login')
       })
     },
-    onMenuItemClick (event) {
+    onMenuItemClick(event) {
       this.$emit('menuitem-click', event)
-    }
+    },
   },
 }
 </script>

@@ -160,7 +160,7 @@ async function bootstrap() {
           ],
         }),
       ],
-      persistAuthorization: false,
+      persistAuthorization: true,
     },
   })
 

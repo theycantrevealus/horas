@@ -24,6 +24,7 @@ export class GlobalResponse {
   @ApiProperty({
     example: 'POST',
     description: '',
+    default: 'UNDEFINED',
   })
   method: string
 

@@ -10,6 +10,7 @@ import redis from '@configs/redis'
 import { AccountModule } from './account/account.module'
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
 import entities from '@configs/entities'
+import { MenuModule } from './menu/menu.module'
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import entities from '@configs/entities'
       inject: [ConfigService],
     }),
     AccountModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [AppService],

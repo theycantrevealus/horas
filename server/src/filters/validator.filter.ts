@@ -6,8 +6,26 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { Request, Response } from 'express'
+@Catch(UnauthorizedException)
+export class UnAuthorizedExceptionFilter implements ExceptionFilter {
+  catch(exception: UnauthorizedException, host: ArgumentsHost): void {
+    const ctx = host.switchToHttp()
+    const response = ctx.getResponse<Response>()
+    const request = ctx.getRequest<Request>()
+    let status = exception.getStatus()
+    const parseResponse = exception.getResponse()
+    response.status(status).json({
+      statusCode: status,
+      message: parseResponse['message'],
+      description: parseResponse['error'],
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    })
+  }
+}
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -15,7 +33,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
     const request = ctx.getRequest<Request>()
-    const status = exception.getStatus()
+    const status = exception.getStatus() | HttpStatus.CREATED
 
     response.status(status).json({
       ...response,
@@ -36,7 +54,7 @@ export class RequestValidatorFilter implements ExceptionFilter {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
     const request = ctx.getRequest<Request>()
-    const status = exception.getStatus()
+    const status = exception.getStatus() | HttpStatus.CREATED
     const parseResponse = exception.getResponse()
 
     response.status(status).json({

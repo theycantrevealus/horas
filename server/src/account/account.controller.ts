@@ -10,6 +10,8 @@ import {
   Delete,
   Logger,
   Query,
+  UseFilters,
+  Version,
 } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { AccountService } from '@/account/account.service'
@@ -23,9 +25,22 @@ import { Authorization } from '@/decorators/auth.decorator'
 import { LoggingInterceptor } from '@/interceptors/logging.interceptor'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
 import { AccountModel } from '@/models/account.model'
+import {
+  MongooseFilter,
+  HttpExceptionFilter,
+  RequestValidatorFilter,
+  PostgreFilter,
+  UnAuthorizedExceptionFilter,
+} from '@/filters/validator.filter'
 
-@Controller('account')
-@ApiTags('account')
+@Controller({ path: 'account', version: '1' })
+@UseFilters(
+  new PostgreFilter(),
+  new HttpExceptionFilter(),
+  new RequestValidatorFilter(),
+  new UnAuthorizedExceptionFilter()
+)
+@ApiTags('Account Management')
 export class AccountController {
   private logger = new Logger('HTTP')
 
