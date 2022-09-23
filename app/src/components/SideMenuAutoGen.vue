@@ -102,7 +102,7 @@ export default {
     ...mapState(['credential']),
   },
   created() {
-    console.log(this.items)
+    //
   },
   methods: {
     onMenuItemClick(event, item, index) {

@@ -2,10 +2,13 @@
   <div class="head_wrapper">
     <Menubar :model="items">
       <template #start>
-        <Chip :label="first_name + ' ' + last_name" :image="profile_photo" />
+        <Chip
+          :label="first_name + ' ' + last_name"
+          :image="profile_photo"
+        />
       </template>
       <template #end>
-        <Button icon="pi pi-power-off" class="button-link button-sm" @click="logout" />
+        ?
       </template>
     </Menubar>
   </div>
@@ -18,9 +21,10 @@ import { mapActions } from 'vuex'
 export default {
   name: 'TopPanelMenu',
   components: {
-    Menubar, Button, Chip
+    Menubar,
+    Chip,
   },
-  data () {
+  data() {
     return {
       sidemenu: [
         {
@@ -33,28 +37,27 @@ export default {
               items: [
                 {
                   label: 'Bookmark',
-                  icon: 'pi pi-fw pi-bookmark'
+                  icon: 'pi pi-fw pi-bookmark',
                 },
                 {
                   label: 'Video',
-                  icon: 'pi pi-fw pi-video'
-                }
-
-              ]
+                  icon: 'pi pi-fw pi-video',
+                },
+              ],
             },
             {
               label: 'Delete',
-              icon: 'pi pi-fw pi-trash'
+              icon: 'pi pi-fw pi-trash',
             },
             {
-              separator: true
+              separator: true,
             },
             {
               label: 'Export',
-              icon: 'pi pi-fw pi-external-link'
-            }
-          ]
-        }
+              icon: 'pi pi-fw pi-external-link',
+            },
+          ],
+        },
       ],
       items: [
         {
@@ -67,29 +70,28 @@ export default {
               items: [
                 {
                   label: 'Bookmark',
-                  icon: 'pi pi-fw pi-bookmark'
+                  icon: 'pi pi-fw pi-bookmark',
                 },
                 {
                   label: 'Video',
-                  icon: 'pi pi-fw pi-video'
-                }
-
-              ]
+                  icon: 'pi pi-fw pi-video',
+                },
+              ],
             },
             {
               label: 'Home',
               icon: 'pi pi-fw pi-trash',
-              to: '/dashboard'
+              to: '/dashboard',
             },
             {
-              separator: true
+              separator: true,
             },
             {
               label: 'About',
               icon: 'pi pi-fw pi-external-link',
-              to: '/about'
-            }
-          ]
+              to: '/about',
+            },
+          ],
         },
         {
           label: 'Edit',
@@ -97,22 +99,21 @@ export default {
           items: [
             {
               label: 'Left',
-              icon: 'pi pi-fw pi-align-left'
+              icon: 'pi pi-fw pi-align-left',
             },
             {
               label: 'Right',
-              icon: 'pi pi-fw pi-align-right'
+              icon: 'pi pi-fw pi-align-right',
             },
             {
               label: 'Center',
-              icon: 'pi pi-fw pi-align-center'
+              icon: 'pi pi-fw pi-align-center',
             },
             {
               label: 'Justify',
-              icon: 'pi pi-fw pi-align-justify'
-            }
-
-          ]
+              icon: 'pi pi-fw pi-align-justify',
+            },
+          ],
         },
         {
           label: 'Users',
@@ -120,13 +121,11 @@ export default {
           items: [
             {
               label: 'New',
-              icon: 'pi pi-fw pi-user-plus'
-
+              icon: 'pi pi-fw pi-user-plus',
             },
             {
               label: 'Delete',
-              icon: 'pi pi-fw pi-user-minus'
-
+              icon: 'pi pi-fw pi-user-minus',
             },
             {
               label: 'Search',
@@ -138,17 +137,17 @@ export default {
                   items: [
                     {
                       label: 'Print',
-                      icon: 'pi pi-fw pi-print'
-                    }
-                  ]
+                      icon: 'pi pi-fw pi-print',
+                    },
+                  ],
                 },
                 {
                   icon: 'pi pi-fw pi-bars',
-                  label: 'List'
-                }
-              ]
-            }
-          ]
+                  label: 'List',
+                },
+              ],
+            },
+          ],
         },
         {
           label: 'Events',
@@ -160,14 +159,13 @@ export default {
               items: [
                 {
                   label: 'Save',
-                  icon: 'pi pi-fw pi-calendar-plus'
+                  icon: 'pi pi-fw pi-calendar-plus',
                 },
                 {
                   label: 'Delete',
-                  icon: 'pi pi-fw pi-calendar-minus'
-                }
-
-              ]
+                  icon: 'pi pi-fw pi-calendar-minus',
+                },
+              ],
             },
             {
               label: 'Archieve',
@@ -175,35 +173,27 @@ export default {
               items: [
                 {
                   label: 'Remove',
-                  icon: 'pi pi-fw pi-calendar-minus'
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                  icon: 'pi pi-fw pi-calendar-minus',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     }
   },
   computed: {
-    profile_photo () {
-      return `${process.env.VUE_APP_APIGATEWAY}avatar/${this.$store.state.credential.uid}.png?d=${Date.now()}`
+    profile_photo() {
+      return `${process.env.VUE_APP_APIGATEWAY}avatar/${
+        this.$store.state.credential.uid
+      }.png?d=${Date.now()}`
     },
-    first_name () {
+    first_name() {
       return this.$store.state.credential.first_name
     },
-    last_name () {
+    last_name() {
       return this.$store.state.credential.last_name
-    }
+    },
   },
-  methods: {
-    ...mapActions({
-      sLogout: 'LOGOUT'
-    }),
-    logout () {
-      this.sLogout().then(() => {
-        this.$router.push('/login')
-      })
-    }
-  }
 }
 </script>

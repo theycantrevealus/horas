@@ -7,6 +7,30 @@
         :root="true"
         @menuitem-click="onMenuItemClick"
       />
+      <ul class="layout-menu">
+        <li
+          class="layout-menuitem-category"
+          role="none"
+        >
+          <div class="layout-menuitem-root-text">Account</div>
+          <ul>
+            <li
+              class=""
+              role="none"
+            >
+              <a
+                href="#"
+                class=""
+                role="menuitem"
+                @click="logout"
+              >
+                <span class="material-icons-outlined">logout</span><span class="caption">Logout</span>
+              </a>
+              <ul style="display: none;"></ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </div>
 </template>

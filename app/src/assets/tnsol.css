@@ -143,7 +143,6 @@ input::-moz-focus-inner,
 .topbar .head_wrapper {
     padding: 10px 20px;
     width: content-box;
-    box-shadow: 1px 0 0 1px #dadfea;
 }
 
 .topbar .p-menubar-start {
@@ -201,7 +200,11 @@ input::-moz-focus-inner,
 }
 
 .content-loader {
+    background: #f5f9f8;
+    margin: 10px;
+    border-radius: 20px;
     padding: 2rem;
+    min-height: 800px;
 }
 
 .loadpanel .wrapper {
@@ -263,7 +266,7 @@ input::-moz-focus-inner,
     left: 0;
     height: 100%;
     overflow-y: hidden;
-    background: #f2f9f9;
+    background: #fff;
 }
 
 .sidepanel .wrapper {
@@ -292,7 +295,7 @@ input::-moz-focus-inner,
     padding: 10px;
     margin: 0 10px;
     border-radius: 10px !important;
-    color: #a2a2a2 !important;
+    color: #575757 !important;
 }
 
 .material-icons-outlined {
@@ -302,13 +305,13 @@ input::-moz-focus-inner,
 .sidepanel .layout-menu li a .material-icons,
 .sidepanel .material-icons-outlined {
     margin-top: 1px;
-    color: #a2a2a2 !important;
+    color: #878787 !important;
 }
 
 .sidepanel .layout-menu li .layout-menuitem-root-text {
     font-weight: bolder !important;
-    padding: 0 22px;
-    color: #454545 !important;
+    padding: 22px 22px 0 22px;
+    color: #1cb973 !important;
     letter-spacing: 2px;
     font-size: .6rem !important;
 }
@@ -341,22 +344,22 @@ input::-moz-focus-inner,
 }
 
 .layout-menu li span {
-    font-size: .65rem !important;
+    font-size: .7rem !important;
     letter-spacing: 1px
 }
 
 .layout-menu li span.material-icons-outlined {
-    font-size: .8rem !important;
+    font-size: 1rem !important;
 }
 
 .layout-menu li a.router-link-exact-active, .layout-menu li a.router-link-active {
     font-weight: bolder !important;
-    background: #def3ee;
-    color: rgb(59, 59, 59) !important
+    background: #1cb973;
+    color: #fff !important
 }
 
 .layout-menu li a.router-link-exact-active .material-icons-outlined, .layout-menu li a.router-link-active .material-icons-outlined {
-    color: #00b23e !important;
+    color: #fff !important;
 }
 
 .p-panel {
@@ -739,8 +742,8 @@ input::-moz-focus-inner,
 }
 
 .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  color:#4e6cf8 !important;
-  border-color: #4e6cf8 !important;
+  color:#1cb973 !important;
+  border-color: #1cb973 !important;
 }
 
 .customized-timeline {

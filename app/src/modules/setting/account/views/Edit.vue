@@ -11,8 +11,11 @@
                   <div class="profile-display">
                     <img :src="formData.image" />
                   </div><Button
-class="button button-info button-sm button-raised" label="Avatar"
-                    icon="pi pi-external-link" @click="toggleEditImageWindow" />
+                    class="button button-info button-sm button-raised"
+                    label="Avatar"
+                    icon="pi pi-external-link"
+                    @click="toggleEditImageWindow"
+                  />
                 </div>
                 <div class="col-8 form-mode">
                   <div class="inputgroup">
@@ -21,24 +24,43 @@ class="button button-info button-sm button-raised" label="Avatar"
                     </span>
                     <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
                   placeholder="Email" /> -->
-                    <InputText v-model="formData.email" class="inputtext-sm" placeholder="Email" />
+                    <InputText
+                      v-model="formData.email"
+                      class="inputtext-sm"
+                      placeholder="Email"
+                    />
                   </div>
                   <div class="inputgroup">
                     <span class="inputgroup-addon">
                       <span class="material-icons-outlined">person</span>
                     </span>
-                    <InputText v-model="formData.first_name" class="inputtext-sm" placeholder="First Name" />
-                    <InputText v-model="formData.last_name" class="inputtext-sm" placeholder="Last Name" />
+                    <InputText
+                      v-model="formData.first_name"
+                      class="inputtext-sm"
+                      placeholder="First Name"
+                    />
+                    <InputText
+                      v-model="formData.last_name"
+                      class="inputtext-sm"
+                      placeholder="Last Name"
+                    />
                   </div>
                   <div class="inputgroup">
                     <span class="inputgroup-addon">
                       <span class="material-icons-outlined">supervised_user_circle</span>
                     </span>
                     <Dropdown
-v-model="formData.authority" :options="authorityData" optionLabel="name" optionValue="uid"
-                      placeholder="Select authority" />
+                      v-model="formData.authority"
+                      :options="authorityData"
+                      optionLabel="name"
+                      optionValue="uid"
+                      placeholder="Select authority"
+                    />
                   </div>
-                  <Button class="button button-info button-sm button-raised" @click="updateAccountData">
+                  <Button
+                    class="button button-info button-sm button-raised"
+                    @click="updateAccountData"
+                  >
                     <span class="material-icons">fact_check</span> Apply from authority
                   </Button>
                 </div>
@@ -48,37 +70,67 @@ v-model="formData.authority" :options="authorityData" optionLabel="name" optionV
               <div class="grid">
                 <div class="col-12">
                   <TreeTable
-v-if="formData.menuTree" class="treetable-sm p-datatable-table vert-top"
-                    filterMode="strict" :value="formData.menuTree" :lazy="true" :paginator="true" :rows="20"
-                    :filters="filtersNode">
-                    <Column field="label" header="Label" :expander="true">
+                    v-if="formData.menuTree"
+                    class="treetable-sm p-datatable-table vert-top"
+                    filterMode="strict"
+                    :value="formData.menuTree"
+                    :lazy="true"
+                    :paginator="true"
+                    :rows="20"
+                    :filters="filtersNode"
+                  >
+                    <Column
+                      field="label"
+                      header="Label"
+                      :expander="true"
+                    >
                       <template #filter>
                         <InputText
-v-model="filtersNode.label.value" type="text" class="column-filter"
-                          placeholder="Filter by label" />
+                          v-model="filtersNode.label.value"
+                          type="text"
+                          class="column-filter"
+                          placeholder="Filter by label"
+                        />
                       </template>
                       <template #body="slotProps">
                         <Checkbox
-v-model="selectedPage" name="menus"
-                          :value="slotProps.node.data.id" @change="check_menu($event, slotProps.node)" /> {{ slotProps.node.data.label }}
+                          v-model="selectedPage"
+                          name="menus"
+                          :value="slotProps.node.data.id"
+                          @change="check_menu($event, slotProps.node)"
+                        /> {{ slotProps.node.data.label }}
                       </template>
                     </Column>
-                    <Column field="to" header="Link">
+                    <Column
+                      field="to"
+                      header="Link"
+                    >
                       <template #filter>
                         <InputText
-v-model="filtersNode.to.value" type="text" class="column-filter"
-                          placeholder="Filter by link" />
+                          v-model="filtersNode.to.value"
+                          type="text"
+                          class="column-filter"
+                          placeholder="Filter by link"
+                        />
                       </template>
                     </Column>
-                    <Column field="to" header="Link">
+                    <Column
+                      field="to"
+                      header="Link"
+                    >
                       <template #body="slotProps">
                         <div v-if="slotProps.node.data.permission !== undefined">
                           <div
-v-for="indexPerm in slotProps.node.data.permission" :key="indexPerm"
-                            class="checkbox-custom">
+                            v-for="indexPerm in slotProps.node.data.permission"
+                            :key="indexPerm"
+                            class="checkbox-custom"
+                          >
                             <Checkbox
-v-model="selectedPerm" name="perms" :value="indexPerm.id"
-                              @change="set_permission($event, indexPerm.id)" />
+                              v-model="selectedPerm"
+                              name="perms"
+                              :value="indexPerm.id"
+                              @change="set_permission($event, indexPerm.id)"
+                            />
                             {{ indexPerm.domiden }}
                           </div>
                         </div>
@@ -94,28 +146,48 @@ v-model="selectedPerm" name="perms" :value="indexPerm.id"
                   <div class="field">
                     <label for="filter-from">From</label>
                     <br />
-                    <Calendar id="filter-from" v-model="logFrom" dateFormat="dd/mm/yy" :showTime="true" :showSeconds="true" />
+                    <Calendar
+                      id="filter-from"
+                      v-model="logFrom"
+                      dateFormat="dd/mm/yy"
+                      :showTime="true"
+                      :showSeconds="true"
+                    />
                   </div>
                 </div>
                 <div class="col-3">
                   <div class="field">
                     <label for="filter-to">To</label>
                     <br />
-                    <Calendar id="filter-to" v-model="logTo" dateFormat="dd/mm/yy" :showTime="true" :showSeconds="true" />
+                    <Calendar
+                      id="filter-to"
+                      v-model="logTo"
+                      dateFormat="dd/mm/yy"
+                      :showTime="true"
+                      :showSeconds="true"
+                    />
                   </div>
                 </div>
                 <div class="col-3">
                   <br />
                   <Button
-type="button" class="button-raised button-sm button-info px-3"
-                    @click="cariLogActivity($event)">
+                    type="button"
+                    class="button-raised button-sm button-info px-3"
+                    @click="cariLogActivity($event)"
+                  >
                     <span class="material-icons-outlined">search</span> Cari Activity
                   </Button>
                 </div>
               </div>
-              <Timeline :value="events" class="customized-timeline no-left">
+              <Timeline
+                :value="events"
+                class="customized-timeline no-left"
+              >
                 <template #marker="slotProps">
-                  <span class="custom-marker shadow-2" :style="{backgroundColor: slotProps.item.color}">
+                  <span
+                    class="custom-marker shadow-2"
+                    :style="{backgroundColor: slotProps.item.color}"
+                  >
                     <i :class="slotProps.item.icon"></i>
                   </span>
                 </template>
@@ -129,7 +201,10 @@ type="button" class="button-raised button-sm button-info px-3"
                     </template>
                     <template #content>
                       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed consequuntur error repudiandae numquam deserunt quisquam repellat libero asperiores earum nam nobis, culpa ratione quam perferendis esse, cupiditate neque quas!</p>
-                      <Button label="Read more" class="button-text"></Button>
+                      <Button
+                        label="Read more"
+                        class="button-text"
+                      ></Button>
                     </template>
                   </Card>
                 </template>
@@ -140,14 +215,20 @@ type="button" class="button-raised button-sm button-info px-3"
             <div class="col-12">
               <div class="d-flex jc-between">
                 <div>
-                  <Button type="button" class="button-raised button-sm button-danger px-3" @click="back()">
+                  <Button
+                    type="button"
+                    class="button-raised button-sm button-danger px-3"
+                    @click="back()"
+                  >
                     <span class="material-icons-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div v-if="allowSave === true">
                   <Button
-type="button" class="button-raised button-sm button-info px-3"
-                    @click="updateAccountData($event)">
+                    type="button"
+                    class="button-raised button-sm button-info px-3"
+                    @click="updateAccountData($event)"
+                  >
                     <span class="material-icons-outlined">check_circle</span> Save Data
                   </Button>
                 </div>
@@ -158,12 +239,22 @@ type="button" class="button-raised button-sm button-info px-3"
       </Card>
       <ConfirmPopup></ConfirmPopup>
     </div>
-    <Dialog v-model:visible="displayEditorImage" header="Avatar Editor" :style="{ width: '50vw' }" :modal="true">
+    <Dialog
+      v-model:visible="displayEditorImage"
+      header="Avatar Editor"
+      :style="{ width: '50vw' }"
+      :modal="true"
+    >
       <p class="m-0">
         <Cropper @cropImage="setImageData" />
       </p>
       <template #footer>
-        <Button label="Close" icon="pi pi-times" class="button-text" @click="toggleEditImageWindow" />
+        <Button
+          label="Close"
+          icon="pi pi-times"
+          class="button-text"
+          @click="toggleEditImageWindow"
+        />
       </template>
     </Dialog>
   </div>
@@ -189,9 +280,22 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'AccountEdit',
   components: {
-    Card, InputText, Button, Dropdown, ConfirmPopup, Checkbox, TreeTable, Column, Cropper, Dialog, TabView, TabPanel, Timeline, Calendar
+    Card,
+    InputText,
+    Button,
+    Dropdown,
+    ConfirmPopup,
+    Checkbox,
+    TreeTable,
+    Column,
+    Cropper,
+    Dialog,
+    TabView,
+    TabPanel,
+    Timeline,
+    Calendar,
   },
-  data () {
+  data() {
     return {
       displayEditorImage: false,
       formData: {
@@ -202,15 +306,36 @@ export default {
         last_name: '',
         image: '',
         image_edit: false,
-        menuTree: []
+        menuTree: [],
       },
       logFrom: null,
       logTo: null,
       events: [
-        { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-shopping-cart', color: '#9C27B0', image: 'game-controller.jpg' },
-        { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-cog', color: '#673AB7' },
-        { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-shopping-cart', color: '#FF9800' },
-        { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-check', color: '#22c55e' }
+        {
+          status: 'Ordered',
+          date: '15/10/2020 10:30',
+          icon: 'pi pi-shopping-cart',
+          color: '#9C27B0',
+          image: 'game-controller.jpg',
+        },
+        {
+          status: 'Processing',
+          date: '15/10/2020 14:00',
+          icon: 'pi pi-cog',
+          color: '#673AB7',
+        },
+        {
+          status: 'Shipped',
+          date: '15/10/2020 16:15',
+          icon: 'pi pi-shopping-cart',
+          color: '#FF9800',
+        },
+        {
+          status: 'Delivered',
+          date: '16/10/2020 10:00',
+          icon: 'pi pi-check',
+          color: '#22c55e',
+        },
       ],
       allowSave: false,
       authorityData: [],
@@ -222,14 +347,14 @@ export default {
       selectedNode: {},
       filtersNode: {
         label: { value: '', matchMode: 'contains' },
-        to: { value: '', matchMode: 'contains' }
+        to: { value: '', matchMode: 'contains' },
       },
       expandedKeys: {},
       nodes: null,
       columns: [
         { field: 'label', header: 'Label', expander: true },
-        { field: 'to', header: 'To' }
-      ]
+        { field: 'to', header: 'To' },
+      ],
     }
   },
   computed: {
@@ -237,26 +362,26 @@ export default {
     ...mapGetters({
       menuTree: 'accountModule/getMenuTree',
       accountDetail: 'accountModule/getAccountDetail',
-      authorityList: 'accountModule/getAuthorityList'
-    })
+      authorityList: 'accountModule/getAuthorityList',
+    }),
   },
   watch: {
     menuTree: {
-      handler (getData) {
+      handler(getData) {
         if (getData) {
           this.formData.menuTree = getData
         }
-      }
+      },
     },
     authorityList: {
-      handler (getAuthorityList) {
+      handler(getAuthorityList) {
         if (getAuthorityList) {
           this.authorityData = getAuthorityList
         }
-      }
+      },
     },
     accountDetail: {
-      handler (getDetail) {
+      handler(getDetail) {
         if (getDetail) {
           if (getDetail.account.uid !== undefined) {
             this.allowSave = true
@@ -270,7 +395,9 @@ export default {
           this.formData.first_name = getDetail.account.first_name
           this.formData.last_name = getDetail.account.last_name
 
-          this.formData.image = `${process.env.VUE_APP_APIGATEWAY}avatar/${getDetail.account.uid}.png?d=${Date.now()}`
+          this.formData.image = `${process.env.VUE_APP_APIGATEWAY}avatar/${
+            getDetail.account.uid
+          }.png?d=${Date.now()}`
           this.formData.image_edit = false
 
           for (const a in getDetail.access) {
@@ -292,32 +419,39 @@ export default {
           this.allowSave = false
         }
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
-  async mounted () {
+  async mounted() {
     this.allowSave = false
     // this.$store.dispatch('accountModule/fetchMenu')
-    await this.$store.dispatch('accountModule/fetchAccountDetail', this.$route.query.uid)
+    await this.$store.dispatch(
+      'accountModule/fetchAccountDetail',
+      this.$route.query.uid
+    )
     await this.$store.dispatch('accountModule/fetchAccountActivity', {
       uid: this.$route.query.uid,
       from: '123',
-      to: '333'
+      to: '333',
     })
     await this.$store.dispatch('accountModule/fetchMenuTree')
     await this.$store.dispatch('accountModule/fetchAuthority')
     this.displayEditorImage = false
   },
   methods: {
-    ...mapActions('accountModule', ['updateAccount', 'updatePermission', 'updateAccess']),
-    back () {
+    ...mapActions('accountModule', [
+      'updateAccount',
+      'updatePermission',
+      'updateAccess',
+    ]),
+    back() {
       this.$router.push('/account')
     },
-    setImageData (value) {
+    setImageData(value) {
       this.formData.image_edit = true
       this.formData.image = value
     },
-    toggleEditImageWindow () {
+    toggleEditImageWindow() {
       this.displayEditorImage = !this.displayEditorImage
     },
     updateAccountData: function (event) {
@@ -330,7 +464,7 @@ export default {
             for (const a in this.selectedMenu) {
               this.updateAccess({
                 account: this.$route.query.uid,
-                menu: this.selectedMenu[a]
+                menu: this.selectedMenu[a],
               }).then((response) => {
                 responseAccess.push(response)
               })
@@ -340,7 +474,7 @@ export default {
               const parsedIDParent = a.split('_')
               this.updateAccess({
                 account: this.$route.query.uid,
-                menu: parsedIDParent[parsedIDParent.length - 1]
+                menu: parsedIDParent[parsedIDParent.length - 1],
               }).then((response) => {
                 responseAccess.push(response)
               })
@@ -349,7 +483,7 @@ export default {
             for (const a in this.selectedPerm) {
               this.updatePermission({
                 account: this.$route.query.uid,
-                permission: this.selectedPerm[a]
+                permission: this.selectedPerm[a],
               }).then((response) => {
                 responsePermission.push(response)
               })
@@ -368,16 +502,14 @@ export default {
               },
               reject: () => {
                 // callback to execute when user rejects the action
-              }
+              },
             })
           }
         })
       }
     },
-    set_permission (event, target) {
-      // console.log(this.selectedPerm)
-    },
-    check_child (children, isDelete) {
+    set_permission(event, target) {},
+    check_child(children, isDelete) {
       for (const a in children) {
         const dataSet = parseInt(children[a].data.id)
         if (isDelete) {
@@ -400,12 +532,12 @@ export default {
         }
       }
     },
-    check_parent (parentSplitRaw, pageDeleteMode) {
+    check_parent(parentSplitRaw, pageDeleteMode) {
       const parentSplit = parentSplitRaw.split('-')
       for (let a = 0; a < parentSplit.length; a++) {
         const getVal = parseInt(parentSplit[a])
 
-        if (a < (parentSplit.length - 1)) {
+        if (a < parentSplit.length - 1) {
           // Is Parent
           if (this.selectedParent[`parent_${getVal}`] === undefined) {
             this.selectedParent[`parent_${getVal}`] = 0
@@ -442,16 +574,16 @@ export default {
         }
       }
     },
-    check_menu (event, target) {
+    check_menu(event, target) {
       const children = target.children
-      const pageDeleteMode = (this.selectedPage.indexOf(target.data.id) < 0)
+      const pageDeleteMode = this.selectedPage.indexOf(target.data.id) < 0
       if (children.length > 0) {
         this.check_child(children, pageDeleteMode)
       } else {
         this.check_parent(target.key, pageDeleteMode)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style>

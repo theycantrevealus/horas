@@ -3,22 +3,41 @@
     <div class="col-12">
       <Card>
         <template #content>
-          <Panel header="Account Management" :toggleable="false">
+          <Panel
+            header="Account Management"
+            :toggleable="false"
+          >
             <template #icons>
-              <Button class="button button-info button-sm button-raised" @click="accountAdd"><span
-                  class="material-icons">add</span>
+              <Button
+                class="button button-info button-sm button-raised"
+                @click="accountAdd"
+              ><span class="material-icons">add</span>
                 Add Account</Button>
             </template>
             <DataTable
-ref="dt" v-model:filters="filters" :value="items" :lazy="true" :paginator="true" :rows="20"
+              ref="dt"
+              v-model:filters="filters"
+              :value="items"
+              :lazy="true"
+              :paginator="true"
+              :rows="20"
               stripedRows
               paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
               :rowsPerPageOptions="[20, 50, 100]"
-              currentPageReportTemplate="Showing {first} to {last} of {totalRecords}" :totalRecords="totalRecords"
-              :loading="loading" filterDisplay="row" :globalFilterFields="['email', 'first_name', 'last_name', 'created_at']" responsiveLayout="scroll"
-              @page="onPage($event)" @sort="onSort($event)"
-              @filter="onFilter($event)">
-              <Column header="#" class="align-right">
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+              :totalRecords="totalRecords"
+              :loading="loading"
+              filterDisplay="row"
+              :globalFilterFields="['email', 'first_name', 'last_name', 'created_at']"
+              responsiveLayout="scroll"
+              @page="onPage($event)"
+              @sort="onSort($event)"
+              @filter="onFilter($event)"
+            >
+              <Column
+                header="#"
+                class="align-right"
+              >
                 <template #body="slotProps">
                   <h6 class="d-inline-flex">#{{ slotProps.data.autonum
                   }}</h6>
@@ -28,47 +47,80 @@ ref="dt" v-model:filters="filters" :value="items" :lazy="true" :paginator="true"
                 <template #body="slotProps">
                   <span class="buttonset wrap_content">
                     <Button
-v-if="permission.btnAccountEdit !== undefined" class="button button-info button-sm button-raised"
-                      @click="accountEdit(slotProps.data.uid)">
+                      v-if="permission.btnAccountEdit !== undefined"
+                      class="button button-info button-sm button-raised"
+                      @click="accountEdit(slotProps.data.uid)"
+                    >
                       <span class="material-icons">edit</span> Edit
                     </Button>
                     <Button
-v-if="permission.btnAccountDelete !== undefined"
+                      v-if="permission.btnAccountDelete !== undefined"
                       class="button button-danger button-sm button-raised"
-                      @click="accountDelete($event, slotProps.data.uid)">
+                      @click="accountDelete($event, slotProps.data.uid)"
+                    >
                       <span class="material-icons">delete</span>
                     </Button>
                   </span>
                 </template>
               </Column>
-              <Column ref="email" field="email" header="Email" filterMatchMode="startsWith" :sortable="true">
+              <Column
+                ref="email"
+                field="email"
+                header="Email"
+                filterMatchMode="startsWith"
+                :sortable="true"
+              >
                 <template #filter="{ filterModel, filterCallback }">
                   <InputText
-v-model="filterModel.value" type="text" class="column-filter"
-                    placeholder="Search by email" @keydown.enter="filterCallback()" />
+                    v-model="filterModel.value"
+                    type="text"
+                    class="column-filter"
+                    placeholder="Search by email"
+                    @keydown.enter="filterCallback()"
+                  />
                 </template>
               </Column>
               <Column
-ref="first_name" field="first_name" header="First Name" filterMatchMode="startsWith"
-                :sortable="true">
+                ref="first_name"
+                field="first_name"
+                header="First Name"
+                filterMatchMode="startsWith"
+                :sortable="true"
+              >
                 <template #filter="{ filterModel, filterCallback }">
                   <InputText
-v-model="filterModel.value" type="text" class="column-filter"
-                    placeholder="Search by first name" @keydown.enter="filterCallback()" />
+                    v-model="filterModel.value"
+                    type="text"
+                    class="column-filter"
+                    placeholder="Search by first name"
+                    @keydown.enter="filterCallback()"
+                  />
                 </template>
               </Column>
               <Column
-ref="last_name" field="last_name" header="Last Name" filterMatchMode="startsWith"
-                :sortable="true">
+                ref="last_name"
+                field="last_name"
+                header="Last Name"
+                filterMatchMode="startsWith"
+                :sortable="true"
+              >
                 <template #filter="{ filterModel, filterCallback }">
                   <InputText
-v-model="filterModel.value" type="text" class="column-filter"
-                    placeholder="Search by last name" @keydown.enter="filterCallback()" />
+                    v-model="filterModel.value"
+                    type="text"
+                    class="column-filter"
+                    placeholder="Search by last name"
+                    @keydown.enter="filterCallback()"
+                  />
                 </template>
               </Column>
               <Column
-ref="created_at" field="created_at" header="Join Date" :sortable="true"
-                class="wrap_content text-right">
+                ref="created_at"
+                field="created_at"
+                header="Join Date"
+                :sortable="true"
+                class="wrap_content text-right"
+              >
                 <template #body="slotProps">
                   <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
                 </template>
@@ -95,9 +147,14 @@ import AccountService from '@/modules/setting/account/service'
 export default {
   name: 'AccountList',
   components: {
-    Card, DataTable, Column, InputText, Button, Panel
+    Card,
+    DataTable,
+    Column,
+    InputText,
+    Button,
+    Panel,
   },
-  data () {
+  data() {
     return {
       loading: false,
       totalRecords: 0,
@@ -105,74 +162,73 @@ export default {
       filters: {
         email: { value: '', matchMode: 'contains' },
         first_name: { value: '', matchMode: 'contains' },
-        last_name: { value: '', matchMode: 'contains' }
+        last_name: { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
       columns: [
         { field: 'email', header: 'Email' },
         { field: 'first_name', header: 'First Name' },
         { field: 'last_name', header: 'Last Name' },
-        { field: 'created_at', header: 'Join Date' }
-      ]
+        { field: 'created_at', header: 'Join Date' },
+      ],
     }
   },
   computed: {
-    permission () {
+    permission() {
       return this.$store.state.credential.permission
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.lazyParams = {
       first: 0,
       rows: this.$refs.dt.rows,
       sortField: '',
       sortOrder: '',
-      filters: this.filters ? this.filters : {}
+      filters: this.filters ? this.filters : {},
     }
     this.loading = false
     this.loadLazyData()
   },
   methods: {
-    loadLazyData () {
+    loadLazyData() {
       this.loading = true
-      AccountService.getAccountList(this.lazyParams)
-        .then(response => {
-          const data = response.data.list
-          const totalRecords = response.data.totalRecords
-          this.items = data
-          this.totalRecords = totalRecords
-          this.loading = false
-        })
+      AccountService.getAccountList(this.lazyParams).then((response) => {
+        const data = response.data.list
+        const totalRecords = response.data.totalRecords
+        this.items = data
+        this.totalRecords = totalRecords
+        this.loading = false
+      })
     },
-    formatDate (date, format) {
+    formatDate(date, format) {
       return DateManagement.formatDate(date, format)
     },
-    onPage (event) {
+    onPage(event) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onSort (event) {
+    onSort(event) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onFilter (event) {
+    onFilter(event) {
       this.lazyParams = event
       // this.lazyParams.filters = this.filters
       this.loadLazyData()
     },
-    accountEdit (uid) {
+    accountEdit(uid) {
       this.$router.push({
         path: `/account/edit/${uid}`,
         query: {
-          uid: uid
-        }
+          uid: uid,
+        },
       })
     },
-    accountAdd () {
+    accountAdd() {
       this.$router.push({
-        path: '/account/add'
+        path: '/account/add',
       })
-    }
-  }
+    },
+  },
 }
 </script>

@@ -144,7 +144,7 @@
                 <div>
                   <Button
                     type="button"
-                    class="button-raised button-sm button-danger px-3"
+                    class="button-raised button-sm p-button-danger px-3"
                     @click="back()"
                   >
                     <span class="material-icons-outlined">arrow_back</span> Back
@@ -383,9 +383,7 @@ export default {
         })
       }
     },
-    set_permission(event, target) {
-      // console.log(this.selectedPerm)
-    },
+    set_permission(event, target) {},
     check_child(children, isDelete) {
       for (const a in children) {
         const dataSet = parseInt(children[a].data.id)

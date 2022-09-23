@@ -115,7 +115,9 @@ export class MenuService {
         })
 
         return await Promise.all(prom).then((b) => {
-          return menuGroupSet
+          return menuGroupSet.sort((a, b) =>
+            a.id > b.id ? 1 : b.id > a.id ? -1 : 0
+          )
         })
       })
       .catch((e) => {

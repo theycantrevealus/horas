@@ -4,13 +4,14 @@ import { filterSetDT } from '@/utilities/mod.lib'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { response } from 'express'
-import { Repository } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 
 @Injectable()
 export class MenuGroupService {
   constructor(
     @InjectRepository(CoreMenuGroupModel)
-    private readonly menuGroupRepo: Repository<CoreMenuGroupModel>
+    private readonly menuGroupRepo: Repository<CoreMenuGroupModel>,
+    private dataSource: DataSource
   ) {}
 
   async add(data: CoreMenuGroupModel): Promise<GlobalResponse> {
@@ -146,7 +147,11 @@ export class MenuGroupService {
   }
 
   async all() {
-    return await this.menuGroupRepo.find({ order: { id: 'ASC' } })
+    return await this.dataSource
+      .getRepository(CoreMenuGroupModel)
+      .createQueryBuilder('menu_group')
+      .orderBy('id', 'ASC')
+      .getMany()
   }
 
   async detail(id: number) {

@@ -79,7 +79,6 @@ const store = createStore({
       state.credential.uid = credentialData.uid
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
-      console.log(state.credential)
 
       const grantedPerm = credentialData.grantedPerm
       const buildPermission = {}
@@ -104,7 +103,6 @@ const store = createStore({
 
         state.credential.routes.push(grantedPage[a].identifier)
       }
-      console.log(buildPage)
       state.credential.pages = buildPage
     },
     CLEAR_SESSION(state: any) {

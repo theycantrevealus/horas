@@ -7,8 +7,43 @@ table thead tr th {
   padding: 10pt 1.5rem !important;
 }
 
+.p-treetable-thead tr th {
+    background: #1cb973 !important;
+    color: #fff !important;
+}
+
+.p-treetable-thead tr th .pi {
+    color: #fff !important;
+}
+
+.p-treetable-thead tr th, .p-treetable-thead tr th.p-filter-column {
+    padding: 7px 1.5rem !important;
+    font-size: 10pt !important;
+}
+.p-treetable-thead tr th.p-filter-column > div.p-column-filter {
+  padding: 0 !important;
+}
+
+.p-treetable-thead tr th.p-filter-column .p-column-filter input {
+    padding: 5px 10px !important;
+}
+
+.p-treetable-thead tr th.p-filter-column .p-column-filter .p-link {
+    padding: 0 !important;
+}
+
+.p-treetable-thead tr th.p-filter-column .p-column-filter .p-link .pi {
+    font-size: 6pt !important;
+}
+
+.p-treetable-thead tr th .p-sortable-column-icon {
+    font-size: 6pt !important;
+}
+
+/*==============================================================*/
+
 .p-datatable-table thead tr th {
-  background: #4e6cf8 !important;
+  background: #1cb973 !important;
   color: #fff !important;
 }
 
