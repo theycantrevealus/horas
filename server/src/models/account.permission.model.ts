@@ -11,6 +11,7 @@ import {
 } from 'typeorm'
 import { AccountModel } from '@models/account.model'
 import { CoreMenuPermissionModel } from '@models/core.menu.permission.model'
+import { properties } from '@/utilities/models/column'
 
 @Entity({ name: 'account_permission' })
 export class AccountPermissionModel {
@@ -26,12 +27,12 @@ export class AccountPermissionModel {
   @ManyToOne(() => AccountModel, (account) => account.uid)
   granted_by: AccountModel
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.created_at)
   created_at: Date
 
-  @UpdateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @UpdateDateColumn(properties.updated_at)
   updated_at: Date
 
-  @DeleteDateColumn({ nullable: true, type: 'timestamp without time zone' })
+  @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 }

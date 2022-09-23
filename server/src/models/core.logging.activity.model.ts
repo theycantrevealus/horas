@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import { AccountModel } from '@models/account.model'
 import { CoreLogLoginModel } from '@models/core.logging.login.model'
+import { properties } from '@/utilities/models/column'
 
 @Entity('core_log_activity')
 export class CoreLogActivityModel {
@@ -19,28 +20,34 @@ export class CoreLogActivityModel {
   @ManyToOne(() => CoreLogLoginModel, (login) => login.id)
   login_id: CoreLogLoginModel
 
-  @Column({ type: 'character varying' })
+  @Column({ type: 'character varying', comment: 'Http request type' })
   method: string
 
-  @Column({ type: 'character varying' })
+  @Column({
+    type: 'character varying',
+    comment: 'Table that affected by changes',
+  })
   table_target: string
 
-  @Column({ type: 'character varying' })
+  @Column({
+    type: 'character varying',
+    comment: 'Foreign identifier that affected',
+  })
   table_identifier: string
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', comment: 'Http request meta data' })
   log_meta: string
 
-  @Column({ type: 'char', length: 1 })
+  @Column({ type: 'char', length: 1, comment: 'Data changes behavior' })
   action: string
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', comment: 'Old data before affected' })
   old_meta: string
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', comment: 'New data after affected' })
   new_meta: string
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.logged_at)
   logged_at: Date
 
   constructor(data?: any) {

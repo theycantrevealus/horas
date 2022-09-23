@@ -1,3 +1,4 @@
+import { properties } from '@/utilities/models/column'
 import {
   Entity,
   Column,
@@ -12,21 +13,25 @@ import {
 export class CoreChannelModel {
   @PrimaryColumn()
   @Generated('uuid')
-  @Column({ nullable: false, type: 'uuid', primary: true })
+  @Column(properties.uid)
   uid: string
 
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'Clients IP that hit service',
+  })
   ip: string
 
-  @Column({ nullable: false, type: 'character varying' })
+  @Column(properties.remark)
   remark: string
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.created_at)
   created_at: Date
 
-  @UpdateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @UpdateDateColumn(properties.updated_at)
   updated_at: Date
 
-  @DeleteDateColumn({ nullable: true, type: 'timestamp without time zone' })
+  @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 }

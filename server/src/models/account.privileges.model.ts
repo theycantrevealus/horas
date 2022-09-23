@@ -1,3 +1,4 @@
+import { properties } from '@/utilities/models/column'
 import {
   Entity,
   Column,
@@ -26,12 +27,12 @@ export class AccountPrivilegesModel {
   @ManyToOne(() => AccountModel, (account) => account.uid)
   granted_by: AccountModel
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.created_at)
   created_at: Date
 
-  @UpdateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @UpdateDateColumn(properties.updated_at)
   updated_at: Date
 
-  @DeleteDateColumn({ nullable: true, type: 'timestamp without time zone' })
+  @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 }

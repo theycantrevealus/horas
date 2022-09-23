@@ -1,3 +1,4 @@
+import { properties } from '@/utilities/models/column'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString } from 'class-validator'
 import {
@@ -17,17 +18,22 @@ export class CoreMenuGroupModel {
 
   @ApiProperty({
     example: 'Menu Group Name',
+    description: 'Group will menu at sidebar',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'Group will menu at sidebar',
+  })
   name: string
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.created_at)
   created_at: Date
 
-  @UpdateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @UpdateDateColumn(properties.updated_at)
   updated_at: Date
 
-  @DeleteDateColumn({ nullable: true, type: 'timestamp without time zone' })
+  @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 }

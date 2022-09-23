@@ -2,22 +2,31 @@ import { properties } from '@/utilities/models/column'
 import {
   Entity,
   Column,
-  PrimaryColumn,
-  Generated,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  PrimaryColumn,
+  Generated,
 } from 'typeorm'
+import { MasterItemModel } from './master.item.model'
 
-@Entity({ name: 'account_authority' })
-export class AccountAuthorityModel {
+@Entity({ name: 'master_item_batch' })
+export class MasterItemBatchModel {
   @PrimaryColumn()
   @Generated('uuid')
   @Column(properties.uid)
   uid: string
 
-  @Column({ nullable: false, type: 'character varying' })
-  name: string
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'Auto generated code',
+  })
+  code: string
+
+  @ManyToOne(() => MasterItemModel, (brand) => brand.uid)
+  item: string
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

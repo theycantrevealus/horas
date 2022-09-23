@@ -10,6 +10,7 @@ import {
 import { CoreMenuGroupModel } from '@models/core.menu.group.model'
 import { IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
+import { properties } from '@/utilities/models/column'
 
 @Entity({ name: 'menu' })
 export class CoreMenuModel {
@@ -18,9 +19,14 @@ export class CoreMenuModel {
 
   @ApiProperty({
     example: 'Menu caption',
+    description: 'Menu caption',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'Menu caption',
+  })
   name: string
 
   @ApiProperty({
@@ -28,7 +34,11 @@ export class CoreMenuModel {
     description: 'Vue 3 support',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'Vue 3 support',
+  })
   identifier: string
 
   @ApiProperty({
@@ -36,7 +46,12 @@ export class CoreMenuModel {
     description: 'Vue 3 route support',
   })
   @IsString()
-  @Column({ nullable: true, type: 'text', default: '/' })
+  @Column({
+    nullable: true,
+    type: 'text',
+    default: '/',
+    comment: 'Vue 3 route support',
+  })
   url: string
 
   @ApiProperty({
@@ -44,7 +59,7 @@ export class CoreMenuModel {
     description: 'Other menu id as parent',
   })
   @IsNumber()
-  @Column({ type: 'integer' })
+  @Column({ type: 'integer', comment: 'Other menu id as parent' })
   parent: number
 
   @ApiProperty({
@@ -60,7 +75,11 @@ export class CoreMenuModel {
     description: 'PrimeIcon class name',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'PrimeIcon class name',
+  })
   icon: string
 
   @ApiProperty({
@@ -69,7 +88,12 @@ export class CoreMenuModel {
     description: 'Y = show, N = hide',
   })
   @IsString()
-  @Column({ nullable: false, type: 'char', length: 1 })
+  @Column({
+    nullable: false,
+    type: 'char',
+    length: 1,
+    comment: 'Y = show, N = hide',
+  })
   show_on_menu: string
 
   @ApiProperty({
@@ -77,7 +101,7 @@ export class CoreMenuModel {
     description: 'Showing order on side panel',
   })
   @IsNumber()
-  @Column({ type: 'integer' })
+  @Column({ type: 'integer', comment: 'Showing order on side panel' })
   show_order: number
 
   @ApiProperty({
@@ -85,7 +109,11 @@ export class CoreMenuModel {
     description: 'Level grouping identifier',
   })
   @IsString()
-  @Column({ type: 'integer', nullable: true })
+  @Column({
+    type: 'integer',
+    nullable: true,
+    comment: 'Level grouping identifier',
+  })
   level: number
 
   @ApiProperty({
@@ -93,23 +121,24 @@ export class CoreMenuModel {
     description: 'Theme customer class name for styling',
   })
   @IsString()
-  @Column({ type: 'character varying', nullable: true })
+  @Column({
+    type: 'character varying',
+    nullable: true,
+    comment: 'Theme customer class name for styling',
+  })
   group_color: string
 
-  @ApiProperty({
-    example: 'Just remark something to describe menu',
-    required: false,
-  })
+  @ApiProperty(properties.remark)
   @IsString()
   @Column({ type: 'text' })
   remark: string
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.created_at)
   created_at: Date
 
-  @UpdateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @UpdateDateColumn(properties.updated_at)
   updated_at: Date
 
-  @DeleteDateColumn({ nullable: true, type: 'timestamp without time zone' })
+  @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 }

@@ -1,3 +1,4 @@
+import { properties } from '@/utilities/models/column'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, ValidateNested } from 'class-validator'
 import {
@@ -29,7 +30,11 @@ export class CoreMenuPermissionModel {
     description: 'For identify dom that granted access',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'For identify dom that granted access',
+  })
   domiden: string
 
   @ApiProperty({
@@ -37,7 +42,11 @@ export class CoreMenuPermissionModel {
     description: 'String dispatch from the dom',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'String dispatch from the dom',
+  })
   dispatchname: string
 
   @ApiProperty({
@@ -45,15 +54,18 @@ export class CoreMenuPermissionModel {
     description: 'For identify dom service name that contain dispatch function',
   })
   @IsString()
-  @Column({ type: 'character varying' })
+  @Column({
+    type: 'character varying',
+    comment: 'For identify dom service name that contain dispatch function',
+  })
   servicegroup: string
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.created_at)
   created_at: Date
 
-  @UpdateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @UpdateDateColumn(properties.updated_at)
   updated_at: Date
 
-  @DeleteDateColumn({ nullable: true, type: 'timestamp without time zone' })
+  @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 }

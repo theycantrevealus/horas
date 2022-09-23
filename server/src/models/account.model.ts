@@ -14,34 +14,40 @@ import {
   ManyToOne,
 } from 'typeorm'
 import { AccountAuthorityModel } from './account.authority.model'
+import { properties } from '@/utilities/models/column'
 
 @Entity({ name: 'account' })
 export class AccountModel {
   @PrimaryColumn()
   @Generated('uuid')
-  @Column({ nullable: false, type: 'uuid', primary: true, unique: true })
+  @Column(properties.uid)
   uid: string
 
   @ApiProperty({
     example: 'example@domain.com',
+    description: 'Account email will used for login',
   })
   @IsString()
   @Matches(regex.email())
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'Account email will used for login',
+  })
   email: string
 
   @ApiProperty({
     example: 'John',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({ nullable: false, type: 'character varying', comment: 'John' })
   first_name: string
 
   @ApiProperty({
     example: 'Doe',
   })
   @IsString()
-  @Column({ nullable: false, type: 'character varying' })
+  @Column({ nullable: false, type: 'character varying', comment: 'Doe' })
   last_name: string
 
   @ApiProperty({
@@ -62,12 +68,12 @@ export class AccountModel {
   @Column({ nullable: false, type: 'character varying' })
   password: string
 
-  @CreateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @CreateDateColumn(properties.created_at)
   created_at: Date
 
-  @UpdateDateColumn({ nullable: false, type: 'timestamp without time zone' })
+  @UpdateDateColumn(properties.updated_at)
   updated_at: Date
 
-  @DeleteDateColumn({ nullable: true, type: 'timestamp without time zone' })
+  @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 }

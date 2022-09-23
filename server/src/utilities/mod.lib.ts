@@ -5,6 +5,13 @@ const colCodeName: any = {
   uid: 'iden',
 }
 
+function getTimeStamp() {
+  const currentdate = new Date()
+  return `${currentdate.getFullYear()}-${
+    currentdate.getMonth() + 1
+  }-${currentdate.getDate()} ${currentdate.getHours()}:${currentdate.getMinutes()}:${currentdate.getSeconds()}`
+}
+
 function isJsonString(str) {
   try {
     JSON.parse(str)
@@ -62,4 +69,4 @@ function filterSetDT(str, target) {
   }
 }
 
-export { colCodeName, isJsonString, filterSetDT, gen_uuid }
+export { colCodeName, isJsonString, filterSetDT, gen_uuid, getTimeStamp }

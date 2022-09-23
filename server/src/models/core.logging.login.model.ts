@@ -6,6 +6,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { properties } from '@/utilities/models/column'
 
 @Entity('core_log_login')
 export class CoreLogLoginModel {
@@ -15,13 +16,9 @@ export class CoreLogLoginModel {
   @ManyToOne(() => AccountModel, (account) => account.uid, { cascade: true })
   account: AccountModel
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', comment: 'Login meta request' })
   log_meta: string
 
-  @CreateDateColumn({
-    nullable: false,
-    type: 'timestamp without time zone',
-    default: new Date().toISOString(),
-  })
+  @CreateDateColumn(properties.logged_at)
   logged_at: Date
 }

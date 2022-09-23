@@ -18,8 +18,8 @@
                   />
                 </div>
                 <div class="col-8 form-mode">
-                  <div class="inputgroup">
-                    <span class="inputgroup-addon">
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
                       <span class="material-icons-outlined">mail</span>
                     </span>
                     <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
@@ -30,8 +30,8 @@
                       placeholder="Email"
                     />
                   </div>
-                  <div class="inputgroup">
-                    <span class="inputgroup-addon">
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
                       <span class="material-icons-outlined">person</span>
                     </span>
                     <InputText
@@ -45,8 +45,8 @@
                       placeholder="Last Name"
                     />
                   </div>
-                  <div class="inputgroup">
-                    <span class="inputgroup-addon">
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
                       <span class="material-icons-outlined">supervised_user_circle</span>
                     </span>
                     <Dropdown
@@ -58,7 +58,7 @@
                     />
                   </div>
                   <Button
-                    class="button button-info button-sm button-raised"
+                    class="p-button button-info button-sm button-raised"
                     @click="updateAccountData"
                   >
                     <span class="material-icons">fact_check</span> Apply from authority
@@ -211,22 +211,26 @@
               </Timeline>
             </TabPanel>
           </TabView>
-          <div class="grid">
-            <div class="col-12">
-              <div class="d-flex jc-between">
-                <div>
+          <div class="p-grid">
+            <div class="p-col-12">
+              <div class="flex jc-between">
+                <div class="flex-initial flex align-items-center justify-content-center m-2 px-5 py-3">
                   <Button
                     type="button"
-                    class="button-raised button-sm button-danger px-3"
+                    class="button-raised button-sm p-button-danger px-3"
                     @click="back()"
                   >
                     <span class="material-icons-outlined">arrow_back</span> Back
                   </Button>
                 </div>
-                <div v-if="allowSave === true">
+                <div class="flex-grow-1 flex align-items-center justify-content-center m-2 px-5 py-3"></div>
+                <div
+                  v-if="allowSave === true"
+                  class="flex-initial flex align-items-right justify-content-center m-2 px-5 py-3"
+                >
                   <Button
                     type="button"
-                    class="button-raised button-sm button-info px-3"
+                    class="button-raised button-sm p-button-info px-3"
                     @click="updateAccountData($event)"
                   >
                     <span class="material-icons-outlined">check_circle</span> Save Data
