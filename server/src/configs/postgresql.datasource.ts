@@ -1,4 +1,5 @@
-import { DataSource } from 'typeorm'
+import { DataSource, DataSourceOptions } from 'typeorm'
+import { SeederOptions } from 'typeorm-extension'
 import entities from './entities'
 require('dotenv').config()
 const isProduction = process.env.MODE != 'development'
@@ -24,7 +25,7 @@ if (isProduction) {
   databaseLogging = process.env.DB_DEV_LOGGING
 }
 const loggingOption: any = databaseLogging.split(',')
-const AppDataSource = new DataSource({
+const options: DataSourceOptions & SeederOptions = {
   type: 'postgres',
   name: 'default',
   host: databaseHost,
@@ -37,8 +38,11 @@ const AppDataSource = new DataSource({
   migrationsTransactionMode: 'each',
   migrationsTableName: 'migrations',
   migrations: ['src/migrations/**/*{.ts,.js}'],
+  seeds: ['src/seeds/**/*.seed.{.ts,.js}'],
+  factories: ['src/factories/**/*.factory.{.ts,.js}'],
   subscribers: ['src/subscribers/**/*{.ts,.js}'],
   migrationsRun: true,
-})
+}
+const AppDataSource = new DataSource(options)
 
 export { AppDataSource }

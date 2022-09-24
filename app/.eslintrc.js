@@ -10,10 +10,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['vue'],
-  extends: [
-    'plugin:vue/vue3-recommended',
-    'prettier',
-  ],
+  extends: ['plugin:vue/vue3-recommended', 'prettier'],
   rules: {
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/no-var-requires': 'off',
@@ -32,13 +29,19 @@ module.exports = {
     'vue/attribute-hyphenation': 0,
     'vue/v-on-event-hyphenation': 0,
     'vue/require-valid-default-prop': 0,
-    'vue/require-explicit-emits': ['error', {
-      "allowProps": false
-    }],
-    'vue/first-attribute-linebreak': ['error', {
-      'singleline': 'ignore',
-      'multiline': 'below'
-    }],
+    'vue/require-explicit-emits': [
+      'error',
+      {
+        allowProps: false,
+      },
+    ],
+    'vue/first-attribute-linebreak': [
+      'error',
+      {
+        singleline: 'ignore',
+        multiline: 'below',
+      },
+    ],
     'vue/no-parsing-error': [
       'error',
       {
@@ -87,4 +90,4 @@ module.exports = {
       },
     ],
   },
-};
+}

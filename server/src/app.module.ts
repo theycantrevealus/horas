@@ -11,6 +11,8 @@ import { AccountModule } from './account/account.module'
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
 import entities from '@configs/entities'
 import { MenuModule } from './menu/menu.module'
+import { CLIModule } from './cli/cli.module'
+import { MasterItemModule } from './master/item/item.module'
 
 @Module({
   imports: [
@@ -54,7 +56,9 @@ import { MenuModule } from './menu/menu.module'
       }),
       inject: [ConfigService],
     }),
+    CLIModule,
     AccountModule,
+    MasterItemModule,
     MenuModule,
   ],
   controllers: [AppController],

@@ -4,7 +4,7 @@
       <div class="col-6 col-offset-3">
         <center>
           <Image
-            class-name="handling_image"
+            class="p-image handling_image"
             :src="require('@/assets/images/handling/403.svg')"
             alt="404"
           />
@@ -17,8 +17,10 @@
   </div>
 </template>
 <script>
-export default {
+import { defineComponent } from 'vue'
+import Image from 'primevue/image'
+export default defineComponent({
   name: 'PageUnauthorized',
-  components: {},
-}
+  components: { Image },
+})
 </script>

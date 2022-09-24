@@ -31,7 +31,6 @@ describe('Login Page', () => {
       .then(() => {
         console.clear()
         const credential = getStore().its('state.credential.token')
-        console.log(credential)
       })
 
     // cy.url().should('include', 'dashboard')

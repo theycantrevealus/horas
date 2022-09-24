@@ -468,7 +468,7 @@ import useVuelidate from '@vuelidate/core'
 import { required, minLength } from '@vuelidate/validators'
 import UserService from '@/modules/user/service'
 import { Kekule } from 'kekule'
-import MasterItemService from '@/modules/master_item/service'
+import MasterItemService from '@/modules/master/item/service'
 
 export default {
   name: 'MasterItemEdit',

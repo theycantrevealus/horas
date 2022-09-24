@@ -29,12 +29,14 @@ import CKEditor from '@ckeditor/ckeditor5-vue'
 import { registerModules } from '@/modules/register'
 import Account from '@/modules/setting/account'
 import Authority from '@/modules/setting/authority'
+import MasterItem from '@/modules/master/item'
 import Service from '@/modules/service'
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 
 registerModules({
   accountModule: Account,
+  masterItem: MasterItem,
   authorityModule: Authority,
   serviceModule: Service,
 })
@@ -47,6 +49,7 @@ declare global {
     store?: any
   }
 }
+declare var require: any
 
 const app = createApp(App)
 

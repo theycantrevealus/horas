@@ -17,20 +17,21 @@ class MasterItemService {
    * }
    * @returns
    */
-  getItemList (parsedData) {
-    if (parsedData.request === undefined) {
-      parsedData.request = 'list'
-    }
-    return axios.post(`${process.env.VUE_APP_APIGATEWAY}Inventory`, parsedData)
-      .then((response:any) => {
-        return Promise.resolve(response.data.response_package)
+  getItemList(parsedData) {
+    return axios
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/paginate`, {
+        params: parsedData,
+      })
+      .then((response: any) => {
+        return Promise.resolve(response)
       })
   }
 
-  getItemDetail (uid) {
-    return axios.get(`${process.env.VUE_APP_APIGATEWAY}Inventory/detail/${uid}`)
-      .then((response:any) => {
-        return Promise.resolve(response.data.response_package)
+  getItemDetail(uid) {
+    return axios
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/${uid}`)
+      .then((response: any) => {
+        return Promise.resolve(response)
       })
   }
 }

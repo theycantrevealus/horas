@@ -3,8 +3,8 @@
     <div class="col">
       <div class="col-6 col-offset-3">
         <center>
-          <image
-            class-name="handling_image"
+          <Image
+            class="p-image handling_image"
             :src="require('@/assets/images/handling/404.svg')"
             alt="404"
           />
@@ -17,8 +17,11 @@
   </div>
 </template>
 <script>
-export default {
+import { defineComponent } from 'vue'
+import Image from 'primevue/image'
+
+export default defineComponent({
   name: 'PageNotFound',
-  components: {},
-}
+  components: { Image },
+})
 </script>

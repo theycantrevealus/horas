@@ -12,6 +12,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  BeforeInsert,
 } from 'typeorm'
 import { AccountAuthorityModel } from './account.authority.model'
 import { properties } from '@/utilities/models/column'
@@ -31,6 +32,7 @@ export class AccountModel {
   @Matches(regex.email())
   @Column({
     nullable: false,
+    unique: true,
     type: 'character varying',
     comment: 'Account email will used for login',
   })

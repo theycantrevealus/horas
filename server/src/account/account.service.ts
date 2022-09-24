@@ -106,7 +106,6 @@ export class AccountService {
         return loginResp
       })
       .catch((e: Error) => {
-        console.log('error')
         throw new Error(e.message)
       })
   }
@@ -236,9 +235,9 @@ export class AccountService {
 
   async add(account: AccountModel): Promise<GlobalResponse> {
     const response = new GlobalResponse()
-    const saltOrRounds = 10
-    const password = account.password
-    account.password = await bcrypt.hash(password, saltOrRounds)
+    // const saltOrRounds = 10
+    // const password = account.password
+    // account.password = await bcrypt.hash(password, saltOrRounds)
     return await this.accountRepo.save(account).then(async (returning) => {
       response.message = 'Account added successfully'
       response.statusCode = HttpStatus.OK
