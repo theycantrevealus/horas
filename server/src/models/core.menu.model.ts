@@ -11,6 +11,7 @@ import { CoreMenuGroupModel } from '@models/core.menu.group.model'
 import { IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { properties } from '@/utilities/models/column'
+import { Type } from 'class-transformer'
 
 @Entity({ name: 'menu' })
 export class CoreMenuModel {
@@ -66,7 +67,8 @@ export class CoreMenuModel {
     example: 'Menu Grouper Name',
     description: 'Vue 3 support',
   })
-  @ValidateNested()
+  @IsNumber()
+  @Type(() => CoreMenuGroupModel)
   @ManyToOne(() => CoreMenuGroupModel, (menu) => menu.id)
   menu_group: CoreMenuGroupModel
 

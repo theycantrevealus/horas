@@ -15,6 +15,10 @@ import {
   AccountLoginResponseDTO,
 } from '@/account/dtos/account.login.dto'
 import { CoreLogLoginModel } from '@/models/core.logging.login.model'
+import { GrantAccessDTO } from './dtos/account.grant.access.dto'
+import { GrantPermissionDTO } from './dtos/account.grant.permission.dto'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 @Injectable()
 export class AccountService {
@@ -121,7 +125,7 @@ export class AccountService {
       .innerJoinAndSelect('account.authority', 'authority')
       .where('account.uid = :uid', { uid })
       .getOne()
-    //LOAD PAGE PERMISSION
+
     const Page = await this.accountPrivileges
       .createQueryBuilder('account_privileges')
       .innerJoinAndSelect('account_privileges.menu', 'menu')
@@ -131,7 +135,6 @@ export class AccountService {
       data.access.push(Page[a].menu)
     }
 
-    //LOAD ACCESS PERMISSION
     const Permission = await this.accountPermission
       .createQueryBuilder('account_permission')
       .innerJoinAndSelect('account_permission.permission', 'menu_permission')
@@ -160,6 +163,10 @@ export class AccountService {
       })
   }
 
+  async profileImageBuffer(uid: string) {
+    return readFileSync(join(process.cwd(), `./avatar/${uid}.png`))
+  }
+
   async edit(account, uid: string): Promise<GlobalResponse> {
     const response = new GlobalResponse()
     return await this.accountRepo
@@ -170,6 +177,12 @@ export class AccountService {
         authority: account.authority,
       })
       .then(async (returning) => {
+        const old = await this.accountRepo
+          .createQueryBuilder('account')
+          .innerJoinAndSelect('account.authority', 'authority')
+          .where('account.uid = :uid', { uid })
+          .getOne()
+
         if (account.password !== undefined) {
           const saltOrRounds = 10
           const password = account.password
@@ -197,35 +210,66 @@ export class AccountService {
           delete account.image
         }
 
-        const resetPrivileges = await this.accountPrivileges
-          .createQueryBuilder('account_privileges')
-          .where({
-            account: uid,
+        await this.dataSource
+          .getRepository(AccountPrivilegesModel)
+          .createQueryBuilder()
+          .where('account = :account', { account: uid })
+          .softDelete()
+          .execute()
+          .then(() => {
+            account.selectedPage.map(async (e) => {
+              console.log(e)
+              await this.grant_access({ account: uid, menu: e }, old)
+            })
           })
-          .getMany()
 
-        for (const a in resetPrivileges) {
-          const setResetPriv = await this.accountPrivileges.softDelete({
-            id: resetPrivileges[a].id,
+        await this.dataSource
+          .getRepository(AccountPermissionModel)
+          .createQueryBuilder()
+          .where('account = :account', { account: uid })
+          .softDelete()
+          .execute()
+          .then(() => {
+            account.selectedPermission.map(async (e) => {
+              await this.grant_permission({ account: uid, permission: e }, old)
+            })
           })
-        }
 
-        const resetPermission = await this.accountPermission
-          .createQueryBuilder('account_permission')
-          .where({
-            account: uid,
-          })
-          .getMany()
+        // const resetPrivileges = await this.accountPrivileges
+        //   .createQueryBuilder('account_privileges')
+        //   .where({
+        //     account: uid,
+        //   })
+        //   .getMany()
 
-        for (const a in resetPermission) {
-          const setResetPerm = await this.accountPermission.softDelete({
-            id: resetPermission[a].id,
-          })
-        }
+        // for (const a in resetPrivileges) {
+        //   const setResetPriv = await this.accountPrivileges.softDelete({
+        //     id: resetPrivileges[a].id,
+        //   })
+        // }
+
+        // const resetPermission = await this.accountPermission
+        //   .createQueryBuilder('account_permission')
+        //   .where({
+        //     account: uid,
+        //   })
+        //   .getMany()
+
+        // for (const a in resetPermission) {
+        //   const setResetPerm = await this.accountPermission.softDelete({
+        //     id: resetPermission[a].id,
+        //   })
+        // }
+
+        //
 
         response.message = 'Account updated successfully'
         response.statusCode = HttpStatus.OK
-        response.payload = await this.detail(uid)
+        response.table_target = 'account'
+        response.method = 'PUT'
+        response.action = 'U'
+        response.transaction_id = uid
+        response.payload = old
         return response
       })
       .catch((e: Error) => {
@@ -251,6 +295,128 @@ export class AccountService {
       .createQueryBuilder('account')
       .innerJoinAndSelect('account.authority', 'authority')
       .getMany()
+  }
+
+  async grant_access(
+    data: GrantAccessDTO,
+    granted_by: AccountModel
+  ): Promise<GlobalResponse> {
+    let response = new GlobalResponse()
+
+    return await this.dataSource
+      .getRepository(AccountPrivilegesModel)
+      .createQueryBuilder('account_privileges')
+      .withDeleted()
+      .where('account_privileges.account = :account', { account: data.account })
+      .andWhere('account_privileges.menu = :menu', { menu: data.menu })
+      .getOne()
+      .then(async (returning) => {
+        if (returning) {
+          return await this.accountPrivileges
+            .update(returning.id, {
+              deleted_at: null,
+            })
+            .then((reactive) => {
+              response.message = 'Access Granted Successfully'
+              response.statusCode = HttpStatus.OK
+              response.table_target = 'account_privileges'
+              response.method = 'PUT'
+              response.action = 'U'
+              response.transaction_id = returning.id.toString()
+              response.payload = returning
+              return response
+            })
+            .catch((e: Error) => {
+              throw new Error(e.message)
+            })
+        } else {
+          const setPrivileges = new AccountPrivilegesModel({
+            granted_by: granted_by,
+            account: data.account,
+            menu: data.menu,
+          })
+          return await this.accountPrivileges
+            .save(setPrivileges)
+            .then(async (reactive) => {
+              response.message = 'Access Granted Successfully'
+              response.statusCode = HttpStatus.OK
+              response.table_target = 'account_privileges'
+              response.method = 'PUT'
+              response.action = 'I'
+              response.transaction_id = returning.id.toString()
+              response.payload = returning
+              return response
+            })
+            .catch((e: Error) => {
+              throw new Error(e.message)
+            })
+        }
+      })
+      .catch((e: Error) => {
+        throw new Error(e.message)
+      })
+  }
+  async grant_permission(
+    data: GrantPermissionDTO,
+    granted_by: AccountModel
+  ): Promise<GlobalResponse> {
+    const response = new GlobalResponse()
+
+    return await this.dataSource
+      .getRepository(AccountPermissionModel)
+      .createQueryBuilder('account_permission')
+      .withDeleted()
+      .where('account_permission.account = :account', { account: data.account })
+      .andWhere('account_permission.permission = :permission', {
+        permission: data.permission,
+      })
+      .getOne()
+      .then(async (returning) => {
+        if (returning) {
+          return await this.accountPermission
+            .update(returning.id, {
+              deleted_at: null,
+            })
+            .then((reactive) => {
+              response.message = 'Permission Granted Successfully'
+              response.statusCode = HttpStatus.OK
+              response.table_target = 'account_permission'
+              response.method = 'PUT'
+              response.action = 'U'
+              response.transaction_id = returning.id.toString()
+              response.payload = returning
+
+              return response
+            })
+            .catch((e: Error) => {
+              throw new Error(e.message)
+            })
+        } else {
+          const setPermission = new AccountPermissionModel({
+            granted_by: granted_by,
+            account: data.account,
+            permission: data.permission,
+          })
+          return await this.accountPermission
+            .save(setPermission)
+            .then(async (reactive) => {
+              response.message = 'Permission Granted Successfully'
+              response.statusCode = HttpStatus.OK
+              response.table_target = 'account_permission'
+              response.method = 'PUT'
+              response.action = 'I'
+              response.transaction_id = returning.id.toString()
+              response.payload = returning
+              return response
+            })
+            .catch((e: Error) => {
+              throw new Error(e.message)
+            })
+        }
+      })
+      .catch((e: Error) => {
+        throw new Error(e.message)
+      })
   }
 
   async paginate(param: any) {

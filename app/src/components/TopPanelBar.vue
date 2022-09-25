@@ -184,9 +184,7 @@ export default {
   },
   computed: {
     profile_photo() {
-      return `${process.env.VUE_APP_APIGATEWAY}avatar/${
-        this.$store.state.credential.uid
-      }.png?d=${Date.now()}`
+      return this.$store.state.credential.profile_photo
     },
     first_name() {
       return this.$store.state.credential.first_name

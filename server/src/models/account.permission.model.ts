@@ -35,4 +35,10 @@ export class AccountPermissionModel {
 
   @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
+
+  constructor(data: any) {
+    this.account = data?.account
+    this.permission = data?.permission
+    this.granted_by = data?.granted_by
+  }
 }

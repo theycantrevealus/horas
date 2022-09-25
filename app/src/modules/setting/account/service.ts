@@ -7,8 +7,8 @@ class AccountService {
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/paginate`, {
         params: parsedData,
       })
-      .then((response: any) => {
-        return Promise.resolve(response)
+      .then(async (response: any) => {
+        return await Promise.resolve(response)
       })
   }
 
@@ -19,8 +19,8 @@ class AccountService {
         `${process.env.VUE_APP_APIGATEWAY}v1/account/grant_permission`,
         parsedData
       )
-      .then((response: any) => {
-        return Promise.resolve(response)
+      .then(async (response: any) => {
+        return await Promise.resolve(response)
       })
   }
 
@@ -31,8 +31,8 @@ class AccountService {
         `${process.env.VUE_APP_APIGATEWAY}v1/account/grant_access`,
         parsedData
       )
-      .then((response: any) => {
-        return Promise.resolve(response)
+      .then(async (response: any) => {
+        return await Promise.resolve(response)
       })
   }
 
@@ -48,10 +48,13 @@ class AccountService {
           authority: parsedData.authority,
           image: parsedData.image,
           image_edit: parsedData.image_edit,
+          selectedPermission: parsedData.selectedPermission,
+          selectedPage: parsedData.selectedPage,
+          selectedParent: parsedData.selectedParent,
         }
       )
-      .then((response: any) => {
-        return Promise.resolve(response)
+      .then(async (response: any) => {
+        return await Promise.resolve(response)
       })
   }
 
@@ -59,8 +62,24 @@ class AccountService {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${uid}/detail`)
-      .then((response: any) => {
-        return Promise.resolve(response)
+      .then(async (response: any) => {
+        response.data.image = await axios
+          .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${uid}/avatar`, {
+            responseType: 'arraybuffer',
+          })
+          .then(async (imageResponse) => {
+            let image = btoa(
+              new Uint8Array(imageResponse.data).reduce(
+                (data, byte) => data + String.fromCharCode(byte),
+                ''
+              )
+            )
+
+            return `data:${imageResponse.headers[
+              'content-type'
+            ].toLowerCase()};base64,${image}`
+          })
+        return await Promise.resolve(response)
       })
   }
 
@@ -72,8 +91,8 @@ class AccountService {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu`)
-      .then((response) => {
-        return Promise.resolve(response)
+      .then(async (response) => {
+        return await Promise.resolve(response)
       })
   }
 
@@ -81,8 +100,8 @@ class AccountService {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/authority`)
-      .then((response) => {
-        return Promise.resolve(response)
+      .then(async (response) => {
+        return await Promise.resolve(response)
       })
   }
 
@@ -90,8 +109,8 @@ class AccountService {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree/manager`)
-      .then((response) => {
-        return Promise.resolve(response)
+      .then(async (response) => {
+        return await Promise.resolve(response)
       })
   }
 }

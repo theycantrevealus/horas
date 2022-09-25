@@ -5,8 +5,30 @@ class AccountService {
   async login(accountData: TAccountLogin) {
     return await axios
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/account/login`, accountData)
-      .then((response) => {
-        axios.defaults.headers.common.Authorization = `Bearer ${response.data.token}`
+      .then(async (response) => {
+        response.data.account.image = await axios
+          .get(
+            `${process.env.VUE_APP_APIGATEWAY}v1/account/${response.data.account.uid}/avatar`,
+            {
+              headers: {
+                Authorization: `Bearer ${response.data.token}`,
+              },
+              responseType: 'arraybuffer',
+            }
+          )
+          .then(async (imageResponse) => {
+            let image = btoa(
+              new Uint8Array(imageResponse.data).reduce(
+                (data, byte) => data + String.fromCharCode(byte),
+                ''
+              )
+            )
+
+            return `data:${imageResponse.headers[
+              'content-type'
+            ].toLowerCase()};base64,${image}`
+          })
+        // axios.defaults.headers.common.Authorization = `Bearer ${response.data.token}`
         return Promise.resolve(response)
       })
   }

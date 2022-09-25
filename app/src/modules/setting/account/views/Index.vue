@@ -9,7 +9,7 @@
           >
             <template #icons>
               <Button
-                class="button button-info button-sm button-raised"
+                class="button p-button-info button-sm button-raised"
                 @click="accountAdd"
               ><span class="material-icons">add</span>
                 Add Account</Button>
@@ -48,7 +48,7 @@
                   <span class="buttonset wrap_content">
                     <Button
                       v-if="permission.btnAccountEdit !== undefined"
-                      class="button button-info button-sm button-raised"
+                      class="button p-button-success button-sm button-raised"
                       @click="accountEdit(slotProps.data.uid)"
                     >
                       <span class="material-icons">edit</span> Edit

@@ -11,7 +11,7 @@
                   <div class="profile-display">
                     <img :src="formData.image" />
                   </div><Button
-                    class="button button-info button-sm button-raised"
+                    class="button p-button-info button-sm button-raised"
                     label="Avatar"
                     icon="pi pi-external-link"
                     @click="toggleEditImageWindow"
@@ -57,10 +57,7 @@
                       placeholder="Select authority"
                     />
                   </div>
-                  <Button
-                    class="p-button button-info button-sm button-raised"
-                    @click="updateAccountData"
-                  >
+                  <Button class="p-button button-info button-sm button-raised">
                     <span class="material-icons">fact_check</span> Apply from authority
                   </Button>
                 </div>
@@ -241,7 +238,8 @@
           </div>
         </template>
       </Card>
-      <ConfirmPopup></ConfirmPopup>
+      <ConfirmPopup group="confirm_changes"></ConfirmPopup>
+      <ConfirmDialog group="keep_editing"></ConfirmDialog>
     </div>
     <Dialog
       v-model:visible="displayEditorImage"
@@ -272,6 +270,7 @@ import Checkbox from 'primevue/checkbox'
 import TreeTable from 'primevue/treetable'
 import Column from 'primevue/column'
 import ConfirmPopup from 'primevue/confirmpopup'
+import ConfirmDialog from 'primevue/confirmdialog'
 import Dialog from 'primevue/dialog'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
@@ -289,6 +288,7 @@ export default {
     Button,
     Dropdown,
     ConfirmPopup,
+    ConfirmDialog,
     Checkbox,
     TreeTable,
     Column,
@@ -311,6 +311,9 @@ export default {
         image: '',
         image_edit: false,
         menuTree: [],
+        selectedPage: [],
+        selectedPermission: [],
+        selectedParent: [],
       },
       logFrom: null,
       logTo: null,
@@ -399,14 +402,25 @@ export default {
           this.formData.first_name = getDetail.account.first_name
           this.formData.last_name = getDetail.account.last_name
 
-          this.formData.image = `${process.env.VUE_APP_APIGATEWAY}avatar/${
-            getDetail.account.uid
-          }.png?d=${Date.now()}`
+          this.formData.image = getDetail.image
           this.formData.image_edit = false
 
           for (const a in getDetail.access) {
+            if (
+              this.selectedParent[`parent_${getDetail.access[a].parent}`] ===
+              undefined
+            ) {
+              this.selectedParent[`parent_${getDetail.access[a].parent}`] = 0
+            }
+
+            this.selectedParent[`parent_${getDetail.access[a].parent}`] += 1
+
             if (this.selectedPage.indexOf(getDetail.access[a].id) < 0) {
               this.selectedPage.push(getDetail.access[a].id)
+            }
+
+            if (this.selectedPage.indexOf(getDetail.access[a].parent) < 0) {
+              this.selectedPage.push(getDetail.access[a].parent)
             }
 
             if (this.selectedMenu.indexOf(getDetail.access[a].id) < 0) {
@@ -428,7 +442,6 @@ export default {
   },
   async mounted() {
     this.allowSave = false
-    // this.$store.dispatch('accountModule/fetchMenu')
     await this.$store.dispatch(
       'accountModule/fetchAccountDetail',
       this.$route.query.uid
@@ -438,8 +451,10 @@ export default {
       from: '123',
       to: '333',
     })
-    await this.$store.dispatch('accountModule/fetchMenuTree')
+    // await this.$store.dispatch('accountModule/fetchMenuTree')
+    await this.$store.dispatch('accountModule/fetchMenuTree', this.lazyParams)
     await this.$store.dispatch('accountModule/fetchAuthority')
+
     this.displayEditorImage = false
   },
   methods: {
@@ -459,56 +474,62 @@ export default {
       this.displayEditorImage = !this.displayEditorImage
     },
     updateAccountData: function (event) {
-      if (this.allowSave) {
-        // this.formData.image = this.formData.image.replace(/^data:image\/\w+;base64,/, '')
-        this.updateAccount(this.formData).then((response) => {
-          if (response.status === 200) {
-            const responseAccess = []
-            const responsePermission = []
-            for (const a in this.selectedMenu) {
-              this.updateAccess({
-                account: this.$route.query.uid,
-                menu: this.selectedMenu[a],
-              }).then((response) => {
-                responseAccess.push(response)
-              })
-            }
+      const target = event.target
 
+      const confirmation = this.$confirm
+      if (this.allowSave) {
+        confirmation.require({
+          group: 'confirm_changes',
+          target: target,
+          message: `Update account data?`,
+          icon: 'pi pi-exclamation-triangle',
+          acceptClass: 'button-success',
+          acceptIcon: 'pi pi-check-circle',
+          acceptLabel: 'Yes',
+          rejectLabel: 'Abort',
+          rejectIcon: 'pi pi-times-circle',
+          accept: () => {
+            this.formData.selectedPage = this.selectedMenu
             for (const a in this.selectedParent) {
               const parsedIDParent = a.split('_')
-              this.updateAccess({
-                account: this.$route.query.uid,
-                menu: parsedIDParent[parsedIDParent.length - 1],
-              }).then((response) => {
-                responseAccess.push(response)
-              })
+              this.formData.selectedParent.push(
+                parseInt(parsedIDParent[parsedIDParent.length - 1])
+              )
             }
-
-            for (const a in this.selectedPerm) {
-              this.updatePermission({
-                account: this.$route.query.uid,
-                permission: this.selectedPerm[a],
-              }).then((response) => {
-                responsePermission.push(response)
-              })
-            }
-
-            this.$store.dispatch('accountModule/fetchMenuTree', this.lazyParams)
-            this.$confirm.require({
-              target: event.target,
-              message: `${response.data.message}. Back to account list?`,
-              icon: 'pi pi-exclamation-triangle',
-              acceptClass: 'button-success',
-              acceptLabel: 'Yes',
-              rejectLabel: 'Keep Editing',
-              accept: () => {
-                this.$router.push('/account')
-              },
-              reject: () => {
-                // callback to execute when user rejects the action
-              },
+            this.formData.selectedPermission = this.selectedPerm
+            this.updateAccount(this.formData).then(async (response) => {
+              if (response.status === 200) {
+                await this.$store.dispatch(
+                  'accountModule/fetchMenuTree',
+                  this.lazyParams
+                )
+                this.$confirm.require({
+                  group: 'keep_editing',
+                  message: `${response.data.message}. Back to account list?`,
+                  header: 'Confirmation',
+                  icon: 'pi pi-exclamation-triangle',
+                  acceptClass: 'p-button-success',
+                  rejectClass: 'p-button-warning',
+                  acceptLabel: 'Yes',
+                  acceptIcon: 'pi pi-check-circle',
+                  rejectLabel: 'Keep Editing',
+                  rejectIcon: 'pi pi-times-circle',
+                  accept: () => {
+                    this.$router.push('/account')
+                  },
+                  reject: () => {
+                    //callback to execute when user rejects the action
+                  },
+                  onHide: () => {
+                    //Callback to execute when dialog is hidden
+                  },
+                })
+              }
             })
-          }
+          },
+          reject: () => {
+            // callback to execute when user rejects the action
+          },
         })
       }
     },
@@ -542,7 +563,6 @@ export default {
         const getVal = parseInt(parentSplit[a])
 
         if (a < parentSplit.length - 1) {
-          // Is Parent
           if (this.selectedParent[`parent_${getVal}`] === undefined) {
             this.selectedParent[`parent_${getVal}`] = 0
           }

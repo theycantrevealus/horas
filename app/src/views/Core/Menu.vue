@@ -383,8 +383,9 @@ export default defineComponent({
         rejectLabel: 'Cancel',
         accept: () => {
           return CoreService.menuDelete(target).then((response: any) => {
-            response = response.data
+            console.log(response)
             if (response.status === 200) {
+              response = response.data
               this.$toast.add({
                 severity: 'success',
                 summary: 'Menu Manager',
@@ -435,11 +436,11 @@ export default defineComponent({
       this.formMode = 'add'
 
       const checkLevel = target.key.split('-')
-      this.form.targetGroup = checkLevel[0]
+      this.form.targetGroup = parseInt(checkLevel[0])
       if (checkLevel.length > 1) {
-        this.form.targetParent = data.id
+        this.form.targetParent = parseInt(data.id)
       } else {
-        this.form.targetParent = checkLevel[0]
+        this.form.targetParent = parseInt(checkLevel[0])
       }
 
       this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
@@ -525,9 +526,9 @@ export default defineComponent({
         show_order: 1,
         show_on_menu: showMenu,
       }).then(async (response: any) => {
-        response = response.data
-        if (response.status === 200) {
-          // Add Menu Permission
+        console.log(response)
+        if (response.status === 201) {
+          response = response.data
           const mimicSetterPermission = this.setterPermission
           let succeedPermission = 0
           for (const a in mimicSetterPermission) {
@@ -540,7 +541,7 @@ export default defineComponent({
               return response
             })
 
-            succeedPermission += permissionAdd.data.status === 200 ? 1 : 0
+            succeedPermission += permissionAdd.data.status === 201 ? 1 : 0
           }
 
           if (succeedPermission === this.setterPermission.length) {

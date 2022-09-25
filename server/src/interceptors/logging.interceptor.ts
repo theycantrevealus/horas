@@ -50,12 +50,14 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
       ? request.clientIp
       : requestIp.getClientIp(request)
     const { url } = request
-    const token = header_token.split(' ')[1]
+    const token = header_token.split('Bearer')[1]
     const method = request.method
     const body = request.body !== '' ? request.body : '{}'
     let curr_date = new Date().toISOString().split('T')[0]
-    const decoded = await this.authService.validate_token(token)
-    const account = await this.acccountService.detail(decoded.account)
+    const decoded = await this.authService.validate_token({
+      token: token,
+    })
+    const account = await this.acccountService.detail(decoded.account.uid)
 
     return next.handle().pipe(
       map(async (response) => {
@@ -71,14 +73,16 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
         curr_date = new Date().toISOString().split('T')[0]
         const SLO_tracing_id = `SLO_${curr_date}_${SLO_id.toString()}`
+
         const newLogActivityRepo = new CoreLogActivityModel({
-          account: account,
+          account: decoded.account.uid,
           table_target: response.table_target,
           table_identifier:
             parseInt(response.transaction_id) > 0
               ? response.transaction_id
               : response.transaction_id,
-          log_meta: `${transaction_classify}|${response.method}`,
+          log_meta: `${transaction_classify}|${request.method}`,
+          method: request.method,
           action: response.action,
           old_meta: JSON.stringify(body),
           new_meta: JSON.stringify(response),

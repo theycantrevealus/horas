@@ -56,6 +56,7 @@ export class CoreLogActivityModel {
     this.table_target = data?.table_target
     this.table_identifier = data?.table_identifier
     this.log_meta = data?.log_meta
+    this.method = data?.method
     this.action = data?.action
     this.old_meta = data?.old_meta
     this.new_meta = data?.new_meta

@@ -17,6 +17,7 @@ const store = createStore({
       first_name: '',
       last_name: '',
       permission: {},
+      profile_photo: '',
       pages: {},
       routes: [],
       token: null,
@@ -79,6 +80,7 @@ const store = createStore({
       state.credential.uid = credentialData.uid
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
+      state.credential.profile_photo = credentialData.image
 
       const grantedPerm = credentialData.grantedPerm
       const buildPermission = {}

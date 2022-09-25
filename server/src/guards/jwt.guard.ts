@@ -44,9 +44,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw new UnauthorizedException('Not authorized request')
     }
 
+    const header_token = request.headers.authorization
+    const token = header_token.split('Bearer')[1]
     const decodeTokenResponse: JWTTokenResponse =
       await this.authService.validate_token({
-        token: request.headers.authorization,
+        token: token,
       })
 
     request.credential = decodeTokenResponse.account

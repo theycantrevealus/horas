@@ -60,6 +60,10 @@ export class MenuService {
       .then(async () => {
         response.message = 'Menu Updated Successfully'
         response.statusCode = HttpStatus.OK
+        response.table_target = 'menu'
+        response.method = 'PUT'
+        response.action = 'U'
+        response.transaction_id = id.toString()
         response.payload = await this.detail(id)
         return response
       })
@@ -76,10 +80,15 @@ export class MenuService {
       .then(() => {
         response.message = 'Menu deleted successfully'
         response.statusCode = HttpStatus.OK
+        response.table_target = 'menu'
+        response.method = 'DELETE'
+        response.action = 'D'
+        response.transaction_id = id.toString()
         response.payload = oldMeta
         return response
       })
       .catch((e) => {
+        console.log(e.message)
         throw new Error(e.message)
       })
   }
@@ -90,7 +99,11 @@ export class MenuService {
       .save(data)
       .then(async (returning) => {
         response.message = 'Menu Added Successfully'
+        response.table_target = 'menu'
+        response.transaction_id = returning.id.toString()
         response.statusCode = HttpStatus.OK
+        response.action = 'I'
+        response.method = 'POST'
         response.payload = await this.detail(returning.id)
         return response
       })
@@ -114,8 +127,8 @@ export class MenuService {
           })
         })
 
-        return await Promise.all(prom).then((b) => {
-          return menuGroupSet.sort((a, b) =>
+        return await Promise.all(prom).then(async (b) => {
+          return await menuGroupSet.sort((a, b) =>
             a.id > b.id ? 1 : b.id > a.id ? -1 : 0
           )
         })
@@ -142,8 +155,10 @@ export class MenuService {
           })
         })
 
-        return await Promise.all(prom).then((b) => {
-          return menuGroupSet
+        return await Promise.all(prom).then(async (b) => {
+          return await menuGroupSet.sort((a, b) =>
+            a.id > b.id ? 1 : b.id > a.id ? -1 : 0
+          )
         })
       }),
     }

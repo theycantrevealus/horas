@@ -1,6 +1,6 @@
 import { regex } from '@/utilities/regex.pattern'
 import { ApiProperty } from '@nestjs/swagger'
-import { Transform } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import * as bcrypt from 'bcrypt'
 import { IsString, Matches, ValidateNested } from 'class-validator'
 import {
@@ -55,8 +55,8 @@ export class AccountModel {
   @ApiProperty({
     type: AccountAuthorityModel,
   })
-  @ValidateNested()
   @IsString()
+  @Type(() => AccountAuthorityModel)
   @ManyToOne(() => AccountAuthorityModel, (authority) => authority.uid)
   authority: AccountAuthorityModel
 

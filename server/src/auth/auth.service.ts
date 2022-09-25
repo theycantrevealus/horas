@@ -52,11 +52,15 @@ export class AuthService implements JwtOptionsFactory {
     let result: JWTTokenDecodeResponse
     if (data && data.token) {
       try {
-        const cleanToken = data.token.split('Bearer')[1].trim()
+        // const cleanToken = data.token.split('Bearer')[1].trim()
+        const cleanToken = data.token.trim()
+
         const decoded = await this.jwtService.decode(cleanToken, {
           complete: true,
         })
+
         const decodedData = (decoded as any).payload
+
         if (decoded) {
           result = {
             status: HttpStatus.OK,
@@ -77,7 +81,7 @@ export class AuthService implements JwtOptionsFactory {
       } catch (e) {
         result = {
           status: HttpStatus.BAD_REQUEST,
-          message: 'token malformed',
+          message: e.message,
           account: null,
           login_id: 0,
           token: data.token,

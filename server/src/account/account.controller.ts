@@ -12,6 +12,8 @@ import {
   Query,
   UseFilters,
   Version,
+  Res,
+  Header,
 } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { AccountService } from '@/account/account.service'
@@ -21,7 +23,7 @@ import {
   AccountLoginResponseDTO,
 } from '@/account/dtos/account.login.dto'
 import { JwtAuthGuard } from '@/guards/jwt.guard'
-import { Authorization } from '@/decorators/auth.decorator'
+import { Authorization, CredentialAccount } from '@/decorators/auth.decorator'
 import { LoggingInterceptor } from '@/interceptors/logging.interceptor'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
 import { AccountModel } from '@/models/account.model'
@@ -32,6 +34,10 @@ import {
   PostgreFilter,
   UnAuthorizedExceptionFilter,
 } from '@/filters/validator.filter'
+import { GrantAccessDTO } from './dtos/account.grant.access.dto'
+import { GrantPermissionDTO } from './dtos/account.grant.permission.dto'
+import { Response, response } from 'express'
+import { createReadStream } from 'fs'
 
 @Controller({ path: 'account', version: '1' })
 @UseFilters(
@@ -98,6 +104,23 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
+  @ApiParam({
+    name: 'uid',
+  })
+  @Get(':uid/avatar')
+  @Header('Content-Type', 'image/png')
+  async avatar(@Param() param, @Res() response: Response) {
+    //0fb77186-6954-4fb1-a69e-9806f2e42b52
+    const data = createReadStream(`avatar/${param.uid}.png`)
+
+    response.setHeader('Content-Disposition', 'attachment; filename=avatar.png')
+
+    data.pipe(response)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiParam({
     name: 'uid',
@@ -124,10 +147,31 @@ export class AccountController {
     name: 'uid',
   })
   @Put(':uid/edit')
-  async edit(
-    @Body() data: AccountModel,
-    @Param() param
-  ): Promise<GlobalResponse> {
+  async edit(@Body() data, @Param() param): Promise<GlobalResponse> {
     return await this.accountService.edit(data, param.uid)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @Post('grant_access')
+  async grant_access(
+    @Body() data: GrantAccessDTO,
+    @CredentialAccount() account: AccountModel
+  ): Promise<GlobalResponse> {
+    return await this.accountService.grant_access(data, account)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @Post('grant_permission')
+  async grant_permission(
+    @Body() data: GrantPermissionDTO,
+    @CredentialAccount() account: AccountModel
+  ): Promise<GlobalResponse> {
+    return await this.accountService.grant_permission(data, account)
   }
 }
