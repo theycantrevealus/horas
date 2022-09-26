@@ -88,7 +88,6 @@ export class MenuService {
         return response
       })
       .catch((e) => {
-        console.log(e.message)
         throw new Error(e.message)
       })
   }
@@ -247,7 +246,7 @@ export class MenuService {
       .andWhere('menu.menu_group = :group', {
         group: group,
       })
-      .orderBy('menu.show_order', 'DESC')
+      .orderBy('menu.show_order', 'ASC')
       .getMany()
       .then(async (menuList) => {
         const menuSet = []
@@ -287,7 +286,9 @@ export class MenuService {
         })
 
         return await Promise.all(prom).then(() => {
-          return menuSet
+          return menuSet.sort((a, b) =>
+            a.id > b.id ? 1 : b.id > a.id ? -1 : 0
+          )
         })
       })
   }

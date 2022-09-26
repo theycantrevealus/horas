@@ -364,6 +364,7 @@ export default {
       ],
     }
   },
+
   computed: {
     ...mapState('accountModule', ['menu_list', 'menu_tree']),
     ...mapGetters({
@@ -503,6 +504,11 @@ export default {
                   'accountModule/fetchMenuTree',
                   this.lazyParams
                 )
+
+                await this.$store.dispatch('UPDATE_MENU')
+
+                //TODO : Refresh sidemenu and reload privileges
+
                 this.$confirm.require({
                   group: 'keep_editing',
                   message: `${response.data.message}. Back to account list?`,

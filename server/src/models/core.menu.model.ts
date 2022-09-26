@@ -110,7 +110,7 @@ export class CoreMenuModel {
     example: 1,
     description: 'Level grouping identifier',
   })
-  @IsString()
+  @IsNumber()
   @Column({
     type: 'integer',
     nullable: true,

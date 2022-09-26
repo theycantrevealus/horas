@@ -1,5 +1,8 @@
 <template>
-  <div class="grid">
+  <div
+    class="main-container p-grid vertical-container"
+    :style="background"
+  >
     <div
       class="col-4 col-offset-4"
       style="margin-top: 50px"
@@ -15,10 +18,13 @@
               class="login-logo"
               alt="horas"
             />
-            <h1 style="padding: 20px">Login</h1>
+            <h1
+              class="text-center"
+              style="padding: 20px"
+            >Login</h1>
           </template>
           <template #content>
-            <div class="grid p-fluid">
+            <div class="p-grid p-fluid">
               <div class="field">
                 <label for="loginEmail">Email</label>
                 <InputText
@@ -39,7 +45,7 @@
                 </Message>
               </div>
             </div>
-            <div class="grid p-fluid">
+            <div class="p-grid p-fluid">
               <div class="field">
                 <label for="loginPassword">Password</label>
                 <Password
@@ -70,11 +76,13 @@
             >{{ response.message }}</Message>
             <Button
               id="submitButton"
+              class="p-button-success"
               type="submit"
               label="Login"
               icon="pi pi-check"
               :disabled="$v.$invalid"
             />
+
             <p style="padding: 20px">
               "Dimana-mana masuk sistem itu login lae. Maka dari itu login kau, unang mangalo"
               <br />
@@ -112,6 +120,9 @@ export default {
   },
   data() {
     return {
+      background: {
+        backgroundImage: `url(${require('@/assets/background.jpg')})`,
+      },
       email: '',
       password: '',
       response: {

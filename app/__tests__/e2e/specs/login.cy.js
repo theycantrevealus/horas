@@ -14,7 +14,7 @@ describe('Login Page', () => {
   })
 
   it('Visits the app root url', () => {
-    cy.contains('h1', 'Login')
+    // cy.contains('h1', 'Login')
     cy.get('button#submitButton').as('btnLogin')
     cy.contains('Email').get('#loginEmail').as('emailInput')
     cy.contains('Password').get('#loginPassword').as('passwordInput')

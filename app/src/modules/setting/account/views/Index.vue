@@ -9,7 +9,7 @@
           >
             <template #icons>
               <Button
-                class="button p-button-info button-sm button-raised"
+                class="p-button-info p-button-rounded p-button-raised button-sm"
                 @click="accountAdd"
               ><span class="material-icons">add</span>
                 Add Account</Button>

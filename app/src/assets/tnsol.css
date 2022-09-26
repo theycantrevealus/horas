@@ -265,7 +265,7 @@ input::-moz-focus-inner,
     width: 12%;
     left: 0;
     height: 100%;
-    overflow-y: hidden;
+    overflow-y: auto;
     background: #fff;
 }
 
@@ -496,7 +496,9 @@ input::-moz-focus-inner,
     width: 1%;
     white-space: nowrap;
 }
-
+.p-field {
+    margin-bottom: 20px;
+}
 .p-field.p-grid,
 .p-formgrid.p-grid {
     padding: 10px;
@@ -716,7 +718,7 @@ input::-moz-focus-inner,
 }
 
 .p-buttonset .p-button {
-    margin: 0 5px;
+    margin: 0 5px !important;
 }
 
 

@@ -2,100 +2,108 @@
   <div class="grid">
     <div class="col-12">
       <Card>
-        <template #title>Menu Management</template>
         <template #content>
-          <TreeTable
-            class="treetable-sm"
-            filter-mode="strict"
-            :value="nodes"
-            :paginator="true"
-            :rows="20"
-            :filters="filtersNode"
+          <Panel
+            header="Menu Management"
+            :toggleable="false"
           >
-            <Column
-              field="label"
-              header="Label"
-              :expander="true"
+            <template #icons>
+              <Button class="p-button-text p-button-info p-button-rounded p-button-raised button-sm"><span class="material-icons">help</span>
+                Info</Button>
+            </template>
+            <TreeTable
+              class="treetable-sm"
+              filter-mode="strict"
+              :value="nodes"
+              :paginator="true"
+              :rows="20"
+              :filters="filtersNode"
             >
-              <template #filter>
-                <InputText
-                  v-model="filtersNode['label']"
-                  type="text"
-                  class="column-filter"
-                  placeholder="Filter by label"
-                />
-              </template>
-            </Column>
-            <Column
-              field="to"
-              header="Link"
-            >
-              <template #filter>
-                <InputText
-                  v-model="filtersNode['to']"
-                  type="text"
-                  class="column-filter"
-                  placeholder="Filter by link"
-                />
-              </template>
-            </Column>
-            <Column
-              field="show_on_menu"
-              header="Visibility"
-            >
-              <template #filter>
-                <InputText
-                  v-model="filtersNode['show_on_menu']"
-                  type="text"
-                  class="column-filter"
-                  placeholder="Filter by visibility"
-                />
-              </template>
-            </Column>
-            <Column
-              :header-style="{ 'width': 'auto' }"
-              :body-style="{ 'text-align': 'center' }"
-            >
-              <template #header>Action</template>
-              <template #body="slotProps">
-                <span class="buttonset">
-                  <Button
-                    type="button"
-                    class="p-button-success button-raised button-sm"
-                    @click="onNodeAdd(slotProps.node, 'Add Child Menu')"
-                  >
-                    <span class="material-icons">add</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    class="p-button-info button-raised button-sm"
-                    @click="onNodeEdit(slotProps.node, 'Edit Child Menu')"
-                  >
-                    <span class="material-icons">edit</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    class="p-button-danger button-raised button-sm"
-                    @click="onNodeDelete($event, slotProps.node.data.id)"
-                  >
-                    <span class="material-icons">delete</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    class="p-button-warning button-raised button-sm"
-                  >
-                    <span class="material-icons">arrow_upward</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    class="p-button-warning button-raised button-sm"
-                  >
-                    <span class="material-icons">arrow_downward</span>
-                  </Button>
-                </span>
-              </template>
-            </Column>
-          </TreeTable>
+              <Column
+                field="label"
+                header="Label"
+                :expander="true"
+              >
+                <template #filter>
+                  <InputText
+                    v-model="filtersNode['label']"
+                    type="text"
+                    class="column-filter"
+                    placeholder="Filter by label"
+                  />
+                </template>
+              </Column>
+              <Column
+                field="to"
+                header="Link"
+              >
+                <template #filter>
+                  <InputText
+                    v-model="filtersNode['to']"
+                    type="text"
+                    class="column-filter"
+                    placeholder="Filter by link"
+                  />
+                </template>
+              </Column>
+              <Column
+                field="show_on_menu"
+                header="Visibility"
+              >
+                <template #filter>
+                  <InputText
+                    v-model="filtersNode['show_on_menu']"
+                    type="text"
+                    class="column-filter"
+                    placeholder="Filter by visibility"
+                  />
+                </template>
+              </Column>
+              <Column
+                :header-style="{ 'width': 'auto' }"
+                :body-style="{ 'text-align': 'center' }"
+              >
+                <template #header>Action</template>
+                <template #body="slotProps">
+                  <span class="p-buttonset">
+                    <Button
+                      type="button"
+                      class="p-button-success p-button-raised p-button-sm"
+                      @click="onNodeAdd(slotProps.node, 'Add Child Menu')"
+                    >
+                      <span class="material-icons">add</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      class="p-button-info p-button-raised p-button-sm"
+                      @click="onNodeEdit(slotProps.node, 'Edit Child Menu')"
+                    >
+                      <span class="material-icons">edit</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      class="p-button-danger p-button-raised p-button-sm"
+                      @click="onNodeDelete($event, slotProps.node.data.id)"
+                    >
+                      <span class="material-icons">delete</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      class="p-button-warning button-raised p-button-sm"
+                    >
+                      <span class="material-icons">arrow_upward</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      class="p-button-warning p-button-raised p-button-sm"
+                    >
+                      <span class="material-icons">arrow_downward</span>
+                    </Button>
+                  </span>
+                </template>
+              </Column>
+            </TreeTable>
+          </Panel>
         </template>
       </Card>
       <Dialog
@@ -105,8 +113,8 @@
         :modal="true"
         :position="ui.modal.manageMenu.position"
       >
-        <div class="p-fluid formgrid grid">
-          <div class="field col-12 md-4">
+        <div class="p-fluid p-formgrid p-grid">
+          <div class="p-field p-col-12 p-md-4">
             <label for="managelabel">Label</label>
             <InputText
               id="managelabel"
@@ -114,7 +122,7 @@
               type="text"
             />
           </div>
-          <div class="field col-12 md-8">
+          <div class="p-field p-col-12 p-md-8">
             <label for="manageroute">Route Name</label>
             <InputText
               id="manageroute"
@@ -122,7 +130,7 @@
               type="text"
             />
           </div>
-          <div class="field col-12 md-8">
+          <div class="p-field p-col-12 p-md-8">
             <label for="manageroute">Route URL</label>
             <InputText
               id="managerouteurl"
@@ -130,32 +138,35 @@
               type="text"
             />
           </div>
-          <div class="field col-12 md-10">
+          <div class="p-field p-col-12 p-md-10">
             <label for="manageicon">Icon</label>
-            <div class="inputgroup">
+            <div class="p-inputgroup">
               <InputText
                 id="manageicon"
                 v-model="form.txt_icon"
                 type="text"
               />
-              <span class="inputgroup-addon">
+              <span class="p-inputgroup-addon">
                 <span class="material-icons-outlined">{{ form.txt_icon }}</span>
               </span>
             </div>
           </div>
-          <div class="field col-12 md-2">
+          <div class="p-field p-col-12 md-2">
             <label for="managecheck">Show on Menu</label>
-            <ToggleButton
-              v-model="form.showMenu"
-              on-label="Show it!"
-              off-label="No, thanks"
-              on-icon="pi pi-check"
-              off-icon="pi pi-times"
-            />
+            <div class="p-inputgroup">
+              <ToggleButton
+                v-model="form.showMenu"
+                on-label="Show it!"
+                off-label="No, thanks"
+                on-icon="pi pi-check"
+                off-icon="pi pi-times"
+              />
+            </div>
+
           </div>
         </div>
-        <div class="grid">
-          <div class="col-12">
+        <div class="p-grid">
+          <div class="p-col-12">
             <DataTable
               :value="setterPermission"
               data-key="id"
@@ -164,7 +175,7 @@
               <template #header>
                 <div class="table-header-container">
                   <Button
-                    class="button-info button-sm"
+                    class="p-button-info p-button-sm"
                     @click="addFeatureForm"
                   >
                     <span class="material-icons">add</span> Add Feature
@@ -190,13 +201,13 @@
         </div>
         <template #footer>
           <Button
-            class="button-text button-sm"
+            class="p-button-text p-button-sm"
             @click="toggleModal"
           >
             <span class="material-icons">highlight_off</span> Cancel
           </Button>
           <Button
-            class="button-sm"
+            class="p-button-sm"
             autofocus
             @click="processForm"
           >
@@ -211,7 +222,7 @@
         :position="ui.modal.manageFeature.position"
         :style="{ width: '50vw' }"
       >
-        <div class="p-fluid formgrid grid">
+        <div class="p-fluid p-formgrid grid">
           <div class="field col-12 md-12">
             <label for="manageFeatureDOM">
               DOM Identity
@@ -257,6 +268,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import Card from 'primevue/card'
+import Panel from 'primevue/panel'
 import TreeTable from 'primevue/treetable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -282,6 +294,7 @@ export default defineComponent({
     Toast,
     DataTable,
     ConfirmPopup,
+    Panel,
   },
   setup() {},
   data() {
@@ -414,7 +427,7 @@ export default defineComponent({
       this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
 
       const checkLevel = target.key.split('-')
-      this.form.targetGroup = checkLevel[0]
+      this.form.targetGroup = parseInt(checkLevel[0])
       // if (checkLevel.length > 1) {
       //   this.form.targetParent = data.id
       // } else {
@@ -471,7 +484,7 @@ export default defineComponent({
         show_on_menu: showMenu,
       }).then((response: any) => {
         response = response.data
-        if (response.status === 200) {
+        if (response.statusCode === 200) {
           this.reloadMenu()
           this.rebuildMenu()
           this.clearForm()

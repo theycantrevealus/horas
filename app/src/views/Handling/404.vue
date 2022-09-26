@@ -1,18 +1,16 @@
 <template>
-  <div class="grid ai-start vertical-container">
-    <div class="col">
-      <div class="col-6 col-offset-3">
-        <center>
-          <Image
-            class="p-image handling_image"
-            :src="require('@/assets/images/handling/404.svg')"
-            alt="404"
-          />
-          <br />
-          Gak nampak halaman yang ente cari.
-          <router-link to="/dashboard">Balek dulu lah ke dashboard</router-link>
-        </center>
-      </div>
+  <div class="main-container p-grid vertical-container">
+    <div class="p-col-12">
+      <center>
+        <Image
+          class="p-image handling_image"
+          :src="require('@/assets/images/handling/404.svg')"
+          alt="404"
+        />
+        <br />
+        Gak nampak halaman yang ente cari.
+        <router-link to="/dashboard">Balek dulu lah ke dashboard</router-link>
+      </center>
     </div>
   </div>
 </template>

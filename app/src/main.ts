@@ -27,6 +27,8 @@ import CKEditor from '@ckeditor/ckeditor5-vue'
 
 // Modular
 import { registerModules } from '@/modules/register'
+import New from '@/modules/new'
+import GetStarted from '@/modules/get_started'
 import Account from '@/modules/setting/account'
 import Authority from '@/modules/setting/authority'
 import MasterItem from '@/modules/master/item'
@@ -35,6 +37,8 @@ import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 
 registerModules({
+  newModule: New,
+  getStarted: GetStarted,
   accountModule: Account,
   masterItem: MasterItem,
   authorityModule: Authority,
