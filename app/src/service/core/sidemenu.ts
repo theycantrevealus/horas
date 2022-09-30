@@ -1,9 +1,8 @@
-import axios from 'axios'
+import api from '@/util/api'
 
 class CoreService {
   async generateMenu(token: String) {
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`
-    return await axios
+    return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree`)
       .then((response) => {
         return Promise.resolve(response)
@@ -11,9 +10,16 @@ class CoreService {
   }
 
   async generateMenuManager(token: String) {
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`
-    return await axios
+    return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree/manager`)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+  }
+
+  async refreshAccess() {
+    return await api({ requiresAuth: true })
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/access`)
       .then((response) => {
         return Promise.resolve(response)
       })

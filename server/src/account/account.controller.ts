@@ -52,6 +52,9 @@ export class AccountController {
 
   constructor(private accountService: AccountService) {}
 
+  @ApiOperation({
+    summary: 'For login access',
+  })
   @Post('login')
   async login(@Body() data: AccountLoginDTO): Promise<AccountLoginResponseDTO> {
     return this.accountService.login(data)
@@ -69,7 +72,9 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @ApiOperation({ summary: 'List all user (Paginate)' })
+  @ApiOperation({
+    summary: 'List all user (Paginate / Prime Datatable support)',
+  })
   @Get('paginate')
   async paginate(
     @Query('first') first: number,
@@ -93,6 +98,9 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
+  @ApiOperation({
+    summary: 'Get an account detail information',
+  })
   @ApiParam({
     name: 'uid',
   })
@@ -104,6 +112,9 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
+  @ApiOperation({
+    summary: 'Get an account profile image',
+  })
   @ApiParam({
     name: 'uid',
   })
@@ -122,18 +133,24 @@ export class AccountController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
+  @ApiOperation({
+    summary: 'Delete an account',
+  })
   @ApiParam({
     name: 'uid',
   })
   @Delete(':uid/delete')
-  async delete_soft(@Param() param): Promise<GlobalResponse> {
-    return await this.accountService.delete_soft(param.uid)
+  async deleteSoft(@Param() param): Promise<GlobalResponse> {
+    return await this.accountService.deleteSoft(param.uid)
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
+  @ApiOperation({
+    summary: 'Add new account',
+  })
   @Post('add')
   async add(@Body() data: AccountModel): Promise<GlobalResponse> {
     return await this.accountService.add(data)
@@ -143,6 +160,9 @@ export class AccountController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
+  @ApiOperation({
+    summary: 'Update an account information',
+  })
   @ApiParam({
     name: 'uid',
   })
@@ -154,24 +174,41 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
-  @Post('grant_access')
-  async grant_access(
-    @Body() data: GrantAccessDTO,
-    @CredentialAccount() account: AccountModel
-  ): Promise<GlobalResponse> {
-    return await this.accountService.grant_access(data, account)
+  @ApiOperation({
+    summary: 'Get detail account access information',
+  })
+  @Get('access')
+  async getAccountAccessMeta(@CredentialAccount() credential: AccountModel) {
+    return this.accountService.getAccountAccessMeta(credential)
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
+  @ApiOperation({
+    summary: 'Grant specific access to an account',
+  })
+  @Post('grant_access')
+  async grantAccess(
+    @Body() data: GrantAccessDTO,
+    @CredentialAccount() account: AccountModel
+  ): Promise<GlobalResponse> {
+    return await this.accountService.grantAccess(data, account)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiOperation({
+    summary: 'Grant specific permission to an account',
+  })
   @Post('grant_permission')
-  async grant_permission(
+  async grantPermission(
     @Body() data: GrantPermissionDTO,
     @CredentialAccount() account: AccountModel
   ): Promise<GlobalResponse> {
-    return await this.accountService.grant_permission(data, account)
+    return await this.accountService.grantPermission(data, account)
   }
 }

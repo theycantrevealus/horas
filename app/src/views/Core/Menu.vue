@@ -356,7 +356,7 @@ export default defineComponent({
   methods: {
     ...mapActions({
       getMenu: 'mCoreMenu/get_all_menu',
-      rebuildMenu: 'UPDATE_MENU',
+      rebuildMenu: 'coreUpdateMenu',
     }),
     clearForm() {
       this.form = {
@@ -396,7 +396,6 @@ export default defineComponent({
         rejectLabel: 'Cancel',
         accept: () => {
           return CoreService.menuDelete(target).then((response: any) => {
-            console.log(response)
             if (response.status === 200) {
               response = response.data
               this.$toast.add({
@@ -539,7 +538,6 @@ export default defineComponent({
         show_order: 1,
         show_on_menu: showMenu,
       }).then(async (response: any) => {
-        console.log(response)
         if (response.status === 201) {
           response = response.data
           const mimicSetterPermission = this.setterPermission

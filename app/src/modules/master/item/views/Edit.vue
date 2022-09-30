@@ -4,10 +4,8 @@
       autocomplete="off"
       @submit.prevent="editItem"
     >
-      <Card class="card-fluid">
-        <template #title>
-          <h5>Edit Master Item</h5>
-        </template>
+      <Card>
+        <template #title>Edit Master Item</template>
         <template #content>
           <TabView
             ref="tabview4"
@@ -18,64 +16,71 @@
                 <span class="material-icons-outlined">info</span>
                 <span>Basic Information</span>
               </template>
-              <div class="p-fluid formgrid grid">
-                <div class="field col-12 md-4">
-                  <label for="itemFormCode">Code</label>
-                  <InputText
-                    id="itemFormCode"
-                    v-model.trim="$v.code.$model"
-                    placeholder="xxxxxxxx"
-                    type="text"
-                  />
-                  <Message
-                    v-if="$v.code.$errors.length > 0"
-                    severity="error"
-                    :closable="false"
-                  >
-                    <div
-                      v-for="(error, index) of $v.code.$errors"
-                      :key="index"
-                      class="error-msg"
-                    >{{ error.$message }}</div>
-                  </Message>
+              <div class="grid p-fluid">
+                <div class="col-3">
+                  <div class="field">
+                    <label for="itemFormCode">Code</label>
+                    <InputText
+                      id="itemFormCode"
+                      v-model.trim="$v.code.$model"
+                      placeholder="xxxxxxxx"
+                      type="text"
+                    />
+                    <Message
+                      v-if="$v.code.$errors.length > 0"
+                      severity="error"
+                      :closable="false"
+                    >
+                      <div
+                        v-for="(error, index) of $v.code.$errors"
+                        :key="index"
+                        class="error-msg"
+                      >{{ error.$message }}</div>
+                    </Message>
+                  </div>
+
                 </div>
-                <div class="field col-12 md-4">
-                  <label for="itemFormName">Name</label>
-                  <InputText
-                    id="itemFormName"
-                    v-model.trim="$v.name.$model"
-                    placeholder="Item Name"
-                    type="text"
-                  />
-                  <Message
-                    v-if="$v.name.$errors.length > 0"
-                    severity="error"
-                    :closable="false"
-                  >
-                    <div
-                      v-for="(error, index) of $v.name.$errors"
-                      :key="index"
-                      class="error-msg"
-                    >{{ error.$message }}</div>
-                  </Message>
+                <div class="col-9">
+                  <div class="field">
+                    <label for="itemFormName">Name</label>
+                    <InputText
+                      id="itemFormName"
+                      v-model.trim="$v.name.$model"
+                      placeholder="Item Name"
+                      type="text"
+                    />
+                    <Message
+                      v-if="$v.name.$errors.length > 0"
+                      severity="error"
+                      :closable="false"
+                    >
+                      <div
+                        v-for="(error, index) of $v.name.$errors"
+                        :key="index"
+                        class="error-msg"
+                      >{{ error.$message }}</div>
+                    </Message>
+                  </div>
                 </div>
-                <div class="field col-12 md-12">
-                  <label for="itemFormRemark">Remark</label>
-                  <ckeditor
-                    id="itemFormRemark"
-                    v-model="$v.remark.$model"
-                    :editor="editor"
-                    :config="editorConfig"
-                  ></ckeditor>
+                <div class="col-12">
+                  <div class="field">
+                    <label for="itemFormRemark">Remark</label>
+                    <ckeditor
+                      id="itemFormRemark"
+                      v-model="$v.remark.$model"
+                      :editor="editor"
+                      :config="editorConfig"
+                    ></ckeditor>
+                  </div>
                 </div>
               </div>
             </TabPanel>
             <TabPanel>
               <template #header>
-                <span class="material-icons-outlined">medication</span>
-                <span>Drug Info</span>
+                <span class="text-yellow-400 material-icons-outlined">medication</span>
+                <span class="text-yellow-400">Drug Info</span>
               </template>
-              <div class="p-fluid formgrid grid chemicalContainer">
+              <div class="p-fluid p-formgrid p-grid chemicalContainer">
                 <div class="field col-12 md-8">
                   <Card>
                     <template #title>

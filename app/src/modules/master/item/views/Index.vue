@@ -212,7 +212,6 @@ export default {
       this.loading = true
 
       MasterItemService.getItemList(this.lazyParams).then((response) => {
-        console.clear()
         if (response) {
           const data = response.data.list
           const totalRecords = response.data.totalRecords

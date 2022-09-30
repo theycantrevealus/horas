@@ -2,7 +2,7 @@
   <div class="sidepanel-container">
     <div class="layout-menu-container">
       <SideMenuAutoGen
-        :items="getSideMenu"
+        :items="menuMeta"
         class="layout-menu"
         :root="true"
         @menuitem-click="onMenuItemClick"
@@ -52,76 +52,7 @@ export default {
   emits: ['menuitem-click'],
   data() {
     return {
-      sidemenu3: [
-        {
-          label: 'Home',
-          items: [
-            {
-              label: 'Dashboard',
-              icon: 'home',
-              to: '/dashboard',
-            },
-            {
-              label: 'About',
-              icon: 'info',
-              to: '/about',
-            },
-          ],
-        },
-        {
-          label: 'Master Data',
-          items: [
-            { label: 'Form Layout', icon: 'api', to: '/form' },
-            { label: 'Message', icon: 'api', to: '/message' },
-          ],
-        },
-        {
-          label: 'Setting',
-          items: [
-            {
-              label: 'Module',
-              icon: 'view_in_ar',
-              to: '/core/menu',
-            },
-            {
-              label: 'Module',
-              icon: 'settings',
-              items: [
-                {
-                  label: 'Submenu 1.1',
-                  icon: 'api',
-                  items: [
-                    { label: 'Submenu 1.1.1', icon: 'api' },
-                    { label: 'Submenu 1.1.2', icon: 'api' },
-                    { label: 'Submenu 1.1.3', icon: 'api' },
-                  ],
-                },
-                {
-                  label: 'Submenu 1.2',
-                  icon: 'api',
-                  items: [
-                    { label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 1.2.2', icon: 'pi pi-fw pi-bookmark' },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: 'Get Started',
-          items: [
-            {
-              label: 'Documentation',
-              icon: 'help_outline',
-            },
-            {
-              label: 'Source',
-              icon: 'code',
-            },
-          ],
-        },
-      ],
+      menuMeta: [],
     }
   },
   computed: {
@@ -129,13 +60,22 @@ export default {
       getSideMenu: 'getSideMenu',
     }),
   },
+  watch: {
+    getSideMenu: {
+      handler(getData) {
+        if (getData) {
+          this.menuMeta = getData
+        }
+      },
+    },
+  },
   mounted() {
     this.rebuildMenu()
   },
   methods: {
     ...mapActions({
-      sLogout: 'LOGOUT',
-      rebuildMenu: 'UPDATE_MENU',
+      sLogout: 'coreLogout',
+      rebuildMenu: 'coreUpdateMenu',
     }),
     logout() {
       this.sLogout().then(() => {

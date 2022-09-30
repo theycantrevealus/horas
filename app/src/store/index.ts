@@ -34,49 +34,84 @@ const store = createStore({
     }),
   ],
   actions: {
-    LOGIN: async ({ commit }, accountRequestData: TAccountLogin) => {
+    coreLogin: async ({ commit }, accountRequestData: TAccountLogin) => {
       return await AccountService.login(accountRequestData).then(
         (response: any) => {
           response = response.data
           if (response.status === 200) {
-            commit('UPDATE_TOKEN', response.token)
-            commit('LOGIN_SUCCESS', response.account)
+            commit('mutateUpdateToken', response.token)
+            commit('mutateLoginSuccess', response.account)
           }
           return response
         }
       )
     },
-    UPDATE_MENU: async ({ commit, getters }) => {
+    coreRefreshAccess: async ({ commit, getters }) => {
+      return await CoreService.refreshAccess().then((response: any) => {
+        response = response.data
+        commit('mutateUpdateAccess', response)
+      })
+    },
+    coreUpdateMenu: async ({ commit, getters }) => {
       return await CoreService.generateMenu(getters.getToken).then(
         (response: any) => {
           response = response.data
-          commit('UPDATE_MENU', response)
+          commit('mutateUpdateMenu', response)
         }
       )
     },
-    LOGOUT: ({ commit }: { commit: Function }) => {
-      commit('CLEAR_SESSION')
+    coreLogout: ({ commit }: { commit: Function }) => {
+      commit('mutateClearSession')
     },
   },
   getters: {
     getToken: (state) => {
       return state.credential.token
     },
+    getPrivileges: (state) => {
+      return state.credential.pages
+    },
     getSideMenu: (state) => {
       return state.sidemenu
     },
   },
   mutations: {
-    START_LOADING: (state) => state.loading++,
-    FINISH_LOADING: (state) => state.loading--,
-    GET_TOKEN: (state) => state.credential.token,
-    UPDATE_TOKEN(state: any, token: string) {
+    mutateUpdateAccess: (state: any, data) => {
+      const grantedPerm = data.grantedPerm
+      const buildPermission = {}
+      for (let a in grantedPerm) {
+        if (buildPermission[grantedPerm[a].domiden]) {
+          buildPermission[grantedPerm[a].domiden] = {}
+        }
+
+        buildPermission[grantedPerm[a].domiden] = grantedPerm[a]
+      }
+
+      state.credential.permission = buildPermission
+
+      const grantedPage = data.grantedPage
+      const buildPage = {}
+      const routes: string[] = ['/login']
+      for (let a in grantedPage) {
+        if (buildPage[`page_${grantedPage[a].id}`]) {
+          buildPage[`page_${grantedPage[a].id}`] = {}
+        }
+        buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
+
+        routes.push(grantedPage[a].identifier)
+      }
+      state.credential.routes = routes
+      state.credential.pages = buildPage
+    },
+    mutateStartLoading: (state) => state.loading++,
+    mutateFinishLoading: (state) => state.loading--,
+    mutateUpdateToken(state: any, token: string) {
       state.credential.token = token
     },
-    UPDATE_MENU(state: any, menu) {
+    mutateUpdateMenu(state: any, menu) {
       state.sidemenu = menu
     },
-    LOGIN_SUCCESS(state: any, credentialData) {
+    mutateLoginSuccess(state: any, credentialData) {
       state.credential.uid = credentialData.uid
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
@@ -96,18 +131,19 @@ const store = createStore({
 
       const grantedPage = credentialData.grantedPage
       const buildPage = {}
-      state.credential.routes.push('/login')
+      const routes: string[] = ['/login']
       for (let a in grantedPage) {
         if (buildPage[`page_${grantedPage[a].id}`]) {
           buildPage[`page_${grantedPage[a].id}`] = {}
         }
         buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
 
-        state.credential.routes.push(grantedPage[a].identifier)
+        routes.push(grantedPage[a].identifier)
       }
+      state.credential.routes = routes
       state.credential.pages = buildPage
     },
-    CLEAR_SESSION(state: any) {
+    mutateClearSession(state: any) {
       state.credential.token = null
     },
   },

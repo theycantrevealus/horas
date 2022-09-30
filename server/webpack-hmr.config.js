@@ -71,9 +71,12 @@ module.exports = {
       ],
     }),
   ],
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+  },
   output: {
     path: path.join(__dirname, 'dist'),
-    publicPath: '/dist/',
+    publicPath: path.join(__dirname, 'dist'),
     filename: 'server.js',
     hotUpdateChunkFilename: 'hot/hot-update.js',
     hotUpdateMainFilename: 'hot/hot-update.json',

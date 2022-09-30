@@ -147,7 +147,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      sLogin: 'LOGIN',
+      sLogin: 'coreLogin',
     }),
     login() {
       return this.sLogin({

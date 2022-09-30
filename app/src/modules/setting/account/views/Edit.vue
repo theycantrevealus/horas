@@ -6,7 +6,7 @@
         <template #content>
           <TabView>
             <TabPanel header="Main Info">
-              <div class="grid">
+              <div class="p-grid">
                 <div class="col-4">
                   <div class="profile-display">
                     <img :src="formData.image" />
@@ -464,6 +464,11 @@ export default {
       'updatePermission',
       'updateAccess',
     ]),
+    ...mapActions({
+      sLogout: 'coreLogout',
+      rebuildMenu: 'coreUpdateMenu',
+      rebuildAccess: 'coreRefreshAccess',
+    }),
     back() {
       this.$router.push('/account')
     },
@@ -500,14 +505,14 @@ export default {
             this.formData.selectedPermission = this.selectedPerm
             this.updateAccount(this.formData).then(async (response) => {
               if (response.status === 200) {
-                await this.$store.dispatch(
-                  'accountModule/fetchMenuTree',
-                  this.lazyParams
-                )
+                // await this.$store.dispatch(
+                //   'accountModule/fetchMenuTree',
+                //   this.lazyParams
+                // )
 
-                await this.$store.dispatch('UPDATE_MENU')
-
-                //TODO : Refresh sidemenu and reload privileges
+                await this.rebuildMenu().then(() => {
+                  this.rebuildAccess()
+                })
 
                 this.$confirm.require({
                   group: 'keep_editing',

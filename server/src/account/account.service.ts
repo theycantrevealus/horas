@@ -114,6 +114,53 @@ export class AccountService {
       })
   }
 
+  async getAccountAccessMeta(account: AccountModel) {
+    return await this.dataSource
+      .getRepository(AccountModel)
+      .createQueryBuilder('account')
+      .where('deleted_at IS NULL')
+      .orderBy('created_at', 'DESC')
+      .andWhere('uid = :uid')
+      .setParameters({ uid: account.uid })
+      .getOne()
+      .then(async (accountResp) => {
+        const grantedPageSet = []
+        const Page = await this.dataSource
+          .getRepository(AccountPrivilegesModel)
+          .createQueryBuilder('account_privileges')
+          .innerJoinAndSelect('account_privileges.menu', 'menu')
+          .where('account_privileges.account = :account', {
+            account: accountResp.uid,
+          })
+          .getMany()
+        for (const a in Page) {
+          grantedPageSet.push(Page[a].menu)
+        }
+        const grantedPermSet = []
+        const Permission = await this.accountPermission
+          .createQueryBuilder('account_permission')
+          .innerJoinAndSelect(
+            'account_permission.permission',
+            'menu_permission'
+          )
+          .where('account_permission.account = :account', {
+            account: accountResp.uid,
+          })
+          .getMany()
+        for (const a in Permission) {
+          grantedPermSet.push(Permission[a].permission)
+        }
+        return {
+          account: accountResp,
+          grantedPerm: grantedPermSet,
+          grantedPage: grantedPageSet,
+        }
+      })
+      .catch((e: Error) => {
+        throw new Error(e.message)
+      })
+  }
+
   async detail(uid: string) {
     const data = {
       account: {},
@@ -147,7 +194,7 @@ export class AccountService {
     return data
   }
 
-  async delete_soft(uid: string): Promise<GlobalResponse> {
+  async deleteSoft(uid: string): Promise<GlobalResponse> {
     const response = new GlobalResponse()
     const oldMeta = await this.detail(uid)
     return await this.accountRepo
@@ -218,8 +265,7 @@ export class AccountService {
           .execute()
           .then(() => {
             account.selectedPage.map(async (e) => {
-              console.log(e)
-              await this.grant_access({ account: uid, menu: e }, old)
+              await this.grantAccess({ account: uid, menu: e }, old)
             })
           })
 
@@ -231,7 +277,7 @@ export class AccountService {
           .execute()
           .then(() => {
             account.selectedPermission.map(async (e) => {
-              await this.grant_permission({ account: uid, permission: e }, old)
+              await this.grantPermission({ account: uid, permission: e }, old)
             })
           })
 
@@ -297,7 +343,7 @@ export class AccountService {
       .getMany()
   }
 
-  async grant_access(
+  async grantAccess(
     data: GrantAccessDTO,
     granted_by: AccountModel
   ): Promise<GlobalResponse> {
@@ -356,7 +402,8 @@ export class AccountService {
         throw new Error(e.message)
       })
   }
-  async grant_permission(
+
+  async grantPermission(
     data: GrantPermissionDTO,
     granted_by: AccountModel
   ): Promise<GlobalResponse> {

@@ -1,24 +1,8 @@
-import axios from 'axios'
+import api from '@/util/api'
 
 class MasterItemService {
-  /**
-   * @brief List all item data with pagination
-   * @param parsedData Object Base. request: parsedData.default is 'list'
-   * {
-   *  request: 'list' <Default is 'list'>,
-   *  first: 0,
-   *  rows: 10 'or this.$refs.dt.rows',
-   *  sortField: null,
-   *  sortOrder: null,
-   *  filters: {
-        columnName: { value: '', matchMode: 'contains' },
-        anotherColumnName: { value: '', matchMode: 'contains' }
-      }
-   * }
-   * @returns
-   */
   getItemList(parsedData) {
-    return axios
+    return api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/paginate`, {
         params: parsedData,
       })
@@ -27,8 +11,8 @@ class MasterItemService {
       })
   }
 
-  getItemDetail(uid) {
-    return axios
+  async getItemDetail(uid) {
+    return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/${uid}`)
       .then((response: any) => {
         return Promise.resolve(response)

@@ -12,10 +12,38 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
+import Card from 'primevue/card'
+import { mapActions, mapGetters } from 'vuex'
+import store from '@/store'
 
 export default defineComponent({
   name: 'GetStartedIndex',
+  components: { Card },
   setup() {},
+  computed: {
+    ...mapGetters({
+      getPrivileges: 'getPrivileges',
+    }),
+  },
+  watch: {
+    getPrivileges: {
+      handler(getData) {
+        // console.log(getData)
+      },
+    },
+  },
+  async mounted() {
+    await this.rebuildMenu()
+    // await this.rebuildAccess()
+  },
+  methods: {
+    ...mapActions({
+      sLogout: 'coreLogout',
+      rebuildMenu: 'coreUpdateMenu',
+      rebuildAccess: 'coreRefreshAccess',
+    }),
+    ...mapActions('accountModule', ['updateAccount', 'updatePermission']),
+  },
 })
 </script>
 
