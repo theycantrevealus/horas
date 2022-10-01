@@ -7,11 +7,23 @@ import { TAccountLogin } from '@/model/Account'
 import AccountService from '@/service/account'
 import CoreService from '@/service/core/sidemenu'
 import { coreMenu } from '@/store/core/menu'
+import getBrowserLocale from '@/util/i18n/browser.config'
 
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
     loading: 0,
+    language: {},
+    languageMeta: {
+      EN: {
+        code: 'US',
+        name: 'United States',
+      },
+      ID: {
+        code: 'ID',
+        name: 'United States',
+      },
+    },
     credential: {
       uid: '',
       first_name: '',
@@ -63,6 +75,9 @@ const store = createStore({
     coreLogout: ({ commit }: { commit: Function }) => {
       commit('mutateClearSession')
     },
+    setLanguange: ({ commit }) => {
+      commit('mutateSetBrowserLanguage', true)
+    },
   },
   getters: {
     getToken: (state) => {
@@ -74,8 +89,17 @@ const store = createStore({
     getSideMenu: (state) => {
       return state.sidemenu
     },
+    getBrowserLanguage: (state) => {
+      return state.language
+    },
   },
   mutations: {
+    mutateSetBrowserLanguage: (state: any, countryCodeOnly = false) => {
+      const selectedLanguage: string = getBrowserLocale({
+        countryCodeOnly: countryCodeOnly,
+      })?.toUpperCase()
+      state.language = state.languageMeta[selectedLanguage]
+    },
     mutateUpdateAccess: (state: any, data) => {
       const grantedPerm = data.grantedPerm
       const buildPermission = {}

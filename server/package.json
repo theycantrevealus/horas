@@ -71,6 +71,7 @@
     "typeorm-extension": "^2.1.10",
     "typeorm-seeding": "^1.6.1",
     "uuid": "^9.0.0",
+    "vue-i18n": "^9.2.2",
     "yargs": "^17.5.1"
   },
   "devDependencies": {

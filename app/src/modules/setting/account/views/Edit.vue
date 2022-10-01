@@ -6,7 +6,7 @@
         <template #content>
           <TabView>
             <TabPanel header="Main Info">
-              <div class="p-grid">
+              <div class="grid">
                 <div class="col-4">
                   <div class="profile-display">
                     <img :src="formData.image" />

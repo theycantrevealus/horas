@@ -1,31 +1,21 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import PrimeVue from 'primevue/config'
-// import * as Sentry from '@sentry/vue'
-// import { Integrations } from '@sentry/tracing'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import setupInterceptors from '@/service/core/interceptor'
-
-import 'primevue/resources/themes/tailwind-light/theme.css'
-import 'primevue/resources/primevue.min.css'
-
-import 'primeicons/primeicons.css'
-import 'primeflex/primeflex.css'
-// import 'primeng/resources/primeng.min.css'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import 'material-icons/iconfont/material-icons.css'
 import '@/assets/tnsol.css'
+import '@/assets/flag.css'
 import '@/assets/style/popconfirm.css'
 import '@/assets/style/toolbar.css'
 import '@/assets/style/table.css'
 import '@/assets/style/modal.css'
 import 'nprogress/nprogress.css'
 import CKEditor from '@ckeditor/ckeditor5-vue'
-
-// Modular
 import { registerModules } from '@/modules/register'
 import New from '@/modules/new'
 import GetStarted from '@/modules/get_started'
@@ -35,6 +25,11 @@ import MasterItem from '@/modules/master/item'
 import Service from '@/modules/service'
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
+import { createI18n } from 'vue-i18n'
+import 'primevue/resources/themes/tailwind-light/theme.css'
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css'
+import 'primeflex/primeflex.css'
 
 registerModules({
   newModule: New,
@@ -54,7 +49,23 @@ declare global {
   }
 }
 declare var require: any
-
+const messages = {
+  en: {
+    message: {
+      hello: 'hello world',
+    },
+  },
+  ja: {
+    message: {
+      hello: 'こんにちは、世界',
+    },
+  },
+}
+const i18n = createI18n({
+  locale: 'en',
+  fallbackLocale: 'en',
+  messages,
+})
 const app = createApp(App)
 
 app
@@ -64,6 +75,7 @@ app
   .use(ToastService)
   .use(ConfirmationService)
   .use(CKEditor)
+  .use(i18n)
 
 app.mount('#app')
 

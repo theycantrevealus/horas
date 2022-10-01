@@ -8,24 +8,65 @@
         />
       </template>
       <template #end>
-        ?
+        <Dropdown
+          v-model="getBrowserLanguage"
+          class="country-selector"
+          :options="countries"
+          optionLabel="name"
+          :filter="true"
+          placeholder="Select a Country"
+          :showClear="true"
+          @change="changeLanguage()"
+        >
+          <template #value="slotProps">
+            <div
+              v-if="slotProps.value"
+              class="country-item country-item-value"
+            >
+              <img
+                :src="require('@/assets/flag_placeholder.png')"
+                :class="'flag flag-' + slotProps.value.code.toLowerCase()"
+                width="18"
+              />
+              <div>{{slotProps.value.name}}</div>
+            </div>
+            <span v-else>
+              {{slotProps.placeholder}}
+            </span>
+          </template>
+          <template #option="slotProps">
+            <div class="country-item">
+              <img
+                :src="require('@/assets/flag_placeholder.png')"
+                :class="'flag flag-' + slotProps.option.code.toLowerCase()"
+              />
+              <div>{{slotProps.option.name}}</div>
+            </div>
+          </template>
+        </Dropdown>
       </template>
     </Menubar>
   </div>
 </template>
 <script>
 import Menubar from 'primevue/menubar'
-import Button from 'primevue/button'
+import Dropdown from 'primevue/dropdown'
 import Chip from 'primevue/chip'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'TopPanelMenu',
   components: {
     Menubar,
     Chip,
+    Dropdown,
   },
+
   data() {
     return {
+      countries: [
+        { name: 'United States', code: 'US' },
+        { name: 'Indonesia', code: 'ID' },
+      ],
       sidemenu: [
         {
           label: 'File',
@@ -183,6 +224,9 @@ export default {
     }
   },
   computed: {
+    getBrowserLanguage() {
+      return this.$store.state.language
+    },
     profile_photo() {
       return this.$store.state.credential.profile_photo
     },
@@ -191,6 +235,18 @@ export default {
     },
     last_name() {
       return this.$store.state.credential.last_name
+    },
+  },
+  created() {},
+  async mounted() {
+    await this.initLanguage()
+  },
+  methods: {
+    ...mapActions({
+      initLanguage: 'setLanguange',
+    }),
+    changeLanguage() {
+      //
     },
   },
 }
