@@ -4,14 +4,14 @@
       <TopPanelBar />
     </div>
     <div class="sidepanel">
-      <div class="wrapper">
+      <div class="wrapper logo-container">
         <img
           class="panelLogo"
           :src="require('../assets/logo-white.png')"
           alt="horas"
         />
       </div>
-      <div class="wrapper">
+      <div class="wrapper sidepanel-menu">
         <SidePanelBar />
       </div>
       <!-- <perfect-scrollbar>

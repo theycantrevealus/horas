@@ -13,6 +13,7 @@ import entities from '@configs/entities'
 import { MenuModule } from './menu/menu.module'
 import { CLIModule } from './cli/cli.module'
 import { MasterItemModule } from './master/item/item.module'
+import { Corei18nModule } from './i18n/i18n.module'
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { MasterItemModule } from './master/item/item.module'
     AccountModule,
     MasterItemModule,
     MenuModule,
+    Corei18nModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -30,6 +30,7 @@ import 'primevue/resources/themes/tailwind-light/theme.css'
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
 import 'primeflex/primeflex.css'
+import { i18n } from '@/util/i18n/instances'
 
 registerModules({
   newModule: New,
@@ -55,17 +56,13 @@ const messages = {
       hello: 'hello world',
     },
   },
-  ja: {
+  id: {
     message: {
       hello: 'こんにちは、世界',
     },
   },
 }
-const i18n = createI18n({
-  locale: 'en',
-  fallbackLocale: 'en',
-  messages,
-})
+
 const app = createApp(App)
 
 app

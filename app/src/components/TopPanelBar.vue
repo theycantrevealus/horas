@@ -8,14 +8,14 @@
         />
       </template>
       <template #end>
+        {{ $t('message.hello') }}
         <Dropdown
-          v-model="getBrowserLanguage"
+          v-model="selectedLanguage"
           class="country-selector"
           :options="countries"
           optionLabel="name"
           :filter="true"
           placeholder="Select a Country"
-          :showClear="true"
           @change="changeLanguage()"
         >
           <template #value="slotProps">
@@ -63,9 +63,10 @@ export default {
 
   data() {
     return {
+      selectedLanguage: null,
       countries: [
-        { name: 'United States', code: 'US' },
-        { name: 'Indonesia', code: 'ID' },
+        { name: 'United States', code: 'us', lang: 'en' },
+        { name: 'Indonesia', code: 'id', lang: 'id' },
       ],
       sidemenu: [
         {
@@ -239,14 +240,19 @@ export default {
   },
   created() {},
   async mounted() {
-    await this.initLanguage()
+    await this.initLanguage().then(() => {
+      this.selectedLanguage = this.$store.state.language
+    })
   },
   methods: {
     ...mapActions({
       initLanguage: 'setLanguange',
+      storeLanguage: 'changeLanguage',
     }),
     changeLanguage() {
-      //
+      this.storeLanguage(this.selectedLanguage).then(() => {
+        this.$i18n.locale = this.selectedLanguage.lang
+      })
     },
   },
 }

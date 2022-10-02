@@ -1,12 +1,14 @@
 import { properties } from '@/utilities/models/column'
 import { ApiProperty } from '@nestjs/swagger'
-import { Transform } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import {
+  IsArray,
   IsNotEmpty,
   IsString,
   Length,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator'
 import {
   Entity,
@@ -17,6 +19,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm'
+import { Corei18nComponentModel } from './core.i18n.compontent.model'
 
 @Entity({ name: 'core_i18n' })
 export class Corei18nModel {
@@ -25,13 +28,6 @@ export class Corei18nModel {
   @Column(properties.uid)
   uid: string
 
-  @ApiProperty({
-    example: 'Indonesia',
-    type: String,
-    description: 'Language name',
-  })
-  @IsString()
-  @IsNotEmpty()
   @Column({
     nullable: false,
     type: 'character varying',
@@ -39,15 +35,6 @@ export class Corei18nModel {
   })
   name: string
 
-  @ApiProperty({
-    example: 'ID',
-    type: String,
-    description: 'ISO 2 digits language code',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @Length(2)
-  @Transform((e) => e.value.toUpperCase())
   @Column({
     nullable: false,
     type: 'character varying',
@@ -56,15 +43,6 @@ export class Corei18nModel {
   })
   iso_2_digits: string
 
-  @ApiProperty({
-    example: 'IDN',
-    type: String,
-    description: 'ISO 3 digits language code',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @Length(3)
-  @Transform((e) => e.value.toUpperCase())
   @Column({
     nullable: false,
     type: 'character varying',
@@ -73,12 +51,6 @@ export class Corei18nModel {
   })
   iso_3_digits: string
 
-  @ApiProperty({
-    example: 'short',
-    enum: ['narrow', 'short', 'long'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -89,12 +61,6 @@ export class Corei18nModel {
   })
   datetime_weekday: string
 
-  @ApiProperty({
-    example: 'short',
-    enum: ['narrow', 'short', 'long'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -105,12 +71,6 @@ export class Corei18nModel {
   })
   datetime_era: string
 
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['numeric', '2-digit'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -121,12 +81,6 @@ export class Corei18nModel {
   })
   datetime_year: string
 
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['numeric', '2-digit', 'narrow', 'short', 'long'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -137,12 +91,6 @@ export class Corei18nModel {
   })
   datetime_month: string
 
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['numeric', '2-digit'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -153,12 +101,6 @@ export class Corei18nModel {
   })
   datetime_day: string
 
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['numeric', '2-digit'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -169,12 +111,6 @@ export class Corei18nModel {
   })
   datetime_hour: string
 
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['numeric', '2-digit'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -185,12 +121,6 @@ export class Corei18nModel {
   })
   datetime_minute: string
 
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['numeric', '2-digit'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',
@@ -201,12 +131,6 @@ export class Corei18nModel {
   })
   datetime_second: string
 
-  @ApiProperty({
-    example: 'short',
-    enum: ['short', 'long'],
-    type: String,
-    description: `You can define named datetime format (e.g. short, long, etc), and you need to use <a href='https://402.ecma-international.org/2.0/#sec-InitializeDateTimeFormat'>the options with ECMA-402 Intl.DateTimeFormat</a>`,
-  })
   @Column({
     nullable: false,
     type: 'enum',

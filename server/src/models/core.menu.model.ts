@@ -12,6 +12,7 @@ import { IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { properties } from '@/utilities/models/column'
 import { Type } from 'class-transformer'
+import { Corei18nComponentModel } from './core.i18n.compontent.model'
 
 @Entity({ name: 'menu' })
 export class CoreMenuModel {

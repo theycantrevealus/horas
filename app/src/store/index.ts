@@ -15,13 +15,15 @@ const store = createStore({
     loading: 0,
     language: {},
     languageMeta: {
-      EN: {
-        code: 'US',
+      en: {
+        code: 'us',
+        lang: 'en',
         name: 'United States',
       },
-      ID: {
-        code: 'ID',
-        name: 'United States',
+      id: {
+        code: 'id',
+        lang: 'id',
+        name: 'Indonesia',
       },
     },
     credential: {
@@ -78,6 +80,9 @@ const store = createStore({
     setLanguange: ({ commit }) => {
       commit('mutateSetBrowserLanguage', true)
     },
+    changeLanguage: ({ commit }, data) => {
+      commit('mutateChangeLanguage', data)
+    },
   },
   getters: {
     getToken: (state) => {
@@ -97,8 +102,11 @@ const store = createStore({
     mutateSetBrowserLanguage: (state: any, countryCodeOnly = false) => {
       const selectedLanguage: string = getBrowserLocale({
         countryCodeOnly: countryCodeOnly,
-      })?.toUpperCase()
+      })
       state.language = state.languageMeta[selectedLanguage]
+    },
+    mutateChangeLanguage: (state: any, language) => {
+      state.language = state.languageMeta[language.lang]
     },
     mutateUpdateAccess: (state: any, data) => {
       const grantedPerm = data.grantedPerm
