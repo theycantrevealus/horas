@@ -18,6 +18,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
 } from 'typeorm'
 import { Corei18nComponentModel } from './core.i18n.compontent.model'
 
@@ -36,17 +39,28 @@ export class Corei18nModel {
   name: string
 
   @Column({
+    unique: true,
     nullable: false,
     type: 'character varying',
-    comment: 'Language Name',
+    comment: 'Country language code 2 digits',
+    length: 2,
+  })
+  language_code: string
+
+  @Column({
+    unique: true,
+    nullable: false,
+    type: 'character varying',
+    comment: 'Country code 2 digits',
     length: 2,
   })
   iso_2_digits: string
 
   @Column({
+    unique: true,
     nullable: false,
     type: 'character varying',
-    comment: 'Language Name',
+    comment: 'Country code 3 digits',
     length: 3,
   })
   iso_3_digits: string
@@ -141,6 +155,11 @@ export class Corei18nModel {
   })
   datetime_timezone_name: string
 
+  @Type(() => Corei18nComponentModel)
+  @OneToMany(() => Corei18nComponentModel, (component) => component.language)
+  @JoinColumn()
+  components: Corei18nComponentModel[]
+
   @CreateDateColumn(properties.created_at)
   created_at: Date
 
@@ -149,4 +168,21 @@ export class Corei18nModel {
 
   @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
+
+  constructor(data: any) {
+    this.name = data?.name
+    this.language_code = data?.language_code
+    this.iso_2_digits = data?.iso_2_digits
+    this.iso_3_digits = data?.iso_3_digits
+    this.datetime_weekday = data?.datetime_weekday
+    this.datetime_era = data?.datetime_era
+    this.datetime_year = data?.datetime_year
+    this.datetime_month = data?.datetime_month
+    this.datetime_day = data?.datetime_day
+    this.datetime_hour = data?.datetime_hour
+    this.datetime_minute = data?.datetime_minute
+    this.datetime_second = data?.datetime_second
+    this.datetime_timezone_name = data?.datetime_timezone_name
+    this.components = data?.components
+  }
 }

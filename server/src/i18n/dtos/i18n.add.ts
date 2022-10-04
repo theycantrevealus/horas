@@ -1,25 +1,8 @@
-import { Corei18nComponentModel } from '@/models/core.i18n.compontent.model'
-import { properties } from '@/utilities/models/column'
+import { IsArrayOfObjects } from '@/decorators/class.validator.object.array'
 import { ApiProperty } from '@nestjs/swagger'
 import { Transform, Type } from 'class-transformer'
-import {
-  IsArray,
-  IsNotEmpty,
-  IsString,
-  Length,
-  MaxLength,
-  MinLength,
-  ValidateNested,
-} from 'class-validator'
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  Generated,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-} from 'typeorm'
+import { IsNotEmpty, IsString, Length, ValidateNested } from 'class-validator'
+import { Corei18nComponentDTO } from './i18n.component'
 
 export class Corei18nDTOAdd {
   @ApiProperty({
@@ -30,6 +13,17 @@ export class Corei18nDTOAdd {
   @IsString()
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    example: 'id',
+    type: String,
+    description: 'Country international language code',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Length(2)
+  @Transform((e) => e.value.toUpperCase())
+  language_code: string
 
   @ApiProperty({
     example: 'ID',
@@ -140,12 +134,12 @@ export class Corei18nDTOAdd {
   datetime_timezone_name: string
 
   @ApiProperty({
-    type: Corei18nComponentModel,
+    type: Corei18nComponentDTO,
     isArray: true,
   })
   @IsNotEmpty()
-  @IsArray()
+  @IsArrayOfObjects()
   @ValidateNested({ each: true })
-  @Type(() => Corei18nComponentModel)
-  components: Corei18nComponentModel[]
+  @Type(() => Corei18nComponentDTO)
+  components: Corei18nComponentDTO[]
 }

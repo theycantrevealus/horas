@@ -18,6 +18,8 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  JoinColumn,
+  OneToMany,
 } from 'typeorm'
 import { Corei18nModel } from './core.i18n.model'
 import { CoreMenuModel } from './core.menu.model'
@@ -29,39 +31,29 @@ export class Corei18nComponentModel {
   @Column(properties.uid)
   uid: string
 
-  @ApiProperty({
-    example: '',
-    type: Corei18nModel,
-  })
-  @IsNotEmpty()
-  @ValidateNested()
-  @Type(() => Corei18nModel)
-  @ManyToOne(() => Corei18nModel, (i18n) => i18n.uid)
-  language: Corei18nModel
-
-  @ApiProperty({
-    example: '',
-    type: CoreMenuModel,
-  })
-  @ValidateNested()
-  @IsNotEmpty()
   @Type(() => CoreMenuModel)
   @ManyToOne(() => CoreMenuModel, (menu) => menu.id)
+  @JoinColumn()
   menu: CoreMenuModel
 
-  @ApiProperty({
-    example: 'group.identifier',
-    type: String,
-    description: 'Component Identifier',
-  })
-  @IsString()
-  @IsNotEmpty()
   @Column({
     nullable: false,
     type: 'character varying',
     comment: 'Component Identifier',
   })
   component: string
+
+  @Column({
+    nullable: false,
+    type: 'character varying',
+    comment: 'Translation value',
+  })
+  translation: string
+
+  @Type(() => Corei18nModel)
+  @ManyToOne(() => Corei18nModel, (i18n) => i18n.components)
+  @JoinColumn()
+  language: Corei18nModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date
@@ -72,9 +64,10 @@ export class Corei18nComponentModel {
   @DeleteDateColumn(properties.deleted_at)
   deleted_at: Date
 
-  constructor(language: Corei18nModel, menu: CoreMenuModel, component: string) {
-    this.language = language
-    this.menu = menu
-    this.component = component
+  constructor(data: any) {
+    this.menu = data?.menu
+    this.component = data?.component
+    this.translation = data?.translation
+    this.language = data?.language
   }
 }

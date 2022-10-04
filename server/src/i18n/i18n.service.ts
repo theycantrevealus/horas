@@ -22,19 +22,22 @@ export class Corei18nService {
   private logger = new Logger('HTTP')
 
   async all() {
-    return await this.corei18nRepo.find()
+    return await this.dataSource
+      .getRepository(Corei18nModel)
+      .createQueryBuilder('core_i18n')
+      .leftJoinAndSelect('core_i18n.components', 'core_i18n_component')
+      .getMany()
   }
 
   async detail(uid: string) {
-    return await this.corei18nRepo
-      .findOne({
-        where: {
-          uid: uid,
-        },
+    return await this.dataSource
+      .getRepository(Corei18nModel)
+      .createQueryBuilder('core_i18n')
+      .leftJoinAndSelect('core_i18n.components', 'core_i18n_component')
+      .where('core_i18n.uid = :uid', {
+        uid: uid,
       })
-      .then((dataSet) => {
-        return dataSet
-      })
+      .getOne()
   }
 
   async edit(data: Corei18nDTOEdit, uid: string): Promise<GlobalResponse> {
@@ -42,7 +45,7 @@ export class Corei18nService {
     return await this.corei18nRepo
       .update(uid, data)
       .then(async () => {
-        await this.corei18nComponentRepo.delete({ language: data })
+        // await this.corei18nComponentRepo.delete({ language: data })
         const propComponent = data.components.map(async (e) => {
           await this.corei18nComponentRepo.save(e)
         })
@@ -69,18 +72,14 @@ export class Corei18nService {
     return await this.corei18nRepo
       .softDelete({ uid })
       .then(async () => {
-        return await this.corei18nComponentRepo
-          .softDelete({ language: await this.detail(uid) })
-          .then(() => {
-            response.message = 'Menu deleted successfully'
-            response.statusCode = HttpStatus.OK
-            response.table_target = 'menu'
-            response.method = 'DELETE'
-            response.action = 'D'
-            response.transaction_id = uid
-            response.payload = oldMeta
-            return response
-          })
+        response.message = 'Menu deleted successfully'
+        response.statusCode = HttpStatus.OK
+        response.table_target = 'menu'
+        response.method = 'DELETE'
+        response.action = 'D'
+        response.transaction_id = uid
+        response.payload = oldMeta
+        return response
       })
       .catch((e) => {
         throw new Error(e.message)
@@ -89,14 +88,21 @@ export class Corei18nService {
 
   async add(data: Corei18nDTOAdd): Promise<GlobalResponse> {
     const response = new GlobalResponse()
+    const newLanguage = new Corei18nModel(data)
     return await this.corei18nRepo
-      .save(data)
+      .save(newLanguage)
       .then(async (returning) => {
         const propComponent = data.components.map(async (e) => {
-          await this.corei18nComponentRepo.save(e)
+          const newComponent = new Corei18nComponentModel({
+            ...e,
+            language: returning.uid,
+          })
+          await this.corei18nComponentRepo.save(newComponent).catch((e) => {
+            console.log(e)
+          })
         })
         return Promise.all(propComponent).then(async () => {
-          response.message = 'Menu Added Successfully'
+          response.message = 'Language Added Successfully'
           response.table_target = 'menu'
           response.transaction_id = returning.uid
           response.statusCode = HttpStatus.OK

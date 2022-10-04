@@ -1,5 +1,4 @@
 import { Corei18nComponentModel } from '@/models/core.i18n.compontent.model'
-import { properties } from '@/utilities/models/column'
 import { ApiProperty } from '@nestjs/swagger'
 import { Transform, Type } from 'class-transformer'
 import {
@@ -7,19 +6,8 @@ import {
   IsNotEmpty,
   IsString,
   Length,
-  MaxLength,
-  MinLength,
   ValidateNested,
 } from 'class-validator'
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  Generated,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-} from 'typeorm'
 
 export class Corei18nDTOEdit {
   @ApiProperty({
