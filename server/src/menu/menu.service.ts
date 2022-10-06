@@ -63,7 +63,7 @@ export class MenuService {
         response.table_target = 'menu'
         response.method = 'PUT'
         response.action = 'U'
-        response.transaction_id = id.toString()
+        response.transaction_id = id
         response.payload = await this.detail(id)
         return response
       })
@@ -83,7 +83,7 @@ export class MenuService {
         response.table_target = 'menu'
         response.method = 'DELETE'
         response.action = 'D'
-        response.transaction_id = id.toString()
+        response.transaction_id = id
         response.payload = oldMeta
         return response
       })
@@ -99,7 +99,7 @@ export class MenuService {
       .then(async (returning) => {
         response.message = 'Menu Added Successfully'
         response.table_target = 'menu'
-        response.transaction_id = returning.id.toString()
+        response.transaction_id = returning.id
         response.statusCode = HttpStatus.OK
         response.action = 'I'
         response.method = 'POST'

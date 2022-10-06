@@ -10,9 +10,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
 } from 'typeorm'
+import { AccountModel } from './account.model'
 import { CoreMenuModel } from './core.menu.model'
 
-@Entity({ name: 'menu_permission' })
+@Entity({ name: 'core_menu_permission' })
 export class CoreMenuPermissionModel {
   @PrimaryGeneratedColumn('increment')
   id: number
@@ -59,6 +60,9 @@ export class CoreMenuPermissionModel {
     comment: 'For identify dom service name that contain dispatch function',
   })
   servicegroup: string
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

@@ -20,16 +20,16 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm'
+import { AccountModel } from './account.model'
 import { Corei18nModel } from './core.i18n.model'
 import { CoreMenuModel } from './core.menu.model'
 
 @Entity({ name: 'core_i18n_component' })
 export class Corei18nComponentModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @Type(() => CoreMenuModel)
   @ManyToOne(() => CoreMenuModel, (menu) => menu.id)
@@ -52,8 +52,11 @@ export class Corei18nComponentModel {
 
   @Type(() => Corei18nModel)
   @ManyToOne(() => Corei18nModel, (i18n) => i18n.components)
-  @JoinColumn()
+  @JoinColumn({ name: 'language_uid' })
   language: Corei18nModel
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

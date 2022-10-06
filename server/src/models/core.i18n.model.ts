@@ -21,15 +21,17 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm'
+import { AccountModel } from './account.model'
 import { Corei18nComponentModel } from './core.i18n.compontent.model'
 
 @Entity({ name: 'core_i18n' })
 export class Corei18nModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  // @Generated('uuid')
+  // @Column(properties.uid)
+  id: number
 
   @Column({
     nullable: false,
@@ -156,9 +158,16 @@ export class Corei18nModel {
   datetime_timezone_name: string
 
   @Type(() => Corei18nComponentModel)
-  @OneToMany(() => Corei18nComponentModel, (component) => component.language)
-  @JoinColumn()
+  @OneToMany(() => Corei18nComponentModel, (component) => component.language, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'components' })
   components: Corei18nComponentModel[]
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

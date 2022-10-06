@@ -25,8 +25,8 @@ export class GoodReceiptNoteOrderDetailModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => GoodReceiptNoteModel, (foreign) => foreign.uid)
-  good_receipt_note: string
+  @ManyToOne(() => GoodReceiptNoteModel, (foreign) => foreign.id)
+  good_receipt_note: GoodReceiptNoteModel
 
   @ApiProperty({
     example: '',
@@ -34,8 +34,8 @@ export class GoodReceiptNoteOrderDetailModel {
     description: 'Item delivered',
   })
   @ValidateNested()
-  @ManyToOne(() => MasterItemModel, (foreign) => foreign.uid)
-  item: string
+  @ManyToOne(() => MasterItemModel, (foreign) => foreign.id)
+  item: MasterItemModel
 
   @ApiProperty({
     example: 10,
@@ -56,8 +56,8 @@ export class GoodReceiptNoteOrderDetailModel {
     description: 'Item unit',
   })
   @ValidateNested()
-  @ManyToOne(() => MasterItemUnitModel, (foreign) => foreign.uid)
-  unit: string
+  @ManyToOne(() => MasterItemUnitModel, (foreign) => foreign.id)
+  unit: MasterItemUnitModel
 
   @ApiProperty({
     example: 'xxxxx',
@@ -99,8 +99,8 @@ export class GoodReceiptNoteOrderDetailModel {
     description: 'Account who create purchase order',
   })
   @ValidateNested()
-  @ManyToOne(() => AccountModel, (foreign) => foreign.uid)
-  created_by: string
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

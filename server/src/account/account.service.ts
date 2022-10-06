@@ -65,7 +65,7 @@ export class AccountService {
             const tokenSet = await this.authService.create_token({
               login_id: logID.id,
               account: accountResp,
-              uid: accountResp.uid,
+              id: accountResp.id,
               email: accountResp.email,
               first_name: accountResp.first_name,
               last_name: accountResp.last_name,
@@ -76,7 +76,7 @@ export class AccountService {
               .createQueryBuilder('account_privileges')
               .innerJoinAndSelect('account_privileges.menu', 'menu')
               .where('account_privileges.account = :account', {
-                account: accountResp.uid,
+                account: accountResp.id,
               })
               .getMany()
             for (const a in Page) {
@@ -90,7 +90,7 @@ export class AccountService {
                 'menu_permission'
               )
               .where('account_permission.account = :account', {
-                account: accountResp.uid,
+                account: accountResp.id,
               })
               .getMany()
             for (const a in Permission) {
@@ -120,8 +120,8 @@ export class AccountService {
       .createQueryBuilder('account')
       .where('deleted_at IS NULL')
       .orderBy('created_at', 'DESC')
-      .andWhere('uid = :uid')
-      .setParameters({ uid: account.uid })
+      .andWhere('id = :id')
+      .setParameters({ id: account.id })
       .getOne()
       .then(async (accountResp) => {
         const grantedPageSet = []
@@ -130,7 +130,7 @@ export class AccountService {
           .createQueryBuilder('account_privileges')
           .innerJoinAndSelect('account_privileges.menu', 'menu')
           .where('account_privileges.account = :account', {
-            account: accountResp.uid,
+            account: accountResp.id,
           })
           .getMany()
         for (const a in Page) {
@@ -144,7 +144,7 @@ export class AccountService {
             'menu_permission'
           )
           .where('account_permission.account = :account', {
-            account: accountResp.uid,
+            account: accountResp.id,
           })
           .getMany()
         for (const a in Permission) {
@@ -161,7 +161,7 @@ export class AccountService {
       })
   }
 
-  async detail(uid: string) {
+  async detail(id: string) {
     const data = {
       account: {},
       access: [],
@@ -170,13 +170,13 @@ export class AccountService {
     data.account = await this.accountRepo
       .createQueryBuilder('account')
       .innerJoinAndSelect('account.authority', 'authority')
-      .where('account.uid = :uid', { uid })
+      .where('account.id = :id', { id })
       .getOne()
 
     const Page = await this.accountPrivileges
       .createQueryBuilder('account_privileges')
       .innerJoinAndSelect('account_privileges.menu', 'menu')
-      .where('account_privileges.account = :account', { account: uid })
+      .where('account_privileges.account = :account', { account: id })
       .getMany()
     for (const a in Page) {
       data.access.push(Page[a].menu)
@@ -185,7 +185,7 @@ export class AccountService {
     const Permission = await this.accountPermission
       .createQueryBuilder('account_permission')
       .innerJoinAndSelect('account_permission.permission', 'menu_permission')
-      .where('account_permission.account = :account', { account: uid })
+      .where('account_permission.account = :account', { account: id })
       .getMany()
     for (const a in Permission) {
       data.permission.push(Permission[a].permission)
@@ -194,11 +194,11 @@ export class AccountService {
     return data
   }
 
-  async deleteSoft(uid: string): Promise<GlobalResponse> {
+  async deleteSoft(id: string): Promise<GlobalResponse> {
     const response = new GlobalResponse()
-    const oldMeta = await this.detail(uid)
+    const oldMeta = await this.detail(id)
     return await this.accountRepo
-      .softDelete({ uid })
+      .softDelete({ id })
       .then(async (returning) => {
         response.message = 'Account deleted successfully'
         response.statusCode = HttpStatus.OK
@@ -210,14 +210,14 @@ export class AccountService {
       })
   }
 
-  async profileImageBuffer(uid: string) {
-    return readFileSync(join(process.cwd(), `./avatar/${uid}.png`))
+  async profileImageBuffer(id: string) {
+    return readFileSync(join(process.cwd(), `./avatar/${id}.png`))
   }
 
-  async edit(account, uid: string): Promise<GlobalResponse> {
+  async edit(account, id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
     return await this.accountRepo
-      .update(uid, {
+      .update(id, {
         email: account.email,
         first_name: account.first_name,
         last_name: account.last_name,
@@ -227,7 +227,7 @@ export class AccountService {
         const old = await this.accountRepo
           .createQueryBuilder('account')
           .innerJoinAndSelect('account.authority', 'authority')
-          .where('account.uid = :uid', { uid })
+          .where('account.id = :id', { id })
           .getOne()
 
         if (account.password !== undefined) {
@@ -245,7 +245,7 @@ export class AccountService {
             'base64'
           )
           const fs = require('fs')
-          const path = `avatar/${uid}.png`
+          const path = `avatar/${id}.png`
           if (!fs.existsSync(path)) {
             fs.mkdirSync('avatar', { recursive: true })
           }
@@ -260,61 +260,33 @@ export class AccountService {
         await this.dataSource
           .getRepository(AccountPrivilegesModel)
           .createQueryBuilder()
-          .where('account = :account', { account: uid })
+          .where('account = :account', { account: id })
           .softDelete()
           .execute()
           .then(() => {
             account.selectedPage.map(async (e) => {
-              await this.grantAccess({ account: uid, menu: e }, old)
+              await this.grantAccess({ account: id, menu: e }, old)
             })
           })
 
         await this.dataSource
           .getRepository(AccountPermissionModel)
           .createQueryBuilder()
-          .where('account = :account', { account: uid })
+          .where('account = :account', { account: id })
           .softDelete()
           .execute()
           .then(() => {
             account.selectedPermission.map(async (e) => {
-              await this.grantPermission({ account: uid, permission: e }, old)
+              await this.grantPermission({ account: id, permission: e }, old)
             })
           })
-
-        // const resetPrivileges = await this.accountPrivileges
-        //   .createQueryBuilder('account_privileges')
-        //   .where({
-        //     account: uid,
-        //   })
-        //   .getMany()
-
-        // for (const a in resetPrivileges) {
-        //   const setResetPriv = await this.accountPrivileges.softDelete({
-        //     id: resetPrivileges[a].id,
-        //   })
-        // }
-
-        // const resetPermission = await this.accountPermission
-        //   .createQueryBuilder('account_permission')
-        //   .where({
-        //     account: uid,
-        //   })
-        //   .getMany()
-
-        // for (const a in resetPermission) {
-        //   const setResetPerm = await this.accountPermission.softDelete({
-        //     id: resetPermission[a].id,
-        //   })
-        // }
-
-        //
 
         response.message = 'Account updated successfully'
         response.statusCode = HttpStatus.OK
         response.table_target = 'account'
         response.method = 'PUT'
         response.action = 'U'
-        response.transaction_id = uid
+        response.transaction_id = id
         response.payload = old
         return response
       })
@@ -331,7 +303,7 @@ export class AccountService {
     return await this.accountRepo.save(account).then(async (returning) => {
       response.message = 'Account added successfully'
       response.statusCode = HttpStatus.OK
-      response.payload = await this.detail(returning.uid)
+      response.payload = await this.detail(returning.id)
       return response
     })
   }
@@ -524,7 +496,7 @@ export class AccountService {
       if (data[a]) {
         dataResult.push({
           autonum: autonum,
-          uid: data[a].uid,
+          id: data[a].id,
           email: data[a].email,
           first_name: data[a].first_name,
           last_name: data[a].last_name,

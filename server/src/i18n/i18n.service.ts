@@ -1,7 +1,12 @@
 import { Corei18nComponentModel } from '@/models/core.i18n.compontent.model'
 import { Corei18nModel } from '@/models/core.i18n.model'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
-import { HttpStatus, Injectable, Logger } from '@nestjs/common'
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
 import { Corei18nDTOAdd } from './dtos/i18n.add'
@@ -29,55 +34,64 @@ export class Corei18nService {
       .getMany()
   }
 
-  async detail(uid: string) {
+  async detail(id: number) {
     return await this.dataSource
       .getRepository(Corei18nModel)
       .createQueryBuilder('core_i18n')
       .leftJoinAndSelect('core_i18n.components', 'core_i18n_component')
-      .where('core_i18n.uid = :uid', {
-        uid: uid,
+      .where('core_i18n.id = :id', {
+        id: id,
       })
       .getOne()
   }
 
-  async edit(data: Corei18nDTOEdit, uid: string): Promise<GlobalResponse> {
-    const response = new GlobalResponse()
-    return await this.corei18nRepo
-      .update(uid, data)
-      .then(async () => {
-        // await this.corei18nComponentRepo.delete({ language: data })
-        const propComponent = data.components.map(async (e) => {
-          await this.corei18nComponentRepo.save(e)
-        })
+  async edit(data: Corei18nDTOEdit, id: number): Promise<GlobalResponse> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.startTransaction()
+    try {
+      const response = new GlobalResponse()
+      const dataSet = new Corei18nModel(data)
+      dataSet.id = id
 
-        return await Promise.all(propComponent).then(async () => {
+      return await queryRunner.manager
+        .save(dataSet)
+        .then(async () => {
+          //Rebase component by language
           response.message = 'Language Updated Successfully'
           response.statusCode = HttpStatus.OK
           response.table_target = 'core_i18n'
           response.method = 'PUT'
           response.action = 'U'
-          response.transaction_id = uid
-          response.payload = await this.detail(uid)
+          response.transaction_id = id
+          response.payload = await this.detail(id)
+          await queryRunner.commitTransaction()
           return response
         })
-      })
-      .catch((e) => {
-        throw new Error(e.message)
-      })
+        .catch(async (e) => {
+          console.log(e)
+          await queryRunner.rollbackTransaction()
+          throw new BadRequestException(response)
+        })
+    } catch (e) {
+      console.log(e)
+      throw new BadRequestException(e)
+    } finally {
+      await queryRunner.release()
+    }
   }
 
-  async delete_soft(uid: string): Promise<GlobalResponse> {
+  async delete_soft(id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
-    const oldMeta = await this.detail(uid)
+    const oldMeta = await this.detail(id)
     return await this.corei18nRepo
-      .softDelete({ uid })
+      .softDelete({ id })
       .then(async () => {
         response.message = 'Menu deleted successfully'
         response.statusCode = HttpStatus.OK
         response.table_target = 'menu'
         response.method = 'DELETE'
         response.action = 'D'
-        response.transaction_id = uid
+        response.transaction_id = id
         response.payload = oldMeta
         return response
       })
@@ -87,33 +101,36 @@ export class Corei18nService {
   }
 
   async add(data: Corei18nDTOAdd): Promise<GlobalResponse> {
-    const response = new GlobalResponse()
-    const newLanguage = new Corei18nModel(data)
-    return await this.corei18nRepo
-      .save(newLanguage)
-      .then(async (returning) => {
-        const propComponent = data.components.map(async (e) => {
-          const newComponent = new Corei18nComponentModel({
-            ...e,
-            language: returning.uid,
-          })
-          await this.corei18nComponentRepo.save(newComponent).catch((e) => {
-            console.log(e)
-          })
-        })
-        return Promise.all(propComponent).then(async () => {
-          response.message = 'Language Added Successfully'
-          response.table_target = 'menu'
-          response.transaction_id = returning.uid
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.startTransaction()
+    try {
+      const response = new GlobalResponse()
+      const dataSet = new Corei18nModel(data)
+
+      return await queryRunner.manager
+        .save(dataSet)
+        .then(async (returning) => {
+          //Rebase component by language
+          response.message = 'Language Updated Successfully'
           response.statusCode = HttpStatus.OK
-          response.action = 'I'
-          response.method = 'POST'
-          response.payload = await this.detail(returning.uid)
+          response.table_target = 'core_i18n'
+          response.method = 'PUT'
+          response.action = 'U'
+          response.transaction_id = returning.id
+          response.payload = await this.detail(returning.id)
+          await queryRunner.commitTransaction()
           return response
         })
-      })
-      .catch((e) => {
-        throw new Error(e.message)
-      })
+        .catch(async (e) => {
+          console.log(e)
+          await queryRunner.rollbackTransaction()
+          throw new BadRequestException(response)
+        })
+    } catch (e) {
+      console.log(e)
+      throw new BadRequestException(e)
+    } finally {
+      await queryRunner.release()
+    }
   }
 }

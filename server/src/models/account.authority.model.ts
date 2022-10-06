@@ -2,22 +2,24 @@ import { properties } from '@/utilities/models/column'
 import {
   Entity,
   Column,
-  PrimaryColumn,
-  Generated,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  PrimaryGeneratedColumn,
+  ManyToOne,
 } from 'typeorm'
+import { AccountModel } from './account.model'
 
 @Entity({ name: 'account_authority' })
 export class AccountAuthorityModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @Column({ nullable: false, type: 'character varying' })
   name: string
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

@@ -27,8 +27,8 @@ export class MasterItemMonitoringModel {
     description: 'What item to monitor',
   })
   @ValidateNested()
-  @ManyToOne(() => MasterItemModel, (foreign) => foreign.uid)
-  item: string
+  @ManyToOne(() => MasterItemModel, (foreign) => foreign.id)
+  item: MasterItemModel
 
   @ApiProperty({
     example: '',
@@ -36,8 +36,8 @@ export class MasterItemMonitoringModel {
     description: 'Where to monitoring',
   })
   @ValidateNested()
-  @ManyToOne(() => MasterStockPointModel, (foreign) => foreign.uid)
-  stock_point: string
+  @ManyToOne(() => MasterStockPointModel, (foreign) => foreign.id)
+  stock_point: MasterStockPointModel
 
   @ApiProperty({
     example: 10,

@@ -13,8 +13,9 @@ import { ApiProperty } from '@nestjs/swagger'
 import { properties } from '@/utilities/models/column'
 import { Type } from 'class-transformer'
 import { Corei18nComponentModel } from './core.i18n.compontent.model'
+import { AccountModel } from './account.model'
 
-@Entity({ name: 'menu' })
+@Entity({ name: 'core_menu' })
 export class CoreMenuModel {
   @PrimaryGeneratedColumn('increment')
   id: number
@@ -135,6 +136,9 @@ export class CoreMenuModel {
   @IsString()
   @Column({ type: 'text' })
   remark: string
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

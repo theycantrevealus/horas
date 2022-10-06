@@ -15,10 +15,8 @@ import { properties } from '@/utilities/models/column'
 
 @Entity({ name: 'master_item_category' })
 export class MasterItemCategoryModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @Column({
     nullable: false,
@@ -48,9 +46,9 @@ export class MasterItemCategoryModel {
   @ValidateNested()
   @ManyToOne(
     () => MasterItemCategoryModel,
-    (category_parent) => category_parent.uid
+    (category_parent) => category_parent.id
   )
-  parent: string
+  parent: MasterItemCategoryModel
 
   @ApiProperty({
     example: 'Just remark to describe something',

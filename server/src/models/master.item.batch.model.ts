@@ -8,15 +8,14 @@ import {
   ManyToOne,
   PrimaryColumn,
   Generated,
+  PrimaryGeneratedColumn,
 } from 'typeorm'
 import { MasterItemModel } from './master.item.model'
 
 @Entity({ name: 'master_item_batch' })
 export class MasterItemBatchModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @Column({
     nullable: false,
@@ -25,8 +24,8 @@ export class MasterItemBatchModel {
   })
   code: string
 
-  @ManyToOne(() => MasterItemModel, (brand) => brand.uid)
-  item: string
+  @ManyToOne(() => MasterItemModel, (brand) => brand.id)
+  item: MasterItemModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

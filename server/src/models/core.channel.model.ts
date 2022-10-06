@@ -7,14 +7,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  PrimaryGeneratedColumn,
+  ManyToOne,
 } from 'typeorm'
+import { AccountModel } from './account.model'
 
 @Entity({ name: 'core_channel' })
 export class CoreChannelModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @Column({
     nullable: false,
@@ -25,6 +26,9 @@ export class CoreChannelModel {
 
   @Column(properties.remark)
   remark: string
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

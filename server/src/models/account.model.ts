@@ -2,27 +2,23 @@ import { regex } from '@/utilities/regex.pattern'
 import { ApiProperty } from '@nestjs/swagger'
 import { Transform, Type } from 'class-transformer'
 import * as bcrypt from 'bcrypt'
-import { IsString, Matches, ValidateNested } from 'class-validator'
+import { IsNumber, IsString, Matches } from 'class-validator'
 import {
   Entity,
   Column,
-  PrimaryColumn,
-  Generated,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
-  BeforeInsert,
+  PrimaryGeneratedColumn,
 } from 'typeorm'
 import { AccountAuthorityModel } from './account.authority.model'
 import { properties } from '@/utilities/models/column'
 
 @Entity({ name: 'account' })
 export class AccountModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @ApiProperty({
     example: 'example@domain.com',
@@ -55,9 +51,9 @@ export class AccountModel {
   @ApiProperty({
     type: AccountAuthorityModel,
   })
-  @IsString()
+  @IsNumber()
   @Type(() => AccountAuthorityModel)
-  @ManyToOne(() => AccountAuthorityModel, (authority) => authority.uid)
+  @ManyToOne(() => AccountAuthorityModel, (authority) => authority.id)
   authority: AccountAuthorityModel
 
   @ApiProperty({
@@ -69,6 +65,9 @@ export class AccountModel {
   @Transform((e) => bcrypt.hash(e, 10))
   @Column({ nullable: false, type: 'character varying' })
   password: string
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

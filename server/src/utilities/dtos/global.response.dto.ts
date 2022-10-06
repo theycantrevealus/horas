@@ -48,11 +48,11 @@ export class GlobalResponse {
   action: string
 
   @ApiProperty({
-    type: String,
-    example: gen_uuid(),
+    type: Number,
+    example: 0,
     description: 'Transaction ID',
   })
-  transaction_id: string
+  transaction_id: number
 }
 
 export class GlobalErrorResponse {
