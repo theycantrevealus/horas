@@ -1,13 +1,13 @@
 {
   "name": "server",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Horas back end server",
+  "author": "Hendry Tanaka",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build --webpack --webpackPath webpack.config.js",
+    "build": "npm run prebuild && nest build --webpack --webpackPath webpack.config.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "configorm": "(test -e ormconfig.json && rm ormconfig.json || echo file not found || :) && ts-node -r tsconfig-paths/register src/configs/orm.config.ts",
     "start": "nest start",

@@ -7,6 +7,7 @@ import store from './store'
 import setupInterceptors from '@/service/core/interceptor'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
+import Tooltip from 'primevue/tooltip'
 import 'material-icons/iconfont/material-icons.css'
 import '@/assets/tnsol.css'
 import '@/assets/flag.css'
@@ -73,6 +74,7 @@ app
   .use(ConfirmationService)
   .use(CKEditor)
   .use(i18n)
+app.directive('tooltip', Tooltip)
 
 app.mount('#app')
 

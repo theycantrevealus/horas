@@ -1,18 +1,18 @@
 export interface IAccount {
-  uid: string,
+  id: number
   email: string
 }
 
 export interface ILoginRequest {
-  requst: string,
-  email: string,
+  requst: string
+  email: string
   password: string
 }
 
 export interface ILoginData {
-  [index: number] : IAccount
+  [index: number]: IAccount
 }
 
 export interface ILogin {
-  responsePackage: { responseData : ILoginData, responseResult : number }
+  responsePackage: { responseData: ILoginData; responseResult: number }
 }

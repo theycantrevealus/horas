@@ -8,7 +8,10 @@
         role="none"
       >
         <template v-if="root">
-          <div class="layout-menuitem-root-text">{{ item.label }}</div>
+          <div
+            v-if="getMenuModeStatus"
+            class="layout-menuitem-root-text"
+          >{{ item.label }}</div>
           <SideMenuAutoGen
             :items="visible(item) && item.items"
             @menuitem-click="$emit('menuitem-click', $event)"
@@ -18,6 +21,7 @@
         <template v-else>
           <router-link
             v-if="item.to && credential.pages[`page_${item.id}`] !== undefined"
+            v-tooltip.right="item.label"
             :to="item.to"
             :class="[item.class, { 'disabled': item.disabled }]"
             :style="item.style"
@@ -27,7 +31,11 @@
           >
             <!--i :class="item.icon"></i-->
             <span class="material-icons-outlined">{{ item.icon }}</span>
-            <span class="caption">{{ item.label }}</span>
+            <!-- This is a label -->
+            <span
+              v-if="getMenuModeStatus"
+              class="caption"
+            >{{ item.label }}</span>
             <!--i v-if="item.items" class="pi pi-fw pi-angle-down menuitem-toggle-icon"></i-->
             <span
               v-if="item.items"
@@ -48,7 +56,7 @@
             @click="onMenuItemClick($event, item, i)"
           >
             <span class="material-icons-outlined">{{ item.icon }}</span>
-            <span>{{ item.label }}</span>
+            <span v-if="getMenuModeStatus">{{ item.label }}</span>
             <span
               v-if="item.items"
               class="material-icons menuitem-toggle-icon"
@@ -78,7 +86,7 @@
   </ul>
 </template>
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'SideMenuAutoGen',
@@ -100,6 +108,16 @@ export default {
   },
   computed: {
     ...mapState(['credential']),
+    ...mapGetters({
+      getMenuModeStatus: 'getMenuModeStatus',
+    }),
+  },
+  watch: {
+    getMenuModeStatus: {
+      handler(getData) {
+        //
+      },
+    },
   },
   created() {
     //

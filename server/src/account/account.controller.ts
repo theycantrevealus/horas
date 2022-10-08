@@ -18,10 +18,6 @@ import {
 import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { AccountService } from '@/account/account.service'
 import { isJsonString } from '@utilities/mod.lib'
-import {
-  AccountLoginDTO,
-  AccountLoginResponseDTO,
-} from '@/account/dtos/account.login.dto'
 import { JwtAuthGuard } from '@/guards/jwt.guard'
 import { Authorization, CredentialAccount } from '@/decorators/auth.decorator'
 import { LoggingInterceptor } from '@/interceptors/logging.interceptor'
@@ -34,10 +30,12 @@ import {
   PostgreFilter,
   UnAuthorizedExceptionFilter,
 } from '@/filters/validator.filter'
-import { GrantAccessDTO } from './dtos/account.grant.access.dto'
-import { GrantPermissionDTO } from './dtos/account.grant.permission.dto'
 import { Response, response } from 'express'
 import { createReadStream } from 'fs'
+import { GrantAccessDTO } from './dtos/account.dto.grant.access'
+import { GrantPermissionDTO } from './dtos/account.dto.grant.permission'
+import { AccountLoginDTO } from './dtos/account.dto.login'
+import { AccountEditDTO } from './dtos/account.dto.edit'
 
 @Controller({ path: 'account', version: '1' })
 @UseFilters(
@@ -56,7 +54,7 @@ export class AccountController {
     summary: 'For login access',
   })
   @Post('login')
-  async login(@Body() data: AccountLoginDTO): Promise<AccountLoginResponseDTO> {
+  async login(@Body() data: AccountLoginDTO) {
     return this.accountService.login(data)
   }
 
@@ -102,29 +100,30 @@ export class AccountController {
     summary: 'Get an account detail information',
   })
   @ApiParam({
-    name: 'uid',
+    name: 'id',
   })
-  @Get(':uid/detail')
+  @Get(':id/detail')
   async detail(@Param() param) {
-    return await this.accountService.detail(param.uid)
+    return await this.accountService.detail(param.id)
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT')
-  @Authorization(true)
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth('JWT')
+  // @Authorization(true)
   @ApiOperation({
     summary: 'Get an account profile image',
   })
   @ApiParam({
-    name: 'uid',
+    name: 'id',
   })
-  @Get(':uid/avatar')
+  @Get(':id/avatar')
   @Header('Content-Type', 'image/png')
   async avatar(@Param() param, @Res() response: Response) {
-    //0fb77186-6954-4fb1-a69e-9806f2e42b52
-    const data = createReadStream(`avatar/${param.uid}.png`)
-
-    response.setHeader('Content-Disposition', 'attachment; filename=avatar.png')
+    const data = createReadStream(`avatar/${param.id}.png`)
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename=${param.id}.png`
+    )
 
     data.pipe(response)
   }
@@ -137,11 +136,11 @@ export class AccountController {
     summary: 'Delete an account',
   })
   @ApiParam({
-    name: 'uid',
+    name: 'id',
   })
-  @Delete(':uid/delete')
+  @Delete(':id/delete')
   async deleteSoft(@Param() param): Promise<GlobalResponse> {
-    return await this.accountService.deleteSoft(param.uid)
+    return await this.accountService.deleteSoft(param.id)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -164,11 +163,14 @@ export class AccountController {
     summary: 'Update an account information',
   })
   @ApiParam({
-    name: 'uid',
+    name: 'id',
   })
-  @Put(':uid/edit')
-  async edit(@Body() data, @Param() param): Promise<GlobalResponse> {
-    return await this.accountService.edit(data, param.uid)
+  @Put(':id/edit')
+  async edit(
+    @Body() data: AccountEditDTO,
+    @Param() param
+  ): Promise<GlobalResponse> {
+    return await this.accountService.edit(data, param.id)
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,16 +1,16 @@
 <template>
   <div class="main-container">
-    <div class="topbar">
+    <div :class="(getMenuModeStatus ? 'open' : '') + ' topbar'">
       <TopPanelBar />
     </div>
-    <div class="sidepanel">
-      <div class="wrapper logo-container">
+    <div :class="(getMenuModeStatus ? 'open' : '') + ' sidepanel'">
+      <!--div class="wrapper logo-container">
         <img
           class="panelLogo"
           :src="require('../assets/logo-white.png')"
           alt="horas"
         />
-      </div>
+      </div-->
       <div class="wrapper sidepanel-menu">
         <SidePanelBar />
       </div>
@@ -18,7 +18,7 @@
         
       </perfect-scrollbar> -->
     </div>
-    <div class="loadpanel">
+    <div :class="(getMenuModeStatus ? 'open' : '') + ' loadpanel'">
       <div class="wrapper">
         <div class="breadcrumb-container">
           <BreadCrumb
@@ -50,6 +50,7 @@ import '@/assets/sakai/layout.scss'
 import TopPanelBar from '@/components/TopPanelBar'
 import SidePanelBar from '@/components/SidePanelBar'
 import BreadCrumb from '@/components/BreadCrumb'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'Builder',
@@ -71,6 +72,10 @@ export default {
     }
   },
   computed: {
+    ...mapState(['menuMode']),
+    ...mapGetters({
+      getMenuModeStatus: 'getMenuModeStatus',
+    }),
     containerClass() {
       return [
         'layout-wrapper',
@@ -99,6 +104,11 @@ export default {
       this.breadcrumb = this.$route.meta.breadcrumb
       this.pageName = this.$route.meta.pageTitle
       this.$refs.scrollLoader.$el.scrollTop = 0
+    },
+    getMenuModeStatus: {
+      handler(getData) {
+        //
+      },
     },
   },
   mounted() {

@@ -547,7 +547,7 @@ export default {
     remark: {},
   },
   mounted() {
-    MasterItemService.getItemDetail(this.$route.params.uid).then((response) => {
+    MasterItemService.getItemDetail(this.$route.params.id).then((response) => {
       const data = response.response_data[0]
 
       this.code = data.code
@@ -584,7 +584,7 @@ export default {
         address: this.address,
         contact: this.contact,
         rolenperm: this.checkedPermission,
-        uid: this.$route.params.uid,
+        id: this.$route.params.id,
       }).then((response) => {
         var result = response.data.response_package.response_result
         if (result > 0) {

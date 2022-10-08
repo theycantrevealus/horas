@@ -53,7 +53,7 @@
                       v-model="formData.authority"
                       :options="authorityData"
                       optionLabel="name"
-                      optionValue="uid"
+                      optionValue="id"
                       placeholder="Select authority"
                     />
                   </div>
@@ -303,7 +303,7 @@ export default {
     return {
       displayEditorImage: false,
       formData: {
-        uid: '',
+        id: 0,
         email: '',
         authority: '',
         first_name: '',
@@ -391,15 +391,15 @@ export default {
     accountDetail: {
       handler(getDetail) {
         if (getDetail) {
-          if (getDetail.account.uid !== undefined) {
+          if (getDetail.account.id !== undefined) {
             this.allowSave = true
           } else {
             this.allowSave = false
           }
 
-          this.formData.uid = getDetail.account.uid
+          this.formData.id = getDetail.account.id
           this.formData.email = getDetail.account.email
-          this.formData.authority = getDetail.account.authority.uid
+          this.formData.authority = getDetail.account.authority.id
           this.formData.first_name = getDetail.account.first_name
           this.formData.last_name = getDetail.account.last_name
 
@@ -445,10 +445,10 @@ export default {
     this.allowSave = false
     await this.$store.dispatch(
       'accountModule/fetchAccountDetail',
-      this.$route.query.uid
+      this.$route.query.id
     )
     await this.$store.dispatch('accountModule/fetchAccountActivity', {
-      uid: this.$route.query.uid,
+      id: this.$route.query.id,
       from: '123',
       to: '333',
     })

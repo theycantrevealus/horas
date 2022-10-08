@@ -133,16 +133,36 @@ input::-moz-focus-inner,
 
 .topbar {
     background: #fff;
+    box-shadow: 0px 2px 2px -2px #888;
     z-index: 1000;
     position: fixed;
-    width: 88%;
-    left: 12%;
-    height: 60px;
+    width: 97%;
+    left: 3%;
+    transition-duration: .5s;
+}
+
+.topbar.open {
+    width: 87%;
+    left: 13%;
 }
 
 .topbar .head_wrapper {
-    padding: 10px 20px;
+    padding: 5px;
     width: content-box;
+}
+
+.logo-container {
+    width: 140px !important;
+    clear: both;
+    float: left;
+    position: relative;
+}
+
+.topbar .head_wrapper .logo-container img {
+    width: 35%;
+    margin: 0 32.5%;
+    height: 20px;
+    top: 0;
 }
 
 .topbar .p-menubar-start {
@@ -194,9 +214,15 @@ input::-moz-focus-inner,
     overflow-x: hidden !important;
     position: fixed;
     z-index: 998;
-    width: 88%;
-    left: 12%;
+    width: 97%;
+    left: 3%;
     height: 100%;
+    transition-duration: .5s;
+}
+
+.loadpanel.open {
+    width: 87%;
+    left: 13%;
 }
 
 .content-loader {
@@ -209,7 +235,7 @@ input::-moz-focus-inner,
 
 .loadpanel .wrapper {
     position: absolute;
-    top: 60px;
+    top: 47.5px;
     margin-bottom: 10px;
     height: 300px;
     width: 100%;
@@ -218,11 +244,22 @@ input::-moz-focus-inner,
 
 .breadcrumb-container {
     font-family: 'Visby Round Bold' !important;
-    margin-top: 10px;
+}
+
+.breadcrumb-container .p-chip {
+    background: #fff;
+}
+
+.breadcrumb-container .p-chip img {
+    width: 30px;
+    height: 30px;
+}
+
+.breadcrumb-container .p-chip .p-chip-text {
+    font-size: 10pt !important;
 }
 
 .breadcrumb-container .grid {
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
     margin: 10px;
     border-radius: 10px;
 }
@@ -262,24 +299,41 @@ input::-moz-focus-inner,
 .sidepanel {
     z-index: 1000;
     position: absolute;
-    width: 12%;
+    width: 3%;
     left: 0;
     height: 100%;
     background: #fff;
     overflow: hidden;
+    box-shadow: 2px 0 2px -2px #888;
+    transition-duration: .5s;
 }
 
-.sidepanel .wrapper.logo-container {
-    padding-bottom: 20px;
-    box-shadow: 0 10px 10px -2px rgba(198, 198, 198, .5);
+.sidepanel.open {
+    width: 13%;
 }
+
+.menu-switch {
+    cursor: pointer;
+    cursor: hand;
+    display: block;
+    text-align: center;
+    padding: 10px;
+    width: 100%;
+    transition-duration: .5s;
+}
+
+.menu-switch.open {
+    text-align: left;
+}
+
+
 
 /* rgba(28, 185, 115, .2) */
 
 .sidepanel-menu {
     position: absolute;
     width: 100%;
-    height: 90%;
+    height: 100%;
     overflow-y: scroll !important;
 }
 
@@ -289,7 +343,7 @@ input::-moz-focus-inner,
 
 .layout-menu-container {
     min-height: 100px;
-    margin: 30px auto 100px;
+    margin: 7px auto;
 }
 
 .sidepanel .panelLogo {
@@ -301,15 +355,21 @@ input::-moz-focus-inner,
 }
 
 .sidepanel-container {
-    padding: 0 .5rem;
+    padding: 0;
 }
 
 .sidepanel .layout-menu li a {
     font-weight: bolder;
     padding: 10px;
-    margin: 0 10px;
-    border-radius: 10px !important;
+    border-radius: 0;
+    text-align: center !important;
+    margin: 0;
     color: #575757 !important;
+    transition-duration: .5s;
+}
+
+.sidepanel.open .layout-menu li a {
+    text-align: left !important;
 }
 
 .material-icons-outlined {
@@ -318,8 +378,14 @@ input::-moz-focus-inner,
 
 .sidepanel .layout-menu li a .material-icons,
 .sidepanel .material-icons-outlined {
-    margin-top: 1px;
+    margin: 0 auto;
     color: #878787 !important;
+    transition-duration: .5s;
+}
+
+.sidepanel.open .layout-menu li a .material-icons,
+.sidepanel.open .material-icons-outlined {
+    margin: 0;
 }
 
 .sidepanel .layout-menu li .layout-menuitem-root-text {
@@ -366,14 +432,16 @@ input::-moz-focus-inner,
     font-size: 1rem !important;
 }
 
+/*background: #1cb973;*/
 .layout-menu li a.router-link-exact-active, .layout-menu li a.router-link-active {
     font-weight: bolder !important;
-    background: #1cb973;
-    color: #fff !important
+    border-radius: 0 !important;
+    box-shadow: inset 3px 0 0 0 #1cb973;
+    background: rgba(28, 185, 115, .1);
 }
 
 .layout-menu li a.router-link-exact-active .material-icons-outlined, .layout-menu li a.router-link-active .material-icons-outlined {
-    color: #fff !important;
+    color: #1cb973 !important;
 }
 
 .p-panel {

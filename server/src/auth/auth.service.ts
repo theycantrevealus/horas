@@ -14,7 +14,7 @@ export class AuthService implements JwtOptionsFactory {
 
   async create_token(data: any): Promise<JWTTokenResponse> {
     let result: JWTTokenResponse
-    if (data && data.uid) {
+    if (data && data.id) {
       try {
         const token = this.jwtService.sign(data, {
           expiresIn: 30 * 24 * 60 * 60,

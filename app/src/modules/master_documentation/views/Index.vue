@@ -6,8 +6,11 @@
           <template #left>
             <Button
               v-if="permission.btnAddItem !== undefined"
-              label="New" icon="pi pi-plus" class="mr-2 button-rounded"
-              @click="itemAddForm" />
+              label="New"
+              icon="pi pi-plus"
+              class="mr-2 button-rounded"
+              @click="itemAddForm"
+            />
           </template>
 
           <template #right>
@@ -17,46 +20,88 @@
       </template>
       <template #content>
         <DataTable
-ref="dt" v-model:filters="filters" :value="items" :lazy="true" :paginator="true" :rows="20"
-          :totalRecords="totalRecords" :loading="loading" filterDisplay="row" :globalFilterFields="['title', 'creator', 'created_at']"
-          responsiveLayout="scroll" @page="onPage($event)" @sort="onSort($event)"
-          @filter="onFilter($event)">
+          ref="dt"
+          v-model:filters="filters"
+          :value="items"
+          :lazy="true"
+          :paginator="true"
+          :rows="20"
+          :totalRecords="totalRecords"
+          :loading="loading"
+          filterDisplay="row"
+          :globalFilterFields="['title', 'creator', 'created_at']"
+          responsiveLayout="scroll"
+          @page="onPage($event)"
+          @sort="onSort($event)"
+          @filter="onFilter($event)"
+        >
           <Column header="Action">
             <template #body="slotProps">
               <span class="buttonset wrap_content">
                 <Button
-v-if="permission.btnEditItem !== undefined" class="button button-info button-sm button-raised"
-                  @click="itemEditForm(slotProps.data.uid)">
+                  v-if="permission.btnEditItem !== undefined"
+                  class="button button-info button-sm button-raised"
+                  @click="itemEditForm(slotProps.data.id)"
+                >
                   <span class="material-icons">edit</span>
                 </Button>
                 <Button
-v-if="permission.btnDeleteItem !== undefined" class="button button-danger button-sm button-raised"
-                  @click="itemDelete($event, slotProps.data.uid)">
+                  v-if="permission.btnDeleteItem !== undefined"
+                  class="button button-danger button-sm button-raised"
+                  @click="itemDelete($event, slotProps.data.id)"
+                >
                   <span class="material-icons">delete</span>
                 </Button>
               </span>
             </template>
           </Column>
-          <Column header="#" class="align-right">
+          <Column
+            header="#"
+            class="align-right"
+          >
             <template #body="slotProps">{{ slotProps.data.autonum }}</template>
           </Column>
-          <Column ref="title" field="title" header="Title" filterMatchMode="startsWith" :sortable="true">
+          <Column
+            ref="title"
+            field="title"
+            header="Title"
+            filterMatchMode="startsWith"
+            :sortable="true"
+          >
             <template #filter="{ filterModel, filterCallback }">
               <InputText
-v-model="filterModel.value" type="text" class="column-filter"
-                placeholder="Search by title" @keydown.enter="filterCallback()" />
-            </template>
-          </Column>
-          <Column ref="creator" field="creator" header="Creator" filterMatchMode="contains" :sortable="true">
-            <template #filter="{ filterModel, filterCallback }">
-              <InputText
-v-model="filterModel.value" type="text" class="column-filter"
-                placeholder="Search by name" @keydown.enter="filterCallback()" />
+                v-model="filterModel.value"
+                type="text"
+                class="column-filter"
+                placeholder="Search by title"
+                @keydown.enter="filterCallback()"
+              />
             </template>
           </Column>
           <Column
-ref="created_at" field="created_at" header="Created Date" :sortable="true"
-            class="wrap_content text-right">
+            ref="creator"
+            field="creator"
+            header="Creator"
+            filterMatchMode="contains"
+            :sortable="true"
+          >
+            <template #filter="{ filterModel, filterCallback }">
+              <InputText
+                v-model="filterModel.value"
+                type="text"
+                class="column-filter"
+                placeholder="Search by name"
+                @keydown.enter="filterCallback()"
+              />
+            </template>
+          </Column>
+          <Column
+            ref="created_at"
+            field="created_at"
+            header="Created Date"
+            :sortable="true"
+            class="wrap_content text-right"
+          >
             <template #body="slotProps">
               <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
             </template>
@@ -82,49 +127,55 @@ import MasterDocumentationService from '@/modules/master_documentation/service'
 
 export default {
   components: {
-    DataTable, Column, InputText, Button, Card, Toolbar, ConfirmPopup
+    DataTable,
+    Column,
+    InputText,
+    Button,
+    Card,
+    Toolbar,
+    ConfirmPopup,
   },
-  data () {
+  data() {
     return {
       loading: false,
       totalRecords: 0,
       items: [],
       filters: {
         title: { value: '', matchMode: 'contains' },
-        creator: { value: '', matchMode: 'contains' }
+        creator: { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
       columns: [
         { field: 'title', header: 'Title' },
         { field: 'creator', header: 'Creator' },
-        { field: 'created_at', header: 'Created At' }
-      ]
+        { field: 'created_at', header: 'Created At' },
+      ],
     }
   },
   computed: {
-    permission () {
+    permission() {
       return this.$store.state.credential.permission
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.lazyParams = {
       first: 0,
       rows: this.$refs.dt.rows,
       sortField: null,
       sortOrder: null,
-      filters: this.filters
+      filters: this.filters,
     }
 
     this.loadLazyData()
   },
   methods: {
-    itemAddForm () {
+    itemAddForm() {
       this.$router.push('/master/documentation/add')
     },
-    itemEditForm (uid) {
-      this.$router.push(`/master/documentation/edit/${uid}`)
+    itemEditForm(id) {
+      this.$router.push(`/master/documentation/edit/${id}`)
     },
-    itemDelete (event, uid) {
+    itemDelete(event, uid) {
       this.$confirm.require({
         target: event.currentTarget,
         message: 'Are you sure to delete this documentation?',
@@ -134,41 +185,35 @@ export default {
         rejectLabel: 'Cancel',
         accept: () => {
           this.loading = true
-        //   UserService.deleteUser(uid).then(data => {
-        //     if (data > 0) {
-        //       this.loadLazyData()
-        //     }
-        //   })
         },
         reject: () => {
           // Reject
-        }
+        },
       })
     },
-    formatDate (date, format) {
+    formatDate(date, format) {
       return DateManagement.formatDate(date, format)
     },
-    loadLazyData () {
+    loadLazyData() {
       this.loading = true
-      MasterDocumentationService.getItemList(this.lazyParams)
-        .then(data => {
-          this.items = data.response_data
-          this.totalRecords = data.totalRecords
-          this.loading = false
-        })
+      MasterDocumentationService.getItemList(this.lazyParams).then((data) => {
+        this.items = data.response_data
+        this.totalRecords = data.totalRecords
+        this.loading = false
+      })
     },
-    onPage (event) {
+    onPage(event) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onSort (event) {
+    onSort(event) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onFilter () {
+    onFilter() {
       this.lazyParams.filters = this.filters
       this.loadLazyData()
-    }
-  }
+    },
+  },
 }
 </script>

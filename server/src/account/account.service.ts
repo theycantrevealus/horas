@@ -10,15 +10,15 @@ import { AccountModel } from '@/models/account.model'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
 import { AccountPrivilegesModel } from '@/models/account.privileges.model'
 import { AccountPermissionModel } from '@/models/account.permission.model'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import { CoreLogLoginModel } from '@/models/core.logging.login.model'
+import { GrantAccessDTO } from './dtos/account.dto.grant.access'
+import { GrantPermissionDTO } from './dtos/account.dto.grant.permission'
 import {
   AccountLoginDTO,
   AccountLoginResponseDTO,
-} from '@/account/dtos/account.login.dto'
-import { CoreLogLoginModel } from '@/models/core.logging.login.model'
-import { GrantAccessDTO } from './dtos/account.grant.access.dto'
-import { GrantPermissionDTO } from './dtos/account.grant.permission.dto'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+} from './dtos/account.dto.login'
 
 @Injectable()
 export class AccountService {
@@ -54,60 +54,63 @@ export class AccountService {
       .setParameters({ email: account.email })
       .getOne()
       .then(async (accountResp) => {
-        const loginLog = this.coreLogLoginRepo.create({
-          log_meta: JSON.stringify(account),
-          account: accountResp,
-        })
+        if (accountResp && accountResp !== null) {
+          const loginLog = this.coreLogLoginRepo.create({
+            log_meta: JSON.stringify(account),
+            account: accountResp,
+          })
 
-        return await this.coreLogLoginRepo
-          .save(loginLog)
-          .then(async (logID) => {
-            const tokenSet = await this.authService.create_token({
-              login_id: logID.id,
-              account: accountResp,
-              id: accountResp.id,
-              email: accountResp.email,
-              first_name: accountResp.first_name,
-              last_name: accountResp.last_name,
+          return await this.coreLogLoginRepo
+            .save(loginLog)
+            .then(async (logID) => {
+              const tokenSet = await this.authService.create_token({
+                login_id: logID.id,
+                account: accountResp,
+                id: accountResp.id,
+                email: accountResp.email,
+                first_name: accountResp.first_name,
+                last_name: accountResp.last_name,
+              })
+              const grantedPageSet = []
+              const Page = await this.dataSource
+                .getRepository(AccountPrivilegesModel)
+                .createQueryBuilder('account_privileges')
+                .innerJoinAndSelect('account_privileges.menu', 'menu')
+                .where('account_privileges.account = :account', {
+                  account: accountResp.id,
+                })
+                .getMany()
+              for (const a in Page) {
+                grantedPageSet.push(Page[a].menu)
+              }
+              const grantedPermSet = []
+              const Permission = await this.accountPermission
+                .createQueryBuilder('account_permission')
+                .innerJoinAndSelect(
+                  'account_permission.permission',
+                  'menu_permission'
+                )
+                .where('account_permission.account = :account', {
+                  account: accountResp.id,
+                })
+                .getMany()
+              for (const a in Permission) {
+                grantedPermSet.push(Permission[a].permission)
+              }
+              loginResp.message = 'Logged In Successfully'
+              loginResp.account = accountResp
+              loginResp.account.grantedPerm = grantedPermSet
+              loginResp.account.grantedPage = grantedPageSet
+              loginResp.token = tokenSet.token
+              loginResp.status = HttpStatus.OK
+              return loginResp
             })
-            const grantedPageSet = []
-            const Page = await this.dataSource
-              .getRepository(AccountPrivilegesModel)
-              .createQueryBuilder('account_privileges')
-              .innerJoinAndSelect('account_privileges.menu', 'menu')
-              .where('account_privileges.account = :account', {
-                account: accountResp.id,
-              })
-              .getMany()
-            for (const a in Page) {
-              grantedPageSet.push(Page[a].menu)
-            }
-            const grantedPermSet = []
-            const Permission = await this.accountPermission
-              .createQueryBuilder('account_permission')
-              .innerJoinAndSelect(
-                'account_permission.permission',
-                'menu_permission'
-              )
-              .where('account_permission.account = :account', {
-                account: accountResp.id,
-              })
-              .getMany()
-            for (const a in Permission) {
-              grantedPermSet.push(Permission[a].permission)
-            }
-            loginResp.message = 'Logged In Successfully'
-            loginResp.account = accountResp
-            loginResp.account.grantedPerm = grantedPermSet
-            loginResp.account.grantedPage = grantedPageSet
-            loginResp.token = tokenSet.token
-            loginResp.status = HttpStatus.OK
-            return loginResp
-          })
-          .catch((err) => {
-            throw new Error(err.message)
-          })
-        return loginResp
+            .catch((e) => {
+              throw new Error(e.message)
+            })
+        } else {
+          throw new Error('Login failed')
+        }
       })
       .catch((e: Error) => {
         throw new Error(e.message)
@@ -161,7 +164,7 @@ export class AccountService {
       })
   }
 
-  async detail(id: string) {
+  async detail(id: number) {
     const data = {
       account: {},
       access: [],
@@ -194,7 +197,7 @@ export class AccountService {
     return data
   }
 
-  async deleteSoft(id: string): Promise<GlobalResponse> {
+  async deleteSoft(id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
     const oldMeta = await this.detail(id)
     return await this.accountRepo
@@ -224,6 +227,7 @@ export class AccountService {
         authority: account.authority,
       })
       .then(async (returning) => {
+        console.log(returning)
         const old = await this.accountRepo
           .createQueryBuilder('account')
           .innerJoinAndSelect('account.authority', 'authority')
@@ -340,7 +344,7 @@ export class AccountService {
               response.table_target = 'account_privileges'
               response.method = 'PUT'
               response.action = 'U'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
               return response
             })
@@ -361,7 +365,7 @@ export class AccountService {
               response.table_target = 'account_privileges'
               response.method = 'PUT'
               response.action = 'I'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
               return response
             })
@@ -402,7 +406,7 @@ export class AccountService {
               response.table_target = 'account_permission'
               response.method = 'PUT'
               response.action = 'U'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
 
               return response
@@ -416,6 +420,7 @@ export class AccountService {
             account: data.account,
             permission: data.permission,
           })
+
           return await this.accountPermission
             .save(setPermission)
             .then(async (reactive) => {
@@ -424,7 +429,7 @@ export class AccountService {
               response.table_target = 'account_permission'
               response.method = 'PUT'
               response.action = 'I'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
               return response
             })

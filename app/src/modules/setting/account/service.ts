@@ -40,7 +40,7 @@ class AccountService {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
       .put(
-        `${process.env.VUE_APP_APIGATEWAY}v1/account/${parsedData.uid}/edit`,
+        `${process.env.VUE_APP_APIGATEWAY}v1/account/${parsedData.id}/edit`,
         {
           email: parsedData.email,
           first_name: parsedData.first_name,
@@ -58,13 +58,13 @@ class AccountService {
       })
   }
 
-  async getAccountDetail(uid) {
+  async getAccountDetail(id) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${uid}/detail`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${id}/detail`)
       .then(async (response: any) => {
         response.data.image = await axios
-          .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${uid}/avatar`, {
+          .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${id}/avatar`, {
             responseType: 'arraybuffer',
           })
           .then(async (imageResponse) => {
@@ -83,7 +83,7 @@ class AccountService {
       })
   }
 
-  async getAccountActivity(uid: string, from: string, to: string) {
+  async getAccountActivity(id: number, from: string, to: string) {
     return []
   }
 

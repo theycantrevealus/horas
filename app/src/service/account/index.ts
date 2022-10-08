@@ -8,7 +8,7 @@ class AccountService {
       .then(async (response) => {
         response.data.account.image = await axios
           .get(
-            `${process.env.VUE_APP_APIGATEWAY}v1/account/${response.data.account.uid}/avatar`,
+            `${process.env.VUE_APP_APIGATEWAY}v1/account/${response.data.account.id}/avatar`,
             {
               headers: {
                 Authorization: `Bearer ${response.data.token}`,

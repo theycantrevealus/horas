@@ -12,6 +12,7 @@ import getBrowserLocale from '@/util/i18n/browser.config'
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
+    menuMode: false,
     loading: 0,
     language: {},
     languageMeta: {
@@ -27,7 +28,7 @@ const store = createStore({
       },
     },
     credential: {
-      uid: '',
+      id: 0,
       first_name: '',
       last_name: '',
       permission: {},
@@ -48,11 +49,15 @@ const store = createStore({
     }),
   ],
   actions: {
+    toggleMenu: async ({ commit }) => {
+      commit('mutateSidePanelToggle')
+    },
     coreLogin: async ({ commit }, accountRequestData: TAccountLogin) => {
       return await AccountService.login(accountRequestData).then(
         (response: any) => {
           response = response.data
-          if (response.status === 200) {
+          console.log(response)
+          if (response.status === 201 || response.status === 200) {
             commit('mutateUpdateToken', response.token)
             commit('mutateLoginSuccess', response.account)
           }
@@ -97,8 +102,14 @@ const store = createStore({
     getBrowserLanguage: (state) => {
       return state.language
     },
+    getMenuModeStatus: (state) => {
+      return state.menuMode
+    },
   },
   mutations: {
+    mutateSidePanelToggle: (state: any) => {
+      state.menuMode = !state.menuMode
+    },
     mutateSetBrowserLanguage: (state: any, countryCodeOnly = false) => {
       const selectedLanguage: string = getBrowserLocale({
         countryCodeOnly: countryCodeOnly,
@@ -144,7 +155,7 @@ const store = createStore({
       state.sidemenu = menu
     },
     mutateLoginSuccess(state: any, credentialData) {
-      state.credential.uid = credentialData.uid
+      state.credential.id = credentialData.id
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
       state.credential.profile_photo = credentialData.image

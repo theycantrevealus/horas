@@ -21,18 +21,18 @@ export class AuthorityService {
     private readonly authService: AuthService
   ) {}
 
-  async detail(uid: string) {
+  async detail(id: number) {
     return await this.accountAuthorityRepo.findOne({
       where: {
-        uid: uid,
+        id: id,
       },
     })
   }
 
-  async edit(data, uid: string): Promise<GlobalResponse> {
+  async edit(data, id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
     return this.accountAuthorityRepo
-      .update(uid, data)
+      .update(id, data)
       .then(async (returning) => {
         response.message = 'Authority updated succesfully'
         response.statusCode = HttpStatus.OK
@@ -44,11 +44,11 @@ export class AuthorityService {
       })
   }
 
-  async delete_soft(uid: string): Promise<GlobalResponse> {
+  async delete_soft(id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
-    const oldMeta = await this.detail(uid)
+    const oldMeta = await this.detail(id)
     return this.accountAuthorityRepo
-      .softDelete(uid)
+      .softDelete(id)
       .then(async (returning) => {
         response.message = 'Authority deleted successfully'
         response.statusCode = HttpStatus.OK
@@ -60,11 +60,11 @@ export class AuthorityService {
       })
   }
 
-  async delete_hard(uid: string): Promise<GlobalResponse> {
+  async delete_hard(id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
-    const oldMeta = await this.detail(uid)
+    const oldMeta = await this.detail(id)
     return this.accountAuthorityRepo
-      .delete(uid)
+      .delete(id)
       .then(async (returning) => {
         response.message = 'Authority deleted successfully'
         response.statusCode = HttpStatus.OK
@@ -138,7 +138,7 @@ export class AuthorityService {
       if (data[a]) {
         dataResult.push({
           autonum: autonum,
-          uid: data[a].uid,
+          id: data[a].id,
           name: data[a].name,
           created_at: data[a].created_at,
         })

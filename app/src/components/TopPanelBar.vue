@@ -2,10 +2,15 @@
   <div class="head_wrapper">
     <Menubar :model="items">
       <template #start>
-        <Chip
-          :label="first_name + ' ' + last_name"
-          :image="profile_photo"
-        />
+        <div class="flex justify-content-start">
+          <div class="logo-container">
+            <img
+              class="panelLogo"
+              :src="require('../assets/logo-white.png')"
+              alt="horas"
+            />
+          </div>
+        </div>
       </template>
       <template #end>
         {{ $t('message.hello') }}
@@ -51,13 +56,11 @@
 <script>
 import Menubar from 'primevue/menubar'
 import Dropdown from 'primevue/dropdown'
-import Chip from 'primevue/chip'
 import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'TopPanelMenu',
   components: {
     Menubar,
-    Chip,
     Dropdown,
   },
 
