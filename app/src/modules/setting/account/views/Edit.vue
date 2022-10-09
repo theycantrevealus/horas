@@ -1,9 +1,17 @@
 <template>
   <div class="grid">
     <div class="col-12">
-      <Card>
-        <template #title>Edit Account</template>
+      <Card class="slim">
         <template #content>
+          <Panel
+            header="Account Management"
+            :toggleable="false"
+          >
+            <template #icons>
+              <Button class="p-button-text p-button-info p-button-rounded p-button-raised button-sm"><span class="material-icons">help</span>
+                Info</Button>
+            </template>
+          </Panel>
           <TabView>
             <TabPanel header="Main Info">
               <div class="grid">
@@ -263,6 +271,7 @@
 </template>
 <script>
 import Card from 'primevue/card'
+import Panel from 'primevue/panel'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
 import Button from 'primevue/button'
@@ -284,6 +293,7 @@ export default {
   name: 'AccountEdit',
   components: {
     Card,
+    Panel,
     InputText,
     Button,
     Dropdown,
@@ -498,11 +508,17 @@ export default {
             this.formData.selectedPage = this.selectedMenu
             for (const a in this.selectedParent) {
               const parsedIDParent = a.split('_')
-              this.formData.selectedParent.push(
-                parseInt(parsedIDParent[parsedIDParent.length - 1])
+              const parentID = parseInt(
+                parsedIDParent[parsedIDParent.length - 1]
               )
+              if (this.formData.selectedPage.indexOf(parentID) < 0) {
+                this.formData.selectedPage.push(parentID)
+                this.formData.selectedParent.push(parentID)
+              }
             }
+
             this.formData.selectedPermission = this.selectedPerm
+
             this.updateAccount(this.formData).then(async (response) => {
               if (response.status === 200) {
                 // await this.$store.dispatch(

@@ -25,7 +25,7 @@
 
 body {
     overflow: hidden;
-    background: #fff !important;
+    background: rgba(28, 185, 115, .1) !important;
     padding: 0 !important;
     margin: 0 !important;
     font-family: 'GreyCliff', SansSerif, Arial, serif !important;
@@ -132,18 +132,13 @@ input::-moz-focus-inner,
 }
 
 .topbar {
-    background: #fff;
+    background: #f8f8f8;
     box-shadow: 0px 2px 2px -2px #888;
     z-index: 1000;
     position: fixed;
     width: 97%;
     left: 3%;
     transition-duration: .5s;
-}
-
-.topbar.open {
-    width: 87%;
-    left: 13%;
 }
 
 .topbar .head_wrapper {
@@ -220,30 +215,27 @@ input::-moz-focus-inner,
     transition-duration: .5s;
 }
 
-.loadpanel.open {
-    width: 87%;
-    left: 13%;
-}
-
 .content-loader {
-    background: #f5f9f8;
     margin: 10px;
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 10px;
     min-height: 800px;
 }
 
 .loadpanel .wrapper {
     position: absolute;
-    top: 47.5px;
+    top: 0;
+    padding-top: 47.5px;
     margin-bottom: 10px;
-    height: 300px;
+    background: #fff;
+    height: 100px;
     width: 100%;
-    min-height: 300px;
+    min-height: 100px;
 }
 
 .breadcrumb-container {
+    background: #fff;
     font-family: 'Visby Round Bold' !important;
+    box-shadow: 0px 2px 2px -2px #888;
 }
 
 .breadcrumb-container .p-chip {
@@ -333,25 +325,33 @@ input::-moz-focus-inner,
 .sidepanel-menu {
     position: absolute;
     width: 100%;
-    height: 100%;
+    top: 5%;
+    height: 95%;
     overflow-y: scroll !important;
 }
 
 .sidepanel .wrapper {
+    overflow-x: hidden;
     padding: 0;
 }
 
 .layout-menu-container {
+    position: absolute;
+    overflow-x: hidden;
     min-height: 100px;
     margin: 7px auto;
 }
 
-.sidepanel .panelLogo {
-    /* -webkit-filter: drop-shadow(0px 0px 7px rgba(240, 240, 240, 0.7));
-    filter: drop-shadow(0px 0px 7px rgba(240, 240, 240, 0.7)); */
+.sidepanel .panel-logo {
     position: relative;
     width: 45%;
-    margin: 5px 27.5% 0px;
+    margin: 12.5px 12.5% 0px;
+}
+
+.sidepanel .panel-logo2 {
+    position: relative;
+    width: 15%;
+    margin: 12.5px 12.5% 0px;
 }
 
 .sidepanel-container {
@@ -361,15 +361,34 @@ input::-moz-focus-inner,
 .sidepanel .layout-menu li a {
     font-weight: bolder;
     padding: 10px;
+    min-height: 20px !important;
+    height: 40px;
     border-radius: 0;
     text-align: center !important;
     margin: 0;
     color: #575757 !important;
     transition-duration: .5s;
+    overflow-x: hidden;
+    width: 300px;
 }
 
 .sidepanel.open .layout-menu li a {
     text-align: left !important;
+}
+
+.sidepanel .layout-menu li a span.caption {
+    display: inline-block;
+    position: absolute;
+    left: 50px;
+    opacity: 0;
+    transition-duration: .5s;
+}
+
+.sidepanel.open .layout-menu li a span.caption {
+    display: inline-block;
+    position: absolute;
+    left: 50px;
+    opacity: 1;
 }
 
 .material-icons-outlined {
@@ -378,7 +397,9 @@ input::-moz-focus-inner,
 
 .sidepanel .layout-menu li a .material-icons,
 .sidepanel .material-icons-outlined {
+    position: absolute;
     margin: 0 auto;
+    left: 20px;
     color: #878787 !important;
     transition-duration: .5s;
 }
@@ -392,8 +413,34 @@ input::-moz-focus-inner,
     font-weight: bolder !important;
     padding: 22px 22px 0 22px;
     color: #1cb973 !important;
+    min-height: 50px;
     letter-spacing: 2px;
     font-size: .6rem !important;
+    text-align: right;
+    transition-duration: .5s;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text b {
+    opacity: 0;
+    transition-duration: .5s;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text.open b {
+    opacity: 1;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text.open {
+    text-align: left;
+    opacity: 1;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text span {
+    color: #1cb973 !important;
+    opacity: 1;
+}
+
+.sidepanel.open .layout-menu li .layout-menuitem-root-text span {
+    opacity: 0;
 }
 
 .sidepanel hr {
@@ -515,9 +562,24 @@ input::-moz-focus-inner,
 
 .p-card {
     padding: 1rem 1.5rem;
-    border-radius: 20px !important;
+    border-radius: 10px !important;
     box-shadow: 0px 0px 5px 5px rgba(240, 240, 240, .5) !important;
     box-shadow: none !important;
+}
+
+.p-card.slim {
+    padding: 0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0px 0px 5px 5px rgba(240, 240, 240, .5) !important;
+    box-shadow: none !important;
+}
+
+.p-card.slim .p-card-body {
+    padding: 0 !important;
+}
+
+.p-card.slim .p-card-content {
+    padding: 0 !important;
 }
 
 .p-card-header {
@@ -539,6 +601,10 @@ input::-moz-focus-inner,
 .p-card-title {
     padding: 10px 10px 0 10px;
     font-size: 11pt !important;
+}
+
+.p-card.slim .p-card-title {
+    padding: 10px 10px 0 20px;
 }
 
 .p-card .p-card-body {

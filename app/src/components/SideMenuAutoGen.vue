@@ -8,10 +8,11 @@
         role="none"
       >
         <template v-if="root">
-          <div
-            v-if="getMenuModeStatus"
-            class="layout-menuitem-root-text"
-          >{{ item.label }}</div>
+          <div :class="(getMenuModeStatus ? 'open' : '') + ' layout-menuitem-root-text'"><b>{{ getMenuModeStatus ? item.label : '' }}</b>
+            <span class="material-icons-outlined">
+              more_horiz
+            </span>
+          </div>
           <SideMenuAutoGen
             :items="visible(item) && item.items"
             @menuitem-click="$emit('menuitem-click', $event)"
@@ -29,14 +30,10 @@
             role="menuitem"
             @click="onMenuItemClick($event, item, i)"
           >
-            <!--i :class="item.icon"></i-->
+            <i :class="item.icon"></i>
             <span class="material-icons-outlined">{{ item.icon }}</span>
             <!-- This is a label -->
-            <span
-              v-if="getMenuModeStatus"
-              class="caption"
-            >{{ item.label }}</span>
-            <!--i v-if="item.items" class="pi pi-fw pi-angle-down menuitem-toggle-icon"></i-->
+            <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.label }}</span>
             <span
               v-if="item.items"
               class="material-icons menuitem-toggle-icon"
@@ -56,11 +53,11 @@
             @click="onMenuItemClick($event, item, i)"
           >
             <span class="material-icons-outlined">{{ item.icon }}</span>
-            <span v-if="getMenuModeStatus">{{ item.label }}</span>
-            <span
-              v-if="item.items"
-              class="material-icons menuitem-toggle-icon"
-            >keyboard_arrow_down</span>
+            <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.label }}</span>
+            <i
+              v-if="item.items && getMenuModeStatus"
+              class="pi pi-fw pi-angle-down menuitem-toggle-icon"
+            ></i>
             <span
               v-if="item.badge"
               class="menuitem-badge"
@@ -120,7 +117,7 @@ export default {
     },
   },
   created() {
-    //
+    console.log(this.items)
   },
   methods: {
     onMenuItemClick(event, item, index) {

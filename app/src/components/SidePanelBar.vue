@@ -1,10 +1,6 @@
 <template>
   <div class="sidepanel-container">
     <div class="layout-menu-container">
-      <a
-        :class="(getMenuModeStatus ? 'open' : '') + ' menu-switch'"
-        @click="toogleMenuStatus"
-      ><span class="material-icons-outlined">tune</span></a>
       <SideMenuAutoGen
         :items="menuMeta"
         class="layout-menu"
@@ -29,10 +25,7 @@
                 @click="logout"
               >
                 <span class="material-icons-outlined">logout</span>
-                <span
-                  v-if="getMenuModeStatus"
-                  class="caption"
-                >Logout</span>
+                <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">Logout</span>
               </a>
               <ul style="display: none;"></ul>
             </li>
@@ -85,7 +78,7 @@ export default {
     ...mapActions({
       sLogout: 'coreLogout',
       rebuildMenu: 'coreUpdateMenu',
-      toogleMenuStatus: 'toggleMenu',
+      // toogleMenuStatus: 'toggleMenu',
     }),
     logout() {
       this.sLogout().then(() => {

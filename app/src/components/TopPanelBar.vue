@@ -2,18 +2,15 @@
   <div class="head_wrapper">
     <Menubar :model="items">
       <template #start>
-        <div class="flex justify-content-start">
-          <div class="logo-container">
-            <img
-              class="panelLogo"
-              :src="require('../assets/logo-white.png')"
-              alt="horas"
-            />
-          </div>
-        </div>
+        <span class="material-icons-outlined">
+          dark_mode
+        </span>
+        <span class="material-icons-outlined">
+          wb_sunny
+        </span>
       </template>
       <template #end>
-        {{ $t('message.hello') }}
+        <span v-if="2>3">{{ $t('message.hello') }}</span>
         <Dropdown
           v-model="selectedLanguage"
           class="country-selector"

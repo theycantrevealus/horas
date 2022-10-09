@@ -6,6 +6,7 @@ import {
   DeleteDateColumn,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm'
 import { CoreMenuGroupModel } from '@models/core.menu.group.model'
 import { IsNumber, IsString, ValidateNested } from 'class-validator'

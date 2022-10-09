@@ -1,7 +1,7 @@
 <template>
   <div class="grid">
     <div class="col-12">
-      <Card>
+      <Card class="slim">
         <template #content>
           <Panel
             header="Account Management"

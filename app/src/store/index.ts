@@ -49,8 +49,11 @@ const store = createStore({
     }),
   ],
   actions: {
-    toggleMenu: async ({ commit }) => {
-      commit('mutateSidePanelToggle')
+    toggleMenuOn: async ({ commit }) => {
+      commit('mutateSidePanelToggleOn')
+    },
+    toggleMenuOff: async ({ commit }) => {
+      commit('mutateSidePanelToggleOff')
     },
     coreLogin: async ({ commit }, accountRequestData: TAccountLogin) => {
       return await AccountService.login(accountRequestData).then(
@@ -107,8 +110,11 @@ const store = createStore({
     },
   },
   mutations: {
-    mutateSidePanelToggle: (state: any) => {
-      state.menuMode = !state.menuMode
+    mutateSidePanelToggleOn: (state: any) => {
+      state.menuMode = true
+    },
+    mutateSidePanelToggleOff: (state: any) => {
+      state.menuMode = false
     },
     mutateSetBrowserLanguage: (state: any, countryCodeOnly = false) => {
       const selectedLanguage: string = getBrowserLocale({

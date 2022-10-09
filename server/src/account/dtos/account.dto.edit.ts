@@ -46,4 +46,11 @@ export class AccountEditDTO {
   })
   @IsArray()
   selectedPermission: number[]
+
+  @ApiProperty({
+    isArray: true,
+    type: Number,
+  })
+  @IsArray()
+  selectedParent: number[]
 }

@@ -227,72 +227,77 @@ export class AccountService {
         authority: account.authority,
       })
       .then(async (returning) => {
-        console.log(returning)
-        const old = await this.accountRepo
+        return await this.accountRepo
           .createQueryBuilder('account')
           .innerJoinAndSelect('account.authority', 'authority')
           .where('account.id = :id', { id })
           .getOne()
+          .then(async (old) => {
+            if (account.password !== undefined) {
+              const saltOrRounds = 10
+              const password = account.password
+              account.password = await bcrypt.hash(password, saltOrRounds)
+            }
 
-        if (account.password !== undefined) {
-          const saltOrRounds = 10
-          const password = account.password
-          account.password = await bcrypt.hash(password, saltOrRounds)
-        }
+            if (account.image_edit) {
+              delete account.image_edit
+              const logger = this.logger
 
-        if (account.image_edit) {
-          delete account.image_edit
-          const logger = this.logger
+              const buff = Buffer.from(
+                await account.image.replace(/^data:image\/\w+;base64,/, ''),
+                'base64'
+              )
+              const fs = require('fs')
+              const path = `avatar/${id}.png`
+              if (!fs.existsSync(path)) {
+                fs.mkdirSync('avatar', { recursive: true })
+              }
 
-          const buff = Buffer.from(
-            await account.image.replace(/^data:image\/\w+;base64,/, ''),
-            'base64'
-          )
-          const fs = require('fs')
-          const path = `avatar/${id}.png`
-          if (!fs.existsSync(path)) {
-            fs.mkdirSync('avatar', { recursive: true })
-          }
+              fs.writeFile(path, buff, function (err) {
+                // logger.log(account.image)
+              })
 
-          fs.writeFile(path, buff, function (err) {
-            // logger.log(account.image)
+              delete account.image
+            }
+
+            await this.dataSource
+              .getRepository(AccountPrivilegesModel)
+              .createQueryBuilder()
+              .where('account = :account', { account: id })
+              .softDelete()
+              .execute()
+              .then(() => {
+                account.selectedPage.map(async (e) => {
+                  if (account.selectedParent.indexOf(e) < 0) {
+                    await this.grantAccess({ account: id, menu: e }, old)
+                  }
+                })
+              })
+
+            await this.dataSource
+              .getRepository(AccountPermissionModel)
+              .createQueryBuilder()
+              .where('account = :account', { account: id })
+              .softDelete()
+              .execute()
+              .then(() => {
+                account.selectedPermission.map(async (e) => {
+                  await this.grantPermission(
+                    { account: id, permission: e },
+                    old
+                  )
+                })
+              })
+
+            response.message = 'Account updated successfully'
+            response.statusCode = HttpStatus.OK
+            response.table_target = 'account'
+            response.method = 'PUT'
+            response.action = 'U'
+            response.transaction_id = id
+            response.payload = old
+            return response
           })
-
-          delete account.image
-        }
-
-        await this.dataSource
-          .getRepository(AccountPrivilegesModel)
-          .createQueryBuilder()
-          .where('account = :account', { account: id })
-          .softDelete()
-          .execute()
-          .then(() => {
-            account.selectedPage.map(async (e) => {
-              await this.grantAccess({ account: id, menu: e }, old)
-            })
-          })
-
-        await this.dataSource
-          .getRepository(AccountPermissionModel)
-          .createQueryBuilder()
-          .where('account = :account', { account: id })
-          .softDelete()
-          .execute()
-          .then(() => {
-            account.selectedPermission.map(async (e) => {
-              await this.grantPermission({ account: id, permission: e }, old)
-            })
-          })
-
-        response.message = 'Account updated successfully'
-        response.statusCode = HttpStatus.OK
-        response.table_target = 'account'
-        response.method = 'PUT'
-        response.action = 'U'
-        response.transaction_id = id
-        response.payload = old
-        return response
       })
       .catch((e: Error) => {
         throw new Error(e.message)
@@ -412,6 +417,7 @@ export class AccountService {
               return response
             })
             .catch((e: Error) => {
+              console.log(e)
               throw new Error(e.message)
             })
         } else {

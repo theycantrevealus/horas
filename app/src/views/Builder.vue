@@ -3,14 +3,25 @@
     <div :class="(getMenuModeStatus ? 'open' : '') + ' topbar'">
       <TopPanelBar />
     </div>
-    <div :class="(getMenuModeStatus ? 'open' : '') + ' sidepanel'">
-      <!--div class="wrapper logo-container">
+    <div
+      :class="(getMenuModeStatus ? 'open' : '') + ' sidepanel'"
+      @mouseover="toogleMenuStatusOn"
+      @mouseleave="toogleMenuStatusOff"
+    >
+      <div class="wrapper logo-container">
         <img
-          class="panelLogo"
+          v-if="getMenuModeStatus"
+          class="panel-logo"
           :src="require('../assets/logo-white.png')"
           alt="horas"
         />
-      </div-->
+        <img
+          v-if="!getMenuModeStatus"
+          class="panel-logo2"
+          :src="require('../assets/icon.png')"
+          alt="horas"
+        />
+      </div>
       <div class="wrapper sidepanel-menu">
         <SidePanelBar />
       </div>
@@ -50,7 +61,7 @@ import '@/assets/sakai/layout.scss'
 import TopPanelBar from '@/components/TopPanelBar'
 import SidePanelBar from '@/components/SidePanelBar'
 import BreadCrumb from '@/components/BreadCrumb'
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'Builder',
@@ -122,6 +133,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      toogleMenuStatusOn: 'toggleMenuOn',
+      toogleMenuStatusOff: 'toggleMenuOff',
+    }),
     updatePageInfo() {
       this.breadcrumb = this.$route.meta.breadcrumb
       this.pageName = this.$route.name

@@ -1,10 +1,11 @@
 table tbody tr td {
-  font-family: 'Visby Round', SansSerif, Arial, serif !important;
+    font-family: 'Visby Round', SansSerif, Arial, serif !important;
 }
+
 table thead tr th {
-  font-family: 'Visby Round Bold', SansSerif, Arial, serif !important;
-  font-size: 10pt !important;
-  padding: 10pt 1.5rem !important;
+    font-family: 'Visby Round Bold', SansSerif, Arial, serif !important;
+    font-size: 10pt !important;
+    padding: 10pt 1.5rem !important;
 }
 
 .p-treetable-thead tr th {
@@ -20,8 +21,9 @@ table thead tr th {
     padding: 7px 1.5rem !important;
     font-size: 10pt !important;
 }
-.p-treetable-thead tr th.p-filter-column > div.p-column-filter {
-  padding: 0 !important;
+
+.p-treetable-thead tr th.p-filter-column>div.p-column-filter {
+    padding: 0 !important;
 }
 
 .p-treetable-thead tr th.p-filter-column .p-column-filter input {
@@ -41,27 +43,34 @@ table thead tr th {
 }
 
 /*==============================================================*/
+.p-treetable .p-treetable-thead>tr>th {
+    border: none !important;
+}
+
+.p-datatable .p-datatable-thead>tr>th {
+    border: none !important;
+}
 
 .p-datatable-table thead tr th {
-  background: #1cb973 !important;
-  color: #fff !important;
+    background: #1cb973 !important;
+    color: #fff !important;
 }
 
 .p-datatable-table thead tr th .pi {
-  color: #fff !important;
+    color: #fff !important;
 }
 
 .p-datatable-table thead tr th .p-column-filter-menu-button-active {
-  background: #8ca0fa !important;
+    background: #8ca0fa !important;
 
 }
 
 .p-datatable-table thead tr th .p-column-filter-menu-button-active .pi {
-  color: #fff !important;
+    color: #fff !important;
 }
 
 tbody tr:nth-child(even) td {
-  background: #eff2fe !important;
+    background: #eff2fe !important;
 }
 
 th.p-filter-column input.p-inputtext {
@@ -83,7 +92,8 @@ tbody tr:hover td {
 }
 
 tbody.p-treetable-tbody tr td .p-treetable-toggler {
-    width: 1rem; height: 1rem;
+    width: 1rem;
+    height: 1rem;
     background: #fafafa !important;
 }
 
@@ -92,7 +102,7 @@ tbody.p-treetable-tbody tr td .p-treetable-toggler-icon {
 }
 
 tbody.p-treetable-tbody tr td .p-buttonset button.p-button.p-button-sm {
-    margin-right:  0 !important;
+    margin-right: 0 !important;
     font-size: 10pt !important;
     padding: 8px !important;
 }
@@ -149,12 +159,14 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     padding: 7px 1.5rem !important;
     font-size: 10pt !important;
 }
-.p-datatable-table thead tr th.p-filter-column > div.p-column-filter {
-  padding: 0 !important;
+
+.p-datatable-table thead tr th.p-filter-column>div.p-column-filter {
+    padding: 0 !important;
 }
 
 .p-column-filter-menu-button {
-    width: 20px !important; height: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
 }
 
 .p-datatable-table thead tr th.p-filter-column .p-column-filter input {
@@ -189,9 +201,9 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
 }
 
 .p-datatable-table tbody tr td .checkbox-custom {
-  margin: 10px;
+    margin: 10px;
 }
 
-.vert-top tr td{
-  vertical-align: top !important;
+.vert-top tr td {
+    vertical-align: top !important;
 }
