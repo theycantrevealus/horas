@@ -19,14 +19,6 @@ export class Corei18nComponentDTO {
   component: string
 
   @ApiProperty({
-    example: 'group.identifier',
-    type: String,
-    description: 'Component Identifier',
-  })
-  @IsNotEmpty()
-  language: string
-
-  @ApiProperty({
     example: 'Hello There',
     type: String,
     description: 'Translation value',

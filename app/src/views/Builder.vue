@@ -1,5 +1,5 @@
 <template>
-  <div class="main-container">
+  <div :class="(getThemeMode ? 'dark' : '') + ' main-container'">
     <div :class="(getMenuModeStatus ? 'open' : '') + ' topbar'">
       <TopPanelBar />
     </div>
@@ -80,12 +80,14 @@ export default {
       menu: [],
       breadcrumb: [],
       pageName: '',
+      darkMode: false,
     }
   },
   computed: {
-    ...mapState(['menuMode']),
+    ...mapState(['menuMode', 'themeModeDark']),
     ...mapGetters({
       getMenuModeStatus: 'getMenuModeStatus',
+      getThemeMode: 'getThemeMode',
     }),
     containerClass() {
       return [
@@ -121,9 +123,24 @@ export default {
         //
       },
     },
+    getThemeMode: {
+      handler(getData) {
+        if (this.themeModeDark) {
+          document.querySelector('body').classList.add('dark')
+        } else {
+          document.querySelector('body').classList.remove('dark')
+        }
+      },
+    },
   },
   mounted() {
+    this.darkMode = this.themeModeDark
     this.updatePageInfo()
+    if (this.darkMode) {
+      document.querySelector('body').classList.add('dark')
+    } else {
+      document.querySelector('body').classList.remove('dark')
+    }
   },
   beforeUpdate() {
     if (this.mobileMenuActive) {

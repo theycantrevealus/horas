@@ -117,7 +117,7 @@ export default {
     },
   },
   created() {
-    console.log(this.items)
+    //
   },
   methods: {
     onMenuItemClick(event, item, index) {

@@ -8,6 +8,10 @@ table thead tr th {
     padding: 10pt 1.5rem !important;
 }
 
+.p-datatable .p-datatable-tbody>tr>td {
+    border: none !important
+}
+
 .p-treetable-thead tr th {
     background: #1cb973 !important;
     color: #fff !important;
@@ -91,6 +95,10 @@ tbody tr:hover td {
     background: #dde3ff !important;
 }
 
+.p-treetable .p-treetable-tbody>tr>td {
+    border: none !important
+}
+
 tbody.p-treetable-tbody tr td .p-treetable-toggler {
     width: 1rem;
     height: 1rem;
@@ -138,6 +146,10 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     min-width: 1px !important;
     height: auto !important;
     padding: 10px !important;
+}
+
+.p-datatable-header {
+    border: none !important
 }
 
 .p-paginator .p-paginator-icon,

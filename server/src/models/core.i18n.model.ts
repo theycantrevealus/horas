@@ -160,13 +160,13 @@ export class Corei18nModel {
   @Type(() => Corei18nComponentModel)
   @OneToMany(() => Corei18nComponentModel, (component) => component.language, {
     cascade: true,
-    eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'components' })
   components: Corei18nComponentModel[]
 
   @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  @JoinColumn({ name: 'account_id' })
   created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)

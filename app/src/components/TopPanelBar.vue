@@ -2,10 +2,18 @@
   <div class="head_wrapper">
     <Menubar :model="items">
       <template #start>
-        <span class="material-icons-outlined">
+        <span
+          v-if="getThemeMode"
+          class="material-icons-outlined dark-mode-switch"
+          @click="toggleDarkMode"
+        >
           dark_mode
         </span>
-        <span class="material-icons-outlined">
+        <span
+          v-if="!getThemeMode"
+          class="material-icons-outlined dark-mode-switch"
+          @click="toggleDarkMode"
+        >
           wb_sunny
         </span>
       </template>
@@ -13,7 +21,7 @@
         <span v-if="2>3">{{ $t('message.hello') }}</span>
         <Dropdown
           v-model="selectedLanguage"
-          class="country-selector"
+          class="country-selector dark"
           :options="countries"
           optionLabel="name"
           :filter="true"
@@ -63,6 +71,7 @@ export default {
 
   data() {
     return {
+      darkMode: false,
       selectedLanguage: null,
       countries: [
         { name: 'United States', code: 'us', lang: 'en' },
@@ -225,6 +234,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      getThemeMode: 'getThemeMode',
+    }),
     getBrowserLanguage() {
       return this.$store.state.language
     },
@@ -238,6 +250,19 @@ export default {
       return this.$store.state.credential.last_name
     },
   },
+  watch: {
+    getThemeMode: {
+      handler(getData) {
+        if (getData) {
+          document.querySelector('body').classList.add('dark')
+        } else {
+          document.querySelector('body').classList.remove('dark')
+        }
+
+        this.darkMode = getData
+      },
+    },
+  },
   created() {},
   async mounted() {
     await this.initLanguage().then(() => {
@@ -248,6 +273,7 @@ export default {
     ...mapActions({
       initLanguage: 'setLanguange',
       storeLanguage: 'changeLanguage',
+      toggleDarkMode: 'toggleDarkMode',
     }),
     changeLanguage() {
       this.storeLanguage(this.selectedLanguage).then(() => {

@@ -13,6 +13,7 @@ const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
     menuMode: false,
+    themeModeDark: false,
     loading: 0,
     language: {},
     languageMeta: {
@@ -55,11 +56,13 @@ const store = createStore({
     toggleMenuOff: async ({ commit }) => {
       commit('mutateSidePanelToggleOff')
     },
+    toggleDarkMode: async ({ commit }) => {
+      commit('mutateThemeDark')
+    },
     coreLogin: async ({ commit }, accountRequestData: TAccountLogin) => {
       return await AccountService.login(accountRequestData).then(
         (response: any) => {
           response = response.data
-          console.log(response)
           if (response.status === 201 || response.status === 200) {
             commit('mutateUpdateToken', response.token)
             commit('mutateLoginSuccess', response.account)
@@ -108,6 +111,9 @@ const store = createStore({
     getMenuModeStatus: (state) => {
       return state.menuMode
     },
+    getThemeMode: (state) => {
+      return state.themeModeDark
+    },
   },
   mutations: {
     mutateSidePanelToggleOn: (state: any) => {
@@ -115,6 +121,9 @@ const store = createStore({
     },
     mutateSidePanelToggleOff: (state: any) => {
       state.menuMode = false
+    },
+    mutateThemeDark: (state: any) => {
+      state.themeModeDark = !state.themeModeDark
     },
     mutateSetBrowserLanguage: (state: any, countryCodeOnly = false) => {
       const selectedLanguage: string = getBrowserLocale({

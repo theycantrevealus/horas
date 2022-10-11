@@ -1,3 +1,4 @@
+import { ORMLogger } from '@/utilities/orm.logger'
 import { DataSource, DataSourceOptions } from 'typeorm'
 import { SeederOptions } from 'typeorm-extension'
 import entities from './entities'

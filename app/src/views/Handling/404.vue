@@ -1,6 +1,6 @@
 <template>
   <div class="main-container p-grid vertical-container">
-    <div class="p-col-12">
+    <div class="p-col-12 handling_container">
       <center>
         <Image
           class="p-image handling_image"

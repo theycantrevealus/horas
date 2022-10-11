@@ -22,6 +22,7 @@ import New from '@/modules/new'
 import GetStarted from '@/modules/get_started'
 import Account from '@/modules/setting/account'
 import Authority from '@/modules/setting/authority'
+import Corei18n from '@/modules/setting/i18n'
 import MasterItem from '@/modules/master/item'
 import Service from '@/modules/service'
 import * as Sentry from '@sentry/vue'
@@ -39,6 +40,7 @@ registerModules({
   accountModule: Account,
   masterItem: MasterItem,
   authorityModule: Authority,
+  corei18N: Corei18n,
   serviceModule: Service,
 })
 localStorage.clear()

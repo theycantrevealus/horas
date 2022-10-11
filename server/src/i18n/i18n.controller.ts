@@ -1,4 +1,4 @@
-import { Authorization } from '@/decorators/auth.decorator'
+import { Authorization, CredentialAccount } from '@/decorators/auth.decorator'
 import {
   HttpExceptionFilter,
   RequestValidatorFilter,
@@ -7,6 +7,7 @@ import {
 } from '@/filters/validator.filter'
 import { JwtAuthGuard } from '@/guards/jwt.guard'
 import { LoggingInterceptor } from '@/interceptors/logging.interceptor'
+import { AccountModel } from '@/models/account.model'
 import { Corei18nModel } from '@/models/core.i18n.model'
 import { CoreMenuModel } from '@/models/core.menu.model'
 import { isJsonString } from '@/utilities/mod.lib'
@@ -66,8 +67,11 @@ export class Corei18nController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @Post('add')
-  async add(@Body() data: Corei18nDTOAdd) {
-    return await this.corei18nService.add(data)
+  async add(
+    @Body() data: Corei18nDTOAdd,
+    @CredentialAccount() account: AccountModel
+  ) {
+    return await this.corei18nService.add(data, account)
   }
 
   @UseGuards(JwtAuthGuard)

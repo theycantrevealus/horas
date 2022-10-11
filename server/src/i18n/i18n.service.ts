@@ -1,3 +1,4 @@
+import { AccountModel } from '@/models/account.model'
 import { Corei18nComponentModel } from '@/models/core.i18n.compontent.model'
 import { Corei18nModel } from '@/models/core.i18n.model'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
@@ -50,14 +51,15 @@ export class Corei18nService {
     await queryRunner.startTransaction()
     try {
       const response = new GlobalResponse()
-      const dataSet = new Corei18nModel(data)
-      dataSet.id = id
+
+      const dataSet = await this.detail(id)
+      Object.assign(dataSet, data)
 
       return await queryRunner.manager
         .save(dataSet)
         .then(async () => {
           //Rebase component by language
-          response.message = 'Language Updated Successfully'
+          response.message = 'Language updated successfully'
           response.statusCode = HttpStatus.OK
           response.table_target = 'core_i18n'
           response.method = 'PUT'
@@ -100,18 +102,22 @@ export class Corei18nService {
       })
   }
 
-  async add(data: Corei18nDTOAdd): Promise<GlobalResponse> {
+  async add(
+    data: Corei18nDTOAdd,
+    account: AccountModel
+  ): Promise<GlobalResponse> {
     const queryRunner = this.dataSource.createQueryRunner()
     await queryRunner.startTransaction()
     try {
       const response = new GlobalResponse()
       const dataSet = new Corei18nModel(data)
+      dataSet.created_by = account
 
       return await queryRunner.manager
         .save(dataSet)
         .then(async (returning) => {
           //Rebase component by language
-          response.message = 'Language Updated Successfully'
+          response.message = 'Language created successfully'
           response.statusCode = HttpStatus.OK
           response.table_target = 'core_i18n'
           response.method = 'PUT'

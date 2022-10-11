@@ -1,28 +1,15 @@
 import { properties } from '@/utilities/models/column'
-import { ApiProperty } from '@nestjs/swagger'
-import { Transform, Type } from 'class-transformer'
-import {
-  IsNotEmpty,
-  IsString,
-  Length,
-  MaxLength,
-  MinLength,
-  ValidateNested,
-} from 'class-validator'
+import { Type } from 'class-transformer'
 import {
   Entity,
   Column,
-  PrimaryColumn,
-  Generated,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
-import { AccountModel } from './account.model'
 import { Corei18nModel } from './core.i18n.model'
 import { CoreMenuModel } from './core.menu.model'
 
@@ -32,8 +19,11 @@ export class Corei18nComponentModel {
   id: number
 
   @Type(() => CoreMenuModel)
-  @ManyToOne(() => CoreMenuModel, (menu) => menu.id)
-  @JoinColumn()
+  @ManyToOne(() => CoreMenuModel, (menu) => menu.id, {
+    orphanedRowAction: 'delete',
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'menu_id' })
   menu: CoreMenuModel
 
   @Column({
@@ -51,12 +41,12 @@ export class Corei18nComponentModel {
   translation: string
 
   @Type(() => Corei18nModel)
-  @ManyToOne(() => Corei18nModel, (i18n) => i18n.components)
-  @JoinColumn({ name: 'language_uid' })
+  @ManyToOne(() => Corei18nModel, (i18n) => i18n.components, {
+    orphanedRowAction: 'delete',
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'language_id' })
   language: Corei18nModel
-
-  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
-  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date
