@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm'
 import { CoreMenuGroupModel } from '@models/core.menu.group.model'
 import { IsNumber, IsString, ValidateNested } from 'class-validator'
@@ -15,6 +16,7 @@ import { properties } from '@/utilities/models/column'
 import { Type } from 'class-transformer'
 import { Corei18nComponentModel } from './core.i18n.compontent.model'
 import { AccountModel } from './account.model'
+import { CoreMenuPermissionModel } from './core.menu.permission.model'
 
 @Entity({ name: 'core_menu' })
 export class CoreMenuModel {
@@ -137,6 +139,14 @@ export class CoreMenuModel {
   @IsString()
   @Column({ type: 'text' })
   remark: string
+
+  @Type(() => CoreMenuPermissionModel)
+  @OneToMany(() => CoreMenuPermissionModel, (permission) => permission.menu, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'permissions' })
+  permission: CoreMenuPermissionModel[]
 
   @ManyToOne(() => AccountModel, (foreign) => foreign.id)
   created_by: AccountModel

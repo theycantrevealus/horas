@@ -252,6 +252,7 @@ body.dark .main-container .breadcrumb-container .p-chip {
 }
 
 body.dark .main-container .p-card {
+    color: #1ed8a5 !important;
     background: #3f6c6c !important;
 }
 
@@ -809,6 +810,7 @@ body.dark .p-inputgroup-addon span {
     border-radius: 10px !important;
     box-shadow: 0px 0px 5px 5px rgba(240, 240, 240, .5) !important;
     box-shadow: none !important;
+    transition-duration: .5s;
 }
 
 .p-card.slim {

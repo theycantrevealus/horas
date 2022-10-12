@@ -1,9 +1,15 @@
 import { CoreMenuGroupModel } from '@/models/core.menu.group.model'
 import { CoreMenuModel } from '@/models/core.menu.model'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
-import { HttpStatus, Injectable, Logger } from '@nestjs/common'
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
+import { CoreMenuDTOEdit } from './dtos/menu.edit'
 import { MenuGroupService } from './menu.group.service'
 import { MenuPermissionService } from './menu.permission.service'
 
@@ -53,23 +59,33 @@ export class MenuService {
     return responseBuilder
   }
 
-  async edit(data: CoreMenuModel, id: number): Promise<GlobalResponse> {
-    const response = new GlobalResponse()
-    return await this.menuRepo
-      .update(id, data)
-      .then(async () => {
-        response.message = 'Menu Updated Successfully'
-        response.statusCode = HttpStatus.OK
-        response.table_target = 'menu'
-        response.method = 'PUT'
-        response.action = 'U'
-        response.transaction_id = id
-        response.payload = await this.detail(id)
-        return response
-      })
-      .catch((e) => {
-        throw new Error(e.message)
-      })
+  async edit(data: CoreMenuDTOEdit, id: number): Promise<GlobalResponse> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.startTransaction()
+    const dataSet = await this.detail(id)
+    Object.assign(dataSet, data)
+    try {
+      const response = new GlobalResponse()
+      return await this.menuRepo
+        .update(id, dataSet)
+        .then(async () => {
+          response.message = 'Menu Updated Successfully'
+          response.statusCode = HttpStatus.OK
+          response.table_target = 'menu'
+          response.method = 'PUT'
+          response.action = 'U'
+          response.transaction_id = id
+          response.payload = await this.detail(id)
+          return response
+        })
+        .catch((e) => {
+          throw new Error(e.message)
+        })
+    } catch (e) {
+      throw new BadRequestException(e)
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   async delete_soft(id: number): Promise<GlobalResponse> {

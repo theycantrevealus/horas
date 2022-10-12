@@ -88,6 +88,7 @@ export default {
     ...mapGetters({
       getMenuModeStatus: 'getMenuModeStatus',
       getThemeMode: 'getThemeMode',
+      geti18n: 'mCorei18n/getData',
     }),
     containerClass() {
       return [
@@ -123,6 +124,28 @@ export default {
         //
       },
     },
+    geti18n: {
+      handler(getData) {
+        if (getData) {
+          getData.map((e) => {
+            const messageCompound = {}
+
+            const componentMessage = e.components
+            componentMessage.map((f) => {
+              if (!messageCompound[f.component]) {
+                messageCompound[f.component] = ''
+              }
+              messageCompound[f.component] = f.translation
+            })
+
+            this.$i18n.setLocaleMessage(
+              e.language_code.toLowerCase(),
+              messageCompound
+            )
+          })
+        }
+      },
+    },
     getThemeMode: {
       handler(getData) {
         if (this.themeModeDark) {
@@ -141,6 +164,7 @@ export default {
     } else {
       document.querySelector('body').classList.remove('dark')
     }
+    this.loadLanguage()
   },
   beforeUpdate() {
     if (this.mobileMenuActive) {
@@ -153,6 +177,7 @@ export default {
     ...mapActions({
       toogleMenuStatusOn: 'toggleMenuOn',
       toogleMenuStatusOff: 'toggleMenuOff',
+      loadLanguage: 'mCorei18n/get_all_i18n',
     }),
     updatePageInfo() {
       this.breadcrumb = this.$route.meta.breadcrumb

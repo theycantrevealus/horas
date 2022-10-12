@@ -2,11 +2,14 @@ import api from '@/util/api'
 class Corei18nService {
   async i18nList(parsedData) {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n`, {
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/paginate`, {
         params: parsedData,
       })
       .then((response) => {
         return Promise.resolve(response)
+      })
+      .catch((e) => {
+        console.log(e)
       })
   }
 

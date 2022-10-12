@@ -18,7 +18,6 @@
         </span>
       </template>
       <template #end>
-        <span v-if="2>3">{{ $t('message.hello') }}</span>
         <Dropdown
           v-model="selectedLanguage"
           class="country-selector dark"
@@ -236,6 +235,7 @@ export default {
   computed: {
     ...mapGetters({
       getThemeMode: 'getThemeMode',
+      geti18n: 'mCorei18n/getData',
     }),
     getBrowserLanguage() {
       return this.$store.state.language
@@ -262,11 +262,24 @@ export default {
         this.darkMode = getData
       },
     },
+    geti18n: {
+      handler(getData) {
+        this.countries = []
+        getData.map((e) => {
+          this.countries.push({
+            name: e.name,
+            code: e.iso_2_digits.toLowerCase(),
+            lang: e.language_code.toLowerCase(),
+          })
+        })
+      },
+    },
   },
   created() {},
   async mounted() {
     await this.initLanguage().then(() => {
       this.selectedLanguage = this.$store.state.language
+      this.$i18n.locale = this.selectedLanguage.lang
     })
   },
   methods: {

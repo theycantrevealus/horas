@@ -2,6 +2,7 @@ import { AccountModel } from '@/models/account.model'
 import { Corei18nComponentModel } from '@/models/core.i18n.compontent.model'
 import { Corei18nModel } from '@/models/core.i18n.model'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
+import { filterSetDT } from '@/utilities/mod.lib'
 import {
   BadRequestException,
   HttpStatus,
@@ -128,7 +129,6 @@ export class Corei18nService {
           return response
         })
         .catch(async (e) => {
-          console.log(e)
           await queryRunner.rollbackTransaction()
           throw new BadRequestException(response)
         })
@@ -137,6 +137,82 @@ export class Corei18nService {
       throw new BadRequestException(e)
     } finally {
       await queryRunner.release()
+    }
+  }
+
+  async paginate(param: any) {
+    const take = param.rows || 20
+    const skip = param.first || 0
+    const dataResult = []
+
+    const rawTotalRecords = await this.corei18nRepo.createQueryBuilder(
+      'account'
+    )
+
+    for (const b in param.filter) {
+      if (param.filter[b].value !== '') {
+        const filterSet: any = filterSetDT(
+          param.filter[b].matchMode,
+          param.filter[b].value
+        )
+        rawTotalRecords.andWhere(`account.${b} ${filterSet.protocol} :a`, {
+          a: filterSet.res,
+        })
+      }
+    }
+
+    const totalRecords = await rawTotalRecords.getMany()
+
+    const dataRaw = this.corei18nRepo
+      .createQueryBuilder('account')
+      // .innerJoinAndSelect('account.authority', 'authority')
+      .skip(param.first)
+      .take(param.rows)
+      .where('account.deleted_at IS NULL')
+    // .andWhere('account.email ilike :email', { email: `%${param.filter.email.value}%` })
+
+    if (param.sortField && param.sortField !== '') {
+      dataRaw.orderBy(
+        `account.${param.sortField}`,
+        param.sortOrder > 0 ? 'ASC' : 'DESC'
+      )
+    } else {
+      dataRaw.orderBy('account.created_at', 'DESC')
+    }
+
+    for (const b in param.filter) {
+      if (param.filter[b].value !== '') {
+        const filterSet: any = filterSetDT(
+          param.filter[b].matchMode,
+          param.filter[b].value
+        )
+        dataRaw.andWhere(`account.${b} ${filterSet.protocol} :a`, {
+          a: filterSet.res,
+        })
+      }
+    }
+
+    const data = await dataRaw.getMany()
+
+    let autonum = parseInt(skip) + 1
+
+    for (const a in data) {
+      if (data[a]) {
+        dataResult.push({
+          autonum: autonum,
+          id: data[a].id,
+          name: data[a].name,
+          iso_2_digits: data[a].iso_2_digits,
+          iso_3_digits: data[a].iso_3_digits,
+          created_at: data[a].created_at,
+        })
+        autonum++
+      }
+    }
+
+    return {
+      list: dataResult,
+      totalRecords: totalRecords.length,
     }
   }
 }

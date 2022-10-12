@@ -53,18 +53,6 @@ declare global {
   }
 }
 declare var require: any
-const messages = {
-  en: {
-    message: {
-      hello: 'hello world',
-    },
-  },
-  id: {
-    message: {
-      hello: 'こんにちは、世界',
-    },
-  },
-}
 
 const app = createApp(App)
 
@@ -76,6 +64,7 @@ app
   .use(ConfirmationService)
   .use(CKEditor)
   .use(i18n)
+
 app.directive('tooltip', Tooltip)
 
 app.mount('#app')

@@ -25,7 +25,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { Corei18nDTOAdd } from './dtos/i18n.add'
 import { Corei18nDTOEdit } from './dtos/i18n.edit'
 import { Corei18nService } from './i18n.service'
@@ -96,5 +96,31 @@ export class Corei18nController {
   @Delete(':id/delete')
   async delete_soft(@Param() param) {
     return await this.corei18nService.delete_soft(param.id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'List all i18n (Paginate / Prime Datatable support)',
+  })
+  @Get('paginate')
+  async paginate(
+    @Query('first') first: number,
+    @Query('rows') rows: number,
+    @Query('sortOrder') sortOrder: number,
+    @Query('sortField') sortField: string,
+    @Query('filters') filters: any
+  ) {
+    const filterSet = isJsonString(filters) ? JSON.parse(filters) : {}
+    const data = await this.corei18nService.paginate({
+      rows: rows,
+      first: first,
+      sortOrder: sortOrder,
+      sortField: sortField,
+      filter: filterSet,
+    })
+
+    return data
   }
 }

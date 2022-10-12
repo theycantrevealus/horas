@@ -8,6 +8,7 @@ import AccountService from '@/service/account'
 import CoreService from '@/service/core/sidemenu'
 import { coreMenu } from '@/store/core/menu'
 import getBrowserLocale from '@/util/i18n/browser.config'
+import { corei18n } from './core/i18n'
 
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
@@ -208,6 +209,7 @@ const store = createStore({
   modules: {
     mAccount: account,
     mCoreMenu: coreMenu,
+    mCorei18n: corei18n,
   },
 })
 

@@ -1,5 +1,6 @@
 import { properties } from '@/utilities/models/column'
 import { ApiProperty } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
 import { IsString, ValidateNested } from 'class-validator'
 import {
   Entity,
@@ -18,19 +19,13 @@ export class CoreMenuPermissionModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ApiProperty({
-    example: 'Identifier',
-    description: 'Vue 3 support',
+  @Type(() => CoreMenuModel)
+  @ManyToOne(() => CoreMenuModel, (menu) => menu.permission, {
+    orphanedRowAction: 'delete',
+    onDelete: 'CASCADE',
   })
-  @ValidateNested()
-  @ManyToOne(() => CoreMenuModel, (menu) => menu.id)
   menu: CoreMenuModel
 
-  @ApiProperty({
-    example: '#DOMIdentifier',
-    description: 'For identify dom that granted access',
-  })
-  @IsString()
   @Column({
     nullable: false,
     type: 'character varying',
@@ -38,11 +33,6 @@ export class CoreMenuPermissionModel {
   })
   domiden: string
 
-  @ApiProperty({
-    example: 'dispatchingString()',
-    description: 'String dispatch from the dom',
-  })
-  @IsString()
   @Column({
     nullable: false,
     type: 'character varying',
@@ -50,11 +40,6 @@ export class CoreMenuPermissionModel {
   })
   dispatchname: string
 
-  @ApiProperty({
-    example: 'ServiceName',
-    description: 'For identify dom service name that contain dispatch function',
-  })
-  @IsString()
   @Column({
     type: 'character varying',
     comment: 'For identify dom service name that contain dispatch function',
