@@ -31,7 +31,7 @@ import {
   UnAuthorizedExceptionFilter,
 } from '@/filters/validator.filter'
 import { Response, response } from 'express'
-import { createReadStream } from 'fs'
+import * as fs from 'fs'
 import { GrantAccessDTO } from './dtos/account.dto.grant.access'
 import { GrantPermissionDTO } from './dtos/account.dto.grant.permission'
 import { AccountLoginDTO } from './dtos/account.dto.login'
@@ -119,7 +119,10 @@ export class AccountController {
   @Get(':id/avatar')
   @Header('Content-Type', 'image/png')
   async avatar(@Param() param, @Res() response: Response) {
-    const data = createReadStream(`avatar/${param.id}.png`)
+    const data = fs.createReadStream(`avatar/${param.id}.png`)
+    data.on('error', (err) => {
+      data.close()
+    })
     response.setHeader(
       'Content-Disposition',
       `attachment; filename=${param.id}.png`

@@ -26,10 +26,10 @@ export class CoreMenuPermissionDTO {
   @IsString()
   dispatchname: string
 
-  @ApiProperty({
-    example: 'ServiceName',
-    description: 'For identify dom service name that contain dispatch function',
-  })
-  @IsString()
-  servicegroup: string
+  // @ApiProperty({
+  //   example: 'ServiceName',
+  //   description: 'For identify dom service name that contain dispatch function',
+  // })
+  // @IsString()
+  // servicegroup: string
 }

@@ -144,7 +144,6 @@ body.dark .main-container {
 
 body.dark .p-inputtext {
     background: #005457 !important;
-    border: none !important;
     color: #25ffc3 !important
 }
 
@@ -162,7 +161,7 @@ body.dark .p-dropdown-filter-icon {
     color: #25ffc3 !important
 }
 
-body.dark .main-container .p-inputtext::placeholder {
+body.dark .p-inputtext::placeholder {
     color: #fff !important;
 }
 
@@ -345,6 +344,35 @@ body.dark .p-inputgroup-addon {
 
 body.dark .p-inputgroup-addon span {
     color: #25ffc3 !important
+}
+
+body.dark .p-tree {
+    background: #36434c;
+}
+
+body.dark .p-tree-filter-container span {
+    color: #1ed8a5 !important;
+}
+
+body.dark .p-treenode-content {
+    color: #fff !important;
+}
+
+body.dark .p-treenode-content .p-treenode-icon {
+    color: #1ed8a5 !important;
+}
+
+body.dark .p-treenode-content button span {
+    color: #1ed8a5 !important;
+}
+
+body.dark .p-highlight {
+    color: #1ed8a5 !important;
+    background: #005457 !important;
+}
+
+.p-tree {
+    border: none !important
 }
 
 
@@ -925,6 +953,7 @@ body.dark .p-inputgroup-addon span {
 
 .p-inputtext {
     padding: 7px 10px;
+    border: none !important;
     font-size: 10pt !important;
 }
 
@@ -1130,6 +1159,9 @@ body.dark .p-inputgroup-addon span {
     margin: 0 5px !important;
 }
 
+.form-mode {
+    padding: 40px !important;
+}
 
 .form-mode .p-inputgroup {
     margin-bottom: 10px;

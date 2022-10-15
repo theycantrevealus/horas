@@ -8,7 +8,7 @@ export default {
   mutations,
   actions,
   getters: {
-    getAuthority: (state) => {
+    fetchi18nDetail: (state) => {
       return state.items
     },
   },

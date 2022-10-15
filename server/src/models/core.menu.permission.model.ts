@@ -10,6 +10,7 @@ import {
   DeleteDateColumn,
   PrimaryGeneratedColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm'
 import { AccountModel } from './account.model'
 import { CoreMenuModel } from './core.menu.model'
@@ -24,6 +25,7 @@ export class CoreMenuPermissionModel {
     orphanedRowAction: 'delete',
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'menu_id' })
   menu: CoreMenuModel
 
   @Column({
@@ -40,11 +42,11 @@ export class CoreMenuPermissionModel {
   })
   dispatchname: string
 
-  @Column({
-    type: 'character varying',
-    comment: 'For identify dom service name that contain dispatch function',
-  })
-  servicegroup: string
+  // @Column({
+  //   type: 'character varying',
+  //   comment: 'For identify dom service name that contain dispatch function',
+  // })
+  // servicegroup: string
 
   @ManyToOne(() => AccountModel, (foreign) => foreign.id)
   created_by: AccountModel

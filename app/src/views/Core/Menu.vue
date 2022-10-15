@@ -316,6 +316,7 @@ export default defineComponent({
           dom: '',
           dispatch: '',
         },
+        permission: [] as any,
       },
       position: 'center',
       ui: {
@@ -367,6 +368,7 @@ export default defineComponent({
         txt_icon: '',
         showMenu: false,
         showFeature: false,
+        permission: [],
         feature: {
           dom: '',
           dispatch: '',
@@ -467,6 +469,8 @@ export default defineComponent({
       const icon = this.form.txt_icon
       const showMenu = this.form.showMenu ? 'Y' : 'N'
 
+      this.form.permission = this.setterPermission
+
       return CoreService.menuEdit(this.form.targetID, {
         name: label,
         menu_group: this.form.targetGroup,
@@ -478,6 +482,7 @@ export default defineComponent({
         show_order: 1,
         level: 2,
         group_color: '',
+        permission: this.setterPermission,
         show_on_menu: showMenu,
       }).then((response: any) => {
         response = response.data
