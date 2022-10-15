@@ -10,11 +10,12 @@ import {
   JoinColumn,
 } from 'typeorm'
 import { CoreMenuGroupModel } from '@models/core.menu.group.model'
-import { IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { properties } from '@/utilities/models/column'
 import { Type } from 'class-transformer'
 import { CoreMenuPermissionDTO } from './menu.permission'
+import { IsArrayOfObjects } from '@/decorators/class.validator.object.array'
 
 export class CoreMenuDTOEdit {
   @ApiProperty({
@@ -49,7 +50,10 @@ export class CoreMenuDTOEdit {
     isArray: true,
     type: CoreMenuPermissionDTO,
   })
-  @IsNumber()
+  @IsNotEmpty()
+  @IsArrayOfObjects()
+  @ValidateNested({ each: true })
+  @Type(() => CoreMenuPermissionDTO)
   permission: CoreMenuPermissionDTO[]
 
   @ApiProperty({

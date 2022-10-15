@@ -43,7 +43,7 @@ const moduleRoute = [
           requiresAuth: true,
           breadcrumb: [
             {
-              label: 'Add New i18n',
+              label: 'i18n Management',
               to: '/setting/i18n',
             },
           ],

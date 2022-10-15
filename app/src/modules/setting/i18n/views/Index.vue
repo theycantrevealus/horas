@@ -28,7 +28,7 @@
               :totalRecords="totalRecords"
               :loading="loading"
               filterDisplay="row"
-              :globalFilterFields="['email', 'first_name', 'last_name', 'created_at']"
+              :globalFilterFields="['email', 'iso_2_digits', 'iso_3_digits', 'created_at']"
               responsiveLayout="scroll"
               @page="onPage($event)"
               @sort="onSort($event)"
@@ -49,14 +49,14 @@
                     <Button
                       v-if="permission.btni18nEdit !== undefined"
                       class="button p-button-success button-sm button-raised"
-                      @click="accountEdit(slotProps.data.id)"
+                      @click="dataEdit(slotProps.data.id)"
                     >
                       <span class="material-icons">edit</span> {{ $t('i18n.datatable.button.edit') }}
                     </Button>
                     <Button
                       v-if="permission.btni18nDelete !== undefined"
                       class="button button-danger button-sm button-raised"
-                      @click="accountDelete($event, slotProps.data.id)"
+                      @click="dataDelete($event, slotProps.data.id)"
                     >
                       <span class="material-icons">delete</span> {{ $t('i18n.datatable.button.delete') }}
                     </Button>
@@ -75,7 +75,7 @@
                     v-model="filterModel.value"
                     type="text"
                     class="column-filter"
-                    placeholder="Search by email"
+                    :placeholder="$t('column.i18n.datatable.name.search')"
                     @keydown.enter="filterCallback()"
                   />
                 </template>
@@ -92,7 +92,7 @@
                     v-model="filterModel.value"
                     type="text"
                     class="column-filter"
-                    placeholder="Search by first name"
+                    :placeholder="$t('column.i18n.datatable.iso_2_digits.search')"
                     @keydown.enter="filterCallback()"
                   />
                 </template>
@@ -206,9 +206,9 @@ export default {
       // this.lazyParams.filters = this.filters
       this.loadLazyData()
     },
-    accountEdit(id) {
+    dataEdit(id) {
       this.$router.push({
-        path: `/account/edit/${id}`,
+        path: `/setting/i18n/edit/${id}`,
         query: {
           id: id,
         },

@@ -64,10 +64,11 @@ export class MenuService {
     await queryRunner.startTransaction()
     const dataSet = await this.detail(id)
     Object.assign(dataSet, data)
+
     try {
       const response = new GlobalResponse()
-      return await this.menuRepo
-        .update(id, dataSet)
+      return await queryRunner.manager
+        .save(dataSet)
         .then(async () => {
           response.message = 'Menu Updated Successfully'
           response.statusCode = HttpStatus.OK
@@ -76,12 +77,14 @@ export class MenuService {
           response.action = 'U'
           response.transaction_id = id
           response.payload = await this.detail(id)
+          queryRunner.commitTransaction()
           return response
         })
         .catch((e) => {
           throw new Error(e.message)
         })
     } catch (e) {
+      await queryRunner.rollbackTransaction()
       throw new BadRequestException(e)
     } finally {
       await queryRunner.release()
