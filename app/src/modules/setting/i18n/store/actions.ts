@@ -3,6 +3,9 @@ import Corei18nService from '@/modules/setting/i18n/service'
 import { deepen, parsedT } from '@/util/object'
 
 export default {
+  async __update({ commit }, paramData: any) {
+    return await Corei18nService.i18nUpdate(paramData)
+  },
   fetchi18nDetail({ commit }, paramData) {
     commit(types.TOGGLE_LOADING_ACTIVE)
     Corei18nService.i18nDetail(paramData).then((response: any) => {
@@ -26,7 +29,6 @@ export default {
       })
 
       const parsedData = parsedT(deepen(ab))
-      // TODO : Still wrong key identifier. Fix it on utils
       data.componentTree = { root: parsedData }
       data.componentIden = Objectidentifier
 

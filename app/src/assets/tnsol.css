@@ -362,19 +362,77 @@ body.dark .p-treenode-content .p-treenode-icon {
     color: #1ed8a5 !important;
 }
 
-body.dark .p-treenode-content button span {
-    color: #1ed8a5 !important;
-}
-
 body.dark .p-highlight {
     color: #1ed8a5 !important;
     background: #005457 !important;
+}
+
+body.dark .p-treenode .p-treenode-content .end-tree-selector {
+    color: #1ed8a5
 }
 
 .p-tree {
     border: none !important
 }
 
+.p-treenode .p-button.p-button-rounded {
+    border-radius: 100% !important;
+}
+
+.p-treenode .p-button span {
+    margin: 0 !important;
+}
+
+.p-treenode .p-treenode-content {
+    position: relative;
+    overflow-x: hidden !important;
+    padding: 2px !important;
+}
+
+.p-treenode .p-treenode-content:hover {
+    background: #005457 !important;
+}
+
+.p-treenode .p-treenode-content .end-tree-selector {
+    color: #818181;
+    transition-duration: .5s;
+}
+
+.p-treenode-label {
+    display: block !important;
+    position: absolute;
+    overflow: visible;
+    width: 95%;
+    left: 5%;
+}
+
+.inline-block.custom {
+    position: relative;
+    width: 70%;
+}
+
+.inline-block.custom .flex {
+    position: relative;
+    min-height: 20px;
+}
+
+.inline-block.custom .action-container {
+    right: 5px;
+    top: -2.5px;
+    padding: 0 10px;
+}
+
+.inline-block.custom .action-container .p-button {
+    width: 25px !important;
+    height: 25px !important;
+    margin: 0 5px;
+    float: left
+}
+
+
+.inline-block.custom .action-container .p-button .pi {
+    font-size: 8pt;
+}
 
 /* ============================================================================================================ */
 
@@ -1153,6 +1211,10 @@ body.dark .p-highlight {
 /* BUTTON */
 .p-button {
     border-radius: 5px !important;
+}
+
+.p-button span {
+    margin-right: 5px;
 }
 
 .p-buttonset .p-button {
