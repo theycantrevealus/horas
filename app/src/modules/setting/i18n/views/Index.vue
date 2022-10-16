@@ -209,9 +209,7 @@ export default {
     dataEdit(id) {
       this.$router.push({
         path: `/setting/i18n/edit/${id}`,
-        query: {
-          id: id,
-        },
+        params: { id: id },
       })
     },
     i18nAdd() {

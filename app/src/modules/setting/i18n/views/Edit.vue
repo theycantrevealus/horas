@@ -248,7 +248,10 @@ export default {
   async mounted() {
     this.allowSave = false
     this.displayEditorDialog = false
-    await this.$store.dispatch('corei18N/fetchi18nDetail', this.$route.query.id)
+    await this.$store.dispatch(
+      'corei18N/fetchi18nDetail',
+      this.$route.params.id
+    )
   },
   methods: {
     onNodeSelect(node) {
