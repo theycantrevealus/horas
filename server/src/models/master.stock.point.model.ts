@@ -7,18 +7,18 @@ import {
   ManyToOne,
   PrimaryColumn,
   Generated,
+  PrimaryGeneratedColumn,
 } from 'typeorm'
 import { IsString, ValidateNested } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { MasterItemBrandModel } from './master.item.brand.model'
 import { properties } from '@/utilities/models/column'
+import { AccountModel } from './account.model'
 
 @Entity({ name: 'master_stock_point' })
 export class MasterStockPointModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @ApiProperty({
     example: 'Stock Point name',
@@ -53,6 +53,15 @@ export class MasterStockPointModel {
   @IsString()
   @Column(properties.remark)
   remark: string
+
+  @ApiProperty({
+    example: '',
+    type: AccountModel,
+    description: 'Account who create purchase order',
+  })
+  @ValidateNested()
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

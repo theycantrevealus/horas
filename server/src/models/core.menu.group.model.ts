@@ -10,8 +10,9 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
 } from 'typeorm'
+import { AccountModel } from './account.model'
 
-@Entity({ name: 'menu_group' })
+@Entity({ name: 'core_menu_group' })
 export class CoreMenuGroupModel {
   @PrimaryGeneratedColumn('increment')
   id: number
@@ -27,6 +28,9 @@ export class CoreMenuGroupModel {
     comment: 'Group will menu at sidebar',
   })
   name: string
+
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

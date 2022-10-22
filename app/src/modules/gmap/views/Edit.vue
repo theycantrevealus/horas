@@ -10,8 +10,8 @@
         </template>
         <template #content>
           <TabView
-            class="tabview-custom"
             ref="tabview4"
+            class="tabview-custom"
           >
             <TabPanel>
               <template #header>
@@ -22,40 +22,40 @@
                 <div class="field col-12 md-4">
                   <label for="itemFormCode">Code</label>
                   <InputText
-                    placeholder="xxxxxxxx"
                     id="itemFormCode"
-                    type="text"
                     v-model.trim="$v.code.$model"
+                    placeholder="xxxxxxxx"
+                    type="text"
                   />
                   <Message
-                    severity="error"
                     v-if="$v.code.$errors.length > 0"
+                    severity="error"
                     :closable="false"
                   >
                     <div
-                      class="error-msg"
                       v-for="(error, index) of $v.code.$errors"
                       :key="index"
+                      class="error-msg"
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
                 <div class="field col-12 md-4">
                   <label for="itemFormName">Name</label>
                   <InputText
-                    placeholder="Item Name"
                     id="itemFormName"
-                    type="text"
                     v-model.trim="$v.name.$model"
+                    placeholder="Item Name"
+                    type="text"
                   />
                   <Message
-                    severity="error"
                     v-if="$v.name.$errors.length > 0"
+                    severity="error"
                     :closable="false"
                   >
                     <div
-                      class="error-msg"
                       v-for="(error, index) of $v.name.$errors"
                       :key="index"
+                      class="error-msg"
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
@@ -63,8 +63,8 @@
                   <label for="itemFormRemark">Remark</label>
                   <ckeditor
                     id="itemFormRemark"
-                    :editor="editor"
                     v-model="$v.remark.$model"
+                    :editor="editor"
                     :config="editorConfig"
                   ></ckeditor>
                 </div>
@@ -173,8 +173,8 @@
                 </div>
                 <div class="field col-12 md-12">
                   <TabView
-                    class="tabview-custom"
                     ref="tabviewDrugDetail"
+                    class="tabview-custom"
                   >
                     <TabPanel>
                       <template #header>
@@ -429,8 +429,8 @@
 
             <template #right>
               <Button
-                label="Save"
                 v-if="permission.btnUpdateUser !== undefined"
+                label="Save"
                 type="submit"
                 :disabled="$v.$invalid"
                 icon="pi pi-save"
@@ -487,11 +487,6 @@ export default {
   setup() {
     return { $v: useVuelidate() }
   },
-  computed: {
-    permission() {
-      return this.$store.state.credential.permission
-    },
-  },
   data() {
     return {
       expandedRows: [],
@@ -531,6 +526,11 @@ export default {
       },
     }
   },
+  computed: {
+    permission() {
+      return this.$store.state.credential.permission
+    },
+  },
   validations: {
     code: {
       required,
@@ -542,7 +542,7 @@ export default {
     remark: {},
   },
   mounted() {
-    MasterItemService.getItemDetail(this.$route.params.uid).then((response) => {
+    MasterItemService.getItemDetail(this.$route.params.id).then((response) => {
       const data = response.response_data[0]
 
       this.code = data.code
@@ -579,7 +579,7 @@ export default {
         address: this.address,
         contact: this.contact,
         rolenperm: this.checkedPermission,
-        uid: this.$route.params.uid,
+        id: this.$route.params.id,
       }).then((response) => {
         var result = response.data.response_package.response_result
         if (result > 0) {

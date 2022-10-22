@@ -11,9 +11,9 @@ class MasterItemService {
       })
   }
 
-  async getItemDetail(uid) {
+  async getItemDetail(id) {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/${uid}`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/${id}`)
       .then((response: any) => {
         return Promise.resolve(response)
       })

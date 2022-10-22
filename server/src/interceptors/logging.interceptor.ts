@@ -57,7 +57,7 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     const decoded = await this.authService.validate_token({
       token: token,
     })
-    const account = await this.acccountService.detail(decoded.account.uid)
+    const account = await this.acccountService.detail(decoded.account.id)
 
     return next.handle().pipe(
       map(async (response) => {
@@ -75,7 +75,7 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
         const SLO_tracing_id = `SLO_${curr_date}_${SLO_id.toString()}`
 
         const newLogActivityRepo = new CoreLogActivityModel({
-          account: decoded.account.uid,
+          account: decoded.account.id,
           table_target: response.table_target,
           table_identifier:
             parseInt(response.transaction_id) > 0

@@ -51,7 +51,7 @@
                   v-model="formData.authority"
                   :options="authorityData"
                   optionLabel="name"
-                  optionValue="uid"
+                  optionValue="id"
                   placeholder="Select authority"
                 />
               </div>
@@ -61,10 +61,6 @@
               >
                 <span class="material-icons">fact_check</span> Apply from authority
               </Button>
-              <!-- <Button @click="accountEdit(slotProps.data.uid)"
-                class="button button-info button-sm button-raised">
-                <span class="material-icons">fact_check</span> Apply from authority
-              </Button> -->
             </div>
             <div class="col-12">
               <h4>Permission List</h4>
@@ -218,7 +214,7 @@ export default {
     return {
       displayEditorImage: false,
       formData: {
-        uid: '',
+        id: 0,
         email: '',
         authority: '',
         first_name: '',
@@ -272,21 +268,21 @@ export default {
     accountDetail: {
       handler(getDetail) {
         if (getDetail) {
-          if (getDetail.account.uid !== undefined) {
+          if (getDetail.account.id !== undefined) {
             this.allowSave = true
           } else {
             this.allowSave = false
           }
 
-          this.formData.uid = getDetail.account.uid
+          this.formData.id = getDetail.account.id
           this.formData.email = getDetail.account.email
-          this.formData.authority = getDetail.account.authority.uid
+          this.formData.authority = getDetail.account.authority.id
           this.formData.first_name = getDetail.account.first_name
           this.formData.last_name = getDetail.account.last_name
 
           this.setImageData(
             `${process.env.VUE_APP_APIGATEWAY}avatar/${
-              getDetail.account.uid
+              getDetail.account.id
             }.png?d=${Date.now()}`
           )
 
@@ -317,7 +313,7 @@ export default {
     // this.$store.dispatch('accountModule/fetchMenu')
     await this.$store.dispatch(
       'accountModule/fetchAccountDetail',
-      this.$route.query.uid
+      this.$route.query.id
     )
     await this.$store.dispatch('accountModule/fetchMenuTree')
     await this.$store.dispatch('accountModule/fetchAuthority')
@@ -348,7 +344,7 @@ export default {
             // // Update Access and Permission if exists
             for (const a in this.selectedMenu) {
               this.updateAccess({
-                account: this.$route.query.uid,
+                account: this.$route.query.id,
                 menu: this.selectedMenu[a],
               }).then((response) => {
                 responseAccess.push(response)
@@ -357,7 +353,7 @@ export default {
 
             for (const a in this.selectedPerm) {
               this.updatePermission({
-                account: this.$route.query.uid,
+                account: this.$route.query.id,
                 permission: this.selectedPerm[a],
               }).then((response) => {
                 responsePermission.push(response)

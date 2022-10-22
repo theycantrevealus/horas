@@ -18,13 +18,13 @@ export class AccountPrivilegesModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => AccountModel, (account) => account.uid)
+  @ManyToOne(() => AccountModel, (account) => account.id)
   account: AccountModel
 
   @ManyToOne(() => CoreMenuModel, (menu) => menu.id)
   menu: CoreMenuModel
 
-  @ManyToOne(() => AccountModel, (account) => account.uid)
+  @ManyToOne(() => AccountModel, (account) => account.id)
   granted_by: AccountModel
 
   @CreateDateColumn(properties.created_at)

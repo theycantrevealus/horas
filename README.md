@@ -15,8 +15,6 @@
   </p>
 </div>
 
-
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -43,43 +41,41 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 HORAS is an open source Hospital Information System. It was created for helping hospital as an assistant to run business easily, help to make business or medical decisions by datas, faster department integity, universal business core.
 
 Here's why:
-* Humanity. Helping hospital faster to save lives
-* Minimize unnecessary expense leakage in order to maximize health services
-* A kind of expensive paid application that makes it difficult for small scale hospitals to run faster
+
+- Humanity. Helping hospital faster to save lives
+- Minimize unnecessary expense leakage in order to maximize health services
+- A kind of expensive paid application that makes it difficult for small scale hospitals to run faster
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 ### Built With
 
 Built using these awesome framework
 
-* [Nest.js](https://nestjs.com/)
-* [Vue.js](https://vuejs.org/)
+- [Nest.js](https://nestjs.com/)
+- [Vue.js](https://vuejs.org/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
+
 Bismillah aja...
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 ### API Service
-* Create <b>.env</b> file from <b>.env.example</b> format and adjust with your local setting
-* Run api service
+
+- Create <b>.env</b> file from <b>.env.example</b> format and adjust with your local setting
+- Run api service
   ```sh
   npm run start
   ```
@@ -87,9 +83,7 @@ Bismillah aja...
   ```sh
   npm run start:dev
   ```
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
+  <p align="right">(<a href="#top">back to top</a>)</p>
 
 ### Installation
 
@@ -108,9 +102,8 @@ _Below is an example of how you can instruct your audience on installing and set
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- USAGE EXAMPLES -->
+
 ## Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
@@ -119,9 +112,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- ROADMAP -->
+
 ## Roadmap
 
 - [x] Add Changelog
@@ -129,16 +121,15 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Add Additional Templates w/ Examples
 - [ ] Add "components" document to easily copy & paste sections of the readme
 - [ ] Multi-language Support
-    - [ ] English
-    - [ ] Indonesia
+  - [ ] English
+  - [ ] Indonesia
 
 See the [open issues](https://github.com/theycantrevealus/horas/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated (God Bless Your Kind Heart)**.
@@ -153,11 +144,24 @@ Don't forget to give the project a star! Thanks again!
 5. Open a Pull Request
 
 Make sure to write properly test and run it on locally to keep commits clean on remote repository
+
+### Contributing Format
+
+This project using following format as committing message. If any suggestion of type, feel free to suggest it
+
+✨ feat: Add a new feature to the codebase (MINOR in semantic versioning).<br />
+🔧 fix: Fix a bug (equivalent to a PATCH in Semantic Versioning).<br />
+📑 docs: Documentation changes.<br />
+👑 style: Code style change (semicolon, indentation...).<br />
+👓 refactor: Refactor code without changing public API.<br />
+🚀 perf: Update code performances.<br />
+🔎 test: Add test to an existing feature.<br />
+📦 chore: Update something without impacting the user (ex: bump a dependency in package.json).<br />
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- STRUCTURE -->
+
 ## Project Structure
 
 <b>HORAS</b> contains 2 main project directory (api and app). You need to run npm start/serve on each folder to run it.
@@ -166,44 +170,39 @@ API default run on port 3000. You can access Open API at `<hostname>:3000/api`
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the APACHE 2.0 License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- CONTACT -->
+
 ## Contact
 
-Hendry Tanaka - [@takashitanaka_](https://twitter.com/takashitanaka_) - theycantrevealus@gmail.com
+Hendry Tanaka - [@takashitanaka\_](https://twitter.com/takashitanaka_) - theycantrevealus@gmail.com
 
 Project Link: [https://github.com/theycantrevealus/horas](https://github.com/theycantrevealus/horas)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- ACKNOWLEDGMENTS -->
+
 ## Acknowledgments
 
 Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
+- [Choose an Open Source License](https://choosealicense.com)
+- [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
+- [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
+- [Malven's Grid Cheatsheet](https://grid.malven.co/)
+- [Img Shields](https://shields.io)
+- [GitHub Pages](https://pages.github.com)
+- [Font Awesome](https://fontawesome.com)
+- [React Icons](https://react-icons.github.io/react-icons/search)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- MARKDOWN LINKS & IMAGES -->

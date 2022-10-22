@@ -39,7 +39,7 @@ export default {
   },
 
   async fetchAccountActivity({ commit }, param: any) {
-    AccountService.getAccountActivity(param.uid, param.from, param.to).then(
+    AccountService.getAccountActivity(param.id, param.from, param.to).then(
       (response: any) => {
         const data = response.data
         // commit(types.ACCOUNT_ACTIVITY, data)
@@ -47,8 +47,8 @@ export default {
     )
   },
 
-  async fetchAccountDetail({ commit }, uid) {
-    AccountService.getAccountDetail(uid).then((response: any) => {
+  async fetchAccountDetail({ commit }, id) {
+    AccountService.getAccountDetail(id).then((response: any) => {
       const data = response.data
       commit(types.ACCOUNT_DETAIL, data)
     })

@@ -54,7 +54,7 @@ const moduleRoute = [
           ),
       },
       {
-        path: 'edit/:uid',
+        path: 'edit/:id',
         name: 'Master ItemEdit',
         meta: {
           pageTitle: 'Master Item Edit',

@@ -24,6 +24,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
+import { CoreMenuDTOEdit } from './dtos/menu.edit'
 import { MenuService } from './menu.service'
 
 @Controller({ path: 'menu', version: '1' })
@@ -113,7 +114,7 @@ export class MenuController {
     name: 'id',
   })
   @Put(':id/edit')
-  async edit(@Body() data: CoreMenuModel, @Param() param) {
+  async edit(@Body() data: CoreMenuDTOEdit, @Param() param) {
     return await this.menuService.edit(data, param.id)
   }
 

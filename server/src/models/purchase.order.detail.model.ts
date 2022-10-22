@@ -24,8 +24,8 @@ export class PurchaseOrderDetailModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => PurchaseOrderModel, (foreign) => foreign.uid)
-  purchase_order: string
+  @ManyToOne(() => PurchaseOrderModel, (foreign) => foreign.id)
+  purchase_order: number
 
   @ApiProperty({
     example: '',
@@ -33,8 +33,8 @@ export class PurchaseOrderDetailModel {
     description: 'Item to purchase',
   })
   @ValidateNested()
-  @ManyToOne(() => MasterItemModel, (foreign) => foreign.uid)
-  item: string
+  @ManyToOne(() => MasterItemModel, (foreign) => foreign.id)
+  item: MasterItemModel
 
   @ApiProperty({
     example: 10,
@@ -55,8 +55,8 @@ export class PurchaseOrderDetailModel {
     description: 'Item unit',
   })
   @ValidateNested()
-  @ManyToOne(() => MasterItemUnitModel, (foreign) => foreign.uid)
-  unit: string
+  @ManyToOne(() => MasterItemUnitModel, (foreign) => foreign.id)
+  unit: MasterItemUnitModel
 
   @Column('numeric', {
     precision: 7,
@@ -128,8 +128,8 @@ export class PurchaseOrderDetailModel {
     description: 'Account who create purchase order',
   })
   @ValidateNested()
-  @ManyToOne(() => AccountModel, (foreign) => foreign.uid)
-  created_by: string
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

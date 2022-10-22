@@ -18,13 +18,13 @@ export class AccountPermissionModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => AccountModel, (account) => account.uid)
+  @ManyToOne(() => AccountModel, (account) => account.id)
   account: AccountModel
 
   @ManyToOne(() => CoreMenuPermissionModel, (perm) => perm.id)
   permission: CoreMenuPermissionModel
 
-  @ManyToOne(() => AccountModel, (account) => account.uid)
+  @ManyToOne(() => AccountModel, (account) => account.id)
   granted_by: AccountModel
 
   @CreateDateColumn(properties.created_at)

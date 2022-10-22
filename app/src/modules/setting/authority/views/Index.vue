@@ -37,14 +37,14 @@
                   <Button
                     v-if="permission.btnAccountAuthorityEdit !== undefined"
                     class="button button-info button-sm button-raised"
-                    @click="accountAuthorityEdit(slotProps.data.uid)"
+                    @click="accountAuthorityEdit(slotProps.data.id)"
                   >
                     <span class="material-icons">edit</span> Edit
                   </Button>
                   <Button
                     v-if="permission.btnAccountAuthorityDelete !== undefined"
                     class="button button-danger button-sm button-raised"
-                    @click="accountAuthorityDelete(slotProps.data.uid)"
+                    @click="accountAuthorityDelete(slotProps.data.id)"
                   >
                     <span class="material-icons">delete</span>
                   </Button>
@@ -164,8 +164,8 @@ export default {
         this.lazyParams
       )
     },
-    accountAuthorityEdit(uid) {
-      this.$router.push(`/authority/edit/:${uid}`)
+    accountAuthorityEdit(id) {
+      this.$router.push(`/authority/edit/:${id}`)
     },
   },
 }

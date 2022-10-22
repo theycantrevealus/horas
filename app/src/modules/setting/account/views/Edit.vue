@@ -1,12 +1,20 @@
 <template>
   <div class="grid">
     <div class="col-12">
-      <Card>
-        <template #title>Edit Account</template>
+      <Card class="slim">
         <template #content>
+          <Panel
+            header="Account Management"
+            :toggleable="false"
+          >
+            <template #icons>
+              <Button class="p-button-text p-button-info p-button-rounded p-button-raised button-sm"><span class="material-icons">help</span>
+                Info</Button>
+            </template>
+          </Panel>
           <TabView>
             <TabPanel header="Main Info">
-              <div class="p-grid">
+              <div class="grid">
                 <div class="col-4">
                   <div class="profile-display">
                     <img :src="formData.image" />
@@ -53,7 +61,7 @@
                       v-model="formData.authority"
                       :options="authorityData"
                       optionLabel="name"
-                      optionValue="uid"
+                      optionValue="id"
                       placeholder="Select authority"
                     />
                   </div>
@@ -263,6 +271,7 @@
 </template>
 <script>
 import Card from 'primevue/card'
+import Panel from 'primevue/panel'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
 import Button from 'primevue/button'
@@ -284,6 +293,7 @@ export default {
   name: 'AccountEdit',
   components: {
     Card,
+    Panel,
     InputText,
     Button,
     Dropdown,
@@ -303,7 +313,7 @@ export default {
     return {
       displayEditorImage: false,
       formData: {
-        uid: '',
+        id: 0,
         email: '',
         authority: '',
         first_name: '',
@@ -391,15 +401,15 @@ export default {
     accountDetail: {
       handler(getDetail) {
         if (getDetail) {
-          if (getDetail.account.uid !== undefined) {
+          if (getDetail.account.id !== undefined) {
             this.allowSave = true
           } else {
             this.allowSave = false
           }
 
-          this.formData.uid = getDetail.account.uid
+          this.formData.id = getDetail.account.id
           this.formData.email = getDetail.account.email
-          this.formData.authority = getDetail.account.authority.uid
+          this.formData.authority = getDetail.account.authority.id
           this.formData.first_name = getDetail.account.first_name
           this.formData.last_name = getDetail.account.last_name
 
@@ -445,10 +455,10 @@ export default {
     this.allowSave = false
     await this.$store.dispatch(
       'accountModule/fetchAccountDetail',
-      this.$route.query.uid
+      this.$route.query.id
     )
     await this.$store.dispatch('accountModule/fetchAccountActivity', {
-      uid: this.$route.query.uid,
+      id: this.$route.query.id,
       from: '123',
       to: '333',
     })
@@ -498,11 +508,17 @@ export default {
             this.formData.selectedPage = this.selectedMenu
             for (const a in this.selectedParent) {
               const parsedIDParent = a.split('_')
-              this.formData.selectedParent.push(
-                parseInt(parsedIDParent[parsedIDParent.length - 1])
+              const parentID = parseInt(
+                parsedIDParent[parsedIDParent.length - 1]
               )
+              if (this.formData.selectedPage.indexOf(parentID) < 0) {
+                this.formData.selectedPage.push(parentID)
+                this.formData.selectedParent.push(parentID)
+              }
             }
+
             this.formData.selectedPermission = this.selectedPerm
+
             this.updateAccount(this.formData).then(async (response) => {
               if (response.status === 200) {
                 // await this.$store.dispatch(

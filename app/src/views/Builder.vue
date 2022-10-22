@@ -1,24 +1,35 @@
 <template>
-  <div class="main-container">
-    <div class="topbar">
+  <div :class="(getThemeMode ? 'dark' : '') + ' main-container'">
+    <div :class="(getMenuModeStatus ? 'open' : '') + ' topbar'">
       <TopPanelBar />
     </div>
-    <div class="sidepanel">
-      <div class="wrapper">
+    <div
+      :class="(getMenuModeStatus ? 'open' : '') + ' sidepanel'"
+      @mouseover="toogleMenuStatusOn"
+      @mouseleave="toogleMenuStatusOff"
+    >
+      <div class="wrapper logo-container">
         <img
-          class="panelLogo"
+          v-if="getMenuModeStatus"
+          class="panel-logo"
           :src="require('../assets/logo-white.png')"
           alt="horas"
         />
+        <img
+          v-if="!getMenuModeStatus"
+          class="panel-logo2"
+          :src="require('../assets/icon.png')"
+          alt="horas"
+        />
       </div>
-      <div class="wrapper">
+      <div class="wrapper sidepanel-menu">
         <SidePanelBar />
       </div>
       <!-- <perfect-scrollbar>
         
       </perfect-scrollbar> -->
     </div>
-    <div class="loadpanel">
+    <div :class="(getMenuModeStatus ? 'open' : '') + ' loadpanel'">
       <div class="wrapper">
         <div class="breadcrumb-container">
           <BreadCrumb
@@ -50,6 +61,7 @@ import '@/assets/sakai/layout.scss'
 import TopPanelBar from '@/components/TopPanelBar'
 import SidePanelBar from '@/components/SidePanelBar'
 import BreadCrumb from '@/components/BreadCrumb'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'Builder',
@@ -68,9 +80,16 @@ export default {
       menu: [],
       breadcrumb: [],
       pageName: '',
+      darkMode: false,
     }
   },
   computed: {
+    ...mapState(['menuMode', 'themeModeDark']),
+    ...mapGetters({
+      getMenuModeStatus: 'getMenuModeStatus',
+      getThemeMode: 'getThemeMode',
+      geti18n: 'mCorei18n/getData',
+    }),
     containerClass() {
       return [
         'layout-wrapper',
@@ -100,9 +119,52 @@ export default {
       this.pageName = this.$route.meta.pageTitle
       this.$refs.scrollLoader.$el.scrollTop = 0
     },
+    getMenuModeStatus: {
+      handler(getData) {
+        //
+      },
+    },
+    geti18n: {
+      handler(getData) {
+        if (getData) {
+          getData.map((e) => {
+            const messageCompound = {}
+
+            const componentMessage = e.components
+            componentMessage.map((f) => {
+              if (!messageCompound[f.component]) {
+                messageCompound[f.component] = ''
+              }
+              messageCompound[f.component] = f.translation
+            })
+
+            this.$i18n.setLocaleMessage(
+              e.language_code.toLowerCase(),
+              messageCompound
+            )
+          })
+        }
+      },
+    },
+    getThemeMode: {
+      handler(getData) {
+        if (this.themeModeDark) {
+          document.querySelector('body').classList.add('dark')
+        } else {
+          document.querySelector('body').classList.remove('dark')
+        }
+      },
+    },
   },
   mounted() {
+    this.darkMode = this.themeModeDark
     this.updatePageInfo()
+    if (this.darkMode) {
+      document.querySelector('body').classList.add('dark')
+    } else {
+      document.querySelector('body').classList.remove('dark')
+    }
+    this.loadLanguage()
   },
   beforeUpdate() {
     if (this.mobileMenuActive) {
@@ -112,6 +174,11 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      toogleMenuStatusOn: 'toggleMenuOn',
+      toogleMenuStatusOff: 'toggleMenuOff',
+      loadLanguage: 'mCorei18n/get_all_i18n',
+    }),
     updatePageInfo() {
       this.breadcrumb = this.$route.meta.breadcrumb
       this.pageName = this.$route.name

@@ -14,7 +14,7 @@ export class CoreLogActivityModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => AccountModel, (account) => account.uid)
+  @ManyToOne(() => AccountModel, (account) => account.id)
   account: AccountModel
 
   @ManyToOne(() => CoreLogLoginModel, (login) => login.id)

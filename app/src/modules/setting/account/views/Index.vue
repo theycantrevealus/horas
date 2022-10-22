@@ -1,7 +1,7 @@
 <template>
   <div class="grid">
     <div class="col-12">
-      <Card>
+      <Card class="slim">
         <template #content>
           <Panel
             header="Account Management"
@@ -49,14 +49,14 @@
                     <Button
                       v-if="permission.btnAccountEdit !== undefined"
                       class="button p-button-success button-sm button-raised"
-                      @click="accountEdit(slotProps.data.uid)"
+                      @click="accountEdit(slotProps.data.id)"
                     >
                       <span class="material-icons">edit</span> Edit
                     </Button>
                     <Button
                       v-if="permission.btnAccountDelete !== undefined"
                       class="button button-danger button-sm button-raised"
-                      @click="accountDelete($event, slotProps.data.uid)"
+                      @click="accountDelete($event, slotProps.data.id)"
                     >
                       <span class="material-icons">delete</span>
                     </Button>
@@ -216,11 +216,11 @@ export default {
       // this.lazyParams.filters = this.filters
       this.loadLazyData()
     },
-    accountEdit(uid) {
+    accountEdit(id) {
       this.$router.push({
-        path: `/account/edit/${uid}`,
+        path: `/account/edit/${id}`,
         query: {
-          uid: uid,
+          id: id,
         },
       })
     },

@@ -1,3 +1,4 @@
+import api from '@/util/api'
 import axios from 'axios'
 
 class CoreService {
@@ -18,10 +19,13 @@ class CoreService {
   }
 
   async menuEdit(id: number, menuData: any) {
-    return await axios
+    return await api({ requiresAuth: true })
       .put(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${id}/edit`, menuData)
       .then((response) => {
         return Promise.resolve(response)
+      })
+      .catch((e) => {
+        console.log(e)
       })
   }
 

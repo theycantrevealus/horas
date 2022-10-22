@@ -7,13 +7,30 @@ import { TAccountLogin } from '@/model/Account'
 import AccountService from '@/service/account'
 import CoreService from '@/service/core/sidemenu'
 import { coreMenu } from '@/store/core/menu'
+import getBrowserLocale from '@/util/i18n/browser.config'
+import { corei18n } from './core/i18n'
 
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
+    menuMode: false,
+    themeModeDark: false,
     loading: 0,
+    language: {},
+    languageMeta: {
+      en: {
+        code: 'us',
+        lang: 'en',
+        name: 'United States',
+      },
+      id: {
+        code: 'id',
+        lang: 'id',
+        name: 'Indonesia',
+      },
+    },
     credential: {
-      uid: '',
+      id: 0,
       first_name: '',
       last_name: '',
       permission: {},
@@ -34,11 +51,20 @@ const store = createStore({
     }),
   ],
   actions: {
+    toggleMenuOn: async ({ commit }) => {
+      commit('mutateSidePanelToggleOn')
+    },
+    toggleMenuOff: async ({ commit }) => {
+      commit('mutateSidePanelToggleOff')
+    },
+    toggleDarkMode: async ({ commit }) => {
+      commit('mutateThemeDark')
+    },
     coreLogin: async ({ commit }, accountRequestData: TAccountLogin) => {
       return await AccountService.login(accountRequestData).then(
         (response: any) => {
           response = response.data
-          if (response.status === 200) {
+          if (response.status === 201 || response.status === 200) {
             commit('mutateUpdateToken', response.token)
             commit('mutateLoginSuccess', response.account)
           }
@@ -63,6 +89,12 @@ const store = createStore({
     coreLogout: ({ commit }: { commit: Function }) => {
       commit('mutateClearSession')
     },
+    setLanguange: ({ commit }) => {
+      commit('mutateSetBrowserLanguage', true)
+    },
+    changeLanguage: ({ commit }, data) => {
+      commit('mutateChangeLanguage', data)
+    },
   },
   getters: {
     getToken: (state) => {
@@ -74,8 +106,35 @@ const store = createStore({
     getSideMenu: (state) => {
       return state.sidemenu
     },
+    getBrowserLanguage: (state) => {
+      return state.language
+    },
+    getMenuModeStatus: (state) => {
+      return state.menuMode
+    },
+    getThemeMode: (state) => {
+      return state.themeModeDark
+    },
   },
   mutations: {
+    mutateSidePanelToggleOn: (state: any) => {
+      state.menuMode = true
+    },
+    mutateSidePanelToggleOff: (state: any) => {
+      state.menuMode = false
+    },
+    mutateThemeDark: (state: any) => {
+      state.themeModeDark = !state.themeModeDark
+    },
+    mutateSetBrowserLanguage: (state: any, countryCodeOnly = false) => {
+      const selectedLanguage: string = getBrowserLocale({
+        countryCodeOnly: countryCodeOnly,
+      })
+      state.language = state.languageMeta[selectedLanguage]
+    },
+    mutateChangeLanguage: (state: any, language) => {
+      state.language = state.languageMeta[language.lang]
+    },
     mutateUpdateAccess: (state: any, data) => {
       const grantedPerm = data.grantedPerm
       const buildPermission = {}
@@ -112,7 +171,7 @@ const store = createStore({
       state.sidemenu = menu
     },
     mutateLoginSuccess(state: any, credentialData) {
-      state.credential.uid = credentialData.uid
+      state.credential.id = credentialData.id
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
       state.credential.profile_photo = credentialData.image
@@ -150,6 +209,7 @@ const store = createStore({
   modules: {
     mAccount: account,
     mCoreMenu: coreMenu,
+    mCorei18n: corei18n,
   },
 })
 

@@ -54,14 +54,14 @@
                 <Button
                   v-if="permission.btnEditItem !== undefined"
                   class="button button-info button-sm button-raised"
-                  @click="itemEditForm(slotProps.data.uid)"
+                  @click="itemEditForm(slotProps.data.id)"
                 >
                   <span class="material-icons">edit</span>
                 </Button>
                 <Button
                   v-if="permission.btnDeleteItem !== undefined"
                   class="button button-danger button-sm button-raised"
-                  @click="itemDelete($event, slotProps.data.uid)"
+                  @click="itemDelete($event, slotProps.data.id)"
                 >
                   <span class="material-icons">delete</span>
                 </Button>
@@ -181,10 +181,10 @@ export default {
     itemAddForm() {
       this.$router.push('/master/item/add')
     },
-    itemEditForm(uid) {
-      this.$router.push(`/master/item/edit/${uid}`)
+    itemEditForm(id) {
+      this.$router.push(`/master/item/edit/${id}`)
     },
-    itemDelete(event, uid) {
+    itemDelete(event, id) {
       this.$confirm.require({
         target: event.currentTarget,
         message: 'Are you sure to delete this item?',
@@ -194,11 +194,6 @@ export default {
         rejectLabel: 'Cancel',
         accept: () => {
           this.loading = true
-          //   UserService.deleteUser(uid).then(data => {
-          //     if (data > 0) {
-          //       this.loadLazyData()
-          //     }
-          //   })
         },
         reject: () => {
           // Reject

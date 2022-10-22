@@ -1,13 +1,13 @@
 {
   "name": "server",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Horas back end server",
+  "author": "Hendry Tanaka",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build --webpack --webpackPath webpack.config.js",
+    "build": "npm run prebuild && nest build --webpack --webpackPath webpack.config.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "configorm": "(test -e ormconfig.json && rm ormconfig.json || echo file not found || :) && ts-node -r tsconfig-paths/register src/configs/orm.config.ts",
     "start": "nest start",
@@ -56,6 +56,7 @@
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "fs": "^0.0.1-security",
     "i": "^0.3.7",
+    "moment-timezone": "^0.5.37",
     "nest-commander": "^3.1.0",
     "nestjs-command": "^3.1.2",
     "passport": "^0.6.0",
@@ -71,6 +72,7 @@
     "typeorm-extension": "^2.1.10",
     "typeorm-seeding": "^1.6.1",
     "uuid": "^9.0.0",
+    "vue-i18n": "^9.2.2",
     "yargs": "^17.5.1"
   },
   "devDependencies": {

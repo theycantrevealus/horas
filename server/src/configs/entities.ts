@@ -2,6 +2,8 @@ import { AccountAuthorityModel } from '@/models/account.authority.model'
 import { AccountModel } from '@/models/account.model'
 import { AccountPermissionModel } from '@/models/account.permission.model'
 import { AccountPrivilegesModel } from '@/models/account.privileges.model'
+import { Corei18nComponentModel } from '@/models/core.i18n.compontent.model'
+import { Corei18nModel } from '@/models/core.i18n.model'
 import { CoreLogActivityModel } from '@/models/core.logging.activity.model'
 import { CoreLogLoginModel } from '@/models/core.logging.login.model'
 import { CoreMenuGroupModel } from '@/models/core.menu.group.model'
@@ -48,6 +50,8 @@ const entities = [
   CoreMenuModel,
   CoreMenuGroupModel,
   CoreMenuPermissionModel,
+  Corei18nModel,
+  Corei18nComponentModel,
 ]
 
 export { AccountModel }

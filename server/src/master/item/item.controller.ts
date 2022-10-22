@@ -16,10 +16,6 @@ import {
 import { ApiTags, ApiBearerAuth, ApiParam, ApiOperation } from '@nestjs/swagger'
 import { AccountService } from '@/account/account.service'
 import { isJsonString } from '@utilities/mod.lib'
-import {
-  AccountLoginDTO,
-  AccountLoginResponseDTO,
-} from '@/account/dtos/account.login.dto'
 import { JwtAuthGuard } from '@/guards/jwt.guard'
 import { Authorization } from '@/decorators/auth.decorator'
 import { LoggingInterceptor } from '@/interceptors/logging.interceptor'
@@ -84,11 +80,11 @@ export class MasterItemController {
   @ApiBearerAuth('JWT')
   @Authorization(true)
   @ApiParam({
-    name: 'uid',
+    name: 'id',
   })
-  @Get(':uid/detail')
+  @Get(':id/detail')
   async detail(@Param() param) {
-    return await this.masterItemService.detail(param.uid)
+    return await this.masterItemService.detail(param.id)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -96,11 +92,11 @@ export class MasterItemController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiParam({
-    name: 'uid',
+    name: 'id',
   })
-  @Delete(':uid/delete')
+  @Delete(':id/delete')
   async delete_soft(@Param() param) {
-    return await this.masterItemService.delete_soft(param.uid)
+    return await this.masterItemService.delete_soft(param.id)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -117,13 +113,13 @@ export class MasterItemController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiParam({
-    name: 'uid',
+    name: 'id',
   })
-  @Put(':uid/edit')
+  @Put(':id/edit')
   async edit(
     @Body() data: MasterItemModel,
     @Param() param
   ): Promise<GlobalResponse> {
-    return await this.masterItemService.edit(data, param.uid)
+    return await this.masterItemService.edit(data, param.id)
   }
 }

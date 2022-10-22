@@ -12,13 +12,12 @@ import {
 import { IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { properties } from '@/utilities/models/column'
+import { AccountModel } from './account.model'
 
 @Entity({ name: 'master_item_unit' })
 export class MasterItemUnitModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @ApiProperty({
     example: 'TAB',
@@ -52,6 +51,15 @@ export class MasterItemUnitModel {
   @IsString()
   @Column(properties.remark)
   remark: string
+
+  @ApiProperty({
+    example: '',
+    type: AccountModel,
+    description: 'Account who create purchase order',
+  })
+  @ValidateNested()
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

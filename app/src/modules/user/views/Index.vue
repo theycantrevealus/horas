@@ -6,55 +6,59 @@
           <template #left>
             <Button
               v-if="permission.btnAddUser !== undefined"
-              @click="userAddForm"
               label="New"
               icon="pi pi-plus"
               class="mr-2 button-rounded"
+              @click="userAddForm"
             />
           </template>
 
           <template #right>
-            <Button label="Upload" icon="pi pi-upload" class="button-success button-rounded" />
+            <Button
+              label="Upload"
+              icon="pi pi-upload"
+              class="button-success button-rounded"
+            />
           </template>
         </Toolbar>
       </template>
       <template #content>
         <DataTable
+          ref="dt"
+          v-model:filters="filters"
           :value="users"
           :lazy="true"
           :paginator="true"
           :rows="20"
-          v-model:filters="filters"
-          ref="dt"
           :totalRecords="totalRecords"
           :loading="loading"
-          @page="onPage($event)"
-          @sort="onSort($event)"
-          @filter="onFilter($event)"
           filterDisplay="row"
           :globalFilterFields="['first_name', 'last_name', 'email']"
           responsiveLayout="scroll"
+          @page="onPage($event)"
+          @sort="onSort($event)"
+          @filter="onFilter($event)"
         >
           <Column header="Action">
             <template #body="slotProps">
               <span class="buttonset wrap_content">
                 <Button
                   v-if="permission.btnEditUser !== undefined"
-                  @click="userEditForm(slotProps.data.uid)"
                   class="button button-info button-sm button-raised"
+                  @click="userEditForm(slotProps.data.id)"
                 >
                   <span class="material-icons">edit</span>
                 </Button>
                 <Button
-                  @click="userResetPass(slotProps.data.uid)"
                   class="button button-warning button-sm button-raised"
+                  @click="userResetPass(slotProps.data.id)"
                 >
                   <span class="material-icons">refresh</span>
                 </Button>
                 <Button
                   v-if="permission.btnDeleteUser !== undefined"
-                  @click="userDelete($event, slotProps.data.uid)"
                   class="button button-danger button-sm button-raised"
+                  @click="userDelete($event, slotProps.data.id)"
                 >
                   <span class="material-icons">delete</span>
                 </Button>
@@ -65,54 +69,54 @@
             <template #body="slotProps">{{ slotProps.data.autonum }}</template>
           </Column>
           <Column
+            ref="first_name"
             field="first_name"
             header="First Name"
             filterMatchMode="startsWith"
-            ref="first_name"
             :sortable="true"
           >
             <template #filter="{ filterModel, filterCallback }">
               <InputText
-                type="text"
                 v-model="filterModel.value"
-                @keydown.enter="filterCallback()"
+                type="text"
                 class="column-filter"
                 placeholder="Search by first name"
+                @keydown.enter="filterCallback()"
               />
             </template>
           </Column>
           <Column
+            ref="last_name"
             field="last_name"
             header="Last Name"
             filterField="last_name"
             filterMatchMode="contains"
-            ref="last_name"
             :sortable="true"
           >
             <template #filter="{ filterModel, filterCallback }">
               <InputText
-                type="text"
                 v-model="filterModel.value"
-                @keydown.enter="filterCallback()"
+                type="text"
                 class="column-filter"
                 placeholder="Search by last name"
+                @keydown.enter="filterCallback()"
               />
             </template>
           </Column>
           <Column
+            ref="email"
             field="email"
             header="Email"
             filterMatchMode="contains"
-            ref="email"
             :sortable="true"
           >
             <template #filter="{ filterModel, filterCallback }">
               <InputText
-                type="text"
                 v-model="filterModel.value"
-                @keydown.enter="filterCallback()"
+                type="text"
                 class="column-filter"
                 placeholder="Search by email"
+                @keydown.enter="filterCallback()"
               />
             </template>
             <template #body="slotProps">
@@ -123,14 +127,14 @@
             </template>
           </Column>
           <Column
+            ref="created_at"
             field="created_at"
             header="Join Date"
-            ref="created_at"
             :sortable="true"
             class="wrap_content text-right"
           >
             <template #body="slotProps">
-              <b>{{ this.formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+              <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
             </template>
           </Column>
         </DataTable>
@@ -154,14 +158,15 @@ import UserService from '../service'
 
 export default {
   components: {
-    DataTable, Column, InputText, Button, Card, Toolbar, ConfirmPopup
+    DataTable,
+    Column,
+    InputText,
+    Button,
+    Card,
+    Toolbar,
+    ConfirmPopup,
   },
-  computed: {
-    permission () {
-      return this.$store.state.credential.permission
-    }
-  },
-  data () {
+  data() {
     return {
       loading: false,
       totalRecords: 0,
@@ -169,36 +174,41 @@ export default {
       filters: {
         first_name: { value: '', matchMode: 'contains' },
         last_name: { value: '', matchMode: 'contains' },
-        email: { value: '', matchMode: 'contains' }
+        email: { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
       columns: [
         { field: 'first_name', header: 'First Name' },
         { field: 'last_name', header: 'Last Name' },
         { field: 'email', header: 'Email' },
-        { field: 'created_at', header: 'Join Date' }
-      ]
+        { field: 'created_at', header: 'Join Date' },
+      ],
     }
   },
-  mounted () {
+  computed: {
+    permission() {
+      return this.$store.state.credential.permission
+    },
+  },
+  mounted() {
     this.lazyParams = {
       first: 0,
       rows: this.$refs.dt.rows,
       sortField: null,
       sortOrder: null,
-      filters: this.filters
+      filters: this.filters,
     }
 
     this.loadLazyData()
   },
   methods: {
-    userAddForm () {
+    userAddForm() {
       this.$router.push('/user/add')
     },
-    userEditForm (uid) {
-      this.$router.push(`/user/edit/${uid}`)
+    userEditForm(id) {
+      this.$router.push(`/user/edit/${id}`)
     },
-    userDelete (event, uid) {
+    userDelete(event, uid) {
       this.$confirm.require({
         target: event.currentTarget,
         message: 'Are you sure to delete this user?',
@@ -208,7 +218,7 @@ export default {
         rejectLabel: 'Cancel',
         accept: () => {
           this.loading = true
-          UserService.deleteUser(uid).then(data => {
+          UserService.deleteUser(id).then((data) => {
             if (data > 0) {
               this.loadLazyData()
             }
@@ -216,34 +226,33 @@ export default {
         },
         reject: () => {
           // callback to execute when user rejects the action
-        }
+        },
       })
     },
-    formatDate (date, format) {
+    formatDate(date, format) {
       return DateManagement.formatDate(date, format)
     },
-    loadLazyData () {
+    loadLazyData() {
       this.loading = true
 
-      UserService.getList(this.lazyParams)
-        .then(data => {
-          this.users = data.response_data
-          this.totalRecords = data.totalRecords
-          this.loading = false
-        })
+      UserService.getList(this.lazyParams).then((data) => {
+        this.users = data.response_data
+        this.totalRecords = data.totalRecords
+        this.loading = false
+      })
     },
-    onPage (event) {
+    onPage(event) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onSort (event) {
+    onSort(event) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onFilter () {
+    onFilter() {
       this.lazyParams.filters = this.filters
       this.loadLazyData()
-    }
-  }
+    },
+  },
 }
 </script>

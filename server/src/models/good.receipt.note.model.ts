@@ -7,6 +7,7 @@ import {
   Column,
   Generated,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsDate, IsString, ValidateNested } from 'class-validator'
@@ -17,10 +18,8 @@ import { properties } from '@/utilities/models/column'
 
 @Entity({ name: 'good_receipt_note' })
 export class GoodReceiptNoteModel {
-  @PrimaryColumn()
-  @Generated('uuid')
-  @Column(properties.uid)
-  uid: string
+  @PrimaryGeneratedColumn('increment')
+  id: number
 
   @Column({
     nullable: false,
@@ -65,8 +64,8 @@ export class GoodReceiptNoteModel {
     description: 'Supplier who provide items',
   })
   @ValidateNested()
-  @ManyToOne(() => MasterSupplierModel, (foreign) => foreign.uid)
-  supplier: string
+  @ManyToOne(() => MasterSupplierModel, (foreign) => foreign.id)
+  supplier: MasterSupplierModel
 
   @ApiProperty({
     example: '',
@@ -75,8 +74,8 @@ export class GoodReceiptNoteModel {
     description: 'If item ordered by specific purchase order',
   })
   @ValidateNested()
-  @ManyToOne(() => PurchaseOrderModel, (foreign) => foreign.uid)
-  purchase_order: string
+  @ManyToOne(() => PurchaseOrderModel, (foreign) => foreign.id)
+  purchase_order: PurchaseOrderModel
 
   @ApiProperty({
     example: 'Just remark to describe something',
@@ -92,8 +91,8 @@ export class GoodReceiptNoteModel {
     description: 'Account who create purchase order',
   })
   @ValidateNested()
-  @ManyToOne(() => AccountModel, (foreign) => foreign.uid)
-  created_by: string
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @CreateDateColumn(properties.created_at)
   created_at: Date

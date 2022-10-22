@@ -10,15 +10,15 @@ import { AccountModel } from '@/models/account.model'
 import { GlobalResponse } from '@/utilities/dtos/global.response.dto'
 import { AccountPrivilegesModel } from '@/models/account.privileges.model'
 import { AccountPermissionModel } from '@/models/account.permission.model'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import { CoreLogLoginModel } from '@/models/core.logging.login.model'
+import { GrantAccessDTO } from './dtos/account.dto.grant.access'
+import { GrantPermissionDTO } from './dtos/account.dto.grant.permission'
 import {
   AccountLoginDTO,
   AccountLoginResponseDTO,
-} from '@/account/dtos/account.login.dto'
-import { CoreLogLoginModel } from '@/models/core.logging.login.model'
-import { GrantAccessDTO } from './dtos/account.grant.access.dto'
-import { GrantPermissionDTO } from './dtos/account.grant.permission.dto'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+} from './dtos/account.dto.login'
 
 @Injectable()
 export class AccountService {
@@ -54,60 +54,63 @@ export class AccountService {
       .setParameters({ email: account.email })
       .getOne()
       .then(async (accountResp) => {
-        const loginLog = this.coreLogLoginRepo.create({
-          log_meta: JSON.stringify(account),
-          account: accountResp,
-        })
+        if (accountResp && accountResp !== null) {
+          const loginLog = this.coreLogLoginRepo.create({
+            log_meta: JSON.stringify(account),
+            account: accountResp,
+          })
 
-        return await this.coreLogLoginRepo
-          .save(loginLog)
-          .then(async (logID) => {
-            const tokenSet = await this.authService.create_token({
-              login_id: logID.id,
-              account: accountResp,
-              uid: accountResp.uid,
-              email: accountResp.email,
-              first_name: accountResp.first_name,
-              last_name: accountResp.last_name,
+          return await this.coreLogLoginRepo
+            .save(loginLog)
+            .then(async (logID) => {
+              const tokenSet = await this.authService.create_token({
+                login_id: logID.id,
+                account: accountResp,
+                id: accountResp.id,
+                email: accountResp.email,
+                first_name: accountResp.first_name,
+                last_name: accountResp.last_name,
+              })
+              const grantedPageSet = []
+              const Page = await this.dataSource
+                .getRepository(AccountPrivilegesModel)
+                .createQueryBuilder('account_privileges')
+                .innerJoinAndSelect('account_privileges.menu', 'menu')
+                .where('account_privileges.account = :account', {
+                  account: accountResp.id,
+                })
+                .getMany()
+              for (const a in Page) {
+                grantedPageSet.push(Page[a].menu)
+              }
+              const grantedPermSet = []
+              const Permission = await this.accountPermission
+                .createQueryBuilder('account_permission')
+                .innerJoinAndSelect(
+                  'account_permission.permission',
+                  'menu_permission'
+                )
+                .where('account_permission.account = :account', {
+                  account: accountResp.id,
+                })
+                .getMany()
+              for (const a in Permission) {
+                grantedPermSet.push(Permission[a].permission)
+              }
+              loginResp.message = 'Logged In Successfully'
+              loginResp.account = accountResp
+              loginResp.account.grantedPerm = grantedPermSet
+              loginResp.account.grantedPage = grantedPageSet
+              loginResp.token = tokenSet.token
+              loginResp.status = HttpStatus.OK
+              return loginResp
             })
-            const grantedPageSet = []
-            const Page = await this.dataSource
-              .getRepository(AccountPrivilegesModel)
-              .createQueryBuilder('account_privileges')
-              .innerJoinAndSelect('account_privileges.menu', 'menu')
-              .where('account_privileges.account = :account', {
-                account: accountResp.uid,
-              })
-              .getMany()
-            for (const a in Page) {
-              grantedPageSet.push(Page[a].menu)
-            }
-            const grantedPermSet = []
-            const Permission = await this.accountPermission
-              .createQueryBuilder('account_permission')
-              .innerJoinAndSelect(
-                'account_permission.permission',
-                'menu_permission'
-              )
-              .where('account_permission.account = :account', {
-                account: accountResp.uid,
-              })
-              .getMany()
-            for (const a in Permission) {
-              grantedPermSet.push(Permission[a].permission)
-            }
-            loginResp.message = 'Logged In Successfully'
-            loginResp.account = accountResp
-            loginResp.account.grantedPerm = grantedPermSet
-            loginResp.account.grantedPage = grantedPageSet
-            loginResp.token = tokenSet.token
-            loginResp.status = HttpStatus.OK
-            return loginResp
-          })
-          .catch((err) => {
-            throw new Error(err.message)
-          })
-        return loginResp
+            .catch((e) => {
+              throw new Error(e.message)
+            })
+        } else {
+          throw new Error('Login failed')
+        }
       })
       .catch((e: Error) => {
         throw new Error(e.message)
@@ -120,8 +123,8 @@ export class AccountService {
       .createQueryBuilder('account')
       .where('deleted_at IS NULL')
       .orderBy('created_at', 'DESC')
-      .andWhere('uid = :uid')
-      .setParameters({ uid: account.uid })
+      .andWhere('id = :id')
+      .setParameters({ id: account.id })
       .getOne()
       .then(async (accountResp) => {
         const grantedPageSet = []
@@ -130,7 +133,7 @@ export class AccountService {
           .createQueryBuilder('account_privileges')
           .innerJoinAndSelect('account_privileges.menu', 'menu')
           .where('account_privileges.account = :account', {
-            account: accountResp.uid,
+            account: accountResp.id,
           })
           .getMany()
         for (const a in Page) {
@@ -144,7 +147,7 @@ export class AccountService {
             'menu_permission'
           )
           .where('account_permission.account = :account', {
-            account: accountResp.uid,
+            account: accountResp.id,
           })
           .getMany()
         for (const a in Permission) {
@@ -161,7 +164,7 @@ export class AccountService {
       })
   }
 
-  async detail(uid: string) {
+  async detail(id: number) {
     const data = {
       account: {},
       access: [],
@@ -170,13 +173,13 @@ export class AccountService {
     data.account = await this.accountRepo
       .createQueryBuilder('account')
       .innerJoinAndSelect('account.authority', 'authority')
-      .where('account.uid = :uid', { uid })
+      .where('account.id = :id', { id })
       .getOne()
 
     const Page = await this.accountPrivileges
       .createQueryBuilder('account_privileges')
       .innerJoinAndSelect('account_privileges.menu', 'menu')
-      .where('account_privileges.account = :account', { account: uid })
+      .where('account_privileges.account = :account', { account: id })
       .getMany()
     for (const a in Page) {
       data.access.push(Page[a].menu)
@@ -185,7 +188,7 @@ export class AccountService {
     const Permission = await this.accountPermission
       .createQueryBuilder('account_permission')
       .innerJoinAndSelect('account_permission.permission', 'menu_permission')
-      .where('account_permission.account = :account', { account: uid })
+      .where('account_permission.account = :account', { account: id })
       .getMany()
     for (const a in Permission) {
       data.permission.push(Permission[a].permission)
@@ -194,11 +197,11 @@ export class AccountService {
     return data
   }
 
-  async deleteSoft(uid: string): Promise<GlobalResponse> {
+  async deleteSoft(id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
-    const oldMeta = await this.detail(uid)
+    const oldMeta = await this.detail(id)
     return await this.accountRepo
-      .softDelete({ uid })
+      .softDelete({ id })
       .then(async (returning) => {
         response.message = 'Account deleted successfully'
         response.statusCode = HttpStatus.OK
@@ -210,113 +213,91 @@ export class AccountService {
       })
   }
 
-  async profileImageBuffer(uid: string) {
-    return readFileSync(join(process.cwd(), `./avatar/${uid}.png`))
+  async profileImageBuffer(id: string) {
+    return readFileSync(join(process.cwd(), `./avatar/${id}.png`))
   }
 
-  async edit(account, uid: string): Promise<GlobalResponse> {
+  async edit(account, id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
     return await this.accountRepo
-      .update(uid, {
+      .update(id, {
         email: account.email,
         first_name: account.first_name,
         last_name: account.last_name,
         authority: account.authority,
       })
       .then(async (returning) => {
-        const old = await this.accountRepo
+        return await this.accountRepo
           .createQueryBuilder('account')
           .innerJoinAndSelect('account.authority', 'authority')
-          .where('account.uid = :uid', { uid })
+          .where('account.id = :id', { id })
           .getOne()
+          .then(async (old) => {
+            if (account.password !== undefined) {
+              const saltOrRounds = 10
+              const password = account.password
+              account.password = await bcrypt.hash(password, saltOrRounds)
+            }
 
-        if (account.password !== undefined) {
-          const saltOrRounds = 10
-          const password = account.password
-          account.password = await bcrypt.hash(password, saltOrRounds)
-        }
+            if (account.image_edit) {
+              delete account.image_edit
+              const logger = this.logger
 
-        if (account.image_edit) {
-          delete account.image_edit
-          const logger = this.logger
+              const buff = Buffer.from(
+                await account.image.replace(/^data:image\/\w+;base64,/, ''),
+                'base64'
+              )
+              const fs = require('fs')
+              const path = `avatar/${id}.png`
+              if (!fs.existsSync(path)) {
+                fs.mkdirSync('avatar', { recursive: true })
+              }
 
-          const buff = Buffer.from(
-            await account.image.replace(/^data:image\/\w+;base64,/, ''),
-            'base64'
-          )
-          const fs = require('fs')
-          const path = `avatar/${uid}.png`
-          if (!fs.existsSync(path)) {
-            fs.mkdirSync('avatar', { recursive: true })
-          }
+              fs.writeFile(path, buff, function (err) {
+                // logger.log(account.image)
+              })
 
-          fs.writeFile(path, buff, function (err) {
-            // logger.log(account.image)
+              delete account.image
+            }
+
+            await this.dataSource
+              .getRepository(AccountPrivilegesModel)
+              .createQueryBuilder()
+              .where('account = :account', { account: id })
+              .softDelete()
+              .execute()
+              .then(() => {
+                account.selectedPage.map(async (e) => {
+                  if (account.selectedParent.indexOf(e) < 0) {
+                    await this.grantAccess({ account: id, menu: e }, old)
+                  }
+                })
+              })
+
+            await this.dataSource
+              .getRepository(AccountPermissionModel)
+              .createQueryBuilder()
+              .where('account = :account', { account: id })
+              .softDelete()
+              .execute()
+              .then(() => {
+                account.selectedPermission.map(async (e) => {
+                  await this.grantPermission(
+                    { account: id, permission: e },
+                    old
+                  )
+                })
+              })
+
+            response.message = 'Account updated successfully'
+            response.statusCode = HttpStatus.OK
+            response.table_target = 'account'
+            response.method = 'PUT'
+            response.action = 'U'
+            response.transaction_id = id
+            response.payload = old
+            return response
           })
-
-          delete account.image
-        }
-
-        await this.dataSource
-          .getRepository(AccountPrivilegesModel)
-          .createQueryBuilder()
-          .where('account = :account', { account: uid })
-          .softDelete()
-          .execute()
-          .then(() => {
-            account.selectedPage.map(async (e) => {
-              await this.grantAccess({ account: uid, menu: e }, old)
-            })
-          })
-
-        await this.dataSource
-          .getRepository(AccountPermissionModel)
-          .createQueryBuilder()
-          .where('account = :account', { account: uid })
-          .softDelete()
-          .execute()
-          .then(() => {
-            account.selectedPermission.map(async (e) => {
-              await this.grantPermission({ account: uid, permission: e }, old)
-            })
-          })
-
-        // const resetPrivileges = await this.accountPrivileges
-        //   .createQueryBuilder('account_privileges')
-        //   .where({
-        //     account: uid,
-        //   })
-        //   .getMany()
-
-        // for (const a in resetPrivileges) {
-        //   const setResetPriv = await this.accountPrivileges.softDelete({
-        //     id: resetPrivileges[a].id,
-        //   })
-        // }
-
-        // const resetPermission = await this.accountPermission
-        //   .createQueryBuilder('account_permission')
-        //   .where({
-        //     account: uid,
-        //   })
-        //   .getMany()
-
-        // for (const a in resetPermission) {
-        //   const setResetPerm = await this.accountPermission.softDelete({
-        //     id: resetPermission[a].id,
-        //   })
-        // }
-
-        //
-
-        response.message = 'Account updated successfully'
-        response.statusCode = HttpStatus.OK
-        response.table_target = 'account'
-        response.method = 'PUT'
-        response.action = 'U'
-        response.transaction_id = uid
-        response.payload = old
-        return response
       })
       .catch((e: Error) => {
         throw new Error(e.message)
@@ -331,7 +312,7 @@ export class AccountService {
     return await this.accountRepo.save(account).then(async (returning) => {
       response.message = 'Account added successfully'
       response.statusCode = HttpStatus.OK
-      response.payload = await this.detail(returning.uid)
+      response.payload = await this.detail(returning.id)
       return response
     })
   }
@@ -368,7 +349,7 @@ export class AccountService {
               response.table_target = 'account_privileges'
               response.method = 'PUT'
               response.action = 'U'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
               return response
             })
@@ -389,7 +370,7 @@ export class AccountService {
               response.table_target = 'account_privileges'
               response.method = 'PUT'
               response.action = 'I'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
               return response
             })
@@ -430,12 +411,13 @@ export class AccountService {
               response.table_target = 'account_permission'
               response.method = 'PUT'
               response.action = 'U'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
 
               return response
             })
             .catch((e: Error) => {
+              console.log(e)
               throw new Error(e.message)
             })
         } else {
@@ -444,6 +426,7 @@ export class AccountService {
             account: data.account,
             permission: data.permission,
           })
+
           return await this.accountPermission
             .save(setPermission)
             .then(async (reactive) => {
@@ -452,7 +435,7 @@ export class AccountService {
               response.table_target = 'account_permission'
               response.method = 'PUT'
               response.action = 'I'
-              response.transaction_id = returning.id.toString()
+              response.transaction_id = returning.id
               response.payload = returning
               return response
             })
@@ -524,7 +507,7 @@ export class AccountService {
       if (data[a]) {
         dataResult.push({
           autonum: autonum,
-          uid: data[a].uid,
+          id: data[a].id,
           email: data[a].email,
           first_name: data[a].first_name,
           last_name: data[a].last_name,

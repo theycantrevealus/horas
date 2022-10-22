@@ -11,17 +11,20 @@ import { MasterItemModel } from './master.item.model'
 import { MasterItemBatchModel } from './master.item.batch.model'
 import { ColumnNumericTransformer } from '@/utilities/class.transformer.postgres'
 import { properties } from '@/utilities/models/column'
+import { ApiProperty } from '@nestjs/swagger'
+import { ValidateNested } from 'class-validator'
+import { AccountModel } from './account.model'
 
 @Entity({ name: 'stock_log' })
 export class StockLogModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => MasterItemModel, (brand) => brand.uid)
-  item: string
+  @ManyToOne(() => MasterItemModel, (brand) => brand.id)
+  item: MasterItemModel
 
-  @ManyToOne(() => MasterItemBatchModel, (brand) => brand.uid)
-  batch: string
+  @ManyToOne(() => MasterItemBatchModel, (brand) => brand.id)
+  batch: MasterItemBatchModel
 
   @Column({
     type: 'enum',
@@ -44,6 +47,15 @@ export class StockLogModel {
     transformer: new ColumnNumericTransformer(),
   })
   balance: number
+
+  @ApiProperty({
+    example: '',
+    type: AccountModel,
+    description: 'Account who create purchase order',
+  })
+  @ValidateNested()
+  @ManyToOne(() => AccountModel, (foreign) => foreign.id)
+  created_by: AccountModel
 
   @Column(properties.remark)
   remark: string

@@ -1,10 +1,10 @@
 export type TAccount = {
-  uid: string,
+  ui: number
   name: string
 }
 
 export type TAccountLogin = {
-  request: string,
-  email: string,
+  request: string
+  email: string
   password: string
 }

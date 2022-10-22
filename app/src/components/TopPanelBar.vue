@@ -2,30 +2,80 @@
   <div class="head_wrapper">
     <Menubar :model="items">
       <template #start>
-        <Chip
-          :label="first_name + ' ' + last_name"
-          :image="profile_photo"
-        />
+        <span
+          v-if="getThemeMode"
+          class="material-icons-outlined dark-mode-switch"
+          @click="toggleDarkMode"
+        >
+          dark_mode
+        </span>
+        <span
+          v-if="!getThemeMode"
+          class="material-icons-outlined dark-mode-switch"
+          @click="toggleDarkMode"
+        >
+          wb_sunny
+        </span>
       </template>
       <template #end>
-        ?
+        <Dropdown
+          v-model="selectedLanguage"
+          class="country-selector dark"
+          :options="countries"
+          optionLabel="name"
+          :filter="true"
+          placeholder="Select a Country"
+          @change="changeLanguage()"
+        >
+          <template #value="slotProps">
+            <div
+              v-if="slotProps.value"
+              class="country-item country-item-value"
+            >
+              <img
+                :src="require('@/assets/flag_placeholder.png')"
+                :class="'flag flag-' + slotProps.value.code.toLowerCase()"
+                width="18"
+              />
+              <div>{{slotProps.value.name}}</div>
+            </div>
+            <span v-else>
+              {{slotProps.placeholder}}
+            </span>
+          </template>
+          <template #option="slotProps">
+            <div class="country-item">
+              <img
+                :src="require('@/assets/flag_placeholder.png')"
+                :class="'flag flag-' + slotProps.option.code.toLowerCase()"
+              />
+              <div>{{slotProps.option.name}}</div>
+            </div>
+          </template>
+        </Dropdown>
       </template>
     </Menubar>
   </div>
 </template>
 <script>
 import Menubar from 'primevue/menubar'
-import Button from 'primevue/button'
-import Chip from 'primevue/chip'
-import { mapActions } from 'vuex'
+import Dropdown from 'primevue/dropdown'
+import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'TopPanelMenu',
   components: {
     Menubar,
-    Chip,
+    Dropdown,
   },
+
   data() {
     return {
+      darkMode: false,
+      selectedLanguage: null,
+      countries: [
+        { name: 'United States', code: 'us', lang: 'en' },
+        { name: 'Indonesia', code: 'id', lang: 'id' },
+      ],
       sidemenu: [
         {
           label: 'File',
@@ -183,6 +233,13 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      getThemeMode: 'getThemeMode',
+      geti18n: 'mCorei18n/getData',
+    }),
+    getBrowserLanguage() {
+      return this.$store.state.language
+    },
     profile_photo() {
       return this.$store.state.credential.profile_photo
     },
@@ -191,6 +248,50 @@ export default {
     },
     last_name() {
       return this.$store.state.credential.last_name
+    },
+  },
+  watch: {
+    getThemeMode: {
+      handler(getData) {
+        if (getData) {
+          document.querySelector('body').classList.add('dark')
+        } else {
+          document.querySelector('body').classList.remove('dark')
+        }
+
+        this.darkMode = getData
+      },
+    },
+    geti18n: {
+      handler(getData) {
+        this.countries = []
+        getData.map((e) => {
+          this.countries.push({
+            name: e.name,
+            code: e.iso_2_digits.toLowerCase(),
+            lang: e.language_code.toLowerCase(),
+          })
+        })
+      },
+    },
+  },
+  created() {},
+  async mounted() {
+    await this.initLanguage().then(() => {
+      this.selectedLanguage = this.$store.state.language
+      this.$i18n.locale = this.selectedLanguage.lang
+    })
+  },
+  methods: {
+    ...mapActions({
+      initLanguage: 'setLanguange',
+      storeLanguage: 'changeLanguage',
+      toggleDarkMode: 'toggleDarkMode',
+    }),
+    changeLanguage() {
+      this.storeLanguage(this.selectedLanguage).then(() => {
+        this.$i18n.locale = this.selectedLanguage.lang
+      })
     },
   },
 }

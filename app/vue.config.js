@@ -8,6 +8,14 @@ module.exports = {
   devServer: {
     host: 'localhost',
   },
+  pluginOptions: {
+    i18n: {
+      locale: 'en',
+      fallbackLocale: 'en',
+      localeDir: 'locales',
+      enableInSFC: false,
+    },
+  },
   transpileDependencies: [/ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/],
   chainWebpack: (config) => {
     const svgRule = config.module.rule('svg')

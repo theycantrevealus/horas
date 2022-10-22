@@ -13,7 +13,7 @@ export class CoreLogLoginModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
-  @ManyToOne(() => AccountModel, (account) => account.uid, { cascade: true })
+  @ManyToOne(() => AccountModel, (account) => account.id, { cascade: true })
   account: AccountModel
 
   @Column({ type: 'text', comment: 'Login meta request' })

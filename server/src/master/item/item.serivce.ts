@@ -19,19 +19,19 @@ export class MasterItemService {
 
   private logger = new Logger('HTTP')
 
-  async detail(uid: string) {
+  async detail(id: number) {
     return await this.dataSource
       .getRepository(MasterItemModel)
       .createQueryBuilder('master_item')
-      .where('master_item.uid = :uid', { uid })
+      .where('master_item.id = :id', { id })
       .getOne()
   }
 
-  async delete_soft(uid: string): Promise<GlobalResponse> {
+  async delete_soft(id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
-    const oldMeta = await this.detail(uid)
+    const oldMeta = await this.detail(id)
     return await this.masterItemRepo
-      .softDelete({ uid })
+      .softDelete({ id })
       .then(async (returning) => {
         response.message = 'Item deleted successfully'
         response.statusCode = HttpStatus.OK
@@ -43,14 +43,14 @@ export class MasterItemService {
       })
   }
 
-  async edit(data: MasterItemModel, uid: string): Promise<GlobalResponse> {
+  async edit(data: MasterItemModel, id: number): Promise<GlobalResponse> {
     const response = new GlobalResponse()
     return await this.masterItemRepo
-      .update(uid, data)
+      .update(id, data)
       .then(async (returning) => {
         response.message = 'Item updated successfully'
         response.statusCode = HttpStatus.OK
-        response.payload = await this.detail(uid)
+        response.payload = await this.detail(id)
         return response
       })
       .catch((e: Error) => {
@@ -63,7 +63,7 @@ export class MasterItemService {
     return await this.masterItemRepo.save(data).then(async (returning) => {
       response.message = 'Item added successfully'
       response.statusCode = HttpStatus.OK
-      response.payload = await this.detail(returning.uid)
+      response.payload = await this.detail(returning.id)
       return response
     })
   }
@@ -135,7 +135,7 @@ export class MasterItemService {
       if (data[a]) {
         dataResult.push({
           autonum: autonum,
-          uid: data[a].uid,
+          id: data[a].id,
           name: data[a].name,
           brand: data[a].brand,
           remark: data[a].remark,
