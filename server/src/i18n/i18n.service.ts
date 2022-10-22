@@ -114,6 +114,8 @@ export class Corei18nService {
       const dataSet = new Corei18nModel(data)
       dataSet.created_by = account
 
+      console.log(dataSet)
+
       return await queryRunner.manager
         .save(dataSet)
         .then(async (returning) => {
@@ -133,7 +135,7 @@ export class Corei18nService {
           throw new BadRequestException(response)
         })
     } catch (e) {
-      console.log(e)
+      console.log(e.message)
       throw new BadRequestException(e)
     } finally {
       await queryRunner.release()

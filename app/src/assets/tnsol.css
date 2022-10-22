@@ -371,8 +371,16 @@ body.dark .p-treenode .p-treenode-content .end-tree-selector {
     color: #1ed8a5
 }
 
+body.dark .p-treenode .p-treenode-content:hover {
+    background: #005457 !important;
+}
+
 .p-tree {
     border: none !important
+}
+
+.p-tree-filter-container input {
+    box-shadow: 0px 0px 1px .5px #888;
 }
 
 .p-treenode .p-button.p-button-rounded {
@@ -390,7 +398,7 @@ body.dark .p-treenode .p-treenode-content .end-tree-selector {
 }
 
 .p-treenode .p-treenode-content:hover {
-    background: #005457 !important;
+    background: #f2f2f2 !important;
 }
 
 .p-treenode .p-treenode-content .end-tree-selector {

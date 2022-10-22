@@ -41,5 +41,18 @@ export function parsedT(obj, level: any = '', identifier: any = '') {
     })
     current++
   }
-  return data
+
+  return sort(data, 'label')
+}
+
+export function sort(array, target) {
+  array.forEach(({ children = [] }) => sort(children, target))
+  array.sort((a, b) => {
+    if (a[target] === b[target]) {
+      return 0
+    } else {
+      return a[target] < b[target] ? -1 : 1
+    }
+  })
+  return array
 }

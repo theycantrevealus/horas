@@ -4,7 +4,7 @@
       <Card class="slim">
         <template #content>
           <Panel
-            :header="$t('i18n.label.page_name')"
+            :header="$t('i18n.label.index')"
             :toggleable="false"
           >
             <template #icons>
@@ -12,7 +12,7 @@
                 class="p-button-info p-button-rounded p-button-raised button-sm"
                 @click="i18nAdd"
               ><span class="material-icons">add</span>
-                {{ $t('i18n.button.add_account') }}</Button>
+                {{ $t('i18n.button.add_language') }}</Button>
             </template>
             <DataTable
               ref="dt"
@@ -66,7 +66,7 @@
               <Column
                 ref="name"
                 field="name"
-                :header="$t('column.i18n.datatable.name')"
+                :header="$t('i18n.datatable.column.name.caption')"
                 filterMatchMode="startsWith"
                 :sortable="true"
               >
@@ -75,15 +75,21 @@
                     v-model="filterModel.value"
                     type="text"
                     class="column-filter"
-                    :placeholder="$t('column.i18n.datatable.name.search')"
+                    :placeholder="$t('i18n.datatable.column.name.search')"
                     @keydown.enter="filterCallback()"
                   />
+                </template>
+                <template #body="slotProps">
+                  <div class="country-item">
+                    <img :class="`flag flag-${slotProps.data.iso_2_digits.toLowerCase()}`" />
+                  </div>
+                  {{ slotProps.data.name }}
                 </template>
               </Column>
               <Column
                 ref="iso_2_digits"
                 field="iso_2_digits"
-                :header="$t('column.i18n.datatable.iso_2_digits')"
+                :header="$t('i18n.datatable.column.iso_2_digits.caption')"
                 filterMatchMode="startsWith"
                 :sortable="true"
               >
@@ -92,7 +98,7 @@
                     v-model="filterModel.value"
                     type="text"
                     class="column-filter"
-                    :placeholder="$t('column.i18n.datatable.iso_2_digits.search')"
+                    :placeholder="$t('i18n.datatable.column.iso_2_digits.search')"
                     @keydown.enter="filterCallback()"
                   />
                 </template>
@@ -100,7 +106,7 @@
               <Column
                 ref="iso_3_digits"
                 field="iso_3_digits"
-                :header="$t('column.i18n.datatable.iso_3_digits')"
+                :header="$t('i18n.datatable.column.iso_3_digits.caption')"
                 filterMatchMode="startsWith"
                 :sortable="true"
               >
@@ -109,7 +115,7 @@
                     v-model="filterModel.value"
                     type="text"
                     class="column-filter"
-                    placeholder="Search by last name"
+                    :placeholder="$t('i18n.datatable.column.iso_3_digits.search')"
                     @keydown.enter="filterCallback()"
                   />
                 </template>

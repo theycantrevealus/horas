@@ -14,13 +14,22 @@ class Corei18nService {
   }
 
   async i18nUpdate(parsedData) {
-    console.log(parsedData)
     return await api({ requiresAuth: true })
       .put(
         `${process.env.VUE_APP_APIGATEWAY}v1/i18n/${parsedData.id}/edit`,
         parsedData
       )
       .then((response) => {
+        return Promise.resolve(response)
+      })
+  }
+
+  async i18nAdd(parsedData) {
+    console.log(parsedData)
+    return await api({ requiresAuth: true })
+      .post(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/add`, parsedData)
+      .then((response) => {
+        console.log(response)
         return Promise.resolve(response)
       })
   }

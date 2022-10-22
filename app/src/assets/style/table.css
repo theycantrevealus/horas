@@ -202,6 +202,12 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     font-size: 10pt !important;
 }
 
+.p-datatable-table tbody tr td img {
+    border: solid 1px #ccc !important;
+    height: 20px !important;
+    border-radius: 2.5px !important;
+}
+
 .p-datatable-table tbody tr td button.p-button {
     font-size: 7pt !important;
     padding: 5px !important;

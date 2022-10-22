@@ -6,6 +6,9 @@ export default {
   async __update({ commit }, paramData: any) {
     return await Corei18nService.i18nUpdate(paramData)
   },
+  async __add({ comit }, paramData: any) {
+    return await Corei18nService.i18nAdd(paramData)
+  },
   fetchi18nDetail({ commit }, paramData) {
     commit(types.TOGGLE_LOADING_ACTIVE)
     Corei18nService.i18nDetail(paramData).then((response: any) => {

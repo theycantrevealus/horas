@@ -8,120 +8,223 @@
             :toggleable="false"
           >
             <template #icons>
-              <Button class="p-button-text p-button-info p-button-rounded p-button-raised button-sm"><span class="material-icons">help</span>
-                Info</Button>
+              <Button
+                type="button"
+                class="button-raised button-sm p-button-info px-3 m-1"
+                @click="duplicateComponent($event)"
+              ><span class="material-icons-outlined">add</span> {{ $t('i18n.button.duplicate_component') }}
+              </Button>
+              <Button
+                type="button"
+                class="button-raised button-sm p-button-info px-3 m-1"
+                @click="addGrouper($event)"
+              ><span class="material-icons-outlined">add</span> {{ $t('i18n.button.add_grouper') }}
+              </Button>
             </template>
           </Panel>
           <div class="grid">
-            <div class="col-12 form-mode">
+            <div class="col-4 form-mode">
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
                   <span class="material-icons-outlined">map</span>
+                  &nbsp;
+                  <small>{{ $t('i18n.input.name.caption') }}</small>
                 </span>
                 <InputText
                   v-model="formData.name"
                   class="inputtext-sm"
-                  :placeholder="$t('i18n.form.name')"
+                  :placeholder="$t('i18n.input.name.placeholder')"
                 />
+              </div>
+              <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
                   <span class="material-icons-outlined">public</span>
+                  &nbsp;
+                  <small>{{ $t('i18n.input.language_code.caption') }}</small>
+                </span>
+                <InputText
+                  v-model="formData.language_code"
+                  class="inputtext-sm"
+                  :placeholder="$t('i18n.input.language_code.placeholder')"
+                />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">map</span>
+                  &nbsp;
+                  <small>{{ $t('i18n.input.iso_3_digits.caption') }}</small>
                 </span>
                 <InputText
                   v-model="formData.iso_3_digits"
                   class="inputtext-sm"
-                  :placeholder="$t('i18n.form.iso_3_digits')"
+                  :placeholder="$t('i18n.input.iso_3_digits.placeholder')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">map</span>
+                  &nbsp;
+                  <small>{{ $t('i18n.input.iso_2_digits.caption') }}</small>
+                </span>
                 <InputText
                   v-model="formData.iso_2_digits"
                   class="inputtext-sm"
-                  :placeholder="$t('i18n.form.iso_2_digits')"
+                  :placeholder="$t('i18n.input.iso_2_digits.placeholder')"
                 />
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
                   <span class="material-icons-outlined">calendar_month</span>
+                  &nbsp;
+                  <small>Weekday</small>
                 </span>
                 <InputText
-                  v-model="formData.iso_3_digits"
+                  v-model="formData.datetime_weekday"
                   class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_weekday')"
+                  :placeholder="$t('i18n.input.datetime_weekday.placeholder')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">calendar_month</span>
+                  &nbsp;
+                  <small>Era</small>
+                </span>
                 <InputText
-                  v-model="formData.iso_2_digits"
+                  v-model="formData.datetime_era"
                   class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_era')"
+                  :placeholder="$t('i18n.input.iso_2_digits.placeholder')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">calendar_month</span>
+                  &nbsp;
+                  <small>Year</small>
+                </span>
                 <InputText
                   v-model="formData.datetime_year"
                   class="inputtext-sm"
                   :placeholder="$t('i18n.form.datetime_year')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">calendar_month</span>
+                  &nbsp;
+                  <small>Month</small>
+                </span>
                 <InputText
                   v-model="formData.datetime_month"
                   class="inputtext-sm"
                   :placeholder="$t('i18n.form.datetime_month')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">calendar_month</span>
+                  &nbsp;
+                  <small>Day</small>
+                </span>
                 <InputText
                   v-model="formData.datetime_day"
                   class="inputtext-sm"
                   :placeholder="$t('i18n.form.datetime_day')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">schedule</span>
+                  &nbsp;
+                  <small>Hour</small>
+                </span>
                 <InputText
                   v-model="formData.datetime_hour"
                   class="inputtext-sm"
                   :placeholder="$t('i18n.form.datetime_hour')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">schedule</span>
+                  &nbsp;
+                  <small>Minute</small>
+                </span>
                 <InputText
                   v-model="formData.datetime_minute"
                   class="inputtext-sm"
                   :placeholder="$t('i18n.form.datetime_minute')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">schedule</span>
+                  &nbsp;
+                  <small>Second</small>
+                </span>
+
                 <InputText
                   v-model="formData.datetime_second"
                   class="inputtext-sm"
                   :placeholder="$t('i18n.form.datetime_second')"
                 />
+              </div>
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">
+                  <span class="material-icons-outlined">schedule</span>
+                  &nbsp;
+                  <small>Timezone</small>
+                </span>
+
                 <InputText
                   v-model="formData.datetime_timezone_name"
                   class="inputtext-sm"
                   :placeholder="$t('i18n.form.datetime_timezone_name')"
                 />
               </div>
-              <Tree
-                v-model:selectionKeys="selectedComponent"
-                :value="formData.componentTree.root"
-                :filter="true"
-                filterMode="lenient"
-                selectionMode="single"
-                :expandedKeys="expandedKeys"
-                @nodeSelect="onNodeSelect"
-              >
-                <template #default="slotProps">
-                  <div class="inline-block custom">
-                    <div class="flex flex-row flex-wrap card-container">
-                      <div class="action-container">
-                        <Button
-                          icon="pi pi-plus"
-                          class="p-button-rounded button-sm p-button-success"
-                        />
-                        <Button
-                          icon="pi pi-trash"
-                          class="p-button-rounded button-sm p-button-danger"
-                          @click="deleteChild($event, slotProps.node)"
-                        />
-                        <Button
-                          icon="pi pi-pencil"
-                          class="p-button-rounded button-sm p-button-warning"
-                          @click="editChild($event, slotProps.node)"
-                        />
-                      </div>
-                      <div class="flex align-items-center block">
-                        <b :class="`${(formData.componentIden[`${slotProps.node.data}`]) ? 'end-tree-selector' : ''}`">{{ (formData.componentIden[`${slotProps.node.data}`]) ? `${slotProps.node.label} - ${formData.componentIden[`${slotProps.node.data}`].translation}` : slotProps.node.label }}</b>
+            </div>
+            <div class="col-8 form-mode">
+              <div class="card-container">
+                <Tree
+                  v-model:selectionKeys="selectedComponent"
+                  scrollHeight="500px"
+                  :value="formData.componentTree.root"
+                  :filter="true"
+                  filterPlaceholder="Search component"
+                  filterMode="lenient"
+                  selectionMode="single"
+                  :expandedKeys="expandedKeys"
+                  @nodeSelect="onNodeSelect"
+                >
+                  <template #default="slotProps">
+                    <div class="inline-block custom">
+                      <div class="flex flex-row flex-wrap card-container">
+                        <div class="action-container">
+                          <Button
+                            icon="pi pi-plus"
+                            class="p-button-rounded button-sm p-button-success"
+                            @click="addChild($event, slotProps.node)"
+                          />
+                          <Button
+                            icon="pi pi-trash"
+                            class="p-button-rounded button-sm p-button-danger"
+                            @click="deleteChild($event, slotProps.node)"
+                          />
+                          <Button
+                            icon="pi pi-pencil"
+                            class="p-button-rounded button-sm p-button-warning"
+                            @click="editChild($event, slotProps.node)"
+                          />
+                        </div>
+                        <div class="flex align-items-center block">
+                          <b :class="`${(formData.componentIden[`${slotProps.node.data}`]) ? 'end-tree-selector' : ''}`">{{ (formData.componentIden[`${slotProps.node.data}`]) ? `${slotProps.node.label} - ${formData.componentIden[`${slotProps.node.data}`].translation}` : slotProps.node.label }}</b>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </template>
-              </Tree>
+                  </template>
+                </Tree>
+              </div>
+
             </div>
           </div>
           <div class="p-grid">
@@ -185,7 +288,7 @@
             </span>
             <InputText
               v-model="selectedComponentData.component"
-              disabled="disabled"
+              :disabled="selectedComponentData.editMode"
               class="inputtext-sm"
               :placeholder="$t('i18n.form.name')"
             />
@@ -245,6 +348,7 @@ export default {
     return {
       formData: {
         id: 0,
+        language_code: '',
         iso_2_digits: '',
         iso_3_digits: '',
         datetime_weekday: '',
@@ -255,9 +359,11 @@ export default {
         datetime_hour: '',
         datetime_minute: '',
         datetime_second: '',
-        datetiem_timezone_name: '',
+        datetime_timezone_name: '',
         components: [],
-        componentTree: {},
+        componentTree: {
+          root: [],
+        },
         componentIden: {},
       },
       errorMessage: '',
@@ -269,11 +375,13 @@ export default {
         translation: '',
         component: '',
         key: '',
+        editMode: false,
       },
       nodes: null,
       expandedKeys: {},
       allowSave: false,
       nodeEditParentMode: false,
+      duplicateCompsMode: false,
     }
   },
 
@@ -286,7 +394,13 @@ export default {
     getDetail: {
       handler(getData) {
         if (getData) {
-          this.formData = getData
+          if (this.duplicateCompsMode) {
+            this.formData.components = getData.components
+            this.formData.componentTree = getData.componentTree
+            this.formData.componentIden = getData.componentIden
+          } else {
+            this.formData = getData
+          }
           getData.componentTree.root.map((e) => {
             this.expandNode(e)
           })
@@ -322,57 +436,91 @@ export default {
           `${this.selectedComponentData.identifier}`
         ].translation = this.selectedComponentData.translation
       } else {
-        const currentParentIden = this.selectedComponentData.identifier
+        const dataSet = []
+        if (this.selectedComponentData.editMode) {
+          const currentParentIden = this.selectedComponentData.identifier
 
-        const mimicIden = this.formData.componentIden
-        for (const ab in mimicIden) {
-          const checkString = mimicIden[ab].component
-          const position = checkString.indexOf(currentParentIden)
-          if (position >= 0) {
-            var regex = new RegExp(`.${currentParentIden}.`, 'g')
-            const checkLevel = currentParentIden.split('.')
-            checkLevel.splice(
-              checkLevel.length - 1,
-              1,
-              this.selectedComponentData.translation
-            )
+          const mimicIden = this.formData.componentIden
+          for (const ab in mimicIden) {
+            const checkString = mimicIden[ab].component
+            const position = checkString.indexOf(currentParentIden)
+            if (position >= 0) {
+              var regex = new RegExp(`.${currentParentIden}.`, 'g')
+              const checkLevel = currentParentIden.split('.')
+              checkLevel.splice(
+                checkLevel.length - 1,
+                1,
+                this.selectedComponentData.translation
+              )
 
-            var regex = new RegExp(`${currentParentIden}`, 'g')
+              var regex = new RegExp(`${currentParentIden}`, 'g')
 
-            const newIdentifier = checkString.replace(
-              regex,
-              `${checkLevel.join('.')}`
-            )
-            if (!this.formData.componentIden[newIdentifier]) {
-              this.formData.componentIden[newIdentifier] = {}
+              const newIdentifier = checkString.replace(
+                regex,
+                `${checkLevel.join('.')}`
+              )
+              if (!this.formData.componentIden[newIdentifier]) {
+                this.formData.componentIden[newIdentifier] = {}
+              }
+
+              this.formData.componentIden[newIdentifier] =
+                this.formData.componentIden[checkString]
+
+              delete this.formData.componentIden[checkString]
             }
+          }
+        } else {
+          console.log({
+            component: this.selectedComponentData.component,
+            translation: this.selectedComponentData.translation,
+          })
 
-            this.formData.componentIden[newIdentifier] =
-              this.formData.componentIden[checkString]
+          dataSet.push({
+            component: this.selectedComponentData.component,
+            translation: this.selectedComponentData.translation,
+          })
 
-            delete this.formData.componentIden[checkString]
+          if (
+            !this.formData.componentIden[this.selectedComponentData.component]
+          ) {
+            this.formData.componentIden[this.selectedComponentData.component] =
+              {}
+          }
 
-            // console.log(this.formData.componentIden)
+          this.formData.componentIden[this.selectedComponentData.component] = {
+            component: this.selectedComponentData.component,
+            translation: this.selectedComponentData.translation,
           }
         }
 
-        const dataSet = []
         for (const az in this.formData.componentIden) {
           this.formData.componentIden[az].component = az
           dataSet.push(this.formData.componentIden[az])
         }
 
-        // this.reRenderTree(dataSet)
+        this.reRenderTree(dataSet)
       }
+
+      // this.formData.componentTree.root.map((e) => {
+      //   this.expandNode(e)
+      // })
 
       this.displayEditorDialog = false
     },
-    addChild(event) {
+    addChild(event, node) {
       const target = event.target
+      this.nodeEditParentMode = true
+      this.selectedComponentData = {
+        identifier: `${node.data}.`,
+        translation: '',
+        component: `${node.data}.`,
+        key: '',
+        editMode: false,
+      }
+      this.displayEditorDialog = true
     },
     deleteChild(event, node) {
       const target = event.target
-
       const confirmation = this.$confirm
       confirmation.require({
         group: 'delete_child',
@@ -386,7 +534,24 @@ export default {
         rejectLabel: 'Abort',
         rejectIcon: 'pi pi-times-circle',
         accept: async () => {
-          alert()
+          const dataSet = []
+
+          const ab = this.formData.componentIden
+          for (const a in ab) {
+            const matches = new RegExp(`^${node.data}.*`)
+            const check = a.match(matches)
+
+            if (check && check !== null) {
+              delete this.formData.componentIden[check[0]]
+            }
+          }
+
+          for (const az in this.formData.componentIden) {
+            this.formData.componentIden[az].component = az
+            dataSet.push(this.formData.componentIden[az])
+          }
+
+          this.reRenderTree(dataSet)
         },
       })
     },
@@ -399,6 +564,7 @@ export default {
           translation: this.formData.componentIden[`${node.data}`].translation,
           component: node.label,
           key: node.key,
+          editMode: true,
         }
       } else {
         this.nodeEditParentMode = true
@@ -407,6 +573,7 @@ export default {
           translation: node.label,
           component: node.label,
           key: node.key,
+          editMode: true,
         }
       }
       this.displayEditorDialog = true
@@ -419,7 +586,8 @@ export default {
         componentParsed.push(componentRaw[a])
       }
       this.formData.components = componentParsed
-
+      console.clear()
+      console.log(this.formData)
       const confirmation = this.$confirm
       confirmation.require({
         group: 'confirm_changes',
@@ -469,15 +637,24 @@ export default {
     },
     reRenderTree(node) {
       const ab = {}
-      node.map((b) => {
+
+      node.map((e) => {
+        const b = e.component
+        const treeChecker = b.split('.')
+        treeChecker.pop()
+        const parentUnique = treeChecker.join('.')
+
         if (!ab[b]) {
           ab[b] = {}
+        } else {
+          delete this.formData.componentIden[parentUnique]
+          delete ab[parentUnique]
         }
 
-        ab[b] = {}
+        // ab[b] = {}
       })
-      const parsedData = parsedT(deepen(ab))
-      console.log(parsedData)
+
+      this.formData.componentTree.root = parsedT(deepen(ab))
     },
     expandNode(node) {
       this.expandedKeys[node.key] = true
@@ -486,6 +663,14 @@ export default {
           this.expandNode(child)
         }
       }
+    },
+    async duplicateComponent() {
+      this.duplicateCompsMode = true
+      await this.$store.dispatch('corei18N/fetchi18nDetail', 9)
+    },
+    addGrouper(event) {
+      this.nodeEditParentMode = true
+      this.displayEditorDialog = true
     },
   },
 }
