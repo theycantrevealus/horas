@@ -176,6 +176,15 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     padding: 0 !important;
 }
 
+.p-datatable-table thead tr th.wrapped {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.p-datatable-table thead tr th.wrapped button {
+    white-space: nowrap;
+}
+
 .p-column-filter-menu-button {
     width: 20px !important;
     height: 20px !important;

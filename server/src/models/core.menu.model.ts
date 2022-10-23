@@ -92,7 +92,7 @@ export class CoreMenuModel {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'permissions' })
+  @JoinColumn({ name: 'permissions', referencedColumnName: 'id' })
   permission: CoreMenuPermissionModel[]
 
   @ManyToOne(() => AccountModel, (foreign) => foreign.id)

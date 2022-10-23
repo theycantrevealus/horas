@@ -1,9 +1,8 @@
 import api from '@/util/api'
-import axios from 'axios'
 
 class CoreService {
   async menuAdd(menuData: any) {
-    return await axios
+    return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/menu/add`, menuData)
       .then((response) => {
         return Promise.resolve(response)
@@ -11,7 +10,7 @@ class CoreService {
   }
 
   async menuPermissionAdd(menuData: any) {
-    return await axios
+    return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/menu_permission/add`, menuData)
       .then((response) => {
         return Promise.resolve(response)
@@ -30,7 +29,7 @@ class CoreService {
   }
 
   async menuDelete(menuData: any) {
-    return await axios
+    return await api({ requiresAuth: true })
       .delete(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${menuData}/delete`)
       .then((response) => {
         return Promise.resolve(response)
@@ -38,7 +37,7 @@ class CoreService {
   }
 
   async menuDetail(id) {
-    return await axios
+    return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${id}/detail`)
       .then((response) => {
         return Promise.resolve(response)
@@ -46,7 +45,7 @@ class CoreService {
   }
 
   async menuPermission() {
-    return await axios
+    return api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/Core/menu_permission`)
       .then((response) => {
         return Promise.resolve(response)
@@ -54,7 +53,7 @@ class CoreService {
   }
 
   async menuTreeEnd() {
-    return await axios
+    return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/Core/menu_manager_treeend`)
       .then((response) => {
         return Promise.resolve(response.data.response_package)
