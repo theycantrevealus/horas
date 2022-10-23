@@ -6,6 +6,13 @@ import { IsNotEmpty, IsString, ValidateNested } from 'class-validator'
 
 export class CoreMenuPermissionDTO {
   @ApiProperty({
+    type: Number,
+    example: 0,
+  })
+  @IsNotEmpty()
+  id: number
+
+  @ApiProperty({
     type: CoreMenuModel,
     example: 0,
   })

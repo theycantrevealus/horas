@@ -11,8 +11,11 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  ManyToMany,
+  OneToMany,
 } from 'typeorm'
 import { AccountModel } from './account.model'
+import { AccountPermissionModel } from './account.permission.model'
 import { CoreMenuModel } from './core.menu.model'
 
 @Entity({ name: 'core_menu_permission' })
@@ -20,11 +23,28 @@ export class CoreMenuPermissionModel {
   @PrimaryGeneratedColumn('increment')
   id: number
 
+  @Type(() => AccountPermissionModel)
+  @OneToMany(
+    () => AccountPermissionModel,
+    (account_permission) => account_permission.permission,
+    {
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    }
+  )
+  @JoinColumn({
+    name: 'account_permission',
+    foreignKeyConstraintName: 'permission',
+  })
+  account_permission: AccountPermissionModel
+
   @Type(() => CoreMenuModel)
   @ManyToOne(() => CoreMenuModel, (menu) => menu.permission, {
     onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
-    cascade: ['insert'],
+    onUpdate: 'CASCADE',
+    orphanedRowAction: 'delete',
+    cascade: ['insert', 'update'],
+    eager: true,
   })
   @JoinColumn({ name: 'menu_id' })
   menu: CoreMenuModel

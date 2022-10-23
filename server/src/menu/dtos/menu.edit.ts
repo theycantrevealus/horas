@@ -19,6 +19,14 @@ import { IsArrayOfObjects } from '@/decorators/class.validator.object.array'
 
 export class CoreMenuDTOEdit {
   @ApiProperty({
+    example: 0,
+    type: Number,
+    description: 'ID for saving',
+  })
+  @IsString()
+  id: number
+
+  @ApiProperty({
     example: 'Menu caption',
     description: 'Menu caption',
   })

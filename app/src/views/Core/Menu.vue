@@ -110,7 +110,7 @@
       :header="ui.modal.manageMenu.title"
       :style="{ width: '80vw' }"
       :modal="true"
-      :position="ui.modal.manageMenu.position"
+      position="center"
     >
       <div class="p-fluid p-formgrid p-grid">
         <div class="p-field p-col-12 p-md-4">
@@ -195,6 +195,19 @@
             >
               <template #body="slotProps">{{ slotProps.data.dispatchname }}</template>
             </Column>
+            <Column
+              field="action"
+              header="Action"
+              class="wrapped"
+            >
+              <template #body="slotProps">
+                <Button
+                  class="p-button-danger p-button-sm"
+                  @click="removeFeature($event, slotProps.data.id)"
+                >
+                  <span class="material-icons">highlight_off</span> Delete
+                </Button></template>
+            </Column>
           </DataTable>
         </div>
       </div>
@@ -216,9 +229,9 @@
     </Dialog>
     <Dialog
       v-model:visible="ui.modal.manageFeature.state"
+      position="center"
       :modal="true"
       :header="ui.modal.manageFeature.title"
-      :position="ui.modal.manageFeature.position"
       :style="{ width: '50vw' }"
     >
       <div class="p-fluid p-formgrid grid">
@@ -299,6 +312,7 @@ export default defineComponent({
     return {
       formMode: 'add',
       setterPermission: Array<{
+        id: number
         domiden: string
         dispatchname: string
       }>(),
@@ -437,6 +451,7 @@ export default defineComponent({
       CoreService.menuDetail(data.id).then((response) => {
         const dataSelected = response.data
         if (dataSelected.permission !== null) {
+          console.log(dataSelected.permission)
           this.setterPermission = dataSelected.permission
         }
       })
@@ -462,7 +477,7 @@ export default defineComponent({
       this.ui.modal.manageFeature.title = 'Feature'
       this.toggleFeature()
     },
-    editMenu() {
+    async editMenu() {
       const label = this.form.txt_label
       const routeTo = this.form.txt_route
       const routeToUrl = this.form.txt_route_url
@@ -471,7 +486,7 @@ export default defineComponent({
 
       this.form.permission = this.setterPermission
 
-      return CoreService.menuEdit(this.form.targetID, {
+      return await CoreService.menuEdit(this.form.targetID, {
         name: label,
         menu_group: this.form.targetGroup,
         identifier: routeTo,
@@ -523,7 +538,15 @@ export default defineComponent({
 
       this.toggleFeature()
     },
-    addMenu() {
+    removeFeature(event: any, data: any) {
+      const permissionMimic = this.setterPermission
+      permissionMimic.map((e, f) => {
+        if (data === e.id) {
+          this.setterPermission.splice(f, 1)
+        }
+      })
+    },
+    async addMenu() {
       const label = this.form.txt_label
       const routeTo = this.form.txt_route
       const routeToUrl = this.form.txt_route_url
