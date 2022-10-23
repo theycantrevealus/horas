@@ -22,8 +22,9 @@ export class CoreMenuPermissionModel {
 
   @Type(() => CoreMenuModel)
   @ManyToOne(() => CoreMenuModel, (menu) => menu.permission, {
-    orphanedRowAction: 'delete',
     onDelete: 'CASCADE',
+    onUpdate: 'NO ACTION',
+    cascade: ['insert'],
   })
   @JoinColumn({ name: 'menu_id' })
   menu: CoreMenuModel

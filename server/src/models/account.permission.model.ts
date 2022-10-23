@@ -8,6 +8,7 @@ import {
   DeleteDateColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  JoinColumn,
 } from 'typeorm'
 import { AccountModel } from '@models/account.model'
 import { CoreMenuPermissionModel } from '@models/core.menu.permission.model'
@@ -21,7 +22,10 @@ export class AccountPermissionModel {
   @ManyToOne(() => AccountModel, (account) => account.id)
   account: AccountModel
 
-  @ManyToOne(() => CoreMenuPermissionModel, (perm) => perm.id)
+  @ManyToOne(() => CoreMenuPermissionModel, (perm) => perm.id, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'permission_id', referencedColumnName: 'id' })
   permission: CoreMenuPermissionModel
 
   @ManyToOne(() => AccountModel, (account) => account.id)
