@@ -3,7 +3,7 @@
     <Card class="slim">
       <template #content>
         <Panel
-          header="Menu Management"
+          :header="$t('menu.label.index')"
           :toggleable="false"
         >
           <template #icons>
@@ -20,7 +20,7 @@
           >
             <Column
               field="label"
-              header="Label"
+              :header="$t('menu.datatable.column.label.caption')"
               :expander="true"
             >
               <template #filter>
@@ -28,33 +28,33 @@
                   v-model="filtersNode['label']"
                   type="text"
                   class="column-filter"
-                  placeholder="Filter by label"
+                  :placeholder="$t('menu.datatable.column.label.placeholder')"
                 />
               </template>
             </Column>
             <Column
               field="to"
-              header="Link"
+              :header="$t('menu.datatable.column.link.caption')"
             >
               <template #filter>
                 <InputText
                   v-model="filtersNode['to']"
                   type="text"
                   class="column-filter"
-                  placeholder="Filter by link"
+                  :placeholder="$t('menu.datatable.column.link.placeholder')"
                 />
               </template>
             </Column>
             <Column
               field="show_on_menu"
-              header="Visibility"
+              :header="$t('menu.datatable.column.visibility.caption')"
             >
               <template #filter>
                 <InputText
                   v-model="filtersNode['show_on_menu']"
                   type="text"
                   class="column-filter"
-                  placeholder="Filter by visibility"
+                  :placeholder="$t('menu.datatable.column.visibility.placeholder')"
                 />
               </template>
             </Column>
@@ -62,7 +62,7 @@
               :header-style="{ 'width': 'auto' }"
               :body-style="{ 'text-align': 'center' }"
             >
-              <template #header>Action</template>
+              <template #header>{{ $t('global.datatable.column.action') }}</template>
               <template #body="slotProps">
                 <span class="p-buttonset">
                   <Button
@@ -71,6 +71,7 @@
                     @click="onNodeAdd(slotProps.node, 'Add Child Menu')"
                   >
                     <span class="material-icons">add</span>
+                    <small>{{ $t('menu.datatable.button.add_child') }}</small>
                   </Button>
                   <Button
                     type="button"
@@ -78,6 +79,7 @@
                     @click="onNodeEdit(slotProps.node, 'Edit Child Menu')"
                   >
                     <span class="material-icons">edit</span>
+                    <small>{{ $t('menu.datatable.button.edit_child') }}</small>
                   </Button>
                   <Button
                     type="button"
@@ -85,18 +87,21 @@
                     @click="onNodeDelete($event, slotProps.node.data.id)"
                   >
                     <span class="material-icons">delete</span>
+                    <small>{{ $t('menu.datatable.button.delete_child') }}</small>
                   </Button>
                   <Button
                     type="button"
                     class="p-button-warning button-raised p-button-sm"
                   >
                     <span class="material-icons">arrow_upward</span>
+                    <small>{{ $t('menu.datatable.button.sort_up') }}</small>
                   </Button>
                   <Button
                     type="button"
                     class="p-button-warning p-button-raised p-button-sm"
                   >
                     <span class="material-icons">arrow_downward</span>
+                    <small>{{ $t('menu.datatable.button.sort_down') }}</small>
                   </Button>
                 </span>
               </template>
