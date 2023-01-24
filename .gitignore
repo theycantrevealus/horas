@@ -58,3 +58,7 @@ pnpm-debug.log*
 # Cypress test result
 **/__tests__/**/*.png
 **/__tests__/**/*.mp4
+
+**/*.csv
+**/*.ttf
+**/*.woff2
