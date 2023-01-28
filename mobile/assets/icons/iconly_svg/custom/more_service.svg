@@ -1,0 +1,16 @@
+<svg clip-rule="evenodd" fill-rule="evenodd" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <clipPath id="a">
+        <path clip-rule="evenodd" d="m0 0h24v24h-24z" />
+    </clipPath>
+    <path d="m0 0h24v24h-24z" fill="none" />
+    <g clip-path="url(#a)">
+        <g fill="none" stroke-width="1.5" transform="matrix(.880205 0 0 .880205 1.87764 2.31774)">
+            <path d="m.75.75h7.5v7.5h-7.5z" stroke="#001469" />
+            <path d="m14.75 13.75h7.5v7.5h-7.5z" stroke="#001469" />
+            <g stroke="#f60">
+                <circle cx="4.5" cy="17.5" r="3.75" />
+                <circle cx="18.5" cy="4.5" r="3.75" />
+            </g>
+        </g>
+    </g>
+</svg>
