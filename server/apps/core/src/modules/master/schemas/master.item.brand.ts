@@ -1,11 +1,15 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { AccountModel } from '@core/account/schemas/account.model'
-import { Prop, raw, Schema } from '@nestjs/mongoose'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
-import { SchemaTypes } from 'mongoose'
+import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+export type MasterItemBrandDocument = HydratedDocument<MasterItemBrandModel>
 @Schema({ collection: 'master_item_brand' })
-export class MasterItemBrand {
+export class MasterItemBrandModel {
+  @Prop({ type: SchemaTypes.String, required: true })
+  code: string
+
   @Prop({ type: SchemaTypes.String, required: true })
   name: string
 
@@ -32,3 +36,5 @@ export class MasterItemBrand {
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
 }
+export const MasterItemBrandSchema =
+  SchemaFactory.createForClass(MasterItemBrandModel)

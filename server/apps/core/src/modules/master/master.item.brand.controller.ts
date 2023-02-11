@@ -1,8 +1,8 @@
 import {
-  MasterItemSupplierAddDTO,
-  MasterItemSupplierEditDTO,
-} from '@core/master/dto/master.item.supplier'
-import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+  MasterItemBrandAddDTO,
+  MasterItemBrandEditDTO,
+} from '@core/master/dto/master.item.brand'
+import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
@@ -32,26 +32,26 @@ import { isJSON } from 'class-validator'
 
 @Controller('master')
 @ApiTags('Master Data Management')
-export class MasterItemSupplierController {
-  private masterItemSupplierService: MasterItemSupplierService
-  constructor(masterItemSupplierService: MasterItemSupplierService) {
-    this.masterItemSupplierService = masterItemSupplierService
+export class MasterItemBrandController {
+  private masterItemBrandService: MasterItemBrandService
+  constructor(masterItembrandService: MasterItemBrandService) {
+    this.masterItemBrandService = masterItembrandService
   }
 
-  @Get('supplier')
+  @Get('brand')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Fetch all supplier',
-    description: 'Showing supplier data',
+    summary: 'Fetch all account',
+    description: 'Showing brand data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterItemSupplierService.all({
+      return await this.masterItemBrandService.all({
         first: parsedData.first,
         rows: parsedData.rows,
         sortField: parsedData.sortField,
@@ -66,54 +66,54 @@ export class MasterItemSupplierController {
     }
   }
 
-  @Post('supplier')
+  @Post('brand')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Add new item supplier',
+    summary: 'Add new item brand',
     description: ``,
   })
   async add(
-    @Body() parameter: MasterItemSupplierAddDTO,
+    @Body() parameter: MasterItemBrandAddDTO,
     @CredentialAccount() account
   ): Promise<GlobalResponse> {
-    return await this.masterItemSupplierService.add(parameter, account)
+    return await this.masterItemBrandService.add(parameter, account)
   }
 
-  @Patch('supplier/:_id')
+  @Patch('brand/:_id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Edit new item supplier',
+    summary: 'Edit new item brand',
     description: ``,
   })
   @ApiParam({
     name: '_id',
   })
-  async edit(@Body() parameter: MasterItemSupplierEditDTO, @Param() param) {
-    return await this.masterItemSupplierService.edit(parameter, param._id)
+  async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param) {
+    return await this.masterItemBrandService.edit(parameter, param._id)
   }
 
-  @Delete('supplier/:_id')
+  @Delete('brand/:_id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Edit new item supplier',
+    summary: 'Edit new item brand',
     description: ``,
   })
   @ApiParam({
     name: '_id',
   })
   async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterItemSupplierService.delete(param._id)
+    return await this.masterItemBrandService.delete(param._id)
   }
 }

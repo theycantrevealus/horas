@@ -5,8 +5,14 @@ import {
   AccountModel,
   AccountSchema,
 } from '@core/account/schemas/account.model'
+import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
+import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+import {
+  MasterItemBrandModel,
+  MasterItemBrandSchema,
+} from '@core/master/schemas/master.item.brand'
 import {
   MasterItemSupplierModel,
   MasterItemSupplierSchema,
@@ -46,6 +52,23 @@ import { TimeManagement } from '@utility/time'
           return schema
         },
       },
+      {
+        name: MasterItemBrandModel.name,
+        useFactory: () => {
+          const schema = MasterItemBrandSchema
+          schema.pre('save', function (next) {
+            if (this.isModified()) {
+              this.increment()
+              this.updated_at = new TimeManagement().getTimezone('Asia/Jakarta')
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          return schema
+        },
+      },
     ]),
     MongooseModule.forFeature([
       { name: AccountModel.name, schema: AccountSchema },
@@ -55,8 +78,8 @@ import { TimeManagement } from '@utility/time'
     AuthModule,
     AccountModule,
   ],
-  controllers: [MasterItemSupplierController],
-  providers: [MasterItemSupplierService],
-  exports: [MasterItemSupplierService],
+  controllers: [MasterItemSupplierController, MasterItemBrandController],
+  providers: [MasterItemSupplierService, MasterItemBrandService],
+  exports: [MasterItemSupplierService, MasterItemBrandService],
 })
 export class MasterModule {}

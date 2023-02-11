@@ -1,6 +1,6 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { AccountModel } from '@core/account/schemas/account.model'
-import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
+import { MasterItemBrandModel } from '@core/master/schemas/master.item.brand'
 import { MasterItemCategory } from '@core/master/schemas/master.item.category'
 import { MasterItemUnit } from '@core/master/schemas/master.item.unit'
 import { Prop, raw, Schema } from '@nestjs/mongoose'
@@ -24,9 +24,9 @@ export class MasterItem {
   @Type(() => MasterItemUnit)
   unit: MasterItemUnit
 
-  @Prop({ type: MasterItemBrand })
-  @Type(() => MasterItemBrand)
-  brand: MasterItemBrand
+  @Prop({ type: MasterItemBrandModel })
+  @Type(() => MasterItemBrandModel)
+  brand: MasterItemBrandModel
 
   @Prop(raw(AccountJoin))
   created_by: AccountModel
