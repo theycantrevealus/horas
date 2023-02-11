@@ -51,7 +51,7 @@ export class MasterItemBrandController {
   async all(@Query('lazyEvent') parameter: string) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterItemBrandService.all({
+      return await this.masterItemBrandService.data_prime({
         first: parsedData.first,
         rows: parsedData.rows,
         sortField: parsedData.sortField,
