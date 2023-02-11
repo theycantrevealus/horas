@@ -1,6 +1,7 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
-import { Authorization } from '@decorators/authorization'
+import { AccountModel } from '@core/account/schemas/account.model'
+import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -11,11 +12,21 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
+  Version,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger'
+import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
+import { isJSON } from 'class-validator'
 
 import { AccountService } from './account.service'
 import { AccountAddDTO } from './dto/account.add'
@@ -30,13 +41,41 @@ export class AccountController {
   }
 
   @Get()
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Fetch all account',
     description: 'Showing account data',
   })
-  async all() {}
+  @ApiQuery(ApiQueryGeneral.primeDT)
+  async all(
+    @Query('lazyEvent') parameter: string,
+    @CredentialAccount() account: any
+  ) {
+    if (isJSON(parameter)) {
+      const parsedData = JSON.parse(parameter)
+      return await this.accountService.all(
+        {
+          first: parsedData.first,
+          rows: parsedData.rows,
+          sortField: parsedData.sortField,
+          sortOrder: parsedData.sortOrder,
+          filters: parsedData.filters,
+        },
+        account
+      )
+    } else {
+      return {
+        message: 'filters is not a valid json',
+        payload: {},
+      }
+    }
+  }
 
   @Get('authenticate')
+  @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
@@ -47,6 +86,7 @@ export class AccountController {
   async authenticate() {}
 
   @Post()
+  @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
@@ -55,11 +95,15 @@ export class AccountController {
     summary: 'Add new account',
     description: ``,
   })
-  async add(@Body() parameter: AccountAddDTO): Promise<GlobalResponse> {
-    return await this.accountService.add(parameter)
+  async add(
+    @Body() parameter: AccountAddDTO,
+    @CredentialAccount() account: AccountModel
+  ): Promise<GlobalResponse> {
+    return await this.accountService.add(parameter, account)
   }
 
   @Patch(':_id')
+  @Version('1')
   @ApiParam({
     name: '_id',
   })
@@ -78,14 +122,26 @@ export class AccountController {
     return await this.accountService.edit(body, param._id)
   }
 
-  @Delete(':id')
+  @Delete(':_id')
+  @Version('1')
+  @ApiParam({
+    name: '_id',
+    description: 'Data document id',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Delete account',
     description: ``,
   })
-  async delete() {}
+  async delete(@Param() param): Promise<GlobalResponse> {
+    return this.accountService.delete(param._id)
+  }
 
   @Post('signin')
+  @Version('1')
   @ApiOperation({
     summary: 'Generate account access token',
     description: ``,

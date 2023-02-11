@@ -1,5 +1,8 @@
 import { AccountService } from '@core/account/account.service'
-import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import {
+  AccountDocument,
+  AccountModel,
+} from '@core/account/schemas/account.model'
 import {
   CallHandler,
   ExecutionContext,
@@ -26,7 +29,7 @@ export interface Response<T> {
 @Injectable()
 export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
   constructor(
-    @InjectModel(Account.name)
+    @InjectModel(AccountModel.name)
     private accountModel: Model<AccountDocument>,
 
     @InjectModel(LogActivity.name)
@@ -78,10 +81,12 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
           identifier: response.transaction_id,
           log_meta: `${transaction_classify}|${request.method}`,
           method: method,
-          doc_v: body?.__v ?? 0,
+          doc_v: body.__v && !isNaN(body.__v) ? body?.__v : 0,
           action: response.action,
-          old_meta: JSON.stringify(response.payload),
-          new_meta: JSON.stringify(body),
+          // old_meta: JSON.stringify(response.payload),
+          // new_meta: JSON.stringify(body),
+          old_meta: response.payload,
+          new_meta: body,
         })
 
         await newLogActivityRepo.save()

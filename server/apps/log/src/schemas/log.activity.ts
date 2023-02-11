@@ -1,4 +1,4 @@
-import { Account } from '@core/account/schemas/account.model'
+import { AccountModel } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -14,7 +14,7 @@ export class LogActivity {
       last_name: { type: String },
     })
   )
-  account: Account
+  account: AccountModel
 
   @Prop({
     type: SchemaTypes.String,
@@ -45,14 +45,14 @@ export class LogActivity {
   action: string
 
   @Prop({
-    type: SchemaTypes.String,
+    type: SchemaTypes.Mixed,
   })
-  old_meta: string
+  old_meta: any
 
   @Prop({
-    type: SchemaTypes.String,
+    type: SchemaTypes.Mixed,
   })
-  new_meta: string
+  new_meta: any
 
   @Prop({
     type: SchemaTypes.Number,
@@ -61,7 +61,7 @@ export class LogActivity {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezoneV2('Asia/Jakarta'),
+    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
     required: true,
   })
   logged_at: Date

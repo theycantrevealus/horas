@@ -4,4 +4,5 @@ export const modCodes = {
     failed: 'F0000',
   },
   AccountService: 'ACC',
+  MenuService: 'MNU',
 }

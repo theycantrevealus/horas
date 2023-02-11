@@ -1,11 +1,11 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@core/account/schemas/account.join'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
-import { Type } from 'class-transformer'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
-export type AccountDocument = HydratedDocument<Account>
+export type AccountDocument = HydratedDocument<AccountModel>
 @Schema({ collection: 'core_account' })
-export class Account {
+export class AccountModel {
   @Prop({
     type: SchemaTypes.String,
     min: 8,
@@ -30,20 +30,22 @@ export class Account {
   })
   phone: string
 
-  @Prop({ type: Types.ObjectId, ref: Account.name })
-  @Type(() => Account)
-  created_by: Account
+  @Prop(raw(AccountJoin))
+  created_by: AccountModel
+
+  @Prop({ type: [Types.ObjectId], default: [] })
+  access: Types.ObjectId[]
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezoneV2('Asia/Jakarta'),
+    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezoneV2('Asia/Jakarta'),
+    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
     required: true,
   })
   updated_at: Date
@@ -54,4 +56,4 @@ export class Account {
   constructor() {}
 }
 
-export const AccountSchema = SchemaFactory.createForClass(Account)
+export const AccountSchema = SchemaFactory.createForClass(AccountModel)

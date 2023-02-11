@@ -7,21 +7,19 @@ import { TimeManagement } from '@utility/time'
 
 import { AccountController } from './account.controller'
 import { AccountService } from './account.service'
-import { Account, AccountSchema } from './schemas/account.model'
+import { AccountModel, AccountSchema } from './schemas/account.model'
 
 @Module({
   imports: [
     MongooseModule.forFeatureAsync([
       {
-        name: Account.name,
+        name: AccountModel.name,
         useFactory: () => {
           const schema = AccountSchema
           schema.pre('save', function (next) {
             if (this.isModified()) {
               this.increment()
-              this.updated_at = new TimeManagement().getTimezoneV2(
-                'Asia/Jakarta'
-              )
+              this.updated_at = new TimeManagement().getTimezone('Asia/Jakarta')
               return next()
             } else {
               return next(new Error('Invalid document'))

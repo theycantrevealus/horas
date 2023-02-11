@@ -40,7 +40,7 @@ export class AuthService implements JwtOptionsFactory {
           login_id: 0,
           status: HttpStatus.BAD_REQUEST,
           message: `token_create_bad_request ${e.message}`,
-          expired_at: TM.getTimezoneV2('Asia/Jakarta'),
+          expired_at: TM.getTimezone('Asia/Jakarta'),
           token: null,
         }
       }
@@ -49,7 +49,7 @@ export class AuthService implements JwtOptionsFactory {
         account: data.account,
         login_id: 0,
         status: HttpStatus.BAD_REQUEST,
-        expired_at: TM.getTimezoneV2('Asia/Jakarta'),
+        expired_at: TM.getTimezone('Asia/Jakarta'),
         message: 'token_create_bad_request',
         token: null,
       }

@@ -19,15 +19,33 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@core/*": ["./apps/core/src/modules/*"],
-      "@log/*": ["./apps/log/src/*"],
-      "@security/*": ["./apps/security/*"],
-      "@configuration/*": ["./apps/configuration/*"],
-      "@seeds/*": ["./apps/gateway/src/seeds/*"],
-      "@interceptors/*": ["./apps/interceptors/*"],
-      "@guards/*": ["./apps/guards/*"],
-      "@decorators/*": ["./apps/decorators/*"],
-      "@utility/*": ["./apps/utility/*"]
+      "@core/*": [
+        "./apps/core/src/modules/*"
+      ],
+      "@log/*": [
+        "./apps/log/src/*"
+      ],
+      "@security/*": [
+        "./apps/security/*"
+      ],
+      "@configuration/*": [
+        "./apps/configuration/*"
+      ],
+      "@seeds/*": [
+        "./apps/gateway/src/seeds/*"
+      ],
+      "@interceptors/*": [
+        "./apps/interceptors/*"
+      ],
+      "@guards/*": [
+        "./apps/guards/*"
+      ],
+      "@decorators/*": [
+        "./apps/decorators/*"
+      ],
+      "@utility/*": [
+        "./apps/utility/*"
+      ]
     }
   }
 }
