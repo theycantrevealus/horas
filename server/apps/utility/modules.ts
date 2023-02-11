@@ -5,4 +5,5 @@ export const modCodes = {
   },
   AccountService: 'ACC',
   MenuService: 'MNU',
+  MasterItemSupplierService: 'MSR-SPP',
 }

@@ -1,14 +1,15 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
+import { AccountModule } from '@core/account/account.module'
+import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { AuthModule } from '@security/auth.module'
 
-import { AuthModule } from '../../security/auth.module'
 import { CoreController } from './core.controller'
 import { CoreService } from './core.service'
-import { AccountModule } from './modules/account/account.module'
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AccountModule } from './modules/account/account.module'
     AuthModule,
     AccountModule,
     MenuModule,
+    MasterModule,
   ],
   controllers: [CoreController],
   providers: [CoreService],

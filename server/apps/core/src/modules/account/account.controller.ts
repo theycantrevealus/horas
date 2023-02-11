@@ -50,22 +50,16 @@ export class AccountController {
     description: 'Showing account data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(
-    @Query('lazyEvent') parameter: string,
-    @CredentialAccount() account: any
-  ) {
+  async all(@Query('lazyEvent') parameter: string) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.accountService.all(
-        {
-          first: parsedData.first,
-          rows: parsedData.rows,
-          sortField: parsedData.sortField,
-          sortOrder: parsedData.sortOrder,
-          filters: parsedData.filters,
-        },
-        account
-      )
+      return await this.accountService.all({
+        first: parsedData.first,
+        rows: parsedData.rows,
+        sortField: parsedData.sortField,
+        sortOrder: parsedData.sortOrder,
+        filters: parsedData.filters,
+      })
     } else {
       return {
         message: 'filters is not a valid json',

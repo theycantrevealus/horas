@@ -28,7 +28,7 @@ export class AccountService {
     this.authService = authService
   }
 
-  async all(parameter: any, account: AccountModel) {
+  async all(parameter: any) {
     const first = parameter.first ? parseInt(parameter.first) : 0
     const rows = parameter.rows ? parseInt(parameter.rows) : 20
     const sortField = parameter.sortField ? parameter.sortField : 'created_at'

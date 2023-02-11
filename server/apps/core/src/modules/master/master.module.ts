@@ -7,8 +7,10 @@ import {
 } from '@core/account/schemas/account.model'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
-import { MasterItemSupplier } from '@core/master/schemas/master.item.supplier'
-import { MenuGroupSchema } from '@core/menu/schemas/menu.group.model'
+import {
+  MasterItemSupplierModel,
+  MasterItemSupplierSchema,
+} from '@core/master/schemas/master.item.supplier'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -28,9 +30,9 @@ import { TimeManagement } from '@utility/time'
     }),
     MongooseModule.forFeatureAsync([
       {
-        name: MasterItemSupplier.name,
+        name: MasterItemSupplierModel.name,
         useFactory: () => {
-          const schema = MenuGroupSchema
+          const schema = MasterItemSupplierSchema
           schema.pre('save', function (next) {
             if (this.isModified()) {
               this.increment()
