@@ -20,4 +20,8 @@ describe('LogController', () => {
       expect(logController.getHello()).toBe('Hello World!')
     })
   })
+
+  // afterAll(async (done) => {
+  //   // done()
+  // })
 })

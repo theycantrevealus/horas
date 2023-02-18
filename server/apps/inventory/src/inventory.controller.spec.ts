@@ -14,4 +14,12 @@ describe('InventoryController', () => {
 
     inventoryController = app.get<InventoryController>(InventoryController)
   })
+
+  it('should be defined', () => {
+    expect(inventoryController).toBeDefined()
+  })
+
+  //afterAll(async (done) => {
+  // done()
+  //})
 })

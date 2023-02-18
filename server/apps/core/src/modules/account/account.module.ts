@@ -29,10 +29,39 @@ import { AccountModel, AccountSchema } from './schemas/account.model'
           return schema
         },
       },
-    ]),
-    MongooseModule.forFeature([
-      { name: LogLogin.name, schema: LogLoginSchema },
-      { name: LogActivity.name, schema: LogActivitySchema },
+      {
+        name: LogLogin.name,
+        useFactory: () => {
+          const schema = LogLoginSchema
+          schema.pre('save', function (next) {
+            return next()
+          })
+
+          return schema
+        },
+      },
+      {
+        name: LogLogin.name,
+        useFactory: () => {
+          const schema = LogLoginSchema
+          schema.pre('save', function (next) {
+            return next()
+          })
+
+          return schema
+        },
+      },
+      {
+        name: LogActivity.name,
+        useFactory: () => {
+          const schema = LogActivitySchema
+          schema.pre('save', function (next) {
+            return next()
+          })
+
+          return schema
+        },
+      },
     ]),
     AuthModule,
   ],
