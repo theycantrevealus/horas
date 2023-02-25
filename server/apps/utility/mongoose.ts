@@ -1,21 +1,32 @@
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import mongoose from 'mongoose'
 
-let mongod: MongoMemoryServer
+const mongoServer = new MongoMemoryServer()
 
-export const rootMongooseTestModule = (options: MongooseModuleOptions = {}) =>
-  MongooseModule.forRootAsync({
+const connect = async (opts: MongooseModuleOptions = {}) => {
+  return MongooseModule.forRootAsync({
     useFactory: async () => {
-      mongod = await MongoMemoryServer.create()
-      mongod.ensureInstance()
-      const mongoUri = mongod.getUri()
+      await mongoServer.ensureInstance()
+      const uri = mongoServer.getUri()
       return {
-        uri: mongoUri,
-        ...options,
+        uri: uri,
       }
     },
   })
-
-export const closeInMongodConnection = async () => {
-  if (mongod) await mongod.stop()
 }
+
+const close = async () => {
+  await mongoose.disconnect()
+  await mongoServer.stop()
+}
+
+const clear = async () => {
+  const collections = mongoose.connection.collections
+
+  for (const key in collections) {
+    await collections[key].deleteMany({})
+  }
+}
+
+export { clear, close, connect }

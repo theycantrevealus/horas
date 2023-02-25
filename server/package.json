@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/server/test/jest-e2e.json"
+    "test:e2e": "jest --config ./jest-e2e.json",
+    "test:unit": "jest --config ./jest-unit.json"
   },
   "dependencies": {
     "@nestjs/common": "^9.2.1",
@@ -37,6 +38,7 @@
     "rxjs": "^7.8.0"
   },
   "devDependencies": {
+    "@golevelup/ts-jest": "^0.3.5",
     "@nestjs/cli": "^9.1.9",
     "@nestjs/microservices": "^9.3.8",
     "@nestjs/passport": "^9.0.0",

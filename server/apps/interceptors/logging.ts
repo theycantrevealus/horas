@@ -3,24 +3,21 @@ import {
   AccountDocument,
   AccountModel,
 } from '@core/account/schemas/account.model'
+import { LogActivity, LogActivityDocument } from '@log/schemas/log.activity'
 import {
   CallHandler,
   ExecutionContext,
+  Inject,
   Injectable,
   Logger,
   NestInterceptor,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { AuthService } from '@security/auth.service'
 import { Model } from 'mongoose'
 import * as requestIp from 'request-ip'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
-
-import {
-  LogActivity,
-  LogActivityDocument,
-} from '../log/src/schemas/log.activity'
-import { AuthService } from '../security/auth.service'
 
 export interface Response<T> {
   data: T
@@ -35,8 +32,10 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     @InjectModel(LogActivity.name)
     private logActivityModel: Model<LogActivityDocument>,
 
-    private authService: AuthService,
-    private acccountService: AccountService
+    @Inject(AuthService)
+    private readonly authService: AuthService,
+    @Inject(AccountService)
+    private readonly acccountService: AccountService
   ) {
     //
   }

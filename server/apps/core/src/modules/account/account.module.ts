@@ -2,7 +2,7 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { AuthModule } from '@security/auth.module'
+import { AuthService } from '@security/auth.service'
 import { TimeManagement } from '@utility/time'
 
 import { AccountController } from './account.controller'
@@ -63,10 +63,9 @@ import { AccountModel, AccountSchema } from './schemas/account.model'
         },
       },
     ]),
-    AuthModule,
   ],
   controllers: [AccountController],
-  providers: [AccountService],
+  providers: [AccountService, { provide: AuthService, useValue: {} }],
   exports: [AccountService],
 })
 export class AccountModule {}
