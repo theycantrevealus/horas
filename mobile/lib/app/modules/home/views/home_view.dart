@@ -17,7 +17,7 @@ class HomeView extends GetView<HomeController> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'HORAS',
+            'HORAS OK',
             style: HorasTextStyle.h4.copyWith(
               color: HorasColors.black,
             ),
