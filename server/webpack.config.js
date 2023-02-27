@@ -1,156 +1,90 @@
-const webpack = require('webpack')
-const nodeExternals = require('webpack-node-externals')
-const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin')
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
-const TerserPlugin = require('terser-webpack-plugin')
-const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const nodeExternals = require('webpack-node-externals')
+const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin')
 
-const tsConfigFile = 'tsconfig.build.json'
-
-const lazyImports = [
-  '@nestjs/microservices',
-  'cache-manager',
-  'class-validator',
-  'class-transformer',
-]
-
-const config = {
-  entry: {
-    server: `./src/main.ts`,
-    'app-init': './scripts/app-init.ts',
-    'prisma-migrations': './scripts/prisma-migrations.ts',
-  },
-  output: {
-    filename: `[name].js`,
-    path: path.join(__dirname, 'dist'),
-    devtoolModuleFilenameTemplate: `${path.sep}[absolute-resource-path][loaders]`,
-  },
-  cache: {
-    type: 'filesystem',
-    cacheDirectory: path.resolve(__dirname, '.build_cache'),
-  },
-  devtool: false,
-  target: 'node',
-  mode: 'none',
-  optimization: {
-    nodeEnv: false,
-  },
-  node: {
-    __filename: false,
-    __dirname: false,
-  },
-  externals: [nodeExternals()],
-  module: {
-    rules: [
-      {
-        test: /.ts?$/,
-        include: [path.resolve(__dirname, 'src')],
-        use: [
-          {
-            loader: 'ts-loader',
-            options: {
-              transpileOnly: true,
-              configFile: tsConfigFile,
-            },
-          },
-        ],
-        exclude: /node_modules/,
-      },
-    ],
-  },
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-    plugins: [
-      new TsconfigPathsPlugin({
-        configFile: tsConfigFile,
+module.exports = (options, webpack) => {
+  const identifierModule = options.output.filename.split('/')
+  return {
+    ...options,
+    entry: ['webpack/hot/poll?100', options.entry],
+    target: 'node',
+    optimization: {
+      minimize: false,
+    },
+    node: {
+      __dirname: false,
+    },
+    externals: [
+      nodeExternals({
+        allowlist: ['webpack/hot/poll?100'],
       }),
     ],
-  },
-  plugins: [
-    new webpack.ProgressPlugin(),
-    new webpack.IgnorePlugin({
-      checkResource(resource) {
-        if (!lazyImports.includes(resource)) {
-          return false
-        }
-        try {
-          require.resolve(resource, {
-            paths: [process.cwd()],
-          })
-        } catch (err) {
-          return true
-        }
-        return false
-      },
-    }),
-    new CleanWebpackPlugin(),
-    new ForkTsCheckerWebpackPlugin({
-      typescript: {
-        configFile: tsConfigFile,
-      },
-    }),
-  ],
-}
-
-module.exports = (
-  env = { debug: false },
-  argv = { mode: 'none', watch: false }
-) => {
-  config.mode = argv.mode
-
-  if (argv.mode === 'development') {
-    config.watch = argv.watch
-    config.cache.name = env.debug ? 'development_debug' : 'development'
-    config.devtool = env.debug ? 'eval-source-map' : undefined
-
-    // If running in watch mode
-    if (config.watch) {
-      config.cache.name = env.debug
-        ? 'development_debug_hmr'
-        : 'development_hmr'
-      config.entry = {
-        ...config.entry,
-        server: [
-          'webpack/hot/poll?100',
-          'webpack/hot/signal',
-          config.entry.server,
-        ],
-      }
-      config.externals = [
-        nodeExternals({
-          allowlist: ['webpack/hot/poll?100', 'webpack/hot/signal'],
-        }),
-      ]
-      config.plugins = [
-        ...config.plugins,
-        new webpack.WatchIgnorePlugin({ paths: [/\.js$/, /\.d\.ts$/] }),
-        new webpack.HotModuleReplacementPlugin(),
-        new RunScriptWebpackPlugin({
-          name: 'server.js',
-          nodeArgs: env.debug ? ['--inspect'] : undefined, // Allow debugging
-          signal: true, // Signal to send for HMR (defaults to `false`, uses 'SIGUSR2' if `true`)
-          keyboard: true, // Allow typing 'rs' to restart the server. default: only if NODE_ENV is 'development'
-          // args: ['scriptArgument1', 'scriptArgument2'], // pass args to script
-        }),
-      ]
-    }
-  }
-
-  if (argv.mode === 'production') {
-    config.devtool = 'source-map'
-    config.cache.name = 'production'
-    config.optimization.minimize = true
-    config.optimization.minimizer = [
-      new TerserPlugin({
-        terserOptions: {
-          keep_classnames: true,
-          keep_fnames: true,
+    module: {
+      rules: [
+        {
+          test: /my_client\/.*\.js$/,
+          use: 'imports-loader?define=>false',
         },
+        {
+          test: /.tsx?$/,
+          use: 'ts-loader',
+          exclude: /node_modules/,
+        },
+        {
+          test: /\.css$/,
+          use: ['css-loader'],
+        },
+        {
+          test: /\.png$/,
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                mimetype: 'image/png',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    mode: 'development',
+    resolve: {
+      alias: {
+        '@core': path.resolve(__dirname, 'apps/core/src/modules'),
+        '@log': path.resolve(__dirname, 'apps/log/src'),
+        '@security': path.resolve(__dirname, 'apps/security'),
+        '@configuration': path.resolve(__dirname, 'apps/configuration'),
+        '@utility': path.resolve(__dirname, 'apps/utility'),
+        '@interceptors': path.resolve(__dirname, 'apps/interceptors'),
+        '@guards': path.resolve(__dirname, 'apps/guards'),
+        '@decorators': path.resolve(__dirname, 'apps/decorators'),
+      },
+      extensions: ['.tsx', '.ts', '.js'],
+    },
+    plugins: [
+      ...options.plugins,
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.WatchIgnorePlugin({
+        paths: [/\.js$/, /\.d\.ts$/],
       }),
-    ]
+      new RunScriptWebpackPlugin({
+        name: `${identifierModule[1]}.server.js`,
+        autoRestart: false,
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          './node_modules/swagger-ui-dist/swagger-ui.css',
+          './node_modules/swagger-ui-dist/swagger-ui-bundle.js',
+          './node_modules/swagger-ui-dist/swagger-ui-standalone-preset.js',
+          './node_modules/swagger-ui-dist/favicon-16x16.png',
+          './node_modules/swagger-ui-dist/favicon-32x32.png',
+        ],
+      }),
+    ],
+    output: {
+      path: path.join(__dirname, 'dist'),
+      filename: `${identifierModule[1]}.server.js`,
+    },
   }
-
-  return config
 }
