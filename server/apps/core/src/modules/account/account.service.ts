@@ -2,7 +2,7 @@ import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
 import { IAccount } from '@core/account/interface/account'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
-import { Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
@@ -14,24 +14,23 @@ import * as bcrypt from 'bcrypt'
 import { Model, Types } from 'mongoose'
 
 import { AccountAddDTO } from './dto/account.add'
-import { AccountDocument, AccountModel } from './schemas/account.model'
+import { Account, AccountDocument } from './schemas/account.model'
 
 @Injectable()
 export class AccountService {
   constructor(
-    @InjectModel(AccountModel.name)
+    @InjectModel(Account.name)
     private accountModel: Model<AccountDocument>,
     @InjectModel(LogLogin.name)
     private logLoginModel: Model<LogLoginDocument>,
-    @Inject(AuthService)
-    private readonly authService: AuthService
+    private authService: AuthService
   ) {}
 
   async all(parameter: any) {
     return await prime_datatable(parameter, this.accountModel)
   }
 
-  async detail(_id: string): Promise<AccountModel> {
+  async detail(_id: string): Promise<Account> {
     return this.accountModel.findOne({ _id: _id })
   }
 
@@ -79,8 +78,8 @@ export class AccountService {
     return response
   }
 
-  async find(filter: any): Promise<AccountModel | undefined> {
-    return this.accountModel.findOne(filter)
+  async find(filter: any): Promise<Account | undefined> {
+    return this.accountModel.findOne(filter).exec()
   }
 
   async crawl(filter: any): Promise<IAccount> {
@@ -112,45 +111,49 @@ export class AccountService {
       transaction_id: new Types.ObjectId(_id),
     } satisfies GlobalResponse
 
-    const data = await this.accountModel.findOne({
-      _id: new Types.ObjectId(_id),
-      __v: parameter.__v,
-    })
-
-    if (data) {
-      data.email = parameter.email
-      data.first_name = parameter.first_name
-      data.last_name = parameter.last_name
-
-      await data
-        .save()
-        .then((result) => {
-          response.message = 'Account updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.success
-          }`
-        })
-        .catch((error: Error) => {
-          response.message = `Account failed to update. ${error.message}`
+    await this.accountModel
+      .findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(_id),
+          __v: parameter.__v,
+        },
+        {
+          email: parameter.email,
+          first_name: parameter.first_name,
+          last_name: parameter.last_name,
+        }
+      )
+      .exec()
+      .then((result) => {
+        if (result === null) {
+          response.message = `Account failed to update`
           response.statusCode = `${modCodes[this.constructor.name]}_I_${
             modCodes.Global.failed
           }`
-          response.payload = error
-        })
-    } else {
-      response.message = `Account failed to update. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
-    }
+          response.payload = result
+        } else {
+          result.__v++
+          response.message = 'Account updated successfully'
+          response.payload = result
+          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+            modCodes.Global.success
+          }`
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Account failed to update. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          modCodes.Global.failed
+        }`
+        response.payload = error
+      })
 
     return response
   }
 
   async add(
     parameter: AccountAddDTO,
-    credential: AccountModel
+    credential: Account
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -164,12 +167,11 @@ export class AccountService {
     const password = parameter.password
     parameter.password = await bcrypt.hash(password, saltOrRounds)
 
-    const newAccount = new this.accountModel({
-      ...parameter,
-      created_by: credential,
-    })
-    await newAccount
-      .save()
+    await this.accountModel
+      .create({
+        ...parameter,
+        created_by: credential,
+      })
       .then((result) => {
         response.message = 'Account created successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
@@ -236,16 +238,18 @@ export class AccountService {
                     expired_at: oldToken.expired_at,
                   }
                 } else {
-                  const tokenSet = await this.authService.create_token({
-                    id: idenPass,
-                    currentTime: currentTime,
-                    account: result,
-                  })
-
-                  token = {
-                    set: tokenSet.token,
-                    expired_at: tokenSet.expired_at,
-                  }
+                  await this.authService
+                    .create_token({
+                      id: idenPass,
+                      currentTime: currentTime,
+                      account: result,
+                    })
+                    .then((tokenSet) => {
+                      token = {
+                        set: tokenSet.token,
+                        expired_at: tokenSet.expired_at,
+                      }
+                    })
                 }
 
                 const logLogin = new this.logLoginModel({
@@ -260,7 +264,6 @@ export class AccountService {
                 await logLogin
                   .save()
                   .then(async (loginResult: any) => {
-                    console.log(result)
                     response.message = 'Sign in success'
                     response.statusCode = `${
                       modCodes[this.constructor.name]
@@ -276,14 +279,18 @@ export class AccountService {
                     response.statusCode = `${
                       modCodes[this.constructor.name]
                     }_I_${modCodes.Global.failed}`
-                    response.payload = {}
+                    response.payload = {
+                      hell: 1,
+                    }
                   })
               } else {
                 response.message = `Sign in failed. Account not found`
                 response.statusCode = `${modCodes[this.constructor.name]}_I_${
                   modCodes.Global.failed
                 }`
-                response.payload = {}
+                response.payload = {
+                  hell: 2,
+                }
               }
             })
         } else {
@@ -291,7 +298,9 @@ export class AccountService {
           response.statusCode = `${modCodes[this.constructor.name]}_I_${
             modCodes.Global.failed
           }`
-          response.payload = {}
+          response.payload = {
+            hell: 3,
+          }
         }
       })
       .catch((error: Error) => {
@@ -299,7 +308,7 @@ export class AccountService {
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.failed
         }`
-        response.payload = error
+        response.payload = error.message
       })
     return response
   }

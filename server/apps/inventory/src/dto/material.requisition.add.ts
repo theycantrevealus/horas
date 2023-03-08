@@ -1,5 +1,5 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { SchemaTypes } from 'mongoose'
@@ -13,7 +13,7 @@ export class MaterialRequisitionAddDTO {
   items: MaterialRequisitionItemDTO[]
 
   @Prop(raw(AccountJoin))
-  created_by: AccountModel
+  created_by: Account
 
   @Prop({
     type: SchemaTypes.Date,

@@ -1,8 +1,5 @@
 import { AccountService } from '@core/account/account.service'
-import {
-  AccountDocument,
-  AccountModel,
-} from '@core/account/schemas/account.model'
+import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { LogActivity, LogActivityDocument } from '@log/schemas/log.activity'
 import {
   CallHandler,
@@ -26,7 +23,7 @@ export interface Response<T> {
 @Injectable()
 export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
   constructor(
-    @InjectModel(AccountModel.name)
+    @InjectModel(Account.name)
     private accountModel: Model<AccountDocument>,
 
     @InjectModel(LogActivity.name)

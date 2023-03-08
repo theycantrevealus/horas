@@ -32,6 +32,7 @@ export class TimeManagement {
     // return moment.tz(Date.now(), target).format('YYYY-MM-DD HH:mm:ss')
     // return new Date(moment().utcOffset('+7').format('YYYY-MM-DD HH:mm:ss'))
     return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
+    //return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
   }
   addTime(from, target, seconds: number) {
     return moment(from)

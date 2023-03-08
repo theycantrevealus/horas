@@ -12,9 +12,15 @@ import { AuthService } from './auth.service'
       imports: [ConfigModule],
       useFactory: async (
         configService: ConfigService
-      ): Promise<JwtModuleOptions> => ({
-        secret: configService.get<string>('application.jwt'),
-      }),
+      ): Promise<JwtModuleOptions> => {
+        const expiresIn = 30 * 24 * 60 * 60
+        return {
+          secret: configService.get<string>('application.jwt'),
+          signOptions: {
+            expiresIn: expiresIn,
+          },
+        }
+      },
       inject: [ConfigService],
     }),
   ],

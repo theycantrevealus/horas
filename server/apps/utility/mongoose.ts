@@ -3,8 +3,10 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 
 const mongoServer = new MongoMemoryServer()
-
-const connect = async (opts: MongooseModuleOptions = {}) => {
+// let connection: Connection
+const MongoConnect = async (opts: MongooseModuleOptions = {}) => {
+  // connection = await module.get(getConnectionToken())
+  // await connect()
   return MongooseModule.forRootAsync({
     useFactory: async () => {
       await mongoServer.ensureInstance()
@@ -16,8 +18,8 @@ const connect = async (opts: MongooseModuleOptions = {}) => {
   })
 }
 
-const close = async () => {
-  await mongoose.disconnect()
+const MongoClose = async () => {
+  // await connection.close()
   await mongoServer.stop()
 }
 
@@ -29,4 +31,4 @@ const clear = async () => {
   }
 }
 
-export { clear, close, connect }
+export { clear, MongoClose, MongoConnect }

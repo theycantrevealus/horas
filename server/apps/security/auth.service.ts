@@ -8,7 +8,7 @@ import { JWTTokenDecodeResponse, JWTTokenResponse } from './auth.dto'
 
 @Injectable()
 export class AuthService implements JwtOptionsFactory {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) {}
   createJwtOptions(): JwtModuleOptions {
     return {
       secret: process.env.JWT_SECRET,
@@ -22,9 +22,8 @@ export class AuthService implements JwtOptionsFactory {
       try {
         const expiresIn = 30 * 24 * 60 * 60
         // const expiresIn = 30
-        const token = this.jwtService.sign(data, {
-          expiresIn: expiresIn,
-        })
+
+        const token = this.jwtService.sign(data)
 
         result = {
           account: data.account,

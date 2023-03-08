@@ -1,5 +1,5 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { MenuGroupModel } from '@core/menu/schemas/menu.group.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
@@ -47,7 +47,7 @@ export class MenuModel {
   menu_group: MenuGroupModel
 
   @Prop(raw(AccountJoin))
-  created_by: AccountModel
+  created_by: Account
 
   @Prop({
     type: SchemaTypes.Date,

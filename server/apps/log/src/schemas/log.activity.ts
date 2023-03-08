@@ -1,4 +1,4 @@
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -14,7 +14,7 @@ export class LogActivity {
       last_name: { type: String },
     })
   )
-  account: AccountModel
+  account: Account
 
   @Prop({
     type: SchemaTypes.String,

@@ -1,4 +1,4 @@
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
@@ -28,7 +28,7 @@ export class MasterItemBrandService {
 
   async add(
     parameter: MasterItemBrandAddDTO,
-    account: AccountModel
+    account: Account
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',

@@ -1,5 +1,5 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -17,7 +17,7 @@ export class MasterItemBrandModel {
   remark: string
 
   @Prop(raw(AccountJoin))
-  created_by: AccountModel
+  created_by: Account
 
   @Prop({
     type: SchemaTypes.Date,

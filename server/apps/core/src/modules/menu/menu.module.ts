@@ -2,10 +2,7 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
 import { AccountService } from '@core/account/account.service'
-import {
-  AccountModel,
-  AccountSchema,
-} from '@core/account/schemas/account.model'
+import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { MenuGroupController } from '@core/menu/menu.group.controller'
 import { MenuGroupService } from '@core/menu/menu.group.service'
 import {
@@ -50,7 +47,7 @@ import { TimeManagement } from '@utility/time'
       },
     ]),
     MongooseModule.forFeature([
-      { name: AccountModel.name, schema: AccountSchema },
+      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
 

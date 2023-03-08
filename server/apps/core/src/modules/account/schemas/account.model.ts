@@ -5,9 +5,9 @@ import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
-export type AccountDocument = HydratedDocument<AccountModel>
+export type AccountDocument = HydratedDocument<Account>
 @Schema({ collection: 'core_account' })
-export class AccountModel {
+export class Account {
   @Prop({
     type: SchemaTypes.String,
     min: 8,
@@ -65,4 +65,4 @@ export class AccountModel {
   }
 }
 
-export const AccountSchema = SchemaFactory.createForClass(AccountModel)
+export const AccountSchema = SchemaFactory.createForClass(Account)

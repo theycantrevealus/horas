@@ -1,4 +1,4 @@
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import {
   MasterItemSupplierAddDTO,
   MasterItemSupplierEditDTO,
@@ -28,7 +28,7 @@ export class MasterItemSupplierService {
 
   async add(
     parameter: MasterItemSupplierAddDTO,
-    account: AccountModel
+    account: Account
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',

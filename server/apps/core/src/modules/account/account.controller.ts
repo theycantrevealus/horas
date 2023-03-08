@@ -1,6 +1,6 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
@@ -91,7 +91,7 @@ export class AccountController {
   })
   async add(
     @Body() parameter: AccountAddDTO,
-    @CredentialAccount() account: AccountModel
+    @CredentialAccount() account: Account
   ): Promise<GlobalResponse> {
     return await this.accountService.add(parameter, account)
   }

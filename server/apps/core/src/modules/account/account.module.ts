@@ -2,18 +2,18 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { AuthService } from '@security/auth.service'
+import { AuthModule } from '@security/auth.module'
 import { TimeManagement } from '@utility/time'
 
 import { AccountController } from './account.controller'
 import { AccountService } from './account.service'
-import { AccountModel, AccountSchema } from './schemas/account.model'
+import { Account, AccountSchema } from './schemas/account.model'
 
 @Module({
   imports: [
     MongooseModule.forFeatureAsync([
       {
-        name: AccountModel.name,
+        name: Account.name,
         useFactory: () => {
           const schema = AccountSchema
           schema.pre('save', function (next) {
@@ -24,6 +24,12 @@ import { AccountModel, AccountSchema } from './schemas/account.model'
             } else {
               return next(new Error('Invalid document'))
             }
+          })
+
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['$inc'] = { __v: 1 }
+            next()
           })
 
           return schema
@@ -63,9 +69,10 @@ import { AccountModel, AccountSchema } from './schemas/account.model'
         },
       },
     ]),
+    AuthModule,
   ],
   controllers: [AccountController],
-  providers: [AccountService, { provide: AuthService, useValue: {} }],
+  providers: [AccountService],
   exports: [AccountService],
 })
 export class AccountModule {}

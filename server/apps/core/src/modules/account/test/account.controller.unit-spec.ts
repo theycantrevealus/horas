@@ -1,7 +1,7 @@
 import { AccountController } from '@core/account/account.controller'
 import { mockAccountService } from '@core/account/mock/account.mock'
 import { accountAddStub, accountStub } from '@core/account/mock/account.stub'
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { LogActivity } from '@log/schemas/log.activity'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -19,7 +19,7 @@ describe('Account Controller', () => {
       providers: [
         { provide: AccountService, useValue: mockAccountService },
         { provide: AuthService, useValue: {} },
-        { provide: getModelToken(AccountModel.name), useValue: {} },
+        { provide: getModelToken(Account.name), useValue: {} },
         { provide: getModelToken(LogActivity.name), useValue: {} },
       ],
     }).compile()
@@ -39,7 +39,7 @@ describe('Account Controller', () => {
   })
 
   it('Pass sign in to service', async () => {
-    const creator = new AccountModel(accountStub())
+    const creator = new Account(accountStub())
     await controller.add(accountAddStub(), creator)
     expect(mockAccountService.add).toHaveBeenCalledWith(
       accountAddStub(),

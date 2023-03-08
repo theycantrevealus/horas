@@ -1,4 +1,4 @@
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { ApiProperty } from '@nestjs/swagger'
 
 export class MenuGroupAddDTO {
@@ -16,7 +16,7 @@ export class MenuGroupAddDTO {
   })
   description: string
 
-  created_by: AccountModel
+  created_by: Account
 
   @ApiProperty({
     type: Number,

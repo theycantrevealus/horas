@@ -67,9 +67,7 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
   }
   //---------------------------------------------------------------------------
 
-  const allNoFilter = await model.aggregate(query, (err, result) => {
-    return result
-  })
+  const allNoFilter = await model.aggregate(query).exec()
 
   query.push({ $skip: first })
 
@@ -85,15 +83,23 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
     })
   }
 
-  const data = await model.aggregate(query, (err, result) => {
-    return result
-  })
+  const data = await model.aggregate(query).exec()
 
-  return {
-    message: HttpStatus.OK,
-    payload: {
-      totalRecords: allNoFilter.length,
-      data: data,
-    },
+  if (allNoFilter) {
+    return {
+      message: HttpStatus.OK,
+      payload: {
+        totalRecords: allNoFilter.length,
+        data: data,
+      },
+    }
+  } else {
+    return {
+      message: HttpStatus.NO_CONTENT,
+      payload: {
+        totalRecords: 0,
+        data: [],
+      },
+    }
   }
 }

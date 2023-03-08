@@ -1,5 +1,5 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { AccountModel } from '@core/account/schemas/account.model'
+import { Account } from '@core/account/schemas/account.model'
 import { MasterItemBrandModel } from '@core/master/schemas/master.item.brand'
 import { MasterItemCategory } from '@core/master/schemas/master.item.category'
 import { MasterItemUnit } from '@core/master/schemas/master.item.unit'
@@ -29,7 +29,7 @@ export class MasterItem {
   brand: MasterItemBrandModel
 
   @Prop(raw(AccountJoin))
-  created_by: AccountModel
+  created_by: Account
 
   @Prop({
     type: SchemaTypes.Date,
