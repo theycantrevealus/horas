@@ -38,13 +38,17 @@ export class MasterItemBrandService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const newData = new this.masterItemBrandModel({
-      ...parameter,
-      created_by: account,
-    })
+    if (!parameter.code) {
+      parameter.code = `${
+        modCodes[this.constructor.name]
+      }-${new Date().getTime()}`
+    }
 
-    await newData
-      .save()
+    await this.masterItemBrandModel
+      .create({
+        ...parameter,
+        created_by: account,
+      })
       .then((result) => {
         response.message = 'Master item brand created successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
@@ -75,39 +79,42 @@ export class MasterItemBrandService {
       transaction_classify: 'MASTER_ITEM_BRAND_EDIT',
       transaction_id: null,
     } satisfies GlobalResponse
-    const data = await this.masterItemBrandModel.findOne({
-      _id: new Types.ObjectId(_id),
-      __v: parameter.__v,
-    })
 
-    if (data) {
-      data.code = parameter.code
-      data.name = parameter.name
-      data.remark = parameter.remark
-
-      await data
-        .save()
-        .then((result) => {
+    await this.masterItemBrandModel
+      .findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(_id),
+          __v: parameter.__v,
+        },
+        {
+          code: parameter.code,
+          name: parameter.name,
+          remark: parameter.remark,
+        }
+      )
+      .then((result) => {
+        if (result) {
           response.message = 'Master item brand updated successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_I_${
             modCodes.Global.success
           }`
+          result.__v++
           response.payload = result
-        })
-        .catch((error: Error) => {
-          response.message = `Master item brand failed to update. ${error.message}`
+        } else {
+          response.message = `Master item brand failed to update. Invalid document`
           response.statusCode = `${modCodes[this.constructor.name]}_I_${
             modCodes.Global.failed
           }`
-          response.payload = error
-        })
-    } else {
-      response.message = `Master item brand failed to update. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
-    }
+          response.payload = {}
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Master item brand failed to update. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          modCodes.Global.failed
+        }`
+        response.payload = error
+      })
     return response
   }
 

@@ -6,4 +6,5 @@ export const modCodes = {
   AccountService: 'ACC',
   MenuService: 'MNU',
   MasterItemSupplierService: 'MSR-SPP',
+  MasterItemBrandService: 'MSR-BRD',
 }

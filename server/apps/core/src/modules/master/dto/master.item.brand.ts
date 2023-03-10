@@ -6,11 +6,9 @@ export class MasterItemBrandAddDTO {
     example: 'xxx-xxxx',
     minLength: 8,
     maxLength: 24,
+    required: false,
     description: 'Unique code of item brand',
   })
-  @MinLength(8)
-  @MaxLength(24)
-  @IsNotEmpty()
   code: string
 
   @ApiProperty({
@@ -26,6 +24,10 @@ export class MasterItemBrandAddDTO {
   })
   @IsNotEmpty()
   remark: string
+
+  @IsNotEmpty()
+  @IsNumber()
+  __v: number
 }
 
 export class MasterItemBrandEditDTO {
@@ -54,6 +56,10 @@ export class MasterItemBrandEditDTO {
   @IsNotEmpty()
   remark: string
 
+  @ApiProperty({
+    example: 0,
+    description: 'Item brand document version',
+  })
   @IsNotEmpty()
   @IsNumber()
   __v: number
