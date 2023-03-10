@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest-e2e.json",
-    "test:unit": "jest --config ./jest-unit.json --watch --verbose --runInBand",
+    "test:unit": "jest --config ./jest-unit.json --verbose --runInBand",
+    "test:unit:watch": "jest --config ./jest-unit.json --watch --verbose --runInBand",
     "test:unit:cov": "jest --config ./jest-unit.json --watch --verbose --runInBand --coverage"
   },
   "dependencies": {
