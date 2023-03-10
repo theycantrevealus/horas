@@ -28,5 +28,5 @@ jobs:
         cache-dependency-path: '**/package-lock.json'
         cache: 'npm'
     - run: npm ci
-    - run: npm test:unit:cov --if-present
+    - run: npm run test:unit --if-present
     
