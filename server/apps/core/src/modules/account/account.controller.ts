@@ -79,6 +79,19 @@ export class AccountController {
   })
   async authenticate() {}
 
+  @Get('_id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Detail data',
+    description: '',
+  })
+  async detail(@Param() param) {
+    return await this.accountService.detail(param._id)
+  }
+
   @Post()
   @Version('1')
   @UseGuards(JwtAuthGuard)

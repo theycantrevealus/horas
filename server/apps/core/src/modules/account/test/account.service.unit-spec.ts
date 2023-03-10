@@ -1,3 +1,5 @@
+import { AccountAddDTO } from '@core/account/dto/account.add'
+import { AccountEditDTO } from '@core/account/dto/account.edit'
 import {
   accountDocArray,
   mockAccount,
@@ -8,6 +10,7 @@ import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
+import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
@@ -26,11 +29,12 @@ describe('Account Service', () => {
       controllers: [],
       providers: [
         AccountService,
+        AuthService,
+        JwtService,
         {
           provide: getModelToken(Account.name),
           useValue: mockAccountModel,
         },
-        { provide: AuthService, useValue: {} },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
       ],
@@ -46,11 +50,14 @@ describe('Account Service', () => {
     jest.clearAllMocks()
   })
 
-  it(testCaption('SERVICE STATE', 'ddl', 'Service should be defined'), () => {
-    expect(service).toBeDefined()
-  })
+  it(
+    testCaption('SERVICE STATE', 'component', 'Service should be defined'),
+    () => {
+      expect(service).toBeDefined()
+    }
+  )
 
-  it(testCaption('DATA', 'dml', 'Should list all account'), async () => {
+  it(testCaption('DATA', 'data', 'Should list all account'), async () => {
     jest.spyOn(model, 'aggregate').mockReturnValue({
       exec: jest.fn().mockReturnValue(accountDocArray),
     } as any)
@@ -66,7 +73,7 @@ describe('Account Service', () => {
     expect(accounts.payload.data).toEqual(accountDocArray)
   })
 
-  it(testCaption('DATA', 'dml', 'Should show account detail'), async () => {
+  it(testCaption('DATA', 'data', 'Should show account detail'), async () => {
     jest.spyOn(model, 'findOne').mockReturnValueOnce(
       createMock<Query<AccountDocument, AccountDocument>>({
         exec: jest.fn().mockResolvedValueOnce(accountDocArray[0]),
@@ -80,19 +87,19 @@ describe('Account Service', () => {
     expect(foundAccount).toEqual(findMockAccount)
   })
 
-  it(testCaption('DATA', 'dml', 'Should create a new account'), async () => {
+  it(testCaption('DATA', 'data', 'Should create a new account'), async () => {
     jest.spyOn(model, 'create').mockImplementationOnce(() => {
       return Promise.resolve(accountDocArray[0])
     })
 
     const newAccount = (await service.add(
-      { ...mockAccount(), __v: 0 },
+      new AccountAddDTO({ ...mockAccount(), __v: 0 }),
       mockAccount()
     )) satisfies GlobalResponse
     expect(newAccount.payload).toHaveProperty('first_name')
   })
 
-  it(testCaption('DATA', 'dml', 'Should edit account data'), async () => {
+  it(testCaption('DATA', 'data', 'Should edit account data'), async () => {
     jest.spyOn(model, 'findOneAndUpdate').mockReturnValueOnce(
       createMock<Query<AccountDocument, AccountDocument>>({
         exec: jest.fn().mockResolvedValueOnce(mockAccountDoc()),
@@ -100,21 +107,19 @@ describe('Account Service', () => {
     )
 
     const data = (await service.edit(
-      {
+      new AccountEditDTO({
         email: accountDocArray[1].email,
         first_name: accountDocArray[1].first_name,
         last_name: accountDocArray[1].last_name,
         phone: accountDocArray[1].phone,
         __v: 0,
-      },
+      }),
       new Types.ObjectId().toString()
     )) satisfies GlobalResponse
     expect(data.payload).toHaveProperty('first_name')
   })
 
-  it.skip('Login test', async () => {})
-
   afterAll(async () => {
-    // await MongoClose()
+    jest.clearAllMocks()
   })
 })

@@ -3,14 +3,17 @@ export function testCaption(
   type,
   caption,
   option = {
-    lLen: 10,
-    rLen: 20,
+    isSkipped: false,
   }
 ) {
-  const lPad = '                            '
+  const lPad = option.isSkipped
+    ? '                    '
+    : '                            '
   const typeLib = {
-    dml: '📦',
+    data: '📦',
     ddl: '📀',
+    component: '📑',
+    feature: '🚀',
   }
 
   return (

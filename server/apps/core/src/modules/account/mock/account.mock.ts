@@ -1,4 +1,5 @@
 import { AccountAddDTO } from '@core/account/dto/account.add'
+import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { TimeManagement } from '@utility/time'
@@ -9,7 +10,9 @@ export const mockAccountService = {
   add: jest.fn().mockResolvedValue((dto: AccountAddDTO, account: Account) => {
     return {}
   }),
-  edit: jest.fn().mockResolvedValue((dto) => dto),
+  edit: jest.fn().mockResolvedValue((dto: AccountEditDTO, id: string) => {
+    return {}
+  }),
   detail: jest.fn().mockResolvedValue((dto) => dto),
   find: jest.fn().mockResolvedValue((dto) => dto),
   delete: jest.fn().mockResolvedValue((dto) => dto),
@@ -94,7 +97,7 @@ export const accountDocArray = [
     first_name: 'Vitani',
     last_name: 'Doe',
     email: 'vitani_doe@domain.com',
-    password: '',
+    password: '123456',
     phone: '6285261510200',
     access: [],
   }),
