@@ -17,11 +17,7 @@ import { LogActivity, LogActivityDocument } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { INestApplication, VersioningType } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import {
-  getModelToken,
-  MongooseModule,
-  MongooseModuleOptions,
-} from '@nestjs/mongoose'
+import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthModule } from '@security/auth.module'
 import { testCaption } from '@utility/string'
@@ -42,18 +38,6 @@ function createTestModule(providers, modules, controllers) {
             : process.env.NODE_ENV
         }.env`,
         load: [ApplicationConfig, MongoConfig],
-      }),
-      MongooseModule.forRootAsync({
-        imports: [ConfigModule],
-        useFactory: async (
-          configService: ConfigService
-        ): Promise<MongooseModuleOptions> => ({
-          uri: configService.get<string>('mongo.uri'),
-          dbName: configService.get<string>('mongo.db_name'),
-          user: configService.get<string>('mongo.db_user'),
-          pass: configService.get<string>('mongo.db_password'),
-        }),
-        inject: [ConfigService],
       }),
       ...modules,
     ],
