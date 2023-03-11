@@ -55,12 +55,19 @@ describe('Account Controller', () => {
     }
   )
 
-  it(testCaption('FLOW', 'feature', 'Should pass add to service'), async () => {
-    const creator = mockAccount()
-    const data = new AccountAddDTO({ ...mockAccount(), __v: 0 })
-    await controller.add(data, creator)
-    expect(mockAccountService.add).toHaveBeenCalledWith(data, creator)
-  })
+  it(
+    testCaption(
+      'FLOW',
+      'feature',
+      'Should pass add to service and logged activity'
+    ),
+    async () => {
+      const creator = mockAccount()
+      const data = new AccountAddDTO({ ...mockAccount(), __v: 0 })
+      await controller.add(data, creator)
+      expect(mockAccountService.add).toHaveBeenCalledWith(data, creator)
+    }
+  )
 
   it(
     testCaption('FLOW', 'feature', 'Should pass edit to service'),

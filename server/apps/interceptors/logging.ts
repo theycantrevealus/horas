@@ -4,6 +4,8 @@ import { LogActivity, LogActivityDocument } from '@log/schemas/log.activity'
 import {
   CallHandler,
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   Logger,
@@ -45,49 +47,77 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
   ): Promise<Observable<any>> {
     const http = context.switchToHttp()
     const request = await http.getRequest()
-    const header_token = request.headers.authorization
+    const header_token =
+      request.headers.authorization ?? request.headers.Authorization
     const ip = request.clientIp
       ? request.clientIp
       : requestIp.getClientIp(request)
     const { url } = request
-    const token = header_token.split('Bearer')[1]
-    const method = request.method
-    const body = request.body !== '' ? request.body : '{}'
-    const curr_date = new Date().toISOString().split('T')[0]
-    const decoded = await this.authService.validate_token({
-      token: token,
-    })
-    const account = await this.acccountService.detail(decoded.account.id)
 
-    return next.handle().pipe(
-      map(async (response) => {
-        const transaction_classify =
-          response && response.transaction_classify
-            ? response.transaction_classify.toString()
-            : 'UNDEFINED_TRANSACTION'
-
-        const SLO_id =
-          response && response.transaction_id ? response.transaction_id : ''
-
-        body.__v += 1
-
-        const newLogActivityRepo = new this.logActivityModel({
-          account: account,
-          collection_name: response.table_target,
-          identifier: response.transaction_id,
-          log_meta: `${transaction_classify}|${request.method}`,
-          method: method,
-          doc_v: body.__v && !isNaN(body.__v) ? body?.__v : 0,
-          action: response.action,
-          // old_meta: JSON.stringify(response.payload),
-          // new_meta: JSON.stringify(body),
-          old_meta: response.payload,
-          new_meta: body,
-        })
-
-        await newLogActivityRepo.save()
-        return response
+    if (header_token) {
+      const token = header_token.split('Bearer')[1]
+      const method = request.method
+      const body = request.body !== '' ? request.body : '{}'
+      const curr_date = new Date().toISOString().split('T')[0]
+      const decoded = await this.authService.validate_token({
+        token: token,
       })
-    )
+
+      if (decoded.status !== HttpStatus.OK) {
+        throw new HttpException(
+          {
+            message: 'UnAuthorized',
+            data: decoded,
+            errors: null,
+          },
+          HttpStatus.UNAUTHORIZED
+        )
+      } else {
+        const account = await this.acccountService.detail(decoded.account.id)
+
+        return next.handle().pipe(
+          map(async (response) => {
+            const transaction_classify =
+              response && response.transaction_classify
+                ? response.transaction_classify.toString()
+                : 'UNDEFINED_TRANSACTION'
+
+            const SLO_id =
+              response && response.transaction_id ? response.transaction_id : ''
+
+            body.__v += 1
+
+            await this.logActivityModel
+              .create({
+                account: account,
+                collection_name: response.table_target,
+                identifier: response.transaction_id,
+                log_meta: `${transaction_classify}|${request.method}`,
+                method: method,
+                doc_v: body.__v && !isNaN(body.__v) ? body?.__v : 0,
+                action: response.action,
+                // old_meta: JSON.stringify(response.payload),
+                // new_meta: JSON.stringify(body),
+                old_meta: response.payload,
+                new_meta: body,
+              })
+              .then((logger) => {
+                response.payload = { ...response.payload, logged: logger }
+              })
+
+            return response
+          })
+        )
+      }
+    } else {
+      throw new HttpException(
+        {
+          message: 'UnAuthorized',
+          data: null,
+          errors: null,
+        },
+        HttpStatus.UNAUTHORIZED
+      )
+    }
   }
 }

@@ -7,15 +7,17 @@ import { Types } from 'mongoose'
 
 export const mockAccountService = {
   all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest.fn().mockResolvedValue((dto: AccountAddDTO, account: Account) => {
-    return {}
+  add: jest.fn().mockImplementation((dto: AccountAddDTO, account: Account) => {
+    return Promise.resolve({})
   }),
-  edit: jest.fn().mockResolvedValue((dto: AccountEditDTO, id: string) => {
-    return {}
+  edit: jest.fn().mockImplementation((dto: AccountEditDTO, id: string) => {
+    return Promise.resolve({})
   }),
   detail: jest.fn().mockResolvedValue((dto) => dto),
   find: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockResolvedValue((dto) => dto),
+  delete: jest.fn().mockImplementation((dto) => {
+    return Promise.resolve({})
+  }),
   signin: jest.fn().mockResolvedValue((dto) => dto),
   token_coordinator: jest.fn().mockResolvedValue((dto) => dto),
 }
