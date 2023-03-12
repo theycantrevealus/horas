@@ -1,0 +1,33 @@
+POST {{host}}/v1/master/brand
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Adidas 2",
+  "remark": "Extra remark",
+  "__v": 0
+}
+
+###
+
+GET {{host}}/v1/master/brand?lazyEvent={"first":0,"rows":10,"sortField":"created_at","sortOrder":1,"filters":{}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+PATCH {{host}}/v1/master/brand/63e7dadab3a9ea8aa8285c34
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Adidas2",
+  "remark": "Extra remark2",
+  "__v": 1
+}
+
+###
+
+DELETE {{host}}/v1/master/brand/63e7dadab3a9ea8aa8285c34
+Content-Type: application/json
+Authorization: Bearer {{access_token}}

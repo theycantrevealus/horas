@@ -77,4 +77,13 @@ export class AccountAddDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
+
+  constructor(data: any = {}) {
+    this.email = data.email
+    this.first_name = data.first_name
+    this.last_name = data.last_name
+    this.password = data.password
+    this.phone = data.phone
+    this.__v = data.__v
+  }
 }

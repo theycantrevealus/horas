@@ -1,0 +1,14 @@
+POST {{host}}/v1/account
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "email": "theycantrevealus@gmail.com",
+  "password": "12345678",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "0822996633112",
+  "__v": 0
+}
+
+###

@@ -1,4 +1,3 @@
-import { SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
@@ -7,8 +6,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator'
-
-import { Account } from '../schemas/account.model'
 
 export class AccountSignInDTO {
   @ApiProperty({
@@ -34,6 +31,8 @@ export class AccountSignInDTO {
   @IsNotEmpty()
   @IsString()
   password: string
+  constructor(data: any = {}) {
+    this.email = data.email
+    this.password = data.password
+  }
 }
-
-export const PICSchema = SchemaFactory.createForClass(Account)

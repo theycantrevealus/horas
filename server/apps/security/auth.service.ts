@@ -8,7 +8,7 @@ import { JWTTokenDecodeResponse, JWTTokenResponse } from './auth.dto'
 
 @Injectable()
 export class AuthService implements JwtOptionsFactory {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) {}
   createJwtOptions(): JwtModuleOptions {
     return {
       secret: process.env.JWT_SECRET,
@@ -22,9 +22,8 @@ export class AuthService implements JwtOptionsFactory {
       try {
         const expiresIn = 30 * 24 * 60 * 60
         // const expiresIn = 30
-        const token = this.jwtService.sign(data, {
-          expiresIn: expiresIn,
-        })
+
+        const token = this.jwtService.sign(data)
 
         result = {
           account: data.account,
@@ -40,7 +39,7 @@ export class AuthService implements JwtOptionsFactory {
           login_id: 0,
           status: HttpStatus.BAD_REQUEST,
           message: `token_create_bad_request ${e.message}`,
-          expired_at: TM.getTimezoneV2('Asia/Jakarta'),
+          expired_at: TM.getTimezone('Asia/Jakarta'),
           token: null,
         }
       }
@@ -49,7 +48,7 @@ export class AuthService implements JwtOptionsFactory {
         account: data.account,
         login_id: 0,
         status: HttpStatus.BAD_REQUEST,
-        expired_at: TM.getTimezoneV2('Asia/Jakarta'),
+        expired_at: TM.getTimezone('Asia/Jakarta'),
         message: 'token_create_bad_request',
         token: null,
       }

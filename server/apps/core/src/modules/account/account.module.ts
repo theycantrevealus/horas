@@ -16,29 +16,65 @@ import { Account, AccountSchema } from './schemas/account.model'
         name: Account.name,
         useFactory: () => {
           const schema = AccountSchema
+          const time = new TimeManagement()
           schema.pre('save', function (next) {
             if (this.isModified()) {
               this.increment()
-              this.updated_at = new TimeManagement().getTimezoneV2(
-                'Asia/Jakarta'
-              )
+              this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
               return next(new Error('Invalid document'))
             }
           })
 
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['updated_at'] = time.getTimezone('Asia/Jakarta')
+            update['$inc'] = { __v: 1 }
+            next()
+          })
+
           return schema
         },
       },
-    ]),
-    MongooseModule.forFeature([
-      { name: LogLogin.name, schema: LogLoginSchema },
-      { name: LogActivity.name, schema: LogActivitySchema },
+      {
+        name: LogLogin.name,
+        useFactory: () => {
+          const schema = LogLoginSchema
+          schema.pre('save', function (next) {
+            return next()
+          })
+
+          return schema
+        },
+      },
+      {
+        name: LogLogin.name,
+        useFactory: () => {
+          const schema = LogLoginSchema
+          schema.pre('save', function (next) {
+            return next()
+          })
+
+          return schema
+        },
+      },
+      {
+        name: LogActivity.name,
+        useFactory: () => {
+          const schema = LogActivitySchema
+          schema.pre('save', function (next) {
+            return next()
+          })
+
+          return schema
+        },
+      },
     ]),
     AuthModule,
   ],
   controllers: [AccountController],
   providers: [AccountService],
+  exports: [AccountService],
 })
 export class AccountModule {}

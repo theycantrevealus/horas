@@ -52,7 +52,7 @@ async function bootstrap() {
     }
   }
 
-  SwaggerModule.setup('api', app, document, {
+  SwaggerModule.setup('swagger', app, document, {
     customCss: `
     @import url(https://fonts.googleapis.com/css?family=Handlee);
     body { padding-top: 218px !important; background: url(\'./body.jpg\') no-repeat; background-attachment: fixed; background-size: cover; background-color: #f !important; }

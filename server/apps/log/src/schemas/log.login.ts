@@ -1,20 +1,14 @@
+import { AccountJoin } from '@core/account/schemas/account.join'
 import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type LogLoginDocument = HydratedDocument<LogLogin>
 
 @Schema({ collection: 'core_log_login' })
 export class LogLogin {
-  @Prop(
-    raw({
-      _id: { type: Types.ObjectId },
-      email: { type: String },
-      first_name: { type: String },
-      last_name: { type: String },
-    })
-  )
+  @Prop(raw(AccountJoin))
   account: Account
 
   @Prop({
@@ -40,7 +34,7 @@ export class LogLogin {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezoneV2('Asia/Jakarta'),
+    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
     required: true,
   })
   logged_at: Date
