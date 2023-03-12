@@ -2,6 +2,7 @@ import { AccountAddDTO } from '@core/account/dto/account.add'
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
@@ -23,17 +24,17 @@ export const mockAccountService = {
 }
 
 export const mockAccount = (
-  email = 'example@domain.com',
-  first_name = 'John',
-  last_name = 'Doe',
+  email = faker.internet.email(),
+  first_name = faker.name.firstName(),
+  last_name = faker.name.lastName(),
   password = '',
-  phone = '6285261510202',
+  phone = faker.phone.number(),
   access: Types.ObjectId[] = [],
   created_by: IAccountCreatedBy = {
     _id: new Types.ObjectId(),
-    first_name: 'Hendry',
-    last_name: 'Tanaka',
-    email: 'theycantrevealus@gmail.com',
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    email: faker.internet.email(),
   },
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -68,17 +69,17 @@ export const mockAccountModel = {
 export const mockAccountDoc = (
   mock?: Partial<Account>
 ): Partial<AccountDocument> => ({
-  first_name: mock?.first_name || 'John',
-  last_name: mock?.last_name || 'Doe',
-  email: mock?.email || 'example@domain.com',
+  first_name: mock?.first_name || faker.name.firstName(),
+  last_name: mock?.last_name || faker.name.lastName(),
+  email: mock?.email || faker.internet.email(),
   password: mock?.password || '',
-  phone: mock?.phone || '6285261510202',
+  phone: mock?.phone || faker.phone.number(),
   access: mock?.access || [],
   created_by: mock?.created_by || {
     _id: new Types.ObjectId(),
-    first_name: 'Hendry',
-    last_name: 'Tanaka',
-    email: 'theycantrevealus@gmail.com',
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    email: faker.internet.email(),
   },
   created_at:
     mock?.created_at || new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -89,26 +90,36 @@ export const mockAccountDoc = (
 
 export const accountArray = [
   mockAccount(),
-  mockAccount('Vitani', 'a new uuid', 'Tabby', ''),
-  mockAccount('Simba', 'the king', 'Lion', ''),
+  mockAccount(
+    faker.internet.email(),
+    faker.name.firstName(),
+    faker.name.lastName(),
+    ''
+  ),
+  mockAccount(
+    faker.internet.email(),
+    faker.name.firstName(),
+    faker.name.lastName(),
+    ''
+  ),
 ]
 
 export const accountDocArray = [
   mockAccountDoc(),
   mockAccountDoc({
-    first_name: 'Vitani',
-    last_name: 'Doe',
-    email: 'vitani_doe@domain.com',
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    email: faker.internet.email(),
     password: '123456',
-    phone: '6285261510200',
+    phone: faker.phone.number(),
     access: [],
   }),
   mockAccountDoc({
-    first_name: 'Suarez',
-    last_name: 'Doe',
-    email: 'suarez_doe@domain.com',
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    email: faker.internet.email(),
     password: '',
-    phone: '6285261510201',
+    phone: faker.phone.number(),
     access: [],
   }),
 ]
