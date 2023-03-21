@@ -1,6 +1,5 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
-import { IAccount } from '@core/account/interface/account'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
@@ -80,24 +79,6 @@ export class AccountService {
 
   async find(filter: any): Promise<Account | undefined> {
     return this.accountModel.findOne(filter).exec()
-  }
-
-  async crawl(filter: any): Promise<IAccount> {
-    const data = await this.accountModel.findOne(filter).exec()
-    return {
-      _id: data._id,
-      email: data.email,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phone: data.phone,
-      access: data.access,
-      created_by: {
-        _id: data.created_by._id,
-        email: data.created_by.email,
-        first_name: data.created_by.first_name,
-        last_name: data.created_by.last_name,
-      },
-    }
   }
 
   async edit(parameter: AccountEditDTO, _id: string): Promise<GlobalResponse> {

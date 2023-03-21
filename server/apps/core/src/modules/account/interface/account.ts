@@ -2,6 +2,7 @@ import { Types } from 'mongoose'
 
 export interface IAccount {
   _id?: Types.ObjectId
+  code: string
   email: string
   first_name: string
   last_name: string
