@@ -28,11 +28,6 @@ import { Account, AccountSchema } from './schemas/account.model'
             }
           })
 
-          schema.post('save', function () {
-            this.code = `account-${this._id}`
-            console.log(`account-${this._id}`)
-          })
-
           schema.pre('findOneAndUpdate', function (next) {
             const update = this.getUpdate()
             update['updated_at'] = time.getTimezone('Asia/Jakarta')
