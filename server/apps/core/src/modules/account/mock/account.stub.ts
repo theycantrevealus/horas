@@ -5,6 +5,7 @@ import { Types } from 'mongoose'
 
 export const accountStub = (): IAccount => {
   return {
+    code: '',
     email: 'johndoe@example.com',
     first_name: 'John',
     last_name: 'Doe',

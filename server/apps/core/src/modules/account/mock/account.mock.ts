@@ -24,6 +24,7 @@ export const mockAccountService = {
 }
 
 export const mockAccount = (
+  code = '',
   email = faker.internet.email(),
   first_name = faker.name.firstName(),
   last_name = faker.name.lastName(),
@@ -40,6 +41,7 @@ export const mockAccount = (
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
 ): Account => ({
+  code,
   email,
   first_name,
   last_name,

@@ -20,6 +20,7 @@ import { Account, AccountSchema } from './schemas/account.model'
           schema.pre('save', function (next) {
             if (this.isModified()) {
               this.increment()
+              this.code = `account-${this._id}`
               this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
