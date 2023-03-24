@@ -8,6 +8,14 @@ import {
   mockAccountService,
 } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import {
+  mockPatientModel,
+  mockPatientService,
+  patientArray,
+} from '@core/patient/mock/patient.mock'
+import { PatientController } from '@core/patient/patient.controller'
+import { PatientService } from '@core/patient/patient.service'
+import { Patient } from '@core/patient/schema/patient.model'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   mockLogActivity,
@@ -114,10 +122,6 @@ describe('Logging Interceptor', () => {
                   useValue: mockLogActivityModel,
                 },
                 {
-                  provide: getModelToken(Account.name),
-                  useValue: mockAccountModel,
-                },
-                {
                   provide: getModelToken(LogLogin.name),
                   useValue: {},
                 },
@@ -175,10 +179,6 @@ describe('Logging Interceptor', () => {
                 {
                   provide: getModelToken(LogActivity.name),
                   useValue: mockLogActivityModel,
-                },
-                {
-                  provide: getModelToken(Account.name),
-                  useValue: mockAccountModel,
                 },
                 {
                   provide: getModelToken(LogLogin.name),
@@ -278,6 +278,202 @@ describe('Logging Interceptor', () => {
 
           await request(app.getHttpServer())
             .delete(`/v1/account/any_id`)
+            .set({ Authorization: `Bearer ${token}` })
+            .then((res) => {
+              expect(res.body.payload.logged.identifier).toEqual(
+                dataSet.identifier
+              )
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('PATIENT CONTROLLER', 'feature', 'Patient Interceptor'),
+    () => {
+      it(
+        testCaption('Add Patient', 'feature', 'Should log patient add'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(Patient.name),
+                  useValue: mockPatientModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                { provide: PatientService, useValue: mockPatientService },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [PatientController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'POST',
+            new Types.ObjectId().toString(),
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'I',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .post(`/v1/patient`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(patientArray[2])
+            .then((res) => {
+              expect(res.body.payload.logged.identifier).toEqual(
+                dataSet.identifier
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('Edit Patient', 'feature', 'Should log patient edit'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(Patient.name),
+                  useValue: mockPatientModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                { provide: PatientService, useValue: mockPatientService },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [PatientController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'PATCH',
+            new Types.ObjectId().toString(),
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'U',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .patch(`/v1/patient/any_id`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(patientArray[2])
+            .then((res) => {
+              expect(res.body.payload.logged.identifier).toEqual(
+                dataSet.identifier
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('Delete Patient', 'feature', 'Should log patient delete'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(Patient.name),
+                  useValue: mockPatientModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                { provide: PatientService, useValue: mockPatientService },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [PatientController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'DELETE',
+            new Types.ObjectId().toString(),
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'D',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .delete(`/v1/patient/any_id`)
             .set({ Authorization: `Bearer ${token}` })
             .then((res) => {
               expect(res.body.payload.logged.identifier).toEqual(

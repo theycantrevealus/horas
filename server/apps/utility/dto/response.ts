@@ -28,11 +28,10 @@ export class GlobalResponse {
   transaction_classify: string
 
   @ApiProperty({
-    type: ObjectId,
     example: new mongoose.Types.ObjectId(),
     description: 'Transaction ID',
   })
-  transaction_id: ObjectId | null
+  transaction_id: ObjectId | string | null
 }
 
 export class GlobalErrorResponse {

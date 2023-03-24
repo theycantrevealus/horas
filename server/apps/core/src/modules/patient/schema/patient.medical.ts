@@ -6,6 +6,6 @@ export interface IPatientMedicalInfo {
 }
 
 export const PatientMedicalInfo = raw({
-  medical_record: { type: String },
-  register_date: { type: Date },
+  medical_record: { type: String, example: 'xxxxxx' },
+  register_date: { type: Date, example: '2023-01-01' },
 })
