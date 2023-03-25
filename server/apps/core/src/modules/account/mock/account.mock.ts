@@ -24,6 +24,7 @@ export const mockAccountService = {
 }
 
 export const mockAccount = (
+  id = `account-${new Types.ObjectId().toString()}`,
   email = faker.internet.email(),
   first_name = faker.name.firstName(),
   last_name = faker.name.lastName(),
@@ -31,7 +32,7 @@ export const mockAccount = (
   phone = faker.phone.number(),
   access: Types.ObjectId[] = [],
   created_by: IAccountCreatedBy = {
-    _id: new Types.ObjectId(),
+    id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),
@@ -40,6 +41,7 @@ export const mockAccount = (
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
 ): Account => ({
+  id,
   email,
   first_name,
   last_name,
@@ -76,7 +78,7 @@ export const mockAccountDoc = (
   phone: mock?.phone || faker.phone.number(),
   access: mock?.access || [],
   created_by: mock?.created_by || {
-    _id: new Types.ObjectId(),
+    id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),

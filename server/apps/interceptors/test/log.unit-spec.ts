@@ -155,9 +155,7 @@ describe('Logging Interceptor', () => {
             .set({ Authorization: `Bearer ${token}` })
             .send(accountArray[2])
             .then((res) => {
-              expect(res.body.payload.logged.identifier).toEqual(
-                dataSet.identifier
-              )
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
             })
         }
       )
@@ -218,9 +216,7 @@ describe('Logging Interceptor', () => {
             .set({ Authorization: `Bearer ${token}` })
             .send(accountArray[2])
             .then((res) => {
-              expect(res.body.payload.logged.identifier).toEqual(
-                dataSet.identifier
-              )
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
             })
         }
       )
@@ -280,9 +276,7 @@ describe('Logging Interceptor', () => {
             .delete(`/v1/account/any_id`)
             .set({ Authorization: `Bearer ${token}` })
             .then((res) => {
-              expect(res.body.payload.logged.identifier).toEqual(
-                dataSet.identifier
-              )
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
             })
         }
       )

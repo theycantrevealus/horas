@@ -1,6 +1,6 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
-import { IAccount } from '@core/account/interface/account'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
@@ -11,7 +11,7 @@ import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
 import { TimeManagement } from '@utility/time'
 import * as bcrypt from 'bcrypt'
-import { Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
 import { AccountAddDTO } from './dto/account.add'
 import { Account, AccountDocument } from './schemas/account.model'
@@ -30,23 +30,23 @@ export class AccountService {
     return await prime_datatable(parameter, this.accountModel)
   }
 
-  async detail(_id: string): Promise<Account> {
-    return this.accountModel.findOne({ _id: _id })
+  async detail(id: string): Promise<Account> {
+    return this.accountModel.findOne({ id: id })
   }
 
-  async delete(_id: string): Promise<GlobalResponse> {
+  async delete(id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: await this.accountModel.findOne({
-        _id: new Types.ObjectId(_id),
+        id: id,
       }),
       transaction_classify: 'ACCOUNT_DELETE',
-      transaction_id: new Types.ObjectId(_id),
+      transaction_id: id,
     } satisfies GlobalResponse
 
     const data = await this.accountModel.findOne({
-      _id: new Types.ObjectId(_id),
+      id: id,
     })
 
     if (data) {
@@ -56,20 +56,20 @@ export class AccountService {
         .save()
         .then((result) => {
           response.message = 'Account deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.success
           }`
         })
         .catch((error: Error) => {
           response.message = `Account failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.failed
           }`
           response.payload = error
         })
     } else {
       response.message = `Account failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
+      response.statusCode = `${modCodes[this.constructor.name]}_D_${
         modCodes.Global.failed
       }`
       response.payload = {}
@@ -82,52 +82,35 @@ export class AccountService {
     return this.accountModel.findOne(filter).exec()
   }
 
-  async crawl(filter: any): Promise<IAccount> {
-    const data = await this.accountModel.findOne(filter).exec()
-    return {
-      _id: data._id,
-      email: data.email,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phone: data.phone,
-      access: data.access,
-      created_by: {
-        _id: data.created_by._id,
-        email: data.created_by.email,
-        first_name: data.created_by.first_name,
-        last_name: data.created_by.last_name,
-      },
-    }
-  }
-
-  async edit(parameter: AccountEditDTO, _id: string): Promise<GlobalResponse> {
+  async edit(parameter: AccountEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: await this.accountModel.findOne({
-        _id: new Types.ObjectId(_id),
+        id: id,
       }),
       transaction_classify: 'ACCOUNT_EDIT',
-      transaction_id: new Types.ObjectId(_id),
+      transaction_id: id,
     } satisfies GlobalResponse
 
     await this.accountModel
       .findOneAndUpdate(
         {
-          _id: new Types.ObjectId(_id),
+          id: id,
           __v: parameter.__v,
         },
         {
           email: parameter.email,
           first_name: parameter.first_name,
           last_name: parameter.last_name,
+          phone: parameter.phone,
         }
       )
       .exec()
       .then((result) => {
         if (result === null) {
           response.message = `Account failed to update`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
           response.payload = result
@@ -135,14 +118,14 @@ export class AccountService {
           result.__v++
           response.message = 'Account updated successfully'
           response.payload = result
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.success
           }`
         }
       })
       .catch((error: Error) => {
         response.message = `Account failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
           modCodes.Global.failed
         }`
         response.payload = error
@@ -152,8 +135,8 @@ export class AccountService {
   }
 
   async add(
-    parameter: AccountAddDTO,
-    credential: Account
+    data: AccountAddDTO,
+    credential: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -164,12 +147,12 @@ export class AccountService {
     } satisfies GlobalResponse
 
     const saltOrRounds = 10
-    const password = parameter.password
-    parameter.password = await bcrypt.hash(password, saltOrRounds)
+    const password = data.password
+    data.password = await bcrypt.hash(password, saltOrRounds)
 
     await this.accountModel
       .create({
-        ...parameter,
+        ...data,
         created_by: credential,
       })
       .then((result) => {
@@ -177,8 +160,11 @@ export class AccountService {
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.success
         }`
-        response.transaction_id = result._id
-        response.payload = result
+        response.transaction_id = result.id
+        response.payload = {
+          id: result.id,
+          ...data,
+        }
       })
       .catch((error: Error) => {
         response.message = `Account failed to create. ${error.message}`
@@ -194,7 +180,7 @@ export class AccountService {
   async token_coordinator(result: any, currentTime) {
     return this.logLoginModel.findOne({
       account: {
-        _id: result._id,
+        id: result.id,
         email: result.email,
         first_name: result.first_name,
         last_name: result.last_name,
@@ -268,7 +254,7 @@ export class AccountService {
                     response.statusCode = `${
                       modCodes[this.constructor.name]
                     }_I_${modCodes.Global.success}`
-                    response.transaction_id = result._id
+                    response.transaction_id = result.id
                     response.payload = {
                       account: result,
                       token: token.set,

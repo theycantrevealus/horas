@@ -79,7 +79,7 @@ export class AccountController {
   })
   async authenticate() {}
 
-  @Get('_id')
+  @Get(':id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -89,7 +89,7 @@ export class AccountController {
     description: '',
   })
   async detail(@Param() param) {
-    return await this.accountService.detail(param._id)
+    return await this.accountService.detail(param.id)
   }
 
   @Post()
@@ -109,10 +109,10 @@ export class AccountController {
     return await this.accountService.add(parameter, account)
   }
 
-  @Patch(':_id')
+  @Patch(':id')
   @Version('1')
   @ApiParam({
-    name: '_id',
+    name: 'id',
   })
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -126,13 +126,13 @@ export class AccountController {
     @Body() body: AccountEditDTO,
     @Param() param
   ): Promise<GlobalResponse> {
-    return await this.accountService.edit(body, param._id)
+    return await this.accountService.edit(body, param.id)
   }
 
-  @Delete(':_id')
+  @Delete(':id')
   @Version('1')
   @ApiParam({
-    name: '_id',
+    name: 'id',
     description: 'Data document id',
   })
   @UseGuards(JwtAuthGuard)
@@ -144,7 +144,7 @@ export class AccountController {
     description: ``,
   })
   async delete(@Param() param): Promise<GlobalResponse> {
-    return this.accountService.delete(param._id)
+    return this.accountService.delete(param.id)
   }
 
   @Post('signin')
