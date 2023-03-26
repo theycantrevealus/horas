@@ -63,7 +63,7 @@ describe('Account Controller', () => {
     ),
     async () => {
       const creator = mockAccount()
-      const data = new AccountAddDTO({ ...mockAccount(), __v: 0 })
+      const data = new AccountAddDTO(mockAccount())
       await controller.add(data, creator)
       expect(mockAccountService.add).toHaveBeenCalledWith(data, creator)
     }
@@ -79,8 +79,8 @@ describe('Account Controller', () => {
         phone: accountDocArray[1].phone,
         __v: 0,
       })
-      const id = new Types.ObjectId().toString()
-      await controller.edit(data, { _id: id })
+      const id = `account-${new Types.ObjectId().toString()}`
+      await controller.edit(data, { id: id })
       expect(mockAccountService.edit).toHaveBeenCalledWith(data, id)
     }
   )
@@ -89,7 +89,7 @@ describe('Account Controller', () => {
     testCaption('FLOW', 'feature', 'Should pass detail to service'),
     async () => {
       const id = new Types.ObjectId().toString()
-      await controller.detail({ _id: id })
+      await controller.detail({ id: id })
       expect(mockAccountService.detail).toHaveBeenCalledWith(id)
     }
   )
@@ -97,8 +97,8 @@ describe('Account Controller', () => {
   it(
     testCaption('FLOW', 'feature', 'Should pass delete to service'),
     async () => {
-      const id = new Types.ObjectId().toString()
-      await controller.delete({ _id: id })
+      const id = `account-${new Types.ObjectId().toString()}`
+      await controller.delete({ id: id })
       expect(mockAccountService.delete).toHaveBeenCalledWith(id)
     }
   )

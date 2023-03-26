@@ -90,8 +90,10 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
             body.__v = body.__v ? response.payload.__v : 0
 
-            if (!response.payload.__v) {
-              response.payload.__v = 0
+            if (!response.payload || !response.payload.__v) {
+              if (response.payload) {
+                response.payload.__v = 0
+              }
             } else {
               response.payload.__v -= 1
             }
@@ -107,7 +109,9 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
               old_meta: response.payload,
               new_meta: body,
             })
-            response.payload.__v += 1
+            if (response.payload) {
+              response.payload.__v += 1
+            }
             return response
           })
         )

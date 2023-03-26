@@ -52,7 +52,7 @@ describe('Logging Interceptor', () => {
   let configService: ConfigService
   let module: TestingModule
   const token =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIwNjQ2ODY3LTU5ZjAtNGRiMC04MTQ3LTZiMmRkM2YwODYyNyIsImN1cnJlbnRUaW1lIjoiMjAyMy0wMy0xMFQyMjowOToxMS4wMDBaIiwiYWNjb3VudCI6eyJjcmVhdGVkX2J5Ijp7Il9pZCI6IjYzZDUxZWRlMzI3OTVjYjdhMmEwZWVkZCIsImVtYWlsIjoiam9obmRvZUBleGFtcGxlLmNvbSIsImZpcnN0X25hbWUiOiJVUERBVEVESm9obiIsImxhc3RfbmFtZSI6IlVQREFURUREb2UifSwiYWNjZXNzIjpbXSwiX2lkIjoiNjNkNTFlZGUzMjc5NWNiN2EyYTBlZWRkIiwiZW1haWwiOiJqb2huZG9lQGV4YW1wbGUuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkR1lQWVdvUkg0RG9Gc2dSdU8ucEVidW5PamlGRFl0SktZdk5ud2NZVHFEV3JsbEhxc1VMS0ciLCJmaXJzdF9uYW1lIjoiVVBEQVRFRERKb2huIiwibGFzdF9uYW1lIjoiRG9lVVBEQVRFREQiLCJwaG9uZSI6IjA4MjI5OTY2MzMzMzMiLCJkZWxldGVkX2F0IjpudWxsLCJjcmVhdGVkX2F0IjoiMjAyMy0wMS0yOFQwMToxMDo1NC4wMDBaIiwidXBkYXRlZF9hdCI6IjIwMjMtMDEtMjlUMDI6MjY6MjUuMDAwWiIsIl9fdiI6MjR9LCJpYXQiOjE2Nzg0NjA5NTEsImV4cCI6MTY4MTA1Mjk1MX0.K8YDqm82DTw4ZenwRvtTmTZ54PWD0TYDfSmLcvYOOEQ'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJmZWQxMDE1LTY5ZjMtNDAxYy04M2M1LTQwNDM2ZmVhNGQzNCIsImN1cnJlbnRUaW1lIjoiMjAyMy0wMy0yNlQwMDoyNTo0MS4wMDBaIiwiYWNjb3VudCI6eyJjcmVhdGVkX2J5Ijp7Il9pZCI6IjYzZDUxZWRlMzI3OTVjYjdhMmEwZWVkZCIsImVtYWlsIjoiam9obmRvZUBleGFtcGxlLmNvbSIsImZpcnN0X25hbWUiOiJVUERBVEVESm9obiIsImxhc3RfbmFtZSI6IlVQREFURUREb2UifSwiYWNjZXNzIjpbXSwiX2lkIjoiNjNkNTFlZGUzMjc5NWNiN2EyYTBlZWRkIiwiZW1haWwiOiJqb2huZG9lQGV4YW1wbGUuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkR1lQWVdvUkg0RG9Gc2dSdU8ucEVidW5PamlGRFl0SktZdk5ud2NZVHFEV3JsbEhxc1VMS0ciLCJmaXJzdF9uYW1lIjoiVVBEQVRFRERKb2huIiwibGFzdF9uYW1lIjoiRG9lVVBEQVRFREQiLCJwaG9uZSI6IjA4MjI5OTY2MzMzMzMiLCJkZWxldGVkX2F0IjpudWxsLCJjcmVhdGVkX2F0IjoiMjAyMy0wMS0yOFQwMToxMDo1NC4wMDBaIiwidXBkYXRlZF9hdCI6IjIwMjMtMDEtMjlUMDI6MjY6MjUuMDAwWiIsIl9fdiI6MjQsImlkIjoiYWNjb3VudC02M2Q1MWVkZTMyNzk1Y2I3YTJhMGVlZGQifSwiaWF0IjoxNjc5NzY1MTQxLCJleHAiOjE2ODIzNTcxNDF9.W0ioCKCJoOMDWL20MoLjGhECVUStbkTU-0F0dsMah70'
   beforeEach(async () => {
     module = await Test.createTestingModule({
       imports: [
@@ -135,7 +135,7 @@ describe('Logging Interceptor', () => {
 
           const dataSet = mockLogActivity(
             'POST',
-            new Types.ObjectId().toString(),
+            `account-${new Types.ObjectId().toString()}`,
             '',
             '',
             '',
@@ -153,9 +153,12 @@ describe('Logging Interceptor', () => {
           await request(app.getHttpServer())
             .post(`/v1/account`)
             .set({ Authorization: `Bearer ${token}` })
-            .send(accountArray[2])
+            .send(accountArray[0])
             .then((res) => {
-              expect(res.body.payload.id).toEqual(dataSet.identifier)
+              expect(res.body.payload.id).toMatch(/^account-/)
+              expect(res.body.payload.first_name).toEqual(
+                accountArray[0].first_name
+              )
             })
         }
       )
@@ -196,7 +199,7 @@ describe('Logging Interceptor', () => {
 
           const dataSet = mockLogActivity(
             'PATCH',
-            new Types.ObjectId().toString(),
+            accountArray[2].id,
             '',
             '',
             '',
@@ -212,7 +215,7 @@ describe('Logging Interceptor', () => {
           })
 
           await request(app.getHttpServer())
-            .patch(`/v1/account/any_id`)
+            .patch(`/v1/account/${accountArray[2].id}`)
             .set({ Authorization: `Bearer ${token}` })
             .send(accountArray[2])
             .then((res) => {
@@ -257,7 +260,7 @@ describe('Logging Interceptor', () => {
 
           const dataSet = mockLogActivity(
             'DELETE',
-            new Types.ObjectId().toString(),
+            accountArray[0].id,
             '',
             '',
             '',
@@ -273,7 +276,7 @@ describe('Logging Interceptor', () => {
           })
 
           await request(app.getHttpServer())
-            .delete(`/v1/account/any_id`)
+            .delete(`/v1/account/${accountArray[0].id}`)
             .set({ Authorization: `Bearer ${token}` })
             .then((res) => {
               expect(res.body.payload.id).toEqual(dataSet.identifier)

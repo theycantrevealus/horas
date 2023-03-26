@@ -9,15 +9,28 @@ import { Types } from 'mongoose'
 export const mockAccountService = {
   all: jest.fn().mockResolvedValue((dto) => dto),
   add: jest.fn().mockImplementation((dto: AccountAddDTO, account: Account) => {
-    return Promise.resolve({})
+    return Promise.resolve({
+      payload: {
+        ...dto,
+        id: `account-${new Types.ObjectId().toString()}`,
+      },
+    })
   }),
   edit: jest.fn().mockImplementation((dto: AccountEditDTO, id: string) => {
-    return Promise.resolve({})
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
   }),
   detail: jest.fn().mockResolvedValue((dto) => dto),
   find: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((dto) => {
-    return Promise.resolve({})
+  delete: jest.fn().mockImplementation((id: string) => {
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
   }),
   signin: jest.fn().mockResolvedValue((dto) => dto),
   token_coordinator: jest.fn().mockResolvedValue((dto) => dto),
@@ -93,16 +106,30 @@ export const mockAccountDoc = (
 export const accountArray = [
   mockAccount(),
   mockAccount(
+    `account-${new Types.ObjectId().toString()}`,
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),
-    ''
+    '12345678',
+    '6285261516666',
+    [],
+    mockAccount(),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    null
   ),
   mockAccount(
+    `account-${new Types.ObjectId().toString()}`,
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),
-    ''
+    '12345678',
+    '6285261517777',
+    [],
+    mockAccount(),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    null
   ),
 ]
 
