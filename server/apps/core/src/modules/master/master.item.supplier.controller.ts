@@ -66,6 +66,19 @@ export class MasterItemSupplierController {
     }
   }
 
+  @Get(':id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Detail data',
+    description: '',
+  })
+  async detail(@Param() param) {
+    return await this.masterItemSupplierService.detail(param.id)
+  }
+
   @Post('supplier')
   @Version('1')
   @UseGuards(JwtAuthGuard)
@@ -83,7 +96,7 @@ export class MasterItemSupplierController {
     return await this.masterItemSupplierService.add(parameter, account)
   }
 
-  @Patch('supplier/:_id')
+  @Patch('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -94,13 +107,13 @@ export class MasterItemSupplierController {
     description: ``,
   })
   @ApiParam({
-    name: '_id',
+    name: 'id',
   })
   async edit(@Body() parameter: MasterItemSupplierEditDTO, @Param() param) {
-    return await this.masterItemSupplierService.edit(parameter, param._id)
+    return await this.masterItemSupplierService.edit(parameter, param.id)
   }
 
-  @Delete('supplier/:_id')
+  @Delete('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -111,9 +124,9 @@ export class MasterItemSupplierController {
     description: ``,
   })
   @ApiParam({
-    name: '_id',
+    name: 'id',
   })
   async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterItemSupplierService.delete(param._id)
+    return await this.masterItemSupplierService.delete(param.id)
   }
 }

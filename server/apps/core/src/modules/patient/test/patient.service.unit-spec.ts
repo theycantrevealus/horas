@@ -80,7 +80,7 @@ describe('Patient Service', () => {
         exec: jest.fn().mockResolvedValueOnce(sample),
       }) as any
     )
-    const foundPatient = await service.detail(sample.code)
+    const foundPatient = await service.detail(sample.id)
     expect(foundPatient).toEqual(sample)
   })
 
@@ -94,7 +94,7 @@ describe('Patient Service', () => {
       new PatientAddDTO({ ...sample, __v: 0 }),
       mockAccount()
     )) satisfies GlobalResponse
-    expect(newData.payload).toHaveProperty('code')
+    expect(newData.payload).toHaveProperty('id')
   })
 
   it(testCaption('DATA', 'data', 'Should edit patient data'), async () => {
@@ -119,7 +119,7 @@ describe('Patient Service', () => {
       }),
       `patient-${new Types.ObjectId().toString()}`
     )) satisfies GlobalResponse
-    expect(data.payload).toHaveProperty('code')
+    expect(data.payload).toHaveProperty('id')
   })
 
   afterAll(async () => {

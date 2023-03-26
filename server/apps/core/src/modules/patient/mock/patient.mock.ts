@@ -10,20 +10,34 @@ import { Types } from 'mongoose'
 export const mockPatientService = {
   all: jest.fn().mockResolvedValue((dto) => dto),
   add: jest.fn().mockImplementation((dto: PatientAddDTO, account: Account) => {
-    return Promise.resolve({})
+    return Promise.resolve({
+      payload: {
+        ...dto,
+        id: `patient-${new Types.ObjectId().toString()}`,
+      },
+    })
   }),
-  edit: jest.fn().mockImplementation((dto: PatientEditDTO, code: string) => {
-    return Promise.resolve({})
+  edit: jest.fn().mockImplementation((dto: PatientEditDTO, id: string) => {
+    return Promise.resolve({
+      payload: {
+        ...dto,
+        id: id,
+      },
+    })
   }),
   detail: jest.fn().mockResolvedValue((dto) => {
     return Promise.resolve({})
   }),
-  delete: jest.fn().mockImplementation((dto) => {
-    return Promise.resolve({})
+  delete: jest.fn().mockImplementation((id: string) => {
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
   }),
 }
 export const mockPatient = (
-  code = `patient-${new Types.ObjectId().toString()}`,
+  id = `patient-${new Types.ObjectId().toString()}`,
   medical_info = {
     medical_record: '',
     register_date: new Date('YYYY-MM-DD'),
@@ -53,7 +67,7 @@ export const mockPatient = (
     father_name: 'Andy',
   },
   created_by: IAccountCreatedBy = {
-    _id: new Types.ObjectId(),
+    id: `account-${new Types.ObjectId()}`,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),
@@ -62,7 +76,7 @@ export const mockPatient = (
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
 ): Patient => ({
-  code,
+  id,
   medical_info,
   basic_info,
   created_by,
@@ -88,7 +102,7 @@ export const mockPatientModel = {
 export const mockPatientDoc = (
   mock?: Partial<Patient>
 ): Partial<PatientDocument> => ({
-  code: `patient-${new Types.ObjectId().toString()}`,
+  id: `patient-${new Types.ObjectId().toString()}`,
   medical_info: {
     medical_record: '',
     register_date: new Date('2023-01-01'),
@@ -118,7 +132,7 @@ export const mockPatientDoc = (
     father_name: mock?.basic_info?.state || faker.name.firstName('male'),
   },
   created_by: mock?.created_by || {
-    _id: new Types.ObjectId(),
+    id: `account-${new Types.ObjectId()}`,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),
@@ -193,7 +207,7 @@ export const patientArray = [
 export const patientDocArray = [
   mockPatientDoc(),
   mockPatientDoc({
-    code: `patient-${new Types.ObjectId().toString()}`,
+    id: `patient-${new Types.ObjectId().toString()}`,
     medical_info: { medical_record: '000003', register_date: new Date() },
     basic_info: {
       id_number: '1234567890123457',
@@ -221,7 +235,7 @@ export const patientDocArray = [
     },
   }),
   mockPatientDoc({
-    code: `patient-${new Types.ObjectId().toString()}`,
+    id: `patient-${new Types.ObjectId().toString()}`,
     medical_info: { medical_record: '000004', register_date: new Date() },
     basic_info: {
       id_number: '1234567890123458',

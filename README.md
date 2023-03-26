@@ -184,7 +184,7 @@ Distributed under the APACHE 2.0 License. See `LICENSE.txt` for more information
 
 Hendry Tanaka - [@takashitanaka\_](https://twitter.com/takashitanaka_) - theycantrevealus@gmail.com
 
-Project Link: [https://github.com/theycantrevealus/horas](https://github.com/theycantrevealus/horas)
+Project Link: [documentation and paper](https://theycantrevealus.github.io/horas/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

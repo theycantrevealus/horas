@@ -80,7 +80,7 @@ export class PatientService {
           modCodes.Global.success
         }`
         response.payload = result
-        response.transaction_id = result.code
+        response.transaction_id = result.id
       })
       .catch((error: Error) => {
         response.message = `Patient failed to create. ${error.message}`

@@ -18,8 +18,9 @@ export type PatientDocument = HydratedDocument<Patient>
 export class Patient {
   @Prop({
     type: SchemaTypes.String,
+    unique: true,
   })
-  code: string
+  id: string
 
   @Prop(raw(PatientMedicalInfo))
   medical_info: IPatientMedicalInfo

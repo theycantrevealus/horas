@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { ObjectId } from 'bson'
 import mongoose from 'mongoose'
 
 export class GlobalResponse {
@@ -28,10 +27,10 @@ export class GlobalResponse {
   transaction_classify: string
 
   @ApiProperty({
-    example: new mongoose.Types.ObjectId(),
+    example: `any-${new mongoose.Types.ObjectId()}`,
     description: 'Transaction ID',
   })
-  transaction_id: ObjectId | string | null
+  transaction_id: string | null
 }
 
 export class GlobalErrorResponse {

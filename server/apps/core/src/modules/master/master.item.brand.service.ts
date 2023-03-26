@@ -4,8 +4,8 @@ import {
   MasterItemBrandEditDTO,
 } from '@core/master/dto/master.item.brand'
 import {
+  MasterItemBrand,
   MasterItemBrandDocument,
-  MasterItemBrandModel,
 } from '@core/master/schemas/master.item.brand'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
@@ -18,7 +18,7 @@ import { Model, Types } from 'mongoose'
 @Injectable()
 export class MasterItemBrandService {
   constructor(
-    @InjectModel(MasterItemBrandModel.name)
+    @InjectModel(MasterItemBrand.name)
     private masterItemBrandModel: Model<MasterItemBrandDocument>
   ) {}
 

@@ -1,11 +1,11 @@
-import { Account } from '@core/account/schemas/account.model'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemSupplierAddDTO,
   MasterItemSupplierEditDTO,
 } from '@core/master/dto/master.item.supplier'
 import {
+  MasterItemSupplier,
   MasterItemSupplierDocument,
-  MasterItemSupplierModel,
 } from '@core/master/schemas/master.item.supplier'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
@@ -13,12 +13,12 @@ import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
 import { TimeManagement } from '@utility/time'
-import { Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
 @Injectable()
 export class MasterItemSupplierService {
   constructor(
-    @InjectModel(MasterItemSupplierModel.name)
+    @InjectModel(MasterItemSupplier.name)
     private masterItemSupplierModel: Model<MasterItemSupplierDocument>
   ) {}
 
@@ -26,9 +26,13 @@ export class MasterItemSupplierService {
     return await prime_datatable(parameter, this.masterItemSupplierModel)
   }
 
+  async detail(id: string): Promise<MasterItemSupplier> {
+    return this.masterItemSupplierModel.findOne({ id: id }).exec()
+  }
+
   async add(
-    parameter: MasterItemSupplierAddDTO,
-    account: Account
+    data: MasterItemSupplierAddDTO,
+    creator: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -38,20 +42,23 @@ export class MasterItemSupplierService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const newData = new this.masterItemSupplierModel({
-      ...parameter,
-      created_by: account,
-    })
-
-    await newData
-      .save()
+    await this.masterItemSupplierModel
+      .create({
+        ...data,
+        __v: 0,
+        created_by: creator,
+      })
       .then((result) => {
         response.message = 'Master item supplier created successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.success
         }`
-        response.transaction_id = result._id
-        response.payload = result
+        response.transaction_id = result.id
+        response.payload = {
+          ...data,
+          __v: 0,
+          created_by: creator,
+        }
       })
       .catch((error: Error) => {
         response.message = `Master item supplier failed to create. ${error.message}`
@@ -65,8 +72,8 @@ export class MasterItemSupplierService {
   }
 
   async edit(
-    parameter: MasterItemSupplierEditDTO,
-    _id: string
+    data: MasterItemSupplierEditDTO,
+    id: string
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -75,47 +82,50 @@ export class MasterItemSupplierService {
       transaction_classify: 'MASTER_ITEM_SUPPLIER_EDIT',
       transaction_id: null,
     } satisfies GlobalResponse
-    const data = await this.masterItemSupplierModel.findOne({
-      _id: new Types.ObjectId(_id),
-      __v: parameter.__v,
-    })
 
-    if (data) {
-      data.code = parameter.code
-      data.name = parameter.name
-      data.phone = parameter.phone
-      data.email = parameter.email
-      data.address = parameter.address
-      data.remark = parameter.remark
-      data.seller_name = parameter.seller_name
-
-      await data
-        .save()
-        .then((result) => {
+    await this.masterItemSupplierModel
+      .findOneAndUpdate(
+        {
+          id: id,
+          __v: data.__v,
+        },
+        {
+          code: data.code,
+          name: data.name,
+          phone: data.phone,
+          email: data.email,
+          address: data.address,
+          remark: data.remark,
+          sales_name: data.sales_name,
+        }
+      )
+      .exec()
+      .then((result) => {
+        if (result) {
           response.message = 'Master item supplier updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.success
           }`
           response.payload = result
-        })
-        .catch((error: Error) => {
-          response.message = `Master item supplier failed to update. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+        } else {
+          response.message = `Master item supplier failed to update`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
-          response.payload = error
-        })
-    } else {
-      response.message = `Master item supplier failed to update. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
-    }
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Master item supplier failed to update. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+        response.payload = error
+      })
+
     return response
   }
 
-  async delete(_id: string): Promise<GlobalResponse> {
+  async delete(id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -124,7 +134,7 @@ export class MasterItemSupplierService {
       transaction_id: null,
     } satisfies GlobalResponse
     const data = await this.masterItemSupplierModel.findOne({
-      _id: new Types.ObjectId(_id),
+      id: id,
     })
 
     if (data) {
@@ -134,20 +144,20 @@ export class MasterItemSupplierService {
         .save()
         .then((result) => {
           response.message = 'Master item supplier deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.success
           }`
         })
         .catch((error: Error) => {
           response.message = `Master item supplier failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.failed
           }`
           response.payload = error
         })
     } else {
       response.message = `Master item supplier failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
+      response.statusCode = `${modCodes[this.constructor.name]}_D_${
         modCodes.Global.failed
       }`
       response.payload = {}

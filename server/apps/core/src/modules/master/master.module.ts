@@ -7,11 +7,15 @@ import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
 import {
-  MasterItemBrandModel,
+  MasterItemBrand,
   MasterItemBrandSchema,
 } from '@core/master/schemas/master.item.brand'
 import {
-  MasterItemSupplierModel,
+  MasterItemCategory,
+  MasterItemCategorySchema,
+} from '@core/master/schemas/master.item.category'
+import {
+  MasterItemSupplier,
   MasterItemSupplierSchema,
 } from '@core/master/schemas/master.item.supplier'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
@@ -33,31 +37,69 @@ import { TimeManagement } from '@utility/time'
     }),
     MongooseModule.forFeatureAsync([
       {
-        name: MasterItemSupplierModel.name,
+        name: MasterItemSupplier.name,
         useFactory: () => {
           const schema = MasterItemSupplierSchema
+          const time = new TimeManagement()
           schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `supplier-${this._id}`
+              this.__v = 0
+            }
+
             if (this.isModified()) {
               this.increment()
-              this.updated_at = new TimeManagement().getTimezone('Asia/Jakarta')
+              this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
               return next(new Error('Invalid document'))
             }
           })
 
+          // schema.pre('findOneAndUpdate', function (next) {
+          //   const update = this.getUpdate()
+          //   update['updated_at'] = time.getTimezone('Asia/Jakarta')
+          //   update['$inc'] = { __v: 1 }
+          //   next()
+          // })
+
           return schema
         },
       },
       {
-        name: MasterItemBrandModel.name,
+        name: MasterItemCategory.name,
+        useFactory: () => {
+          const schema = MasterItemCategorySchema
+          const time = new TimeManagement()
+          schema.pre('save', function (next) {
+            if (this.isModified()) {
+              this.increment()
+              this.id = `supplier-${this._id}`
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['updated_at'] = time.getTimezone('Asia/Jakarta')
+            update['$inc'] = { __v: 1 }
+            next()
+          })
+
+          return schema
+        },
+      },
+      {
+        name: MasterItemBrand.name,
         useFactory: () => {
           const schema = MasterItemBrandSchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
             if (this.isModified()) {
               this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
+              this.id = `brand-${this._id}`
               return next()
             } else {
               return next(new Error('Invalid document'))

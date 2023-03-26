@@ -8,6 +8,9 @@ import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 export type AccountDocument = HydratedDocument<Account>
 @Schema({ collection: 'core_account' })
 export class Account {
+  @Prop({ type: SchemaTypes.String, unique: true })
+  id: string
+
   @Prop({
     type: SchemaTypes.String,
     lowercase: true,

@@ -19,9 +19,14 @@ import { TimeManagement } from '@utility/time'
           const schema = PatientSchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `patient-${this._id}`
+              this.__v = 0
+            }
+
             if (this.isModified()) {
               this.increment()
-              this.code = `patient-${this._id}`
+              this.id = `patient-${this._id}`
               this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {

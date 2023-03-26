@@ -1,11 +1,17 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { SchemaTypes } from 'mongoose'
 
 @Schema({ collection: 'master_item_unit' })
 export class MasterItemUnit {
+  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  id: string
+
+  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  code: string
+
   @Prop({ type: SchemaTypes.String, required: true })
   name: string
 
@@ -13,7 +19,7 @@ export class MasterItemUnit {
   remark: string
 
   @Prop(raw(AccountJoin))
-  created_by: Account
+  created_by: IAccountCreatedBy
 
   @Prop({
     type: SchemaTypes.Date,

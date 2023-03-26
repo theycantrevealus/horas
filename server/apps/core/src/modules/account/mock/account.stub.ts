@@ -5,6 +5,7 @@ import { Types } from 'mongoose'
 
 export const accountStub = (): IAccount => {
   return {
+    id: `account-${new Types.ObjectId().toString()}`,
     code: '',
     email: 'johndoe@example.com',
     first_name: 'John',
@@ -12,7 +13,7 @@ export const accountStub = (): IAccount => {
     phone: '0822996633112',
     access: [],
     created_by: {
-      _id: new Types.ObjectId(),
+      id: `account-${new Types.ObjectId().toString()}`,
       first_name: '',
       last_name: '',
       email: '',
@@ -27,7 +28,6 @@ export const accountAddStub = (): AccountAddDTO => {
     email: accountStub().email,
     password: '12345678',
     phone: accountStub().phone,
-    __v: 0,
   } satisfies AccountAddDTO
 }
 

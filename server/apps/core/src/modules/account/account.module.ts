@@ -18,9 +18,15 @@ import { Account, AccountSchema } from './schemas/account.model'
           const schema = AccountSchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `account-${this._id}`
+              this.__v = 0
+            }
+
             if (this.isModified()) {
+              // this.increment()
               this.increment()
-              this.code = `account-${this._id}`
+              this.id = `account-${this._id}`
               this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {

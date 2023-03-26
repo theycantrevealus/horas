@@ -1,14 +1,16 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
-export type MasterItemSupplierDocument =
-  HydratedDocument<MasterItemSupplierModel>
+export type MasterItemSupplierDocument = HydratedDocument<MasterItemSupplier>
 @Schema({ collection: 'master_item_supplier' })
-export class MasterItemSupplierModel {
+export class MasterItemSupplier {
   @Prop({ type: SchemaTypes.String, unique: true })
+  id: string
+
+  @Prop({ type: SchemaTypes.String, required: true, unique: true })
   code: string
 
   @Prop({ type: SchemaTypes.String, unique: true })
@@ -21,7 +23,7 @@ export class MasterItemSupplierModel {
   email: string
 
   @Prop({ type: SchemaTypes.String })
-  seller_name: string
+  sales_name: string
 
   @Prop({ type: SchemaTypes.String })
   address: string
@@ -30,7 +32,7 @@ export class MasterItemSupplierModel {
   remark: string
 
   @Prop(raw(AccountJoin))
-  created_by: Account
+  created_by: IAccountCreatedBy
 
   @Prop({
     type: SchemaTypes.Date,
@@ -50,6 +52,5 @@ export class MasterItemSupplierModel {
   deleted_at: Date | null
 }
 
-export const MasterItemSupplierSchema = SchemaFactory.createForClass(
-  MasterItemSupplierModel
-)
+export const MasterItemSupplierSchema =
+  SchemaFactory.createForClass(MasterItemSupplier)
