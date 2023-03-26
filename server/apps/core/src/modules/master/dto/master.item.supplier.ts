@@ -49,7 +49,7 @@ export class MasterItemSupplierAddDTO {
     description: 'Item supplier sales for contact person',
   })
   @IsNotEmpty()
-  seller_name: string
+  sales_name: string
 
   @ApiProperty({
     example: '15th Avenue',
@@ -64,6 +64,16 @@ export class MasterItemSupplierAddDTO {
   })
   @IsNotEmpty()
   remark: string
+
+  constructor(parameter: any) {
+    this.code = parameter.code
+    this.name = parameter.name
+    this.phone = parameter.phone
+    this.email = parameter.email
+    this.sales_name = parameter.sales_name
+    this.address = parameter.address
+    this.remark = parameter.remark
+  }
 }
 
 export class MasterItemSupplierEditDTO {
@@ -106,7 +116,7 @@ export class MasterItemSupplierEditDTO {
     description: 'Item supplier sales for contact person',
   })
   @IsNotEmpty()
-  seller_name: string
+  sales_name: string
 
   @ApiProperty({
     example: '15th Avenue',
@@ -125,4 +135,14 @@ export class MasterItemSupplierEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
+
+  constructor(parameter: any) {
+    this.code = parameter.code
+    this.name = parameter.name
+    this.phone = parameter.phone
+    this.email = parameter.email
+    this.sales_name = parameter.sales_name
+    this.address = parameter.address
+    this.remark = parameter.remark
+  }
 }
