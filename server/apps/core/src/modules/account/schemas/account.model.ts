@@ -13,6 +13,13 @@ export class Account {
 
   @Prop({
     type: SchemaTypes.String,
+    lowercase: true,
+    unique: true,
+  })
+  code: string
+
+  @Prop({
+    type: SchemaTypes.String,
     min: 8,
     max: 24,
     unique: true,
@@ -59,6 +66,7 @@ export class Account {
   deleted_at: Date | null
 
   constructor(parameter: IAccount) {
+    this.code = parameter.code
     this.first_name = parameter.first_name
     this.last_name = parameter.last_name
     this.email = parameter.email

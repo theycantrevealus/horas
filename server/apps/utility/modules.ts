@@ -4,6 +4,7 @@ export const modCodes = {
     failed: 'F0000',
   },
   AccountService: 'ACC',
+  PatientService: 'PENT',
   MenuService: 'MNU',
   MasterItemSupplierService: 'MSR-SPP',
   MasterItemBrandService: 'MSR-BRD',

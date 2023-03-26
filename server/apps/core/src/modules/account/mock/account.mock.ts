@@ -38,6 +38,7 @@ export const mockAccountService = {
 
 export const mockAccount = (
   id = `account-${new Types.ObjectId().toString()}`,
+  code = '',
   email = faker.internet.email(),
   first_name = faker.name.firstName(),
   last_name = faker.name.lastName(),
@@ -55,6 +56,7 @@ export const mockAccount = (
   deleted_at = null
 ): Account => ({
   id,
+  code,
   email,
   first_name,
   last_name,
@@ -107,6 +109,7 @@ export const accountArray = [
   mockAccount(),
   mockAccount(
     `account-${new Types.ObjectId().toString()}`,
+    'XX-XX',
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),
@@ -120,6 +123,7 @@ export const accountArray = [
   ),
   mockAccount(
     `account-${new Types.ObjectId().toString()}`,
+    'XX-XX',
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),

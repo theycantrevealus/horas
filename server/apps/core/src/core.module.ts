@@ -3,6 +3,7 @@ import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
 import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
+import { PatientModule } from '@core/patient/patient.module'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
@@ -34,6 +35,7 @@ import { CoreService } from './core.service'
     }),
     AuthModule,
     AccountModule,
+    PatientModule,
     MenuModule,
     MasterModule,
   ],

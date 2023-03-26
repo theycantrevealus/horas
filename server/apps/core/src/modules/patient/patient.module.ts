@@ -1,3 +1,8 @@
+import { AccountService } from '@core/account/account.service'
+import { Account, AccountSchema } from '@core/account/schemas/account.model'
+import { PatientController } from '@core/patient/patient.controller'
+import { PatientService } from '@core/patient/patient.service'
+import { Patient, PatientSchema } from '@core/patient/schema/patient.model'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -5,28 +10,23 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { TimeManagement } from '@utility/time'
 
-import { AccountController } from './account.controller'
-import { AccountService } from './account.service'
-import { Account, AccountSchema } from './schemas/account.model'
-
 @Module({
   imports: [
     MongooseModule.forFeatureAsync([
       {
-        name: Account.name,
+        name: Patient.name,
         useFactory: () => {
-          const schema = AccountSchema
+          const schema = PatientSchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
             if (this.isNew) {
-              this.id = `account-${this._id}`
+              this.id = `patient-${this._id}`
               this.__v = 0
             }
 
             if (this.isModified()) {
-              // this.increment()
               this.increment()
-              this.id = `account-${this._id}`
+              this.id = `patient-${this._id}`
               this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
@@ -45,43 +45,22 @@ import { Account, AccountSchema } from './schemas/account.model'
         },
       },
       {
-        name: LogLogin.name,
-        useFactory: () => {
-          const schema = LogLoginSchema
-          schema.pre('save', function (next) {
-            return next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: LogLogin.name,
-        useFactory: () => {
-          const schema = LogLoginSchema
-          schema.pre('save', function (next) {
-            return next()
-          })
-
-          return schema
-        },
+        name: Account.name,
+        useFactory: () => AccountSchema,
       },
       {
         name: LogActivity.name,
-        useFactory: () => {
-          const schema = LogActivitySchema
-          schema.pre('save', function (next) {
-            return next()
-          })
-
-          return schema
-        },
+        useFactory: () => LogActivitySchema,
+      },
+      {
+        name: LogLogin.name,
+        useFactory: () => LogLoginSchema,
       },
     ]),
     AuthModule,
   ],
-  controllers: [AccountController],
-  providers: [AccountService],
-  exports: [AccountService],
+  controllers: [PatientController],
+  providers: [PatientService, AccountService],
+  exports: [PatientService],
 })
-export class AccountModule {}
+export class PatientModule {}

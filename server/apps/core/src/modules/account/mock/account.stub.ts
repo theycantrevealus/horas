@@ -5,6 +5,8 @@ import { Types } from 'mongoose'
 
 export const accountStub = (): IAccount => {
   return {
+    id: `account-${new Types.ObjectId().toString()}`,
+    code: '',
     email: 'johndoe@example.com',
     first_name: 'John',
     last_name: 'Doe',
