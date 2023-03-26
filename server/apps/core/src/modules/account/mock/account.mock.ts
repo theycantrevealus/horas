@@ -9,21 +9,35 @@ import { Types } from 'mongoose'
 export const mockAccountService = {
   all: jest.fn().mockResolvedValue((dto) => dto),
   add: jest.fn().mockImplementation((dto: AccountAddDTO, account: Account) => {
-    return Promise.resolve({})
+    return Promise.resolve({
+      payload: {
+        ...dto,
+        id: `account-${new Types.ObjectId().toString()}`,
+      },
+    })
   }),
   edit: jest.fn().mockImplementation((dto: AccountEditDTO, id: string) => {
-    return Promise.resolve({})
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
   }),
   detail: jest.fn().mockResolvedValue((dto) => dto),
   find: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((dto) => {
-    return Promise.resolve({})
+  delete: jest.fn().mockImplementation((id: string) => {
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
   }),
   signin: jest.fn().mockResolvedValue((dto) => dto),
   token_coordinator: jest.fn().mockResolvedValue((dto) => dto),
 }
 
 export const mockAccount = (
+  id = `account-${new Types.ObjectId().toString()}`,
   email = faker.internet.email(),
   first_name = faker.name.firstName(),
   last_name = faker.name.lastName(),
@@ -31,7 +45,7 @@ export const mockAccount = (
   phone = faker.phone.number(),
   access: Types.ObjectId[] = [],
   created_by: IAccountCreatedBy = {
-    _id: new Types.ObjectId(),
+    id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),
@@ -40,6 +54,7 @@ export const mockAccount = (
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
 ): Account => ({
+  id,
   email,
   first_name,
   last_name,
@@ -76,7 +91,7 @@ export const mockAccountDoc = (
   phone: mock?.phone || faker.phone.number(),
   access: mock?.access || [],
   created_by: mock?.created_by || {
-    _id: new Types.ObjectId(),
+    id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),
@@ -91,16 +106,30 @@ export const mockAccountDoc = (
 export const accountArray = [
   mockAccount(),
   mockAccount(
+    `account-${new Types.ObjectId().toString()}`,
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),
-    ''
+    '12345678',
+    '6285261516666',
+    [],
+    mockAccount(),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    null
   ),
   mockAccount(
+    `account-${new Types.ObjectId().toString()}`,
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),
-    ''
+    '12345678',
+    '6285261517777',
+    [],
+    mockAccount(),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    null
   ),
 ]
 

@@ -1,6 +1,6 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { Account } from '@core/account/schemas/account.model'
-import { MasterItemBrandModel } from '@core/master/schemas/master.item.brand'
+import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
 import { MasterItemCategory } from '@core/master/schemas/master.item.category'
 import { MasterItemUnit } from '@core/master/schemas/master.item.unit'
 import { Prop, raw, Schema } from '@nestjs/mongoose'
@@ -10,7 +10,10 @@ import { SchemaTypes } from 'mongoose'
 
 @Schema({ collection: 'master_item' })
 export class MasterItem {
-  @Prop({ type: SchemaTypes.String })
+  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  id: string
+
+  @Prop({ type: SchemaTypes.String, required: true, unique: true })
   code: string
 
   @Prop({ type: SchemaTypes.String })
@@ -24,12 +27,12 @@ export class MasterItem {
   @Type(() => MasterItemUnit)
   unit: MasterItemUnit
 
-  @Prop({ type: MasterItemBrandModel })
-  @Type(() => MasterItemBrandModel)
-  brand: MasterItemBrandModel
+  @Prop({ type: MasterItemBrand })
+  @Type(() => MasterItemBrand)
+  brand: MasterItemBrand
 
   @Prop(raw(AccountJoin))
-  created_by: Account
+  created_by: IAccountCreatedBy
 
   @Prop({
     type: SchemaTypes.Date,

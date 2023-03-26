@@ -1,12 +1,16 @@
-import { AccountController } from '@core/account/account.controller'
-import { AccountAddDTO } from '@core/account/dto/account.add'
-import { AccountEditDTO } from '@core/account/dto/account.edit'
-import {
-  accountDocArray,
-  mockAccount,
-  mockAccountService,
-} from '@core/account/mock/account.mock'
+import { AccountService } from '@core/account/account.service'
+import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import {
+  MasterItemSupplierAddDTO,
+  MasterItemSupplierEditDTO,
+} from '@core/master/dto/master.item.supplier'
+import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
+import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+import {
+  mockMasterItemSupplier,
+  mockMasterItemSupplierService,
+} from '@core/master/mock/master.item.supplier.mock'
 import { LogActivity } from '@log/schemas/log.activity'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -14,25 +18,29 @@ import { AuthService } from '@security/auth.service'
 import { testCaption } from '@utility/string'
 import { Types } from 'mongoose'
 
-import { AccountService } from '../account.service'
-
-describe('Account Controller', () => {
-  let controller: AccountController
-  let service: AccountService
+describe('Master Item Supplier Controller', () => {
+  let controller: MasterItemSupplierController
+  let service: MasterItemSupplierService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AccountController],
+      controllers: [MasterItemSupplierController],
       providers: [
-        { provide: AccountService, useValue: mockAccountService },
+        {
+          provide: MasterItemSupplierService,
+          useValue: mockMasterItemSupplierService,
+        },
         { provide: AuthService, useValue: {} },
+        { provide: AccountService, useValue: {} },
         { provide: getModelToken(Account.name), useValue: {} },
         { provide: getModelToken(LogActivity.name), useValue: {} },
       ],
     }).compile()
 
-    controller = module.get<AccountController>(AccountController)
-    service = module.get<AccountService>(AccountService)
+    controller = module.get<MasterItemSupplierController>(
+      MasterItemSupplierController
+    )
+    service = module.get<MasterItemSupplierService>(MasterItemSupplierService)
 
     jest.clearAllMocks()
   })
@@ -63,25 +71,22 @@ describe('Account Controller', () => {
     ),
     async () => {
       const creator = mockAccount()
-      const data = new AccountAddDTO(mockAccount())
+      const data = new MasterItemSupplierAddDTO(mockMasterItemSupplier())
       await controller.add(data, creator)
-      expect(mockAccountService.add).toHaveBeenCalledWith(data, creator)
+      expect(mockMasterItemSupplierService.add).toHaveBeenCalledWith(
+        data,
+        creator
+      )
     }
   )
 
   it(
     testCaption('FLOW', 'feature', 'Should pass edit to service'),
     async () => {
-      const data = new AccountEditDTO({
-        email: accountDocArray[1].email,
-        first_name: accountDocArray[1].first_name,
-        last_name: accountDocArray[1].last_name,
-        phone: accountDocArray[1].phone,
-        __v: 0,
-      })
-      const id = `account-${new Types.ObjectId().toString()}`
+      const data = new MasterItemSupplierEditDTO(mockMasterItemSupplier())
+      const id = `supplier-${new Types.ObjectId().toString()}`
       await controller.edit(data, { id: id })
-      expect(mockAccountService.edit).toHaveBeenCalledWith(data, id)
+      expect(mockMasterItemSupplierService.edit).toHaveBeenCalledWith(data, id)
     }
   )
 
@@ -90,7 +95,7 @@ describe('Account Controller', () => {
     async () => {
       const id = new Types.ObjectId().toString()
       await controller.detail({ id: id })
-      expect(mockAccountService.detail).toHaveBeenCalledWith(id)
+      expect(mockMasterItemSupplierService.detail).toHaveBeenCalledWith(id)
     }
   )
 
@@ -99,7 +104,7 @@ describe('Account Controller', () => {
     async () => {
       const id = `account-${new Types.ObjectId().toString()}`
       await controller.delete({ id: id })
-      expect(mockAccountService.delete).toHaveBeenCalledWith(id)
+      expect(mockMasterItemSupplierService.delete).toHaveBeenCalledWith(id)
     }
   )
 })

@@ -8,7 +8,7 @@ export interface IAccount {
   phone: string
   access: Types.ObjectId[]
   created_by: {
-    _id: Types.ObjectId | null
+    id: string
     email: string
     first_name: string
     last_name: string

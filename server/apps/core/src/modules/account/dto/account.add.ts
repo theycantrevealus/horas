@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsString,
   MaxLength,
   MinLength,
@@ -70,20 +69,11 @@ export class AccountAddDTO {
   @IsString()
   phone: string
 
-  @ApiProperty({
-    example: 0,
-    description: 'Document version',
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  __v: number
-
   constructor(data: any = {}) {
     this.email = data.email
     this.first_name = data.first_name
     this.last_name = data.last_name
     this.password = data.password
     this.phone = data.phone
-    this.__v = data.__v
   }
 }

@@ -11,7 +11,7 @@ export const mockLogActivity = (
   old_meta: any = {},
   new_meta: any = {},
   account: IAccountCreatedBy = {
-    _id: new Types.ObjectId(),
+    id: `account-${new Types.ObjectId().toString()}`,
     first_name: 'Hendry',
     last_name: 'Tanaka',
     email: 'theycantrevealus@gmail.com',

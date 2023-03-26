@@ -6,9 +6,11 @@ export class MasterItemBrandAddDTO {
     example: 'xxx-xxxx',
     minLength: 8,
     maxLength: 24,
-    required: false,
     description: 'Unique code of item brand',
   })
+  @MinLength(8)
+  @MaxLength(24)
+  @IsNotEmpty()
   code: string
 
   @ApiProperty({
@@ -28,6 +30,12 @@ export class MasterItemBrandAddDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
+  constructor(parameter: any) {
+    this.code = parameter.code
+    this.name = parameter.name
+    this.remark = parameter.remark
+    this.__v = parameter.__v
+  }
 }
 
 export class MasterItemBrandEditDTO {
@@ -63,4 +71,11 @@ export class MasterItemBrandEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
+
+  constructor(parameter: any) {
+    this.code = parameter.code
+    this.name = parameter.name
+    this.remark = parameter.remark
+    this.__v = parameter.__v
+  }
 }

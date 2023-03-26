@@ -1,4 +1,5 @@
 import { AccountService } from '@core/account/account.service'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { LogActivity, LogActivityDocument } from '@log/schemas/log.activity'
 import {
@@ -73,7 +74,9 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
           HttpStatus.UNAUTHORIZED
         )
       } else {
-        const account = await this.acccountService.detail(decoded.account.id)
+        const account: IAccountCreatedBy = await this.acccountService.detail(
+          decoded.account.id
+        )
 
         return next.handle().pipe(
           map(async (response) => {
@@ -85,26 +88,30 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
             const SLO_id =
               response && response.transaction_id ? response.transaction_id : ''
 
-            body.__v += 1
+            body.__v = body.__v ? response.payload.__v : 0
 
-            await this.logActivityModel
-              .create({
-                account: account,
-                collection_name: response.table_target,
-                identifier: response.transaction_id,
-                log_meta: `${transaction_classify}|${request.method}`,
-                method: method,
-                doc_v: body.__v && !isNaN(body.__v) ? body?.__v : 0,
-                action: response.action,
-                // old_meta: JSON.stringify(response.payload),
-                // new_meta: JSON.stringify(body),
-                old_meta: response.payload,
-                new_meta: body,
-              })
-              .then((logger) => {
-                response.payload = { ...response.payload, logged: logger }
-              })
+            if (!response.payload || !response.payload.__v) {
+              if (response.payload) {
+                response.payload.__v = 0
+              }
+            } else {
+              response.payload.__v -= 1
+            }
 
+            await this.logActivityModel.create({
+              account: account,
+              collection_name: response.table_target,
+              identifier: response.transaction_id,
+              log_meta: `${transaction_classify}|${request.method}`,
+              method: method,
+              doc_v: body.__v && !isNaN(body.__v) ? body?.__v : 0,
+              action: response.action,
+              old_meta: response.payload,
+              new_meta: body,
+            })
+            if (response.payload) {
+              response.payload.__v += 1
+            }
             return response
           })
         )
