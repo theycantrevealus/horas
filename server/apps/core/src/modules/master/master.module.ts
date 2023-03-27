@@ -72,9 +72,14 @@ import { TimeManagement } from '@utility/time'
           const schema = MasterItemCategorySchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `item_category-${this._id}`
+              this.__v = 0
+            }
+
             if (this.isModified()) {
               this.increment()
-              this.id = `supplier-${this._id}`
+              this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
               return next(new Error('Invalid document'))
@@ -97,9 +102,14 @@ import { TimeManagement } from '@utility/time'
           const schema = MasterItemBrandSchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `brand-${this._id}`
+              this.__v = 0
+            }
+
             if (this.isModified()) {
               this.increment()
-              this.id = `brand-${this._id}`
+              this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
               return next(new Error('Invalid document'))
