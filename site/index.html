@@ -46,32 +46,6 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#built-with">Built With</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#api-service">API Service</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#roadmap">Roadmap</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#contributing-format">Contributing Format</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#license">License</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#contact">Contact</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#acknowledgments">Acknowledgments</a>
-    </li>
     </ul>
                 </li>
               </ul>
@@ -107,8 +81,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <div align="center">
-  <img src="https://raw.githubusercontent.com/theycantrevealus/horas/main/horas.png" width="180" />
+                <div id="top"></div>
+<!-- PROJECT LOGO -->
+<p><br /></p>
+<div align="center">
+  <img alt="logo" src="img/horas.png" width="180" />
   <h3 align="center">HORAS Project</h3>
   <p align="center">
     Hospital Responsive Assistant System
@@ -121,7 +98,35 @@
   </p>
 </div>
 
-<h1 id="horas">HORAS</h1>
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
+
+<!-- ABOUT THE PROJECT -->
+
+<h2 id="about-the-project">About The Project</h2>
 <p>HORAS is an open source Hospital Information System. It was created for helping hospital as an assistant to run business easily, help to make business or medical decisions by datas, faster department integity, universal business core.</p>
 <p>Here's why:</p>
 <ul>
@@ -130,38 +135,65 @@
 <li>A kind of expensive paid application that makes it difficult for small scale hospitals to run faster</li>
 </ul>
 <p align="right">(<a href="#top">back to top</a>)</p>
+<hr />
 
 <h3 id="built-with">Built With</h3>
-<p>Built using these awesome framework</p>
+<p>Built using these awesome frameworks</p>
 <ul>
 <li><a href="https://nestjs.com/">Nest.js</a></li>
 <li><a href="https://vuejs.org/">Vue.js</a></li>
 </ul>
 <p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- GETTING STARTED -->
 
 <h2 id="getting-started">Getting Started</h2>
-<p>Bismillah aja...</p>
+<h3 id="requirements">Requirements</h3>
+<ol>
+<li>Nodejs</li>
+<li>npm@9.5.1<ol>
+<li>@nestjs/cli@9.2.0</li>
+<li>jest@29.4.3</li>
+</ol>
+</li>
+</ol>
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- STRUCTURE -->
+<hr />
+<h2 id="project-structure">Project Structure</h2>
+<p><b>HORAS</b> contains 2 main project directory (server and app). You need to run npm start/serve on each folder to run it.</p>
+<p>API default run on port 3000. You can access Open API at <code>&lt;hostname&gt;:3000/api</code></p>
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <h3 id="api-service">API Service</h3>
-<ul>
-<li>Create <b>.env</b> file from <b>.env.example</b> format and adjust with your local setting</li>
-<li>Run api service
+<p>API service is inside server folder (NestJS environtment, monorepo mode)
+- Create <b>.env</b> file from <b>.env.example</b> format and adjust with your local setting (environtment folder)
+- Run api service
   <code>sh
   npm run start</code>
   Watch Mode
   <code>sh
   npm run start:dev</code>
+  And module target (see package.json)
+  <code>sh
+  npm run start:dev:core</code>
 <br />
 <p align="right">(<a href="#top">back to top</a>)</p>
-</li>
+</p>
+<h3 id="front-end">Front End</h3>
+<ul>
+<li>Run front end
+  <code>sh
+  npm run serve</code>
+<br />
+<p align="right">(<a href="#top">back to top</a>)</p></li>
 </ul>
+<hr />
+
 <h3 id="installation">Installation</h3>
 <p><em>Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services.</em></p>
 <ol>
-<li>Get a free API Key at <a href="https://example.com">https://example.com</a></li>
 <li>Clone the repo
    <code>sh
    git clone https://github.com/theycantrevealus/horas.git</code></li>
@@ -171,22 +203,17 @@
    npm install</code></li>
 </ol>
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- USAGE EXAMPLES -->
-
-<h2 id="usage">Usage</h2>
-<p>Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.</p>
-<p><em>For more examples, please refer to the <a href="https://example.com">Documentation</a></em></p>
-<p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- ROADMAP -->
 
 <h2 id="roadmap">Roadmap</h2>
 <ul>
-<li>[x] Add Changelog</li>
-<li>[x] Add back to top links</li>
-<li>[ ] Add Additional Templates w/ Examples</li>
+<li>[ ] Application Design</li>
+<li>[ ] Discussion and Evaluation</li>
+<li>[ ] Documentation</li>
+<li>[ ] Code strategy</li>
 <li>[ ] Add "components" document to easily copy &amp; paste sections of the readme</li>
+<li>[ ] Documentation Adjustment</li>
 <li>[ ] Multi-language Support<ul>
 <li>[ ] English</li>
 <li>[ ] Indonesia</li>
@@ -195,7 +222,7 @@
 </ul>
 <p>See the <a href="https://github.com/theycantrevealus/horas/issues">open issues</a> for a full list of proposed features (and known issues).</p>
 <p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- CONTRIBUTING -->
 
 <h2 id="contributing">Contributing</h2>
@@ -211,7 +238,7 @@ Don't forget to give the project a star! Thanks again!</p>
 </ol>
 <p>Make sure to write properly test and run it on locally to keep commits clean on remote repository</p>
 <h3 id="contributing-format">Contributing Format</h3>
-<p>This project using following format as committing message. If any suggestion of type, feel free to suggest it</p>
+<p>This project using following format as committing message. If any suggestion of type, feel free to suggest it. For now we are not using git lint yet, but soon</p>
 <p>✨ feat: Add a new feature to the codebase (MINOR in semantic versioning).<br />
 🔧 fix: Fix a bug (equivalent to a PATCH in Semantic Versioning).<br />
 📑 docs: Documentation changes.<br />
@@ -221,26 +248,21 @@ Don't forget to give the project a star! Thanks again!</p>
 🔎 test: Add test to an existing feature.<br />
 📦 chore: Update something without impacting the user (ex: bump a dependency in package.json).<br /></p>
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- STRUCTURE -->
-
-<h2 id="project-structure">Project Structure</h2>
-<p><b>HORAS</b> contains 2 main project directory (api and app). You need to run npm start/serve on each folder to run it.</p>
-<p>API default run on port 3000. You can access Open API at <code>&lt;hostname&gt;:3000/api</code></p>
-<p align="right">(<a href="#top">back to top</a>)</p>
+<hr />
 
 <!-- LICENSE -->
 
 <h2 id="license">License</h2>
 <p>Distributed under the APACHE 2.0 License. See <code>LICENSE.txt</code> for more information.</p>
 <p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- CONTACT -->
-<h2 id="contact">Contact</h2>
-<p>Hendry Tanaka - <a href="https://twitter.com/takashitanaka_">@takashitanaka_</a> - theycantrevealus@gmail.com <br />
-Project Link: <a href="https://github.com/theycantrevealus/horas">https://github.com/theycantrevealus/horas</a></p>
-<p align="right">(<a href="#top">back to top</a>)</p>
 
+<h2 id="contact">Contact</h2>
+<p>Hendry Tanaka - <a href="https://twitter.com/takashitanaka_">@takashitanaka_</a> - theycantrevealus@gmail.com</p>
+<p>Project Link: <a href="https://theycantrevealus.github.io/horas/">documentation and paper</a></p>
+<p align="right">(<a href="#top">back to top</a>)</p>
+<hr />
 <!-- ACKNOWLEDGMENTS -->
 
 <h2 id="acknowledgments">Acknowledgments</h2>
@@ -309,5 +331,5 @@ Project Link: <a href="https://github.com/theycantrevealus/horas">https://github
 
 <!--
 MkDocs version : 1.4.2
-Build Date UTC : 2023-01-25 18:38:47.401578+00:00
+Build Date UTC : 2023-03-26 14:20:15.397465+00:00
 -->

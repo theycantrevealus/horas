@@ -28,3 +28,74 @@
 .wy-menu-vertical li.current > a button.toctree-expand, .wy-menu-vertical li.on a button.toctree-expand {
     color: #fff;
 }
+
+/*===================================================================================   MATERIAL*/
+@font-face {
+    font-family: "Fira Code";
+    src: url('../fonts/FiraCode/FiraMono-Regular.ttf');
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url('../fonts/Roboto/Roboto-Regular.ttf');
+}
+
+code {
+    font-family: "Fira Code", serif;
+    font-size: 8.5pt !important;
+    color: #b10046 !important;
+    background: #ffb4cb !important;
+    border-radius: 5px !important;
+    padding: 5px !important;
+}
+
+.md-header {
+    background: #007a43;
+}
+
+.md-container {
+    font-family: Roboto, serif;
+}
+
+.md-grid {
+    max-width: 100% !important;
+}
+
+.md-main__inner {
+    margin-top: 0 !important;
+}
+
+.md-sidebar {
+    padding: 0 0 1.2rem;
+}
+
+.md-sidebar__scrollwrap {
+    background: #1cb973;
+    padding-top: 1.2rem;
+    margin: 0 !important;
+}
+
+.md-nav__link {
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.md-nav__link.md-nav__link--active {
+    background: #179d60;
+    border-bottom: solid 3px #065c35;
+    color: #fff;
+}
+
+.md-nav--primary .md-nav__title {
+    color: #fff;
+    font-weight: bolder;
+    box-shadow: none;
+    background: transparent;
+}
+
+.md-nav--secondary .md-nav__title {
+    color: #fff;
+    font-weight: bolder;
+    box-shadow: none;
+    background: transparent;
+}

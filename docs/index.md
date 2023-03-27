@@ -1,5 +1,8 @@
+<div id="top"></div>
+<!-- PROJECT LOGO -->
+<br />
 <div align="center">
-  <img src="https://raw.githubusercontent.com/theycantrevealus/horas/main/horas.png" width="180" />
+  <img alt="logo" src="img/horas.png" width="180" />
   <h3 align="center">HORAS Project</h3>
   <p align="center">
     Hospital Responsive Assistant System
@@ -12,7 +15,61 @@
   </p>
 </div>
 
-# HORAS
+<p align="center">
+    <a href="https://github.com/theycantrevealus/horas/graphs/contributors" alt="Contributors">
+        <img src="https://img.shields.io/github/contributors/theycantrevealus/horas.svg?style=plastic" /></a>
+	<a href="https://github.com/theycantrevealus/horas" alt="Language">
+        <img src="https://img.shields.io/github/languages/count/theycantrevealus/horas?label=code%20languange&style=plastic" /></a>
+	<a href="https://github.com/theycantrevealus/horas/network/members" alt="Forks">
+        <img src="https://img.shields.io/github/forks/theycantrevealus/horas.svg?style=plastic" /></a>
+	<a href="https://github.com/theycantrevealus/horas/stargazers" alt="Stars">
+        <img src="https://img.shields.io/github/stars/theycantrevealus/horas.svg?style=plastic" /></a>
+	<br />
+	<a href="https://github.com/theycantrevealus/horas/issues" alt="Issues">
+        <img src="https://img.shields.io/github/issues/theycantrevealus/horas.svg?style=plastic" /></a>
+	<a href="https://github.com/badges/shields/pulse" alt="Activity">
+        <img src="https://img.shields.io/github/commit-activity/m/theycantrevealus/horas.svg?style=plastic" /></a>
+	<a href="https://github.com/theycantrevealus/horas/blob/main/LICENSE" alt="License">
+        <img src="https://img.shields.io/github/license/theycantrevealus/horas.svg?style=plastic" /></a>
+	<br />
+    <a href="https://discord.gg/SyrGHtGAEP">
+        <img src="https://img.shields.io/discord/1021895078735786014?logo=discord&style=plastic"
+            alt="chat on Discord"></a>
+    <a href="https://twitter.com/intent/follow?screen_name=shields_io">
+        <img src="https://img.shields.io/twitter/follow/takashitanaka_?style=social&logo=twitter"
+            alt="follow on Twitter"></a>
+</p>
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
+
+<!-- ABOUT THE PROJECT -->
+
+## About The Project
+
 HORAS is an open source Hospital Information System. It was created for helping hospital as an assistant to run business easily, help to make business or medical decisions by datas, faster department integity, universal business core.
 
 Here's why:
@@ -22,27 +79,42 @@ Here's why:
 - A kind of expensive paid application that makes it difficult for small scale hospitals to run faster
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+<hr />
 
 ### Built With
 
-Built using these awesome framework
+Built using these awesome frameworks
 
 - [Nest.js](https://nestjs.com/)
 - [Vue.js](https://vuejs.org/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- GETTING STARTED -->
 
 ## Getting Started
 
-Bismillah aja...
+### Requirements
+1. Nodejs
+2. npm@9.5.1
+    1. @nestjs/cli@9.2.0
+    2. jest@29.4.3
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- STRUCTURE -->
+<hr />
+## Project Structure
+
+<b>HORAS</b> contains 2 main project directory (server and app). You need to run npm start/serve on each folder to run it.
+
+API default run on port 3000. You can access Open API at `<hostname>:3000/api`
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ### API Service
-
-- Create <b>.env</b> file from <b>.env.example</b> format and adjust with your local setting
+API service is inside server folder (NestJS environtment, monorepo mode)
+- Create <b>.env</b> file from <b>.env.example</b> format and adjust with your local setting (environtment folder)
 - Run api service
   ```sh
   npm run start
@@ -51,43 +123,46 @@ Bismillah aja...
   ```sh
   npm run start:dev
   ```
+  And module target (see package.json)
+  ```sh
+  npm run start:dev:core
+  ```
   <p align="right">(<a href="#top">back to top</a>)</p>
+
+### Front End
+- Run front end
+  ```sh
+  npm run serve
+  ```
+  <p align="right">(<a href="#top">back to top</a>)</p>
+  <hr />
 
 ### Installation
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the repo
    ```sh
    git clone https://github.com/theycantrevealus/horas.git
    ```
-3. Enter your config in `.env`
-4. Install NPM packages (for each folder api and app)
+2. Enter your config in `.env`
+3. Install NPM packages (for each folder api and app)
    ```sh
    npm install
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- USAGE EXAMPLES -->
-
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- ROADMAP -->
 
 ## Roadmap
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
+- [ ] Application Design
+- [ ] Discussion and Evaluation
+- [ ] Documentation
+- [ ] Code strategy
 - [ ] Add "components" document to easily copy & paste sections of the readme
+- [ ] Documentation Adjustment
 - [ ] Multi-language Support
     - [ ] English
     - [ ] Indonesia
@@ -95,7 +170,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 See the [open issues](https://github.com/theycantrevealus/horas/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- CONTRIBUTING -->
 
 ## Contributing
@@ -115,43 +190,38 @@ Make sure to write properly test and run it on locally to keep commits clean on 
 
 ### Contributing Format
 
-This project using following format as committing message. If any suggestion of type, feel free to suggest it
+This project using following format as committing message. If any suggestion of type, feel free to suggest it. For now we are not using git lint yet, but soon
 
-✨ feat: Add a new feature to the codebase (MINOR in semantic versioning).<br />
-🔧 fix: Fix a bug (equivalent to a PATCH in Semantic Versioning).<br />
-📑 docs: Documentation changes.<br />
-👑 style: Code style change (semicolon, indentation...).<br />
-👓 refactor: Refactor code without changing public API.<br />
-🚀 perf: Update code performances.<br />
-🔎 test: Add test to an existing feature.<br />
-📦 chore: Update something without impacting the user (ex: bump a dependency in package.json).<br />
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- STRUCTURE -->
-
-## Project Structure
-
-<b>HORAS</b> contains 2 main project directory (api and app). You need to run npm start/serve on each folder to run it.
-
-API default run on port 3000. You can access Open API at `<hostname>:3000/api`
+✨ **feat**: Add a new feature to the codebase (MINOR in semantic versioning).<br />
+🔧 **fix**: Fix a bug (equivalent to a PATCH in Semantic Versioning).<br />
+📑 **docs**: Documentation changes.<br />
+👑 **style**: Code style change (semicolon, indentation...).<br />
+👓 **refactor**: Refactor code without changing public API.<br />
+🚀 **perf**: Update code performances.<br />
+🔎 **test**: Add test to an existing feature.<br />
+📦 **chore**: Update something without impacting the user (ex: bump a dependency in package.json).<br />
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+<hr />
 
 <!-- LICENSE -->
 
 ## License
-Distributed under the APACHE 2.0 License. See `LICENSE.txt` for more information.
-<p align="right">(<a href="#top">back to top</a>)</p>
 
+Distributed under the APACHE 2.0 License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+<hr />
 <!-- CONTACT -->
+
 ## Contact
 
-Hendry Tanaka - [@takashitanaka\_](https://twitter.com/takashitanaka_) - theycantrevealus@gmail.com <br />
-Project Link: [https://github.com/theycantrevealus/horas](https://github.com/theycantrevealus/horas)
+Hendry Tanaka - [@takashitanaka\_](https://twitter.com/takashitanaka_) - theycantrevealus@gmail.com
+
+Project Link: [documentation and paper](https://theycantrevealus.github.io/horas/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
+<hr />
 <!-- ACKNOWLEDGMENTS -->
 
 ## Acknowledgments
