@@ -56,12 +56,12 @@ import { TimeManagement } from '@utility/time'
             }
           })
 
-          // schema.pre('findOneAndUpdate', function (next) {
-          //   const update = this.getUpdate()
-          //   update['updated_at'] = time.getTimezone('Asia/Jakarta')
-          //   update['$inc'] = { __v: 1 }
-          //   next()
-          // })
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['updated_at'] = time.getTimezone('Asia/Jakarta')
+            update['$inc'] = { __v: 1 }
+            next()
+          })
 
           return schema
         },

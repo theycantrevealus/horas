@@ -27,7 +27,7 @@ export class MasterItemBrandService {
   }
 
   async add(
-    parameter: MasterItemBrandAddDTO,
+    data: MasterItemBrandAddDTO,
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
@@ -38,15 +38,13 @@ export class MasterItemBrandService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    if (!parameter.code) {
-      parameter.code = `${
-        modCodes[this.constructor.name]
-      }-${new Date().getTime()}`
+    if (!data.code) {
+      data.code = `${modCodes[this.constructor.name]}-${new Date().getTime()}`
     }
 
     await this.masterItemBrandModel
       .create({
-        ...parameter,
+        ...data,
         created_by: account,
       })
       .then((result) => {
@@ -70,7 +68,7 @@ export class MasterItemBrandService {
 
   async edit(
     parameter: MasterItemBrandEditDTO,
-    _id: string
+    id: string
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -83,7 +81,7 @@ export class MasterItemBrandService {
     await this.masterItemBrandModel
       .findOneAndUpdate(
         {
-          _id: new Types.ObjectId(_id),
+          id: id,
           __v: parameter.__v,
         },
         {
@@ -98,7 +96,6 @@ export class MasterItemBrandService {
           response.statusCode = `${modCodes[this.constructor.name]}_I_${
             modCodes.Global.success
           }`
-          result.__v++
           response.payload = result
         } else {
           response.message = `Master item brand failed to update. Invalid document`
@@ -113,7 +110,6 @@ export class MasterItemBrandService {
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.failed
         }`
-        response.payload = error
       })
     return response
   }

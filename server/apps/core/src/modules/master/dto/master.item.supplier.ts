@@ -134,6 +134,10 @@ export class MasterItemSupplierEditDTO {
 
   @IsNotEmpty()
   @IsNumber()
+  @ApiProperty({
+    example: 0,
+    description: 'Document version',
+  })
   __v: number
 
   constructor(parameter: any) {
@@ -144,5 +148,6 @@ export class MasterItemSupplierEditDTO {
     this.sales_name = parameter.sales_name
     this.address = parameter.address
     this.remark = parameter.remark
+    this.__v = parameter.__v
   }
 }
