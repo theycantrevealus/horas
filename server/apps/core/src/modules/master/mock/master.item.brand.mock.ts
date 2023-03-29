@@ -1,0 +1,140 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { mockAccount } from '@core/account/mock/account.mock'
+import { Account } from '@core/account/schemas/account.model'
+import {
+  MasterItemBrandAddDTO,
+  MasterItemBrandEditDTO,
+} from '@core/master/dto/master.item.brand'
+import {
+  MasterItemBrand,
+  MasterItemBrandDocument,
+} from '@core/master/schemas/master.item.brand'
+import { faker } from '@faker-js/faker'
+import { TimeManagement } from '@utility/time'
+import { Types } from 'mongoose'
+
+export const mockMasterItemBrandService = {
+  all: jest.fn().mockResolvedValue((dto) => dto),
+  add: jest
+    .fn()
+    .mockImplementation((dto: MasterItemBrandAddDTO, account: Account) => {
+      return Promise.resolve({
+        payload: {
+          ...dto,
+          id: `brand-${new Types.ObjectId().toString()}`,
+        },
+      })
+    }),
+  edit: jest
+    .fn()
+    .mockImplementation((dto: MasterItemBrandEditDTO, id: string) => {
+      return Promise.resolve({
+        payload: {
+          id: id,
+        },
+      })
+    }),
+  detail: jest.fn().mockResolvedValue((dto) => dto),
+  delete: jest.fn().mockImplementation((id: string) => {
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
+  }),
+}
+
+export const mockMasterItemBrand = (
+  id = `brand-${new Types.ObjectId().toString()}`,
+  code = 'BRD-0001',
+  name = faker.company.name(),
+  remark = '',
+  created_by: IAccountCreatedBy = {
+    id: `account-${new Types.ObjectId().toString()}`,
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    email: faker.internet.email(),
+  },
+  created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
+  updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
+  deleted_at = null
+): MasterItemBrand => ({
+  id,
+  code,
+  name,
+  remark,
+  created_by,
+  created_at,
+  updated_at,
+  deleted_at,
+})
+
+export const mockMasterItemBrandModel = {
+  new: jest.fn().mockResolvedValue(mockMasterItemBrand()),
+  constructor: jest.fn().mockResolvedValue(mockMasterItemBrand()),
+  find: jest.fn(),
+  aggregate: jest.fn().mockReturnThis(),
+  findOne: jest.fn(),
+  findOneAndUpdate: jest.fn(),
+  update: jest.fn(),
+  create: jest.fn(),
+  save: jest.fn(),
+  remove: jest.fn(),
+  exec: jest.fn(),
+}
+
+export const mockMasterItemBrandDoc = (
+  mock?: Partial<MasterItemBrand>
+): Partial<MasterItemBrandDocument> => ({
+  code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
+  name: mock?.name || faker.company.name(),
+  remark: mock?.remark || '',
+  created_by: mock?.created_by || {
+    id: `account-${new Types.ObjectId().toString()}`,
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    email: faker.internet.email(),
+  },
+  created_at:
+    mock?.created_at || new TimeManagement().getTimezone('Asia/Jakarta'),
+  updated_at:
+    mock?.updated_at || new TimeManagement().getTimezone('Asia/Jakarta'),
+  deleted_at: mock?.deleted_at || null,
+})
+
+export const masterItemBrandArray = [
+  mockMasterItemBrand(),
+  mockMasterItemBrand(
+    `brand-${new Types.ObjectId().toString()}`,
+    'BRD-0001',
+    '',
+    '',
+    mockAccount(),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    null
+  ),
+  mockMasterItemBrand(
+    `brand-${new Types.ObjectId().toString()}`,
+    'BRD-0002',
+    '',
+    '',
+    mockAccount(),
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    new TimeManagement().getTimezone('Asia/Jakarta')
+  ),
+]
+
+export const masterItemBrandDocArray = [
+  mockMasterItemBrandDoc(),
+  mockMasterItemBrandDoc({
+    code: 'XX-002',
+    name: faker.name.firstName(),
+    remark: '',
+  }),
+  mockMasterItemBrandDoc({
+    code: 'XX-001',
+    name: faker.name.firstName(),
+    remark: '',
+  }),
+]
