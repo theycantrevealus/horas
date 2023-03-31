@@ -4,6 +4,8 @@ import { AccountModule } from '@core/account/account.module'
 import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
 import { MasterItemBrandService } from '@core/master/master.item.brand.service'
+import { MasterItemCategoryController } from '@core/master/master.item.category.controller'
+import { MasterItemCategoryService } from '@core/master/master.item.category.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
 import {
@@ -126,6 +128,36 @@ import { TimeManagement } from '@utility/time'
           return schema
         },
       },
+      {
+        name: MasterItemCategory.name,
+        useFactory: () => {
+          const schema = MasterItemCategorySchema
+          const time = new TimeManagement()
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `brand-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              this.updated_at = time.getTimezone('Asia/Jakarta')
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['updated_at'] = time.getTimezone('Asia/Jakarta')
+            update['$inc'] = { __v: 1 }
+            next()
+          })
+
+          return schema
+        },
+      },
     ]),
     MongooseModule.forFeature([
       { name: Account.name, schema: AccountSchema },
@@ -135,8 +167,20 @@ import { TimeManagement } from '@utility/time'
     AuthModule,
     AccountModule,
   ],
-  controllers: [MasterItemSupplierController, MasterItemBrandController],
-  providers: [MasterItemSupplierService, MasterItemBrandService],
-  exports: [MasterItemSupplierService, MasterItemBrandService],
+  controllers: [
+    MasterItemSupplierController,
+    MasterItemBrandController,
+    MasterItemCategoryController,
+  ],
+  providers: [
+    MasterItemSupplierService,
+    MasterItemBrandService,
+    MasterItemCategoryService,
+  ],
+  exports: [
+    MasterItemSupplierService,
+    MasterItemBrandService,
+    MasterItemCategoryService,
+  ],
 })
 export class MasterModule {}
