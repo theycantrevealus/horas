@@ -51,7 +51,7 @@ export class MasterItemBrandController {
   async all(@Query('lazyEvent') parameter: string) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterItemBrandService.data_prime({
+      return await this.masterItemBrandService.all({
         first: parsedData.first,
         rows: parsedData.rows,
         sortField: parsedData.sortField,
@@ -64,6 +64,19 @@ export class MasterItemBrandController {
         payload: {},
       }
     }
+  }
+
+  @Get(':id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Detail data',
+    description: '',
+  })
+  async detail(@Param() param) {
+    return await this.masterItemBrandService.detail(param.id)
   }
 
   @Post('brand')
@@ -83,7 +96,7 @@ export class MasterItemBrandController {
     return await this.masterItemBrandService.add(parameter, account)
   }
 
-  @Patch('brand/:_id')
+  @Patch('brand/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -94,13 +107,13 @@ export class MasterItemBrandController {
     description: ``,
   })
   @ApiParam({
-    name: '_id',
+    name: 'id',
   })
   async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param) {
-    return await this.masterItemBrandService.edit(parameter, param._id)
+    return await this.masterItemBrandService.edit(parameter, param.id)
   }
 
-  @Delete('brand/:_id')
+  @Delete('brand/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -111,9 +124,9 @@ export class MasterItemBrandController {
     description: ``,
   })
   @ApiParam({
-    name: '_id',
+    name: 'id',
   })
   async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterItemBrandService.delete(param._id)
+    return await this.masterItemBrandService.delete(param.id)
   }
 }

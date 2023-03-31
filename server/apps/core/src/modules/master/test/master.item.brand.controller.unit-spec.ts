@@ -2,15 +2,15 @@ import { AccountService } from '@core/account/account.service'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
 import {
-  MasterItemSupplierAddDTO,
-  MasterItemSupplierEditDTO,
-} from '@core/master/dto/master.item.supplier'
-import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
-import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+  MasterItemBrandAddDTO,
+  MasterItemBrandEditDTO,
+} from '@core/master/dto/master.item.brand'
+import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
+import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import {
-  mockMasterItemSupplier,
-  mockMasterItemSupplierService,
-} from '@core/master/mock/master.item.supplier.mock'
+  mockMasterItemBrand,
+  mockMasterItemBrandService,
+} from '@core/master/mock/master.item.brand.mock'
 import { LogActivity } from '@log/schemas/log.activity'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -18,17 +18,17 @@ import { AuthService } from '@security/auth.service'
 import { testCaption } from '@utility/string'
 import { Types } from 'mongoose'
 
-describe('Master Item Supplier Controller', () => {
-  let controller: MasterItemSupplierController
-  let service: MasterItemSupplierService
+describe('Master Item Brand Controller', () => {
+  let controller: MasterItemBrandController
+  let service: MasterItemBrandService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MasterItemSupplierController],
+      controllers: [MasterItemBrandController],
       providers: [
         {
-          provide: MasterItemSupplierService,
-          useValue: mockMasterItemSupplierService,
+          provide: MasterItemBrandService,
+          useValue: mockMasterItemBrandService,
         },
         { provide: AuthService, useValue: {} },
         { provide: AccountService, useValue: {} },
@@ -37,10 +37,10 @@ describe('Master Item Supplier Controller', () => {
       ],
     }).compile()
 
-    controller = module.get<MasterItemSupplierController>(
-      MasterItemSupplierController
+    controller = module.get<MasterItemBrandController>(
+      MasterItemBrandController
     )
-    service = module.get<MasterItemSupplierService>(MasterItemSupplierService)
+    service = module.get<MasterItemBrandService>(MasterItemBrandService)
 
     jest.clearAllMocks()
   })
@@ -71,31 +71,28 @@ describe('Master Item Supplier Controller', () => {
     ),
     async () => {
       const creator = mockAccount()
-      const data = new MasterItemSupplierAddDTO(mockMasterItemSupplier())
+      const data = new MasterItemBrandAddDTO(mockMasterItemBrand())
       await controller.add(data, creator)
-      expect(mockMasterItemSupplierService.add).toHaveBeenCalledWith(
-        data,
-        creator
-      )
+      expect(mockMasterItemBrandService.add).toHaveBeenCalledWith(data, creator)
     }
   )
 
   it(
     testCaption('FLOW', 'feature', 'Should pass edit to service'),
     async () => {
-      const data = new MasterItemSupplierEditDTO(mockMasterItemSupplier())
-      const id = `supplier-${new Types.ObjectId().toString()}`
+      const data = new MasterItemBrandEditDTO(mockMasterItemBrand())
+      const id = `brand-${new Types.ObjectId().toString()}`
       await controller.edit(data, { id: id })
-      expect(mockMasterItemSupplierService.edit).toHaveBeenCalledWith(data, id)
+      expect(mockMasterItemBrandService.edit).toHaveBeenCalledWith(data, id)
     }
   )
 
   it(
     testCaption('FLOW', 'feature', 'Should pass detail to service'),
     async () => {
-      const id = `supplier-${new Types.ObjectId().toString()}`
+      const id = `brand-${new Types.ObjectId().toString()}`
       await controller.detail({ id: id })
-      expect(mockMasterItemSupplierService.detail).toHaveBeenCalledWith(id)
+      expect(mockMasterItemBrandService.detail).toHaveBeenCalledWith(id)
     }
   )
 
@@ -104,7 +101,7 @@ describe('Master Item Supplier Controller', () => {
     async () => {
       const id = `account-${new Types.ObjectId().toString()}`
       await controller.delete({ id: id })
-      expect(mockMasterItemSupplierService.delete).toHaveBeenCalledWith(id)
+      expect(mockMasterItemBrandService.delete).toHaveBeenCalledWith(id)
     }
   )
 })

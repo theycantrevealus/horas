@@ -134,7 +134,7 @@ describe('Master Item Supplier Service', () => {
 
       const data = (await service.edit(
         new MasterItemSupplierEditDTO(masterItemSupplierDocArray[0]),
-        new Types.ObjectId().toString()
+        `supplier-${new Types.ObjectId().toString()}`
       )) satisfies GlobalResponse
       expect(data.payload).toHaveProperty('code')
     }

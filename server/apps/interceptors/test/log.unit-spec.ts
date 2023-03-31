@@ -8,14 +8,23 @@ import {
   mockAccountService,
 } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemBrandAddDTO } from '@core/master/dto/master.item.brand'
 import { MasterItemSupplierAddDTO } from '@core/master/dto/master.item.supplier'
+import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
+import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+import {
+  masterItemBrandArray,
+  mockMasterItemBrandModel,
+  mockMasterItemBrandService,
+} from '@core/master/mock/master.item.brand.mock'
 import {
   masterItemSupplierArray,
   mockMasterItemSupplierModel,
   mockMasterItemSupplierService,
 } from '@core/master/mock/master.item.supplier.mock'
+import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
 import { MasterItemSupplier } from '@core/master/schemas/master.item.supplier'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import {
@@ -306,6 +315,216 @@ describe('Logging Interceptor', () => {
 
   describe(
     testCaption(
+      'MASTER BRAND CONTROLLER',
+      'feature',
+      'Master Item Brand Interceptor'
+    ),
+    () => {
+      it(
+        testCaption('Add Master Brand', 'feature', 'Should log add'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItemBrand.name),
+                  useValue: mockMasterItemBrandModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemBrandService,
+                  useValue: mockMasterItemBrandService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemBrandController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'POST',
+            `brand-${new Types.ObjectId().toString()}`,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'I',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .post(`/v1/master/brand`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(new MasterItemBrandAddDTO(masterItemBrandArray[0]))
+            .then((res) => {
+              expect(res.body.payload.id).toMatch(/^brand-/)
+              expect(res.body.payload.name).toEqual(
+                masterItemBrandArray[0].name
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('Edit Master Brand', 'feature', 'Should log edit'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItemBrand.name),
+                  useValue: mockMasterItemBrandModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemBrandService,
+                  useValue: mockMasterItemBrandService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemBrandController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'PATCH',
+            masterItemBrandArray[2].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'U',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .patch(`/v1/master/brand/${masterItemBrandArray[2].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(masterItemBrandArray[2])
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+
+      it(
+        testCaption(
+          'Delete Master Brand',
+          'feature',
+          'Should log brand delete'
+        ),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItemBrand.name),
+                  useValue: mockMasterItemBrandModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemBrandService,
+                  useValue: mockMasterItemBrandService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemBrandController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'DELETE',
+            masterItemBrandArray[0].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'D',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .delete(`/v1/master/brand/${masterItemBrandArray[0].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption(
       'MASTER SUPPLIER CONTROLLER',
       'feature',
       'Master Item Supplier Interceptor'
@@ -380,7 +599,7 @@ describe('Logging Interceptor', () => {
       )
 
       it(
-        testCaption('Edit Account', 'feature', 'Should log edit'),
+        testCaption('Edit Master Supplier', 'feature', 'Should log edit'),
         async () => {
           app = (
             await createTestModule(
@@ -445,7 +664,11 @@ describe('Logging Interceptor', () => {
       )
 
       it(
-        testCaption('Delete Account', 'feature', 'Should log account delete'),
+        testCaption(
+          'Delete Master Supplier',
+          'feature',
+          'Should log supplier delete'
+        ),
         async () => {
           app = (
             await createTestModule(
@@ -484,7 +707,7 @@ describe('Logging Interceptor', () => {
 
           const dataSet = mockLogActivity(
             'DELETE',
-            accountArray[0].id,
+            masterItemSupplierArray[0].id,
             '',
             '',
             '',
@@ -500,7 +723,7 @@ describe('Logging Interceptor', () => {
           })
 
           await request(app.getHttpServer())
-            .delete(`/v1/master/supplier/${accountArray[0].id}`)
+            .delete(`/v1/master/supplier/${masterItemSupplierArray[0].id}`)
             .set({ Authorization: `Bearer ${token}` })
             .then((res) => {
               expect(res.body.payload.id).toEqual(dataSet.identifier)

@@ -13,7 +13,7 @@ import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
 import { TimeManagement } from '@utility/time'
-import { Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
 @Injectable()
 export class MasterItemBrandService {
@@ -22,8 +22,12 @@ export class MasterItemBrandService {
     private masterItemBrandModel: Model<MasterItemBrandDocument>
   ) {}
 
-  async data_prime(parameter: any) {
+  async all(parameter: any) {
     return await prime_datatable(parameter, this.masterItemBrandModel)
+  }
+
+  async detail(id: string): Promise<MasterItemBrand> {
+    return this.masterItemBrandModel.findOne({ id: id }).exec()
   }
 
   async add(
@@ -67,7 +71,7 @@ export class MasterItemBrandService {
   }
 
   async edit(
-    parameter: MasterItemBrandEditDTO,
+    data: MasterItemBrandEditDTO,
     id: string
   ): Promise<GlobalResponse> {
     const response = {
@@ -82,24 +86,25 @@ export class MasterItemBrandService {
       .findOneAndUpdate(
         {
           id: id,
-          __v: parameter.__v,
+          __v: data.__v,
         },
         {
-          code: parameter.code,
-          name: parameter.name,
-          remark: parameter.remark,
+          code: data.code,
+          name: data.name,
+          remark: data.remark,
         }
       )
+      .exec()
       .then((result) => {
         if (result) {
           response.message = 'Master item brand updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.success
           }`
           response.payload = result
         } else {
           response.message = `Master item brand failed to update. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
           response.payload = {}
@@ -107,14 +112,14 @@ export class MasterItemBrandService {
       })
       .catch((error: Error) => {
         response.message = `Master item brand failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
           modCodes.Global.failed
         }`
       })
     return response
   }
 
-  async delete(_id: string): Promise<GlobalResponse> {
+  async delete(id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -123,7 +128,7 @@ export class MasterItemBrandService {
       transaction_id: null,
     } satisfies GlobalResponse
     const data = await this.masterItemBrandModel.findOne({
-      _id: new Types.ObjectId(_id),
+      id: id,
     })
 
     if (data) {
@@ -133,20 +138,20 @@ export class MasterItemBrandService {
         .save()
         .then((result) => {
           response.message = 'Master item brand deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.success
           }`
         })
         .catch((error: Error) => {
           response.message = `Master item brand failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.failed
           }`
           response.payload = error
         })
     } else {
       response.message = `Master item brand failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
+      response.statusCode = `${modCodes[this.constructor.name]}_D_${
         modCodes.Global.failed
       }`
       response.payload = {}

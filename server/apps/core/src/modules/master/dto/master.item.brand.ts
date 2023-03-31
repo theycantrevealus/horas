@@ -27,14 +27,10 @@ export class MasterItemBrandAddDTO {
   @IsNotEmpty()
   remark: string
 
-  @IsNotEmpty()
-  @IsNumber()
-  __v: number
   constructor(parameter: any) {
     this.code = parameter.code
     this.name = parameter.name
     this.remark = parameter.remark
-    this.__v = parameter.__v
   }
 }
 
