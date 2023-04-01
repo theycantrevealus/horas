@@ -1,12 +1,13 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { Prop, raw, Schema } from '@nestjs/mongoose'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
-import { SchemaTypes } from 'mongoose'
+import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+export type MasterItemUnitDocument = HydratedDocument<MasterItemUnit>
 @Schema({ collection: 'master_item_unit' })
 export class MasterItemUnit {
-  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
   @Prop({ type: SchemaTypes.String, required: true, unique: true })
@@ -38,3 +39,5 @@ export class MasterItemUnit {
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
 }
+
+export const MasterItemUnitSchema = SchemaFactory.createForClass(MasterItemUnit)

@@ -67,7 +67,7 @@ export class MasterItemCategoryController {
     }
   }
 
-  @Get(':id')
+  @Get('category/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)

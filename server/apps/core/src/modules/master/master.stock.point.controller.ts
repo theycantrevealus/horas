@@ -67,7 +67,7 @@ export class MasterStockPointController {
     }
   }
 
-  @Get(':id')
+  @Get('stock_point/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
