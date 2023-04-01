@@ -38,6 +38,7 @@
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <li><a href="#contributors">Contributors</a></li>
   </ol>
 </details>
 
@@ -215,3 +216,22 @@ Use this space to list resources you find helpful and would like to give credit 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
+
+<!-- CONTRIBUTORS -->
+
+## Contributors
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/theycantrevealus/horas">
+        <img src="https://contrib.rocks/image?repo=theycantrevealus/horas" width="100px;" alt="Hendry Tanaka"/>
+        <br />
+        <sub>
+          <b>Hendry Tanaka</b>
+        </sub>
+        <br />
+        <a href="https://github.com/theycantrevealus/horas/commits?author=theycantrevealus" title="Code">💻</a>
+      </td>
+    </tr>
+</table>
+<p align="right">(<a href="#top">back to top</a>)</p>
