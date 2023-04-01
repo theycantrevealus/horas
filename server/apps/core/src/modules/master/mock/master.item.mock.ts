@@ -2,38 +2,39 @@ import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
 import {
-  MasterItemCategoryAddDTO,
-  MasterItemCategoryEditDTO,
-} from '@core/master/dto/master.item.category'
+  MasterItemAddDTO,
+  MasterItemEditDTO,
+} from '@core/master/dto/master.item'
+import { masterItemBrandArray } from '@core/master/mock/master.item.brand.mock'
+import { masterItemCategoryArray } from '@core/master/mock/master.item.category.mock'
+import { masterItemUnitArray } from '@core/master/mock/master.item.unit.mock'
 import {
-  MasterItemCategory,
-  MasterItemCategoryDocument,
-} from '@core/master/schemas/master.item.category'
+  MasterItem,
+  MasterItemDocument,
+} from '@core/master/schemas/master.item'
 import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterItemCategoryService = {
+export const mockMasterItemService = {
   all: jest.fn().mockResolvedValue((dto) => dto),
   add: jest
     .fn()
-    .mockImplementation((dto: MasterItemCategoryAddDTO, account: Account) => {
+    .mockImplementation((dto: MasterItemAddDTO, account: Account) => {
       return Promise.resolve({
         payload: {
           ...dto,
-          id: `category-${new Types.ObjectId().toString()}`,
+          id: `item-${new Types.ObjectId().toString()}`,
         },
       })
     }),
-  edit: jest
-    .fn()
-    .mockImplementation((dto: MasterItemCategoryEditDTO, id: string) => {
-      return Promise.resolve({
-        payload: {
-          id: id,
-        },
-      })
-    }),
+  edit: jest.fn().mockImplementation((dto: MasterItemEditDTO, id: string) => {
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
+  }),
   detail: jest.fn().mockResolvedValue((dto) => dto),
   delete: jest.fn().mockImplementation((id: string) => {
     return Promise.resolve({
@@ -44,10 +45,13 @@ export const mockMasterItemCategoryService = {
   }),
 }
 
-export const mockMasterItemCategory = (
-  id = `category-${new Types.ObjectId().toString()}`,
-  code = 'CAT-0001',
-  name = 'Drugs',
+export const mockMasterItem = (
+  id = `item-${new Types.ObjectId().toString()}`,
+  code = 'BRD-0001',
+  name = faker.company.name(),
+  category = masterItemCategoryArray,
+  unit = masterItemUnitArray[0],
+  brand = masterItemBrandArray[0],
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -58,10 +62,13 @@ export const mockMasterItemCategory = (
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
-): MasterItemCategory => ({
+): MasterItem => ({
   id,
   code,
   name,
+  category,
+  unit,
+  brand,
   remark,
   created_by,
   created_at,
@@ -69,9 +76,9 @@ export const mockMasterItemCategory = (
   deleted_at,
 })
 
-export const mockMasterItemCategoryModel = {
-  new: jest.fn().mockResolvedValue(mockMasterItemCategory()),
-  constructor: jest.fn().mockResolvedValue(mockMasterItemCategory()),
+export const mockMasterItemModel = {
+  new: jest.fn().mockResolvedValue(mockMasterItem()),
+  constructor: jest.fn().mockResolvedValue(mockMasterItem()),
   find: jest.fn(),
   aggregate: jest.fn().mockReturnThis(),
   findOne: jest.fn(),
@@ -83,12 +90,12 @@ export const mockMasterItemCategoryModel = {
   exec: jest.fn(),
 }
 
-export const mockMasterItemCategoryDoc = (
-  mock?: Partial<MasterItemCategory>
-): Partial<MasterItemCategoryDocument> => ({
-  id: mock?.id || `item_category-${new Types.ObjectId().toString()}`,
+export const mockMasterItemDoc = (
+  mock?: Partial<MasterItem>
+): Partial<MasterItemDocument> => ({
+  id: mock?.id || `item-${new Types.ObjectId().toString()}`,
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
-  name: mock?.name || 'Drugs',
+  name: mock?.name || faker.company.name(),
   remark: mock?.remark || '',
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -103,39 +110,38 @@ export const mockMasterItemCategoryDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-export const masterItemCategoryArray = [
-  mockMasterItemCategory(),
-  mockMasterItemCategory(
-    `item_category-${new Types.ObjectId().toString()}`,
-    `item_category-${new Types.ObjectId().toString()}`,
-    'CAT-0001',
+export const masterItemArray = [
+  mockMasterItem(),
+  mockMasterItem(
+    `item-${new Types.ObjectId().toString()}`,
+    'ITM-0001',
+    '',
+    [],
+    masterItemUnitArray[0],
+    masterItemBrandArray[0],
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
     new TimeManagement().getTimezone('Asia/Jakarta'),
     null
   ),
-  mockMasterItemCategory(
-    `item_category-${new Types.ObjectId().toString()}`,
-    `item_category-${new Types.ObjectId().toString()}`,
-    'CAT-0002',
+  mockMasterItem(
+    `item-${new Types.ObjectId().toString()}`,
+    'ITM-0001',
+    '',
+    [],
+    masterItemUnitArray[0],
+    masterItemBrandArray[0],
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta')
+    new TimeManagement().getTimezone('Asia/Jakarta'),
+    null
   ),
 ]
 
-export const masterItemCategoryDocArray = [
-  mockMasterItemCategoryDoc(),
-  mockMasterItemCategoryDoc({
-    code: 'XX-002',
-    name: 'Drugs',
-    remark: '',
-  }),
-  mockMasterItemCategoryDoc({
-    code: 'XX-001',
-    name: 'Drugs',
-    remark: '',
-  }),
+export const masterItemDocArray = [
+  mockMasterItemDoc(),
+  mockMasterItemDoc(),
+  mockMasterItemDoc(),
 ]

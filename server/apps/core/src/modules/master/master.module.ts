@@ -6,10 +6,15 @@ import { MasterItemBrandController } from '@core/master/master.item.brand.contro
 import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import { MasterItemCategoryController } from '@core/master/master.item.category.controller'
 import { MasterItemCategoryService } from '@core/master/master.item.category.service'
+import { MasterItemController } from '@core/master/master.item.controller'
+import { MasterItemService } from '@core/master/master.item.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+import { MasterItemUnitController } from '@core/master/master.item.unit.controller'
+import { MasterItemUnitService } from '@core/master/master.item.unit.service'
 import { MasterStockPointController } from '@core/master/master.stock.point.controller'
 import { MasterStockPointService } from '@core/master/master.stock.point.service'
+import { MasterItem, MasterItemSchema } from '@core/master/schemas/master.item'
 import {
   MasterItemBrand,
   MasterItemBrandSchema,
@@ -22,6 +27,10 @@ import {
   MasterItemSupplier,
   MasterItemSupplierSchema,
 } from '@core/master/schemas/master.item.supplier'
+import {
+  MasterItemUnit,
+  MasterItemUnitSchema,
+} from '@core/master/schemas/master.item.unit'
 import {
   MasterStockPoint,
   MasterStockPointSchema,
@@ -44,6 +53,36 @@ import { TimeManagement } from '@utility/time'
       load: [ApplicationConfig, MongoConfig],
     }),
     MongooseModule.forFeatureAsync([
+      {
+        name: MasterItem.name,
+        useFactory: () => {
+          const schema = MasterItemSchema
+          const time = new TimeManagement()
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `item-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              this.updated_at = time.getTimezone('Asia/Jakarta')
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['updated_at'] = time.getTimezone('Asia/Jakarta')
+            update['$inc'] = { __v: 1 }
+            next()
+          })
+
+          return schema
+        },
+      },
       {
         name: MasterItemSupplier.name,
         useFactory: () => {
@@ -105,13 +144,13 @@ import { TimeManagement } from '@utility/time'
         },
       },
       {
-        name: MasterItemBrand.name,
+        name: MasterItemUnit.name,
         useFactory: () => {
-          const schema = MasterItemBrandSchema
+          const schema = MasterItemUnitSchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
             if (this.isNew) {
-              this.id = `brand-${this._id}`
+              this.id = `item_unit-${this._id}`
               this.__v = 0
             }
 
@@ -135,9 +174,9 @@ import { TimeManagement } from '@utility/time'
         },
       },
       {
-        name: MasterItemCategory.name,
+        name: MasterItemBrand.name,
         useFactory: () => {
-          const schema = MasterItemCategorySchema
+          const schema = MasterItemBrandSchema
           const time = new TimeManagement()
           schema.pre('save', function (next) {
             if (this.isNew) {
@@ -208,18 +247,24 @@ import { TimeManagement } from '@utility/time'
     MasterItemBrandController,
     MasterItemCategoryController,
     MasterStockPointController,
+    MasterItemUnitController,
+    MasterItemController,
   ],
   providers: [
     MasterItemSupplierService,
     MasterItemBrandService,
     MasterItemCategoryService,
     MasterStockPointService,
+    MasterItemUnitService,
+    MasterItemService,
   ],
   exports: [
     MasterItemSupplierService,
     MasterItemBrandService,
     MasterItemCategoryService,
     MasterStockPointService,
+    MasterItemUnitService,
+    MasterItemService,
   ],
 })
 export class MasterModule {}

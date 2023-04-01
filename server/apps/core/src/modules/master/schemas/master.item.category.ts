@@ -5,9 +5,9 @@ import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterItemCategoryDocument = HydratedDocument<MasterItemCategory>
-@Schema({ collection: 'master_item' })
+@Schema({ collection: 'master_item_category' })
 export class MasterItemCategory {
-  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
   @Prop({ type: SchemaTypes.String, required: true, unique: true })

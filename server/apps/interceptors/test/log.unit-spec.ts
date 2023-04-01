@@ -8,16 +8,22 @@ import {
   mockAccountService,
 } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemAddDTO } from '@core/master/dto/master.item'
 import { MasterItemBrandAddDTO } from '@core/master/dto/master.item.brand'
 import { MasterItemCategoryAddDTO } from '@core/master/dto/master.item.category'
 import { MasterItemSupplierAddDTO } from '@core/master/dto/master.item.supplier'
+import { MasterItemUnitAddDTO } from '@core/master/dto/master.item.unit'
 import { MasterStockPointAddDTO } from '@core/master/dto/master.stock.point'
 import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
 import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import { MasterItemCategoryController } from '@core/master/master.item.category.controller'
 import { MasterItemCategoryService } from '@core/master/master.item.category.service'
+import { MasterItemController } from '@core/master/master.item.controller'
+import { MasterItemService } from '@core/master/master.item.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+import { MasterItemUnitController } from '@core/master/master.item.unit.controller'
+import { MasterItemUnitService } from '@core/master/master.item.unit.service'
 import { MasterStockPointController } from '@core/master/master.stock.point.controller'
 import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import {
@@ -31,18 +37,30 @@ import {
   mockMasterItemCategoryService,
 } from '@core/master/mock/master.item.category.mock'
 import {
+  masterItemArray,
+  mockMasterItemModel,
+  mockMasterItemService,
+} from '@core/master/mock/master.item.mock'
+import {
   masterItemSupplierArray,
   mockMasterItemSupplierModel,
   mockMasterItemSupplierService,
 } from '@core/master/mock/master.item.supplier.mock'
 import {
+  masterItemUnitArray,
+  mockMasterItemUnitModel,
+  mockMasterItemUnitService,
+} from '@core/master/mock/master.item.unit.mock'
+import {
   masterStockPointArray,
   mockMasterStockPointModel,
   mockMasterStockPointService,
 } from '@core/master/mock/master.stock.point.mock'
+import { MasterItem } from '@core/master/schemas/master.item'
 import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
 import { MasterItemCategory } from '@core/master/schemas/master.item.category'
 import { MasterItemSupplier } from '@core/master/schemas/master.item.supplier'
+import { MasterItemUnit } from '@core/master/schemas/master.item.unit'
 import { MasterStockPoint } from '@core/master/schemas/master.stock.point'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import {
@@ -536,6 +554,210 @@ describe('Logging Interceptor', () => {
 
   describe(
     testCaption(
+      'MASTER UNIT CONTROLLER',
+      'feature',
+      'Master Item Unit Interceptor'
+    ),
+    () => {
+      it(
+        testCaption('Add Master Unit', 'feature', 'Should log add'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItemUnit.name),
+                  useValue: mockMasterItemUnitModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemUnitService,
+                  useValue: mockMasterItemUnitService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemUnitController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'POST',
+            `item_unit-${new Types.ObjectId().toString()}`,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'I',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .post(`/v1/master/unit`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(new MasterItemUnitAddDTO(masterItemUnitArray[0]))
+            .then((res) => {
+              expect(res.body.payload.id).toMatch(/^item_unit-/)
+              expect(res.body.payload.name).toEqual(masterItemUnitArray[0].name)
+            })
+        }
+      )
+
+      it(
+        testCaption('Edit Master Unit', 'feature', 'Should log edit'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItemUnit.name),
+                  useValue: mockMasterItemUnitModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemUnitService,
+                  useValue: mockMasterItemUnitService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemUnitController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'PATCH',
+            masterItemUnitArray[2].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'U',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .patch(`/v1/master/unit/${masterItemUnitArray[2].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(masterItemUnitArray[2])
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+
+      it(
+        testCaption('Delete Master Unit', 'feature', 'Should log delete'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItemUnit.name),
+                  useValue: mockMasterItemUnitModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemUnitService,
+                  useValue: mockMasterItemUnitService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemUnitController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'DELETE',
+            masterItemUnitArray[0].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'D',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .delete(`/v1/master/unit/${masterItemUnitArray[0].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption(
       'MASTER CATEGORY CONTROLLER',
       'feature',
       'Master Item Category Interceptor'
@@ -937,6 +1159,206 @@ describe('Logging Interceptor', () => {
 
           await request(app.getHttpServer())
             .delete(`/v1/master/supplier/${masterItemSupplierArray[0].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('MASTER ITEM CONTROLLER', 'feature', 'Master Item Interceptor'),
+    () => {
+      it(
+        testCaption('Add Master Item', 'feature', 'Should log add'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItem.name),
+                  useValue: mockMasterItemModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemService,
+                  useValue: mockMasterItemService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'POST',
+            `item-${new Types.ObjectId().toString()}`,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'I',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .post(`/v1/master/item`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(new MasterItemAddDTO(masterItemArray[0]))
+            .then((res) => {
+              expect(res.body.payload.id).toMatch(/^item-/)
+              expect(res.body.payload.name).toEqual(masterItemArray[0].name)
+            })
+        }
+      )
+
+      it(
+        testCaption('Edit Master Unit', 'feature', 'Should log edit'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItem.name),
+                  useValue: mockMasterItemModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemService,
+                  useValue: mockMasterItemService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'PATCH',
+            masterItemArray[2].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'U',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .patch(`/v1/master/item/${masterItemArray[2].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(masterItemArray[2])
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+
+      it(
+        testCaption('Delete Master Item', 'feature', 'Should log delete'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterItem.name),
+                  useValue: mockMasterItemModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterItemService,
+                  useValue: mockMasterItemService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterItemController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'DELETE',
+            masterItemArray[0].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'D',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .delete(`/v1/master/item/${masterItemArray[0].id}`)
             .set({ Authorization: `Bearer ${token}` })
             .then((res) => {
               expect(res.body.payload.id).toEqual(dataSet.identifier)

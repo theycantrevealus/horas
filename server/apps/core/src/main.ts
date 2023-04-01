@@ -14,7 +14,6 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(CoreModule)
   const configService = app.get<ConfigService>(ConfigService)
   app.useStaticAssets(join(__dirname, './assets'))
-  console.log(join(__dirname, './assets'))
 
   app.enableVersioning({
     type: VersioningType.URI,

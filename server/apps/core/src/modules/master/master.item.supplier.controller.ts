@@ -66,7 +66,7 @@ export class MasterItemSupplierController {
     }
   }
 
-  @Get(':id')
+  @Get('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)

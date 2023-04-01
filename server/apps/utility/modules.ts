@@ -6,6 +6,10 @@ export const modCodes = {
   AccountService: 'ACC',
   PatientService: 'PENT',
   MenuService: 'MNU',
-  MasterItemSupplierService: 'MSR-SPP',
-  MasterItemBrandService: 'MSR-BRD',
+  MasterItemService: 'MSRI',
+  MasterItemUnitService: 'MSRI-UNT',
+  MasterItemSupplierService: 'MSRI-SPP',
+  MasterItemBrandService: 'MSRI-BRD',
+  MasterItemCategoryService: 'MSRI-CAT',
+  PurchaseOrderService: 'PO',
 }

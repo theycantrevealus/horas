@@ -1,6 +1,7 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
+import { InventoryModule } from '@core/inventory/inventory.module'
 import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
 import { PatientModule } from '@core/patient/patient.module'
@@ -38,6 +39,7 @@ import { CoreService } from './core.service'
     PatientModule,
     MenuModule,
     MasterModule,
+    InventoryModule,
   ],
   controllers: [CoreController],
   providers: [CoreService],
