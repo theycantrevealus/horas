@@ -7,8 +7,8 @@ export function testCaption(
   }
 ) {
   const lPad = option.isSkipped
-    ? '                    '
-    : '                            '
+    ? '                                         '
+    : '                                                        '
   const typeLib = {
     data: '📦',
     ddl: '📀',
