@@ -8,6 +8,8 @@ import { MasterItemCategoryController } from '@core/master/master.item.category.
 import { MasterItemCategoryService } from '@core/master/master.item.category.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+import { MasterStockPointController } from '@core/master/master.stock.point.controller'
+import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import {
   MasterItemBrand,
   MasterItemBrandSchema,
@@ -20,6 +22,10 @@ import {
   MasterItemSupplier,
   MasterItemSupplierSchema,
 } from '@core/master/schemas/master.item.supplier'
+import {
+  MasterStockPoint,
+  MasterStockPointSchema,
+} from '@core/master/schemas/master.stock.point'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -158,6 +164,36 @@ import { TimeManagement } from '@utility/time'
           return schema
         },
       },
+      {
+        name: MasterStockPoint.name,
+        useFactory: () => {
+          const schema = MasterStockPointSchema
+          const time = new TimeManagement()
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `stock_point-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              this.updated_at = time.getTimezone('Asia/Jakarta')
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['updated_at'] = time.getTimezone('Asia/Jakarta')
+            update['$inc'] = { __v: 1 }
+            next()
+          })
+
+          return schema
+        },
+      },
     ]),
     MongooseModule.forFeature([
       { name: Account.name, schema: AccountSchema },
@@ -171,16 +207,19 @@ import { TimeManagement } from '@utility/time'
     MasterItemSupplierController,
     MasterItemBrandController,
     MasterItemCategoryController,
+    MasterStockPointController,
   ],
   providers: [
     MasterItemSupplierService,
     MasterItemBrandService,
     MasterItemCategoryService,
+    MasterStockPointService,
   ],
   exports: [
     MasterItemSupplierService,
     MasterItemBrandService,
     MasterItemCategoryService,
+    MasterStockPointService,
   ],
 })
 export class MasterModule {}
