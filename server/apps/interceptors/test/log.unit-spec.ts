@@ -11,12 +11,15 @@ import { Account } from '@core/account/schemas/account.model'
 import { MasterItemBrandAddDTO } from '@core/master/dto/master.item.brand'
 import { MasterItemCategoryAddDTO } from '@core/master/dto/master.item.category'
 import { MasterItemSupplierAddDTO } from '@core/master/dto/master.item.supplier'
+import { MasterStockPointAddDTO } from '@core/master/dto/master.stock.point'
 import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
 import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import { MasterItemCategoryController } from '@core/master/master.item.category.controller'
 import { MasterItemCategoryService } from '@core/master/master.item.category.service'
 import { MasterItemSupplierController } from '@core/master/master.item.supplier.controller'
 import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
+import { MasterStockPointController } from '@core/master/master.stock.point.controller'
+import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import {
   masterItemBrandArray,
   mockMasterItemBrandModel,
@@ -32,9 +35,15 @@ import {
   mockMasterItemSupplierModel,
   mockMasterItemSupplierService,
 } from '@core/master/mock/master.item.supplier.mock'
+import {
+  masterStockPointArray,
+  mockMasterStockPointModel,
+  mockMasterStockPointService,
+} from '@core/master/mock/master.stock.point.mock'
 import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
 import { MasterItemCategory } from '@core/master/schemas/master.item.category'
 import { MasterItemSupplier } from '@core/master/schemas/master.item.supplier'
+import { MasterStockPoint } from '@core/master/schemas/master.stock.point'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import {
   mockPatientModel,
@@ -928,6 +937,216 @@ describe('Logging Interceptor', () => {
 
           await request(app.getHttpServer())
             .delete(`/v1/master/supplier/${masterItemSupplierArray[0].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption(
+      'MASTER STOCK POINT CONTROLLER',
+      'feature',
+      'Master Stock Point Interceptor'
+    ),
+    () => {
+      it(
+        testCaption('Add Stock Point', 'feature', 'Should log add'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterStockPoint.name),
+                  useValue: mockMasterStockPointModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterStockPointService,
+                  useValue: mockMasterStockPointService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterStockPointController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'POST',
+            `stock_point-${new Types.ObjectId().toString()}`,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'I',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .post(`/v1/master/stock_point`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(new MasterStockPointAddDTO(masterStockPointArray[0]))
+            .then((res) => {
+              expect(res.body.payload.id).toMatch(/^stock_point-/)
+              expect(res.body.payload.name).toEqual(
+                masterStockPointArray[0].name
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('Edit Master Stock Point', 'feature', 'Should log edit'),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterStockPoint.name),
+                  useValue: mockMasterStockPointModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterStockPointService,
+                  useValue: mockMasterStockPointService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterStockPointController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'PATCH',
+            masterStockPointArray[2].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'U',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .patch(`/v1/master/stock_point/${masterStockPointArray[2].id}`)
+            .set({ Authorization: `Bearer ${token}` })
+            .send(masterStockPointArray[2])
+            .then((res) => {
+              expect(res.body.payload.id).toEqual(dataSet.identifier)
+            })
+        }
+      )
+
+      it(
+        testCaption(
+          'Delete Master Stock Point',
+          'feature',
+          'Should log delete'
+        ),
+        async () => {
+          app = (
+            await createTestModule(
+              [
+                {
+                  provide: getModelToken(MasterStockPoint.name),
+                  useValue: mockMasterStockPointModel,
+                },
+                {
+                  provide: getModelToken(Account.name),
+                  useValue: mockAccountModel,
+                },
+                {
+                  provide: getModelToken(LogActivity.name),
+                  useValue: mockLogActivityModel,
+                },
+                {
+                  provide: getModelToken(LogLogin.name),
+                  useValue: {},
+                },
+                {
+                  provide: MasterStockPointService,
+                  useValue: mockMasterStockPointService,
+                },
+                { provide: AccountService, useValue: mockAccountService },
+              ],
+              [AuthModule],
+              [MasterStockPointController]
+            )
+          ).createNestApplication()
+          app.enableCors()
+          app.enableVersioning({
+            type: VersioningType.URI,
+          })
+          await app.init()
+
+          const dataSet = mockLogActivity(
+            'DELETE',
+            masterStockPointArray[0].id,
+            '',
+            '',
+            '',
+            accountArray[0],
+            0,
+            '',
+            'D',
+            new TimeManagement().getTimezone('Asia/Jakarta')
+          )
+
+          jest.spyOn(logActivityModel, 'create').mockImplementationOnce(() => {
+            return Promise.resolve(dataSet)
+          })
+
+          await request(app.getHttpServer())
+            .delete(`/v1/master/stock_point/${masterStockPointArray[0].id}`)
             .set({ Authorization: `Bearer ${token}` })
             .then((res) => {
               expect(res.body.payload.id).toEqual(dataSet.identifier)
