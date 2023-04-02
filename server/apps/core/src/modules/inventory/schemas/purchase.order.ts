@@ -15,7 +15,7 @@ import { HydratedDocument, SchemaTypes } from 'mongoose'
 export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
 @Schema({ collection: 'inventory_purchase_order' })
 export class PurchaseOrder {
-  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
   @Prop({ type: SchemaTypes.String, required: true, unique: true })
@@ -37,6 +37,35 @@ export class PurchaseOrder {
     type: [PurchaseOrderDetail],
   })
   detail: IPurchaseOrderDetail[]
+
+  @Prop({
+    type: SchemaTypes.Number,
+  })
+  total: number
+
+  @Prop({
+    type: SchemaTypes.String,
+    enum: ['p', 'v', 'n'],
+    default: 'n',
+  })
+  discount_type: string
+
+  @Prop({
+    type: SchemaTypes.Number,
+  })
+  discount_value: number
+
+  @Prop({
+    type: SchemaTypes.Number,
+  })
+  grand_total: number
+
+  @Prop({
+    type: SchemaTypes.String,
+    enum: ['new', 'approved', 'rejected'],
+    default: 'new',
+  })
+  status: string
 
   @Prop({ type: SchemaTypes.String })
   remark: string
@@ -62,3 +91,41 @@ export class PurchaseOrder {
   deleted_at: Date | null
 }
 export const PurchaseOrderSchema = SchemaFactory.createForClass(PurchaseOrder)
+
+export class IPurchaseOrder {
+  code: string
+
+  extras: any
+
+  supplier: IMasterItemSupplier
+
+  purchase_date: Date
+
+  detail: IPurchaseOrderDetail[]
+
+  total: number
+
+  discount_type: string
+
+  discount_value: number
+
+  grand_total: number
+
+  status: string
+
+  remark: string
+
+  constructor(data: any) {
+    this.code = data.code
+    this.extras = data.extras
+    this.purchase_date = data.purchase_date
+    this.supplier = data.supplier
+    this.detail = data.detail
+    this.total = data.total
+    this.discount_type = data.discount_type
+    this.discount_value = data.discount_value
+    this.grand_total = data.grand_total
+    this.status = data.status
+    this.remark = data.remark
+  }
+}

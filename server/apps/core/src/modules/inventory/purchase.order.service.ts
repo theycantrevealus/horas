@@ -1,9 +1,11 @@
 import { Account } from '@core/account/schemas/account.model'
 import { PurchaseOrderAddDTO } from '@core/inventory/dto/purchase.order'
 import {
+  IPurchaseOrder,
   PurchaseOrder,
   PurchaseOrderDocument,
 } from '@core/inventory/schemas/purchase.order'
+import { IPurchaseOrderDetail } from '@core/inventory/schemas/purchase.order.detail'
 import { MasterItemService } from '@core/master/master.item.service'
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
@@ -32,13 +34,24 @@ export class PurchaseOrderService {
   }
 
   async add(
-    data: PurchaseOrderAddDTO,
+    payload: PurchaseOrderAddDTO,
     account: Account
   ): Promise<GlobalResponse> {
     /*
      * #1. Prepare for the data
+     *     a. Prepare code
+     *     b. Calculate price
      * #2. Save the data
      * */
+    const data: IPurchaseOrder = new IPurchaseOrder({
+      ...payload,
+      total: 0,
+      grand_total: 0,
+      status: 'new',
+    })
+
+    const detailData: IPurchaseOrderDetail[] = []
+
     const response = {
       statusCode: '',
       message: '',
@@ -50,19 +63,48 @@ export class PurchaseOrderService {
     // #1
     if (!data.code) {
       const now = new Date()
-      const counter = await this.purchaseOrderModel
+      await this.purchaseOrderModel
         .count({
           created_at: {
             $gte: new Date(now.getFullYear(), now.getMonth(), 1),
             $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0),
           },
         })
-        .then((result) => result++)
+        .then((counter) => {
+          data.code = `${modCodes[this.constructor.name]}-${new Date()
+            .toJSON()
+            .slice(0, 7)
+            .replace(/-/g, '/')}/${pad('000000', counter + 1, true)}`
+        })
+    }
 
-      data.code = `${modCodes[this.constructor.name]}-${new Date()
-        .toJSON()
-        .slice(0, 7)
-        .replace(/-/g, '/')}/${pad('000000', counter, true)}`
+    data.detail.forEach((row, e) => {
+      const detail: IPurchaseOrderDetail = new IPurchaseOrderDetail({
+        ...row,
+        total: 0,
+      })
+
+      const itemTotal = row.qty * row.price
+      let totalRow = 0
+      if (row.discount_type === 'n') {
+        totalRow = itemTotal
+      } else if (row.discount_type === 'p') {
+        totalRow = itemTotal - (itemTotal * row.discount_value) / 100
+      } else if (row.discount_type === 'v') {
+        totalRow = itemTotal - row.discount_value
+      }
+
+      detail.total = totalRow
+      data.total += totalRow
+      detailData.push(detail)
+    })
+
+    data.detail = detailData
+
+    if (data.discount_type === 'p') {
+      data.grand_total = data.total - (data.total * data.discount_value) / 100
+    } else if (data.discount_type === 'v') {
+      data.grand_total = data.total - data.discount_value
     }
 
     // #2

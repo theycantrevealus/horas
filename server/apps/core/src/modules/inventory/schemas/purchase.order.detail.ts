@@ -17,17 +17,9 @@ export const PurchaseOrderDetail = raw({
     default: 'n',
   },
   discount_value: { type: Number, example: 10 },
+  total: { type: Number, example: 1002000.01 },
   remark: { type: String, example: 'Another remark for an item' },
 })
-
-export interface IPurchaseOrderDetail {
-  item: IMasterItem
-  qty: number
-  price: number
-  discount_type: string
-  discount_value: number
-  remark: string
-}
 
 export class CPurchaseOrderDetail {
   @ApiProperty({
@@ -49,12 +41,6 @@ export class CPurchaseOrderDetail {
   price: number
 
   @ApiProperty({
-    type: Number,
-    example: 1002000.01,
-  })
-  total: number
-
-  @ApiProperty({
     type: String,
     example: 'n',
     enum: ['p', 'v', 'n'],
@@ -74,4 +60,30 @@ export class CPurchaseOrderDetail {
     example: '',
   })
   remark: string
+}
+
+export class IPurchaseOrderDetail {
+  item: IMasterItem
+
+  qty: number
+
+  price: number
+
+  total: number
+
+  discount_type: string
+
+  discount_value: number
+
+  remark: string
+
+  constructor(data: any) {
+    this.item = data.item
+    this.qty = data.qty
+    this.price = data.price
+    this.qty = data.qty
+    this.total = data.total
+    this.discount_type = data.discount_type
+    this.discount_value = data.discount_value
+  }
 }

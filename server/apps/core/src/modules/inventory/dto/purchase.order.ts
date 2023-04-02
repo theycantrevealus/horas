@@ -7,7 +7,6 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
-  IsNumber,
   MaxLength,
   MinLength,
   ValidateNested,
@@ -57,18 +56,27 @@ export class PurchaseOrderAddDTO {
   detail: CPurchaseOrderDetail[]
 
   @ApiProperty({
+    example: 'n',
+    enum: ['p', 'v', 'n'],
+    description: 'P = Percentage; V = Value; N = None',
+  })
+  @IsNotEmpty()
+  discount_type: string
+
+  @ApiProperty({
+    example: 0,
+    type: Number,
+    description: '',
+  })
+  @IsNotEmpty()
+  discount_value: number
+
+  @ApiProperty({
     example: 'Extra description',
     description: '',
   })
-  @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   remark: string
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.remark = parameter.remark
-  }
 }
 
 export class PurchaseOrderEditDTO {
@@ -76,7 +84,7 @@ export class PurchaseOrderEditDTO {
     example: 'xxx-xxxx',
     minLength: 8,
     maxLength: 24,
-    description: 'Unique code of item brand',
+    description: 'Unique code. Left it blank so it will generate auto code',
   })
   @MinLength(8)
   @MaxLength(24)
@@ -84,31 +92,56 @@ export class PurchaseOrderEditDTO {
   code: string
 
   @ApiProperty({
-    example: 'Adidas',
-    description: 'Item brand name',
+    example: '',
+    description: 'Any extra object',
   })
   @IsNotEmpty()
-  name: string
+  extras: any
 
   @ApiProperty({
-    example: 'Extra remark',
-    description: 'Item brand extra remark',
+    type: MasterItemSupplierJoin,
+    description: 'Supplier info',
   })
   @IsNotEmpty()
-  remark: string
+  supplier: IMasterItemSupplier
+
+  @ApiProperty({
+    example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
+    description: 'Purchase date',
+  })
+  @IsNotEmpty()
+  purchase_date: Date
+
+  @ApiProperty({
+    type: CPurchaseOrderDetail,
+    isArray: true,
+    description: 'Purchase item(s)',
+  })
+  @Type(() => CPurchaseOrderDetail)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  detail: CPurchaseOrderDetail[]
+
+  @ApiProperty({
+    example: 'n',
+    enum: ['p', 'v', 'n'],
+    description: 'P = Percentage; V = Value; N = None',
+  })
+  @IsNotEmpty()
+  discount_type: string
 
   @ApiProperty({
     example: 0,
-    description: 'Item brand document version',
+    type: Number,
+    description: '',
   })
   @IsNotEmpty()
-  @IsNumber()
-  __v: number
+  discount_value: number
 
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.remark = parameter.remark
-    this.__v = parameter.__v
-  }
+  @ApiProperty({
+    example: 'Extra description',
+    description: '',
+  })
+  @IsNotEmpty()
+  remark: string
 }
