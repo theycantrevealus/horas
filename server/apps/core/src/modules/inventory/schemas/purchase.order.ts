@@ -15,7 +15,7 @@ import { HydratedDocument, SchemaTypes } from 'mongoose'
 export const PurchaseOrderApprovalHistory = raw({
   status: {
     type: String,
-    enum: ['new', 'approved', 'rejected'],
+    enum: ['new', 'approved', 'declined'],
     default: 'new',
   },
   logged_at: {
@@ -30,7 +30,7 @@ export const PurchaseOrderApprovalHistory = raw({
 export class IPurchaseOrderApproval {
   @Prop({
     type: String,
-    enum: ['new', 'approved', 'rejected'],
+    enum: ['new', 'approved', 'declined'],
     default: 'new',
   })
   status: string
@@ -106,7 +106,7 @@ export class PurchaseOrder {
 
   @Prop({
     type: SchemaTypes.String,
-    enum: ['new', 'approved', 'rejected'],
+    enum: ['new', 'approved', 'declined'],
     default: 'new',
   })
   status: string

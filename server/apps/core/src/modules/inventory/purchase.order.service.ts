@@ -2,6 +2,7 @@ import { Account } from '@core/account/schemas/account.model'
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderApproval,
+  PurchaseOrderEditDTO,
 } from '@core/inventory/dto/purchase.order'
 import {
   IPurchaseOrder,
@@ -17,6 +18,7 @@ import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
 import { pad } from '@utility/string'
+import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
@@ -244,92 +246,138 @@ export class PurchaseOrderService {
     return response
   }
 
-  // async edit(
-  //   data: MasterItemBrandEditDTO,
-  //   id: string
-  // ): Promise<GlobalResponse> {
-  //   const response = {
-  //     statusCode: '',
-  //     message: '',
-  //     payload: {},
-  //     transaction_classify: 'MASTER_ITEM_BRAND_EDIT',
-  //     transaction_id: null,
-  //   } satisfies GlobalResponse
-  //
-  //   await this.masterItemBrandModel
-  //     .findOneAndUpdate(
-  //       {
-  //         id: id,
-  //         __v: data.__v,
-  //       },
-  //       {
-  //         code: data.code,
-  //         name: data.name,
-  //         remark: data.remark,
-  //       }
-  //     )
-  //     .exec()
-  //     .then((result) => {
-  //       if (result) {
-  //         response.message = 'Master item brand updated successfully'
-  //         response.statusCode = `${modCodes[this.constructor.name]}_U_${
-  //           modCodes.Global.success
-  //         }`
-  //         response.payload = result
-  //       } else {
-  //         response.message = `Master item brand failed to update. Invalid document`
-  //         response.statusCode = `${modCodes[this.constructor.name]}_U_${
-  //           modCodes.Global.failed
-  //         }`
-  //         response.payload = {}
-  //       }
-  //     })
-  //     .catch((error: Error) => {
-  //       response.message = `Master item brand failed to update. ${error.message}`
-  //       response.statusCode = `${modCodes[this.constructor.name]}_U_${
-  //         modCodes.Global.failed
-  //       }`
-  //     })
-  //   return response
-  // }
-  //
-  // async delete(id: string): Promise<GlobalResponse> {
-  //   const response = {
-  //     statusCode: '',
-  //     message: '',
-  //     payload: {},
-  //     transaction_classify: 'MASTER_ITEM_BRAND_DELETE',
-  //     transaction_id: null,
-  //   } satisfies GlobalResponse
-  //   const data = await this.masterItemBrandModel.findOne({
-  //     id: id,
-  //   })
-  //
-  //   if (data) {
-  //     data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
-  //
-  //     await data
-  //       .save()
-  //       .then((result) => {
-  //         response.message = 'Master item brand deleted successfully'
-  //         response.statusCode = `${modCodes[this.constructor.name]}_D_${
-  //           modCodes.Global.success
-  //         }`
-  //       })
-  //       .catch((error: Error) => {
-  //         response.message = `Master item brand failed to delete. ${error.message}`
-  //         response.statusCode = `${modCodes[this.constructor.name]}_D_${
-  //           modCodes.Global.failed
-  //         }`
-  //         response.payload = error
-  //       })
-  //   } else {
-  //     response.message = `Master item brand failed to deleted. Invalid document`
-  //     response.statusCode = `${modCodes[this.constructor.name]}_D_${
-  //       modCodes.Global.failed
-  //     }`
-  //     response.payload = {}
-  //   }
-  //   return response
-  // }
+  async edit(
+    payload: PurchaseOrderEditDTO,
+    id: string
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'PURCHASE_ORDER_EDIT',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const data: IPurchaseOrder = new IPurchaseOrder({
+      ...payload,
+      total: 0,
+      grand_total: 0,
+      status: 'new',
+    })
+
+    const detailData: IPurchaseOrderDetail[] = []
+
+    data.detail.forEach((row, e) => {
+      const detail: IPurchaseOrderDetail = new IPurchaseOrderDetail({
+        ...row,
+        total: 0,
+      })
+
+      const itemTotal = row.qty * row.price
+      let totalRow = 0
+      if (row.discount_type === 'n') {
+        totalRow = itemTotal
+      } else if (row.discount_type === 'p') {
+        totalRow = itemTotal - (itemTotal * row.discount_value) / 100
+      } else if (row.discount_type === 'v') {
+        totalRow = itemTotal - row.discount_value
+      }
+
+      detail.total = totalRow
+      data.total += totalRow
+      detailData.push(detail)
+    })
+
+    data.detail = detailData
+
+    if (data.discount_type === 'p') {
+      data.grand_total = data.total - (data.total * data.discount_value) / 100
+    } else if (data.discount_type === 'v') {
+      data.grand_total = data.total - data.discount_value
+    }
+
+    await this.purchaseOrderModel
+      .findOneAndUpdate(
+        {
+          id: id,
+          status: {
+            $ne: 'approved',
+          },
+          __v: payload.__v,
+        },
+        {
+          supplier: data.supplier,
+          purhcase_date: data.purchase_date,
+          detail: data.detail,
+          total: data.total,
+          discount_type: data.discount_type,
+          discount_value: data.discount_value,
+          grand_total: data.grand_total,
+          remark: data.remark,
+        }
+      )
+      .exec()
+      .then((result) => {
+        if (result) {
+          response.message = 'Purchase Order updated successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.success
+          }`
+          response.payload = result
+        } else {
+          response.message = `Purchase Order failed to update. Invalid document`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+          response.payload = {}
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase Order failed to update. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+      })
+    return response
+  }
+
+  async delete(id: string): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'PURCHASE_ORDER_DELETE',
+      transaction_id: null,
+    } satisfies GlobalResponse
+    const data = await this.purchaseOrderModel.findOne({
+      id: id,
+    })
+
+    if (data) {
+      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
+
+      await data
+        .save()
+        .then((result) => {
+          response.message = 'Purchase order deleted successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
+            modCodes.Global.success
+          }`
+        })
+        .catch((error: Error) => {
+          response.message = `Purchase order failed to delete. ${error.message}`
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
+            modCodes.Global.failed
+          }`
+          response.payload = error
+        })
+    } else {
+      response.message = `Purchase order failed to deleted. Invalid document`
+      response.statusCode = `${modCodes[this.constructor.name]}_D_${
+        modCodes.Global.failed
+      }`
+      response.payload = {}
+    }
+    return response
+  }
 }
