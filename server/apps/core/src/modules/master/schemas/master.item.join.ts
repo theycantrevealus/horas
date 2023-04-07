@@ -9,7 +9,7 @@ export const MasterItemJoin = raw({
   id: { type: String, example: `item-${new Types.ObjectId().toString()}` },
   code: { type: String, example: 'ABC00123' },
   name: { type: String, example: 'Any Item' },
-  brand: { type: MasterItemBrandJoin },
+  brand: { type: MasterItemBrandJoin, _id: false },
 })
 
 export interface IMasterItem {
