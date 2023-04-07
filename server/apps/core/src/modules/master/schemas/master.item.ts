@@ -29,14 +29,24 @@ export class MasterItem {
   name: string
 
   @Prop({
+    unique: false,
     type: [MasterItemCategoryJoin],
+    _id: false,
   })
   category: IMasterItemCategory[]
 
-  @Prop(raw(MasterItemUnitJoin))
+  @Prop({
+    unique: false,
+    type: MasterItemUnitJoin,
+    _id: false,
+  })
   unit: IMasterItemUnit
 
-  @Prop(raw(MasterItemBrandJoin))
+  @Prop({
+    unique: false,
+    type: MasterItemBrandJoin,
+    _id: false,
+  })
   brand: IMasterItemBrand
 
   @Prop({ type: SchemaTypes.String })
