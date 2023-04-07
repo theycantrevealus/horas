@@ -6,7 +6,7 @@ import { raw } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 
 export const PurchaseOrderDetail = raw({
-  item: { type: MasterItemJoin },
+  item: { type: MasterItemJoin, _id: false },
   qty: { type: Number, example: 10 },
   price: { type: Number, example: 102000.01 },
   discount_type: {

@@ -35,6 +35,7 @@ export class PurchaseOrder {
 
   @Prop({
     type: [PurchaseOrderDetail],
+    _id: false,
   })
   detail: IPurchaseOrderDetail[]
 
