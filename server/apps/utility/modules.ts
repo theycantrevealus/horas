@@ -12,4 +12,5 @@ export const modCodes = {
   MasterItemBrandService: 'MSRI-BRD',
   MasterItemCategoryService: 'MSRI-CAT',
   PurchaseOrderService: 'PO',
+  GeneralReceiveNoteService: 'GRN',
 }

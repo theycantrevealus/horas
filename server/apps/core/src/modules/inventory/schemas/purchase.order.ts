@@ -10,7 +10,19 @@ import {
 } from '@core/master/schemas/master.item.supplier.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
-import { HydratedDocument, SchemaTypes } from 'mongoose'
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+
+export const PurchaseOrderJoin = raw({
+  id: {
+    type: String,
+    example: `purchase_order-${new Types.ObjectId().toString()}`,
+  },
+  code: { type: String, example: 'PO00001' },
+  supplier: { type: MasterItemSupplierJoin },
+  purchase_date: { type: Date },
+  remark: { type: String },
+  created_by: { type: AccountJoin },
+})
 
 export const PurchaseOrderApprovalHistory = raw({
   status: {
@@ -140,6 +152,7 @@ export class PurchaseOrder {
 export const PurchaseOrderSchema = SchemaFactory.createForClass(PurchaseOrder)
 
 export class IPurchaseOrder {
+  id: string
   code: string
 
   extras: any
@@ -165,6 +178,7 @@ export class IPurchaseOrder {
   remark: string
 
   constructor(data: any) {
+    this.id = data.id
     this.code = data.code
     this.extras = data.extras
     this.purchase_date = data.purchase_date

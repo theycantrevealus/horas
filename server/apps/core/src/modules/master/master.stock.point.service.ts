@@ -27,7 +27,9 @@ export class MasterStockPointService {
   }
 
   async detail(id: string): Promise<MasterStockPoint> {
-    return this.masterStockPointModel.findOne({ id: id }).exec()
+    return this.masterStockPointModel
+      .findOne({ id: id, deleted_at: null })
+      .exec()
   }
 
   async add(

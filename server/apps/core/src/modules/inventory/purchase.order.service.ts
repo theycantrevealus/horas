@@ -12,6 +12,7 @@ import {
 } from '@core/inventory/schemas/purchase.order'
 import { IPurchaseOrderDetail } from '@core/inventory/schemas/purchase.order.detail'
 import { MasterItemService } from '@core/master/master.item.service'
+import { IMasterItem } from '@core/master/schemas/master.item.join'
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -36,7 +37,7 @@ export class PurchaseOrderService {
   }
 
   async detail(id: string): Promise<PurchaseOrder> {
-    return this.purchaseOrderModel.findOne({ id: id }).exec()
+    return this.purchaseOrderModel.findOne({ id: id, deleted_at: null }).exec()
   }
 
   async add(
@@ -307,7 +308,7 @@ export class PurchaseOrderService {
         },
         {
           supplier: data.supplier,
-          purhcase_date: data.purchase_date,
+          purchase_date: data.purchase_date,
           detail: data.detail,
           total: data.total,
           discount_type: data.discount_type,
@@ -379,5 +380,21 @@ export class PurchaseOrderService {
       response.payload = {}
     }
     return response
+  }
+
+  async update_receive(id: string, item: IMasterItem, delivered: number) {
+    return await this.purchaseOrderModel
+      .updateOne(
+        {
+          id: id,
+          'detail.item.id': item.id,
+        },
+        {
+          $set: {
+            'detail.$.delivered': delivered,
+          },
+        }
+      )
+      .exec()
   }
 }

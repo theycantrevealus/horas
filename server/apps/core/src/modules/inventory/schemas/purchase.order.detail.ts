@@ -8,6 +8,7 @@ import { ApiProperty } from '@nestjs/swagger'
 export const PurchaseOrderDetail = raw({
   item: { type: MasterItemJoin, _id: false },
   qty: { type: Number, example: 10 },
+  delivered: { type: Number, example: 5 },
   price: { type: Number, example: 102000.01 },
   discount_type: {
     type: String,
@@ -67,6 +68,8 @@ export class IPurchaseOrderDetail {
 
   qty: number
 
+  delivered: number
+
   price: number
 
   total: number
@@ -80,6 +83,7 @@ export class IPurchaseOrderDetail {
   constructor(data: any) {
     this.item = data.item
     this.qty = data.qty
+    this.delivered = data.delivered
     this.price = data.price
     this.qty = data.qty
     this.total = data.total
