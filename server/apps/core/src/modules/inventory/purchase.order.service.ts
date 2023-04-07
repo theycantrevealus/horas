@@ -37,7 +37,7 @@ export class PurchaseOrderService {
   }
 
   async detail(id: string): Promise<PurchaseOrder> {
-    return this.purchaseOrderModel.findOne({ id: id }).exec()
+    return this.purchaseOrderModel.findOne({ id: id, deleted_at: null }).exec()
   }
 
   async add(
@@ -396,11 +396,5 @@ export class PurchaseOrderService {
         }
       )
       .exec()
-      .then(() => {
-        console.log('Updated')
-      })
-      .catch((e: Error) => {
-        console.log(e)
-      })
   }
 }

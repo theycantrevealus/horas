@@ -25,7 +25,7 @@ export class InventoryStock {
   @Prop(raw(MasterStockPointJoin))
   stock_point: IMasterStockPoint
 
-  @Prop({ type: SchemaTypes.Decimal128 })
+  @Prop({ type: SchemaTypes.Number })
   qty: number
 }
 export const InventoryStockSchema = SchemaFactory.createForClass(InventoryStock)

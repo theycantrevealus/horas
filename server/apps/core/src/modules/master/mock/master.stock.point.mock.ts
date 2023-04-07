@@ -6,6 +6,7 @@ import {
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
 import {
+  IMasterStockPointConfiguration,
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@core/master/schemas/master.stock.point'
@@ -48,6 +49,12 @@ export const mockMasterStockPoint = (
   id = `stock_point-${new Types.ObjectId().toString()}`,
   code = 'BRD-0001',
   name = faker.company.name(),
+  configuration: IMasterStockPointConfiguration = {
+    allow_grn: true,
+    allow_incoming: true,
+    allow_outgoing: true,
+    allow_destruction: true,
+  },
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -62,6 +69,7 @@ export const mockMasterStockPoint = (
   id,
   code,
   name,
+  configuration,
   remark,
   created_by,
   created_at,
@@ -108,6 +116,12 @@ export const masterStockPointArray = [
     `stock_point-${new Types.ObjectId().toString()}`,
     'BRD-0001',
     '',
+    {
+      allow_grn: true,
+      allow_incoming: true,
+      allow_outgoing: true,
+      allow_destruction: true,
+    },
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -118,6 +132,12 @@ export const masterStockPointArray = [
     `stock_point-${new Types.ObjectId().toString()}`,
     'BRD-0002',
     '',
+    {
+      allow_grn: true,
+      allow_incoming: true,
+      allow_outgoing: true,
+      allow_destruction: true,
+    },
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),

@@ -8,6 +8,10 @@ import {
   IPurchaseOrder,
   PurchaseOrderJoin,
 } from '@core/inventory/schemas/purchase.order'
+import {
+  IMasterStockPoint,
+  MasterStockPointJoin,
+} from '@core/master/schemas/master.stock.point.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -23,6 +27,9 @@ export class GeneralReceiveNote {
 
   @Prop({ type: SchemaTypes.Mixed, required: false })
   extras: any
+
+  @Prop(raw(MasterStockPointJoin))
+  stock_point: IMasterStockPoint
 
   @Prop(raw(PurchaseOrderJoin))
   purchase_order: IPurchaseOrder

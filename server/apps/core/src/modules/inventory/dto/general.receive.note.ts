@@ -3,6 +3,10 @@ import {
   IPurchaseOrder,
   PurchaseOrderJoin,
 } from '@core/inventory/schemas/purchase.order'
+import {
+  IMasterStockPoint,
+  MasterStockPointJoin,
+} from '@core/master/schemas/master.stock.point.join'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
@@ -31,6 +35,13 @@ export class GeneralReceiveNoteAddDTO {
   })
   @IsNotEmpty()
   extras: any
+
+  @ApiProperty({
+    type: MasterStockPointJoin,
+    description: 'Target stock point',
+  })
+  @IsNotEmpty()
+  stock_point: IMasterStockPoint
 
   @ApiProperty({
     type: PurchaseOrderJoin,
@@ -75,6 +86,13 @@ export class GeneralReceiveNoteEditDTO {
   })
   @IsNotEmpty()
   extras: any
+
+  @ApiProperty({
+    type: MasterStockPointJoin,
+    description: 'Target stock point',
+  })
+  @IsNotEmpty()
+  stock_point: IMasterStockPoint
 
   @ApiProperty({
     type: PurchaseOrderJoin,

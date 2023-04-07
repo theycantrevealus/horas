@@ -76,6 +76,9 @@ export class MasterStockPointController {
     summary: 'Detail data',
     description: '',
   })
+  @ApiParam({
+    name: 'id',
+  })
   async detail(@Param() param) {
     return await this.masterStockPointService.detail(param.id)
   }

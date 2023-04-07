@@ -1,3 +1,7 @@
+import {
+  CMasterStockPointConfiguration,
+  IMasterStockPointConfiguration,
+} from '@core/master/schemas/master.stock.point'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsNumber, MaxLength, MinLength } from 'class-validator'
 
@@ -19,6 +23,13 @@ export class MasterStockPointAddDTO {
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    type: CMasterStockPointConfiguration,
+    description: 'Stock point configuration',
+  })
+  @IsNotEmpty()
+  configuration: IMasterStockPointConfiguration
 
   @ApiProperty({
     example: 'Extra remark',
@@ -52,6 +63,13 @@ export class MasterStockPointEditDTO {
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    type: CMasterStockPointConfiguration,
+    description: 'Stock point configuration',
+  })
+  @IsNotEmpty()
+  configuration: IMasterStockPointConfiguration
 
   @ApiProperty({
     example: 'Extra remark',
