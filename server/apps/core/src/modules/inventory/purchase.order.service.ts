@@ -1,7 +1,11 @@
 import { Account } from '@core/account/schemas/account.model'
-import { PurchaseOrderAddDTO } from '@core/inventory/dto/purchase.order'
+import {
+  PurchaseOrderAddDTO,
+  PurchaseOrderApproval,
+} from '@core/inventory/dto/purchase.order'
 import {
   IPurchaseOrder,
+  IPurchaseOrderApproval,
   PurchaseOrder,
   PurchaseOrderDocument,
 } from '@core/inventory/schemas/purchase.order'
@@ -107,6 +111,14 @@ export class PurchaseOrderService {
       data.grand_total = data.total - data.discount_value
     }
 
+    data.approval_history = [
+      new IPurchaseOrderApproval({
+        status: 'new',
+        remark: data.remark,
+        created_by: account,
+      }),
+    ]
+
     // #2
     await this.purchaseOrderModel
       .create({
@@ -127,6 +139,106 @@ export class PurchaseOrderService {
           modCodes.Global.failed
         }`
         response.payload = error
+      })
+
+    return response
+  }
+
+  async approve(
+    data: PurchaseOrderApproval,
+    id: string,
+    account: Account
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'PURCHASE_ORDER_APPROVE',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const status = new IPurchaseOrderApproval({
+      status: data.status,
+      remark: data.remark,
+      created_by: account,
+    })
+
+    await this.purchaseOrderModel
+      .findOneAndUpdate(
+        { id: id, status: 'new', __v: data.__v },
+        { status: data.status, $push: { approval_history: status } }
+      )
+      .exec()
+      .then((result) => {
+        if (result) {
+          response.message = 'Purchase order approved successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.success
+          }`
+          response.payload = result
+        } else {
+          response.message = `Purchase order failed to approve. Invalid document`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+          response.payload = {}
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase order failed to approve. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+      })
+
+    return response
+  }
+
+  async decline(
+    data: PurchaseOrderApproval,
+    id: string,
+    account: Account
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'PURCHASE_ORDER_DECLINE',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const status = new IPurchaseOrderApproval({
+      status: data.status,
+      remark: data.remark,
+      created_by: account,
+    })
+
+    await this.purchaseOrderModel
+      .findOneAndUpdate(
+        { id: id, status: { $ne: 'approved' }, __v: data.__v },
+        { status: data.status, $push: { approval_history: status } }
+      )
+      .exec()
+      .then((result) => {
+        if (result) {
+          response.message = 'Purchase order approved successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.success
+          }`
+          response.payload = result
+        } else {
+          response.message = `Purchase order failed to approve. Invalid document`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+          response.payload = {}
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase order failed to approve. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
       })
 
     return response

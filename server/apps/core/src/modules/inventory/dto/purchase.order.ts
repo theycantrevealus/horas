@@ -7,6 +7,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
+  IsNumber,
   MaxLength,
   MinLength,
   ValidateNested,
@@ -144,4 +145,37 @@ export class PurchaseOrderEditDTO {
   })
   @IsNotEmpty()
   remark: string
+
+  @ApiProperty({
+    example: 0,
+    description: 'Item brand document version',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  __v: number
+}
+
+export class PurchaseOrderApproval {
+  @ApiProperty({
+    example: 'approved',
+    enum: ['new', 'approved', 'rejected'],
+    description: 'Approval status',
+  })
+  @IsNotEmpty()
+  status: string
+
+  @ApiProperty({
+    example: 'Extra description',
+    description: '',
+  })
+  @IsNotEmpty()
+  remark: string
+
+  @ApiProperty({
+    example: 0,
+    description: 'Item brand document version',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  __v: number
 }

@@ -1,4 +1,7 @@
-import { PurchaseOrderAddDTO } from '@core/inventory/dto/purchase.order'
+import {
+  PurchaseOrderAddDTO,
+  PurchaseOrderApproval,
+} from '@core/inventory/dto/purchase.order'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -9,13 +12,20 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
   UseInterceptors,
   Version,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
@@ -84,6 +94,48 @@ export class PurchaseOrderController {
     @CredentialAccount() account
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.add(parameter, account)
+  }
+
+  @Patch('purchase_order/approve/:id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Approve new purchase order',
+    description: ``,
+  })
+  @ApiParam({
+    name: 'id',
+  })
+  async approve(
+    @Body() parameter: PurchaseOrderApproval,
+    @Param() param,
+    @CredentialAccount() account
+  ): Promise<GlobalResponse> {
+    return await this.purchaseOrderService.approve(parameter, param.id, account)
+  }
+
+  @Patch('purchase_order/decline/:id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Approve new purchase order',
+    description: ``,
+  })
+  @ApiParam({
+    name: 'id',
+  })
+  async decline(
+    @Body() parameter: PurchaseOrderApproval,
+    @Param() param,
+    @CredentialAccount() account
+  ): Promise<GlobalResponse> {
+    return await this.purchaseOrderService.decline(parameter, param.id, account)
   }
 
   // @Patch('brand/:id')
