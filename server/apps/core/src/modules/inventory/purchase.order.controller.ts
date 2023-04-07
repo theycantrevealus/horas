@@ -1,6 +1,7 @@
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderApproval,
+  PurchaseOrderEditDTO,
 } from '@core/inventory/dto/purchase.order'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
@@ -9,6 +10,7 @@ import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -138,37 +140,37 @@ export class PurchaseOrderController {
     return await this.purchaseOrderService.decline(parameter, param.id, account)
   }
 
-  // @Patch('brand/:id')
-  // @Version('1')
-  // @UseGuards(JwtAuthGuard)
-  // @Authorization(true)
-  // @UseInterceptors(LoggingInterceptor)
-  // @ApiBearerAuth('JWT')
-  // @ApiOperation({
-  //   summary: 'Edit new item brand',
-  //   description: ``,
-  // })
-  // @ApiParam({
-  //   name: 'id',
-  // })
-  // async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param) {
-  //   return await this.masterItemBrandService.edit(parameter, param.id)
-  // }
-  //
-  // @Delete('brand/:id')
-  // @Version('1')
-  // @UseGuards(JwtAuthGuard)
-  // @Authorization(true)
-  // @UseInterceptors(LoggingInterceptor)
-  // @ApiBearerAuth('JWT')
-  // @ApiOperation({
-  //   summary: 'Edit new item brand',
-  //   description: ``,
-  // })
-  // @ApiParam({
-  //   name: 'id',
-  // })
-  // async delete(@Param() param): Promise<GlobalResponse> {
-  //   return await this.masterItemBrandService.delete(param.id)
-  // }
+  @Patch('purchase_order/:id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Edit purchase order (not approved)',
+    description: ``,
+  })
+  @ApiParam({
+    name: 'id',
+  })
+  async edit(@Body() parameter: PurchaseOrderEditDTO, @Param() param) {
+    return await this.purchaseOrderService.edit(parameter, param.id)
+  }
+
+  @Delete('purchase_order/:id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Delete purchase order (not approved)',
+    description: ``,
+  })
+  @ApiParam({
+    name: 'id',
+  })
+  async delete(@Param() param): Promise<GlobalResponse> {
+    return await this.purchaseOrderService.delete(param.id)
+  }
 }

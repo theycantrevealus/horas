@@ -158,7 +158,7 @@ export class PurchaseOrderEditDTO {
 export class PurchaseOrderApproval {
   @ApiProperty({
     example: 'approved',
-    enum: ['new', 'approved', 'rejected'],
+    enum: ['new', 'approved', 'declined'],
     description: 'Approval status',
   })
   @IsNotEmpty()
