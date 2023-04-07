@@ -12,6 +12,49 @@ import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+export const PurchaseOrderApprovalHistory = raw({
+  status: {
+    type: String,
+    enum: ['new', 'approved', 'rejected'],
+    default: 'new',
+  },
+  logged_at: {
+    type: Date,
+    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    required: true,
+  },
+  remark: { type: SchemaTypes.String },
+  created_by: { type: raw(AccountJoin) },
+})
+
+export class IPurchaseOrderApproval {
+  @Prop({
+    type: String,
+    enum: ['new', 'approved', 'rejected'],
+    default: 'new',
+  })
+  status: string
+
+  @Prop({
+    type: SchemaTypes.Date,
+    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    required: true,
+  })
+  logged_at: Date
+
+  @Prop({ type: SchemaTypes.String })
+  remark: string
+
+  @Prop(raw(AccountJoin))
+  created_by: IAccountCreatedBy
+
+  constructor(data: any) {
+    this.status = data.status
+    this.remark = data.remark
+    this.created_by = data.created_at
+  }
+}
+
 export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
 @Schema({ collection: 'inventory_purchase_order' })
 export class PurchaseOrder {
@@ -68,6 +111,9 @@ export class PurchaseOrder {
   })
   status: string
 
+  @Prop({ type: [PurchaseOrderApprovalHistory], _id: false })
+  approval_history: IPurchaseOrderApproval[]
+
   @Prop({ type: SchemaTypes.String })
   remark: string
 
@@ -114,6 +160,8 @@ export class IPurchaseOrder {
 
   status: string
 
+  approval_history: IPurchaseOrderApproval[]
+
   remark: string
 
   constructor(data: any) {
@@ -127,6 +175,7 @@ export class IPurchaseOrder {
     this.discount_value = data.discount_value
     this.grand_total = data.grand_total
     this.status = data.status
+    this.approval_history = data.approval_history
     this.remark = data.remark
   }
 }
