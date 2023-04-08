@@ -1,12 +1,6 @@
 import { Account } from '@core/account/schemas/account.model'
-import {
-  MasterItemAddDTO,
-  MasterItemEditDTO,
-} from '@core/master/dto/master.item'
-import {
-  MasterItem,
-  MasterItemDocument,
-} from '@core/master/schemas/master.item'
+import { LOVAddDTO, LOVEditDTO } from '@core/lov/dto/lov'
+import { LOV, LOVDocument } from '@core/lov/schemas/lov'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -16,40 +10,33 @@ import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
-export class MasterItemService {
-  constructor(
-    @InjectModel(MasterItem.name)
-    private masterItemModel: Model<MasterItemDocument>
-  ) {}
+export class LOVService {
+  constructor(@InjectModel(LOV.name) private lovModel: Model<LOVDocument>) {}
 
   async all(parameter: any) {
-    return await prime_datatable(parameter, this.masterItemModel)
+    return await prime_datatable(parameter, this.lovModel)
   }
 
-  async detail(id: string): Promise<MasterItem> {
-    return this.masterItemModel.findOne({ id: id }).exec()
+  async detail(id: string): Promise<LOV> {
+    return this.lovModel.findOne({ id: id }).exec()
   }
 
-  async add(data: MasterItemAddDTO, account: Account): Promise<GlobalResponse> {
+  async add(data: LOVAddDTO, account: Account): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_ADD',
+      transaction_classify: 'LOV_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
 
-    if (!data.code) {
-      data.code = `${modCodes[this.constructor.name]}-${new Date().getTime()}`
-    }
-
-    await this.masterItemModel
+    await this.lovModel
       .create({
         ...data,
         created_by: account,
       })
       .then((result) => {
-        response.message = 'Master item created successfully'
+        response.message = 'LOV created successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.success
         }`
@@ -57,7 +44,7 @@ export class MasterItemService {
         response.payload = result
       })
       .catch((error: Error) => {
-        response.message = `Master item failed to create. ${error.message}`
+        response.message = `LOV failed to create. ${error.message}`
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.failed
         }`
@@ -67,41 +54,37 @@ export class MasterItemService {
     return response
   }
 
-  async edit(data: MasterItemEditDTO, id: string): Promise<GlobalResponse> {
+  async edit(data: LOVEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_EDIT',
+      transaction_classify: 'LOV_EDIT',
       transaction_id: null,
     } satisfies GlobalResponse
 
-    await this.masterItemModel
+    await this.lovModel
       .findOneAndUpdate(
         {
           id: id,
           __v: data.__v,
         },
         {
-          code: data.code,
           name: data.name,
-          brand: data.brand,
-          category: data.category,
-          unit: data.unit,
-          properties: data.properties,
+          parent: data.parent,
           remark: data.remark,
         }
       )
       .exec()
       .then((result) => {
         if (result) {
-          response.message = 'Master item updated successfully'
+          response.message = 'LOV updated successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.success
           }`
           response.payload = result
         } else {
-          response.message = `Master item failed to update. Invalid document`
+          response.message = `LOV failed to update. Invalid document`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
@@ -109,7 +92,7 @@ export class MasterItemService {
         }
       })
       .catch((error: Error) => {
-        response.message = `Master item failed to update. ${error.message}`
+        response.message = `LOV failed to update. ${error.message}`
         response.statusCode = `${modCodes[this.constructor.name]}_U_${
           modCodes.Global.failed
         }`
@@ -122,10 +105,10 @@ export class MasterItemService {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_DELETE',
+      transaction_classify: 'LOV_DELETE',
       transaction_id: null,
     } satisfies GlobalResponse
-    const data = await this.masterItemModel.findOne({
+    const data = await this.lovModel.findOne({
       id: id,
     })
 
@@ -135,20 +118,20 @@ export class MasterItemService {
       await data
         .save()
         .then((result) => {
-          response.message = 'Master item deleted successfully'
+          response.message = 'LOV deleted successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.success
           }`
         })
         .catch((error: Error) => {
-          response.message = `Master item failed to delete. ${error.message}`
+          response.message = `LOV failed to delete. ${error.message}`
           response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.failed
           }`
           response.payload = error
         })
     } else {
-      response.message = `Master item failed to deleted. Invalid document`
+      response.message = `LOV failed to deleted. Invalid document`
       response.statusCode = `${modCodes[this.constructor.name]}_D_${
         modCodes.Global.failed
       }`
