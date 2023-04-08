@@ -22,6 +22,9 @@
       "@core/*": [
         "./apps/core/src/modules/*"
       ],
+      "@inventory/*": [
+        "./apps/inventory/src/*"
+      ],
       "@log/*": [
         "./apps/log/src/*"
       ],

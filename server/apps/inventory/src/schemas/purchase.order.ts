@@ -1,13 +1,13 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import {
-  IPurchaseOrderDetail,
-  PurchaseOrderDetail,
-} from '@core/inventory/schemas/purchase.order.detail'
-import {
   IMasterItemSupplier,
   MasterItemSupplierJoin,
 } from '@core/master/schemas/master.item.supplier.join'
+import {
+  IPurchaseOrderDetail,
+  PurchaseOrderDetail,
+} from '@inventory/schemas/purchase.order.detail'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'

@@ -1,17 +1,17 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import {
-  GeneralReceiveNoteDetail,
-  IGeneralReceiveNoteDetail,
-} from '@core/inventory/schemas/general.receive.note.detail'
-import {
-  IPurchaseOrder,
-  PurchaseOrderJoin,
-} from '@core/inventory/schemas/purchase.order'
-import {
   IMasterStockPoint,
   MasterStockPointJoin,
 } from '@core/master/schemas/master.stock.point.join'
+import {
+  GeneralReceiveNoteDetail,
+  IGeneralReceiveNoteDetail,
+} from '@inventory/schemas/general.receive.note.detail'
+import {
+  IPurchaseOrder,
+  PurchaseOrderJoin,
+} from '@inventory/schemas/purchase.order'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'

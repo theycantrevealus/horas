@@ -1,12 +1,12 @@
-import { CGeneralReceiveNoteDetail } from '@core/inventory/schemas/general.receive.note.detail'
-import {
-  IPurchaseOrder,
-  PurchaseOrderJoin,
-} from '@core/inventory/schemas/purchase.order'
 import {
   IMasterStockPoint,
   MasterStockPointJoin,
 } from '@core/master/schemas/master.stock.point.join'
+import { CGeneralReceiveNoteDetail } from '@inventory/schemas/general.receive.note.detail'
+import {
+  IPurchaseOrder,
+  PurchaseOrderJoin,
+} from '@inventory/schemas/purchase.order'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {

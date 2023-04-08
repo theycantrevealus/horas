@@ -1,8 +1,8 @@
-import { CPurchaseOrderDetail } from '@core/inventory/schemas/purchase.order.detail'
 import {
   IMasterItemSupplier,
   MasterItemSupplierJoin,
 } from '@core/master/schemas/master.item.supplier.join'
+import { CPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {

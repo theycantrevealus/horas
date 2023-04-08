@@ -1,26 +1,22 @@
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemService } from '@core/master/master.item.service'
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderApproval,
   PurchaseOrderEditDTO,
-} from '@core/inventory/dto/purchase.order'
+} from '@inventory/dto/purchase.order'
 import {
-  IPurchaseOrder,
-  IPurchaseOrderApproval,
   PurchaseOrder,
   PurchaseOrderDocument,
-} from '@core/inventory/schemas/purchase.order'
-import { IPurchaseOrderDetail } from '@core/inventory/schemas/purchase.order.detail'
-import { MasterItemService } from '@core/master/master.item.service'
-import { IMasterItem } from '@core/master/schemas/master.item.join'
+} from '@inventory/schemas/purchase.order'
 import { Inject, Injectable } from '@nestjs/common'
+import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
-import { pad } from '@utility/string'
 import { TimeManagement } from '@utility/time'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 
 @Injectable()
 export class PurchaseOrderService {
@@ -29,7 +25,9 @@ export class PurchaseOrderService {
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
     @Inject(MasterItemService)
-    private readonly masterItemService: MasterItemService
+    private readonly masterItemService: MasterItemService,
+
+    @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
   ) {}
 
   async all(parameter: any) {
@@ -41,24 +39,9 @@ export class PurchaseOrderService {
   }
 
   async add(
-    payload: PurchaseOrderAddDTO,
+    data: PurchaseOrderAddDTO,
     account: Account
   ): Promise<GlobalResponse> {
-    /*
-     * #1. Prepare for the data
-     *     a. Prepare code
-     *     b. Calculate price
-     * #2. Save the data
-     * */
-    const data: IPurchaseOrder = new IPurchaseOrder({
-      ...payload,
-      total: 0,
-      grand_total: 0,
-      status: 'new',
-    })
-
-    const detailData: IPurchaseOrderDetail[] = []
-
     const response = {
       statusCode: '',
       message: '',
@@ -67,82 +50,26 @@ export class PurchaseOrderService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    // #1
-    if (!data.code) {
-      const now = new Date()
-      await this.purchaseOrderModel
-        .count({
-          created_at: {
-            $gte: new Date(now.getFullYear(), now.getMonth(), 1),
-            $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0),
-          },
-        })
-        .then((counter) => {
-          data.code = `${modCodes[this.constructor.name]}-${new Date()
-            .toJSON()
-            .slice(0, 7)
-            .replace(/-/g, '/')}/${pad('000000', counter + 1, true)}`
-        })
-    }
+    const generatedID = new Types.ObjectId().toString()
 
-    data.detail.forEach((row, e) => {
-      const detail: IPurchaseOrderDetail = new IPurchaseOrderDetail({
-        ...row,
-        total: 0,
-      })
-
-      const itemTotal = row.qty * row.price
-      let totalRow = 0
-      if (row.discount_type === 'n') {
-        totalRow = itemTotal
-      } else if (row.discount_type === 'p') {
-        totalRow = itemTotal - (itemTotal * row.discount_value) / 100
-      } else if (row.discount_type === 'v') {
-        totalRow = itemTotal - row.discount_value
-      }
-
-      detail.total = totalRow
-      data.total += totalRow
-      detailData.push(detail)
+    const emitter = await this.clientInventory.emit('purchase_order', {
+      action: 'add',
+      id: generatedID,
+      data: data,
+      account: account,
     })
-
-    data.detail = detailData
-
-    if (data.discount_type === 'p') {
-      data.grand_total = data.total - (data.total * data.discount_value) / 100
-    } else if (data.discount_type === 'v') {
-      data.grand_total = data.total - data.discount_value
+    if (emitter) {
+      response.message = 'Purchase Order created successfully'
+      response.statusCode = `${modCodes[this.constructor.name]}_I_${
+        modCodes.Global.success
+      }`
+      response.transaction_id = `purchase_order-${generatedID}`
+    } else {
+      response.message = `Purchase Order failed to create`
+      response.statusCode = `${modCodes[this.constructor.name]}_I_${
+        modCodes.Global.failed
+      }`
     }
-
-    data.approval_history = [
-      new IPurchaseOrderApproval({
-        status: 'new',
-        remark: data.remark,
-        created_by: account,
-      }),
-    ]
-
-    // #2
-    await this.purchaseOrderModel
-      .create({
-        ...data,
-        created_by: account,
-      })
-      .then((result) => {
-        response.message = 'Purchase Order created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
-        response.transaction_id = result._id
-        response.payload = result
-      })
-      .catch((error: Error) => {
-        response.message = `Purchase Order failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
-        response.payload = error
-      })
 
     return response
   }
@@ -160,25 +87,31 @@ export class PurchaseOrderService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const status = new IPurchaseOrderApproval({
-      status: data.status,
-      remark: data.remark,
-      created_by: account,
-    })
-
     await this.purchaseOrderModel
-      .findOneAndUpdate(
-        { id: id, status: 'new', __v: data.__v },
-        { status: data.status, $push: { approval_history: status } }
-      )
+      .findOne({ id: id, status: 'new', __v: data.__v })
       .exec()
-      .then((result) => {
+      .then(async (result) => {
         if (result) {
-          response.message = 'Purchase order approved successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
-          response.payload = result
+          const emitter = await this.clientInventory.emit('purchase_order', {
+            action: 'approve',
+            id: id,
+            data: data,
+            account: account,
+          })
+          if (emitter) {
+            response.message = 'Purchase order approved successfully'
+            response.statusCode = `${modCodes[this.constructor.name]}_U_${
+              modCodes.Global.success
+            }`
+            response.transaction_id = id
+            response.payload = result
+          } else {
+            response.message = `Purchase Order failed to create`
+            response.statusCode = `${modCodes[this.constructor.name]}_I_${
+              modCodes.Global.failed
+            }`
+            response.transaction_id = id
+          }
         } else {
           response.message = `Purchase order failed to approve. Invalid document`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
@@ -210,27 +143,33 @@ export class PurchaseOrderService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const status = new IPurchaseOrderApproval({
-      status: data.status,
-      remark: data.remark,
-      created_by: account,
-    })
-
     await this.purchaseOrderModel
-      .findOneAndUpdate(
-        { id: id, status: { $ne: 'approved' }, __v: data.__v },
-        { status: data.status, $push: { approval_history: status } }
-      )
+      .findOne({ id: id, status: { $ne: 'approved' }, __v: data.__v })
       .exec()
-      .then((result) => {
+      .then(async (result) => {
         if (result) {
-          response.message = 'Purchase order approved successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
-          response.payload = result
+          const emitter = await this.clientInventory.emit('purchase_order', {
+            action: 'decline',
+            id: id,
+            data: data,
+            account: account,
+          })
+          if (emitter) {
+            response.message = 'Purchase order declined successfully'
+            response.statusCode = `${modCodes[this.constructor.name]}_U_${
+              modCodes.Global.success
+            }`
+            response.transaction_id = id
+            response.payload = result
+          } else {
+            response.message = `Purchase Order failed to decline`
+            response.statusCode = `${modCodes[this.constructor.name]}_I_${
+              modCodes.Global.failed
+            }`
+            response.transaction_id = id
+          }
         } else {
-          response.message = `Purchase order failed to approve. Invalid document`
+          response.message = `Purchase order failed to decline. Invalid document`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
@@ -247,10 +186,7 @@ export class PurchaseOrderService {
     return response
   }
 
-  async edit(
-    payload: PurchaseOrderEditDTO,
-    id: string
-  ): Promise<GlobalResponse> {
+  async edit(data: PurchaseOrderEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -259,77 +195,43 @@ export class PurchaseOrderService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const data: IPurchaseOrder = new IPurchaseOrder({
-      ...payload,
-      total: 0,
-      grand_total: 0,
-      status: 'new',
-    })
-
-    const detailData: IPurchaseOrderDetail[] = []
-
-    data.detail.forEach((row, e) => {
-      const detail: IPurchaseOrderDetail = new IPurchaseOrderDetail({
-        ...row,
-        total: 0,
-      })
-
-      const itemTotal = row.qty * row.price
-      let totalRow = 0
-      if (row.discount_type === 'n') {
-        totalRow = itemTotal
-      } else if (row.discount_type === 'p') {
-        totalRow = itemTotal - (itemTotal * row.discount_value) / 100
-      } else if (row.discount_type === 'v') {
-        totalRow = itemTotal - row.discount_value
-      }
-
-      detail.total = totalRow
-      data.total += totalRow
-      detailData.push(detail)
-    })
-
-    data.detail = detailData
-
-    if (data.discount_type === 'p') {
-      data.grand_total = data.total - (data.total * data.discount_value) / 100
-    } else if (data.discount_type === 'v') {
-      data.grand_total = data.total - data.discount_value
-    }
-
     await this.purchaseOrderModel
-      .findOneAndUpdate(
-        {
-          id: id,
-          status: {
-            $ne: 'approved',
-          },
-          __v: payload.__v,
+      .findOne({
+        id: id,
+        status: {
+          $ne: 'approved',
         },
-        {
-          supplier: data.supplier,
-          purchase_date: data.purchase_date,
-          detail: data.detail,
-          total: data.total,
-          discount_type: data.discount_type,
-          discount_value: data.discount_value,
-          grand_total: data.grand_total,
-          remark: data.remark,
-        }
-      )
+        __v: data.__v,
+      })
       .exec()
-      .then((result) => {
+      .then(async (result) => {
         if (result) {
-          response.message = 'Purchase Order updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
-          response.payload = result
+          const emitter = await this.clientInventory.emit('purchase_order', {
+            action: 'edit',
+            id: id,
+            data: data,
+          })
+          if (emitter) {
+            response.message = 'Purchase Order updated successfully'
+            response.statusCode = `${modCodes[this.constructor.name]}_U_${
+              modCodes.Global.success
+            }`
+            response.transaction_id = id
+            response.payload = result
+          } else {
+            response.message = `Purchase Order failed to update. Invalid document`
+            response.statusCode = `${modCodes[this.constructor.name]}_U_${
+              modCodes.Global.failed
+            }`
+            response.transaction_id = id
+            response.payload = {}
+          }
         } else {
           response.message = `Purchase Order failed to update. Invalid document`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
+          response.transaction_id = id
           response.payload = {}
         }
       })
@@ -338,6 +240,8 @@ export class PurchaseOrderService {
         response.statusCode = `${modCodes[this.constructor.name]}_U_${
           modCodes.Global.failed
         }`
+        response.transaction_id = id
+        response.payload = {}
       })
     return response
   }
@@ -357,21 +261,26 @@ export class PurchaseOrderService {
     if (data) {
       data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
 
-      await data
-        .save()
-        .then((result) => {
-          response.message = 'Purchase order deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
-        })
-        .catch((error: Error) => {
-          response.message = `Purchase order failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
-          response.payload = error
-        })
+      const emitter = await this.clientInventory.emit('purchase_order', {
+        action: 'delete',
+        id: id,
+        data: data,
+      })
+      if (emitter) {
+        response.message = 'Purchase order deleted successfully'
+        response.statusCode = `${modCodes[this.constructor.name]}_D_${
+          modCodes.Global.success
+        }`
+        response.transaction_id = id
+        response.payload = {}
+      } else {
+        response.message = 'Purchase order failed to delete'
+        response.statusCode = `${modCodes[this.constructor.name]}_D_${
+          modCodes.Global.failed
+        }`
+        response.transaction_id = id
+        response.payload = {}
+      }
     } else {
       response.message = `Purchase order failed to deleted. Invalid document`
       response.statusCode = `${modCodes[this.constructor.name]}_D_${
@@ -380,21 +289,5 @@ export class PurchaseOrderService {
       response.payload = {}
     }
     return response
-  }
-
-  async update_receive(id: string, item: IMasterItem, delivered: number) {
-    return await this.purchaseOrderModel
-      .updateOne(
-        {
-          id: id,
-          'detail.item.id': item.id,
-        },
-        {
-          $set: {
-            'detail.$.delivered': delivered,
-          },
-        }
-      )
-      .exec()
   }
 }

@@ -1,4 +1,5 @@
 import { ApplicationConfig } from '@configuration/environtment'
+import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
 import { InventoryModule } from '@core/inventory/inventory.module'
@@ -21,7 +22,7 @@ import { CoreService } from './core.service'
       envFilePath: `${process.cwd()}/environment/${
         process.env.NODE_ENV === 'development' ? '' : process.env.NODE_ENV
       }.env`,
-      load: [ApplicationConfig, MongoConfig],
+      load: [ApplicationConfig, MongoConfig, KafkaConfig],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

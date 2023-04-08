@@ -9,6 +9,7 @@ import {
 } from '@core/master/schemas/master.item'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { FileDto } from '@utility/dto/file'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
@@ -155,5 +156,9 @@ export class MasterItemService {
       response.payload = {}
     }
     return response
+  }
+
+  async import(file: FileDto, account: Account) {
+    //
   }
 }

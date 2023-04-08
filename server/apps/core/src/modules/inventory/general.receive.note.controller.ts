@@ -1,8 +1,8 @@
-import { GeneralReceiveNoteAddDTO } from '@core/inventory/dto/general.receive.note'
 import { GeneralReceiveNoteService } from '@core/inventory/general.receive.note.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
+import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
 import {
   Body,
   Controller,
@@ -15,7 +15,13 @@ import {
   UseInterceptors,
   Version,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
@@ -64,6 +70,9 @@ export class GeneralReceiveNoteController {
   @ApiOperation({
     summary: 'Detail data',
     description: '',
+  })
+  @ApiParam({
+    name: 'id',
   })
   async detail(@Param() param) {
     return await this.generalReceiveNoteService.detail(param.id)
