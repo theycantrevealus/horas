@@ -20,7 +20,7 @@ import {
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { TimeManagement } from '@utility/time'
-import { IsBoolean, IsNotEmpty } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 // ==============================================================================Item Configuration
@@ -49,11 +49,33 @@ export class CMasterItemConfiguration {
 export const MasterItemStoring = raw({
   stock_point: { type: MasterStockPointJoin, _id: false },
   storing_label: { type: String },
+  minimum: { type: Number },
+  maximum: { type: Number },
 })
 
 export interface IMasterItemStoring {
   stock_point: IMasterStockPoint
   storing_label: string
+  minimum: number
+  maximum: number
+}
+
+export class CMasterItemStoring {
+  @ApiProperty({
+    type: Number,
+    description: 'Minimum qty to alert',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  minimum: number
+
+  @ApiProperty({
+    type: Number,
+    description: 'Maximum qty to alert',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  maximum: number
 }
 
 export type MasterItemDocument = HydratedDocument<MasterItem>

@@ -138,6 +138,8 @@ export class InventoryService {
         const storingSet: IMasterItemStoring = {
           stock_point: stock_point,
           storing_label: label,
+          minimum: 0,
+          maximum: 0,
         }
         if (result) {
           await this.masterItemModel

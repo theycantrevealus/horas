@@ -1,7 +1,9 @@
 import { CLOV, ILOV } from '@core/lov/schemas/lov.join'
 import {
   CMasterItemConfiguration,
+  CMasterItemStoring,
   IMasterItemConfiguration,
+  IMasterItemStoring,
 } from '@core/master/schemas/master.item'
 import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
 import {
@@ -49,6 +51,13 @@ export class MasterItemAddDTO {
   })
   @IsNotEmpty()
   configuration: IMasterItemConfiguration
+
+  @ApiProperty({
+    type: CMasterItemStoring,
+    description: 'Storing configuration',
+  })
+  @IsNotEmpty()
+  storing: IMasterItemStoring
 
   @ApiProperty({
     type: CMasterItemCategory,
