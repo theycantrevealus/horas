@@ -1,3 +1,4 @@
+import { CLOV, ILOV } from '@core/lov/schemas/lov.join'
 import {
   CMasterItemConfiguration,
   IMasterItemConfiguration,
@@ -70,6 +71,14 @@ export class MasterItemAddDTO {
   brand: IMasterItemBrand
 
   @ApiProperty({
+    type: CLOV,
+    isArray: true,
+    description: 'Stock point configuration',
+  })
+  @IsNotEmpty()
+  properties: ILOV[]
+
+  @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
   })
@@ -133,6 +142,14 @@ export class MasterItemEditDTO {
   })
   @IsNotEmpty()
   brand: MasterItemBrand
+
+  @ApiProperty({
+    type: CLOV,
+    isArray: true,
+    description: 'Stock point configuration',
+  })
+  @IsNotEmpty()
+  properties: ILOV[]
 
   @ApiProperty({
     example: 'Extra remark',

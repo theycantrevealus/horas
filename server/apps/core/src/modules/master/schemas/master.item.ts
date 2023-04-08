@@ -1,5 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
+import { ILOV, LOVJoin } from '@core/lov/schemas/lov.join'
 import {
   IMasterItemBrand,
   MasterItemBrandJoin,
@@ -75,6 +76,14 @@ export class MasterItem {
     _id: false,
   })
   brand: IMasterItemBrand
+
+  @Prop({
+    unique: false,
+    required: false,
+    type: [LOVJoin],
+    _id: false,
+  })
+  properties: ILOV[]
 
   @Prop({ type: SchemaTypes.String })
   remark: string

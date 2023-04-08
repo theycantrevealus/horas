@@ -13,4 +13,5 @@ export const modCodes = {
   MasterItemCategoryService: 'MSRI-CAT',
   PurchaseOrderService: 'PO',
   GeneralReceiveNoteService: 'GRN',
+  LOVService: 'LOV',
 }

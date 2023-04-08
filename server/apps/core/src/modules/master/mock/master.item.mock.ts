@@ -9,6 +9,7 @@ import { masterItemBrandArray } from '@core/master/mock/master.item.brand.mock'
 import { masterItemCategoryArray } from '@core/master/mock/master.item.category.mock'
 import { masterItemUnitArray } from '@core/master/mock/master.item.unit.mock'
 import {
+  IMasterItemConfiguration,
   MasterItem,
   MasterItemDocument,
 } from '@core/master/schemas/master.item'
@@ -49,9 +50,19 @@ export const mockMasterItem = (
   id = `item-${new Types.ObjectId().toString()}`,
   code = 'BRD-0001',
   name = faker.company.name(),
+  configuration: IMasterItemConfiguration = {
+    allow_sell: true,
+  },
   category = masterItemCategoryArray,
   unit = masterItemUnitArray[0],
   brand = masterItemBrandArray[0],
+  properties = [
+    {
+      id: `lov-${new Types.ObjectId().toString()}`,
+      name: 'ingredients',
+      value: 'paracetamol',
+    },
+  ],
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -66,9 +77,11 @@ export const mockMasterItem = (
   id,
   code,
   name,
+  configuration,
   category,
   unit,
   brand,
+  properties,
   remark,
   created_by,
   created_at,
@@ -116,9 +129,19 @@ export const masterItemArray = [
     `item-${new Types.ObjectId().toString()}`,
     'ITM-0001',
     '',
+    {
+      allow_sell: true,
+    },
     [],
     masterItemUnitArray[0],
     masterItemBrandArray[0],
+    [
+      {
+        id: `lov-${new Types.ObjectId().toString()}`,
+        name: 'ingredients',
+        value: 'paracetamol',
+      },
+    ],
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -129,9 +152,19 @@ export const masterItemArray = [
     `item-${new Types.ObjectId().toString()}`,
     'ITM-0001',
     '',
+    {
+      allow_sell: true,
+    },
     [],
     masterItemUnitArray[0],
     masterItemBrandArray[0],
+    [
+      {
+        id: `lov-${new Types.ObjectId().toString()}`,
+        name: 'ingredients',
+        value: 'paracetamol',
+      },
+    ],
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
