@@ -1,3 +1,7 @@
+import {
+  CMasterItemConfiguration,
+  IMasterItemConfiguration,
+} from '@core/master/schemas/master.item'
 import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
 import {
   IMasterItemBrand,
@@ -37,6 +41,13 @@ export class MasterItemAddDTO {
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    type: CMasterItemConfiguration,
+    description: 'Stock point configuration',
+  })
+  @IsNotEmpty()
+  configuration: IMasterItemConfiguration
 
   @ApiProperty({
     type: CMasterItemCategory,
@@ -93,6 +104,13 @@ export class MasterItemEditDTO {
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    type: CMasterItemConfiguration,
+    description: 'Stock point configuration',
+  })
+  @IsNotEmpty()
+  configuration: IMasterItemConfiguration
 
   @ApiProperty({
     type: MasterItemCategory,

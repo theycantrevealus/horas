@@ -13,8 +13,32 @@ import {
   MasterItemUnitJoin,
 } from '@core/master/schemas/master.item.unit.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { ApiProperty } from '@nestjs/swagger'
 import { TimeManagement } from '@utility/time'
+import { IsBoolean, IsNotEmpty } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
+
+export const MasterItemConfiguration = raw({
+  allow_grn: { type: Boolean, default: false },
+  allow_incoming: { type: Boolean, default: false },
+  allow_outgoing: { type: Boolean, default: false },
+  allow_destruction: { type: Boolean, default: false },
+})
+
+export interface IMasterItemConfiguration {
+  allow_sell: boolean
+}
+
+export class CMasterItemConfiguration {
+  @ApiProperty({
+    example: true,
+    type: Boolean,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  allow_sell: boolean
+}
 
 export type MasterItemDocument = HydratedDocument<MasterItem>
 @Schema({ collection: 'master_item' })
@@ -27,6 +51,9 @@ export class MasterItem {
 
   @Prop({ type: SchemaTypes.String })
   name: string
+
+  @Prop(raw(MasterItemConfiguration))
+  configuration: IMasterItemConfiguration
 
   @Prop({
     unique: false,
