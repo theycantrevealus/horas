@@ -13,12 +13,17 @@ import {
   IMasterItemUnit,
   MasterItemUnitJoin,
 } from '@core/master/schemas/master.item.unit.join'
+import {
+  IMasterStockPoint,
+  MasterStockPointJoin,
+} from '@core/master/schemas/master.stock.point.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { TimeManagement } from '@utility/time'
 import { IsBoolean, IsNotEmpty } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+// ==============================================================================Item Configuration
 export const MasterItemConfiguration = raw({
   allow_grn: { type: Boolean, default: false },
   allow_incoming: { type: Boolean, default: false },
@@ -39,6 +44,16 @@ export class CMasterItemConfiguration {
   @IsNotEmpty()
   @IsBoolean()
   allow_sell: boolean
+}
+// ==============================================================================Item Storing Label
+export const MasterItemStoring = raw({
+  stock_point: { type: MasterStockPointJoin, _id: false },
+  storing_label: { type: String },
+})
+
+export interface IMasterItemStoring {
+  stock_point: IMasterStockPoint
+  storing_label: string
 }
 
 export type MasterItemDocument = HydratedDocument<MasterItem>
@@ -84,6 +99,14 @@ export class MasterItem {
     _id: false,
   })
   properties: ILOV[]
+
+  @Prop({
+    unique: false,
+    required: false,
+    type: [MasterItemStoring],
+    _id: false,
+  })
+  storing: IMasterItemStoring[]
 
   @Prop({ type: SchemaTypes.String })
   remark: string

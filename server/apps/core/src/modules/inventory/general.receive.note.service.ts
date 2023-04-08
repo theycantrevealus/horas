@@ -119,6 +119,7 @@ export class GeneralReceiveNoteService {
                         item: foundItem.item,
                         delivered: delivered,
                         qty: row.qty,
+                        label: row.storing_label,
                         batch: {
                           code: row.batch,
                           expired: row.expired_date,
@@ -152,7 +153,7 @@ export class GeneralReceiveNoteService {
                             .update_receive(e.po, e.item, e.delivered)
                             .then(async () => {
                               await this.inventoryService
-                                .stock_move({
+                                .stockMove({
                                   item: e.item,
                                   batch:
                                     await this.inventoryService.batchCreator(
@@ -166,6 +167,16 @@ export class GeneralReceiveNoteService {
                                   type: 'in',
                                   transaction: 'general_receive_note',
                                   transaction_id: result.id,
+                                })
+                                .then(async () => {
+                                  // Update master item information for storing label
+                                  await this.inventoryService
+                                    .storingLabel(e.label, e.item, stock_point)
+                                    .catch((error: Error) => {
+                                      response.payload = {
+                                        message: `General receive note failed to create. Fail to update storing label ${error.message}`,
+                                      }
+                                    })
                                 })
                                 .catch((error: Error) => {
                                   response.payload = {

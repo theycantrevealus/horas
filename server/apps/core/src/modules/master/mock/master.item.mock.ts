@@ -63,6 +63,16 @@ export const mockMasterItem = (
       value: 'paracetamol',
     },
   ],
+  storing = [
+    {
+      stock_point: {
+        id: `stock_point-${new Types.ObjectId().toString()}`,
+        code: 'HRS-001',
+        name: 'Main Storage',
+      },
+      storing_label: '',
+    },
+  ],
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -82,6 +92,7 @@ export const mockMasterItem = (
   unit,
   brand,
   properties,
+  storing,
   remark,
   created_by,
   created_at,
@@ -142,6 +153,16 @@ export const masterItemArray = [
         value: 'paracetamol',
       },
     ],
+    [
+      {
+        stock_point: {
+          id: `stock_point-${new Types.ObjectId().toString()}`,
+          code: 'HRS-001',
+          name: 'Main Storage',
+        },
+        storing_label: '',
+      },
+    ],
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -163,6 +184,16 @@ export const masterItemArray = [
         id: `lov-${new Types.ObjectId().toString()}`,
         name: 'ingredients',
         value: 'paracetamol',
+      },
+    ],
+    [
+      {
+        stock_point: {
+          id: `stock_point-${new Types.ObjectId().toString()}`,
+          code: 'HRS-001',
+          name: 'Main Storage',
+        },
+        storing_label: '',
       },
     ],
     '',

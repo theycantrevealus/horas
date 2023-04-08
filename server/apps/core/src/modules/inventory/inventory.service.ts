@@ -9,11 +9,17 @@ import {
   InventoryStockLogDocument,
 } from '@core/inventory/schemas/stock.log'
 import {
+  IMasterItemStoring,
+  MasterItem,
+  MasterItemDocument,
+} from '@core/master/schemas/master.item'
+import {
   MasterItemBatch,
   MasterItemBatchDocument,
 } from '@core/master/schemas/master.item.batch'
 import { IMasterItemBatch } from '@core/master/schemas/master.item.batch.join'
 import { IMasterItem } from '@core/master/schemas/master.item.join'
+import { IMasterStockPoint } from '@core/master/schemas/master.stock.point.join'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -21,6 +27,9 @@ import { Model } from 'mongoose'
 @Injectable()
 export class InventoryService {
   constructor(
+    @InjectModel(MasterItem.name)
+    private masterItemModel: Model<MasterItemDocument>,
+
     @InjectModel(MasterItemBatch.name)
     private masterItemBatchModel: Model<MasterItemBatchDocument>,
 
@@ -59,7 +68,7 @@ export class InventoryService {
       })
   }
 
-  async stock_move(data: StockDTO) {
+  async stockMove(data: StockDTO) {
     await this.inventoryStockModel
       .findOne({
         'item.id': data.item.id,
@@ -111,6 +120,62 @@ export class InventoryService {
 
           await log.save()
         }
+      })
+  }
+
+  async storingLabel(
+    label: string,
+    item: IMasterItem,
+    stock_point: IMasterStockPoint
+  ) {
+    await this.masterItemModel
+      .findOne({
+        id: item.id,
+        'storing.stock_point.id': stock_point.id,
+      })
+      .exec()
+      .then(async (result) => {
+        const storingSet: IMasterItemStoring = {
+          stock_point: stock_point,
+          storing_label: label,
+        }
+        if (result) {
+          await this.masterItemModel
+            .updateOne(
+              {
+                id: item.id,
+                'storing.stock_point.id': stock_point.id,
+              },
+              {
+                $set: {
+                  'storing.$.storing_label': label,
+                },
+              }
+            )
+            .exec()
+            .catch((e: Error) => {
+              console.log(e.message)
+            })
+        } else {
+          await this.masterItemModel
+            .updateOne(
+              {
+                id: item.id,
+              },
+              {
+                $push: {
+                  storing: storingSet,
+                },
+              }
+            )
+            .exec()
+            .catch((e: Error) => {
+              console.log(e.message)
+            })
+        }
+      })
+      .catch((e: Error) => {
+        console.log(e.message)
       })
   }
 }
