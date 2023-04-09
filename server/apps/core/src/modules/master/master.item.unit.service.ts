@@ -7,6 +7,7 @@ import {
   MasterItemUnit,
   MasterItemUnitDocument,
 } from '@core/master/schemas/master.item.unit'
+import { IMasterItemUnit } from '@core/master/schemas/master.item.unit.join'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -30,6 +31,31 @@ export class MasterItemUnitService {
     return this.masterItemUnitModel.findOne({ id: id }).exec()
   }
 
+  async find(term: any): Promise<MasterItemUnit> {
+    return this.masterItemUnitModel.findOne(term).exec()
+  }
+
+  async upsert(term: any, account: Account): Promise<IMasterItemUnit> {
+    let targetUnit: IMasterItemUnit = await this.find({ name: term.name })
+    if (!targetUnit) {
+      await this.add(
+        {
+          code: '',
+          name: term.name,
+          remark: '',
+        },
+        account
+      ).then((result) => {
+        targetUnit = {
+          id: result.transaction_id,
+          code: '',
+          name: term.name,
+        }
+      })
+    }
+    return targetUnit
+  }
+
   async add(
     data: MasterItemUnitAddDTO,
     account: Account
@@ -51,12 +77,12 @@ export class MasterItemUnitService {
         ...data,
         created_by: account,
       })
-      .then((result) => {
+      .then((result: IMasterItemUnit) => {
         response.message = 'Master item unit created successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.success
         }`
-        response.transaction_id = result._id
+        response.transaction_id = result.id
         response.payload = result
       })
       .catch((error: Error) => {

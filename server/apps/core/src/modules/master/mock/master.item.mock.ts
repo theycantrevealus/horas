@@ -50,6 +50,7 @@ export const mockMasterItem = (
   id = `item-${new Types.ObjectId().toString()}`,
   code = 'BRD-0001',
   name = faker.company.name(),
+  alias = '',
   configuration: IMasterItemConfiguration = {
     allow_sell: true,
   },
@@ -89,6 +90,7 @@ export const mockMasterItem = (
   id,
   code,
   name,
+  alias,
   configuration,
   category,
   unit,
@@ -142,6 +144,7 @@ export const masterItemArray = [
     `item-${new Types.ObjectId().toString()}`,
     'ITM-0001',
     '',
+    '',
     {
       allow_sell: true,
     },
@@ -176,6 +179,7 @@ export const masterItemArray = [
   mockMasterItem(
     `item-${new Types.ObjectId().toString()}`,
     'ITM-0001',
+    '',
     '',
     {
       allow_sell: true,

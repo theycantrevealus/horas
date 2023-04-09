@@ -7,6 +7,7 @@ import {
   MasterItemCategory,
   MasterItemCategoryDocument,
 } from '@core/master/schemas/master.item.category'
+import { IMasterItemCategory } from '@core/master/schemas/master.item.category.join'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -28,6 +29,31 @@ export class MasterItemCategoryService {
 
   async detail(id: string): Promise<MasterItemCategory> {
     return this.masterItemCategoryModel.findOne({ id: id }).exec()
+  }
+
+  async find(term: any): Promise<MasterItemCategory> {
+    return this.masterItemCategoryModel.findOne(term).exec()
+  }
+
+  async upsert(term: any, account: Account): Promise<IMasterItemCategory> {
+    let targetUnit: IMasterItemCategory = await this.find({ name: term.name })
+    if (!targetUnit) {
+      await this.add(
+        {
+          code: '',
+          name: term.name,
+          remark: '',
+        },
+        account
+      ).then((result) => {
+        targetUnit = {
+          id: result.transaction_id.toString(),
+          code: '',
+          name: term.name,
+        }
+      })
+    }
+    return targetUnit
   }
 
   async add(
@@ -56,7 +82,7 @@ export class MasterItemCategoryService {
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.success
         }`
-        response.transaction_id = result._id
+        response.transaction_id = result.id
         response.payload = result
       })
       .catch((error: Error) => {

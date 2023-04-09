@@ -39,7 +39,7 @@ import { KafkaConn } from '@utility/kafka'
 
 @Module({
   imports: [
-    ClientsModule.registerAsync([KafkaConn.inventory[0]]),
+    ClientsModule.registerAsync([KafkaConn.inventory[0], KafkaConn.m_item[0]]),
     MongooseModule.forFeature([
       { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },

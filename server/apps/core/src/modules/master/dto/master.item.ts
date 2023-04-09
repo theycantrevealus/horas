@@ -46,6 +46,13 @@ export class MasterItemAddDTO {
   name: string
 
   @ApiProperty({
+    example: 'Adidas ALias',
+    description: 'Item alias name',
+  })
+  @IsNotEmpty()
+  alias: string
+
+  @ApiProperty({
     type: CMasterItemConfiguration,
     description: 'Stock point configuration',
   })
@@ -54,10 +61,12 @@ export class MasterItemAddDTO {
 
   @ApiProperty({
     type: CMasterItemStoring,
+    isArray: true,
+    required: false,
     description: 'Storing configuration',
   })
   @IsNotEmpty()
-  storing: IMasterItemStoring
+  storing: IMasterItemStoring[]
 
   @ApiProperty({
     type: CMasterItemCategory,
@@ -118,10 +127,17 @@ export class MasterItemEditDTO {
 
   @ApiProperty({
     example: 'Adidas',
-    description: 'Item brand name',
+    description: 'Item name',
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    example: 'Adidas ALias',
+    description: 'Item alias name',
+  })
+  @IsNotEmpty()
+  alias: string
 
   @ApiProperty({
     type: CMasterItemConfiguration,
@@ -161,6 +177,15 @@ export class MasterItemEditDTO {
   properties: ILOV[]
 
   @ApiProperty({
+    type: CMasterItemStoring,
+    isArray: true,
+    required: false,
+    description: 'Storing configuration',
+  })
+  @IsNotEmpty()
+  storing: IMasterItemStoring[]
+
+  @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
   })
@@ -178,6 +203,7 @@ export class MasterItemEditDTO {
   constructor(parameter: any) {
     this.code = parameter.code
     this.name = parameter.name
+    this.alias = parameter.alias
     this.category = parameter.category
     this.unit = parameter.unit
     this.brand = parameter.brand

@@ -84,11 +84,14 @@ export class MasterItem {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
-  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  @Prop({ type: SchemaTypes.String, unique: true })
   code: string
 
   @Prop({ type: SchemaTypes.String })
   name: string
+
+  @Prop({ type: SchemaTypes.String, required: false })
+  alias: string
 
   @Prop(raw(MasterItemConfiguration))
   configuration: IMasterItemConfiguration

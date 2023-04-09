@@ -1,6 +1,7 @@
 import { Account } from '@core/account/schemas/account.model'
 import { LOVAddDTO, LOVEditDTO } from '@core/lov/dto/lov'
 import { LOV, LOVDocument } from '@core/lov/schemas/lov'
+import { ILOV } from '@core/lov/schemas/lov.join'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -19,6 +20,31 @@ export class LOVService {
 
   async detail(id: string): Promise<LOV> {
     return this.lovModel.findOne({ id: id }).exec()
+  }
+
+  async find(term: any): Promise<LOV> {
+    return this.lovModel.findOne(term).exec()
+  }
+
+  async upsert(term: any, account: Account): Promise<ILOV> {
+    let target: ILOV = await this.find({ name: term.name })
+    if (!target) {
+      await this.add(
+        {
+          name: term.name,
+          parent: term.parent,
+          remark: term.remark,
+        },
+        account
+      ).then((result) => {
+        target = {
+          id: `lov-${result.transaction_id.toString()}`,
+          name: term.name,
+          value: term.value,
+        }
+      })
+    }
+    return target
   }
 
   async add(data: LOVAddDTO, account: Account): Promise<GlobalResponse> {

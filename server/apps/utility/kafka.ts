@@ -60,6 +60,41 @@ const KafkaConnCoord = (devMode) => {
           }),
         },
       ] satisfies ClientsModuleAsyncOptions,
+      m_item: [
+        {
+          name: process.env.KAFKA_M_ITEM_SERVICE,
+          imports: [
+            ConfigModule.forRoot({
+              isGlobal: true,
+              envFilePath: `${process.cwd()}/environment/${
+                !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
+                  ? ''
+                  : process.env.NODE_ENV
+              }.env`,
+              load: [ApplicationConfig, MongoConfig, KafkaConfig],
+            }),
+          ],
+          inject: [ConfigService],
+          useFactory: async (
+            configService: ConfigService
+          ): Promise<ClientProvider> => ({
+            transport: Transport.KAFKA,
+            options: {
+              client: {
+                clientId: configService.get<string>('kafka.master.item.topic'),
+                brokers: [
+                  configService.get<string>('kafka.master.item.broker'),
+                ],
+              },
+              consumer: {
+                groupId: configService.get<string>(
+                  'kafka.master.item.cons_group'
+                ),
+              },
+            },
+          }),
+        },
+      ] satisfies ClientsModuleAsyncOptions,
     }
   } else {
     // PROD / PREPROD MODE
@@ -112,6 +147,62 @@ const KafkaConnCoord = (devMode) => {
               consumer: {
                 groupId: configService.get<string>(
                   'kafka.inventory.cons_group'
+                ),
+              },
+            },
+          }),
+        },
+      ] satisfies ClientsModuleAsyncOptions,
+      m_item: [
+        {
+          name: process.env.KAFKA_M_ITEM_SERVICE,
+          imports: [
+            ConfigModule.forRoot({
+              isGlobal: true,
+              envFilePath: `${process.cwd()}/environment/${
+                !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
+                  ? ''
+                  : process.env.NODE_ENV
+              }.env`,
+              load: [ApplicationConfig, MongoConfig, KafkaConfig],
+            }),
+          ],
+          inject: [ConfigService],
+          useFactory: async (
+            configService: ConfigService
+          ): Promise<ClientProvider> => ({
+            transport: Transport.KAFKA,
+            options: {
+              client: {
+                clientId: configService.get<string>('kafka.master.item.topic'),
+                brokers: [
+                  configService.get<string>('kafka.master.item.broker'),
+                ],
+                ssl: {
+                  secureProtocol: configService.get<string>(
+                    'kafka.master.item.ssl.protocol'
+                  ),
+                  rejectUnauthorized: false,
+                  cert: fs.readFileSync(
+                    configService.get<string>('kafka.master.item.ssl.ca')
+                  ),
+                  passphrase: configService.get<string>(
+                    'kafka.master.item.ssl.passphrase'
+                  ),
+                },
+                sasl: {
+                  mechanism: 'scram-sha-512',
+                  username: configService.get<string>(
+                    'kafka.master.item.sasl.username'
+                  ),
+                  password: configService.get<string>(
+                    'kafka.master.item.sasl.password'
+                  ),
+                },
+              },
+              consumer: {
+                groupId: configService.get<string>(
+                  'kafka.master.item.cons_group'
                 ),
               },
             },
