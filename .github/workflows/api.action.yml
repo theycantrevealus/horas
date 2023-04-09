@@ -11,6 +11,8 @@ on:
 
 jobs:
   test-api:
+    env:
+      - NODE_ENV=development
     runs-on: ubuntu-latest
     defaults:
       run:
