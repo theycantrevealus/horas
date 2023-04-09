@@ -12,7 +12,7 @@ import { LogService } from './log.service'
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === 'development' ? '' : process.env.NODE_ENV
+        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
       }.env`,
       load: [ApplicationConfig, MongoConfig],
     }),

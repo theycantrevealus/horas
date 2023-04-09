@@ -12,9 +12,7 @@ import * as fs from 'fs'
 
 dotenv.config({
   path:
-    !process.env.NODE_ENV ||
-    process.env.NODE_ENV === '' ||
-    process.env.NODE_ENV === 'development'
+    !process.env.NODE_ENV || process.env.NODE_ENV === ''
       ? `environment/.env`
       : `environment/${process.env.NODE_ENV}.env`,
 })
@@ -34,9 +32,7 @@ const KafkaConnCoord = (devMode) => {
             ConfigModule.forRoot({
               isGlobal: true,
               envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
-                  ? ''
-                  : process.env.NODE_ENV
+                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
               }.env`,
               load: [ApplicationConfig, MongoConfig, KafkaConfig],
             }),
@@ -67,9 +63,7 @@ const KafkaConnCoord = (devMode) => {
             ConfigModule.forRoot({
               isGlobal: true,
               envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
-                  ? ''
-                  : process.env.NODE_ENV
+                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
               }.env`,
               load: [ApplicationConfig, MongoConfig, KafkaConfig],
             }),
@@ -106,9 +100,7 @@ const KafkaConnCoord = (devMode) => {
             ConfigModule.forRoot({
               isGlobal: true,
               envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
-                  ? ''
-                  : process.env.NODE_ENV
+                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
               }.env`,
               load: [ApplicationConfig, MongoConfig, KafkaConfig],
             }),
@@ -160,9 +152,7 @@ const KafkaConnCoord = (devMode) => {
             ConfigModule.forRoot({
               isGlobal: true,
               envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
-                  ? ''
-                  : process.env.NODE_ENV
+                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
               }.env`,
               load: [ApplicationConfig, MongoConfig, KafkaConfig],
             }),
