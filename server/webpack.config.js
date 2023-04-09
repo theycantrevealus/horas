@@ -52,6 +52,7 @@ module.exports = (options, webpack) => {
     resolve: {
       alias: {
         '@core': path.resolve(__dirname, 'apps/core/src/modules'),
+        '@inventory': path.resolve(__dirname, 'apps/inventory/src'),
         '@log': path.resolve(__dirname, 'apps/log/src'),
         '@security': path.resolve(__dirname, 'apps/security'),
         '@configuration': path.resolve(__dirname, 'apps/configuration'),

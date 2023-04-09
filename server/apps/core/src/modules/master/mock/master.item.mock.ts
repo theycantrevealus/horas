@@ -50,6 +50,7 @@ export const mockMasterItem = (
   id = `item-${new Types.ObjectId().toString()}`,
   code = 'BRD-0001',
   name = faker.company.name(),
+  alias = '',
   configuration: IMasterItemConfiguration = {
     allow_sell: true,
   },
@@ -61,6 +62,18 @@ export const mockMasterItem = (
       id: `lov-${new Types.ObjectId().toString()}`,
       name: 'ingredients',
       value: 'paracetamol',
+    },
+  ],
+  storing = [
+    {
+      stock_point: {
+        id: `stock_point-${new Types.ObjectId().toString()}`,
+        code: 'HRS-001',
+        name: 'Main Storage',
+      },
+      storing_label: '',
+      minimum: 5,
+      maximum: 10,
     },
   ],
   remark = '',
@@ -77,11 +90,13 @@ export const mockMasterItem = (
   id,
   code,
   name,
+  alias,
   configuration,
   category,
   unit,
   brand,
   properties,
+  storing,
   remark,
   created_by,
   created_at,
@@ -129,6 +144,7 @@ export const masterItemArray = [
     `item-${new Types.ObjectId().toString()}`,
     'ITM-0001',
     '',
+    '',
     {
       allow_sell: true,
     },
@@ -142,6 +158,18 @@ export const masterItemArray = [
         value: 'paracetamol',
       },
     ],
+    [
+      {
+        stock_point: {
+          id: `stock_point-${new Types.ObjectId().toString()}`,
+          code: 'HRS-001',
+          name: 'Main Storage',
+        },
+        storing_label: '',
+        minimum: 5,
+        maximum: 10,
+      },
+    ],
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -151,6 +179,7 @@ export const masterItemArray = [
   mockMasterItem(
     `item-${new Types.ObjectId().toString()}`,
     'ITM-0001',
+    '',
     '',
     {
       allow_sell: true,
@@ -163,6 +192,18 @@ export const masterItemArray = [
         id: `lov-${new Types.ObjectId().toString()}`,
         name: 'ingredients',
         value: 'paracetamol',
+      },
+    ],
+    [
+      {
+        stock_point: {
+          id: `stock_point-${new Types.ObjectId().toString()}`,
+          code: 'HRS-001',
+          name: 'Main Storage',
+        },
+        storing_label: '',
+        minimum: 5,
+        maximum: 10,
       },
     ],
     '',

@@ -1,11 +1,14 @@
 import { ApplicationConfig } from '@configuration/environtment'
+import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
+import { LOVModule } from '@core/lov/lov.module'
+import { MasterModule } from '@core/master/master.module'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
 
-import { LogController } from './log.controller'
-import { LogService } from './log.service'
+import { ImportController } from './import.controller'
+import { ImportService } from './import.service'
 
 @Module({
   imports: [
@@ -14,7 +17,7 @@ import { LogService } from './log.service'
       envFilePath: `${process.cwd()}/environment/${
         process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
       }.env`,
-      load: [ApplicationConfig, MongoConfig],
+      load: [ApplicationConfig, MongoConfig, KafkaConfig],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -28,8 +31,10 @@ import { LogService } from './log.service'
       }),
       inject: [ConfigService],
     }),
+    MasterModule,
+    LOVModule,
   ],
-  controllers: [LogController],
-  providers: [LogService],
+  controllers: [ImportController],
+  providers: [ImportService],
 })
-export class LogModule {}
+export class ImportModule {}

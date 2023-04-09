@@ -72,6 +72,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/inventory/tsconfig.app.json"
       }
+    },
+    "import": {
+      "type": "application",
+      "root": "apps/import",
+      "entryFile": "main",
+      "sourceRoot": "apps/import/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/import/tsconfig.app.json"
+      }
     }
   }
 }

@@ -1,7 +1,9 @@
 import { CLOV, ILOV } from '@core/lov/schemas/lov.join'
 import {
   CMasterItemConfiguration,
+  CMasterItemStoring,
   IMasterItemConfiguration,
+  IMasterItemStoring,
 } from '@core/master/schemas/master.item'
 import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
 import {
@@ -44,11 +46,27 @@ export class MasterItemAddDTO {
   name: string
 
   @ApiProperty({
+    example: 'Adidas ALias',
+    description: 'Item alias name',
+  })
+  @IsNotEmpty()
+  alias: string
+
+  @ApiProperty({
     type: CMasterItemConfiguration,
     description: 'Stock point configuration',
   })
   @IsNotEmpty()
   configuration: IMasterItemConfiguration
+
+  @ApiProperty({
+    type: CMasterItemStoring,
+    isArray: true,
+    required: false,
+    description: 'Storing configuration',
+  })
+  @IsNotEmpty()
+  storing: IMasterItemStoring[]
 
   @ApiProperty({
     type: CMasterItemCategory,
@@ -109,10 +127,17 @@ export class MasterItemEditDTO {
 
   @ApiProperty({
     example: 'Adidas',
-    description: 'Item brand name',
+    description: 'Item name',
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    example: 'Adidas ALias',
+    description: 'Item alias name',
+  })
+  @IsNotEmpty()
+  alias: string
 
   @ApiProperty({
     type: CMasterItemConfiguration,
@@ -152,6 +177,15 @@ export class MasterItemEditDTO {
   properties: ILOV[]
 
   @ApiProperty({
+    type: CMasterItemStoring,
+    isArray: true,
+    required: false,
+    description: 'Storing configuration',
+  })
+  @IsNotEmpty()
+  storing: IMasterItemStoring[]
+
+  @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
   })
@@ -169,6 +203,7 @@ export class MasterItemEditDTO {
   constructor(parameter: any) {
     this.code = parameter.code
     this.name = parameter.name
+    this.alias = parameter.alias
     this.category = parameter.category
     this.unit = parameter.unit
     this.brand = parameter.brand

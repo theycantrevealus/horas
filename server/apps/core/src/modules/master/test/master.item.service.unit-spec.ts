@@ -1,3 +1,5 @@
+import { ApplicationConfig } from '@configuration/environtment'
+import { MongoConfig } from '@configuration/mongo'
 import { AccountService } from '@core/account/account.service'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
@@ -18,11 +20,14 @@ import {
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
+import { ConfigModule } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
+import { ClientsModule } from '@nestjs/microservices'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
+import { KafkaConn } from '@utility/kafka'
 import { testCaption } from '@utility/string'
 import { Model, Query, Types } from 'mongoose'
 
@@ -32,6 +37,16 @@ describe('Master Item Service', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: `${process.cwd()}/environment/${
+            process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
+          }.env`,
+          load: [ApplicationConfig, MongoConfig],
+        }),
+        ClientsModule.registerAsync([KafkaConn.m_item[0]]),
+      ],
       controllers: [],
       providers: [
         MasterItemService,

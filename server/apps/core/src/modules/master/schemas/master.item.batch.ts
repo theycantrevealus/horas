@@ -14,7 +14,7 @@ export class MasterItemBatch {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
-  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  @Prop({ type: SchemaTypes.String, required: true })
   code: string
 
   @Prop(raw(MasterItemJoin))

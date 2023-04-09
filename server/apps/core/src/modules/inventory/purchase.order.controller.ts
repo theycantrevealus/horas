@@ -1,12 +1,12 @@
-import {
-  PurchaseOrderAddDTO,
-  PurchaseOrderApproval,
-  PurchaseOrderEditDTO,
-} from '@core/inventory/dto/purchase.order'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
+import {
+  PurchaseOrderAddDTO,
+  PurchaseOrderApproval,
+  PurchaseOrderEditDTO,
+} from '@inventory/dto/purchase.order'
 import {
   Body,
   Controller,

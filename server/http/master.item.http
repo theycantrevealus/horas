@@ -1,0 +1,16 @@
+POST {{host}}/v1/master/item/import
+Content-Type: multipart/form-data; boundary=boundary
+Authorization: Bearer {{access_token}}
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="product.csv"
+
+// The 'input.txt' file will be uploaded
+< /media/takashitanaka/DATA/db_backup/product.csv
+--boundary
+Content-Disposition: form-data; name="advertType"
+
+1
+--boundary
+
+###

@@ -39,8 +39,10 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { KafkaConn } from '@utility/kafka'
 import { TimeManagement } from '@utility/time'
 
 @Module({
@@ -48,10 +50,11 @@ import { TimeManagement } from '@utility/time'
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === 'development' ? '' : process.env.NODE_ENV
+        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
       }.env`,
       load: [ApplicationConfig, MongoConfig],
     }),
+    ClientsModule.registerAsync([KafkaConn.m_item[0]]),
     MongooseModule.forFeatureAsync([
       {
         name: MasterItem.name,
@@ -69,7 +72,8 @@ import { TimeManagement } from '@utility/time'
               this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
-              return next(new Error('Invalid document'))
+              return next()
+              //return next(new Error('Invalid document'))
             }
           })
 

@@ -7,7 +7,8 @@ import {
   MasterItem,
   MasterItemDocument,
 } from '@core/master/schemas/master.item'
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
+import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -19,7 +20,9 @@ import { Model } from 'mongoose'
 export class MasterItemService {
   constructor(
     @InjectModel(MasterItem.name)
-    private masterItemModel: Model<MasterItemDocument>
+    private masterItemModel: Model<MasterItemDocument>,
+
+    @Inject('M_ITEM_SERVICE') private readonly mItemClient: ClientKafka
   ) {}
 
   async all(parameter: any) {
@@ -28,6 +31,57 @@ export class MasterItemService {
 
   async detail(id: string): Promise<MasterItem> {
     return this.masterItemModel.findOne({ id: id }).exec()
+  }
+
+  async find(term: any) {
+    return this.masterItemModel.findOne(term).exec()
+  }
+
+  async bulk(bulkData = []) {
+    console.log(`Writing ${bulkData.length} data(s)`)
+    if (bulkData.length > 0) {
+      const prepareBulk = await Promise.all(
+        bulkData.map(async (data) => {
+          console.log(`Preparing -> ${data.code}`)
+          let prepareData = await this.find({
+            $and: [{ code: data.code }],
+          })
+          if (!prepareData) {
+            prepareData = new this.masterItemModel({
+              code: data.code,
+              name: data.name,
+              alias: data.alias,
+              unit: data.unit,
+              category: data.category,
+              configuration: data.configuration,
+              brand: data.brand,
+              storing: data.storing,
+              remark: data.remark,
+              properties: data.properties,
+            })
+          } else {
+            prepareData.name = data.name
+            prepareData.alias = data.alias
+            prepareData.unit = data.unit
+            prepareData.category = data.category
+            // prepareData.configuration = data.configuration
+            prepareData.brand = data.brand
+            // prepareData.storing = data.storing
+            prepareData.remark = data.remark
+            prepareData.properties = data.properties
+          }
+          return prepareData
+        })
+      )
+      await this.masterItemModel
+        .bulkSave(prepareBulk, { ordered: false })
+        .then(() => {
+          console.log('Write success')
+        })
+        .catch((e: Error) => {
+          console.log(e.message)
+        })
+    }
   }
 
   async add(data: MasterItemAddDTO, account: Account): Promise<GlobalResponse> {
@@ -150,6 +204,33 @@ export class MasterItemService {
     } else {
       response.message = `Master item failed to deleted. Invalid document`
       response.statusCode = `${modCodes[this.constructor.name]}_D_${
+        modCodes.Global.failed
+      }`
+      response.payload = {}
+    }
+    return response
+  }
+
+  async import(file: string, account: Account): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'MASTER_ITEM_IMPORT',
+      transaction_id: null,
+    } satisfies GlobalResponse
+    const emitter = await this.mItemClient.emit('master_item', {
+      file: file,
+      account: account,
+    })
+    if (emitter) {
+      response.message = 'Master item imported successfully'
+      response.statusCode = `${modCodes[this.constructor.name]}_G_${
+        modCodes.Global.success
+      }`
+    } else {
+      response.message = `Master item failed to import`
+      response.statusCode = `${modCodes[this.constructor.name]}_G_${
         modCodes.Global.failed
       }`
       response.payload = {}

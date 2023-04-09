@@ -11,6 +11,7 @@ export const GeneralReceiveNoteDetail = raw({
   qty: { type: Number, example: 10 },
   pending: { type: Number, example: 5 },
   batch: { type: String, example: 'XXXX' },
+  storing_label: { type: String, example: 'XXXX' },
   expired_date: { type: Date },
   remark: { type: String, example: 'Another remark for an item' },
 })
@@ -24,6 +25,8 @@ export class IGeneralReceiveNoteDetail {
 
   batch: string
 
+  storing_label: string
+
   expired_date: Date
 
   remark: string
@@ -33,6 +36,7 @@ export class IGeneralReceiveNoteDetail {
     this.qty = data.qty
     this.pending = data.pending
     this.batch = data.batch
+    this.storing_label = data.storing_label
     this.expired_date = data.expired_date
     this.remark = data.remark
   }
@@ -56,6 +60,14 @@ export class CGeneralReceiveNoteDetail {
     example: 'XXXXX',
   })
   batch: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XXXXX',
+    required: false,
+    description: 'Storing label to tracking',
+  })
+  storing_label: string
 
   @ApiProperty({
     example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),

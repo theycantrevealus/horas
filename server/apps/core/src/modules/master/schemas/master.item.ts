@@ -13,12 +13,17 @@ import {
   IMasterItemUnit,
   MasterItemUnitJoin,
 } from '@core/master/schemas/master.item.unit.join'
+import {
+  IMasterStockPoint,
+  MasterStockPointJoin,
+} from '@core/master/schemas/master.stock.point.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { TimeManagement } from '@utility/time'
-import { IsBoolean, IsNotEmpty } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+// ==============================================================================Item Configuration
 export const MasterItemConfiguration = raw({
   allow_grn: { type: Boolean, default: false },
   allow_incoming: { type: Boolean, default: false },
@@ -40,6 +45,38 @@ export class CMasterItemConfiguration {
   @IsBoolean()
   allow_sell: boolean
 }
+// ==============================================================================Item Storing Label
+export const MasterItemStoring = raw({
+  stock_point: { type: MasterStockPointJoin, _id: false },
+  storing_label: { type: String },
+  minimum: { type: Number },
+  maximum: { type: Number },
+})
+
+export interface IMasterItemStoring {
+  stock_point: IMasterStockPoint
+  storing_label: string
+  minimum: number
+  maximum: number
+}
+
+export class CMasterItemStoring {
+  @ApiProperty({
+    type: Number,
+    description: 'Minimum qty to alert',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  minimum: number
+
+  @ApiProperty({
+    type: Number,
+    description: 'Maximum qty to alert',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  maximum: number
+}
 
 export type MasterItemDocument = HydratedDocument<MasterItem>
 @Schema({ collection: 'master_item' })
@@ -47,11 +84,14 @@ export class MasterItem {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
-  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  @Prop({ type: SchemaTypes.String, unique: true })
   code: string
 
   @Prop({ type: SchemaTypes.String })
   name: string
+
+  @Prop({ type: SchemaTypes.String, required: false })
+  alias: string
 
   @Prop(raw(MasterItemConfiguration))
   configuration: IMasterItemConfiguration
@@ -84,6 +124,14 @@ export class MasterItem {
     _id: false,
   })
   properties: ILOV[]
+
+  @Prop({
+    unique: false,
+    required: false,
+    type: [MasterItemStoring],
+    _id: false,
+  })
+  storing: IMasterItemStoring[]
 
   @Prop({ type: SchemaTypes.String })
   remark: string

@@ -27,5 +27,8 @@ export class InventoryStock {
 
   @Prop({ type: SchemaTypes.Number })
   qty: number
+
+  @Prop({ type: SchemaTypes.String })
+  storing_label: string
 }
 export const InventoryStockSchema = SchemaFactory.createForClass(InventoryStock)
