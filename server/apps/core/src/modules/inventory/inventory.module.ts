@@ -65,4 +65,4 @@ import { KafkaConn } from '@utility/kafka'
   ],
   exports: [PurchaseOrderService, GeneralReceiveNoteService],
 })
-export class InventoryModule {}
+export class GatewayInventoryModule {}

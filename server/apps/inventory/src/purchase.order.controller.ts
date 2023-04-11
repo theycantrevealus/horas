@@ -27,6 +27,13 @@ export class PurchaseOrderController {
       case 'delete':
         await this.purchaseOrderService.delete(payload.id)
         break
+      case 'ask_approval':
+        await this.purchaseOrderService.askApproval(
+          payload.data,
+          payload.id,
+          payload.account
+        )
+        break
       case 'approve':
         await this.purchaseOrderService.approve(
           payload.data,

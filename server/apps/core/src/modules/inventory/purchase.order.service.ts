@@ -74,6 +74,64 @@ export class PurchaseOrderService {
     return response
   }
 
+  async askApproval(
+    data: PurchaseOrderApproval,
+    id: string,
+    account: Account
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'PURCHASE_ORDER_APPROVE',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    data.status = 'need_approval'
+
+    await this.purchaseOrderModel
+      .findOne({ id: id, status: 'new', __v: data.__v })
+      .exec()
+      .then(async (result) => {
+        if (result) {
+          const emitter = await this.clientInventory.emit('purchase_order', {
+            action: 'ask_approval',
+            id: id,
+            data: data,
+            account: account,
+          })
+          if (emitter) {
+            response.message = 'Purchase order proposed successfully'
+            response.statusCode = `${modCodes[this.constructor.name]}_U_${
+              modCodes.Global.success
+            }`
+            response.transaction_id = id
+            response.payload = result
+          } else {
+            response.message = `Purchase Order failed to proposed`
+            response.statusCode = `${modCodes[this.constructor.name]}_I_${
+              modCodes.Global.failed
+            }`
+            response.transaction_id = id
+          }
+        } else {
+          response.message = `Purchase order failed to proposed. Invalid document`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+          response.payload = {}
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase order failed to proposed. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+      })
+
+    return response
+  }
+
   async approve(
     data: PurchaseOrderApproval,
     id: string,
@@ -87,8 +145,10 @@ export class PurchaseOrderService {
       transaction_id: null,
     } satisfies GlobalResponse
 
+    data.status = 'approved'
+
     await this.purchaseOrderModel
-      .findOne({ id: id, status: 'new', __v: data.__v })
+      .findOne({ id: id, status: 'need_approval', __v: data.__v })
       .exec()
       .then(async (result) => {
         if (result) {
@@ -106,7 +166,7 @@ export class PurchaseOrderService {
             response.transaction_id = id
             response.payload = result
           } else {
-            response.message = `Purchase Order failed to create`
+            response.message = `Purchase Order failed to approved`
             response.statusCode = `${modCodes[this.constructor.name]}_I_${
               modCodes.Global.failed
             }`
@@ -143,8 +203,14 @@ export class PurchaseOrderService {
       transaction_id: null,
     } satisfies GlobalResponse
 
+    data.status = 'declined'
+
     await this.purchaseOrderModel
-      .findOne({ id: id, status: { $ne: 'approved' }, __v: data.__v })
+      .findOne({
+        id: id,
+        status: 'need_approval',
+        __v: data.__v,
+      })
       .exec()
       .then(async (result) => {
         if (result) {
@@ -198,9 +264,7 @@ export class PurchaseOrderService {
     await this.purchaseOrderModel
       .findOne({
         id: id,
-        status: {
-          $ne: 'approved',
-        },
+        status: { $or: [{ status: 'new' }, { status: 'declined' }] },
         __v: data.__v,
       })
       .exec()

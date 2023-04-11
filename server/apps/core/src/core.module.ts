@@ -2,7 +2,7 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
-import { InventoryModule } from '@core/inventory/inventory.module'
+import { GatewayInventoryModule } from '@core/inventory/inventory.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
@@ -42,7 +42,7 @@ import { CoreService } from './core.service'
     PatientModule,
     MenuModule,
     MasterModule,
-    InventoryModule,
+    GatewayInventoryModule,
   ],
   controllers: [CoreController],
   providers: [CoreService],
