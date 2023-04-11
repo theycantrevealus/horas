@@ -98,6 +98,31 @@ export class PurchaseOrderController {
     return await this.purchaseOrderService.add(parameter, account)
   }
 
+  @Patch('purchase_order/ask_approval/:id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Ask for approval new purchase order',
+    description: ``,
+  })
+  @ApiParam({
+    name: 'id',
+  })
+  async ask_approval(
+    @Body() parameter: PurchaseOrderApproval,
+    @Param() param,
+    @CredentialAccount() account
+  ): Promise<GlobalResponse> {
+    return await this.purchaseOrderService.askApproval(
+      parameter,
+      param.id,
+      account
+    )
+  }
+
   @Patch('purchase_order/approve/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)

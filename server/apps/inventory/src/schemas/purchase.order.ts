@@ -27,7 +27,7 @@ export const PurchaseOrderJoin = raw({
 export const PurchaseOrderApprovalHistory = raw({
   status: {
     type: String,
-    enum: ['new', 'approved', 'declined'],
+    enum: ['new', 'need_approval', 'approved', 'declined'],
     default: 'new',
   },
   logged_at: {

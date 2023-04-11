@@ -144,7 +144,7 @@ export class PurchaseOrderService {
     return response
   }
 
-  async approve(
+  async askApproval(
     data: PurchaseOrderApproval,
     id: string,
     account: Account
@@ -194,6 +194,57 @@ export class PurchaseOrderService {
     return response
   }
 
+  async approve(
+    data: PurchaseOrderApproval,
+    id: string,
+    account: Account
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'PURCHASE_ORDER_APPROVE',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const status = new IPurchaseOrderApproval({
+      status: data.status,
+      remark: data.remark,
+      created_by: account,
+    })
+
+    await this.purchaseOrderModel
+      .findOneAndUpdate(
+        { id: id, status: 'need_approval', __v: data.__v },
+        { status: data.status, $push: { approval_history: status } }
+      )
+      .exec()
+      .then((result) => {
+        if (result) {
+          response.message = 'Purchase order approved successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.success
+          }`
+          response.payload = result
+        } else {
+          response.message = `Purchase order failed to approve. Invalid document`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+          response.payload = {}
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase order failed to approve. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+      })
+
+    console.log(response)
+    return response
+  }
+
   async decline(
     data: PurchaseOrderApproval,
     id: string,
@@ -215,7 +266,7 @@ export class PurchaseOrderService {
 
     await this.purchaseOrderModel
       .findOneAndUpdate(
-        { id: id, status: { $ne: 'approved' }, __v: data.__v },
+        { id: id, status: 'need_approval', __v: data.__v },
         { status: data.status, $push: { approval_history: status } }
       )
       .exec()
