@@ -1,6 +1,7 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
+import { SocketConfig } from '@configuration/socket'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import {
   ClientProvider,
@@ -34,7 +35,7 @@ const KafkaConnCoord = (devMode) => {
               envFilePath: `${process.cwd()}/environment/${
                 !process.env.NODE_ENV ? '' : process.env.NODE_ENV
               }.env`,
-              load: [ApplicationConfig, MongoConfig, KafkaConfig],
+              load: [ApplicationConfig, MongoConfig, KafkaConfig, SocketConfig],
             }),
           ],
           inject: [ConfigService],

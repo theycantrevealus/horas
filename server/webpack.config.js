@@ -56,6 +56,7 @@ module.exports = (options, webpack) => {
         '@log': path.resolve(__dirname, 'apps/log/src'),
         '@security': path.resolve(__dirname, 'apps/security'),
         '@configuration': path.resolve(__dirname, 'apps/configuration'),
+        '@socket': path.resolve(__dirname, 'apps/socket/src'),
         '@utility': path.resolve(__dirname, 'apps/utility'),
         '@interceptors': path.resolve(__dirname, 'apps/interceptors'),
         '@guards': path.resolve(__dirname, 'apps/guards'),
