@@ -1,5 +1,6 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
+import { SocketConfig } from '@configuration/socket'
 import { AccountModule } from '@core/account/account.module'
 import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { MasterItemService } from '@core/master/master.item.service'
@@ -38,6 +39,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { SocketIoClientProvider } from '@socket/socket.provider'
+import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { KafkaConn } from '@utility/kafka'
 import { TimeManagement } from '@utility/time'
 
@@ -48,7 +51,7 @@ import { TimeManagement } from '@utility/time'
       envFilePath: `${process.cwd()}/environment/${
         process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
       }.env`,
-      load: [ApplicationConfig, MongoConfig],
+      load: [ApplicationConfig, MongoConfig, SocketConfig],
     }),
     ClientsModule.registerAsync([KafkaConn.m_item[0]]),
     MongooseModule.forRootAsync({
@@ -209,6 +212,8 @@ import { TimeManagement } from '@utility/time'
     GeneralReceiveNoteService,
     MasterItemService,
     MasterStockPointService,
+    SocketIoClientProvider,
+    SocketIoClientProxyService,
   ],
   exports: [PurchaseOrderService, GeneralReceiveNoteService],
 })

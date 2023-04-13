@@ -38,11 +38,9 @@ export class MasterItemService {
   }
 
   async bulk(bulkData = []) {
-    console.log(`Writing ${bulkData.length} data(s)`)
     if (bulkData.length > 0) {
       const prepareBulk = await Promise.all(
         bulkData.map(async (data) => {
-          console.log(`Preparing -> ${data.code}`)
           let prepareData = await this.find({
             $and: [{ code: data.code }],
           })
@@ -76,7 +74,7 @@ export class MasterItemService {
       await this.masterItemModel
         .bulkSave(prepareBulk, { ordered: false })
         .then(() => {
-          console.log('Write success')
+          //
         })
         .catch((e: Error) => {
           console.log(e.message)

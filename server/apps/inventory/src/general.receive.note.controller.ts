@@ -14,10 +14,10 @@ export class GeneralReceiveNoteController {
     await this.generalReceiveNoteService
       .add(payload.id, payload.data, payload.account)
       .then((result) => {
-        console.log(result)
+        //
       })
       .catch((e: Error) => {
-        console.log(e)
+        //
       })
   }
 }
