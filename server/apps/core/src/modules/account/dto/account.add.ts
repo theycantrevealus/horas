@@ -1,3 +1,4 @@
+import { CMenu } from '@core/menu/schemas/menu.model'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
@@ -5,6 +6,7 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator'
 
 export class AccountAddDTO {
@@ -69,11 +71,28 @@ export class AccountAddDTO {
   @IsString()
   phone: string
 
+  @ApiProperty({
+    type: CMenu,
+    isArray: true,
+  })
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  access: CMenu[]
+
+  @ApiProperty({
+    type: String,
+    isArray: true,
+  })
+  @IsNotEmpty()
+  permission: string[]
+
   constructor(data: any = {}) {
     this.email = data.email
     this.first_name = data.first_name
     this.last_name = data.last_name
     this.password = data.password
     this.phone = data.phone
+    this.access = data.access
+    this.permission = data.permission
   }
 }

@@ -2,6 +2,7 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
+import { i18nModule } from '@core/i18n/i18n.module'
 import { GatewayInventoryModule } from '@core/inventory/inventory.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
@@ -42,6 +43,7 @@ import { CoreService } from './core.service'
     PatientModule,
     MenuModule,
     MasterModule,
+    i18nModule,
     GatewayInventoryModule,
   ],
   controllers: [CoreController],

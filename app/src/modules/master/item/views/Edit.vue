@@ -548,7 +548,7 @@ export default {
   },
   mounted() {
     MasterItemService.getItemDetail(this.$route.params.id).then((response) => {
-      const data = response.response_data[0]
+      const data = response.data
 
       this.code = data.code
       this.name = data.name

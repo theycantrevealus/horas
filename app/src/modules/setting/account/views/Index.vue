@@ -192,8 +192,8 @@ export default {
   methods: {
     loadLazyData() {
       this.loading = true
-      AccountService.getAccountList(this.lazyParams).then((response) => {
-        const data = response.data.list
+      AccountService.getAccountList(JSON.stringify(this.lazyParams)).then((response) => {
+        const data = response.data.payload.data
         const totalRecords = response.data.totalRecords
         this.items = data
         this.totalRecords = totalRecords

@@ -1,3 +1,4 @@
+import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
 import { Types } from 'mongoose'
 
 export interface IAccount {
@@ -8,7 +9,8 @@ export interface IAccount {
   first_name: string
   last_name: string
   phone: string
-  access: Types.ObjectId[]
+  access: IMenu[]
+  permission: IMenuPermission[]
   created_by: {
     id: string
     email: string

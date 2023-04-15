@@ -2,7 +2,7 @@ import axios from 'axios';
 class AccountService {
     async login(accountData) {
         return await axios
-            .post(`${process.env.VUE_APP_APIGATEWAY}v1/account/login`, accountData)
+            .post(`${process.env.VUE_APP_APIGATEWAY}v1/account/signin`, accountData)
             .then(async (response) => {
             response.data.account.image = await axios
                 .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${response.data.account.id}/avatar`, {

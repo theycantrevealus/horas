@@ -2,13 +2,13 @@
   <ul v-if="items">
     <template v-for="(item, i) of items">
       <li
-        v-if="visible(item) && !item.separator && item.show_on_menu === 'Y'"
+        v-if="visible(item) && !item.separator && item.show_on_menu"
         :key="item.label || i"
         :class="[{ 'layout-menuitem-category': root, 'sol-active-menuitem': activeIndex === i && !item.to && !item.disabled }]"
         role="none"
       >
         <template v-if="root">
-          <div :class="(getMenuModeStatus ? 'open' : '') + ' layout-menuitem-root-text'"><b>{{ getMenuModeStatus ? item.label : '' }}</b>
+          <div :class="(getMenuModeStatus ? 'open' : '') + ' layout-menuitem-root-text'"><b>{{ getMenuModeStatus ? item.name : '' }}</b>
             <span class="material-icons-outlined">
               more_horiz
             </span>
@@ -22,7 +22,7 @@
         <template v-else>
           <router-link
             v-if="item.to && credential.pages[`page_${item.id}`] !== undefined"
-            v-tooltip.right="item.label"
+            v-tooltip.right="item.name"
             :to="item.to"
             :class="[item.class, { 'disabled': item.disabled }]"
             :style="item.style"
@@ -33,7 +33,7 @@
             <i :class="item.icon"></i>
             <span class="material-icons-outlined">{{ item.icon }}</span>
             <!-- This is a label -->
-            <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.label }}</span>
+            <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.name }}</span>
             <span
               v-if="item.items"
               class="material-icons menuitem-toggle-icon"
@@ -53,7 +53,7 @@
             @click="onMenuItemClick($event, item, i)"
           >
             <span class="material-icons-outlined">{{ item.icon }}</span>
-            <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.label }}</span>
+            <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.name }}</span>
             <i
               v-if="item.items && getMenuModeStatus"
               class="pi pi-fw pi-angle-down menuitem-toggle-icon"

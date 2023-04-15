@@ -77,7 +77,17 @@ export class AccountController {
     summary: 'Authenticate token',
     description: '',
   })
-  async authenticate() {}
+  async authenticate(
+    @CredentialAccount() account: Account
+  ): Promise<GlobalResponse> {
+    return {
+      statusCode: '200',
+      message: 'Authenticated successfully',
+      payload: await this.accountService.detail(account.id),
+      transaction_classify: 'AUTHENTICATE',
+      transaction_id: null,
+    } satisfies GlobalResponse
+  }
 
   @Get(':id')
   @Version('1')

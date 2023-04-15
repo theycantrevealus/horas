@@ -3,7 +3,7 @@ import api from '@/util/api'
 class Corei18nService {
   async generatei18n() {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/all`)
       .then((response) => {
         return Promise.resolve(response)
       })

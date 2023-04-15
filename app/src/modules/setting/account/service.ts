@@ -4,8 +4,10 @@ class AccountService {
   async getAccountList(parsedData) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/paginate`, {
-        params: parsedData,
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account`, {
+        params: {
+          lazyEvent: parsedData
+        },
       })
       .then(async (response: any) => {
         return await Promise.resolve(response)

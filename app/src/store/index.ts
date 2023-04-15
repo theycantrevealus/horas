@@ -64,9 +64,9 @@ const store = createStore({
       return await AccountService.login(accountRequestData).then(
         (response: any) => {
           response = response.data
-          if (response.status === 201 || response.status === 200) {
-            commit('mutateUpdateToken', response.token)
-            commit('mutateLoginSuccess', response.account)
+          if (response.statusCode === 'ACC_I_S0000') {
+            commit('mutateUpdateToken', response.payload.token)
+            commit('mutateLoginSuccess', response.payload.account)
           }
           return response
         }
@@ -174,21 +174,23 @@ const store = createStore({
       state.credential.id = credentialData.id
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
-      state.credential.profile_photo = credentialData.image
+      // state.credential.profile_photo = credentialData.image
 
-      const grantedPerm = credentialData.grantedPerm
+      const grantedPerm = credentialData.permission
       const buildPermission = {}
       for (let a in grantedPerm) {
-        if (buildPermission[grantedPerm[a].domiden]) {
-          buildPermission[grantedPerm[a].domiden] = {}
+        if (buildPermission[grantedPerm[a].domIdentity]) {
+          buildPermission[grantedPerm[a].domIdentity] = {}
         }
 
-        buildPermission[grantedPerm[a].domiden] = grantedPerm[a]
+        buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
       }
+
+      console.log(buildPermission)
 
       state.credential.permission = buildPermission
 
-      const grantedPage = credentialData.grantedPage
+      const grantedPage = credentialData.access
       const buildPage = {}
       const routes: string[] = ['/login']
       for (let a in grantedPage) {

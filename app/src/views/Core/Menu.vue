@@ -38,7 +38,7 @@
             >
               <template #filter>
                 <InputText
-                  v-model="filtersNode['to']"
+                  v-model="filtersNode['url']"
                   type="text"
                   class="column-filter"
                   :placeholder="$t('menu.datatable.column.link.placeholder')"
@@ -56,6 +56,14 @@
                   class="column-filter"
                   :placeholder="$t('menu.datatable.column.visibility.placeholder')"
                 />
+              </template>
+              <template #body="slotProps">
+                <label :class="`${slotProps.node.data.show_on_menu ? 'text-green-500' : 'text-red-500'}`">
+                  <center>
+                    <span class="material-icons" v-if="slotProps.node.data.show_on_menu">done</span>
+                    <span class="material-icons" v-if="!slotProps.node.data.show_on_menu">close</span>
+                  </center>
+                </label>
               </template>
             </Column>
             <Column
@@ -187,18 +195,18 @@
               </div>
             </template>
             <Column
-              field="domiden"
+              field="domIdentity"
               header="DOM"
               sortable
             >
-              <template #body="slotProps">{{ slotProps.data.domiden }}</template>
+              <template #body="slotProps">{{ slotProps.data.domIdentity }}</template>
             </Column>
             <Column
-              field="dispatchname"
+              field="dispatchName"
               header="Dispatch"
               sortable
             >
-              <template #body="slotProps">{{ slotProps.data.dispatchname }}</template>
+              <template #body="slotProps">{{ slotProps.data.dispatchName }}</template>
             </Column>
             <Column
               field="action"
@@ -208,7 +216,7 @@
               <template #body="slotProps">
                 <Button
                   class="p-button-danger p-button-sm"
-                  @click="removeFeature($event, slotProps.data.id)"
+                  @click="removeFeature($event, slotProps.data)"
                 >
                   <span class="material-icons">highlight_off</span> Delete
                 </Button></template>
@@ -247,7 +255,7 @@
           </label>
           <InputText
             id="manageFeatureDOM"
-            v-model="form.feature.dom"
+            v-model="form.feature.domIdentity"
             type="text"
           />
         </div>
@@ -255,7 +263,7 @@
           <label for="manageFeatureDispatch">Dispatch Command</label>
           <InputText
             id="manageFeatureDispatch"
-            v-model="form.feature.dispatch"
+            v-model="form.feature.dispatchName"
             type="text"
           />
         </div>
@@ -317,13 +325,15 @@ export default defineComponent({
     return {
       formMode: 'add',
       setterPermission: Array<{
-        id: number
-        domiden: string
-        dispatchname: string
+        domIdentity: string
+        dispatchName: string
       }>(),
       form: {
-        targetGroup: 0,
-        targetParent: 0,
+        targetGroup: {
+          'id': '',
+          'name': '',
+        },
+        targetParent: '',
         targetID: 0,
         txt_label: '',
         txt_route: '',
@@ -332,10 +342,11 @@ export default defineComponent({
         showMenu: false,
         showFeature: false,
         feature: {
-          dom: '',
-          dispatch: '',
+          domIdentity: '',
+          dispatchName: '',
         },
         permission: [] as any,
+        __v: 0,
       },
       position: 'center',
       ui: {
@@ -378,8 +389,11 @@ export default defineComponent({
     }),
     clearForm() {
       this.form = {
-        targetGroup: 0,
-        targetParent: 0,
+        targetGroup: {
+          'id': '',
+          'name': '',
+        },
+        targetParent: '',
         targetID: 0,
         txt_label: '',
         txt_route: '',
@@ -389,14 +403,15 @@ export default defineComponent({
         showFeature: false,
         permission: [],
         feature: {
-          dom: '',
-          dispatch: '',
+          domIdentity: '',
+          dispatchName: '',
         },
+        __v: 0,
       }
     },
     reloadMenu() {
       this.getMenu().then((data: any) => {
-        this.nodes = data.data.root
+        this.nodes = data.data
       })
     },
     toggleModal() {
@@ -440,26 +455,17 @@ export default defineComponent({
       this.form.txt_route = data.identifier
       this.form.txt_route_url = data.to
       this.form.txt_icon = data.icon
-      this.form.showMenu = target.show_on_menu === 'Y'
+      this.setterPermission = data.permission || []
+      this.form.showMenu = target.show_on_menu
       this.formMode = 'edit'
       this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
 
       const checkLevel = target.key.split('-')
-      this.form.targetGroup = parseInt(checkLevel[0])
-      // if (checkLevel.length > 1) {
-      //   this.form.targetParent = data.id
-      // } else {
-      //   this.form.targetParent = checkLevel[0]
-      // }
+      this.form.targetGroup = data.menu_group
       this.form.targetParent = data.parent
+      this.form.__v = data.__v
 
-      CoreService.menuDetail(data.id).then((response) => {
-        const dataSelected = response.data
-        if (dataSelected.permission !== null) {
-          console.log(dataSelected.permission)
-          this.setterPermission = dataSelected.permission
-        }
-      })
+
       this.toggleModal()
     },
     onNodeAdd(target: any, mode: string) {
@@ -467,13 +473,9 @@ export default defineComponent({
       this.clearForm()
       this.formMode = 'add'
 
-      const checkLevel = target.key.split('-')
-      this.form.targetGroup = parseInt(checkLevel[0])
-      if (checkLevel.length > 1) {
-        this.form.targetParent = parseInt(data.id)
-      } else {
-        this.form.targetParent = parseInt(checkLevel[0])
-      }
+      this.form.targetParent = data.id
+      this.form.targetGroup = data.menu_group
+      this.form.__v = 0
 
       this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
       this.toggleModal()
@@ -487,7 +489,7 @@ export default defineComponent({
       const routeTo = this.form.txt_route
       const routeToUrl = this.form.txt_route_url
       const icon = this.form.txt_icon
-      const showMenu = this.form.showMenu ? 'Y' : 'N'
+      const showMenu = this.form.showMenu
 
       this.form.permission = this.setterPermission
 
@@ -504,9 +506,9 @@ export default defineComponent({
         group_color: '',
         permission: this.setterPermission,
         show_on_menu: showMenu,
+        __v: this.form.__v,
       }).then((response: any) => {
-        response = response.data
-        if (response.statusCode === 200) {
+        if ((response.status === 200 || response.status === 201) && response.data.statusCode === 'MNU_U_S0000') {
           this.reloadMenu()
           this.rebuildMenu()
           this.clearForm()
@@ -532,21 +534,22 @@ export default defineComponent({
     },
     processFeature() {
       this.autoFeature({
-        domiden: this.form.feature.dom,
-        dispatchname: this.form.feature.dispatch,
+        domIdentity: this.form.feature.domIdentity,
+        dispatchName: this.form.feature.dispatchName,
       })
 
       this.form.feature = {
-        dom: '',
-        dispatch: '',
+        domIdentity: '',
+        dispatchName: '',
       }
+
 
       this.toggleFeature()
     },
     removeFeature(event: any, data: any) {
       const permissionMimic = this.setterPermission
       permissionMimic.map((e, f) => {
-        if (data === e.id) {
+        if (data === e) {
           this.setterPermission.splice(f, 1)
         }
       })
@@ -556,48 +559,33 @@ export default defineComponent({
       const routeTo = this.form.txt_route
       const routeToUrl = this.form.txt_route_url
       const icon = this.form.txt_icon
-      const showMenu = this.form.showMenu ? 'Y' : 'N'
+      const showMenu = this.form.showMenu
+
+      const checkParent =this.form.targetParent.split('-')
 
       return CoreService.menuAdd({
         name: label,
-        menu_group: this.form.targetGroup,
+        menu_group: (checkParent[0] === 'menu_group') ? this.form.targetParent : this.form.targetGroup,
         identifier: routeTo,
         url: routeToUrl,
         remark: '',
-        parent: this.form.targetParent,
+        parent: (checkParent[0] === 'menu_group') ? '' : this.form.targetParent,
+        permission: this.setterPermission,
         icon: icon,
         show_order: 1,
         show_on_menu: showMenu,
       }).then(async (response: any) => {
-        if (response.status === 201) {
-          response = response.data
-          const mimicSetterPermission = this.setterPermission
-          let succeedPermission = 0
-          for (const a in mimicSetterPermission) {
-            const permissionAdd = await CoreService.menuPermissionAdd({
-              menu: response.returning.id,
-              servicegroup: '',
-              dispatchname: mimicSetterPermission[a].dispatchname,
-              domiden: mimicSetterPermission[a].domiden,
-            }).then(async (response: any) => {
-              return response
-            })
-
-            succeedPermission += permissionAdd.data.status === 201 ? 1 : 0
-          }
-
-          if (succeedPermission === this.setterPermission.length) {
-            this.reloadMenu()
-            this.rebuildMenu()
-            this.clearForm()
-            this.ui.modal.manageMenu.state = false
-            this.$toast.add({
-              severity: 'success',
-              summary: 'Menu Manager',
-              detail: response.message,
-              life: 3000,
-            })
-          }
+        if ((response.status === 201 || response.status === 200) && response.data.statusCode === 'MNU_I_S0000') {
+          this.reloadMenu()
+          this.rebuildMenu()
+          this.clearForm()
+          this.ui.modal.manageMenu.state = false
+          this.$toast.add({
+            severity: 'success',
+            summary: 'Menu Manager',
+            detail: response.message,
+            life: 3000,
+          })
         }
       })
     },

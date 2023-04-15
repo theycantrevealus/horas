@@ -11,6 +11,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -33,10 +34,10 @@ import { isJSON } from 'class-validator'
 @Controller('master')
 @ApiTags('Master Data Management')
 export class MasterItemBrandController {
-  private masterItemBrandService: MasterItemBrandService
-  constructor(masterItembrandService: MasterItemBrandService) {
-    this.masterItemBrandService = masterItembrandService
-  }
+  constructor(
+    @Inject(MasterItemBrandService)
+    private readonly masterItemBrandService: MasterItemBrandService
+  ) {}
 
   @Get('brand')
   @Version('1')

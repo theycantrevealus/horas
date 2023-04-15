@@ -988,10 +988,27 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 
-.wrap_content {
+.p-datatable .p-datatable-tbody > tr > td.wrap_content {
+    padding: 5px 5px 5px 1.5rem !important;
     word-wrap: break-word !important;
-    width: 1%;
     white-space: nowrap;
+    width: 1% !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th.text-right {
+    text-align: left !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th.wrap_content .p-column-filter {
+    width: 200px;
+}
+
+.p-datatable .p-datatable-thead > tr > th.wrap_content .p-column-filter .p-hidden-space {
+    display: none !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th.wrap_content .p-column-title {
+    width: 200px;
 }
 
 .p-field {

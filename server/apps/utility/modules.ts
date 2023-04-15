@@ -14,4 +14,5 @@ export const modCodes = {
   PurchaseOrderService: 'PO',
   GeneralReceiveNoteService: 'GRN',
   LOVService: 'LOV',
+  i18nService: 'I18N',
 }

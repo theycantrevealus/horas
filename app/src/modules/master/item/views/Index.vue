@@ -33,7 +33,7 @@
           :totalRecords="totalRecords"
           :loading="loading"
           filterDisplay="row"
-          :globalFilterFields="['first_name', 'last_name', 'email']"
+          :globalFilterFields="['code', 'name']"
           responsiveLayout="scroll"
           @page="onPage($event)"
           @sort="onSort($event)"
@@ -41,26 +41,28 @@
         >
           <Column
             header="#"
-            class="align-right"
+            class="wrap_content text-right"
           >
             <template #body="slotProps">
-              <h6 class="d-inline-flex">#{{ slotProps.data.autonum
-                  }}</h6>
+              <strong class="d-inline-flex">
+                <span class="material-icons-outlined">hashtag</span>
+                {{ slotProps.data.autonum}}
+              </strong>
             </template>
           </Column>
-          <Column header="Action">
+          <Column header="Action" class="wrap_content">
             <template #body="slotProps">
-              <span class="buttonset wrap_content">
+              <span class="p-buttonset">
                 <Button
                   v-if="permission.btnEditItem !== undefined"
-                  class="button button-info button-sm button-raised"
+                  class="p-button-info p-button-sm p-button-raised"
                   @click="itemEditForm(slotProps.data.id)"
                 >
                   <span class="material-icons">edit</span>
                 </Button>
                 <Button
                   v-if="permission.btnDeleteItem !== undefined"
-                  class="button button-danger button-sm button-raised"
+                  class="p-button-danger p-button-sm p-button-raised"
                   @click="itemDelete($event, slotProps.data.id)"
                 >
                   <span class="material-icons">delete</span>
@@ -69,11 +71,12 @@
             </template>
           </Column>
           <Column
-            ref="first_name"
+            ref="code"
             field="code"
             header="Code"
             filterMatchMode="startsWith"
             :sortable="true"
+            class="wrap_content"
           >
             <template #filter="{ filterModel, filterCallback }">
               <InputText
@@ -86,7 +89,7 @@
             </template>
           </Column>
           <Column
-            ref="last_name"
+            ref="name"
             field="name"
             header="Name"
             filterField="name"
@@ -108,7 +111,6 @@
             field="created_at"
             header="Created Date"
             :sortable="true"
-            class="wrap_content text-right"
           >
             <template #body="slotProps">
               <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
@@ -170,8 +172,8 @@ export default {
     this.lazyParams = {
       first: 0,
       rows: this.$refs.dt.rows,
-      sortField: null,
-      sortOrder: null,
+      sortField: 'created_at',
+      sortOrder: 1,
       filters: this.filters,
     }
 
@@ -208,11 +210,10 @@ export default {
 
       MasterItemService.getItemList(this.lazyParams).then((response) => {
         if (response) {
-          const data = response.data.list
-          const totalRecords = response.data.totalRecords
+          const data = response.data.payload.data
+          const totalRecords = response.data.payload.totalRecords
           this.items = data
           this.totalRecords = totalRecords
-          this.loading = false
         } else {
           this.items = []
           this.totalRecords = 0

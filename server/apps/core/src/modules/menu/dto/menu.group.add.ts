@@ -1,5 +1,5 @@
-import { Account } from '@core/account/schemas/account.model'
 import { ApiProperty } from '@nestjs/swagger'
+import { IsNotEmpty, IsNumber } from 'class-validator'
 
 export class MenuGroupAddDTO {
   @ApiProperty({
@@ -16,12 +16,38 @@ export class MenuGroupAddDTO {
   })
   description: string
 
-  created_by: Account
+  constructor(data: any) {
+    this.name = data.name
+    this.description = data.description
+  }
+}
+
+export class MenuGroupEditDTO {
+  @ApiProperty({
+    type: String,
+    example: '',
+    description: 'Menu group name',
+  })
+  name: string
 
   @ApiProperty({
-    type: Number,
+    type: String,
+    example: '',
+    description: 'Menu group name',
+  })
+  description: string
+
+  @ApiProperty({
     example: 0,
     description: 'Document version',
   })
+  @IsNotEmpty()
+  @IsNumber()
   __v: number
+
+  constructor(data: any) {
+    this.name = data.name
+    this.description = data.description
+    this.__v = data.__v
+  }
 }

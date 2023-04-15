@@ -2,8 +2,8 @@ import { HttpStatus } from '@nestjs/common'
 import { Model } from 'mongoose'
 
 export async function prime_datatable(parameter: any, model: Model<any>) {
-  const first = parameter.first ? parseInt(parameter.first) : 0
-  const rows = parameter.rows ? parseInt(parameter.rows) : 20
+  const first: number = parameter.first ? parseInt(parameter.first) : 0
+  const rows: number = parameter.rows ? parseInt(parameter.rows) : 20
   const sortField = parameter.sortField ? parameter.sortField : 'created_at'
   const sortOrder = parameter.sortOrder ? parseInt(parameter.sortOrder) : 1
   const filters = parameter.filters
@@ -67,7 +67,14 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
   }
   //---------------------------------------------------------------------------
 
-  const allNoFilter = await model.aggregate(query).exec()
+  const allNoFilter = await model
+    .aggregate([
+      ...query,
+      {
+        $count: 'total',
+      },
+    ])
+    .exec()
 
   query.push({ $skip: first })
 
@@ -83,13 +90,34 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
     })
   }
 
-  const data = await model.aggregate(query).exec()
+  query.push({
+    $group: {
+      _id: null,
+      data: { $push: '$$ROOT' },
+    },
+  })
 
+  query.push({
+    $unwind: {
+      path: '$data',
+      includeArrayIndex: 'index',
+    },
+  })
+
+  query.push({
+    $replaceRoot: {
+      newRoot: {
+        $mergeObjects: ['$data', { autonum: { $add: ['$index', first + 1] } }],
+      },
+    },
+  })
+
+  const data = await model.aggregate(query).exec()
   if (allNoFilter) {
     return {
       message: HttpStatus.OK,
       payload: {
-        totalRecords: allNoFilter.length,
+        totalRecords: allNoFilter[0].total,
         data: data,
       },
     }

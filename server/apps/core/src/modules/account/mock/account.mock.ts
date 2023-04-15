@@ -2,6 +2,7 @@ import { AccountAddDTO } from '@core/account/dto/account.add'
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
 import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
@@ -44,7 +45,8 @@ export const mockAccount = (
   last_name = faker.name.lastName(),
   password = '',
   phone = faker.phone.number(),
-  access: Types.ObjectId[] = [],
+  access: IMenu[] = [],
+  permission: IMenuPermission[] = [],
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.name.firstName(),
@@ -63,6 +65,7 @@ export const mockAccount = (
   password,
   phone,
   access,
+  permission,
   created_by,
   created_at,
   updated_at,
@@ -116,6 +119,7 @@ export const accountArray = [
     '12345678',
     '6285261516666',
     [],
+    [],
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -129,6 +133,7 @@ export const accountArray = [
     faker.name.lastName(),
     '12345678',
     '6285261517777',
+    [],
     [],
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),

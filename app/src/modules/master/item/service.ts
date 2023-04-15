@@ -3,8 +3,10 @@ import api from '@/util/api'
 class MasterItemService {
   getItemList(parsedData) {
     return api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/paginate`, {
-        params: parsedData,
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item`, {
+        params: {
+          lazyEvent: JSON.stringify(parsedData)
+        },
       })
       .then((response: any) => {
         return Promise.resolve(response)

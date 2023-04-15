@@ -104,11 +104,13 @@ export class AccountService {
           first_name: parameter.first_name,
           last_name: parameter.last_name,
           phone: parameter.phone,
+          access: parameter.access,
+          permission: parameter.permission,
         }
       )
       .exec()
       .then((result) => {
-        if (result === null) {
+        if (!result) {
           response.message = `Account failed to update`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed

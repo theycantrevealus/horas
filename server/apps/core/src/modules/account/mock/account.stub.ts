@@ -12,6 +12,7 @@ export const accountStub = (): IAccount => {
     last_name: 'Doe',
     phone: '0822996633112',
     access: [],
+    permission: [],
     created_by: {
       id: `account-${new Types.ObjectId().toString()}`,
       first_name: '',
@@ -28,6 +29,8 @@ export const accountAddStub = (): AccountAddDTO => {
     email: accountStub().email,
     password: '12345678',
     phone: accountStub().phone,
+    access: [],
+    permission: [],
   } satisfies AccountAddDTO
 }
 

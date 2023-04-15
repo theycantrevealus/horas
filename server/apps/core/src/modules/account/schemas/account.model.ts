@@ -1,9 +1,15 @@
 import { IAccount } from '@core/account/interface/account'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
+import {
+  IMenu,
+  IMenuPermission,
+  MenuJoin,
+  MenuPermissionJoin,
+} from '@core/menu/schemas/menu.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
 @Schema({ collection: 'core_account' })
@@ -42,8 +48,20 @@ export class Account {
   })
   phone: string
 
-  @Prop({ type: [Types.ObjectId], default: [] })
-  access: Types.ObjectId[]
+  @Prop({
+    unique: false,
+    type: [MenuJoin],
+    _id: false,
+  })
+  access: IMenu[]
+
+  @Prop({
+    type: [MenuPermissionJoin],
+    default: [],
+    required: false,
+    _id: false,
+  })
+  permission: IMenuPermission[]
 
   @Prop(raw(AccountJoin))
   created_by: IAccountCreatedBy
@@ -72,6 +90,7 @@ export class Account {
     this.email = parameter.email
     this.phone = parameter.phone
     this.access = parameter.access
+    this.permission = parameter.permission
     this.created_by = parameter.created_by
   }
 }

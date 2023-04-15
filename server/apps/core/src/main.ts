@@ -11,7 +11,9 @@ import { CoreModule } from './core.module'
 
 declare const module: any
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(CoreModule)
+  const app = await NestFactory.create<NestExpressApplication>(CoreModule, {
+    logger: ['error', 'warn', 'debug'],
+  })
   const configService = app.get<ConfigService>(ConfigService)
   app.useStaticAssets(join(__dirname, './assets'))
 
@@ -58,8 +60,8 @@ async function bootstrap() {
     body { padding-top: 218px !important; background: url(\'./body.jpg\') no-repeat; background-attachment: fixed; background-size: cover; background-color: #f !important; }
     .topbar { box-shadow: 0 -10px 10px 10px #f6f3f3 inset; width: 100%; margin: -20px auto; position:fixed; top: 0; left: 0; z-index: 100; background: url(\'./mbi.png\')no-repeat !important; background-size: 130px 25px !important; background-color: #fff !important; background-position: 1430px 30px !important; }
     .topbar-wrapper img {content:url(\'./index.png\'); width:137px; height:auto; margin: 24px}
-    .swagger-ui .topbar { background-color: #fff !important; z-index: 100; }
-    .scheme-container { position: fixed; top: 100px; width: 100%; padding: 15px 0 !important; z-index: 200; box-shadow: 0 2px 4px 0 rgba(0,0,0,.15) !important; }
+    .swagger-ui .topbar { background-color: #red !important; z-index: 100; }
+    .scheme-container { position: fixed; top: 80px; width: 100%; padding: 15px 0 !important; z-index: 200; box-shadow: 0 2px 4px 0 rgba(0,0,0,.15) !important; }
     .information-container { position: fixed; right: 250px; top: 0; padding: 0 !important; z-index: 100; }
     .information-container.wrapper { max-width: 800px; }
     .information-container .info { margin: 20px 0; }

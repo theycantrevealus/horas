@@ -3,7 +3,7 @@ import api from '@/util/api'
 class CoreService {
   async menuAdd(menuData: any) {
     return await api({ requiresAuth: true })
-      .post(`${process.env.VUE_APP_APIGATEWAY}v1/menu/add`, menuData)
+      .post(`${process.env.VUE_APP_APIGATEWAY}v1/menu`, menuData)
       .then((response) => {
         return Promise.resolve(response)
       })
@@ -19,7 +19,7 @@ class CoreService {
 
   async menuEdit(id: number, menuData: any) {
     return await api({ requiresAuth: true })
-      .put(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${id}/edit`, menuData)
+      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${id}`, menuData)
       .then((response) => {
         return Promise.resolve(response)
       })
@@ -30,7 +30,7 @@ class CoreService {
 
   async menuDelete(menuData: any) {
     return await api({ requiresAuth: true })
-      .delete(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${menuData}/delete`)
+      .delete(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${menuData}`)
       .then((response) => {
         return Promise.resolve(response)
       })
@@ -38,7 +38,7 @@ class CoreService {
 
   async menuDetail(id) {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${id}/detail`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/${id}`)
       .then((response) => {
         return Promise.resolve(response)
       })
