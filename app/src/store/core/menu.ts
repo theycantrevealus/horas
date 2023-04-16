@@ -11,7 +11,7 @@ export const coreMenu = {
     },
   },
   actions: {
-    get_all_menu: async ({
+    getAllMenu: async ({
       commit,
       rootState,
     }: {

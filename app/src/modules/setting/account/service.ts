@@ -41,18 +41,18 @@ class AccountService {
   async updateAccount(parsedData) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
-      .put(
-        `${process.env.VUE_APP_APIGATEWAY}v1/account/${parsedData.id}/edit`,
+      .patch(
+        `${process.env.VUE_APP_APIGATEWAY}v1/account/${parsedData.id}`,
         {
           email: parsedData.email,
           first_name: parsedData.first_name,
           last_name: parsedData.last_name,
-          authority: parsedData.authority,
-          image: parsedData.image,
-          image_edit: parsedData.image_edit,
-          selectedPermission: parsedData.selectedPermission,
-          selectedPage: parsedData.selectedPage,
-          selectedParent: parsedData.selectedParent,
+          // authority: parsedData.authority,
+          // image: parsedData.image,
+          // image_edit: parsedData.image_edit,
+          permission: parsedData.selectedPermission,
+          access: parsedData.selectedAccess,
+          __v: parsedData.__v,
         }
       )
       .then(async (response: any) => {
@@ -63,24 +63,24 @@ class AccountService {
   async getAccountDetail(id) {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${id}/detail`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${id}`)
       .then(async (response: any) => {
-        response.data.image = await axios
-          .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${id}/avatar`, {
-            responseType: 'arraybuffer',
-          })
-          .then(async (imageResponse) => {
-            let image = btoa(
-              new Uint8Array(imageResponse.data).reduce(
-                (data, byte) => data + String.fromCharCode(byte),
-                ''
-              )
-            )
-
-            return `data:${imageResponse.headers[
-              'content-type'
-            ].toLowerCase()};base64,${image}`
-          })
+        // response.data.image = await axios
+        //   .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${id}/avatar`, {
+        //     responseType: 'arraybuffer',
+        //   })
+        //   .then(async (imageResponse) => {
+        //     let image = btoa(
+        //       new Uint8Array(imageResponse.data).reduce(
+        //         (data, byte) => data + String.fromCharCode(byte),
+        //         ''
+        //       )
+        //     )
+        //
+        //     return `data:${imageResponse.headers[
+        //       'content-type'
+        //     ].toLowerCase()};base64,${image}`
+        //   })
         return await Promise.resolve(response)
       })
   }
@@ -111,6 +111,15 @@ class AccountService {
     axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
     return axios
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree/manager`)
+      .then(async (response) => {
+        return await Promise.resolve(response)
+      })
+  }
+
+  async menuList() {
+    axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`
+    return axios
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu?lazyEvent={"first":0,"rows":200,"sortField":"created_at","sortOrder":1,"filters":{}}`)
       .then(async (response) => {
         return await Promise.resolve(response)
       })

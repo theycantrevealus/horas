@@ -1,4 +1,4 @@
-import { CMenu } from '@core/menu/schemas/menu.model'
+import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
@@ -68,11 +68,12 @@ export class AccountEditDTO {
   access: CMenu[]
 
   @ApiProperty({
-    type: String,
+    type: CMenuPermission,
     isArray: true,
   })
+  @ValidateNested({ each: true })
   @IsNotEmpty()
-  permission: string[]
+  permission: CMenuPermission[]
 
   @ApiProperty({
     example: 0,

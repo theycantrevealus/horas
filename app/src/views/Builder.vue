@@ -26,7 +26,7 @@
         <SidePanelBar />
       </div>
       <!-- <perfect-scrollbar>
-        
+
       </perfect-scrollbar> -->
     </div>
     <div :class="(getMenuModeStatus ? 'open' : '') + ' loadpanel'">

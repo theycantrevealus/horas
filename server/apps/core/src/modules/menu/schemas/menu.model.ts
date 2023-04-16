@@ -16,6 +16,7 @@ export interface IMenu {
   id: { type: string }
   name: { type: string }
   url: { type: string }
+  identifier: { type: string }
 }
 
 export interface IMenuTree {
@@ -59,6 +60,12 @@ export class CMenu {
     example: '/',
   })
   url: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  identifier: string
 }
 
 export interface IMenuPermission {

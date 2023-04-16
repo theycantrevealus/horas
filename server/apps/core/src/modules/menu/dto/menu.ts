@@ -42,14 +42,14 @@ export class MenuAddDTO {
 
   @ApiProperty({
     type: Number,
-    example: '',
+    example: 0,
     description: 'Display order',
   })
   show_order: number
 
   @ApiProperty({
     type: Number,
-    example: '',
+    example: 0,
     description: 'Display level',
   })
   level: number

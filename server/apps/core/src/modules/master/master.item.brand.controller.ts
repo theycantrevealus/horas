@@ -72,6 +72,9 @@ export class MasterItemBrandController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @ApiParam({
+    name: 'id',
+  })
   @ApiOperation({
     summary: 'Detail data',
     description: '',

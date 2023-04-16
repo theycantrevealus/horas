@@ -11,8 +11,10 @@
               Info</Button>
           </template>
           <TreeTable
+            v-model:expandedKeys="expandedKeys"
             class="treetable-sm"
             filter-mode="strict"
+            :expanded="true"
             :value="nodes"
             :paginator="true"
             :rows="20"
@@ -60,8 +62,8 @@
               <template #body="slotProps">
                 <label :class="`${slotProps.node.data.show_on_menu ? 'text-green-500' : 'text-red-500'}`">
                   <center>
-                    <span class="material-icons" v-if="slotProps.node.data.show_on_menu">done</span>
-                    <span class="material-icons" v-if="!slotProps.node.data.show_on_menu">close</span>
+                    <span v-if="slotProps.node.data.show_on_menu" class="material-icons">done</span>
+                    <span v-if="!slotProps.node.data.show_on_menu" class="material-icons">close</span>
                   </center>
                 </label>
               </template>
@@ -305,6 +307,7 @@ import ConfirmPopup from 'primevue/confirmpopup'
 import { mapActions, mapGetters } from 'vuex'
 import CoreService from '@/service/core/menu'
 import { ref } from 'vue'
+
 export default defineComponent({
   name: 'Module',
   components: {
@@ -348,6 +351,7 @@ export default defineComponent({
         permission: [] as any,
         __v: 0,
       },
+      expandedKeys: {},
       position: 'center',
       ui: {
         modal: {
@@ -365,7 +369,6 @@ export default defineComponent({
       },
       selectedNode: {},
       filtersNode: {},
-      expandedKeys: {},
       nodes: [],
       columns: [
         { field: 'label', header: 'Label', expander: true },
@@ -384,7 +387,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions({
-      getMenu: 'mCoreMenu/get_all_menu',
+      getMenu: 'mCoreMenu/getAllMenu',
       rebuildMenu: 'coreUpdateMenu',
     }),
     clearForm() {
@@ -408,11 +411,23 @@ export default defineComponent({
         },
         __v: 0,
       }
+      this.setterPermission = []
     },
     reloadMenu() {
       this.getMenu().then((data: any) => {
         this.nodes = data.data
+        this.expandAll(data.data)
       })
+    },
+    expandAll(children) {
+      for(const a in children) {
+        if(!this.expandedKeys[children[a].key]) {
+          this.expandedKeys[children[a].key] = true
+        }
+        if(children[a].children.length > 0) {
+          this.expandAll(children[a].children)
+        }
+      }
     },
     toggleModal() {
       this.ui.modal.manageMenu.state = !this.ui.modal.manageMenu.state

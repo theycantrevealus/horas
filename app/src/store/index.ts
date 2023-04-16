@@ -136,19 +136,20 @@ const store = createStore({
       state.language = state.languageMeta[language.lang]
     },
     mutateUpdateAccess: (state: any, data) => {
-      const grantedPerm = data.grantedPerm
+      data = data.payload
+      const grantedPerm = data.permission
       const buildPermission = {}
       for (let a in grantedPerm) {
-        if (buildPermission[grantedPerm[a].domiden]) {
-          buildPermission[grantedPerm[a].domiden] = {}
+        if (buildPermission[grantedPerm[a].domIdentity]) {
+          buildPermission[grantedPerm[a].domIdentity] = {}
         }
 
-        buildPermission[grantedPerm[a].domiden] = grantedPerm[a]
+        buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
       }
 
       state.credential.permission = buildPermission
 
-      const grantedPage = data.grantedPage
+      const grantedPage = data.access
       const buildPage = {}
       const routes: string[] = ['/login']
       for (let a in grantedPage) {
@@ -186,20 +187,22 @@ const store = createStore({
         buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
       }
 
-      console.log(buildPermission)
-
       state.credential.permission = buildPermission
 
       const grantedPage = credentialData.access
+      console.clear()
+      console.log(grantedPage)
       const buildPage = {}
       const routes: string[] = ['/login']
       for (let a in grantedPage) {
-        if (buildPage[`page_${grantedPage[a].id}`]) {
-          buildPage[`page_${grantedPage[a].id}`] = {}
-        }
-        buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
+        if(grantedPage[a]) {
+          if (buildPage[`page_${grantedPage[a].id}`]) {
+            buildPage[`page_${grantedPage[a].id}`] = {}
+          }
+          buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
 
-        routes.push(grantedPage[a].identifier)
+          routes.push(grantedPage[a].url)
+        }
       }
       state.credential.routes = routes
       state.credential.pages = buildPage

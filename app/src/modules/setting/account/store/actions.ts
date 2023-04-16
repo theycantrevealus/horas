@@ -56,8 +56,15 @@ export default {
 
   async fetchMenuTree({ commit }) {
     AccountService.menuTree().then((response: any) => {
-      const data = response.data.root
+      const data = response.data
       commit(types.MENU_TREE_SET, data)
+    })
+  },
+
+  async fetchMenuList({ commit }) {
+    AccountService.menuList().then((response: any) => {
+      const data = response.data
+      commit(types.MENU_SET, data)
     })
   },
 }

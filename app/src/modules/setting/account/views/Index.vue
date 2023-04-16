@@ -45,7 +45,7 @@
               </Column>
               <Column header="Action">
                 <template #body="slotProps">
-                  <span class="buttonset wrap_content">
+                  <span class="p-buttonset wrap_content">
                     <Button
                       v-if="permission.btnAccountEdit !== undefined"
                       class="button p-button-success button-sm button-raised"
@@ -175,6 +175,8 @@ export default {
   },
   computed: {
     permission() {
+      console.clear()
+      console.log(this.$store.state.credential.permission)
       return this.$store.state.credential.permission
     },
   },

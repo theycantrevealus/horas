@@ -75,10 +75,10 @@
               <div class="grid">
                 <div class="col-12">
                   <TreeTable
-                    v-if="formData.menuTree"
+                    v-if="menuTreeData"
                     class="treetable-sm p-datatable-table vert-top"
                     filterMode="strict"
-                    :value="formData.menuTree"
+                    :value="menuTreeData"
                     :lazy="true"
                     :paginator="true"
                     :rows="20"
@@ -99,10 +99,10 @@
                       </template>
                       <template #body="slotProps">
                         <Checkbox
-                          v-model="selectedPage"
+                          v-model="selectedAccess"
                           name="menus"
                           :value="slotProps.node.data.id"
-                          @change="check_menu($event, slotProps.node)"
+                          @change="check_menu($event, slotProps)"
                         /> {{ slotProps.node.data.label }}
                       </template>
                     </Column>
@@ -131,12 +131,12 @@
                             class="checkbox-custom"
                           >
                             <Checkbox
-                              v-model="selectedPerm"
+                              v-model="selectedPermission"
                               name="perms"
-                              :value="indexPerm.id"
-                              @change="set_permission($event, indexPerm.id)"
+                              :value="indexPerm"
+                              @change="set_permission($event, indexPerm)"
                             />
-                            {{ indexPerm.domiden }}
+                            {{ indexPerm.domIdentity }}
                           </div>
                         </div>
                       </template>
@@ -313,17 +313,14 @@ export default {
     return {
       displayEditorImage: false,
       formData: {
-        id: 0,
+        id: '',
         email: '',
-        authority: '',
         first_name: '',
         last_name: '',
-        image: '',
-        image_edit: false,
-        menuTree: [],
-        selectedPage: [],
+        authority: '',
+        selectedAccess: [],
         selectedPermission: [],
-        selectedParent: [],
+        __v: 0,
       },
       logFrom: null,
       logTo: null,
@@ -354,12 +351,16 @@ export default {
           color: '#22c55e',
         },
       ],
+      raw: {
+        access: {},
+        permission: [],
+      },
+      menuTreeData: [],
       allowSave: false,
       authorityData: [],
-      selectedParent: {},
-      selectedMenu: [],
-      selectedPage: [],
-      selectedPerm: [],
+      selectedGroup: [],
+      selectedAccess: [],
+      selectedPermission: [],
       lazyParams: {},
       selectedNode: {},
       filtersNode: {
@@ -376,72 +377,56 @@ export default {
   },
 
   computed: {
-    ...mapState('accountModule', ['menu_list', 'menu_tree']),
     ...mapGetters({
       menuTree: 'accountModule/getMenuTree',
+      menuList: 'accountModule/getMenuList',
       accountDetail: 'accountModule/getAccountDetail',
-      authorityList: 'accountModule/getAuthorityList',
     }),
   },
   watch: {
     menuTree: {
       handler(getData) {
         if (getData) {
-          this.formData.menuTree = getData
+          this.menuTreeData = getData
         }
       },
     },
-    authorityList: {
-      handler(getAuthorityList) {
-        if (getAuthorityList) {
-          this.authorityData = getAuthorityList
+    menuList: {
+      handler(getData) {
+        if (getData) {
+          const accessData = getData.payload.data
+          for (const a in accessData) {
+            if(this.raw.access[accessData[a].id]) {
+              this.raw.access[accessData[a].id] = {}
+            }
+            this.raw.access[accessData[a].id] = accessData[a]
+          }
         }
       },
     },
     accountDetail: {
       handler(getDetail) {
         if (getDetail) {
-          if (getDetail.account.id !== undefined) {
-            this.allowSave = true
-          } else {
-            this.allowSave = false
-          }
+          this.allowSave = !!getDetail.id;
 
-          this.formData.id = getDetail.account.id
-          this.formData.email = getDetail.account.email
-          this.formData.authority = getDetail.account.authority.id
-          this.formData.first_name = getDetail.account.first_name
-          this.formData.last_name = getDetail.account.last_name
-
-          this.formData.image = getDetail.image
-          this.formData.image_edit = false
+          this.formData.id = getDetail.id
+          this.formData.email = getDetail.email
+          this.formData.first_name = getDetail.first_name
+          this.formData.last_name = getDetail.last_name
+          this.formData.__v = getDetail.__v
+          // this.formData.authority = getDetail.authority.id
 
           for (const a in getDetail.access) {
-            if (
-              this.selectedParent[`parent_${getDetail.access[a].parent}`] ===
-              undefined
-            ) {
-              this.selectedParent[`parent_${getDetail.access[a].parent}`] = 0
-            }
-
-            this.selectedParent[`parent_${getDetail.access[a].parent}`] += 1
-
-            if (this.selectedPage.indexOf(getDetail.access[a].id) < 0) {
-              this.selectedPage.push(getDetail.access[a].id)
-            }
-
-            if (this.selectedPage.indexOf(getDetail.access[a].parent) < 0) {
-              this.selectedPage.push(getDetail.access[a].parent)
-            }
-
-            if (this.selectedMenu.indexOf(getDetail.access[a].id) < 0) {
-              this.selectedMenu.push(getDetail.access[a].id)
+            if(this.formData.selectedAccess.indexOf(getDetail.access[a]) < 0) {
+              // this.formData.selectedAccess.push(getDetail.access[a])
+              this.selectedAccess.push(getDetail.access[a].id)
             }
           }
 
           for (const a in getDetail.permission) {
-            if (this.selectedPerm.indexOf(getDetail.permission[a].id) < 0) {
-              this.selectedPerm.push(getDetail.permission[a].id)
+            if (this.formData.selectedPermission.indexOf(getDetail.permission[a]) < 0) {
+              // this.formData.selectedPermission.push(getDetail.permission[a])
+              this.selectedPermission.push(getDetail.permission[a])
             }
           }
         } else {
@@ -457,14 +442,9 @@ export default {
       'accountModule/fetchAccountDetail',
       this.$route.query.id
     )
-    await this.$store.dispatch('accountModule/fetchAccountActivity', {
-      id: this.$route.query.id,
-      from: '123',
-      to: '333',
-    })
-    // await this.$store.dispatch('accountModule/fetchMenuTree')
-    await this.$store.dispatch('accountModule/fetchMenuTree', this.lazyParams)
-    await this.$store.dispatch('accountModule/fetchAuthority')
+
+    await this.$store.dispatch('accountModule/fetchMenuTree')
+    await this.$store.dispatch('accountModule/fetchMenuList')
 
     this.displayEditorImage = false
   },
@@ -505,26 +485,23 @@ export default {
           rejectLabel: 'Abort',
           rejectIcon: 'pi pi-times-circle',
           accept: () => {
-            this.formData.selectedPage = this.selectedMenu
-            for (const a in this.selectedParent) {
-              const parsedIDParent = a.split('_')
-              const parentID = parseInt(
-                parsedIDParent[parsedIDParent.length - 1]
-              )
-              if (this.formData.selectedPage.indexOf(parentID) < 0) {
-                this.formData.selectedPage.push(parentID)
-                this.formData.selectedParent.push(parentID)
+            for(const a in this.selectedAccess) {
+              if(this.raw.access[this.selectedAccess[a]]) {
+                this.formData.selectedAccess.push(this.raw.access[this.selectedAccess[a]])
               }
             }
 
-            this.formData.selectedPermission = this.selectedPerm
+            this.formData.selectedPermission = this.selectedPermission
 
             this.updateAccount(this.formData).then(async (response) => {
-              if (response.status === 200) {
-                // await this.$store.dispatch(
-                //   'accountModule/fetchMenuTree',
-                //   this.lazyParams
-                // )
+              if (response.status === 200 || response.status === 201) {
+                await this.$store.dispatch(
+                  'accountModule/fetchAccountDetail',
+                  this.$route.query.id
+                )
+
+                await this.$store.dispatch('accountModule/fetchMenuTree')
+                await this.$store.dispatch('accountModule/fetchMenuList')
 
                 await this.rebuildMenu().then(() => {
                   this.rebuildAccess()
@@ -563,76 +540,25 @@ export default {
     set_permission(event, target) {},
     check_child(children, isDelete) {
       for (const a in children) {
-        const dataSet = parseInt(children[a].data.id)
-        if (isDelete) {
-          this.selectedPage.splice(this.selectedPage.indexOf(dataSet), 1)
-          this.selectedMenu.splice(this.selectedPage.indexOf(dataSet), 1)
+        const dataSet = children[a].id
+        if(isDelete) {
+          this.selectedAccess.splice(this.selectedAccess.indexOf(dataSet), 1)
         } else {
-          if (this.selectedPage.indexOf(dataSet) < 0) {
-            this.selectedPage.push(dataSet)
-          }
-
-          if (this.selectedMenu.indexOf(dataSet) < 0) {
-            this.selectedMenu.push(dataSet)
+          if(this.selectedAccess.indexOf(dataSet) < 0) {
+            this.selectedAccess.push(dataSet)
           }
         }
 
-        if (children[a].children.length > 0) {
+        if(children[a].children.length > 0) {
           this.check_child(children[a].children, isDelete)
-        } else {
-          this.check_parent(children[a].key, isDelete)
-        }
-      }
-    },
-    check_parent(parentSplitRaw, pageDeleteMode) {
-      const parentSplit = parentSplitRaw.split('-')
-      for (let a = 0; a < parentSplit.length; a++) {
-        const getVal = parseInt(parentSplit[a])
-
-        if (a < parentSplit.length - 1) {
-          if (this.selectedParent[`parent_${getVal}`] === undefined) {
-            this.selectedParent[`parent_${getVal}`] = 0
-          }
-
-          if (pageDeleteMode) {
-            if (parseInt(this.selectedParent[`parent_${getVal}`]) > 0) {
-              this.selectedParent[`parent_${getVal}`] -= 1
-            }
-          } else {
-            this.selectedParent[`parent_${getVal}`] += 1
-          }
-        } else {
-          if (pageDeleteMode) {
-            this.selectedMenu.splice(this.selectedPage.indexOf(getVal), 1)
-          } else {
-            if (this.selectedMenu.indexOf(getVal) < 0) {
-              this.selectedMenu.push(getVal)
-            }
-          }
-        }
-      }
-
-      for (const b in this.selectedParent) {
-        const getParent = parseInt(b.split('_')[1])
-        const getChecker = parseInt(this.selectedParent[b])
-        if (getChecker > 0) {
-          if (this.selectedPage.indexOf(getParent) < 0) {
-            this.selectedPage.push(getParent)
-          }
-        } else {
-          delete this.selectedParent[b]
-          this.selectedPage.splice(this.selectedPage.indexOf(getParent), 1)
         }
       }
     },
     check_menu(event, target) {
-      const children = target.children
-      const pageDeleteMode = this.selectedPage.indexOf(target.data.id) < 0
-      if (children.length > 0) {
-        this.check_child(children, pageDeleteMode)
-      } else {
-        this.check_parent(target.key, pageDeleteMode)
-      }
+      const data = target.node
+      const pageDeleteMode = this.selectedAccess.indexOf(data.id) < 0
+      const isGroup = data.id.split('-')
+      this.check_child(data.children, pageDeleteMode)
     },
   },
 }

@@ -19,7 +19,7 @@ class CoreService {
 
   async refreshAccess() {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/access`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/authenticate`)
       .then((response) => {
         return Promise.resolve(response)
       })

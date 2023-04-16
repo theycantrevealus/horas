@@ -11,6 +11,9 @@ export default {
     getMenuTree: (state) => {
       return state.menu_tree
     },
+    getMenuList: (state) => {
+      return state.menu_list
+    },
     getAccountDetail: (state) => {
       return state.account_detail
     },

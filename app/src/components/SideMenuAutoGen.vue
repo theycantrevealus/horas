@@ -83,7 +83,7 @@
   </ul>
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex'
+import {mapState, mapGetters, mapActions} from 'vuex'
 
 export default {
   name: 'SideMenuAutoGen',
@@ -120,6 +120,10 @@ export default {
     //
   },
   methods: {
+    ...mapActions({
+      toogleMenuStatusOn: 'toggleMenuOn',
+      toogleMenuStatusOff: 'toggleMenuOff',
+    }),
     onMenuItemClick(event, item, index) {
       if (item.disabled) {
         event.preventDefault()
@@ -128,6 +132,8 @@ export default {
 
       if (!item.to && !item.url) {
         event.preventDefault()
+      } else {
+        this.toogleMenuStatusOff()
       }
 
       // execute command

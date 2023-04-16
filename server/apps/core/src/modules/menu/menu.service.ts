@@ -40,6 +40,10 @@ export class MenuService {
     return this.menuModel.findOne(filter).exec()
   }
 
+  async findMany(filter: any): Promise<Menu[] | undefined> {
+    return this.menuModel.find(filter).exec()
+  }
+
   async treeManager(parent = '', group = '', keyMapper: string[] = []) {
     const buildMenu: any[] = []
     if (group === '') {
@@ -82,6 +86,8 @@ export class MenuService {
               buildMenu.push(dataSet)
             })
           )
+
+          buildMenu.sort((a, b) => (a.id < b.id ? -1 : 1))
         })
     } else {
       await this.menuModel
@@ -123,6 +129,7 @@ export class MenuService {
               }
 
               buildMenu.push(dataSet)
+              buildMenu.sort((a, b) => (a.show_order < b.show_order ? -1 : 1))
             })
           )
         })
@@ -136,7 +143,7 @@ export class MenuService {
     if (group === '') {
       await this.menuGroupModel
         .find({ deleted_at: null })
-        .sort({ _id: -1 })
+        .sort({ _id: 1 })
         .exec()
         .then(async (menuGroupDetail) => {
           await Promise.all(
@@ -157,6 +164,7 @@ export class MenuService {
               buildMenu.unshift(dataSet)
             })
           )
+          buildMenu.sort((a, b) => (a.created_at < b.created_at ? -1 : 1))
         })
     } else {
       await this.menuModel
@@ -182,6 +190,7 @@ export class MenuService {
               }
 
               buildMenu.push(dataSet)
+              buildMenu.sort((a, b) => (a.show_order < b.show_order ? -1 : 1))
             })
           )
         })
@@ -198,6 +207,12 @@ export class MenuService {
       transaction_classify: 'MENU_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
+    // Set Show Order Sorting
+    const getLateOrder = await this.findMany({
+      parent: data.parent,
+      menu_group: data.menu_group,
+    })
+    data.show_order = getLateOrder.length + 1
     await this.menuModel
       .create({
         ...data,

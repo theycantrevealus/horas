@@ -122,7 +122,7 @@ router.beforeEach((to, from, next) => {
 
     if (isAuthed) {
       if (!to.matched.length) {
-        next('/404')
+        next('/403')
       } else {
         next()
         return
