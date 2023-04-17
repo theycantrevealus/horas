@@ -90,7 +90,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/403',
     name: 'PageUnauthorized',
     meta: {
-      requiresAuth: true,
+      requiresAuth: false,
     },
     component: PageUnauthorized,
   },
@@ -113,7 +113,6 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
-
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     const isAuthed =
       (<any>store.state).credential.token !== '' &&
@@ -122,10 +121,36 @@ router.beforeEach((to, from, next) => {
 
     if (isAuthed) {
       if (!to.matched.length) {
-        next('/403')
+        next('/404')
       } else {
-        next()
-        return
+        console.clear()
+        console.log((<any>store.state).credential.routeMap)
+        // next()
+        // return
+        if(to.name) {
+          if(
+            (<any>store.state).credential.routes.indexOf(to.name.toString()) < 0
+          ) {
+            if((<any>store.state).credential.routeMap[to.name.toString()]) {
+              next()
+              return
+              // const dispatches = (<any>store.state).credential.routeMap[to.name.toString()].permission
+              // if(dispatches.indexOf(to.name.toString()) < 0) {
+              //   next('/403')
+              // } else {
+              //   next()
+              //   return
+              // }
+            } else {
+              next('/403')
+            }
+          } else {
+            next()
+            return
+          }
+        } else {
+          next('/404')
+        }
       }
     } else {
       next('/login')

@@ -52,6 +52,7 @@ class AccountService {
           // image_edit: parsedData.image_edit,
           permission: parsedData.selectedPermission,
           access: parsedData.selectedAccess,
+          // access: [],
           __v: parsedData.__v,
         }
       )

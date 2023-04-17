@@ -155,8 +155,6 @@ export default {
         email: this.email,
         password: this.password,
       }).then((response) => {
-        console.clear()
-        console.log(response)
         if (response.statusCode === 'ACC_I_S0000') {
           this.$router.push('/dashboard')
         } else {

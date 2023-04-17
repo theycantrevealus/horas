@@ -133,8 +133,8 @@
                             <Checkbox
                               v-model="selectedPermission"
                               name="perms"
-                              :value="indexPerm"
-                              @change="set_permission($event, indexPerm)"
+                              :value="`${slotProps.node.data.id}__${indexPerm.domIdentity}`"
+                              @change="set_permission($event, indexPerm, slotProps.node.data.id)"
                             />
                             {{ indexPerm.domIdentity }}
                           </div>
@@ -353,7 +353,7 @@ export default {
       ],
       raw: {
         access: {},
-        permission: [],
+        permission: {},
       },
       menuTreeData: [],
       allowSave: false,
@@ -396,8 +396,25 @@ export default {
         if (getData) {
           const accessData = getData.payload.data
           for (const a in accessData) {
-            if(this.raw.access[accessData[a].id]) {
+            if(!this.raw.access[accessData[a].id]) {
               this.raw.access[accessData[a].id] = {}
+            }
+            const permission = accessData[a].permission
+            for(const b in permission) {
+              if(!this.raw.permission[permission[b].domIdentity]) {
+                this.raw.permission[permission[b].domIdentity] = {}
+              }
+
+              this.raw.permission[permission[b].domIdentity] = {
+                domIdentity: permission[b].domIdentity,
+                dispatchName: permission[b].dispatchName,
+                menu: {
+                  id: accessData[a].id,
+                  name: accessData[a].name,
+                  url: accessData[a].url,
+                  identifier: accessData[a].identifier,
+                }
+              }
             }
             this.raw.access[accessData[a].id] = accessData[a]
           }
@@ -415,20 +432,24 @@ export default {
           this.formData.last_name = getDetail.last_name
           this.formData.__v = getDetail.__v
           // this.formData.authority = getDetail.authority.id
-
+          this.selectedAccess = []
+          this.formData.selectedAccess = []
           for (const a in getDetail.access) {
-            if(this.formData.selectedAccess.indexOf(getDetail.access[a]) < 0) {
-              // this.formData.selectedAccess.push(getDetail.access[a])
+            if(this.selectedAccess.indexOf(getDetail.access[a]) < 0) {
               this.selectedAccess.push(getDetail.access[a].id)
             }
           }
 
+          this.selectedPermission = []
+          this.formData.selectedPermission = []
           for (const a in getDetail.permission) {
-            if (this.formData.selectedPermission.indexOf(getDetail.permission[a]) < 0) {
-              // this.formData.selectedPermission.push(getDetail.permission[a])
-              this.selectedPermission.push(getDetail.permission[a])
+            const targetPermission = `${getDetail.permission[a].menu.id}__${getDetail.permission[a].domIdentity}`
+
+            if (getDetail.permission[a].menu.id && getDetail.permission[a].domIdentity && this.selectedPermission.indexOf(targetPermission) < 0) {
+              this.selectedPermission.push(targetPermission)
             }
           }
+
         } else {
           this.allowSave = false
         }
@@ -487,11 +508,25 @@ export default {
           accept: () => {
             for(const a in this.selectedAccess) {
               if(this.raw.access[this.selectedAccess[a]]) {
-                this.formData.selectedAccess.push(this.raw.access[this.selectedAccess[a]])
+                if(this.formData.selectedAccess.indexOf(this.raw.access[this.selectedAccess[a]]) < 0) {
+                  this.formData.selectedAccess.push({
+                    id: this.raw.access[this.selectedAccess[a]].id,
+                    name: this.raw.access[this.selectedAccess[a]].name,
+                    url: this.raw.access[this.selectedAccess[a]].url,
+                    identifier: this.raw.access[this.selectedAccess[a]].identifier,
+                  })
+                }
               }
             }
 
-            this.formData.selectedPermission = this.selectedPermission
+            for(const b in this.selectedPermission) {
+              const dataSetPermission = this.selectedPermission[b].split('__')
+              const permissionBuild = this.raw.permission[dataSetPermission[1]]
+
+              if(this.formData.selectedPermission.indexOf(permissionBuild) < 0) {
+                this.formData.selectedPermission.push(permissionBuild)
+              }
+            }
 
             this.updateAccount(this.formData).then(async (response) => {
               if (response.status === 200 || response.status === 201) {
@@ -537,7 +572,7 @@ export default {
         })
       }
     },
-    set_permission(event, target) {},
+    set_permission(event, target, menu) {},
     check_child(children, isDelete) {
       for (const a in children) {
         const dataSet = children[a].id

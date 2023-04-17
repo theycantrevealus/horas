@@ -37,6 +37,7 @@ const store = createStore({
       profile_photo: '',
       pages: {},
       routes: [],
+      routeMap: {},
       token: null,
     },
     sidemenu: [],
@@ -151,16 +152,26 @@ const store = createStore({
 
       const grantedPage = data.access
       const buildPage = {}
-      const routes: string[] = ['/login']
+      const routes: string[] = ['Login']
+      const routeMap = {}
       for (let a in grantedPage) {
         if (buildPage[`page_${grantedPage[a].id}`]) {
           buildPage[`page_${grantedPage[a].id}`] = {}
         }
         buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
 
-        routes.push(grantedPage[a].identifier)
+        if(routes.indexOf(grantedPage[a].identifier) < 0) routes.push(grantedPage[a].identifier)
+        if(grantedPage[a].identifier !== '') {
+          if(!routeMap[grantedPage[a].identifier]) {
+            routeMap[grantedPage[a].identifier] = {}
+          }
+          routeMap[grantedPage[a].identifier] = grantedPage[a]
+        }
       }
+
+      state.credential.routes = []
       state.credential.routes = routes
+      state.credential.routeMap = routeMap
       state.credential.pages = buildPage
     },
     mutateStartLoading: (state) => state.loading++,
@@ -177,34 +188,57 @@ const store = createStore({
       state.credential.last_name = credentialData.last_name
       // state.credential.profile_photo = credentialData.image
 
-      const grantedPerm = credentialData.permission
-      const buildPermission = {}
-      for (let a in grantedPerm) {
-        if (buildPermission[grantedPerm[a].domIdentity]) {
-          buildPermission[grantedPerm[a].domIdentity] = {}
-        }
-
-        buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
-      }
-
-      state.credential.permission = buildPermission
-
       const grantedPage = credentialData.access
-      console.clear()
-      console.log(grantedPage)
       const buildPage = {}
-      const routes: string[] = ['/login']
+      const routes: string[] = ['Login']
+      const routeMap = {}
       for (let a in grantedPage) {
         if(grantedPage[a]) {
           if (buildPage[`page_${grantedPage[a].id}`]) {
             buildPage[`page_${grantedPage[a].id}`] = {}
           }
           buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
-
-          routes.push(grantedPage[a].url)
+          if(routes.indexOf(grantedPage[a].identifier) < 0) routes.push(grantedPage[a].identifier)
+          if(grantedPage[a].identifier !== '') {
+            if(!routeMap[grantedPage[a].identifier]) {
+              routeMap[grantedPage[a].identifier] = {}
+            }
+            routeMap[grantedPage[a].identifier] = grantedPage[a]
+          }
         }
       }
+
+      const grantedPerm = credentialData.permission
+      const buildPermission = {}
+      for (let a in grantedPerm) {
+        if (buildPermission[grantedPerm[a].domIdentity]) {
+          buildPermission[grantedPerm[a].domIdentity] = {}
+        }
+        buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
+        if(routeMap[grantedPerm[a].menu.identifier]) {
+          if(!routeMap[grantedPerm[a].menu.identifier].permission) {
+            routeMap[grantedPerm[a].menu.identifier].permission = []
+
+            // if(!routeMap[grantedPerm[a].menu.identifier].permission[grantedPerm[a].domIdentity]) {
+            //   routeMap[grantedPerm[a].menu.identifier].permission[grantedPerm[a].domIdentity] = {}
+            // }
+          }
+
+          if(routeMap[grantedPerm[a].menu.identifier].permission.indexOf(grantedPerm[a].dispatchName) < 0) {
+            routeMap[grantedPerm[a].menu.identifier].permission.push(grantedPerm[a].dispatchName)
+          }
+
+          if(!routeMap[grantedPerm[a].dispatchName]) {
+            routeMap[grantedPerm[a].dispatchName] = {}
+          }
+        }
+
+        // routeMap[grantedPerm[a].menu.identifier].permission[grantedPerm[a].domIdentity] = grantedPerm[a]
+      }
+
+      state.credential.permission = buildPermission
       state.credential.routes = routes
+      state.credential.routeMap = routeMap
       state.credential.pages = buildPage
     },
     mutateClearSession(state: any) {

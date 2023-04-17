@@ -19,7 +19,7 @@ const moduleRoute = [
     children: [
       {
         path: '',
-        name: 'AccountList',
+        name: 'Account',
         meta: {
           pageTitle: 'Account Management',
           requiresAuth: true,

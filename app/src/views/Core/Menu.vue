@@ -523,17 +523,26 @@ export default defineComponent({
         show_on_menu: showMenu,
         __v: this.form.__v,
       }).then((response: any) => {
-        if ((response.status === 200 || response.status === 201) && response.data.statusCode === 'MNU_U_S0000') {
+        if ((response.status === 200 || response.status === 201)) {
+          if(response.data.statusCode === 'MNU_U_S0000') {
+            this.$toast.add({
+              severity: 'success',
+              summary: 'Menu Manager',
+              detail: response.data.message,
+              life: 3000,
+            })
+          } else {
+            this.$toast.add({
+              severity: 'warning',
+              summary: 'Menu Manager',
+              detail: response.data.message,
+              life: 3000,
+            })
+          }
           this.reloadMenu()
           this.rebuildMenu()
           this.clearForm()
           this.ui.modal.manageMenu.state = false
-          this.$toast.add({
-            severity: 'success',
-            summary: 'Menu Manager',
-            detail: response.message,
-            life: 3000,
-          })
         }
       })
     },
@@ -590,17 +599,26 @@ export default defineComponent({
         show_order: 1,
         show_on_menu: showMenu,
       }).then(async (response: any) => {
-        if ((response.status === 201 || response.status === 200) && response.data.statusCode === 'MNU_I_S0000') {
-          this.reloadMenu()
-          this.rebuildMenu()
+        if ((response.status === 201 || response.status === 200)) {
+          if(response.data.statusCode === 'MNU_I_S0000') {
+            this.$toast.add({
+              severity: 'success',
+              summary: 'Menu Manager',
+              detail: response.data.message,
+              life: 3000,
+            })
+          } else {
+            this.$toast.add({
+              severity: 'warning',
+              summary: 'Menu Manager',
+              detail: response.data.message,
+              life: 3000,
+            })
+          }
+          await this.reloadMenu()
+          await this.rebuildMenu()
           this.clearForm()
           this.ui.modal.manageMenu.state = false
-          this.$toast.add({
-            severity: 'success',
-            summary: 'Menu Manager',
-            detail: response.message,
-            life: 3000,
-          })
         }
       })
     },

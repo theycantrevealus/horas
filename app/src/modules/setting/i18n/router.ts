@@ -19,7 +19,7 @@ const moduleRoute = [
     children: [
       {
         path: '',
-        name: 'I18nList',
+        name: 'i18n',
         meta: {
           pageTitle: 'i18n Management',
           requiresAuth: true,
@@ -37,7 +37,7 @@ const moduleRoute = [
       },
       {
         path: 'add',
-        name: 'I18nAdd',
+        name: 'i18nAdd',
         meta: {
           pageTitle: 'New i18n',
           requiresAuth: true,
@@ -55,7 +55,7 @@ const moduleRoute = [
       },
       {
         path: 'edit/:id',
-        name: 'I18nEdit',
+        name: 'i18nEdit',
         meta: {
           pageTitle: 'i18n Edit',
           requiresAuth: true,
