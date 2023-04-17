@@ -43,7 +43,6 @@ export class Account {
 
   @Prop({
     type: SchemaTypes.String,
-    required: true,
     unique: true,
   })
   phone: string
@@ -69,14 +68,12 @@ export class Account {
   @Prop({
     type: SchemaTypes.Date,
     default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
-    required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
     default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
-    required: true,
   })
   updated_at: Date
 

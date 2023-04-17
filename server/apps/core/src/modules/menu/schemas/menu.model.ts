@@ -10,6 +10,7 @@ export const MenuJoin = raw({
   id: { type: String },
   name: { type: String },
   url: { type: String },
+  identifier: { type: String },
 })
 
 export interface IMenu {
@@ -71,11 +72,13 @@ export class CMenu {
 export interface IMenuPermission {
   domIdentity: string
   dispatchName: string
+  menu: IMenu
 }
 
 export const MenuPermissionJoin = raw({
   domIdentity: { type: String },
   dispatchName: { type: String },
+  menu: { type: MenuJoin, _id: false },
 })
 
 export class CMenuPermission {
@@ -90,6 +93,11 @@ export class CMenuPermission {
     example: '',
   })
   dispatchName: string
+
+  @ApiProperty({
+    type: CMenu,
+  })
+  menu: CMenu
 }
 
 export type MenuDocument = HydratedDocument<Menu>

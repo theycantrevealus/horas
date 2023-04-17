@@ -1,4 +1,4 @@
-import { Account } from '@core/account/schemas/account.model'
+import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { MenuAddDTO, MenuEditDTO } from '@core/menu/dto/menu'
 import {
   MenuGroup,
@@ -26,7 +26,10 @@ export class MenuService {
     private menuModel: Model<MenuDocument>,
 
     @InjectModel(MenuGroup.name)
-    private menuGroupModel: Model<MenuGroupDocument>
+    private menuGroupModel: Model<MenuGroupDocument>,
+
+    @InjectModel(Account.name)
+    private accountModel: Model<AccountDocument>
   ) {}
   async all(parameter: any) {
     return await prime_datatable(parameter, this.menuModel)
@@ -271,20 +274,99 @@ export class MenuService {
         }
       )
       .exec()
-      .then((result) => {
-        if (result === null) {
-          response.message = `Menu group failed to update`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = result
-        } else {
+      .then(async (result) => {
+        if (result) {
+          // Update all account with current access and permission
+          await this.accountModel
+            .findOneAndUpdate(
+              {
+                'access.id': id,
+              },
+              {
+                $set: {
+                  'access.$.name': parameter.name,
+                  'access.$.url': parameter.url,
+                  'access.$.identifier': parameter.identifier,
+                },
+              }
+            )
+            .exec()
+            .catch((e) => {
+              this.logger.debug(e)
+            })
+
+          // Reset all permission
+          let updatedAccount = await this.accountModel
+            .find(
+              {
+                'permission.menu.id': id,
+              },
+              'id -_id'
+            )
+            .exec()
+
+          updatedAccount = updatedAccount.map(({ id }) => id)
+
+          await this.accountModel
+            .updateMany(
+              {
+                id: {
+                  $in: updatedAccount,
+                },
+              },
+              {
+                $pull: {
+                  permission: {
+                    'menu.id': id,
+                  },
+                },
+              }
+            )
+            .exec()
+
+          parameter.permission = parameter.permission.map((e) => {
+            return {
+              domIdentity: e.domIdentity,
+              dispatchName: e.dispatchName,
+              menu: {
+                id: id,
+                name: parameter.name,
+                url: parameter.url,
+                identifier: parameter.identifier,
+              },
+            }
+          })
+
+          await this.accountModel
+            .updateMany(
+              {
+                id: {
+                  $in: updatedAccount,
+                },
+              },
+              {
+                $push: {
+                  permission: {
+                    $each: parameter.permission,
+                  },
+                },
+              }
+            )
+            .exec()
+
           result.__v++
           response.message = 'Menu group updated successfully'
           response.payload = result
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.success
           }`
+        } else {
+          response.message = `Menu group failed to update`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+          result.__v = parameter.__v
+          response.payload = result
         }
       })
       .catch((error: Error) => {
