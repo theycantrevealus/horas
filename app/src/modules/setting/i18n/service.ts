@@ -2,9 +2,7 @@ import api from '@/util/api'
 class Corei18nService {
   async i18nList(parsedData) {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/paginate`, {
-        params: parsedData,
-      })
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n?lazyEvent=${JSON.stringify(parsedData)}`)
       .then((response) => {
         return Promise.resolve(response)
       })
@@ -36,7 +34,7 @@ class Corei18nService {
 
   async i18nDetail(id) {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/${id}/detail`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/${id}`)
       .then((response) => {
         return Promise.resolve(response)
       })

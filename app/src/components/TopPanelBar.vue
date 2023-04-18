@@ -270,6 +270,7 @@ export default {
             name: e.name,
             code: e.iso_2_digits.toLowerCase(),
             lang: e.language_code.toLowerCase(),
+            currency: e.currency.toLowerCase(),
           })
         })
       },

@@ -28,7 +28,7 @@
               :totalRecords="totalRecords"
               :loading="loading"
               filterDisplay="row"
-              :globalFilterFields="['email', 'iso_2_digits', 'iso_3_digits', 'created_at']"
+              :globalFilterFields="['iso_2_digits', 'iso_3_digits', 'created_at']"
               responsiveLayout="scroll"
               @page="onPage($event)"
               @sort="onSort($event)"
@@ -39,8 +39,7 @@
                 class="align-right"
               >
                 <template #body="slotProps">
-                  <h6 class="d-inline-flex">#{{ slotProps.data.autonum
-                    }}</h6>
+                  <h6 class="d-inline-flex">#{{ slotProps.data.autonum}}</h6>
                 </template>
               </Column>
               <Column :header="$t('i18n.datatable.column.action')">
@@ -186,8 +185,8 @@ export default {
       this.loading = true
       Corei18nService.i18nList(this.lazyParams)
         .then((response) => {
-          const data = response.data.list
-          const totalRecords = response.data.totalRecords
+          const data = response.data.payload.data
+          const totalRecords = response.data.payload.totalRecords
           this.items = data
           this.totalRecords = totalRecords
           this.loading = false
@@ -226,4 +225,3 @@ export default {
   },
 }
 </script>
-  
