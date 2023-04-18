@@ -84,6 +84,7 @@ export class i18nService {
           iso_2_digits: data.iso_2_digits,
           iso_3_digits: data.iso_3_digits,
           name: data.name,
+          currency: data.currency,
           datetime_weekday: data.datetime_weekday,
           datetime_era: data.datetime_era,
           datetime_year: data.datetime_year,

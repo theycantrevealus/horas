@@ -3,6 +3,7 @@ export const modCodes = {
     success: 'S0000',
     failed: 'F0000',
   },
+  CoreService: 'CFG',
   AccountService: 'ACC',
   PatientService: 'PENT',
   MenuService: 'MNU',

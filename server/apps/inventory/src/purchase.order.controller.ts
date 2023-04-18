@@ -1,5 +1,5 @@
 import { PurchaseOrderService } from '@inventory/purchase.order.service'
-import { Controller, Inject } from '@nestjs/common'
+import { Controller, Inject, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { MessagePattern, Payload } from '@nestjs/microservices'
 import { ApiTags } from '@nestjs/swagger'
@@ -9,6 +9,7 @@ import { SocketIoClientProxyService } from '@socket/socket.proxy'
 @Controller('inventory')
 @ApiTags('Purchase Order')
 export class PurchaseOrderController {
+  private readonly logger: Logger = new Logger(PurchaseOrderController.name)
   constructor(
     @Inject(PurchaseOrderService)
     private readonly purchaseOrderService: PurchaseOrderService,

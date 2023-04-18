@@ -113,11 +113,11 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
   })
 
   const data = await model.aggregate(query).exec()
-  if (allNoFilter) {
+  if (allNoFilter && allNoFilter.length > 0) {
     return {
       message: HttpStatus.OK,
       payload: {
-        totalRecords: allNoFilter[0].total,
+        totalRecords: allNoFilter[0].total ? allNoFilter[0].total : 0,
         data: data,
       },
     }

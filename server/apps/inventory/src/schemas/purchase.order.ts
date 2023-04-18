@@ -1,5 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
+import { CurrencyJoin, ICurrency } from '@core/i18n/schemas/i18n'
 import {
   IMasterItemSupplier,
   MasterItemSupplierJoin,
@@ -88,6 +89,9 @@ export class PurchaseOrder {
   })
   purchase_date: Date
 
+  @Prop(raw(CurrencyJoin))
+  locale: ICurrency
+
   @Prop({
     type: [PurchaseOrderDetail],
     _id: false,
@@ -161,6 +165,8 @@ export class IPurchaseOrder {
 
   purchase_date: Date
 
+  locale: ICurrency
+
   detail: IPurchaseOrderDetail[]
 
   total: number
@@ -182,6 +188,7 @@ export class IPurchaseOrder {
     this.code = data.code
     this.extras = data.extras
     this.purchase_date = data.purchase_date
+    this.locale = data.locale
     this.supplier = data.supplier
     this.detail = data.detail
     this.total = data.total

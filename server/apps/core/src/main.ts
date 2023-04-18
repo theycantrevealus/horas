@@ -12,7 +12,7 @@ import { CoreModule } from './core.module'
 declare const module: any
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(CoreModule, {
-    logger: ['error', 'warn', 'debug'],
+    logger: ['error', 'warn', 'debug', 'verbose'],
   })
   const configService = app.get<ConfigService>(ConfigService)
   app.useStaticAssets(join(__dirname, './assets'))

@@ -1,29 +1,63 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
+import { RedisConfig } from '@configuration/redis'
 import { AccountModule } from '@core/account/account.module'
+import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { i18nModule } from '@core/i18n/i18n.module'
 import { GatewayInventoryModule } from '@core/inventory/inventory.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
 import { PatientModule } from '@core/patient/patient.module'
-import { Module } from '@nestjs/common'
+import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
+import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
+import {
+  CACHE_MANAGER,
+  CacheModule,
+  Inject,
+  Logger,
+  Module,
+} from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import {
+  InjectModel,
+  MongooseModule,
+  MongooseModuleOptions,
+} from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { Cache } from 'cache-manager'
+import * as redisStore from 'cache-manager-ioredis'
+import { Model } from 'mongoose'
 
 import { CoreController } from './core.controller'
 import { CoreService } from './core.service'
+import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
+        !process.env.NODE_ENV || process.env.NODE_ENV === ''
+          ? ''
+          : process.env.NODE_ENV
       }.env`,
-      load: [ApplicationConfig, MongoConfig, KafkaConfig],
+      load: [ApplicationConfig, MongoConfig, KafkaConfig, RedisConfig],
+    }),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          store: redisStore,
+          host: configService.get<string>('redis.host'),
+          port: configService.get<string>('redis.port'),
+          username: configService.get<string>('redis.username'),
+          password: configService.get<string>('redis.password'),
+          isGlobal: true,
+        }
+      },
+      inject: [ConfigService],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -37,6 +71,40 @@ import { CoreService } from './core.service'
       }),
       inject: [ConfigService],
     }),
+    MongooseModule.forFeatureAsync([
+      {
+        name: Config.name,
+        useFactory: () => {
+          const schema = ConfigSchema
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `config-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['$inc'] = { __v: 1 }
+            next()
+          })
+
+          return schema
+        },
+      },
+    ]),
+    MongooseModule.forFeature([
+      { name: Account.name, schema: AccountSchema },
+      { name: LogLogin.name, schema: LogLoginSchema },
+      { name: LogActivity.name, schema: LogActivitySchema },
+    ]),
     AuthModule,
     AccountModule,
     LOVModule,
@@ -49,4 +117,61 @@ import { CoreService } from './core.service'
   controllers: [CoreController],
   providers: [CoreService],
 })
-export class CoreModule {}
+export class CoreModule {
+  private readonly logger: Logger = new Logger(CoreModule.name)
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectModel(Config.name)
+    private readonly configModel: Model<ConfigDocument>
+  ) {
+    this.loadConfiguration().then(() => {
+      this.logger.warn('=================================')
+      this.logger.verbose('LAUNCHING APPLICATION')
+    })
+  }
+
+  async loadConfiguration() {
+    this.logger.warn('=================================')
+    this.logger.debug('LOADING SYSTEM CONFIGURATION')
+    const config = await this.configModel.find().exec()
+    if (config.length > 0) {
+      await Promise.all(
+        config.map(async (e) => {
+          const keyCheck: IConfig = await this.cacheManager.get(e.name)
+          if (keyCheck) {
+            this.logger.verbose(
+              `          Checking for [${e.name}] version (${keyCheck.__v}) -> ${e.__v}`
+            )
+            if (keyCheck.__v !== e.__v) {
+              this.logger.verbose(
+                `          Updating [${e.name}] configuration`
+              )
+              await this.cacheManager
+                .set(e.name, {
+                  setter: e.setter,
+                  __v: e.__v,
+                })
+                .then(() => {
+                  this.logger.verbose(
+                    `          [${e.name}] configuration updated`
+                  )
+                })
+            } else {
+              this.logger.verbose(
+                `          [${e.name}] configuration up to date`
+              )
+            }
+          } else {
+            await this.cacheManager.set(e.name, e.setter).then(() => {
+              this.logger.verbose(`          [${e.name}] configuration set`)
+            })
+          }
+
+          this.logger.verbose('------------------------------------------')
+        })
+      )
+    } else {
+      this.logger.verbose('          NO CONFIGURATION FOUND')
+    }
+  }
+}

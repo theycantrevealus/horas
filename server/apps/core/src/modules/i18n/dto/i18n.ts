@@ -50,6 +50,13 @@ export class i18nAddDTO {
   name: string
 
   @ApiProperty({
+    example: '',
+    description: '',
+  })
+  @IsNotEmpty()
+  currency: string
+
+  @ApiProperty({
     example: 'long',
     enum: ['narrow', 'short', 'long'],
     description: '',
@@ -159,6 +166,7 @@ export class i18nAddDTO {
     this.iso_2_digits = parameter.iso_2_digits
     this.iso_3_digits = parameter.iso_3_digits
     this.name = parameter.name
+    this.currency = parameter.currency
     this.datetime_weekday = parameter.datetime_weekday
     this.datetime_era = parameter.datetime_era
     this.datetime_year = parameter.datetime_year
@@ -213,6 +221,13 @@ export class i18nEditDTO {
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    example: '',
+    description: '',
+  })
+  @IsNotEmpty()
+  currency: string
 
   @ApiProperty({
     example: 'long',
@@ -332,6 +347,7 @@ export class i18nEditDTO {
     this.iso_2_digits = parameter.iso_2_digits
     this.iso_3_digits = parameter.iso_3_digits
     this.name = parameter.name
+    this.currency = parameter.currency
     this.datetime_weekday = parameter.datetime_weekday
     this.datetime_era = parameter.datetime_era
     this.datetime_year = parameter.datetime_year

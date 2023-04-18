@@ -13,7 +13,7 @@ import {
   PurchaseOrderDocument,
 } from '@inventory/schemas/purchase.order'
 import { IPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -23,6 +23,7 @@ import { Model } from 'mongoose'
 
 @Injectable()
 export class PurchaseOrderService {
+  private readonly logger: Logger = new Logger(PurchaseOrderService.name)
   constructor(
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
@@ -53,6 +54,8 @@ export class PurchaseOrderService {
       grand_total: 0,
       status: 'new',
     })
+
+    this.logger.debug(data)
 
     const detailData: IPurchaseOrderDetail[] = []
 

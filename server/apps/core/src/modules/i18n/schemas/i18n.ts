@@ -36,6 +36,38 @@ export class Ci18nComponent {
   // menu: CMenu
 }
 
+export const CurrencyJoin = raw({
+  language_code: { type: String },
+  iso_2_digits: { type: String },
+  currency: { type: String },
+})
+
+export class CCurrency {
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  language_code: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  iso_2_digits: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  currency: string
+}
+
+export interface ICurrency {
+  language_code: string
+  iso_2_digits: string
+  currency: string
+}
+
 export type i18nDocument = HydratedDocument<i18n>
 @Schema({ collection: 'core_i18n' })
 export class i18n {
@@ -71,6 +103,12 @@ export class i18n {
 
   @Prop({ type: SchemaTypes.String, required: true })
   name: string
+
+  @Prop({
+    type: SchemaTypes.String,
+    default: '',
+  })
+  currency: string
 
   @Prop({
     type: SchemaTypes.String,

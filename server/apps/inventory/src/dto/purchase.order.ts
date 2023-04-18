@@ -1,3 +1,4 @@
+import { CCurrency } from '@core/i18n/schemas/i18n'
 import {
   IMasterItemSupplier,
   MasterItemSupplierJoin,
@@ -45,6 +46,14 @@ export class PurchaseOrderAddDTO {
   })
   @IsNotEmpty()
   purchase_date: Date
+
+  @ApiProperty({
+    type: CCurrency,
+    description: 'Currency',
+  })
+  @IsNotEmpty()
+  @ValidateNested({ each: true })
+  locale: CCurrency
 
   @ApiProperty({
     type: CPurchaseOrderDetail,
@@ -112,6 +121,14 @@ export class PurchaseOrderEditDTO {
   })
   @IsNotEmpty()
   purchase_date: Date
+
+  @ApiProperty({
+    type: CCurrency,
+    description: 'Currency',
+  })
+  @IsNotEmpty()
+  @ValidateNested({ each: true })
+  locale: CCurrency
 
   @ApiProperty({
     type: CPurchaseOrderDetail,
