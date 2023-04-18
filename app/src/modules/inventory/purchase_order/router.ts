@@ -1,20 +1,21 @@
-const moduleName = 'Purchase Order'
+const moduleName = 'PurchaseOrder'
+const moduleCaption = 'Purchase Order'
 const moduleUrl = '/inventory/purchase_order'
 const moduleTarget = '@/modules/inventory/purchase_order'
 const moduleRoute = [
   {
-    path: `/inventory/${moduleUrl}`,
-    name: moduleName,
+    path: `${moduleUrl}`,
+    name: `${moduleName}`,
     component: () =>
       import(
-        /* webpackChunkName: "purchase_order" */ `${moduleTarget}/Module.vue`
+        /* webpackChunkName: "purchase_order" */ `@/modules/inventory/purchase_order/Module.vue`
         ),
     meta: {
-      pageTitle: `${moduleName} Builder`,
+      pageTitle: `${moduleCaption} Builder`,
       requiresAuth: true,
       breadcrumb: [
         {
-          label: `${moduleName}`,
+          label: `${moduleCaption}`,
           to: `${moduleUrl}`,
         },
       ],
@@ -22,56 +23,56 @@ const moduleRoute = [
     children: [
       {
         path: '',
-        name: `${moduleName} List`,
+        name: `${moduleName}`,
         meta: {
-          pageTitle: `${moduleName} Management`,
+          pageTitle: `${moduleCaption} Management`,
           requiresAuth: true,
           breadcrumb: [
             {
-              label: moduleName,
+              label: moduleCaption,
               to: `${moduleUrl}`,
             },
           ],
         },
         component: () =>
           import(
-            /* webpackChunkName: "purchase_order" */ `${moduleTarget}/views/Index.vue`
+            /* webpackChunkName: "purchase_order" */ `@/modules/inventory/purchase_order/views/Index.vue`
             ),
       },
       {
         path: 'add',
-        name: `${moduleName} Add`,
+        name: `${moduleName}Add`,
         meta: {
-          pageTitle: `${moduleName} Add`,
+          pageTitle: `${moduleCaption} Add`,
           requiresAuth: true,
           breadcrumb: [
             {
-              label: `${moduleName}`,
+              label: `${moduleCaption}`,
               to: `${moduleUrl}`,
             },
           ],
         },
         component: () =>
           import(
-            /* webpackChunkName: "purchase_order" */ `${moduleTarget}/views/Add.vue`
+            /* webpackChunkName: "purchase_order" */ `@/modules/inventory/purchase_order/views/Add.vue`
             ),
       },
       {
         path: 'edit/:id',
-        name: `${moduleName} Edit`,
+        name: `${moduleCaption}Edit`,
         meta: {
-          pageTitle: `${moduleName} Edit`,
+          pageTitle: `${moduleCaption} Edit`,
           requiresAuth: true,
           breadcrumb: [
             {
-              label: `${moduleName}`,
+              label: `${moduleCaption}`,
               to: `${moduleUrl}`,
             },
           ],
         },
         component: () =>
           import(
-            /* webpackChunkName: "purchase_order" */ `${moduleTarget}/views/Edit.vue`
+            /* webpackChunkName: "purchase_order" */ `@/modules/inventory/purchase_order/views/Edit.vue`
             ),
       },
     ],

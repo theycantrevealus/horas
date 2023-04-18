@@ -101,6 +101,27 @@
             </template>
           </Column>
           <Column
+            ref="supplier"
+            field="total"
+            header="Total"
+            filterField="total"
+            filterMatchMode="contains"
+            :sortable="true"
+          >
+            <template #filter="{ filterModel, filterCallback }">
+              <InputText
+                v-model="filterModel.value"
+                type="text"
+                class="column-filter"
+                placeholder="Search by supplier"
+                @keydown.enter="filterCallback()"
+              />
+            </template>
+            <template #body="slotProps">
+              <CurrencyLabel :number="parseFloat(slotProps.data.total)" :code="`id`" :currency="`IDR`" :lang="`ID`" />
+            </template>
+          </Column>
+          <Column
             ref="created_at"
             field="created_at"
             header="Created Date"
@@ -127,6 +148,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import CurrencyLabel from '@/components/currency/Label.vue'
 import PurchaseOrderService from '@/modules/inventory/purchase_order/service'
 
 export default {
@@ -138,6 +160,7 @@ export default {
     Card,
     Toolbar,
     ConfirmPopup,
+    CurrencyLabel,
   },
   data() {
     return {
@@ -152,7 +175,7 @@ export default {
       columns: [
         { field: 'code', header: 'Code' },
         { field: 'supplier.name', header: 'Name' },
-        { field: 'created_at', header: 'Join Date' },
+        { field: 'created_at', header: 'Created Date' },
       ],
     }
   },
@@ -173,6 +196,9 @@ export default {
     this.loadLazyData()
   },
   methods: {
+    round(num, roundCount) {
+      return parseFloat(num).toFixed(roundCount)
+    },
     purchaseOrderAdd() {
       this.$router.push('/inventory/purchase_order/add')
     },
