@@ -1338,3 +1338,11 @@ body.dark .p-treenode .p-treenode-content:hover {
 .p-datepicker {
     min-width: 0 !important;
 }
+
+label.currency-label{
+    display: block;
+    text-align: right;
+    letter-spacing: 1.5px;
+    font-family: "Courier New", monospace;
+    font-weight: bolder;
+}
