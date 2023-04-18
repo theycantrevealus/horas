@@ -1,7 +1,7 @@
 const moduleRoute = [
   {
     path: '/master/item',
-    name: 'Master Item',
+    name: 'MasterItem',
     component: () =>
       import(
         /* webpackChunkName: "master_item" */ '@/modules/master/item/Module.vue'
@@ -19,7 +19,7 @@ const moduleRoute = [
     children: [
       {
         path: '',
-        name: 'Master ItemList',
+        name: 'MasterItem',
         meta: {
           pageTitle: 'Master Item Management',
           requiresAuth: true,
@@ -37,7 +37,7 @@ const moduleRoute = [
       },
       {
         path: 'add',
-        name: 'Master Item Add',
+        name: 'MasterItemAdd',
         meta: {
           pageTitle: 'Master Item Add',
           requiresAuth: true,
@@ -55,7 +55,7 @@ const moduleRoute = [
       },
       {
         path: 'edit/:id',
-        name: 'Master ItemEdit',
+        name: 'MasterItemEdit',
         meta: {
           pageTitle: 'Master Item Edit',
           requiresAuth: true,

@@ -22,11 +22,13 @@ const store = createStore({
         code: 'us',
         lang: 'en',
         name: 'United States',
+        currency: 'USD',
       },
       id: {
         code: 'id',
         lang: 'id',
         name: 'Indonesia',
+        currency: 'IDR',
       },
     },
     credential: {
@@ -116,6 +118,9 @@ const store = createStore({
     getThemeMode: (state) => {
       return state.themeModeDark
     },
+    getCurrentLanguage: (state) => {
+      return state.languageMeta
+    },
   },
   mutations: {
     mutateSidePanelToggleOn: (state: any) => {
@@ -138,38 +143,55 @@ const store = createStore({
     },
     mutateUpdateAccess: (state: any, data) => {
       data = data.payload
+      const grantedPage = data.access
+      const buildPage = {}
+      const routes: string[] = ['Login']
+      const routeMap = {}
+      for (let a in grantedPage) {
+        if(grantedPage[a]) {
+          if (buildPage[`page_${grantedPage[a].id}`]) {
+            buildPage[`page_${grantedPage[a].id}`] = {}
+          }
+          buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
+          if(routes.indexOf(grantedPage[a].identifier) < 0) routes.push(grantedPage[a].identifier)
+          if(grantedPage[a].identifier !== '') {
+            if(!routeMap[grantedPage[a].identifier]) {
+              routeMap[grantedPage[a].identifier] = {}
+            }
+            routeMap[grantedPage[a].identifier] = grantedPage[a]
+          }
+        }
+      }
+
       const grantedPerm = data.permission
       const buildPermission = {}
       for (let a in grantedPerm) {
         if (buildPermission[grantedPerm[a].domIdentity]) {
           buildPermission[grantedPerm[a].domIdentity] = {}
         }
-
         buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
+        if(routeMap[grantedPerm[a].menu.identifier]) {
+          if(!routeMap[grantedPerm[a].menu.identifier].permission) {
+            routeMap[grantedPerm[a].menu.identifier].permission = []
+
+            // if(!routeMap[grantedPerm[a].menu.identifier].permission[grantedPerm[a].domIdentity]) {
+            //   routeMap[grantedPerm[a].menu.identifier].permission[grantedPerm[a].domIdentity] = {}
+            // }
+          }
+
+          if(routeMap[grantedPerm[a].menu.identifier].permission.indexOf(grantedPerm[a].dispatchName) < 0) {
+            routeMap[grantedPerm[a].menu.identifier].permission.push(grantedPerm[a].dispatchName)
+          }
+
+          if(!routeMap[grantedPerm[a].dispatchName]) {
+            routeMap[grantedPerm[a].dispatchName] = {}
+          }
+        }
+
+        // routeMap[grantedPerm[a].menu.identifier].permission[grantedPerm[a].domIdentity] = grantedPerm[a]
       }
 
       state.credential.permission = buildPermission
-
-      const grantedPage = data.access
-      const buildPage = {}
-      const routes: string[] = ['Login']
-      const routeMap = {}
-      for (let a in grantedPage) {
-        if (buildPage[`page_${grantedPage[a].id}`]) {
-          buildPage[`page_${grantedPage[a].id}`] = {}
-        }
-        buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
-
-        if(routes.indexOf(grantedPage[a].identifier) < 0) routes.push(grantedPage[a].identifier)
-        if(grantedPage[a].identifier !== '') {
-          if(!routeMap[grantedPage[a].identifier]) {
-            routeMap[grantedPage[a].identifier] = {}
-          }
-          routeMap[grantedPage[a].identifier] = grantedPage[a]
-        }
-      }
-
-      state.credential.routes = []
       state.credential.routes = routes
       state.credential.routeMap = routeMap
       state.credential.pages = buildPage

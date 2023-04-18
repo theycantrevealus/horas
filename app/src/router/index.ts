@@ -128,6 +128,7 @@ router.beforeEach((to, from, next) => {
         // next()
         // return
         if(to.name) {
+          console.log(to.name.toString())
           if(
             (<any>store.state).credential.routes.indexOf(to.name.toString()) < 0
           ) {
