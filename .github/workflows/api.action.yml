@@ -26,6 +26,15 @@ jobs:
       MONGO_DB_PASSWORD:
       REDIS_HOST: localhost
       REDIS_PORT: 6379
+      REDIS_USERNAME: default
+      REDIS_PASSWORD: kalijati123
+      SOCKET_IO_HOST: http://localhost
+      SOCKET_IO_PORT: 9000
+      LOG_INFO: info
+      LOG_VERBOSE: verbose
+      LOG_WARN: warn
+      LOG_DEBUG: debug
+      LOG_ERROR: error
       KAFKA_M_ITEM_TOPIC: master_item_process
       KAFKA_M_ITEM_BROKER: 127.0.0.1:9092
       KAFKA_M_ITEM_SERVICE: M_ITEM_SERVICE
