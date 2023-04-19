@@ -76,6 +76,7 @@
     "kafkajs": "^2.2.4",
     "mongodb-memory-server": "^8.11.5",
     "multer": "^1.4.5-lts.1",
+    "nestjs-soap": "^3.0.1",
     "passport": "^0.6.0",
     "prettier": "^2.8.4",
     "redis": "^4.6.5",
@@ -91,7 +92,8 @@
     "uuid": "^9.0.0",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-node-externals": "^3.0.0",
+    "winston": "^3.8.2"
   },
   "jest": {
     "moduleFileExtensions": [

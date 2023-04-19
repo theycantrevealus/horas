@@ -16,6 +16,7 @@ import { IPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import { pad } from '@utility/string'
 import { TimeManagement } from '@utility/time'
@@ -23,8 +24,9 @@ import { Model } from 'mongoose'
 
 @Injectable()
 export class PurchaseOrderService {
-  private readonly logger: Logger = new Logger(PurchaseOrderService.name)
   constructor(
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger = new Logger(PurchaseOrder.name),
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 

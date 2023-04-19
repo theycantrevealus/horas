@@ -28,12 +28,12 @@ import { isJSON } from 'class-validator'
 import { CoreService } from './core.service'
 import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
 
-@Controller('configuration')
-@ApiTags('AA - Configuration')
+@Controller()
+@ApiTags('AA - System')
 export class CoreController {
   constructor(private readonly coreService: CoreService) {}
 
-  @Get('/reload')
+  @Get('configuration/reload')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -46,7 +46,7 @@ export class CoreController {
     return await this.coreService.reloadConfig()
   }
 
-  @Get()
+  @Get('configuration')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -74,7 +74,7 @@ export class CoreController {
     }
   }
 
-  @Get(':id')
+  @Get('configuration/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -90,7 +90,7 @@ export class CoreController {
     return await this.coreService.detail(param.id)
   }
 
-  @Post()
+  @Post('configuration')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -104,7 +104,7 @@ export class CoreController {
     return await this.coreService.add(parameter)
   }
 
-  @Patch(':id')
+  @Patch('configuration/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -121,7 +121,7 @@ export class CoreController {
     return await this.coreService.edit(parameter, param.id)
   }
 
-  @Delete(':id')
+  @Delete('configuration/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -136,5 +136,34 @@ export class CoreController {
   })
   async delete(@Param() param): Promise<GlobalResponse> {
     return await this.coreService.delete(param.id)
+  }
+
+  //==============================================================================LOG
+  @Get('log')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Fetch all',
+    description: 'Showing brand data',
+  })
+  @ApiQuery(ApiQueryGeneral.primeDT)
+  async log(@Query('lazyEvent') parameter: string) {
+    if (isJSON(parameter)) {
+      const parsedData = JSON.parse(parameter)
+      return await this.coreService.log({
+        first: parsedData.first,
+        rows: parsedData.rows,
+        sortField: parsedData.sortField,
+        sortOrder: parsedData.sortOrder,
+        filters: parsedData.filters,
+      })
+    } else {
+      return {
+        message: 'filters is not a valid json',
+        payload: {},
+      }
+    }
   }
 }

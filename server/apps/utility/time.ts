@@ -34,10 +34,19 @@ export class TimeManagement {
     return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
     //return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
   }
-  addTime(from, target, seconds: number) {
-    return moment(from)
-      .add(seconds, 'seconds')
-      .tz(target)
-      .format('YYYY-MM-DD HH:mm:ss')
+
+  getDate(format = 'YYYY-MM-DD') {
+    return moment().format(format)
+  }
+
+  format(target, format) {
+    return moment(target).format(format)
+  }
+  addTime(from, gap: number, unit: string, format = '', target = '') {
+    return moment(moment(from, format).tz(target).add(gap, unit)).format(format)
+  }
+
+  subtractTime(from, gap: number, unit: string, format = '', target = '') {
+    return moment(moment(from).tz(target).subtract(gap, unit)).format(format)
   }
 }

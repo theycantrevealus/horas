@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 import * as CopyPlugin from 'copy-webpack-plugin'
 import { json } from 'express'
 import { join } from 'path'
@@ -12,15 +13,16 @@ import { CoreModule } from './core.module'
 declare const module: any
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(CoreModule, {
-    logger: ['error', 'warn', 'debug', 'verbose'],
+    logger: false,
   })
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))
+
   const configService = app.get<ConfigService>(ConfigService)
   app.useStaticAssets(join(__dirname, './assets'))
 
   app.enableVersioning({
     type: VersioningType.URI,
   })
-
   app.use(json({ limit: '5mb' }))
   app.enableCors()
 

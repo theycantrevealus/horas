@@ -7,6 +7,13 @@ export const ApplicationConfig = () => ({
     node_env: process.env.NODE_ENV,
     timezone: parseInt(process.env.TIMEZONE) * 60 * 60 * 1000,
     jwt: 'TAKASHITANAKA0192',
+    log: {
+      info: process.env.LOG_INFO,
+      verbose: process.env.LOG_VERBOSE,
+      warn: process.env.LOG_WARN,
+      debug: process.env.LOG_DEBUG,
+      error: process.env.LOG_ERROR,
+    },
     token: '',
   },
 })

@@ -1,20 +1,25 @@
-import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
+import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
+import * as winston from 'winston'
+import { createLogger, Logger } from 'winston'
 
 import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
 import { Config, ConfigDocument, IConfig } from './schemas/config'
 
 @Injectable()
 export class CoreService {
-  private readonly logger: Logger = new Logger(CoreService.name)
   constructor(
     @InjectModel(Config.name) private configModel: Model<ConfigDocument>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger
   ) {}
 
   loadConfiguration() {}
@@ -61,6 +66,92 @@ export class CoreService {
     } else {
       this.logger.verbose('          NO CONFIGURATION FOUND')
     }
+  }
+
+  async log(parameter: any): Promise<GlobalResponse> {
+    const time = new TimeManagement()
+    const files = []
+    const startDate = time.subtractTime(
+      time.getDate(),
+      1,
+      'days',
+      'YYYY-MM-DD HH:mm:ss',
+      'Asia/Jakarta'
+    )
+    const endDate = time.getDate('YYYY-MM-DD 00:00:00')
+    let currentDate = time.format(startDate, 'YYYY-MM-DD')
+
+    while (currentDate <= endDate) {
+      files.push(`error/${currentDate.toString()}.txt`)
+      files.push(`verbose/${currentDate.toString()}.txt`)
+      files.push(`warn/${currentDate.toString()}.txt`)
+      currentDate = time.format(
+        time.addTime(
+          currentDate,
+          1,
+          'days',
+          'YYYY-MM-DD HH:mm:ss',
+          'Asia/Jakarta'
+        ),
+        'YYYY-MM-DD'
+      )
+    }
+
+    console.log(files)
+
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {
+        data: [],
+      },
+      transaction_classify: 'LOG',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    const promises = files.map(async (file) => {
+      return await new Promise(async (resolve, reject) => {
+        const instance = await createLogger({
+          transports: [
+            new winston.transports.File({
+              filename: `logs/${file}`,
+            }),
+          ],
+        })
+
+        await instance.query(
+          {
+            limit: parameter.rows,
+            start: parameter.start,
+            order: 'desc',
+            fields: ['message', 'timestamp', 'level'],
+          },
+          (err, results) => {
+            if (err) {
+              return reject(err)
+            } else {
+              const dataSet = {
+                target: file,
+                data: results.file,
+              }
+              return resolve(dataSet)
+            }
+          }
+        )
+      })
+    })
+
+    await Promise.all(promises).then((result) => {
+      response.payload = {
+        data: result,
+      }
+    })
+
+    response.statusCode = `${modCodes[this.constructor.name]}_L_${
+      modCodes.Global.success
+    }`
+
+    return response
   }
 
   async all(parameter: any) {

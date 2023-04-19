@@ -30,7 +30,13 @@ export class AuthService implements JwtOptionsFactory {
           login_id: data.id,
           status: HttpStatus.CREATED,
           message: 'token_create_success',
-          expired_at: TM.addTime(data.currentTime, 'Asia/Jakarta', expiresIn),
+          expired_at: TM.addTime(
+            data.currentTime,
+            expiresIn,
+            'seconds',
+            'YYYY-MM-DD HH:mm:ss',
+            'Asia/Jakarta'
+          ),
           token: token,
         }
       } catch (e) {

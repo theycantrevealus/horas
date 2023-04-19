@@ -111,6 +111,7 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
             })
             if (response.payload) {
               response.payload.__v += 1
+              this.logger.verbose(response)
             }
             return response
           })

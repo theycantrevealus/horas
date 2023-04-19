@@ -26,9 +26,13 @@ import {
   MongooseModuleOptions,
 } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { WinstonModule } from '@utility/logger/module'
+import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import * as redisStore from 'cache-manager-ioredis'
 import { Model } from 'mongoose'
+import * as winston from 'winston'
 
 import { CoreController } from './core.controller'
 import { CoreService } from './core.service'
@@ -55,6 +59,77 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
           username: configService.get<string>('redis.username'),
           password: configService.get<string>('redis.password'),
           isGlobal: true,
+        }
+      },
+      inject: [ConfigService],
+    }),
+    WinstonModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const today = new TimeManagement()
+        return {
+          levels: {
+            error: 0,
+            warn: 1,
+            verbose: 3,
+          },
+          transports: [
+            new winston.transports.File({
+              filename: `logs/${configService.get<string>(
+                'application.log.verbose'
+              )}/${today.getDate().toString()}.txt`,
+              level: configService
+                .get<string>('application.log.verbose')
+                .toString(),
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+            new winston.transports.File({
+              filename: `logs/${configService.get<string>(
+                'application.log.warn'
+              )}/${today.getDate().toString()}.txt`,
+              level: configService
+                .get<string>('application.log.warn')
+                .toString(),
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+            new winston.transports.File({
+              filename: `logs/${configService.get<string>(
+                'application.log.error'
+              )}/${today.getDate().toString()}.txt`,
+              level: configService
+                .get<string>('application.log.error')
+                .toString(),
+              handleExceptions: true,
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+          ],
         }
       },
       inject: [ConfigService],
@@ -118,21 +193,24 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
   providers: [CoreService],
 })
 export class CoreModule {
-  private readonly logger: Logger = new Logger(CoreModule.name)
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Config.name)
-    private readonly configModel: Model<ConfigDocument>
+    private readonly configModel: Model<ConfigDocument>,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger = new Logger(CoreModule.name)
   ) {
     this.loadConfiguration().then(() => {
-      this.logger.warn('=================================')
-      this.logger.verbose('LAUNCHING APPLICATION')
+      // this.logger.verbose('Verbose this')
+      // this.logger.warn('Warn this')
+      // this.logger.debug('Debug me')
+      // throw new Error('Test Error')
+      //
     })
   }
 
   async loadConfiguration() {
-    this.logger.warn('=================================')
-    this.logger.debug('LOADING SYSTEM CONFIGURATION')
+    this.logger.verbose('LOADING SYSTEM CONFIGURATION')
     const config = await this.configModel.find().exec()
     if (config.length > 0) {
       await Promise.all(
@@ -140,38 +218,31 @@ export class CoreModule {
           const keyCheck: IConfig = await this.cacheManager.get(e.name)
           if (keyCheck) {
             this.logger.verbose(
-              `          Checking for [${e.name}] version (${keyCheck.__v}) -> ${e.__v}`
+              `Checking for [${e.name}] version (${keyCheck.__v}) -> ${e.__v}`
             )
             if (keyCheck.__v !== e.__v) {
-              this.logger.verbose(
-                `          Updating [${e.name}] configuration`
-              )
+              this.logger.verbose(`Updating [${e.name}] configuration`)
               await this.cacheManager
                 .set(e.name, {
                   setter: e.setter,
                   __v: e.__v,
                 })
                 .then(() => {
-                  this.logger.verbose(
-                    `          [${e.name}] configuration updated`
-                  )
+                  this.logger.verbose(`[${e.name}] configuration updated`)
                 })
             } else {
-              this.logger.verbose(
-                `          [${e.name}] configuration up to date`
-              )
+              this.logger.verbose(`[${e.name}] configuration up to date`)
             }
           } else {
             await this.cacheManager.set(e.name, e.setter).then(() => {
-              this.logger.verbose(`          [${e.name}] configuration set`)
+              this.logger.verbose(`[${e.name}] configuration set`)
             })
           }
-
-          this.logger.verbose('------------------------------------------')
         })
       )
     } else {
-      this.logger.verbose('          NO CONFIGURATION FOUND')
+      this.logger.verbose('NO CONFIGURATION FOUND')
     }
+    this.logger.verbose('LAUNCHING APPLICATION')
   }
 }
