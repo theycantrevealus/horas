@@ -47,12 +47,16 @@ table thead tr th {
 }
 
 /*==============================================================*/
-.p-treetable .p-treetable-thead>tr>th {
+.p-treetable .p-treetable-thead > tr > th {
     border: none !important;
 }
 
-.p-datatable .p-datatable-thead>tr>th {
+.p-datatable .p-datatable-thead > tr > th {
     border: none !important;
+}
+
+.p-datatable .p-datatable-thead > tr:nth-child(odd) > th {
+    border-bottom: solid 1.5px #00874b !important;
 }
 
 .p-datatable-table thead tr th {

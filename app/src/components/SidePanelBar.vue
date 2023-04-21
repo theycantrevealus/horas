@@ -82,6 +82,7 @@ export default {
     }),
     logout() {
       this.sLogout().then(() => {
+        this.$socket.disconnect()
         this.$router.push('/login')
       })
     },

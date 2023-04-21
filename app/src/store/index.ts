@@ -10,9 +10,19 @@ import { coreMenu } from '@/store/core/menu'
 import getBrowserLocale from '@/util/i18n/browser.config'
 import { corei18n } from './core/i18n'
 
+import {CoreResponse, CoreResponseLib} from "@/model/Response";
+
+import { credential } from "@/store/states/credential";
+import { socket } from "@/store/states/socket";
+
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
+    ...credential,
+    ...socket,
+    connect: false,
+    reconnecting: false,
+    message: '',
     menuMode: false,
     themeModeDark: false,
     loading: 0,
@@ -31,17 +41,6 @@ const store = createStore({
         currency: 'IDR',
       },
     },
-    credential: {
-      id: 0,
-      first_name: '',
-      last_name: '',
-      permission: {},
-      profile_photo: '',
-      pages: {},
-      routes: [],
-      routeMap: {},
-      token: null,
-    },
     sidemenu: [],
   },
   plugins: [
@@ -54,6 +53,31 @@ const store = createStore({
     }),
   ],
   actions: {
+    socket_connect: ({ commit }) => {
+      commit('socket_status', {
+        connect: true,
+      })
+    },
+    socket_disconnect: ({ commit }) => {
+      commit('socket_status', {
+        disconnect: true
+      })
+    },
+    socket_reconnecting: ({ commit }) => {
+      commit('socket_status', {
+        reconnecting: true
+      })
+    },
+    socket_error: ({ commit }) => {
+      commit('socket_status', {
+        error: true
+      })
+    },
+    socket_connect_error: ({ commit }) => {
+      commit('socket_status', {
+        disconnect: true
+      })
+    },
     toggleMenuOn: async ({ commit }) => {
       commit('mutateSidePanelToggleOn')
     },
@@ -64,10 +88,9 @@ const store = createStore({
       commit('mutateThemeDark')
     },
     coreLogin: async ({ commit }, accountRequestData: TAccountLogin) => {
-      return await AccountService.login(accountRequestData).then(
-        (response: any) => {
-          response = response.data
-          if (response.statusCode === 'ACC_I_S0000') {
+      return await AccountService.signIn(accountRequestData).then(
+        (response: CoreResponse) => {
+          if (response.statusCode === CoreResponseLib.Login.success) {
             commit('mutateUpdateToken', response.payload.token)
             commit('mutateLoginSuccess', response.payload.account)
           }
@@ -100,6 +123,9 @@ const store = createStore({
     },
   },
   getters: {
+    getCredential: (state) => {
+      return state.credential
+    },
     getToken: (state) => {
       return state.credential.token
     },
@@ -118,11 +144,32 @@ const store = createStore({
     getThemeMode: (state) => {
       return state.themeModeDark
     },
+    getSocketSession: (state) => {
+      return state.socket.status
+    },
     getCurrentLanguage: (state) => {
       return state.languageMeta
     },
   },
   mutations: {
+    socket_status: (state: any, payload: any) => {
+      state.socket.status = {
+        connect: false,
+        connect_error: false,
+        connect_timeout: false,
+        connecting: false,
+        disconnect: false,
+        reconnect: false,
+        reconnect_attempt: false,
+        reconnecting: false,
+        reconnect_error: false,
+        reconnect_failed: false,
+        error: false,
+        ping: false,
+        pong: false,
+      }
+      state.socket.status[Object.keys(payload)[0]] = payload[Object.keys(payload)[0]]
+    },
     mutateSidePanelToggleOn: (state: any) => {
       state.menuMode = true
     },
@@ -208,7 +255,6 @@ const store = createStore({
       state.credential.id = credentialData.id
       state.credential.first_name = credentialData.first_name
       state.credential.last_name = credentialData.last_name
-      // state.credential.profile_photo = credentialData.image
 
       const grantedPage = credentialData.access
       const buildPage = {}

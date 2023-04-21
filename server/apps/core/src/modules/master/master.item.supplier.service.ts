@@ -30,6 +30,12 @@ export class MasterItemSupplierService {
     return this.masterItemSupplierModel.findOne({ id: id }).exec()
   }
 
+  async find(param, limit: number): Promise<any[]> {
+    return await this.masterItemSupplierModel.find({
+      code: /SUP/,
+    })
+  }
+
   async add(
     data: MasterItemSupplierAddDTO,
     creator: IAccountCreatedBy

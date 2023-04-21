@@ -6,6 +6,9 @@ export const SocketConfig = () => ({
   neural: {
     event: {
       proceed: 'proceed',
+      notify_result: {
+        data: 'data_result',
+      },
     },
   },
 })

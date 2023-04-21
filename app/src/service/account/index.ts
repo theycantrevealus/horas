@@ -1,35 +1,18 @@
-import axios from 'axios'
+import axios, {AxiosResponse} from 'axios'
 import { TAccountLogin } from '@/model/Account'
+import {CoreResponse} from "@/model/Response"
+import api from "@/util/api"
 
 class AccountService {
-  async login(accountData: TAccountLogin) {
-    return await axios
+  async signIn(accountData: TAccountLogin):Promise<CoreResponse> {
+    return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/account/signin`, accountData)
-      .then(async (response) => {
-        // response.data.account.image = await axios
-        //   .get(
-        //     `${process.env.VUE_APP_APIGATEWAY}v1/account/${response.data.account.id}/avatar`,
-        //     {
-        //       headers: {
-        //         Authorization: `Bearer ${response.data.token}`,
-        //       },
-        //       responseType: 'arraybuffer',
-        //     }
-        //   )
-        //   .then(async (imageResponse) => {
-        //     let image = btoa(
-        //       new Uint8Array(imageResponse.data).reduce(
-        //         (data, byte) => data + String.fromCharCode(byte),
-        //         ''
-        //       )
-        //     )
-        //
-        //     return `data:${imageResponse.headers[
-        //       'content-type'
-        //     ].toLowerCase()};base64,${image}`
-        //   })
-        // axios.defaults.headers.common.Authorization = `Bearer ${response.data.token}`
-        return Promise.resolve(response)
+      .then(async (response: AxiosResponse) => {
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
+      })
+      .catch((e: Error) => {
+        return Promise.reject(e)
       })
   }
 }

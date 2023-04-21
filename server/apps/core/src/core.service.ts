@@ -24,8 +24,6 @@ export class CoreService {
 
   loadConfiguration() {}
   async reloadConfig() {
-    this.logger.warn('=================================')
-    this.logger.debug('LOADING SYSTEM CONFIGURATION')
     const config = await this.configModel.find().exec()
     if (config.length > 0) {
       await Promise.all(

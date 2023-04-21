@@ -1,5 +1,6 @@
 import store from '@/store'
 import axios from 'axios'
+import {CoreResponse} from "@/model/Response";
 
 export default ({ requiresAuth = true } = {}) => {
   const options = {

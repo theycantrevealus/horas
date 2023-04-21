@@ -34,7 +34,7 @@ import {
 } from '@inventory/schemas/stock.log'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import { Module } from '@nestjs/common'
+import { Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
@@ -42,7 +42,11 @@ import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { KafkaConn } from '@utility/kafka'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { WinstonModule } from '@utility/logger/module'
 import { TimeManagement } from '@utility/time'
+import * as winston from 'winston'
+import { Logger } from 'winston'
 
 @Module({
   imports: [
@@ -54,6 +58,48 @@ import { TimeManagement } from '@utility/time'
       load: [ApplicationConfig, MongoConfig, SocketConfig],
     }),
     ClientsModule.registerAsync([KafkaConn.m_item[0]]),
+    WinstonModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const today = new TimeManagement()
+        return {
+          levels: {
+            error: 0,
+            warn: 1,
+            verbose: 3,
+          },
+          transports: [
+            new winston.transports.Console({
+              level: 'warn',
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+            new winston.transports.Console({
+              level: 'verbose',
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+          ],
+        }
+      },
+      inject: [ConfigService],
+    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (
@@ -217,4 +263,11 @@ import { TimeManagement } from '@utility/time'
   ],
   exports: [PurchaseOrderService, GeneralReceiveNoteService],
 })
-export class InventoryModule {}
+export class InventoryModule {
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger
+  ) {
+    //
+  }
+}

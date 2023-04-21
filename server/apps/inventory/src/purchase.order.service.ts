@@ -57,8 +57,6 @@ export class PurchaseOrderService {
       status: 'new',
     })
 
-    this.logger.debug(data)
-
     const detailData: IPurchaseOrderDetail[] = []
 
     const response = {

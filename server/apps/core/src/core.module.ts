@@ -12,13 +12,7 @@ import { MenuModule } from '@core/menu/menu.module'
 import { PatientModule } from '@core/patient/patient.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import {
-  CACHE_MANAGER,
-  CacheModule,
-  Inject,
-  Logger,
-  Module,
-} from '@nestjs/common'
+import { CACHE_MANAGER, CacheModule, Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import {
   InjectModel,
@@ -33,6 +27,7 @@ import { Cache } from 'cache-manager'
 import * as redisStore from 'cache-manager-ioredis'
 import { Model } from 'mongoose'
 import * as winston from 'winston'
+import { Logger } from 'winston'
 
 import { CoreController } from './core.controller'
 import { CoreService } from './core.service'
@@ -198,7 +193,7 @@ export class CoreModule {
     @InjectModel(Config.name)
     private readonly configModel: Model<ConfigDocument>,
     @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger = new Logger(CoreModule.name)
+    private readonly logger: Logger
   ) {
     this.loadConfiguration().then(() => {
       // this.logger.verbose('Verbose this')

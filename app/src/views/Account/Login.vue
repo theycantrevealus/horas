@@ -147,15 +147,15 @@ export default {
   },
   methods: {
     ...mapActions({
-      sLogin: 'coreLogin',
+      accountLogin: 'coreLogin',
     }),
     login() {
-      return this.sLogin({
-        request: 'login',
+      return this.accountLogin({
         email: this.email,
         password: this.password,
       }).then((response) => {
         if (response.statusCode === 'ACC_I_S0000') {
+          this.$socket.connect(this.$socket.io.opts)
           this.$router.push('/dashboard')
         } else {
           this.response.message = response.message

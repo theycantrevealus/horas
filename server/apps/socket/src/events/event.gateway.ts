@@ -1,31 +1,54 @@
-import { Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Inject } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets'
+import { JWTTokenDecodeResponse } from '@security/auth.dto'
+import { AuthService } from '@security/auth.service'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { Cache } from 'cache-manager'
 import { from, Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Server, Socket } from 'socket.io'
+import { Logger } from 'winston'
+
+import { IConfig } from '../../../core/src/schemas/config'
 // origin: [
 //   'http://localhost:port',
 //   new RegExp(`/^http:\/\/192\.168\.1\.([1-9]|[1-9]\d):port$/`),
 // ],
-@WebSocketGateway({
+@WebSocketGateway(9900, {
+  allowEIO3: true,
   cors: {
-    origin: '*',
+    origin: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   },
 })
-export class EventsGateway implements OnGatewayConnection {
+export class EventsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+{
   @WebSocketServer()
   io: Server
 
-  private readonly logger: Logger = new Logger(EventsGateway.name)
+  constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(AuthService) private readonly authService: AuthService
+  ) {
+    //
+  }
 
   @SubscribeMessage('events')
   findAll(
@@ -43,11 +66,84 @@ export class EventsGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage('proceed')
-  async process_result(@MessageBody() data: ProceedDataTrafficDTO) {
+  async process_result(
+    @MessageBody() data: ProceedDataTrafficDTO,
+    @ConnectedSocket() client: Socket
+  ) {
+    this.io.sockets.emit(
+      this.configService.get<string>('neural.event.notify_result.data'),
+      data
+    )
     return data
   }
 
-  handleConnection(client: any, ...args: any[]): any {
-    //
+  async afterInit() {
+    this.io.use(async (socket, next) => {
+      if (
+        socket.handshake.headers.authorization &&
+        socket.handshake.headers.authorization
+      ) {
+        const token: string = socket.handshake.headers.authorization
+          .split('Bearer')[1]
+          .trim()
+        const decodeTokenResponse: JWTTokenDecodeResponse =
+          await this.authService.validate_token({
+            token: token,
+          })
+        if (!decodeTokenResponse.account)
+          return next(new Error('Authentication error'))
+        next()
+      } else {
+        next(new Error('Authentication error'))
+      }
+    })
+  }
+
+  async handleDisconnect(client: any, ...args: any[]) {
+    const connectedClients: IConfig = await this.cacheManager.get(
+      'CONNECTED_SOCKET'
+    )
+
+    const clientMeta = connectedClients.setter
+    delete clientMeta[client.id]
+    await this.cacheManager.set('CONNECTED_SOCKET', {
+      setter: clientMeta,
+      __v: 0,
+    })
+  }
+
+  async handleConnection(client: any, ...args: any[]) {
+    const connectedClients: IConfig = await this.cacheManager.get(
+      'CONNECTED_SOCKET'
+    )
+
+    const token: string = client.handshake.headers.authorization
+      .split('Bearer')[1]
+      .trim()
+
+    const decodeTokenResponse: JWTTokenDecodeResponse =
+      await this.authService.validate_token({
+        token: token,
+      })
+
+    let clientMeta = {}
+
+    if (!connectedClients) {
+      if (!clientMeta[client.id]) {
+        clientMeta[client.id] = {}
+      }
+      clientMeta[client.id] = decodeTokenResponse.account
+    } else {
+      clientMeta = connectedClients.setter
+      if (!clientMeta[client.id]) {
+        clientMeta[client.id] = {}
+      }
+      clientMeta[client.id] = decodeTokenResponse.account
+    }
+
+    await this.cacheManager.set('CONNECTED_SOCKET', {
+      setter: clientMeta,
+      __v: 0,
+    })
   }
 }

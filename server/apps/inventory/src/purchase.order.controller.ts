@@ -1,23 +1,28 @@
 import { PurchaseOrderService } from '@inventory/purchase.order.service'
-import { Controller, Inject, Logger } from '@nestjs/common'
+import { Controller, Inject } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { MessagePattern, Payload } from '@nestjs/microservices'
 import { ApiTags } from '@nestjs/swagger'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { Logger } from 'winston'
 
 @Controller('inventory')
 @ApiTags('Purchase Order')
 export class PurchaseOrderController {
-  private readonly logger: Logger = new Logger(PurchaseOrderController.name)
   constructor(
     @Inject(PurchaseOrderService)
     private readonly purchaseOrderService: PurchaseOrderService,
     //@Inject(SocketIoClientProxyService)
     private readonly socketProxy: SocketIoClientProxyService,
     @Inject(ConfigService)
-    private readonly configService: ConfigService
-  ) {}
+    private readonly configService: ConfigService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger
+  ) {
+    logger.verbose('Test')
+  }
 
   @MessagePattern('purchase_order')
   async proceed(@Payload() payload) {

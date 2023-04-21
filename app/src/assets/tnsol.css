@@ -846,6 +846,11 @@ body.dark .p-treenode .p-treenode-content:hover {
     border: none !important
 }
 
+.p-paginator-bottom {
+    background: #bdf2da !important;
+    margin-top: 50px !important;
+}
+
 
 .p-panel-header {
     padding: .5rem !important;
@@ -1345,4 +1350,26 @@ label.currency-label{
     letter-spacing: 1.5px;
     font-family: "Courier New", monospace;
     font-weight: bolder;
+}
+
+.socket-status-container {
+    padding: 0 1rem;
+}
+
+.socket-status-container div.socket-status-label {
+    display: flex;
+    align-items: center;
+    font-size: .65em;
+}
+
+.socket-status-container div.socket-status-label.connected {
+    color: #1cb973 !important;
+}
+
+.socket-status-container div.socket-status-label.disconnected {
+    color: #c52d2d !important;
+}
+
+.socket-status-container div.socket-status-label.hold {
+    color: #ffc300 !important;
 }

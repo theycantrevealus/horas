@@ -1,137 +1,136 @@
 <template>
   <div>
     <Card class="card-fluid">
-      <template #header>
-        <Toolbar>
-          <template #left>
+      <template #content>
+        <Panel
+          header="Purchase Order Management"
+          :toggleable="false"
+        >
+          <template #icons>
             <Button
-              v-if="permission.btnAddPurchaseOrder !== undefined"
-              label="New"
+              v-if="permission.allowAdd"
+              label="Add"
               icon="pi pi-plus"
-              class="mr-2 button-rounded"
+              class="p-button-info p-button-rounded p-button-raised button-sm"
               @click="purchaseOrderAdd"
             />
           </template>
-
-          <template #right></template>
-        </Toolbar>
-      </template>
-      <template #content>
-        <DataTable
-          ref="dt"
-          v-model:filters="filters"
-          :value="items"
-          :lazy="true"
-          :paginator="true"
-          :rows="20"
-          :totalRecords="totalRecords"
-          :loading="loading"
-          filterDisplay="row"
-          :globalFilterFields="['code', 'supplier', 'created_by']"
-          responsiveLayout="scroll"
-          @page="onPage($event)"
-          @sort="onSort($event)"
-          @filter="onFilter($event)"
-        >
-          <Column
-            header="#"
-            class="wrap_content text-right"
+          <DataTable
+            ref="dt"
+            v-model:filters="filters"
+            :value="items"
+            :lazy="true"
+            :paginator="true"
+            :rows="20"
+            :totalRecords="totalRecords"
+            :loading="loading"
+            filterDisplay="row"
+            :globalFilterFields="['code', 'supplier', 'created_by']"
+            responsiveLayout="scroll"
+            @page="onPage($event)"
+            @sort="onSort($event)"
+            @filter="onFilter($event)"
           >
-            <template #body="slotProps">
-              <strong class="d-inline-flex">
-                <span class="material-icons-outlined">hashtag</span>
-                {{ slotProps.data.autonum}}
-              </strong>
-            </template>
-          </Column>
-          <Column header="Action" class="wrap_content">
-            <template #body="slotProps">
+            <Column
+              header="#"
+              class="wrap_content text-right"
+            >
+              <template #body="slotProps">
+                <strong class="d-inline-flex">
+                  <span class="material-icons-outlined">hashtag</span>
+                  {{ slotProps.data.autonum}}
+                </strong>
+              </template>
+            </Column>
+            <Column header="Action" class="wrap_content">
+              <template #body="slotProps">
               <span class="p-buttonset">
                 <Button
-                  v-if="permission.btnEditPurchaseOrder !== undefined"
+                  v-if="permission.allowEdit"
                   class="p-button-info p-button-sm p-button-raised"
                   @click="purchaseOrderEdit(slotProps.data.id)"
                 >
                   <span class="material-icons">edit</span>
                 </Button>
                 <Button
-                  v-if="permission.btnDeletePurchaseOrder !== undefined"
+                  v-if="permission.allowDelete"
                   class="p-button-danger p-button-sm p-button-raised"
                   @click="purchaseOrderDelete($event, slotProps.data.id)"
                 >
                   <span class="material-icons">delete</span>
                 </Button>
               </span>
-            </template>
-          </Column>
-          <Column
-            ref="code"
-            field="code"
-            header="Code"
-            filterMatchMode="startsWith"
-            :sortable="true"
-            class="wrap_content"
-          >
-            <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                v-model="filterModel.value"
-                type="text"
-                class="column-filter"
-                placeholder="Search by code"
-                @keydown.enter="filterCallback()"
-              />
-            </template>
-          </Column>
-          <Column
-            ref="supplier"
-            field="supplier.name"
-            header="Supplier Name"
-            filterField="supplier.name"
-            filterMatchMode="contains"
-            :sortable="true"
-          >
-            <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                v-model="filterModel.value"
-                type="text"
-                class="column-filter"
-                placeholder="Search by supplier"
-                @keydown.enter="filterCallback()"
-              />
-            </template>
-          </Column>
-          <Column
-            ref="supplier"
-            field="total"
-            header="Total"
-            filterField="total"
-            filterMatchMode="contains"
-            :sortable="true"
-          >
-            <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                v-model="filterModel.value"
-                type="text"
-                class="column-filter"
-                placeholder="Search by supplier"
-                @keydown.enter="filterCallback()"
-              />
-            </template>
-            <template #body="slotProps">
-              <CurrencyLabel :number="parseFloat(slotProps.data.total)" :code="`id`" :currency="`IDR`" :lang="`ID`" />
-            </template>
-          </Column>
-          <Column
-            ref="created_at"
-            field="created_at"
-            header="Created Date"
-            :sortable="true"
-          >
-            <template #body="slotProps">
-              <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
-            </template>
-          </Column>
-        </DataTable>
+              </template>
+            </Column>
+            <Column
+              ref="code"
+              field="code"
+              header="Code"
+              filterMatchMode="startsWith"
+              :sortable="true"
+              class="wrap_content"
+            >
+              <template #filter="{ filterModel, filterCallback }">
+                <InputText
+                  v-model="filterModel.value"
+                  type="text"
+                  class="column-filter"
+                  placeholder="Search by code"
+                  @keydown.enter="filterCallback()"
+                />
+              </template>
+            </Column>
+            <Column
+              ref="supplier"
+              field="supplier.name"
+              header="Supplier Name"
+              filterField="supplier.name"
+              filterMatchMode="contains"
+              :sortable="true"
+            >
+              <template #filter="{ filterModel, filterCallback }">
+                <InputText
+                  v-model="filterModel.value"
+                  type="text"
+                  class="column-filter"
+                  placeholder="Search by supplier"
+                  @keydown.enter="filterCallback()"
+                />
+              </template>
+            </Column>
+            <Column
+              ref="supplier"
+              field="total"
+              header="Total"
+              filterField="total"
+              filterMatchMode="contains"
+              :sortable="true"
+            >
+              <template #filter="{ filterModel, filterCallback }">
+                <InputText
+                  v-model="filterModel.value"
+                  type="text"
+                  class="column-filter"
+                  placeholder="Search by supplier"
+                  @keydown.enter="filterCallback()"
+                />
+              </template>
+              <template #body="slotProps">
+                <CurrencyLabel :number="parseFloat(slotProps.data.total)" :code="`id`" :currency="`IDR`" :lang="`ID`" />
+              </template>
+            </Column>
+            <Column
+              ref="created_at"
+              field="created_at"
+              header="Created Date"
+              :sortable="true"
+            >
+              <template #body="slotProps">
+                <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+              </template>
+            </Column>
+          </DataTable>
+        </Panel>
       </template>
       <template #footer></template>
     </Card>
@@ -143,13 +142,14 @@
 import DateManagement from '@/modules/function'
 import Card from 'primevue/card'
 import ConfirmPopup from 'primevue/confirmpopup'
-import Toolbar from 'primevue/toolbar'
+import Panel from 'primevue/panel'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import CurrencyLabel from '@/components/currency/Label.vue'
 import PurchaseOrderService from '@/modules/inventory/purchase_order/service'
+import {mapGetters} from "vuex"
 
 export default {
   components: {
@@ -158,12 +158,17 @@ export default {
     InputText,
     Button,
     Card,
-    Toolbar,
+    Panel,
     ConfirmPopup,
     CurrencyLabel,
   },
   data() {
     return {
+      permission: {
+        allowAdd: false,
+        allowEdit: false,
+        allowDelete: false,
+      },
       loading: false,
       totalRecords: 0,
       items: [],
@@ -180,11 +185,19 @@ export default {
     }
   },
   computed: {
-    permission() {
-      return this.$store.state.credential.permission
-    },
+    ...mapGetters(['getCredential']),
+  },
+  watch: {
+    getCredential: {
+      handler(getData) {
+
+      }
+    }
   },
   mounted() {
+    this.permission.allowAdd = !(!this.getCredential.permission.btnPurchaseOrderAdd)
+    this.permission.allowEdit = !(!this.getCredential.permission.btnPurchaseOrderEdit)
+    this.permission.allowDelete = !(!this.getCredential.permission.btnPurchaseOrderDelete)
     this.lazyParams = {
       first: 0,
       rows: this.$refs.dt.rows,

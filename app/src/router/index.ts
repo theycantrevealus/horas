@@ -123,8 +123,6 @@ router.beforeEach((to, from, next) => {
       if (!to.matched.length) {
         next('/404')
       } else {
-        console.clear()
-        console.log((<any>store.state).credential.routeMap)
         // next()
         // return
         if(to.name) {

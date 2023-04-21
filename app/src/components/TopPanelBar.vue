@@ -18,41 +18,55 @@
         </span>
       </template>
       <template #end>
-        <Dropdown
-          v-model="selectedLanguage"
-          class="country-selector dark"
-          :options="countries"
-          optionLabel="name"
-          :filter="true"
-          placeholder="Select a Country"
-          @change="changeLanguage()"
-        >
-          <template #value="slotProps">
-            <div
-              v-if="slotProps.value"
-              class="country-item country-item-value"
-            >
-              <img
-                :src="require('@/assets/flag_placeholder.png')"
-                :class="'flag flag-' + slotProps.value.code.toLowerCase()"
-                width="18"
-              />
-              <div>{{slotProps.value.name}}</div>
+        <div class="p-menubar-root-list">
+          <div class="socket-status-container">
+            <div v-if="socket.status.connect" class="socket-status-label connected">
+              <span class="material-icons">import_export</span> Connected
             </div>
-            <span v-else>
+            <div v-if="socket.status.disconnect" class="socket-status-label disconnected">
+              <span class="material-icons">mobiledata_off</span> Disconnected
+            </div>
+            <div v-if="socket.status.reconnecting" class="socket-status-label hold">
+              <span class="material-icons">cached</span> Reconnecting
+            </div>
+          </div>
+
+          <Dropdown
+            v-model="selectedLanguage"
+            class="country-selector dark"
+            :options="countries"
+            optionLabel="name"
+            :filter="true"
+            placeholder="Select a Country"
+            @change="changeLanguage()"
+          >
+            <template #value="slotProps">
+              <div
+                v-if="slotProps.value"
+                class="country-item country-item-value"
+              >
+                <img
+                  :src="require('@/assets/flag_placeholder.png')"
+                  :class="'flag flag-' + slotProps.value.code.toLowerCase()"
+                  width="18"
+                />
+                <div>{{slotProps.value.name}}</div>
+              </div>
+              <span v-else>
               {{slotProps.placeholder}}
             </span>
-          </template>
-          <template #option="slotProps">
-            <div class="country-item">
-              <img
-                :src="require('@/assets/flag_placeholder.png')"
-                :class="'flag flag-' + slotProps.option.code.toLowerCase()"
-              />
-              <div>{{slotProps.option.name}}</div>
-            </div>
-          </template>
-        </Dropdown>
+            </template>
+            <template #option="slotProps">
+              <div class="country-item">
+                <img
+                  :src="require('@/assets/flag_placeholder.png')"
+                  :class="'flag flag-' + slotProps.option.code.toLowerCase()"
+                />
+                <div>{{slotProps.option.name}}</div>
+              </div>
+            </template>
+          </Dropdown>
+        </div>
       </template>
     </Menubar>
   </div>
@@ -70,6 +84,24 @@ export default {
 
   data() {
     return {
+      socket: {
+        status: {
+          connect: false,
+          connect_error: false,
+          connect_timeout: false,
+          connecting: false,
+          disconnect: false,
+          reconnect: false,
+          reconnect_attempt: false,
+          reconnecting: false,
+          reconnect_error: false,
+          reconnect_failed: false,
+          error: false,
+          ping: false,
+          pong: false,
+        },
+        message: ''
+      },
       darkMode: false,
       selectedLanguage: null,
       countries: [
@@ -236,6 +268,7 @@ export default {
     ...mapGetters({
       getThemeMode: 'getThemeMode',
       geti18n: 'mCorei18n/getData',
+      getSocketSession: 'getSocketSession',
     }),
     getBrowserLanguage() {
       return this.$store.state.language
@@ -251,6 +284,11 @@ export default {
     },
   },
   watch: {
+    getSocketSession: {
+      handler(getData) {
+        this.socket.status = getData
+      }
+    },
     getThemeMode: {
       handler(getData) {
         if (getData) {
@@ -279,6 +317,11 @@ export default {
   created() {},
   async mounted() {
     await this.initLanguage().then(() => {
+      // this.sockets.subscribe('data_result', (data) => {
+      //   console.log(data)
+      // });
+
+      this.socket.status = this.$store.state.socket.status
       this.selectedLanguage = this.$store.state.language
       this.$i18n.locale = this.selectedLanguage.lang
     })

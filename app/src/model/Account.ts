@@ -4,7 +4,6 @@ export type TAccount = {
 }
 
 export type TAccountLogin = {
-  request: string
   email: string
   password: string
 }

@@ -75,8 +75,32 @@ export class MasterItemSupplierController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
+  async detail(@Query() param) {
     return await this.masterItemSupplierService.detail(param.id)
+  }
+
+  @Get('supplier/:limit')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Detail data',
+    description: '',
+  })
+  @ApiQuery({
+    name: 'search',
+    type: String,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: true,
+  })
+  async find(@Query() parameter): Promise<string> {
+    return parameter
+    // return await this.masterItemSupplierService.find(parameter, limit)
   }
 
   @Post('supplier')

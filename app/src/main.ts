@@ -34,6 +34,8 @@ import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
 import 'primeflex/primeflex.css'
 import { i18n } from '@/util/i18n/instances'
+import VueSocketIO from 'vue-3-socket.io'
+import {io} from "socket.io-client";
 
 registerModules({
   newModule: New,
@@ -57,8 +59,23 @@ declare global {
 declare var require: any
 
 const app = createApp(App)
-
 app
+  .use(new VueSocketIO({
+    debug: true,
+    connection: io(process.env.NODE_ENV === "production" ? "http://localhost:9900" : "http://localhost:9900", {
+      withCredentials: true,
+      auth: {
+        token: `Bearer ${store.state.credential.token}`
+      },
+      extraHeaders: {
+        Authorization: `Bearer ${store.state.credential.token}`
+      }
+    }),
+    vuex: {
+      store,
+      actionPrefix: 'socket_',
+    },
+  }))
   .use(PrimeVue)
   .use(store)
   .use(router)
