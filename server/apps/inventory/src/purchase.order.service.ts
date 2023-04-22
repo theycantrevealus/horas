@@ -13,7 +13,8 @@ import {
   PurchaseOrderDocument,
 } from '@inventory/schemas/purchase.order'
 import { IPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { LogService } from '@log/log.service'
+import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -21,12 +22,14 @@ import { modCodes } from '@utility/modules'
 import { pad } from '@utility/string'
 import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
+import { Logger } from 'winston'
 
 @Injectable()
 export class PurchaseOrderService {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger = new Logger(PurchaseOrder.name),
+    private readonly logger: Logger,
+    @Inject(LogService) private readonly logService: LogService,
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
@@ -128,7 +131,11 @@ export class PurchaseOrderService {
         ...data,
         created_by: account,
       })
-      .then((result) => {
+      .then(async (result) => {
+        await this.logService.updateTask(
+          `purchase_order-${generatedID}`,
+          'done'
+        )
         response.message = 'Purchase Order created successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.success

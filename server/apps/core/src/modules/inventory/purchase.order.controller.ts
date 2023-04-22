@@ -7,6 +7,7 @@ import {
   PurchaseOrderApproval,
   PurchaseOrderEditDTO,
 } from '@inventory/dto/purchase.order'
+import { LogService } from '@log/log.service'
 import {
   Body,
   Controller,
@@ -17,6 +18,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
   UseInterceptors,
   Version,
@@ -37,7 +39,8 @@ import { isJSON } from 'class-validator'
 export class PurchaseOrderController {
   constructor(
     @Inject(PurchaseOrderService)
-    private readonly purchaseOrderService: PurchaseOrderService
+    private readonly purchaseOrderService: PurchaseOrderService,
+    @Inject(LogService) private readonly logService: LogService
   ) {}
 
   @Get('purchase_order')
@@ -93,9 +96,14 @@ export class PurchaseOrderController {
   })
   async add(
     @Body() parameter: PurchaseOrderAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account,
+    @Req() request
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.add(parameter, account)
+    return await this.purchaseOrderService.add(
+      parameter,
+      account,
+      request.headers.authorization
+    )
   }
 
   @Patch('purchase_order/ask_approval/:id')

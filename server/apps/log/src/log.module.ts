@@ -1,8 +1,12 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
+import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { WinstonModule } from '@utility/logger/module'
+import { TimeManagement } from '@utility/time'
+import * as winston from 'winston'
 
 import { LogController } from './log.controller'
 import { LogService } from './log.service'
@@ -16,6 +20,36 @@ import { LogService } from './log.service'
       }.env`,
       load: [ApplicationConfig, MongoConfig],
     }),
+    WinstonModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const today = new TimeManagement()
+        return {
+          levels: {
+            error: 0,
+            warn: 1,
+            verbose: 3,
+          },
+          transports: [
+            new winston.transports.Console({
+              level: configService
+                .get<string>('application.log.verbose')
+                .toString(),
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+          ],
+        }
+      },
+    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (
@@ -28,6 +62,9 @@ import { LogService } from './log.service'
       }),
       inject: [ConfigService],
     }),
+    MongooseModule.forFeature([
+      { name: LogActivity.name, schema: LogActivitySchema },
+    ]),
   ],
   controllers: [LogController],
   providers: [LogService],

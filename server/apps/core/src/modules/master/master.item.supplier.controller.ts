@@ -11,6 +11,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -28,13 +29,19 @@ import {
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { isJSON } from 'class-validator'
+import { Logger } from 'winston'
 
 @Controller('master')
 @ApiTags('Master Data Management')
 export class MasterItemSupplierController {
   private masterItemSupplierService: MasterItemSupplierService
-  constructor(masterItemSupplierService: MasterItemSupplierService) {
+  constructor(
+    masterItemSupplierService: MasterItemSupplierService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger
+  ) {
     this.masterItemSupplierService = masterItemSupplierService
   }
 
@@ -66,26 +73,13 @@ export class MasterItemSupplierController {
     }
   }
 
-  @Get('supplier/:id')
+  @Get('supplier/find')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Detail data',
-    description: '',
-  })
-  async detail(@Query() param) {
-    return await this.masterItemSupplierService.detail(param.id)
-  }
-
-  @Get('supplier/:limit')
-  @Version('1')
-  @UseGuards(JwtAuthGuard)
-  @Authorization(true)
-  @ApiBearerAuth('JWT')
-  @ApiOperation({
-    summary: 'Detail data',
+    summary: 'Find data',
     description: '',
   })
   @ApiQuery({
@@ -98,9 +92,24 @@ export class MasterItemSupplierController {
     type: Number,
     required: true,
   })
-  async find(@Query() parameter): Promise<string> {
-    return parameter
-    // return await this.masterItemSupplierService.find(parameter, limit)
+  async find(@Query() parameter) {
+    return await this.masterItemSupplierService.find(
+      parameter.search,
+      parameter.limit
+    )
+  }
+
+  @Get('supplier/:id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Detail data',
+    description: '',
+  })
+  async detail(@Query() param) {
+    return await this.masterItemSupplierService.detail(param.id)
   }
 
   @Post('supplier')

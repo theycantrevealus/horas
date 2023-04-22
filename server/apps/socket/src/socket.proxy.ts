@@ -20,6 +20,10 @@ export class SocketIoClientProxyService extends ClientProxy {
     this.client.getSocket()
   }
 
+  async reconnect(config): Promise<any> {
+    return this.client.getSocket(config)
+  }
+
   async close() {
     this.client.getSocket().disconnect()
   }

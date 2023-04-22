@@ -69,10 +69,7 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
             verbose: 3,
           },
           transports: [
-            new winston.transports.File({
-              filename: `logs/${configService.get<string>(
-                'application.log.verbose'
-              )}/${today.getDate().toString()}.txt`,
+            new winston.transports.Console({
               level: configService
                 .get<string>('application.log.verbose')
                 .toString(),
@@ -87,43 +84,61 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
                 })
               ),
             }),
-            new winston.transports.File({
-              filename: `logs/${configService.get<string>(
-                'application.log.warn'
-              )}/${today.getDate().toString()}.txt`,
-              level: configService
-                .get<string>('application.log.warn')
-                .toString(),
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-            new winston.transports.File({
-              filename: `logs/${configService.get<string>(
-                'application.log.error'
-              )}/${today.getDate().toString()}.txt`,
-              level: configService
-                .get<string>('application.log.error')
-                .toString(),
-              handleExceptions: true,
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
+            // new winston.transports.File({
+            //   filename: `logs/${configService.get<string>(
+            //     'application.log.verbose'
+            //   )}/${today.getDate().toString()}.txt`,
+            //   level: configService
+            //     .get<string>('application.log.verbose')
+            //     .toString(),
+            //   format: winston.format.combine(
+            //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+            //     winston.format.printf((data) => {
+            //       return JSON.stringify({
+            //         timestamp: data.timestamp,
+            //         level: data.level,
+            //         message: data.message,
+            //       })
+            //     })
+            //   ),
+            // }),
+            // new winston.transports.File({
+            //   filename: `logs/${configService.get<string>(
+            //     'application.log.warn'
+            //   )}/${today.getDate().toString()}.txt`,
+            //   level: configService
+            //     .get<string>('application.log.warn')
+            //     .toString(),
+            //   format: winston.format.combine(
+            //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+            //     winston.format.printf((data) => {
+            //       return JSON.stringify({
+            //         timestamp: data.timestamp,
+            //         level: data.level,
+            //         message: data.message,
+            //       })
+            //     })
+            //   ),
+            // }),
+            // new winston.transports.File({
+            //   filename: `logs/${configService.get<string>(
+            //     'application.log.error'
+            //   )}/${today.getDate().toString()}.txt`,
+            //   level: configService
+            //     .get<string>('application.log.error')
+            //     .toString(),
+            //   handleExceptions: true,
+            //   format: winston.format.combine(
+            //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+            //     winston.format.printf((data) => {
+            //       return JSON.stringify({
+            //         timestamp: data.timestamp,
+            //         level: data.level,
+            //         message: data.message,
+            //       })
+            //     })
+            //   ),
+            // }),
           ],
         }
       },

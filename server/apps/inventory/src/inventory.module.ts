@@ -32,6 +32,7 @@ import {
   InventoryStockLog,
   InventoryStockLogSchema,
 } from '@inventory/schemas/stock.log'
+import { LogService } from '@log/log.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Inject, Module } from '@nestjs/common'
@@ -253,6 +254,7 @@ import { Logger } from 'winston'
   ],
   controllers: [PurchaseOrderController, GeneralReceiveNoteController],
   providers: [
+    LogService,
     InventoryService,
     PurchaseOrderService,
     GeneralReceiveNoteService,

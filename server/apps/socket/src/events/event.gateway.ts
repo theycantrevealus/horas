@@ -9,16 +9,14 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from '@nestjs/websockets'
 import { JWTTokenDecodeResponse } from '@security/auth.dto'
 import { AuthService } from '@security/auth.service'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Cache } from 'cache-manager'
-import { from, Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
-import { Server, Socket } from 'socket.io'
+import { Server } from 'socket.io'
+import { Socket } from 'socket.io-client'
 import { Logger } from 'winston'
 
 import { IConfig } from '../../../core/src/schemas/config'
@@ -50,20 +48,20 @@ export class EventsGateway
     //
   }
 
-  @SubscribeMessage('events')
-  findAll(
-    @MessageBody() data: any,
-    @ConnectedSocket() client: Socket
-  ): Observable<WsResponse<number>> {
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: 'events', data: item }))
-    )
-  }
-
-  @SubscribeMessage('identity')
-  async identity(@MessageBody() data: number): Promise<number> {
-    return data
-  }
+  // @SubscribeMessage('events')
+  // findAll(
+  //   @MessageBody() data: any,
+  //   @ConnectedSocket() client: Socket
+  // ): Observable<WsResponse<number>> {
+  //   return from([1, 2, 3]).pipe(
+  //     map((item) => ({ event: 'events', data: item }))
+  //   )
+  // }
+  //
+  // @SubscribeMessage('identity')
+  // async identity(@MessageBody() data: number): Promise<number> {
+  //   return data
+  // }
 
   @SubscribeMessage('proceed')
   async process_result(

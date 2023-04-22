@@ -29,6 +29,19 @@ export class MasterItemService {
     return await prime_datatable(parameter, this.masterItemModel)
   }
 
+  async filter(search: string, limit: number): Promise<MasterItem[]> {
+    return await this.masterItemModel
+      .find({
+        $or: [
+          { code: new RegExp(search, 'i') },
+          { name: new RegExp(search, 'i') },
+          { alias: new RegExp(search, 'i') },
+        ],
+      })
+      .limit(limit)
+      .exec()
+  }
+
   async detail(id: string): Promise<MasterItem> {
     return this.masterItemModel.findOne({ id: id }).exec()
   }

@@ -14,12 +14,14 @@ import {CoreResponse, CoreResponseLib} from "@/model/Response";
 
 import { credential } from "@/store/states/credential";
 import { socket } from "@/store/states/socket";
+import {task} from "@/store/states/task";
 
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
     ...credential,
     ...socket,
+    ...task,
     connect: false,
     reconnecting: false,
     message: '',
@@ -150,6 +152,9 @@ const store = createStore({
     getCurrentLanguage: (state) => {
       return state.languageMeta
     },
+    getTask: (state) => {
+      return state.task
+    },
   },
   mutations: {
     socket_status: (state: any, payload: any) => {
@@ -242,6 +247,13 @@ const store = createStore({
       state.credential.routes = routes
       state.credential.routeMap = routeMap
       state.credential.pages = buildPage
+    },
+    mutateUpdateTask: (state, data: any) => {
+      if(!state.task[data.identifier]) {
+        state.task[data.identifier] = []
+      }
+
+      state.task[data.identifier].push(data.task)
     },
     mutateStartLoading: (state) => state.loading++,
     mutateFinishLoading: (state) => state.loading--,

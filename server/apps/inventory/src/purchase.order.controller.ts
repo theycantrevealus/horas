@@ -21,7 +21,7 @@ export class PurchaseOrderController {
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {
-    logger.verbose('Test')
+    //
   }
 
   @MessagePattern('purchase_order')
@@ -31,16 +31,26 @@ export class PurchaseOrderController {
         await this.purchaseOrderService
           .add(payload.id, payload.data, payload.account)
           .then(async (response) => {
-            await this.socketProxy.connect().then(async () => {
-              await this.socketProxy.emit(
-                this.configService.get<string>('neural.event.proceed'),
-                {
-                  sender: payload.account,
-                  receiver: payload.account,
-                  payload: response,
-                } satisfies ProceedDataTrafficDTO
-              )
-            })
+            await this.socketProxy
+              .reconnect({
+                extraHeaders: {
+                  Authorization: payload.token,
+                },
+              })
+              .then(async (clientSet) => {
+                await clientSet
+                  .emit('proceed', {
+                    sender: payload.account,
+                    receiver: payload.account,
+                    payload: response,
+                  } satisfies ProceedDataTrafficDTO)
+                  .then(() => {
+                    clientSet.disconnect()
+                  })
+              })
+              .catch((e: Error) => {
+                this.logger.warn('Failed to connect')
+              })
           })
         break
       case 'edit':

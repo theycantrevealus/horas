@@ -72,6 +72,32 @@ export class MasterItemController {
     }
   }
 
+  @Get('item/find')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Find data',
+    description: '',
+  })
+  @ApiQuery({
+    name: 'search',
+    type: String,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: true,
+  })
+  async find(@Query() parameter) {
+    return await this.masterItemService.filter(
+      parameter.search,
+      parameter.limit
+    )
+  }
+
   @Get('item/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)

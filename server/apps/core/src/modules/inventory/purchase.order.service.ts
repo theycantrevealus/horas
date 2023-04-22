@@ -23,10 +23,8 @@ export class PurchaseOrderService {
   constructor(
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
-
     @Inject(MasterItemService)
     private readonly masterItemService: MasterItemService,
-
     @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
   ) {}
 
@@ -40,7 +38,8 @@ export class PurchaseOrderService {
 
   async add(
     data: PurchaseOrderAddDTO,
-    account: Account
+    account: Account,
+    token: string
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -57,6 +56,7 @@ export class PurchaseOrderService {
       id: generatedID,
       data: data,
       account: account,
+      token: token,
     })
 
     if (emitter) {

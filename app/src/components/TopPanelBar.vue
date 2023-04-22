@@ -317,7 +317,8 @@ export default {
   created() {},
   async mounted() {
     await this.initLanguage().then(() => {
-      // this.sockets.subscribe('data_result', (data) => {
+      // this.sockets.subscribe('proceed', (data) => {
+      //   console.log('Catch in header')
       //   console.log(data)
       // });
 

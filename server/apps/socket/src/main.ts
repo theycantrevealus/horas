@@ -6,7 +6,7 @@ import { SocketModule } from './socket.module'
 
 async function bootstrap() {
   const app = await NestFactory.create(SocketModule, {
-    // logger: ['error', 'warn', 'debug'],
+    logger: ['error', 'warn', 'debug', 'verbose'],
     cors: {
       origin: '*:*',
     },

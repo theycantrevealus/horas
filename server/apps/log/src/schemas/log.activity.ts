@@ -50,6 +50,13 @@ export class LogActivity {
   new_meta: any
 
   @Prop({
+    type: SchemaTypes.String,
+    enum: ['created', 'done'],
+    default: 'created',
+  })
+  status: string
+
+  @Prop({
     type: SchemaTypes.Number,
   })
   doc_v: number

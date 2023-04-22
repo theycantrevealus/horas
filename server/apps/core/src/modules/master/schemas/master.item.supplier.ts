@@ -5,32 +5,32 @@ import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterItemSupplierDocument = HydratedDocument<MasterItemSupplier>
-@Schema({ collection: 'master_item_supplier', autoIndex: true })
+@Schema({ collection: 'master_item_supplier' })
 export class MasterItemSupplier {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
-  @Prop({ type: SchemaTypes.String, required: true, unique: true, text: true })
+  @Prop({ type: SchemaTypes.String, required: true, unique: true })
   code: string
 
-  @Prop({ type: SchemaTypes.String, unique: true, text: true })
+  @Prop({ type: SchemaTypes.String, unique: true })
   name: string
 
-  @Prop({ type: SchemaTypes.String, text: true, index: true })
+  @Prop({ type: SchemaTypes.String })
   phone: string
 
-  @Prop({ type: SchemaTypes.String, text: true, index: true })
+  @Prop({ type: SchemaTypes.String })
   email: string
 
-  @Prop({ type: SchemaTypes.String, text: true, index: true })
+  @Prop({ type: SchemaTypes.String })
   sales_name: string
 
-  @Prop({ type: SchemaTypes.String, text: true, index: true })
+  @Prop({ type: SchemaTypes.String, required: false })
   address: string
 
   //{$text: { $search: 'Supplier Example', $caseSensitive: false, $diacriticSensitive: false}}
 
-  @Prop({ type: SchemaTypes.String, text: true, index: true })
+  @Prop({ type: SchemaTypes.String, required: false })
   remark: string
 
   @Prop(raw(AccountJoin))

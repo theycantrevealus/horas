@@ -27,13 +27,21 @@ export class MasterItemSupplierService {
   }
 
   async detail(id: string): Promise<MasterItemSupplier> {
-    return this.masterItemSupplierModel.findOne({ id: id }).exec()
+    return await this.masterItemSupplierModel.findOne({ id: id }).exec()
   }
 
-  async find(param, limit: number): Promise<any[]> {
-    return await this.masterItemSupplierModel.find({
-      code: /SUP/,
-    })
+  async find(search: string, limit: number): Promise<MasterItemSupplier[]> {
+    return await this.masterItemSupplierModel
+      .find({
+        $or: [
+          { code: new RegExp(search, 'i') },
+          { name: new RegExp(search, 'i') },
+          { email: new RegExp(search, 'i') },
+          { phone: new RegExp(search, 'i') },
+        ],
+      })
+      .limit(limit)
+      .exec()
   }
 
   async add(
