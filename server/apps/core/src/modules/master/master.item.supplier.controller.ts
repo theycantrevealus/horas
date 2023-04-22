@@ -11,7 +11,6 @@ import {
   Controller,
   Delete,
   Get,
-  Inject,
   Param,
   Patch,
   Post,
@@ -29,19 +28,13 @@ import {
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { isJSON } from 'class-validator'
-import { Logger } from 'winston'
 
 @Controller('master')
 @ApiTags('Master Data Management')
 export class MasterItemSupplierController {
   private masterItemSupplierService: MasterItemSupplierService
-  constructor(
-    masterItemSupplierService: MasterItemSupplierService,
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger
-  ) {
+  constructor(masterItemSupplierService: MasterItemSupplierService) {
     this.masterItemSupplierService = masterItemSupplierService
   }
 

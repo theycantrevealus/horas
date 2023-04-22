@@ -16,6 +16,7 @@ export const mockLogActivity = (
     last_name: 'Tanaka',
     email: 'theycantrevealus@gmail.com',
   },
+  status: string,
   doc_v: number,
   collection_name: string,
   action: string,
@@ -30,6 +31,7 @@ export const mockLogActivity = (
   old_meta,
   new_meta,
   doc_v,
+  status,
   logged_at,
 })
 
@@ -44,6 +46,7 @@ export const mockLogActivityModel = {
         '',
         '',
         accountArray[0],
+        'created',
         0,
         'core_account',
         'I',
@@ -60,6 +63,7 @@ export const mockLogActivityModel = {
         '',
         '',
         accountArray[0],
+        'created',
         0,
         '',
         'I',
