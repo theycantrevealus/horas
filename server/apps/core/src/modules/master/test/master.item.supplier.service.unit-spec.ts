@@ -18,12 +18,15 @@ import {
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
+import { CacheModule } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { testCaption } from '@utility/string'
+import * as redisStore from 'cache-manager-ioredis'
 import { Model, Query, Types } from 'mongoose'
 
 describe('Master Item Supplier Service', () => {
@@ -32,6 +35,23 @@ describe('Master Item Supplier Service', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        CacheModule.registerAsync({
+          isGlobal: true,
+          imports: [ConfigModule],
+          useFactory: async (configService: ConfigService) => {
+            return {
+              store: redisStore,
+              host: configService.get<string>('redis.host'),
+              port: configService.get<string>('redis.port'),
+              username: configService.get<string>('redis.username'),
+              password: configService.get<string>('redis.password'),
+              isGlobal: true,
+            }
+          },
+          inject: [ConfigService],
+        }),
+      ],
       controllers: [],
       providers: [
         MasterItemSupplierService,

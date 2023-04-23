@@ -20,7 +20,8 @@ import {
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
-import { ConfigModule } from '@nestjs/config'
+import { CacheModule } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { ClientsModule } from '@nestjs/microservices'
 import { getModelToken } from '@nestjs/mongoose'
@@ -29,6 +30,7 @@ import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { KafkaConn } from '@utility/kafka'
 import { testCaption } from '@utility/string'
+import * as redisStore from 'cache-manager-ioredis'
 import { Model, Query, Types } from 'mongoose'
 
 describe('Master Item Service', () => {
@@ -46,6 +48,21 @@ describe('Master Item Service', () => {
           load: [ApplicationConfig, MongoConfig],
         }),
         ClientsModule.registerAsync([KafkaConn.m_item[0]]),
+        CacheModule.registerAsync({
+          isGlobal: true,
+          imports: [ConfigModule],
+          useFactory: async (configService: ConfigService) => {
+            return {
+              store: redisStore,
+              host: configService.get<string>('redis.host'),
+              port: configService.get<string>('redis.port'),
+              username: configService.get<string>('redis.username'),
+              password: configService.get<string>('redis.password'),
+              isGlobal: true,
+            }
+          },
+          inject: [ConfigService],
+        }),
       ],
       controllers: [],
       providers: [
