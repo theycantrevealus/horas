@@ -9,7 +9,7 @@ import {
 
 export class AccountSignInDTO {
   @ApiProperty({
-    example: 'johndoe@example.com',
+    example: 'takashitanaka@horas.com',
     minLength: 8,
     maxLength: 24,
     description: '',

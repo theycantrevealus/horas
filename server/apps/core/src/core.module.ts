@@ -45,6 +45,7 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
       load: [ApplicationConfig, MongoConfig, KafkaConfig, RedisConfig],
     }),
     CacheModule.registerAsync({
+      isGlobal: true,
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         return {

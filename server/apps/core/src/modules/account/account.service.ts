@@ -2,7 +2,7 @@ import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
-import { Injectable } from '@nestjs/common'
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
@@ -11,8 +11,10 @@ import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
 import { TimeManagement } from '@utility/time'
 import * as bcrypt from 'bcrypt'
+import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 
+import { IConfig } from '../../schemas/config'
 import { AccountAddDTO } from './dto/account.add'
 import { Account, AccountDocument } from './schemas/account.model'
 
@@ -23,6 +25,7 @@ export class AccountService {
     private accountModel: Model<AccountDocument>,
     @InjectModel(LogLogin.name)
     private logLoginModel: Model<LogLoginDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private authService: AuthService
   ) {}
 
@@ -249,6 +252,26 @@ export class AccountService {
                   expired_at: token.expired_at,
                 })
 
+                const config = {
+                  application: {
+                    name: await this.cacheManager
+                      .get('APPLICATION_NAME')
+                      .then((response: IConfig) => {
+                        return response.setter
+                      }),
+                    version: await this.cacheManager
+                      .get('APPLICATION_VERSION')
+                      .then((response: IConfig) => {
+                        return response.setter
+                      }),
+                  },
+                  locale: await this.cacheManager
+                    .get('APPLICATION_LOCALE')
+                    .then((response: IConfig) => {
+                      return response.setter
+                    }),
+                }
+
                 await logLogin
                   .save()
                   .then(async (loginResult: any) => {
@@ -260,6 +283,7 @@ export class AccountService {
                     response.payload = {
                       account: result,
                       token: token.set,
+                      config: config,
                     }
                   })
                   .catch(() => {

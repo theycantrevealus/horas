@@ -15,10 +15,12 @@ import {CoreResponse, CoreResponseLib} from "@/model/Response";
 import { credential } from "@/store/states/credential";
 import { socket } from "@/store/states/socket";
 import {task} from "@/store/states/task";
+import {application} from "@/store/states/application";
 
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
+    ...application,
     ...credential,
     ...socket,
     ...task,
@@ -95,6 +97,7 @@ const store = createStore({
           if (response.statusCode === CoreResponseLib.Login.success) {
             commit('mutateUpdateToken', response.payload.token)
             commit('mutateLoginSuccess', response.payload.account)
+            commit('mutateSystemConfig', response.payload.config)
           }
           return response
         }
@@ -262,6 +265,9 @@ const store = createStore({
     },
     mutateUpdateMenu(state: any, menu) {
       state.sidemenu = menu
+    },
+    mutateSystemConfig(state: any, data) {
+      state.application = data
     },
     mutateLoginSuccess(state: any, credentialData) {
       state.credential.id = credentialData.id

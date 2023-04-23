@@ -53,7 +53,7 @@ export class CoreController {
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Fetch all',
-    description: 'Showing brand data',
+    description: 'Showing data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
@@ -72,6 +72,19 @@ export class CoreController {
         payload: {},
       }
     }
+  }
+
+  @Get('configuration/configured')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Fetch all configured',
+    description: 'Showing configuration',
+  })
+  async configure() {
+    return await this.coreService.configured()
   }
 
   @Get('configuration/:id')

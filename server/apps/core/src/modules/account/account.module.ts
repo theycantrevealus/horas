@@ -1,9 +1,11 @@
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import { Module } from '@nestjs/common'
+import { CacheModule, Module } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { TimeManagement } from '@utility/time'
+import * as redisStore from 'cache-manager-ioredis'
 
 import { AccountController } from './account.controller'
 import { AccountService } from './account.service'
@@ -11,6 +13,21 @@ import { Account, AccountSchema } from './schemas/account.model'
 
 @Module({
   imports: [
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          store: redisStore,
+          host: configService.get<string>('redis.host'),
+          port: configService.get<string>('redis.port'),
+          username: configService.get<string>('redis.username'),
+          password: configService.get<string>('redis.password'),
+          isGlobal: true,
+        }
+      },
+      inject: [ConfigService],
+    }),
     MongooseModule.forFeatureAsync([
       {
         name: Account.name,

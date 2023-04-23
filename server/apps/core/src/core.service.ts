@@ -23,6 +23,28 @@ export class CoreService {
   ) {}
 
   loadConfiguration() {}
+
+  async configured() {
+    return {
+      application: {
+        name: await this.cacheManager
+          .get('APPLICATION_NAME')
+          .then((response: IConfig) => {
+            return response.setter
+          }),
+        version: await this.cacheManager
+          .get('APPLICATION_VERSION')
+          .then((response: IConfig) => {
+            return response.setter
+          }),
+      },
+      locale: await this.cacheManager
+        .get('APPLICATION_LOCALE')
+        .then((response: IConfig) => {
+          return response.setter
+        }),
+    }
+  }
   async reloadConfig() {
     const config = await this.configModel.find().exec()
     if (config.length > 0) {

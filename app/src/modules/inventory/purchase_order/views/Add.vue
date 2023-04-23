@@ -83,7 +83,7 @@
                           tableClass="editable-cells-table"
                           tableStyle="min-width: 50rem"
                           @row-edit-save="onRowEditSave">
-                          <Column field="id" header="Action" style="width: 100px" class="wrap_content text-right">
+                          <Column field="id" header="Action" style="width: 80px" class="wrap_content text-right">
                             <template #editor="{ data, field }">
                               <strong class="d-inline-flex">
                                 <span class="material-icons-outlined">hashtag</span>{{ data[field] }}
@@ -133,7 +133,7 @@
                               <div><Tag v-if="slotProps.data.item.code" :value="slotProps.data.item.code" severity="info" /> {{ slotProps.data.item.name }}</div>
                             </template>
                           </Column>
-                          <Column field="qty" header="Qty" style="width: 200px" class="wrap_content text-right">
+                          <Column field="qty" header="Qty" style="width: 150px" class="wrap_content text-right">
                             <template #editor="{ data, field }">
                               <div class="p-inputgroup">
                                 <InputText
@@ -147,7 +147,17 @@
                               {{ slotProps.data.qty }}
                             </template>
                           </Column>
-                          <Column field="discount_type" header="Discount Type" style="width: 200px">
+                          <Column field="price" header="Price" style="width: 20%; overflow: hidden">
+                            <template #body="{ data, field }">
+                              <div class="wrap_content text-right">
+                                {{ formatCurrency(data[field]) }}
+                              </div>
+                            </template>
+                            <template #editor="{ data, field }">
+                              <InputNumber v-model="data[field]" mode="currency" :currency="application.locale.currency" :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                            </template>
+                          </Column>
+                          <Column field="discount_type" header="Discount Type" style="width: 10%">
                             <template #editor="{ data, field }">
                               <div class="p-inputgroup">
                                 <Dropdown
@@ -167,7 +177,7 @@
                               {{ getDiscountLabel(slotProps.data.discount_type) }}
                             </template>
                           </Column>
-                          <Column field="discount_value" header="Discount Value" style="width: 200px" class="wrap_content text-right">
+                          <Column field="discount_value" header="Discount Value" style="width: 10%" class="wrap_content text-right">
                             <template #editor="{ data, field }">
                               <div class="p-inputgroup">
                                 <InputText
@@ -181,12 +191,12 @@
                               {{ slotProps.data.discount_value }}
                             </template>
                           </Column>
-                          <Column field="price" header="Price" style="width: 20%" class="wrap_content text-right">
+                          <Column field="total" header="Total" style="width: 200px" class="wrap_content text-right">
                             <template #body="{ data, field }">
                               {{ formatCurrency(data[field]) }}
                             </template>
                             <template #editor="{ data, field }">
-                              <InputNumber v-model="data[field]" mode="currency" currency="IDR" locale="id-ID" />
+                              {{ data[field] }}
                             </template>
                           </Column>
                           <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
@@ -231,10 +241,24 @@
                           />
                         </div>
                       </div>
+                      <div class="col-4">
+                        <div class="flex flex-column gap-2">
+                          <label for="total">Total</label>
+                          <InputNumber
+                            id="total"
+                            v-model="computer.total"
+                            disabled="disabled"
+                            class="p-inputtext-sm"
+                            placeholder="Total"
+                            mode="currency"
+                            :currency="application.locale.currency"
+                            :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                        </div>
+                      </div>
                       <div class="col-12">
                         <div class="flex flex-column gap-2">
                           <label for="remark">Remark</label>
-                          <Textarea id="remark" :disabled="disabler.remark" v-model="formData.remark" placeholder="Purchase order remark" autoResize rows="5" cols="30" />
+                          <Textarea id="remark" v-model="formData.remark" :disabled="disabler.remark" placeholder="Purchase order remark" autoResize rows="5" cols="30" />
                         </div>
                       </div>
                     </div>
@@ -283,24 +307,6 @@
       <ConfirmPopup group="confirm_changes"></ConfirmPopup>
       <ConfirmDialog group="keep_editing"></ConfirmDialog>
     </div>
-    <Dialog
-      v-model:visible="displayEditorImage"
-      header="Avatar Editor"
-      :style="{ width: '50vw' }"
-      :modal="true"
-    >
-      <p class="m-0">
-        <Cropper @cropImage="setImageData" />
-      </p>
-      <template #footer>
-        <Button
-          label="Close"
-          icon="pi pi-times"
-          class="button-text"
-          @click="toggleEditImageWindow"
-        />
-      </template>
-    </Dialog>
   </div>
 </template>
 <script>
@@ -312,7 +318,6 @@ import Button from 'primevue/button'
 import Column from 'primevue/column'
 import ConfirmPopup from 'primevue/confirmpopup'
 import ConfirmDialog from 'primevue/confirmdialog'
-import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
 import TabView from 'primevue/tabview'
 import InputNumber from 'primevue/inputnumber'
@@ -320,15 +325,10 @@ import TabPanel from 'primevue/tabpanel'
 import DataTable from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import BlockUI from 'primevue/blockui'
-import Cropper from '@/components/Cropper.vue'
 import MasterItemService from '@/modules/master/item/service'
 import PurchaseOrderService from '@/modules/inventory/purchase_order/service'
 import Calendar from 'primevue/calendar'
-import { getCurrentTimestamp } from '@/util/time'
-
-import { mapActions, mapGetters, mapState } from 'vuex'
-import {ISupplier} from "@/model/Supplier"
-import {CoreResponse} from "@/model/Response"
+import { mapGetters, mapState } from 'vuex'
 export default {
   name: 'PurchaseOrderAdd',
   components: {
@@ -343,13 +343,11 @@ export default {
     Column,
     BlockUI,
     Tag,
-    Dialog,
     TabView,
     TabPanel,
     InputNumber,
     Calendar,
     Textarea,
-    Cropper,
   },
   data() {
     return {
@@ -365,6 +363,9 @@ export default {
       autoTable: {
         editingRows: []
       },
+      computer: {
+        total: 0
+      },
       products: [
         {
           id: 1,
@@ -379,6 +380,7 @@ export default {
             },
           },
           price: 0,
+          total: 0,
           qty: 0,
           discount_type: 'n',
           discount_value: 0,
@@ -413,6 +415,7 @@ export default {
   },
   computed: {
     ...mapGetters(['getTask']),
+    ...mapState(['application']),
   },
   watch: {
     getTask: {
@@ -468,6 +471,7 @@ export default {
           },
           price: 0,
           qty: 0,
+          total: 0,
           discount_type: 'n',
           discount_value: 0,
           remark: '',
@@ -475,7 +479,7 @@ export default {
       }
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+      return new Intl.NumberFormat(`${this.application.locale.language_code.toLowerCase()}-${this.application.locale.iso_2_digits.toUpperCase()}`, { style: 'currency', currency: this.application.locale.currency }).format(value);
     },
     allowAdd() {
       return (
@@ -494,11 +498,24 @@ export default {
     },
     onRowEditSave(event) {
       let { newData, index } = event;
+      const discount_type = newData.discount_type
+      const totalPre = newData.qty * newData.price
+      if(discount_type === 'v') {
+        newData.total = totalPre - newData.discount_value
+      } else if(discount_type === 'p') {
+        newData.total = totalPre - (totalPre * newData.discount_value / 100)
+      } else {
+        newData.total = totalPre
+      }
+
+      this.computer.total += newData.total
+
       this.products[index] = newData
       this.addItem()
       this.allowSubmit()
     },
     deleteDetail(data) {
+      this.computer.total -= data.total
       this.products.splice(this.products.indexOf(data), 1)
     },
     getDiscountLabel(status) {
@@ -595,18 +612,3 @@ export default {
   },
 }
 </script>
-<style>
-.profile-display {
-  position: relative;
-  background: red;
-}
-
-.profile-display img {
-  position: absolute;
-  border-radius: 100%;
-  width: 200px;
-  height: 200px;
-  background: #f2f2f2;
-  margin: 0 25%;
-}
-</style>

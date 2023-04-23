@@ -14,15 +14,18 @@ import {
 } from '@inventory/schemas/purchase.order'
 import { IPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { LogService } from '@log/log.service'
-import { Inject, Injectable } from '@nestjs/common'
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import { pad } from '@utility/string'
 import { TimeManagement } from '@utility/time'
+import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
+
+import { IConfig } from '../../core/src/schemas/config'
 
 @Injectable()
 export class PurchaseOrderService {
@@ -34,7 +37,8 @@ export class PurchaseOrderService {
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
     @Inject(MasterItemService)
-    private readonly masterItemService: MasterItemService
+    private readonly masterItemService: MasterItemService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   async detail(id: string): Promise<PurchaseOrder> {
@@ -129,6 +133,11 @@ export class PurchaseOrderService {
     await this.purchaseOrderModel
       .create({
         ...data,
+        locale: await this.cacheManager
+          .get('APPLICATION_LOCALE')
+          .then((response: IConfig) => {
+            return response.setter
+          }),
         created_by: account,
       })
       .then(async (result) => {

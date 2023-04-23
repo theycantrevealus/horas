@@ -33,7 +33,8 @@
           >
             <Column
               header="#"
-              class="wrap_content text-right"
+              class="text-right"
+              style="width: 150px"
             >
               <template #body="slotProps">
                 <strong class="d-inline-flex">
@@ -50,16 +51,42 @@
                   class="p-button-info p-button-sm p-button-raised"
                   @click="purchaseOrderEdit(slotProps.data.id)"
                 >
-                  <span class="material-icons">edit</span>
+                  <span class="material-icons">edit</span> Edit
                 </Button>
                 <Button
                   v-if="permission.allowDelete"
                   class="p-button-danger p-button-sm p-button-raised"
                   @click="purchaseOrderDelete($event, slotProps.data.id)"
                 >
-                  <span class="material-icons">delete</span>
+                  <span class="material-icons">delete</span> Delete
+                </Button>
+                <Button
+                  class="p-button-info p-button-sm p-button-raised"
+                  @click="view($event, slotProps.data.id)"
+                >
+                  <span class="material-icons">remove_red_eye</span> View
                 </Button>
               </span>
+              </template>
+            </Column>
+            <Column
+              ref="created_at"
+              field="created_at"
+              header="Created Date"
+              :sortable="true"
+            >
+              <template #body="slotProps">
+                <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+              </template>
+            </Column>
+            <Column
+              ref="status"
+              field="status"
+              header="Status"
+              :sortable="true"
+            >
+              <template #body="slotProps">
+                <b :class="`${status[slotProps.data.status].class}`">{{ status[slotProps.data.status].caption }}</b>
               </template>
             </Column>
             <Column
@@ -97,6 +124,9 @@
                   @keydown.enter="filterCallback()"
                 />
               </template>
+              <template #body="slotProps">
+                <b>{{ slotProps.data.supplier.code }}</b> - {{ slotProps.data.supplier.name }}
+              </template>
             </Column>
             <Column
               ref="supplier"
@@ -120,13 +150,13 @@
               </template>
             </Column>
             <Column
-              ref="created_at"
-              field="created_at"
-              header="Created Date"
+              ref="created_by"
+              field="created_by"
+              header="Created By"
               :sortable="true"
             >
               <template #body="slotProps">
-                <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
+                <b>{{ slotProps.data.created_by.last_name }}, {{ slotProps.data.created_by.first_name }}</b>
               </template>
             </Column>
           </DataTable>
@@ -177,6 +207,12 @@ export default {
         'supplier.name': { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
+      status: {
+        new: {
+          class: 'text-green-500',
+          caption: 'New'
+        },
+      },
       columns: [
         { field: 'code', header: 'Code' },
         { field: 'supplier.name', header: 'Name' },

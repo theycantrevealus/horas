@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type ConfigDocument = HydratedDocument<Config>
@@ -24,3 +24,9 @@ export interface IConfig {
   remark: string
   __v: number
 }
+
+export const ConfigJoin = raw({
+  id: { type: SchemaTypes.String },
+  name: { type: SchemaTypes.String },
+  setter: { type: SchemaTypes.Mixed },
+})
