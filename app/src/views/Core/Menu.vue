@@ -533,7 +533,7 @@ export default defineComponent({
             })
           } else {
             this.$toast.add({
-              severity: 'warning',
+              severity: 'warn',
               summary: 'Menu Manager',
               detail: response.data.message,
               life: 3000,
@@ -609,7 +609,7 @@ export default defineComponent({
             })
           } else {
             this.$toast.add({
-              severity: 'warning',
+              severity: 'warn',
               summary: 'Menu Manager',
               detail: response.data.message,
               life: 3000,

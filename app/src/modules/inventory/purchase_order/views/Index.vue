@@ -50,7 +50,8 @@
             :value="items"
             :lazy="true"
             :paginator="true"
-            :rows="20"
+            :rows="10"
+            :rowsPerPageOptions="[5, 10, 20, 50]"
             :totalRecords="totalRecords"
             :loading="loading"
             filterDisplay="row"
@@ -274,6 +275,16 @@ export default {
   data() {
     return {
       messages: [],
+      socketLib: {
+        core: {
+          PO_I_S0000: 'New purchase order submitted',
+          PO_U_S0000: 'Purchase order updated',
+          PO_D_S0000: 'Purchase order deleted',
+          PO_A_S0000: 'Purchase order approved',
+          PO_R_S0000: 'Purchase order declined',
+          PO_N_S0000: 'Purchase order need to review'
+        }
+      },
       ui: {
         dialog: {
           visible: false,
@@ -345,8 +356,16 @@ export default {
   async mounted() {
     await this.sockets.subscribe('data_result', (request) => {
       const data = request.payload
-      this.messages = []
-      this.messages.push({ severity: 'info', content: 'New purchase order submitted', id: 1 })
+      const sender = request.sender
+      const receiver = request.receiver
+      console.log(data)
+      if(sender.id === this.credential.id) {
+
+      } else {
+        this.messages = []
+        this.messages.push({ severity: 'info', content: data.message, id: 1, status: data.statusCode })
+      }
+
     })
     this.permission.allowAdd = !(!this.credential.permission.btnPurchaseOrderAdd)
     this.permission.allowEdit = !(!this.credential.permission.btnPurchaseOrderEdit)
@@ -361,6 +380,8 @@ export default {
       sortOrder: 1,
       filters: this.filters,
     }
+
+    this.messages = []
 
     this.loadLazyData()
   },
@@ -394,6 +415,7 @@ export default {
                   __v: parameter.__v
                 }).then((response) => {
                   this.loadLazyData()
+                  // this.loading = true
                 })
               } else if(parameter.header === 'Decline') {
                 await PurchaseOrderService.declineApproval({
@@ -402,6 +424,7 @@ export default {
                   __v: parameter.__v
                 }).then((response) => {
                   this.loadLazyData()
+                  // this.loading = true
                 })
               } else {
                 await PurchaseOrderService.askApproval({
@@ -410,6 +433,7 @@ export default {
                   __v: parameter.__v
                 }).then((response) => {
                   this.loadLazyData()
+                  // this.loading = true
                 })
               }
             }
@@ -442,48 +466,12 @@ export default {
         ...data,
         header: 'Approve'
       })
-      // const target = event.target
-      // const confirmation = this.$confirm
-      // confirmation.require({
-      //   target: target,
-      //   message: `Approve Purchase Order?`,
-      //   icon: 'pi pi-exclamation-triangle',
-      //   acceptClass: 'button-success',
-      //   acceptIcon: 'pi pi-check-circle',
-      //   acceptLabel: 'Yes',
-      //   rejectLabel: 'Abort',
-      //   rejectIcon: 'pi pi-times-circle',
-      //   accept: async () => {
-      //     //
-      //   },
-      //   reject: () => {
-      //     // callback to execute when user rejects the action
-      //   },
-      // })
     },
     declinePurchaseOrder(event, data) {
       this.toggleDialog({
         ...data,
         header: 'Decline'
       })
-      // const target = event.target
-      // const confirmation = this.$confirm
-      // confirmation.require({
-      //   target: target,
-      //   message: `Decline Purchase Order?`,
-      //   icon: 'pi pi-exclamation-triangle',
-      //   acceptClass: 'button-success',
-      //   acceptIcon: 'pi pi-check-circle',
-      //   acceptLabel: 'Yes',
-      //   rejectLabel: 'Abort',
-      //   rejectIcon: 'pi pi-times-circle',
-      //   accept: async () => {
-      //     //
-      //   },
-      //   reject: () => {
-      //     // callback to execute when user rejects the action
-      //   },
-      // })
     },
     async purchaseOrderAsk (event, data) {
       this.toggleDialog({
@@ -520,7 +508,12 @@ export default {
       this.$router.push('/inventory/purchase_order/add')
     },
     purchaseOrderEdit(id) {
-      this.$router.push(`/inventory/purchase_order/edit/${id}`)
+      this.$router.push({
+        path: `/inventory/purchase_order/edit/${id}`,
+        query: {
+          id: id
+        }
+      })
     },
     itemDelete(event, id) {
       //
@@ -531,13 +524,36 @@ export default {
     loadLazyData() {
       this.loading = true
       this.items = []
+
+      if(this.messages.length > 0) {
+        if(this.messages[0].status === 'PO_I_S0000') {
+          this.ui.dropdown.status.selected = { id: 'all', name: 'All' }
+          this.filters.status = { value: 'new', matchMode: 'equals' }
+        } else if(this.messages[0].status === 'PO_N_S0000') {
+          this.ui.dropdown.status.selected = { id: 'need_approval', name: 'Need Approval' }
+          this.filters.status = { value: 'need_approval', matchMode: 'equals' }
+        } else if(this.messages[0].status === 'PO_A_S0000') {
+          this.ui.dropdown.status.selected = { id: 'approved', name: 'Approved' }
+          this.filters.status = { value: 'approved', matchMode: 'equals' }
+        } else if(this.messages[0].status === 'PO_R_S0000') {
+          this.ui.dropdown.status.selected = { id: 'declined', name: 'Declined' }
+          this.filters.status = { value: 'declined', matchMode: 'equals' }
+        }
+
+        this.lazyParams.sortField = 'created_at'
+        this.lazyParams.sortOrder = -1
+      } else {
+        if(this.ui.dropdown.status.selected.id !== 'all') {
+          this.filters.status = { value: this.ui.dropdown.status.selected.id, matchMode: 'equals' }
+        } else {
+          delete this.filters.status
+        }
+      }
+
+      this.lazyParams.filters = this.filters
       this.messages = []
 
-      if(this.ui.dropdown.status.selected.id !== 'all') {
-        this.filters.status = { value: this.ui.dropdown.status.selected.id, matchMode: 'equals' }
-      } else {
-        delete this.filters.status
-      }
+
 
       PurchaseOrderService.getItemList(this.lazyParams).then((response) => {
         if (response) {

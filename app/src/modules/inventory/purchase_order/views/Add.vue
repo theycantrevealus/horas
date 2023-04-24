@@ -59,7 +59,7 @@
                             id="purchase_date"
                             v-model="formData.purchase_date"
                             :disabled="disabler.purchase_date"
-                            dateFormat="dd/mm/yy"
+                            dateFormat="yy-mm-dd"
                             class="p-inputtext-sm"
                             placeholder="Purchase Date"
                             @update:modelValue="allowSubmit"/>
@@ -205,7 +205,7 @@
                     </Panel>
                     <hr />
                     <div class="grid">
-                      <div class="col-4">
+                      <div class="col-3">
                         <div class="flex flex-column gap-2">
                           <label for="discount_type">Discount Type</label>
                           <Dropdown
@@ -228,7 +228,7 @@
                           <small id="discount_type-help" class="text-blue-500">Discount will apply to total of purchase order</small>
                         </div>
                       </div>
-                      <div class="col-4">
+                      <div class="col-3">
                         <div class="flex flex-column gap-2">
                           <label for="discount_value">Discount Type</label>
                           <InputText
@@ -241,7 +241,7 @@
                           />
                         </div>
                       </div>
-                      <div class="col-4">
+                      <div class="col-3">
                         <div class="flex flex-column gap-2">
                           <label for="total">Total</label>
                           <InputNumber
@@ -250,6 +250,20 @@
                             disabled="disabled"
                             class="p-inputtext-sm"
                             placeholder="Total"
+                            mode="currency"
+                            :currency="application.locale.currency"
+                            :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="flex flex-column gap-2">
+                          <label for="total">Grand Total</label>
+                          <InputNumber
+                            id="total"
+                            v-model="computer.final_total"
+                            disabled="disabled"
+                            class="p-inputtext-sm"
+                            placeholder="Grand Total"
                             mode="currency"
                             :currency="application.locale.currency"
                             :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
@@ -364,7 +378,8 @@ export default {
         editingRows: []
       },
       computer: {
-        total: 0
+        total: 0,
+        final_total: 0,
       },
       products: [
         {
@@ -488,6 +503,7 @@ export default {
       )
     },
     allowSubmit() {
+      this.calculateAll()
       let countProduct = 0
       this.products.map((e) => {
         if(e.item.id !== '' && parseFloat(e.qty) > 0) {
@@ -495,6 +511,17 @@ export default {
         }
       })
       this.allowSave = (this.formData.supplier.id !== '' && countProduct > 0 && this.formData.code !== '')
+    },
+    calculateAll() {
+      let totalAfterDiscount = this.computer.total
+      if(this.formData.discount_type.value === 'v') {
+        totalAfterDiscount = totalAfterDiscount - this.formData.discount_value
+      } else if(this.formData.discount_type.value === 'p') {
+        totalAfterDiscount = totalAfterDiscount - (totalAfterDiscount * this.formData.discount_value / 100)
+      } else {
+        this.computer.final_total = this.computer.total
+      }
+      this.computer.final_total = totalAfterDiscount
     },
     onRowEditSave(event) {
       let { newData, index } = event;
@@ -510,13 +537,25 @@ export default {
 
       this.computer.total += newData.total
 
+      let totalAfterDiscount = newData.total
+      if(this.formData.discount_type.value === 'v') {
+        totalAfterDiscount = totalAfterDiscount - newData.discount_value
+      } else if(this.formData.discount_type.value === 'p') {
+        totalAfterDiscount = totalAfterDiscount - (totalAfterDiscount * newData.discount_value / 100)
+      } else {
+        totalAfterDiscount = this.computer.total
+      }
+
+      this.computer.final_total += totalAfterDiscount
+
       this.products[index] = newData
       this.addItem()
       this.allowSubmit()
     },
     deleteDetail(data) {
-      this.computer.total -= data.total
       this.products.splice(this.products.indexOf(data), 1)
+      this.computer.total -= data.total
+      this.allowSubmit()
     },
     getDiscountLabel(status) {
       switch (status) {

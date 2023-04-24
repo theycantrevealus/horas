@@ -38,10 +38,11 @@ export class PurchaseOrderController {
                 },
               })
               .then(async (clientSet) => {
+                response.message = 'New purchase order created'
                 await clientSet
                   .emit('proceed', {
                     sender: payload.account,
-                    receiver: payload.account,
+                    receiver: null,
                     payload: response,
                   } satisfies ProceedDataTrafficDTO)
                   .then(() => {
@@ -55,82 +56,137 @@ export class PurchaseOrderController {
         break
       case 'edit':
         await this.purchaseOrderService
-          .edit(payload.data, payload.id)
+          .edit(payload.data, payload.id, payload.account)
           .then(async (response) => {
-            await this.socketProxy.connect().then(async () => {
-              await this.socketProxy.emit(
-                this.configService.get<string>('neural.event.proceed'),
-                {
-                  sender: payload.account,
-                  receiver: payload.account,
-                  payload: response,
-                } satisfies ProceedDataTrafficDTO
-              )
-            })
+            response.message = 'Purchase order edited'
+            await this.socketProxy
+              .reconnect({
+                extraHeaders: {
+                  Authorization: payload.token,
+                },
+              })
+              .then(async (clientSet) => {
+                await clientSet
+                  .emit('proceed', {
+                    sender: payload.account,
+                    receiver: null,
+                    payload: response,
+                  } satisfies ProceedDataTrafficDTO)
+                  .then(() => {
+                    clientSet.disconnect()
+                  })
+              })
+              .catch((e: Error) => {
+                this.logger.warn('Failed to connect')
+              })
           })
         break
       case 'delete':
         await this.purchaseOrderService
           .delete(payload.id)
           .then(async (response) => {
-            await this.socketProxy.connect().then(async () => {
-              await this.socketProxy.emit(
-                this.configService.get<string>('neural.event.proceed'),
-                {
-                  sender: payload.account,
-                  receiver: payload.account,
-                  payload: response,
-                } satisfies ProceedDataTrafficDTO
-              )
-            })
+            response.message = 'Purchase order deleted'
+            await this.socketProxy
+              .reconnect({
+                extraHeaders: {
+                  Authorization: payload.token,
+                },
+              })
+              .then(async (clientSet) => {
+                await clientSet
+                  .emit('proceed', {
+                    sender: payload.account,
+                    receiver: null,
+                    payload: response,
+                  } satisfies ProceedDataTrafficDTO)
+                  .then(() => {
+                    clientSet.disconnect()
+                  })
+              })
+              .catch((e: Error) => {
+                this.logger.warn('Failed to connect')
+              })
           })
         break
       case 'ask_approval':
         await this.purchaseOrderService
           .askApproval(payload.data, payload.id, payload.account)
           .then(async (response) => {
-            await this.socketProxy.connect().then(async () => {
-              await this.socketProxy.emit(
-                this.configService.get<string>('neural.event.proceed'),
-                {
-                  sender: payload.account,
-                  receiver: payload.account,
-                  payload: response,
-                } satisfies ProceedDataTrafficDTO
-              )
-            })
+            response.message = 'Purchase order need to review'
+            await this.socketProxy
+              .reconnect({
+                extraHeaders: {
+                  Authorization: payload.token,
+                },
+              })
+              .then(async (clientSet) => {
+                await clientSet
+                  .emit('proceed', {
+                    sender: payload.account,
+                    receiver: null,
+                    payload: response,
+                  } satisfies ProceedDataTrafficDTO)
+                  .then(() => {
+                    clientSet.disconnect()
+                  })
+              })
+              .catch((e: Error) => {
+                this.logger.warn(e.message)
+              })
           })
         break
       case 'approve':
         await this.purchaseOrderService
           .approve(payload.data, payload.id, payload.account)
           .then(async (response) => {
-            await this.socketProxy.connect().then(async () => {
-              await this.socketProxy.emit(
-                this.configService.get<string>('neural.event.proceed'),
-                {
-                  sender: payload.account,
-                  receiver: payload.account,
-                  payload: response,
-                } satisfies ProceedDataTrafficDTO
-              )
-            })
+            response.message = 'Purchase order approved'
+            await this.socketProxy
+              .reconnect({
+                extraHeaders: {
+                  Authorization: payload.token,
+                },
+              })
+              .then(async (clientSet) => {
+                await clientSet
+                  .emit('proceed', {
+                    sender: payload.account,
+                    receiver: payload.created_by,
+                    payload: response,
+                  } satisfies ProceedDataTrafficDTO)
+                  .then(() => {
+                    clientSet.disconnect()
+                  })
+              })
+              .catch((e: Error) => {
+                this.logger.warn(e.message)
+              })
           })
         break
       case 'decline':
         await this.purchaseOrderService
           .decline(payload.data, payload.id, payload.account)
           .then(async (response) => {
-            await this.socketProxy.connect().then(async () => {
-              await this.socketProxy.emit(
-                this.configService.get<string>('neural.event.proceed'),
-                {
-                  sender: payload.account,
-                  receiver: payload.account,
-                  payload: response,
-                } satisfies ProceedDataTrafficDTO
-              )
-            })
+            await this.socketProxy
+              .reconnect({
+                extraHeaders: {
+                  Authorization: payload.token,
+                },
+              })
+              .then(async (clientSet) => {
+                response.message = 'Purchase order declined'
+                await clientSet
+                  .emit('proceed', {
+                    sender: payload.account,
+                    receiver: payload.created_by,
+                    payload: response,
+                  } satisfies ProceedDataTrafficDTO)
+                  .then(() => {
+                    clientSet.disconnect()
+                  })
+              })
+              .catch((e: Error) => {
+                this.logger.warn(e.message)
+              })
           })
         break
     }

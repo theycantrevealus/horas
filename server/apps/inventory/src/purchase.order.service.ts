@@ -190,22 +190,22 @@ export class PurchaseOrderService {
       .exec()
       .then((result) => {
         if (result) {
-          response.message = 'Purchase order approved successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          response.message = 'Purchase order requested to review successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_N_${
             modCodes.Global.success
           }`
           response.payload = result
         } else {
-          response.message = `Purchase order failed to approve. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          response.message = `Purchase order failed to review request. Invalid document`
+          response.statusCode = `${modCodes[this.constructor.name]}_N_${
             modCodes.Global.failed
           }`
           response.payload = {}
         }
       })
       .catch((error: Error) => {
-        response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+        response.message = `Purchase order failed to review request. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_N_${
           modCodes.Global.failed
         }`
       })
@@ -241,13 +241,13 @@ export class PurchaseOrderService {
       .then((result) => {
         if (result) {
           response.message = 'Purchase order approved successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          response.statusCode = `${modCodes[this.constructor.name]}_A_${
             modCodes.Global.success
           }`
           response.payload = result
         } else {
           response.message = `Purchase order failed to approve. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          response.statusCode = `${modCodes[this.constructor.name]}_A_${
             modCodes.Global.failed
           }`
           response.payload = {}
@@ -255,7 +255,7 @@ export class PurchaseOrderService {
       })
       .catch((error: Error) => {
         response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+        response.statusCode = `${modCodes[this.constructor.name]}_A_${
           modCodes.Global.failed
         }`
       })
@@ -291,22 +291,22 @@ export class PurchaseOrderService {
       .exec()
       .then((result) => {
         if (result) {
-          response.message = 'Purchase order approved successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          response.message = 'Purchase order declined successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_R_${
             modCodes.Global.success
           }`
           response.payload = result
         } else {
-          response.message = `Purchase order failed to approve. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          response.message = `Purchase order failed to decline. Invalid document`
+          response.statusCode = `${modCodes[this.constructor.name]}_R_${
             modCodes.Global.failed
           }`
           response.payload = {}
         }
       })
       .catch((error: Error) => {
-        response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+        response.message = `Purchase order failed to decline. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_R_${
           modCodes.Global.failed
         }`
       })
@@ -316,7 +316,8 @@ export class PurchaseOrderService {
 
   async edit(
     payload: PurchaseOrderEditDTO,
-    id: string
+    id: string,
+    account: Account
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -364,6 +365,12 @@ export class PurchaseOrderService {
       data.grand_total = data.total - data.discount_value
     }
 
+    const status = new IPurchaseOrderApproval({
+      status: 'new',
+      remark: data.remark,
+      created_by: account,
+    })
+
     await this.purchaseOrderModel
       .findOneAndUpdate(
         {
@@ -381,7 +388,9 @@ export class PurchaseOrderService {
           discount_type: data.discount_type,
           discount_value: data.discount_value,
           grand_total: data.grand_total,
+          status: 'new',
           remark: data.remark,
+          $push: { approval_history: status },
         }
       )
       .exec()
@@ -401,6 +410,7 @@ export class PurchaseOrderService {
         }
       })
       .catch((error: Error) => {
+        response.payload = error
         response.message = `Purchase Order failed to update. ${error.message}`
         response.statusCode = `${modCodes[this.constructor.name]}_U_${
           modCodes.Global.failed

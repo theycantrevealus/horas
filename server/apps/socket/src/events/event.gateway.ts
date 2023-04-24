@@ -68,6 +68,7 @@ export class EventsGateway
     @MessageBody() data: ProceedDataTrafficDTO,
     @ConnectedSocket() client: Socket
   ) {
+    this.logger.warn('Get Data')
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.notify_result.data'),
       data

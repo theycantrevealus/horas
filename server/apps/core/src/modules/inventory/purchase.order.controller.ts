@@ -122,12 +122,14 @@ export class PurchaseOrderController {
   async ask_approval(
     @Body() parameter: PurchaseOrderApproval,
     @Param() param,
-    @CredentialAccount() account
+    @CredentialAccount() account,
+    @Req() request
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.askApproval(
       parameter,
       param.id,
-      account
+      account,
+      request.headers.authorization
     )
   }
 
@@ -147,9 +149,15 @@ export class PurchaseOrderController {
   async approve(
     @Body() parameter: PurchaseOrderApproval,
     @Param() param,
-    @CredentialAccount() account
+    @CredentialAccount() account,
+    @Req() request
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.approve(parameter, param.id, account)
+    return await this.purchaseOrderService.approve(
+      parameter,
+      param.id,
+      account,
+      request.headers.authorization
+    )
   }
 
   @Patch('purchase_order/decline/:id')
@@ -168,9 +176,15 @@ export class PurchaseOrderController {
   async decline(
     @Body() parameter: PurchaseOrderApproval,
     @Param() param,
-    @CredentialAccount() account
+    @CredentialAccount() account,
+    @Req() request
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.decline(parameter, param.id, account)
+    return await this.purchaseOrderService.decline(
+      parameter,
+      param.id,
+      account,
+      request.headers.authorization
+    )
   }
 
   @Patch('purchase_order/:id')
@@ -186,8 +200,18 @@ export class PurchaseOrderController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: PurchaseOrderEditDTO, @Param() param) {
-    return await this.purchaseOrderService.edit(parameter, param.id)
+  async edit(
+    @Body() parameter: PurchaseOrderEditDTO,
+    @CredentialAccount() account,
+    @Param() param,
+    @Req() request
+  ) {
+    return await this.purchaseOrderService.edit(
+      parameter,
+      param.id,
+      account,
+      request.headers.authorization
+    )
   }
 
   @Delete('purchase_order/:id')

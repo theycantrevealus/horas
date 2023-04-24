@@ -50,10 +50,6 @@ const moduleRoute = [
               label: `${moduleCaption}`,
               to: `${moduleUrl}`,
             },
-            {
-              label: `${moduleCaption} Add`,
-              to: ``,
-            },
           ],
         },
         component: () =>
@@ -63,7 +59,7 @@ const moduleRoute = [
       },
       {
         path: 'edit/:id',
-        name: `${moduleCaption}Edit`,
+        name: `${moduleName}Edit`,
         meta: {
           pageTitle: `${moduleCaption} Edit`,
           requiresAuth: true,

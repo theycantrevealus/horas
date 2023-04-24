@@ -126,20 +126,22 @@ router.beforeEach((to, from, next) => {
         // next()
         // return
         if(to.name) {
-          console.log(to.name.toString())
           if(
             (<any>store.state).credential.routes.indexOf(to.name.toString()) < 0
           ) {
             if((<any>store.state).credential.routeMap[to.name.toString()]) {
-              next()
-              return
-              // const dispatches = (<any>store.state).credential.routeMap[to.name.toString()].permission
-              // if(dispatches.indexOf(to.name.toString()) < 0) {
-              //   next('/403')
-              // } else {
-              //   next()
-              //   return
-              // }
+              const dispatches = (<any>store.state).credential.routeMap[to.name.toString()].permission
+              if(dispatches && dispatches.indexOf(to.name.toString()) < 0) {
+                next({
+                  path: '/403',
+                  query: {
+                    from: from.fullPath
+                  }
+                })
+              } else {
+                next()
+                return
+              }
             } else {
               next({
                 path: '/403',

@@ -78,7 +78,8 @@ export class PurchaseOrderService {
   async askApproval(
     data: PurchaseOrderApproval,
     id: string,
-    account: Account
+    account: Account,
+    token: string
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -100,6 +101,7 @@ export class PurchaseOrderService {
             id: id,
             data: data,
             account: account,
+            token: token,
           })
           if (emitter) {
             response.message = 'Purchase order proposed successfully'
@@ -136,7 +138,8 @@ export class PurchaseOrderService {
   async approve(
     data: PurchaseOrderApproval,
     id: string,
-    account: Account
+    account: Account,
+    token: string
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -158,6 +161,7 @@ export class PurchaseOrderService {
             id: id,
             data: data,
             account: account,
+            token: token,
           })
           if (emitter) {
             response.message = 'Purchase order approved successfully'
@@ -194,7 +198,8 @@ export class PurchaseOrderService {
   async decline(
     data: PurchaseOrderApproval,
     id: string,
-    account: Account
+    account: Account,
+    token: string
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -220,6 +225,7 @@ export class PurchaseOrderService {
             id: id,
             data: data,
             account: account,
+            token: token,
           })
           if (emitter) {
             response.message = 'Purchase order declined successfully'
@@ -253,7 +259,12 @@ export class PurchaseOrderService {
     return response
   }
 
-  async edit(data: PurchaseOrderEditDTO, id: string): Promise<GlobalResponse> {
+  async edit(
+    data: PurchaseOrderEditDTO,
+    id: string,
+    account: Account,
+    token: string
+  ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -264,9 +275,10 @@ export class PurchaseOrderService {
 
     await this.purchaseOrderModel
       .findOne({
-        id: id,
-        status: { $or: [{ status: 'new' }, { status: 'declined' }] },
-        __v: data.__v,
+        $and: [
+          { id: id, __v: data.__v },
+          { $or: [{ status: 'new' }, { status: 'declined' }] },
+        ],
       })
       .exec()
       .then(async (result) => {
@@ -275,6 +287,8 @@ export class PurchaseOrderService {
             action: 'edit',
             id: id,
             data: data,
+            token: token,
+            account: account,
           })
           if (emitter) {
             response.message = 'Purchase Order updated successfully'

@@ -15,7 +15,7 @@ class PurchaseOrderService {
       })
   }
 
-  async getItemDetail(id) {
+  async getPurchaseOrderDetail(id) {
     return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${id}`)
       .then((response: any) => {
@@ -26,6 +26,15 @@ class PurchaseOrderService {
   async addPurchaseOrder(data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order`,data)
+      .then((response:AxiosResponse) => {
+        const data:CoreResponse = response.data
+        return data
+      })
+  }
+
+  async editPurchaseOrder(id, data): Promise<CoreResponse> {
+    return await api({requiresAuth: true})
+      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${id}`,data)
       .then((response:AxiosResponse) => {
         const data:CoreResponse = response.data
         return data
