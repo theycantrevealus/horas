@@ -50,6 +50,10 @@ const moduleRoute = [
               label: `${moduleCaption}`,
               to: `${moduleUrl}`,
             },
+            {
+              label: `${moduleCaption} Add`,
+              to: ``,
+            },
           ],
         },
         component: () =>

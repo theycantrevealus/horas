@@ -33,6 +33,7 @@ import 'primevue/resources/themes/tailwind-light/theme.css'
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
 import 'primeflex/primeflex.css'
+import DialogService from 'primevue/dialogservice'
 import { i18n } from '@/util/i18n/instances'
 import VueSocketIO from 'vue-3-socket.io'
 import {io} from "socket.io-client";
@@ -83,6 +84,7 @@ app
   .use(ConfirmationService)
   .use(CKEditor)
   .use(i18n)
+  .use(DialogService)
 
 app.directive('tooltip', Tooltip)
 

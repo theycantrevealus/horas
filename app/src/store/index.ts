@@ -21,9 +21,9 @@ const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
     ...application,
-    ...credential,
     ...socket,
     ...task,
+    credential: credential,
     connect: false,
     reconnecting: false,
     message: '',

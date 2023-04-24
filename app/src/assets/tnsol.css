@@ -89,7 +89,7 @@ input::-moz-focus-inner,
 }
 
 .router-link-active {
-    color: red;
+    color: var(--cyan-500) !important;
 }
 
 .fade-enter-active,
@@ -578,10 +578,20 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .breadcrumb-container .p-breadcrumb {
-    margin: .25rem 0;
+    margin: .15rem 0;
     background: transparent;
     border: none !important;
     padding: .3rem !important
+}
+
+.breadcrumb-container .p-breadcrumb li a{
+    font-size: 10pt !important;
+    color: #888;
+    padding-top: 5px;
+}
+
+.breadcrumb-container .p-breadcrumb .p-breadcrumb-home a{
+    color: var(--cyan-500) !important;
 }
 
 .breadcrumb-container .p-menuitem-link span {
@@ -590,13 +600,13 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .breadcrumb-container .p-breadcrumb-chevron {
-    margin-top: 3px !important;
+    margin-top: 2px !important;
     font-size: .5rem !important;
     color: #394141 !important;
 }
 
 .breadcrumb-container .pageName {
-    margin: .5rem 0;
+    margin: .4rem 0;
     font-size: 1rem !important;
     font-weight: bolder;
     border-right: solid 1px #394141;
@@ -857,6 +867,7 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .p-panel-title {
+    font-size: 1rem;
     padding: 0 .5rem;
 }
 
@@ -976,17 +987,20 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .handling_container {
+    text-align: center;
+    position: relative;
     padding-top: 200px;
+    margin: 0 auto;
     overflow: hidden;
+    width: 20% !important;
 }
 
 .handling_image {
-    margin-top: 200px;
-    width: 80% !important;
+    justify-content: center;
 }
 
 .handling_image img {
-    width: 20%;
+    width: 100%;
 }
 
 .p-toast-message {
@@ -1153,6 +1167,10 @@ body.dark .p-treenode .p-treenode-content:hover {
     padding: .5rem !important;
 }
 
+.p-button.no-padding {
+    padding: 0 !important;
+}
+
 
 
 .p-badge {
@@ -1291,6 +1309,11 @@ body.dark .p-treenode .p-treenode-content:hover {
 .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
     color: #1cb973 !important;
     border-color: #1cb973 !important;
+}
+
+.p-tag {
+    padding: 0.25rem 1rem !important;
+    font-size: 7pt !important;
 }
 
 .country-selector {

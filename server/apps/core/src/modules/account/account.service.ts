@@ -7,12 +7,14 @@ import { InjectModel } from '@nestjs/mongoose'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { gen_uuid } from '@utility/generator'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
 import { TimeManagement } from '@utility/time'
 import * as bcrypt from 'bcrypt'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
+import { Logger } from 'winston'
 
 import { IConfig } from '../../schemas/config'
 import { AccountAddDTO } from './dto/account.add'
@@ -25,6 +27,8 @@ export class AccountService {
     private accountModel: Model<AccountDocument>,
     @InjectModel(LogLogin.name)
     private logLoginModel: Model<LogLoginDocument>,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private authService: AuthService
   ) {}
@@ -257,6 +261,7 @@ export class AccountService {
                     name: await this.cacheManager
                       .get('APPLICATION_NAME')
                       .then((response: IConfig) => {
+                        this.logger.verbose(response)
                         return response.setter
                       }),
                     version: await this.cacheManager

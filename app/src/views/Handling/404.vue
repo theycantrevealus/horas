@@ -1,16 +1,16 @@
 <template>
   <div class="main-container p-grid vertical-container">
     <div class="p-col-12 handling_container">
-      <center>
+      <div class="flex flex-wrap justify-content-center gap-2">
         <Image
           class="p-image handling_image"
           :src="require('@/assets/images/handling/404.svg')"
           alt="404"
         />
-        <br />
-        Gak nampak halaman yang ente cari.
+        <br /><br /><br /><br />
+        Page not found.
         <router-link to="/dashboard">Balek dulu lah ke dashboard</router-link>
-      </center>
+      </div>
     </div>
   </div>
 </template>

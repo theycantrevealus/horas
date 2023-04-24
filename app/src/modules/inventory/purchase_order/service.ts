@@ -31,6 +31,45 @@ class PurchaseOrderService {
         return data
       })
   }
+
+  async askApproval(data): Promise<CoreResponse> {
+    return await api({requiresAuth: true})
+      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/ask_approval/${data.id}`, {
+        status: 'need_approval',
+        remark: data.remark,
+        __v: data.__v
+      })
+      .then((response:AxiosResponse) => {
+        const data:CoreResponse = response.data
+        return data
+      })
+  }
+
+  async approveApproval(data): Promise<CoreResponse> {
+    return await api({requiresAuth: true})
+      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/approve/${data.id}`, {
+        status: 'approved',
+        remark: data.remark,
+        __v: data.__v
+      })
+      .then((response:AxiosResponse) => {
+        const data:CoreResponse = response.data
+        return data
+      })
+  }
+
+  async declineApproval(data): Promise<CoreResponse> {
+    return await api({requiresAuth: true})
+      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/decline/${data.id}`, {
+        status: 'declined',
+        remark: data.remark,
+        __v: data.__v
+      })
+      .then((response:AxiosResponse) => {
+        const data:CoreResponse = response.data
+        return data
+      })
+  }
 }
 
 export default new PurchaseOrderService()

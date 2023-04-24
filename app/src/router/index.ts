@@ -141,7 +141,12 @@ router.beforeEach((to, from, next) => {
               //   return
               // }
             } else {
-              next('/403')
+              next({
+                path: '/403',
+                query: {
+                  from: from.fullPath
+                }
+              })
             }
           } else {
             next()

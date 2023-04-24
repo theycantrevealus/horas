@@ -122,7 +122,7 @@ export class PurchaseOrder {
 
   @Prop({
     type: SchemaTypes.String,
-    enum: ['new', 'approved', 'declined'],
+    enum: ['new', 'need_approval', 'approved', 'declined'],
     default: 'new',
   })
   status: string

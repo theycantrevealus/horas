@@ -22,7 +22,21 @@
       <Breadcrumb
         :home="home"
         :model="items"
-      />
+      >
+        <template #item="item">
+          <div v-if="item.item.to === ''">
+            <a>{{ item.item.label }}</a>
+          </div>
+          <div v-else>
+            <router-link v-if="item.item.to !== '/dashboard'" :to="item.item.to">
+              <span>{{ item.item.label }}</span>
+            </router-link>
+            <router-link v-else :to="item.item.to">
+              <i class="pi pi-home"></i>
+            </router-link>
+          </div>
+        </template>
+      </Breadcrumb>
     </div>
   </div>
 </template>
