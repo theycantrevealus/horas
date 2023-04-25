@@ -3,19 +3,12 @@
     <Card class="card-fluid">
       <template #content>
         <Panel
-          header="Purchase Order Management"
+          header="General Receive Note Management"
           :toggleable="false"
         >
           <template #icons>
             <Toolbar>
               <template #start>
-                <Button
-                  v-if="permission.allowAdd"
-                  label="Add"
-                  icon="pi pi-plus"
-                  class="p-button-info p-button-rounded p-button-raised button-sm mr-2"
-                  @click="purchaseOrderAdd"
-                />
                 <i class="pi pi-filter p-toolbar-separator mr-2" />
               </template>
               <template #end>
@@ -78,7 +71,7 @@
               <span class="p-buttonset">
                 <Button
                   class="p-button-info p-button-sm p-button-raised"
-                  @click="purchaseOrderDetail(slotProps.data)"
+                  @click="purchaseOrderDetail($event, slotProps.data.id)"
                 >
                   <span class="material-icons">remove_red_eye</span> View
                 </Button>
@@ -230,7 +223,6 @@
       <template #footer></template>
     </Card>
     <ConfirmPopup></ConfirmPopup>
-    <Toast />
     <DynamicDialog />
   </div>
 </template>
@@ -248,7 +240,6 @@ import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Toolbar from 'primevue/toolbar'
-import Toast from 'primevue/toast'
 import Tag from 'primevue/tag'
 import CurrencyLabel from '@/components/currency/Label.vue'
 import PurchaseOrderService from '@/modules/inventory/purchase_order/service'
@@ -257,9 +248,6 @@ import { markRaw, defineAsyncComponent } from 'vue'
 
 import FormPurchaseOrderApproval from '@/modules/inventory/purchase_order/components/Approval.vue'
 import ApprovalFooter from '@/modules/inventory/purchase_order/components/ApprovalFooter.vue'
-
-const DetailFooter = defineAsyncComponent(() => import('@/modules/inventory/purchase_order/components/DetailFooter.vue'))
-const Detail = defineAsyncComponent(() => import('@/modules/inventory/purchase_order/components/Detail.vue'))
 
 export default {
   components: {
@@ -275,7 +263,6 @@ export default {
     Message,
     ConfirmPopup,
     Dropdown,
-    Toast,
     CurrencyLabel,
   },
   data() {
@@ -452,7 +439,7 @@ export default {
       const confirmation = this.$confirm
       confirmation.require({
         target: target,
-        message: `Delete Purchase Order?`,
+        message: `Approve Purchase Order?`,
         icon: 'pi pi-exclamation-triangle',
         acceptClass: 'button-success',
         acceptIcon: 'pi pi-check-circle',
@@ -460,23 +447,10 @@ export default {
         rejectLabel: 'Abort',
         rejectIcon: 'pi pi-times-circle',
         accept: async () => {
-          await PurchaseOrderService.deletePurchaseOrder({
-            id: id
-          }).then(async (response) => {
-            if(response.statusCode === 'PO_D_S0000') {
-              await this.loadLazyData()
-            }
-
-            this.$toast.add({
-              severity: (response.statusCode === 'PO_D_S0000') ? 'success' : 'error',
-              summary: 'Purchase Order Delete',
-              detail: response.message,
-              life: 3000,
-            })
-          })
+          //
         },
         reject: () => {
-          // Reject delete action
+          // callback to execute when user rejects the action
         },
       })
     },
@@ -497,49 +471,28 @@ export default {
         ...data,
         header: 'Ask Approval'
       })
+      // const target = event.target
+      // const confirmation = this.$confirm
+      // confirmation.require({
+      //   target: target,
+      //   message: `Ask for approval?`,
+      //   icon: 'pi pi-exclamation-triangle',
+      //   acceptClass: 'button-success',
+      //   acceptIcon: 'pi pi-check-circle',
+      //   acceptLabel: 'Yes',
+      //   rejectLabel: 'Abort',
+      //   rejectIcon: 'pi pi-times-circle',
+      //   accept: async () => {
+      //     this.ui.dialog.header = 'Ask Approval'
+      //
+      //   },
+      //   reject: () => {
+      //     // callback to execute when user rejects the action
+      //   },
+      // })
     },
-    purchaseOrderDetail(parameter) {
-      this.$dialog.open(Detail, {
-        props: {
-          header: 'Purchase Order Detail',
-          style: {
-            width: '90vw'
-          },
-          breakpoints: {
-            '960px': '75vw',
-            '640px': '90vw'
-          },
-          modal: true,
-        },
-        data: {
-          payload: parameter
-        },
-        templates: {
-          footer: markRaw(DetailFooter)
-        },
-        onClose: async (options) => {
-          const data = options.data;
-
-          if (data) {
-            const buttonType = data.buttonType;
-            if(buttonType === 0) {
-              let stylesHtml = '';
-              for (const node of [...document.querySelectorAll('link[rel="stylesheet"], style')]) {
-                stylesHtml += node.outerHTML;
-              }
-
-              const WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
-
-              WinPrint.document.write(`<!DOCTYPE html><html><head>${stylesHtml}</head><body>${data.print.html}</body></html>`);
-
-              WinPrint.document.close();
-              WinPrint.focus();
-              WinPrint.print();
-              WinPrint.close();
-            }
-          }
-        }
-      })
+    purchaseOrderDetail(event, id) {
+      //
     },
     round(num, roundCount) {
       return parseFloat(num).toFixed(roundCount)

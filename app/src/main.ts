@@ -25,6 +25,7 @@ import Authority from '@/modules/setting/authority'
 import Corei18n from '@/modules/setting/i18n'
 import MasterItem from '@/modules/master/item'
 import PurchaseOrder from '@/modules/inventory/purchase_order'
+import GeneralReceiveNote from '@/modules/inventory/general_receive_note'
 import Service from '@/modules/service'
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
@@ -46,7 +47,8 @@ registerModules({
   authorityModule: Authority,
   corei18N: Corei18n,
   serviceModule: Service,
-  purchaseOrder: PurchaseOrder,
+  inventory__PurchaseOrder: PurchaseOrder,
+  inventory__GeneralReceiveNote: GeneralReceiveNote,
 })
 // localStorage.clear()
 setupInterceptors()

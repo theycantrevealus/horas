@@ -310,8 +310,12 @@ body.dark .p-treetable .p-treetable-tbody>tr td {
     color: #fff !important
 }
 
-body.dark .p-paginator-pages button {
+body.dark .p-paginator-pages {
     border: 1px solid #d4d4d8 !important;
+    color: #fff !important
+}
+
+body.dark .p-paginator-next {
     color: #fff !important
 }
 
@@ -861,6 +865,11 @@ body.dark .p-treenode .p-treenode-content:hover {
     margin-top: 50px !important;
 }
 
+.p-paginator-pages, .p-paginator-next, .p-paginator-first {
+    font-size: 12pt !important;
+    border: 1px solid #d4d4d8 !important;
+}
+
 
 .p-panel-header {
     padding: .5rem !important;
@@ -1018,6 +1027,13 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-toast-message-text {
     font-size: 10pt !important;
+}
+
+td.wrap_content, th.wrap_content {
+    padding: 5px 5px 5px 1.5rem !important;
+    word-wrap: break-word !important;
+    white-space: nowrap;
+    width: 1% !important;
 }
 
 
@@ -1366,12 +1382,16 @@ body.dark .p-treenode .p-treenode-content:hover {
     min-width: 0 !important;
 }
 
-label.currency-label{
-    display: block;
+.currency-container {
+    width: 200px;
+}
+
+label.currency-label {
+    position: relative;
+    display: inline-block;
     text-align: right;
     letter-spacing: 1.5px;
     font-family: "Courier New", monospace;
-    font-weight: bolder;
 }
 
 label[for] {
@@ -1398,4 +1418,36 @@ label[for] {
 
 .socket-status-container div.socket-status-label.hold {
     color: #ffc300 !important;
+}
+
+
+.purchase-order-detail-header {
+    text-size: 10pt !important;
+}
+
+.purchase-order-detail-header h3 {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.purchase-order-items {
+    margin-top: 20px;
+    min-height: 500px;
+}
+
+.purchase-order-items table {
+    font-weight: normal;
+}
+
+.purchase-order-items table.calculation thead tr th:last-child {
+    border-left: solid 2px #ccc;
+}
+
+.purchase-order-items table.calculation tbody tr td.last-liner {
+    border-left: solid 2px #ccc;
+}
+
+.purchase-order-items table thead tr th{
+    padding: 10px !important;
+    border-bottom: solid 2px #ccc;
 }

@@ -325,7 +325,11 @@ export class PurchaseOrderService {
     return response
   }
 
-  async delete(id: string): Promise<GlobalResponse> {
+  async delete(
+    id: string,
+    account: Account,
+    token: string
+  ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -344,6 +348,8 @@ export class PurchaseOrderService {
         action: 'delete',
         id: id,
         data: data,
+        account: account,
+        token: token,
       })
       if (emitter) {
         response.message = 'Purchase order deleted successfully'

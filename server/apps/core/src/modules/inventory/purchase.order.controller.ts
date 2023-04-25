@@ -227,7 +227,15 @@ export class PurchaseOrderController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.delete(param.id)
+  async delete(
+    @Param() param,
+    @Req() request,
+    @CredentialAccount() account
+  ): Promise<GlobalResponse> {
+    return await this.purchaseOrderService.delete(
+      param.id,
+      account,
+      request.headers.authorization
+    )
   }
 }

@@ -1,10 +1,34 @@
 <template>
-  <div>
-    <label class="currency-label">{{ format(number) }}</label>
+  <div class="flex flex-row flex-wrap currency-container" v-if="!asCell">
+    <div class="flex-1">
+      <label class="currency-label text-teal-400">
+        <small>{{ formatted.currency }}</small>
+      </label>
+    </div>
+    <div class="flex-1">
+    </div>
+    <div class="flex-1">
+      <label class="currency-label">
+        {{ formatted.value }}
+      </label>
+    </div>
   </div>
+  <template v-else>
+    <td class="wrap_content text-right {{ lastLiner ? 'last-liner': '' }}" v-bind:class="[lastLinerClass]">
+      <label class="currency-label text-teal-400">
+        <small>{{ formatted.currency }}</small>
+      </label>
+    </td>
+    <td class="wrap_content text-right">
+      <label class="currency-label">
+        {{ formatted.value }}
+      </label>
+    </td>
+  </template>
 </template>
 <script>
 import {mapGetters, mapState} from "vuex"
+import { NumberParser } from '@/util/number'
 
 export default {
   name: 'CurrencyLabel',
@@ -29,21 +53,43 @@ export default {
       default: 'ID',
       required: true
     },
+    asCell: {
+      type: Boolean,
+      default: false
+    },
+    lastLiner: {
+      type: Boolean,
+      default: false
+    }
   },
   emits: ['display'],
   data() {
-    return {}
+    return {
+      formatted: {},
+      lastLinerClass: 'last-liner'
+    }
   },
   computed: {
     ...mapGetters(['getBrowserLanguage'])
   },
-  mounted() { },
+  mounted() {
+    this.formatted = this.format(this.number)
+    this.lastLinerClass = this.lastLiner ? 'last-liner': ''
+  },
   methods: {
     format(num) {
-      return parseFloat(num).toLocaleString(`${this.lang.toLowerCase()}-${this.code.toLowerCase()}`, {
+      const option = {
         style: 'currency',
+        currencyDisplay: 'symbol',
+        minimumFractionDigits: 2,
         currency: this.currency.toUpperCase(),
-      })
+      }
+      const formatter = new Intl.NumberFormat(`${this.lang.toLowerCase()}-${this.code.toUpperCase()}`, option)
+      const parser = new NumberParser(`${this.lang.toLowerCase()}-${this.code.toUpperCase()}`, num, option)
+      return {
+        currency: parser._currency,
+        value: parser.parse(formatter.format(num))
+      }
     }
   }
 }

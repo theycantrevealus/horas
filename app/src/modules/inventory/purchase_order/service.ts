@@ -79,6 +79,13 @@ class PurchaseOrderService {
         return data
       })
   }
+
+  async deletePurchaseOrder(data): Promise<CoreResponse> {
+    return await api({requiresAuth: true}).delete(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${data.id}`).then((response: AxiosResponse) => {
+      const data:CoreResponse = response.data
+      return data
+    })
+  }
 }
 
 export default new PurchaseOrderService()
