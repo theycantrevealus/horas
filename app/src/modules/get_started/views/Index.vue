@@ -28,7 +28,7 @@ export default defineComponent({
   watch: {
     getPrivileges: {
       handler(getData) {
-        // console.log(getData)
+        //
       },
     },
   },

@@ -6,6 +6,7 @@ import { TAccountLogin } from '@/model/Account'
 
 import AccountService from '@/service/account'
 import CoreService from '@/service/core/sidemenu'
+import ConfigService from '@/service/core/config'
 import { coreMenu } from '@/store/core/menu'
 import getBrowserLocale from '@/util/i18n/browser.config'
 import { corei18n } from './core/i18n'
@@ -20,7 +21,7 @@ import {application} from "@/store/states/application";
 const ls = new SecureLS({ isCompression: false })
 const store = createStore({
   state: {
-    ...application,
+    application: application,
     ...socket,
     ...task,
     credential: credential,
@@ -57,6 +58,11 @@ const store = createStore({
     }),
   ],
   actions: {
+    getAppsConfig: async ({commit}) => {
+      await ConfigService.getConfig().then((response) => {
+        commit('mutateSystemConfig', response['config'])
+      })
+    },
     socket_connect: ({ commit }) => {
       commit('socket_status', {
         connect: true,
@@ -128,6 +134,9 @@ const store = createStore({
     },
   },
   getters: {
+    getSystemConfig: (state) => {
+      return state.application
+    },
     getCredential: (state) => {
       return state.credential
     },

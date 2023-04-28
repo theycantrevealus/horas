@@ -20,6 +20,8 @@ import {
   MongooseModuleOptions,
 } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { SocketIoClientProvider } from '@socket/socket.provider'
+import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
 import { TimeManagement } from '@utility/time'
@@ -201,7 +203,7 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
     GatewayInventoryModule,
   ],
   controllers: [CoreController],
-  providers: [CoreService],
+  providers: [CoreService, SocketIoClientProvider, SocketIoClientProxyService],
 })
 export class CoreModule {
   constructor(

@@ -161,7 +161,7 @@ export default {
           this.response.message = response.message
         }
       }).catch((error) => {
-        console.log(error)
+        //
       })
     },
   },

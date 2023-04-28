@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-row flex-wrap currency-container" v-if="!asCell">
+  <div v-if="!asCell" class="flex flex-row flex-wrap currency-container">
     <div class="flex-1">
       <label class="currency-label text-teal-400">
         <small>{{ formatted.currency }}</small>
@@ -14,7 +14,7 @@
     </div>
   </div>
   <template v-else>
-    <td class="wrap_content text-right {{ lastLiner ? 'last-liner': '' }}" v-bind:class="[lastLinerClass]">
+    <td class="wrap_content text-right {{ lastLiner ? 'last-liner': '' }}" :class="[lastLinerClass]">
       <label class="currency-label text-teal-400">
         <small>{{ formatted.currency }}</small>
       </label>

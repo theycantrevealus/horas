@@ -435,7 +435,7 @@ export default {
   watch: {
     getTask: {
       handler(getData) {
-        console.log(getData)
+        //
       }
     }
   },

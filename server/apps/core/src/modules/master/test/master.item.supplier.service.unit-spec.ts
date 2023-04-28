@@ -19,6 +19,7 @@ import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -40,6 +41,14 @@ describe('Master Item Supplier Service', () => {
         AccountService,
         AuthService,
         JwtService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              return null
+            }),
+          },
+        },
         {
           provide: CACHE_MANAGER,
           useValue: {

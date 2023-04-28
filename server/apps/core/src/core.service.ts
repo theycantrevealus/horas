@@ -1,3 +1,4 @@
+import { AccountService } from '@core/account/account.service'
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -18,6 +19,7 @@ export class CoreService {
   constructor(
     @InjectModel(Config.name) private configModel: Model<ConfigDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(AccountService) private readonly accountService: AccountService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {}
@@ -26,25 +28,58 @@ export class CoreService {
 
   async configured() {
     return {
-      application: {
-        name: await this.cacheManager
-          .get('APPLICATION_NAME')
-          .then((response: IConfig) => {
-            return response.setter
-          }),
-        version: await this.cacheManager
-          .get('APPLICATION_VERSION')
-          .then((response: IConfig) => {
-            return response.setter
-          }),
-      },
-      locale: await this.cacheManager
-        .get('APPLICATION_LOCALE')
-        .then((response: IConfig) => {
-          return response.setter
-        }),
+      tree: [
+        {
+          key: '0',
+          label: 'General',
+          data: 'General Configuration',
+          icon: 'pi pi-fw pi-desktop',
+          children: [
+            {
+              key: '0-0',
+              label: 'Profile',
+              icon: 'pi pi-fw pi-users',
+              data: 'application',
+            },
+            {
+              key: '0-1',
+              label: 'Logging',
+              icon: 'pi pi-fw pi-file',
+              data: 'logging',
+            },
+          ],
+        },
+      ],
+      config: await this.accountService.configMeta(),
     }
   }
+
+  async configTree() {
+    return {
+      tree: {
+        key: '0',
+        label: 'General',
+        data: 'General Configuration',
+        icon: 'pi pi-fw pi-desktop',
+        children: [
+          {
+            key: '0-0',
+            label: 'Profile',
+            icon: 'pi pi-fw pi-users',
+            data: 'APPLICATION',
+          },
+          {
+            key: '0-1',
+            label: 'Logging',
+            icon: 'pi pi-fw pi-file',
+            data: 'LOGGING',
+          },
+        ],
+      },
+      config: await this.accountService.configMeta(),
+    }
+  }
+
   async reloadConfig() {
     const config = await this.configModel.find().exec()
     if (config.length > 0) {
@@ -53,30 +88,24 @@ export class CoreService {
           const keyCheck: IConfig = await this.cacheManager.get(e.name)
           if (keyCheck) {
             this.logger.verbose(
-              `          Checking for [${e.name}] version (${keyCheck.__v}) -> ${e.__v}`
+              `Checking for [${e.name}] version (${keyCheck.__v}) -> ${e.__v}`
             )
             if (keyCheck.__v !== e.__v) {
-              this.logger.verbose(
-                `          Updating [${e.name}] configuration`
-              )
+              this.logger.verbose(`Updating [${e.name}] configuration`)
               await this.cacheManager
                 .set(e.name, {
                   setter: e.setter,
                   __v: e.__v,
                 })
                 .then(() => {
-                  this.logger.verbose(
-                    `          [${e.name}] configuration updated`
-                  )
+                  this.logger.verbose(`[${e.name}] configuration updated`)
                 })
             } else {
-              this.logger.verbose(
-                `          [${e.name}] configuration up to date`
-              )
+              this.logger.verbose(`[${e.name}] configuration up to date`)
             }
           } else {
             await this.cacheManager.set(e.name, e.setter).then(() => {
-              this.logger.verbose(`          [${e.name}] configuration set`)
+              this.logger.verbose(`[${e.name}] configuration set`)
             })
           }
 
@@ -84,7 +113,7 @@ export class CoreService {
         })
       )
     } else {
-      this.logger.verbose('          NO CONFIGURATION FOUND')
+      this.logger.verbose('NO CONFIGURATION FOUND')
     }
   }
 
@@ -204,9 +233,7 @@ export class CoreService {
             __v: 0,
           })
           .then(() => {
-            this.logger.verbose(
-              `          Create [${result.name}] configuration`
-            )
+            this.logger.verbose(`Create [${result.name}] configuration`)
             response.message = 'Config created successfully'
             response.statusCode = `${modCodes[this.constructor.name]}_I_${
               modCodes.Global.success
@@ -265,9 +292,7 @@ export class CoreService {
               __v: 0,
             })
             .then(() => {
-              this.logger.verbose(
-                `          Update [${result.name}] configuration`
-              )
+              this.logger.verbose(`Update [${result.name}] configuration`)
               response.message = 'Config updated successfully'
               response.statusCode = `${modCodes[this.constructor.name]}_U_${
                 modCodes.Global.success
@@ -314,7 +339,7 @@ export class CoreService {
       .exec()
       .then(async (result) => {
         await this.cacheManager.del(result.name.toUpperCase())
-        this.logger.verbose(`          Deleting [${result.name}] configuration`)
+        this.logger.verbose(`Deleting [${result.name}] configuration`)
         response.message = 'Config deleted successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_D_${
           modCodes.Global.success

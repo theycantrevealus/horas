@@ -24,7 +24,7 @@ class CoreService {
         return Promise.resolve(response)
       })
       .catch((e) => {
-        console.log(e)
+        //
       })
   }
 

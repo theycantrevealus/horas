@@ -6,10 +6,12 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
   UseInterceptors,
   Version,
@@ -21,9 +23,13 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
+import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { isJSON } from 'class-validator'
+import { Logger } from 'winston'
 
 import { CoreService } from './core.service'
 import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
@@ -31,7 +37,12 @@ import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
 @Controller()
 @ApiTags('AA - System')
 export class CoreController {
-  constructor(private readonly coreService: CoreService) {}
+  constructor(
+    private readonly coreService: CoreService,
+    private readonly socketProxy: SocketIoClientProxyService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger
+  ) {}
 
   @Get('configuration/reload')
   @Version('1')
@@ -113,8 +124,35 @@ export class CoreController {
     summary: 'Add config',
     description: ``,
   })
-  async add(@Body() parameter: ConfigAddDTO): Promise<GlobalResponse> {
-    return await this.coreService.add(parameter)
+  async add(
+    @Body() parameter: ConfigAddDTO,
+    @Req() request
+  ): Promise<GlobalResponse> {
+    return await this.coreService.add(parameter).then(async (response) => {
+      if (/S0000/.test(response.statusCode)) {
+        await this.socketProxy
+          .reconnect({
+            extraHeaders: {
+              Authorization: request.headers.authorization,
+            },
+          })
+          .then(async (clientSet) => {
+            await clientSet
+              .emit('config', {
+                sender: request.headers.authorization,
+                receiver: null,
+                payload: response,
+              } satisfies ProceedDataTrafficDTO)
+              .then(() => {
+                clientSet.disconnect()
+              })
+          })
+          .catch((e: Error) => {
+            this.logger.warn('Failed to connect')
+          })
+      }
+      return response
+    })
   }
 
   @Patch('configuration/:id')
@@ -130,8 +168,34 @@ export class CoreController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: ConfigEditDTO, @Param() param) {
-    return await this.coreService.edit(parameter, param.id)
+  async edit(@Body() parameter: ConfigEditDTO, @Param() param, @Req() request) {
+    return await this.coreService
+      .edit(parameter, param.id)
+      .then(async (response) => {
+        if (/S0000/.test(response.statusCode)) {
+          await this.socketProxy
+            .reconnect({
+              extraHeaders: {
+                Authorization: request.headers.authorization,
+              },
+            })
+            .then(async (clientSet) => {
+              await clientSet
+                .emit('config', {
+                  sender: request.headers.authorization,
+                  receiver: null,
+                  payload: response,
+                } satisfies ProceedDataTrafficDTO)
+                .then(() => {
+                  clientSet.disconnect()
+                })
+            })
+            .catch((e: Error) => {
+              this.logger.warn('Failed to connect')
+            })
+        }
+        return response
+      })
   }
 
   @Delete('configuration/:id')
@@ -147,8 +211,32 @@ export class CoreController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.coreService.delete(param.id)
+  async delete(@Param() param, @Req() request): Promise<GlobalResponse> {
+    return await this.coreService.delete(param.id).then(async (response) => {
+      if (/S0000/.test(response.statusCode)) {
+        await this.socketProxy
+          .reconnect({
+            extraHeaders: {
+              Authorization: request.headers.authorization,
+            },
+          })
+          .then(async (clientSet) => {
+            await clientSet
+              .emit('config', {
+                sender: request.headers.authorization,
+                receiver: null,
+                payload: response,
+              } satisfies ProceedDataTrafficDTO)
+              .then(() => {
+                clientSet.disconnect()
+              })
+          })
+          .catch((e: Error) => {
+            this.logger.warn('Failed to connect')
+          })
+      }
+      return response
+    })
   }
 
   //==============================================================================LOG

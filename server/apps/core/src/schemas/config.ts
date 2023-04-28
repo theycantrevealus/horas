@@ -10,6 +10,41 @@ export class Config {
   @Prop({ type: SchemaTypes.String, unique: true })
   name: string
 
+  @Prop({
+    type: SchemaTypes.String,
+    default: '',
+    required: false,
+  })
+  label: string
+
+  @Prop({
+    type: SchemaTypes.String,
+    default: '0',
+    required: false,
+  })
+  group_level: string
+
+  @Prop({
+    type: SchemaTypes.String,
+    default: 'pi-file',
+    required: false,
+  })
+  group_icon: string
+
+  @Prop({
+    type: SchemaTypes.String,
+    default: 'General',
+    required: false,
+  })
+  group_parent: string
+
+  @Prop({
+    type: SchemaTypes.String,
+    default: 'Profile',
+    required: false,
+  })
+  group: string
+
   @Prop({ type: SchemaTypes.Mixed })
   setter: any
 

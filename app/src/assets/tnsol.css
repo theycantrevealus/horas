@@ -380,7 +380,13 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .p-tree {
-    border: none !important
+    border: none !important;
+    height: calc(100vh - 300px);
+    overflow: auto;
+}
+
+.p-treenode-label {
+    padding-left: 40%;
 }
 
 .p-tree-filter-container input {
@@ -680,7 +686,6 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .sidepanel .panel-logo {
     position: relative;
-    width: 45%;
     margin: 12.5px 13% 0px;
 }
 
@@ -1419,7 +1424,6 @@ label[for] {
 .socket-status-container div.socket-status-label.hold {
     color: #ffc300 !important;
 }
-
 
 .purchase-order-detail-header {
     text-size: 10pt !important;

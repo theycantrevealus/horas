@@ -7,7 +7,7 @@ class Corei18nService {
         return Promise.resolve(response)
       })
       .catch((e) => {
-        console.log(e)
+        //
       })
   }
 
@@ -23,11 +23,9 @@ class Corei18nService {
   }
 
   async i18nAdd(parsedData) {
-    console.log(parsedData)
     return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/add`, parsedData)
       .then((response) => {
-        console.log(response)
         return Promise.resolve(response)
       })
   }

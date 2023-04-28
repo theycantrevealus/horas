@@ -317,11 +317,6 @@ export default {
   created() {},
   async mounted() {
     await this.initLanguage().then(() => {
-      // this.sockets.subscribe('proceed', (data) => {
-      //   console.log('Catch in header')
-      //   console.log(data)
-      // });
-
       this.socket.status = this.$store.state.socket.status
       this.selectedLanguage = this.$store.state.language
       this.$i18n.locale = this.selectedLanguage.lang

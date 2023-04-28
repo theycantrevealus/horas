@@ -175,8 +175,6 @@ export default {
   },
   computed: {
     permission() {
-      console.clear()
-      console.log(this.$store.state.credential.permission)
       return this.$store.state.credential.permission
     },
   },

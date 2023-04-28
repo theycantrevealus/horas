@@ -3,6 +3,7 @@ import { AccountSignInDTO } from '@core/account/dto/account.signin'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
@@ -30,7 +31,8 @@ export class AccountService {
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   async all(parameter: any) {
@@ -256,26 +258,7 @@ export class AccountService {
                   expired_at: token.expired_at,
                 })
 
-                const config = {
-                  application: {
-                    name: await this.cacheManager
-                      .get('APPLICATION_NAME')
-                      .then((response: IConfig) => {
-                        this.logger.verbose(response)
-                        return response.setter
-                      }),
-                    version: await this.cacheManager
-                      .get('APPLICATION_VERSION')
-                      .then((response: IConfig) => {
-                        return response.setter
-                      }),
-                  },
-                  locale: await this.cacheManager
-                    .get('APPLICATION_LOCALE')
-                    .then((response: IConfig) => {
-                      return response.setter
-                    }),
-                }
+                const config = await this.configMeta()
 
                 await logLogin
                   .save()
@@ -328,5 +311,52 @@ export class AccountService {
         response.payload = error.message
       })
     return response
+  }
+
+  async configMeta() {
+    return {
+      application: {
+        name: await this.cacheManager
+          .get('APPLICATION_NAME')
+          .then((response: IConfig) => {
+            this.logger.verbose(response)
+            return response.setter
+          }),
+        version: await this.cacheManager
+          .get('APPLICATION_VERSION')
+          .then((response: IConfig) => {
+            return response.setter
+          }),
+        logo: await this.cacheManager
+          .get('APPLICATION_LOGO')
+          .then((response: IConfig) => {
+            return {
+              target: `${this.configService.get<string>(
+                'application.host_port'
+              )}/${this.configService.get<string>(
+                'application.images.core_prefix'
+              )}/${response.setter.image}`,
+              size: response.setter.size,
+            }
+          }),
+        icon: await this.cacheManager
+          .get('APPLICATION_ICON')
+          .then((response: IConfig) => {
+            return {
+              target: `${this.configService.get<string>(
+                'application.host_port'
+              )}/${this.configService.get<string>(
+                'application.images.core_prefix'
+              )}/${response.setter.image}`,
+              size: response.setter.size,
+            }
+          }),
+      },
+      locale: await this.cacheManager
+        .get('APPLICATION_LOCALE')
+        .then((response: IConfig) => {
+          return response.setter
+        }),
+    }
   }
 }

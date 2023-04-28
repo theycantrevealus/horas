@@ -15,10 +15,15 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(CoreModule, {
     logger: false,
   })
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))
-
   const configService = app.get<ConfigService>(ConfigService)
   app.useStaticAssets(join(__dirname, './assets'))
+  app.useStaticAssets(
+    join(__dirname, configService.get<string>('application.images.core_dir')),
+    {
+      prefix: `/${configService.get<string>('application.images.core_prefix')}`,
+    }
+  )
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))
 
   app.enableVersioning({
     type: VersioningType.URI,

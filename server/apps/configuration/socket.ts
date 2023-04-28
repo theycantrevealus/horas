@@ -9,6 +9,9 @@ export const SocketConfig = () => ({
       notify_result: {
         data: 'data_result',
       },
+      configuration: {
+        update: 'configuration_update',
+      },
     },
   },
 })

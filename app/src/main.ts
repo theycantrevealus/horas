@@ -23,6 +23,7 @@ import GetStarted from '@/modules/get_started'
 import Account from '@/modules/setting/account'
 import Authority from '@/modules/setting/authority'
 import Corei18n from '@/modules/setting/i18n'
+import ApplicationConfiguration from '@/modules/setting/configuration'
 import MasterItem from '@/modules/master/item'
 import PurchaseOrder from '@/modules/inventory/purchase_order'
 import GeneralReceiveNote from '@/modules/inventory/general_receive_note'
@@ -46,6 +47,7 @@ registerModules({
   masterItem: MasterItem,
   authorityModule: Authority,
   corei18N: Corei18n,
+  applicationConfiguration: ApplicationConfiguration,
   serviceModule: Service,
   inventory__PurchaseOrder: PurchaseOrder,
   inventory__GeneralReceiveNote: GeneralReceiveNote,

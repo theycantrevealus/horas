@@ -354,7 +354,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['credential']),
+    ...mapState(['credential', 'application']),
   },
   watch: {
     //
@@ -364,7 +364,6 @@ export default {
       const data = request.payload
       const sender = request.sender
       const receiver = request.receiver
-      console.log(data)
       if(sender.id === this.credential.id) {
 
       } else {

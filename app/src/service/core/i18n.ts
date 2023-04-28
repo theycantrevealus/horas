@@ -8,7 +8,7 @@ class Corei18nService {
         return Promise.resolve(response)
       })
       .catch((e) => {
-        console.log(e)
+        //
       })
   }
 }

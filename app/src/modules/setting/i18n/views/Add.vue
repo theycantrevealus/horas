@@ -378,8 +378,6 @@ export default {
     getDetail: {
       handler(getData) {
         if (getData) {
-          // this.formData = getData
-          // console.log(getData)
           this.formData.components = getData.components
           this.formData.componentTree = getData.componentTree
           this.formData.componentIden = getData.componentIden
@@ -448,11 +446,6 @@ export default {
             }
           }
         } else {
-          console.log({
-            component: this.selectedComponentData.component,
-            translation: this.selectedComponentData.translation,
-          })
-
           dataSet.push({
             component: this.selectedComponentData.component,
             translation: this.selectedComponentData.translation,
@@ -501,7 +494,7 @@ export default {
       await this.$store
         .dispatch('corei18N/fetchi18nDetail', 9)
         .then((duplicateData) => {
-          console.log(duplicateData)
+          //
         })
     },
     deleteChild(event, node) {
@@ -571,8 +564,6 @@ export default {
         componentParsed.push(componentRaw[a])
       }
       this.formData.components = componentParsed
-      console.clear()
-      console.log(this.formData)
       const confirmation = this.$confirm
       confirmation.require({
         group: 'confirm_changes',

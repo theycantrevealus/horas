@@ -425,7 +425,7 @@ export default {
   watch: {
     getTask: {
       handler(getData) {
-        console.log(getData)
+        //
       }
     }
   },
@@ -553,7 +553,6 @@ export default {
       this.calculateAll()
       let countProduct = 0
       await Promise.all(this.products.map((e) => {
-        console.log(e.item)
         if(e.item.id !== '' && parseFloat(e.qty) > 0) {
           countProduct++
         }
@@ -675,7 +674,7 @@ export default {
             this.formData.discount_type = this.formData.discount_type.value
             this.formData.detail = parseDetail
             this.allowSave = false
-            console.log(this.formData)
+
             this.closeDisabler()
 
             await PurchaseOrderService.editPurchaseOrder(this.$route.query.id.toString(), this.formData).then(() => {

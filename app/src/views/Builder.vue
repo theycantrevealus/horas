@@ -12,13 +12,15 @@
         <img
           v-if="getMenuModeStatus"
           class="panel-logo"
-          :src="require('../assets/logo-white.png')"
+          :style="{ width: logo[layoutColorMode].image.size.sidepanel.width }"
+          :src="logo[layoutColorMode].image.target"
           alt="horas"
         />
         <img
           v-if="!getMenuModeStatus"
           class="panel-logo2"
-          :src="require('../assets/icon.png')"
+          :style="{ width: logo[layoutColorMode].icon.size.sidepanel.width }"
+          :src="logo[layoutColorMode].icon.target"
           alt="horas"
         />
       </div>
@@ -81,44 +83,28 @@ export default {
       breadcrumb: [],
       pageName: '',
       darkMode: false,
+      logo: {
+        light: {
+          image: '',
+          icon: '',
+        },
+        dark: {
+          image: '',
+          icon: '',
+        }
+      }
     }
   },
   computed: {
-    ...mapState(['menuMode', 'themeModeDark']),
+    ...mapState(['menuMode', 'themeModeDark', 'application']),
     ...mapGetters({
       getMenuModeStatus: 'getMenuModeStatus',
       getThemeMode: 'getThemeMode',
       geti18n: 'mCorei18n/getData',
+      refreshConfig: 'getSystemConfig',
     }),
-    containerClass() {
-      return [
-        'layout-wrapper',
-        {
-          'layout-overlay': this.layoutMode === 'overlay',
-          'layout-static': this.layoutMode === 'static',
-          'layout-static-sidebar-inactive':
-            this.staticMenuInactive && this.layoutMode === 'static',
-          'layout-overlay-sidebar-active':
-            this.overlayMenuActive && this.layoutMode === 'overlay',
-          'layout-mobile-sidebar-active': this.mobileMenuActive,
-          'input-filled': this.$primevue.config.inputStyle === 'filled',
-          'ripple-disabled': this.$primevue.config.ripple === false,
-          'layout-theme-light': this.$appState.theme.startsWith('saga'),
-        },
-      ]
-    },
-    logo() {
-      return this.layoutColorMode === 'dark'
-        ? 'images/logo-white.svg'
-        : 'images/logo.svg'
-    },
   },
   watch: {
-    $route() {
-      this.breadcrumb = this.$route.meta.breadcrumb
-      this.pageName = this.$route.meta.pageTitle
-      this.$refs.scrollLoader.$el.scrollTop = 0
-    },
     getMenuModeStatus: {
       handler(getData) {
         //
@@ -147,17 +133,33 @@ export default {
       },
     },
     getThemeMode: {
-      handler(getData) {
+      handler() {
         if (this.themeModeDark) {
+          this.layoutColorMode = 'dark'
           document.querySelector('body').classList.add('dark')
         } else {
+          this.layoutColorMode = 'light'
           document.querySelector('body').classList.remove('dark')
         }
+      },
+    },
+    refreshConfig: {
+      handler(getData) {
+        this.logo.dark.image = getData.application.logo
+        this.logo.dark.icon = getData.application.icon
+
+        this.logo.light.image = getData.application.logo
+        this.logo.light.icon = getData.application.icon
       },
     },
   },
   mounted() {
     this.darkMode = this.themeModeDark
+    this.logo.dark.image = this.application.application.logo
+    this.logo.dark.icon = this.application.application.icon
+    this.logo.light.image = this.application.application.logo
+    this.logo.light.icon = this.application.application.icon
+
     this.updatePageInfo()
     if (this.darkMode) {
       document.querySelector('body').classList.add('dark')
@@ -165,13 +167,6 @@ export default {
       document.querySelector('body').classList.remove('dark')
     }
     this.loadLanguage()
-  },
-  beforeUpdate() {
-    if (this.mobileMenuActive) {
-      this.addClass(document.body, 'body-overflow-hidden')
-    } else {
-      this.removeClass(document.body, 'body-overflow-hidden')
-    }
   },
   methods: {
     ...mapActions({
@@ -183,48 +178,11 @@ export default {
       this.breadcrumb = this.$route.meta.breadcrumb
       this.pageName = this.$route.name
     },
-    onWrapperClick() {
-      if (!this.menuClick) {
-        this.overlayMenuActive = false
-        this.mobileMenuActive = false
-      }
-
-      this.menuClick = false
-    },
-    onMenuToggle() {
-      this.menuClick = true
-
-      if (this.isDesktop()) {
-        if (this.layoutMode === 'overlay') {
-          if (this.mobileMenuActive === true) {
-            this.overlayMenuActive = true
-          }
-
-          this.overlayMenuActive = !this.overlayMenuActive
-          this.mobileMenuActive = false
-        } else if (this.layoutMode === 'static') {
-          this.staticMenuInactive = !this.staticMenuInactive
-        }
-      } else {
-        this.mobileMenuActive = !this.mobileMenuActive
-      }
-
-      event.preventDefault()
-    },
-    onSidebarClick() {
-      this.menuClick = true
-    },
     onMenuItemClick(event) {
       if (event.item && !event.item.items) {
         this.overlayMenuActive = false
         this.mobileMenuActive = false
       }
-    },
-    onLayoutChange(layoutMode) {
-      this.layoutMode = layoutMode
-    },
-    onLayoutColorChange(layoutColorMode) {
-      this.layoutColorMode = layoutColorMode
     },
     addClass(element, className) {
       if (element.classList) {
@@ -245,20 +203,6 @@ export default {
           ' '
         )
       }
-    },
-    isDesktop() {
-      return window.innerWidth >= 992
-    },
-    isSidebarVisible() {
-      if (this.isDesktop()) {
-        if (this.layoutMode === 'static') {
-          return !this.staticMenuInactive
-        } else if (this.layoutMode === 'overlay') {
-          return this.overlayMenuActive
-        }
-      }
-
-      return true
     },
   },
 }

@@ -470,11 +470,6 @@ export default {
             }
           }
         } else {
-          console.log({
-            component: this.selectedComponentData.component,
-            translation: this.selectedComponentData.translation,
-          })
-
           dataSet.push({
             component: this.selectedComponentData.component,
             translation: this.selectedComponentData.translation,
@@ -586,8 +581,6 @@ export default {
         componentParsed.push(componentRaw[a])
       }
       this.formData.components = componentParsed
-      console.clear()
-      console.log(this.formData)
       const confirmation = this.$confirm
       confirmation.require({
         group: 'confirm_changes',

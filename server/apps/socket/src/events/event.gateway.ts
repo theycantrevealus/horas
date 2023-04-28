@@ -68,9 +68,21 @@ export class EventsGateway
     @MessageBody() data: ProceedDataTrafficDTO,
     @ConnectedSocket() client: Socket
   ) {
-    this.logger.warn('Get Data')
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.notify_result.data'),
+      data
+    )
+    return data
+  }
+
+  @SubscribeMessage('config')
+  async config_update(
+    @MessageBody() data: ProceedDataTrafficDTO,
+    @ConnectedSocket() client: Socket
+  ) {
+    this.logger.verbose('Emit configuration change')
+    this.io.sockets.emit(
+      this.configService.get<string>('neural.event.configuration.update'),
       data
     )
     return data

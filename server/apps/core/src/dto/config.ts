@@ -12,6 +12,46 @@ export class ConfigAddDTO {
   name: string
 
   @ApiProperty({
+    example: '',
+    required: false,
+    description: 'For displaying on configuration manager',
+  })
+  @IsNotEmpty()
+  label: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: '',
+  })
+  @IsNotEmpty()
+  group_level: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: '',
+  })
+  @IsNotEmpty()
+  group_icon: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: '',
+  })
+  @IsNotEmpty()
+  group_parent: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: 'Configiguration grouper',
+  })
+  @IsNotEmpty()
+  group: string
+
+  @ApiProperty({
     example: ``,
     description: 'Setter for configuration',
   })
@@ -39,6 +79,46 @@ export class ConfigEditDTO {
   })
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: 'For displaying on configuration manager',
+  })
+  @IsNotEmpty()
+  label: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: '',
+  })
+  @IsNotEmpty()
+  group_level: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: '',
+  })
+  @IsNotEmpty()
+  group_icon: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: '',
+  })
+  @IsNotEmpty()
+  group_parent: string
+
+  @ApiProperty({
+    example: '',
+    required: false,
+    description: 'Configiguration grouper',
+  })
+  @IsNotEmpty()
+  group: string
 
   @ApiProperty({
     example: ``,

@@ -8,9 +8,8 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
-
-import { JWTTokenDecodeResponse } from '../security/auth.dto'
-import { AuthService } from '../security/auth.service'
+import { JWTTokenDecodeResponse } from '@security/auth.dto'
+import { AuthService } from '@security/auth.service'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

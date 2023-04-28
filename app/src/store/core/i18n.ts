@@ -18,7 +18,7 @@ export const corei18n = {
           return response
         })
         .catch((e) => {
-          console.log(e)
+          //
         })
     },
   },

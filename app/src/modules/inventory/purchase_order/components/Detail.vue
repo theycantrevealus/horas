@@ -2,15 +2,22 @@
   <div id="po-print">
     <div class="purchase-order-detail-header">
       <div class="flex card-container indigo-container">
-        <div class="flex-2 h-4rem font-bold text-center"></div>
+        <div class="flex-2 h-4rem font-bold text-center">
+          <img
+            :style="{ width: application.application.logo.size.print.width }"
+            :src="application.application.logo.target"
+            class="print-logo"
+            alt="horas"
+          />
+        </div>
         <div class="flex-1 h-4rem text-center mx-4">
           <h3>PURCHASE ORDER</h3>
-          <small>{{ new Date(this.dialogRef.data.payload.created_at).toDateString() }}</small>
-          <small>. Created by <strong>{{ this.dialogRef.data.payload.created_by.last_name }}, {{ this.dialogRef.data.payload.created_by.first_name }}</strong></small>
+          <small>{{ new Date(dialogRef.data.payload.created_at).toDateString() }}</small>
+          <small>. Created by <strong>{{ dialogRef.data.payload.created_by.last_name }}, {{ dialogRef.data.payload.created_by.first_name }}</strong></small>
         </div>
         <div class="flex-2 h-4rem text-right">
-          <strong>{{ this.dialogRef.data.payload.supplier.code }}</strong> - {{ this.dialogRef.data.payload.supplier.name }}<br />
-          <small>{{ this.dialogRef.data.payload.code }}</small>
+          <strong>{{ dialogRef.data.payload.supplier.code }}</strong> - {{ dialogRef.data.payload.supplier.name }}<br />
+          <small>{{ dialogRef.data.payload.code }}</small>
         </div>
       </div>
       <hr />
@@ -29,7 +36,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(item, i) of this.dialogRef.data.payload.detail" :key="i">
+        <tr v-for="(item, i) of dialogRef.data.payload.detail" :key="i">
           <td>{{ i + 1 }}</td>
           <td>{{ item.item.name }}</td>
           <td class="text-right">
@@ -59,29 +66,31 @@
           <td colspan="7" class="text-right">
             <strong>TOTAL</strong>
           </td>
-          <CurrencyLabel :number="parseFloat(this.dialogRef.data.payload.total)" :code="`id`" :currency="`IDR`" :asCell="true" :lang="`ID`" :lastLiner="true" />
+          <CurrencyLabel :number="parseFloat(dialogRef.data.payload.total)" :code="`id`" :currency="`IDR`" :asCell="true" :lang="`ID`" :lastLiner="true" />
         </tr>
         <tr>
           <td colspan="7" class="text-right">
             <strong>DISCOUNT</strong>
           </td>
-          <template v-if="this.dialogRef.data.payload.discount_type === 'v'">
-            <CurrencyLabel :number="parseFloat(this.dialogRef.data.payload.discount_value)" :code="`id`" :currency="`IDR`" :asCell="true" :lang="`ID`" :lastLiner="true" />
+          <template v-if="dialogRef.data.payload.discount_type === 'v'">
+            <CurrencyLabel :number="parseFloat(dialogRef.data.payload.discount_value)" :code="`id`" :currency="`IDR`" :asCell="true" :lang="`ID`" :lastLiner="true" />
           </template>
-          <template v-if="this.dialogRef.data.payload.discount_type === 'p'">
+          <template v-if="dialogRef.data.payload.discount_type === 'p'">
             <td colspan="2" class="text-right last-liner">
-              <NumberLabel :number="parseFloat(this.dialogRef.data.payload.discount_value)" :code="`id`" :currency="`IDR`" :prefix="'%'" :lang="`ID`" />
+              <NumberLabel :number="parseFloat(dialogRef.data.payload.discount_value)" :code="`id`" :currency="`IDR`" :prefix="'%'" :lang="`ID`" />
             </td>
           </template>
           <template v-else>
-            <NumberLabel :number="parseFloat(0)" :code="`id`" :currency="`IDR`" :lang="`ID`" :lastLiner="true" />
+            <td colspan="2" class="text-right last-liner">
+              <NumberLabel :number="parseFloat(0)" :code="`id`" :currency="`IDR`" :lang="`ID`" :lastLiner="true" />
+            </td>
           </template>
         </tr>
         <tr>
           <td colspan="7" class="text-right">
             <strong>GRAND TOTAL</strong>
           </td>
-          <CurrencyLabel :number="parseFloat(this.dialogRef.data.payload.grand_total)" :code="`id`" :currency="`IDR`" :asCell="true" :lang="`ID`" :lastLiner="true" />
+          <CurrencyLabel :number="parseFloat(dialogRef.data.payload.grand_total)" :code="`id`" :currency="`IDR`" :asCell="true" :lang="`ID`" :lastLiner="true" />
         </tr>
         </tbody>
       </table>
@@ -90,7 +99,7 @@
         <div class="flex-1 p-4"></div>
         <div class="flex-1 p-4">
           <strong>Remark:</strong><br />
-          <p>{{ this.dialogRef.data.payload.remark }}</p>
+          <p>{{ dialogRef.data.payload.remark }}</p>
         </div>
       </div>
     </div>
@@ -98,6 +107,7 @@
 </template>
 <script>
 import {defineAsyncComponent} from "vue"
+import {mapState} from "vuex"
 
 const NumberLabel = defineAsyncComponent(() => import('@/components/Number.vue'))
 const CurrencyLabel = defineAsyncComponent(() => import('@/components/currency/Label.vue'))
@@ -111,6 +121,9 @@ export default {
     return {
       data: {},
     }
+  },
+  computed: {
+    ...mapState(['application']),
   },
   mounted() {
     let stylesHtml = '';

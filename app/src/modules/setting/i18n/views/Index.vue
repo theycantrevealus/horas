@@ -192,7 +192,7 @@ export default {
           this.loading = false
         })
         .error((e) => {
-          console.log(e)
+          //
         })
     },
     formatDate(date, format) {
