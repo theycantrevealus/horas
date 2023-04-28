@@ -10,15 +10,14 @@ import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
-import { CacheModule } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { CACHE_MANAGER } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
-import * as redisStore from 'cache-manager-ioredis'
 import { Model, Query, Types } from 'mongoose'
 
 import { AccountService } from '../account.service'
@@ -29,28 +28,27 @@ describe('Account Service', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        CacheModule.registerAsync({
-          isGlobal: true,
-          imports: [ConfigModule],
-          useFactory: async (configService: ConfigService) => {
-            return {
-              store: redisStore,
-              host: configService.get<string>('redis.host'),
-              port: configService.get<string>('redis.port'),
-              username: configService.get<string>('redis.username'),
-              password: configService.get<string>('redis.password'),
-              isGlobal: true,
-            }
-          },
-          inject: [ConfigService],
-        }),
-      ],
       controllers: [],
       providers: [
         AccountService,
         AuthService,
         JwtService,
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: () => 'any value',
+            set: () => jest.fn(),
+          },
+        },
+        {
+          provide: WINSTON_MODULE_PROVIDER,
+          useValue: {
+            log: jest.fn(),
+            warn: jest.fn(),
+            verbose: jest.fn(),
+            error: jest.fn(),
+          },
+        },
         {
           provide: getModelToken(Account.name),
           useValue: mockAccountModel,

@@ -1,5 +1,3 @@
-import { ApplicationConfig } from '@configuration/environtment'
-import { MongoConfig } from '@configuration/mongo'
 import { AccountService } from '@core/account/account.service'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
@@ -20,17 +18,15 @@ import {
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
-import { CacheModule } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { CACHE_MANAGER } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { ClientsModule } from '@nestjs/microservices'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
+import { M_ITEM_SERVICE } from '@utility/constants'
 import { GlobalResponse } from '@utility/dto/response'
-import { KafkaConn } from '@utility/kafka'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
-import * as redisStore from 'cache-manager-ioredis'
 import { Model, Query, Types } from 'mongoose'
 
 describe('Master Item Service', () => {
@@ -39,37 +35,34 @@ describe('Master Item Service', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          isGlobal: true,
-          envFilePath: `${process.cwd()}/environment/${
-            process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
-          }.env`,
-          load: [ApplicationConfig, MongoConfig],
-        }),
-        ClientsModule.registerAsync([KafkaConn.m_item[0]]),
-        CacheModule.registerAsync({
-          isGlobal: true,
-          imports: [ConfigModule],
-          useFactory: async (configService: ConfigService) => {
-            return {
-              store: redisStore,
-              host: configService.get<string>('redis.host'),
-              port: configService.get<string>('redis.port'),
-              username: configService.get<string>('redis.username'),
-              password: configService.get<string>('redis.password'),
-              isGlobal: true,
-            }
-          },
-          inject: [ConfigService],
-        }),
-      ],
       controllers: [],
       providers: [
         MasterItemService,
         AccountService,
         AuthService,
         JwtService,
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: () => 'any value',
+            set: () => jest.fn(),
+          },
+        },
+        {
+          provide: M_ITEM_SERVICE,
+          useValue: {
+            emit: jest.fn(),
+          },
+        },
+        {
+          provide: WINSTON_MODULE_PROVIDER,
+          useValue: {
+            log: jest.fn(),
+            warn: jest.fn(),
+            verbose: jest.fn(),
+            error: jest.fn(),
+          },
+        },
         {
           provide: getModelToken(MasterItem.name),
           useValue: mockMasterItemModel,

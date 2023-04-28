@@ -1,0 +1,1 @@
+export const M_ITEM_SERVICE = 'M_ITEM_SERVICE'

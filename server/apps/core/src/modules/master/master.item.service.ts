@@ -10,6 +10,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
+import { M_ITEM_SERVICE } from '@utility/constants'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { prime_datatable } from '@utility/prime'
@@ -22,7 +23,7 @@ export class MasterItemService {
     @InjectModel(MasterItem.name)
     private masterItemModel: Model<MasterItemDocument>,
 
-    @Inject('M_ITEM_SERVICE') private readonly mItemClient: ClientKafka
+    @Inject(M_ITEM_SERVICE) private readonly mItemClient: ClientKafka
   ) {}
 
   async all(parameter: any) {
