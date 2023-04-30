@@ -31,9 +31,12 @@ import { Model } from 'mongoose'
 import * as winston from 'winston'
 import { Logger } from 'winston'
 
+import { CoreConfigGroupController } from './core.config.group.controller'
+import { CoreConfigGroupService } from './core.config.group.service'
 import { CoreController } from './core.controller'
 import { CoreService } from './core.service'
 import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
+import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
 
 @Module({
   imports: [
@@ -76,6 +79,32 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
               level: configService
                 .get<string>('application.log.verbose')
                 .toString(),
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+            new winston.transports.Console({
+              level: 'error',
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+            new winston.transports.Console({
+              level: 'warn',
               format: winston.format.combine(
                 winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
                 winston.format.printf((data) => {
@@ -187,6 +216,33 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
           return schema
         },
       },
+      {
+        name: ConfigGroup.name,
+        useFactory: () => {
+          const schema = ConfigGroupSchema
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `config_group-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', function (next) {
+            const update = this.getUpdate()
+            update['$inc'] = { __v: 1 }
+            next()
+          })
+
+          return schema
+        },
+      },
     ]),
     MongooseModule.forFeature([
       { name: Account.name, schema: AccountSchema },
@@ -202,8 +258,13 @@ import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
     i18nModule,
     GatewayInventoryModule,
   ],
-  controllers: [CoreController],
-  providers: [CoreService, SocketIoClientProvider, SocketIoClientProxyService],
+  controllers: [CoreController, CoreConfigGroupController],
+  providers: [
+    CoreService,
+    CoreConfigGroupService,
+    SocketIoClientProvider,
+    SocketIoClientProxyService,
+  ],
 })
 export class CoreModule {
   constructor(
@@ -226,8 +287,12 @@ export class CoreModule {
     this.logger.verbose('LOADING SYSTEM CONFIGURATION')
     const config = await this.configModel.find().exec()
     if (config.length > 0) {
+      const configSet = []
       await Promise.all(
         config.map(async (e) => {
+          if (configSet.indexOf(e.name) < 0) {
+            configSet.push(e.name)
+          }
           const keyCheck: IConfig = await this.cacheManager.get(e.name)
           if (keyCheck) {
             this.logger.verbose(
@@ -252,7 +317,12 @@ export class CoreModule {
             })
           }
         })
-      )
+      ).then(async () => {
+        await this.cacheManager.set('CONFIGURATION_META', {
+          setter: configSet,
+          __v: 0,
+        })
+      })
     } else {
       this.logger.verbose('NO CONFIGURATION FOUND')
     }

@@ -23,7 +23,7 @@ export default {
   },
   methods: {
     mapClick (event) {
-      console.clear()
+      //
     }
   },
   data () {

@@ -51,6 +51,6 @@ export default defineComponent({
   name: 'Dashboard',
   components: {
     Card,
-  },
+  }
 })
 </script>

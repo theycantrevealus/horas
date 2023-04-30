@@ -60,7 +60,7 @@ const store = createStore({
   actions: {
     getAppsConfig: async ({commit}) => {
       await ConfigService.getConfig().then((response) => {
-        commit('mutateSystemConfig', response['config'])
+        commit('mutateSystemConfig', response)
       })
     },
     socket_connect: ({ commit }) => {

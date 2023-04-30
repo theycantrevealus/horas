@@ -314,49 +314,29 @@ export class AccountService {
   }
 
   async configMeta() {
-    return {
-      application: {
-        name: await this.cacheManager
-          .get('APPLICATION_NAME')
-          .then((response: IConfig) => {
-            this.logger.verbose(response)
-            return response.setter
-          }),
-        version: await this.cacheManager
-          .get('APPLICATION_VERSION')
-          .then((response: IConfig) => {
-            return response.setter
-          }),
-        logo: await this.cacheManager
-          .get('APPLICATION_LOGO')
-          .then((response: IConfig) => {
-            return {
-              target: `${this.configService.get<string>(
+    return await this.cacheManager
+      .get('CONFIGURATION_META')
+      .then(async (data: any) => {
+        const fields = {}
+        await Promise.all(
+          data.setter.map(async (e) => {
+            if (!fields[e]) {
+              fields[e] = {}
+            }
+
+            fields[e] = await this.cacheManager
+              .get(e)
+              .then((getData: IConfig) => getData.setter)
+            if (e === 'APPLICATION_ICON' || e === 'APPLICATION_LOGO') {
+              fields[e].image = `${this.configService.get<string>(
                 'application.host_port'
               )}/${this.configService.get<string>(
                 'application.images.core_prefix'
-              )}/${response.setter.image}`,
-              size: response.setter.size,
+              )}/${fields[e].image}`
             }
-          }),
-        icon: await this.cacheManager
-          .get('APPLICATION_ICON')
-          .then((response: IConfig) => {
-            return {
-              target: `${this.configService.get<string>(
-                'application.host_port'
-              )}/${this.configService.get<string>(
-                'application.images.core_prefix'
-              )}/${response.setter.image}`,
-              size: response.setter.size,
-            }
-          }),
-      },
-      locale: await this.cacheManager
-        .get('APPLICATION_LOCALE')
-        .then((response: IConfig) => {
-          return response.setter
-        }),
-    }
+          })
+        )
+        return fields
+      })
   }
 }

@@ -1,5 +1,9 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { AccountJoin } from '@core/account/schemas/account.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
+
+import { ConfigGroupJoin } from './config.group'
 
 export type ConfigDocument = HydratedDocument<Config>
 @Schema({ collection: 'core_config' })
@@ -18,29 +22,8 @@ export class Config {
   label: string
 
   @Prop({
-    type: SchemaTypes.String,
-    default: '0',
-    required: false,
-  })
-  group_level: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    default: 'pi-file',
-    required: false,
-  })
-  group_icon: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    default: 'General',
-    required: false,
-  })
-  group_parent: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    default: 'Profile',
+    type: ConfigGroupJoin,
+    _id: false,
     required: false,
   })
   group: string
@@ -50,6 +33,9 @@ export class Config {
 
   @Prop({ type: SchemaTypes.String })
   remark: string
+
+  @Prop(raw(AccountJoin))
+  created_by: IAccountCreatedBy
 }
 export const ConfigSchema = SchemaFactory.createForClass(Config)
 

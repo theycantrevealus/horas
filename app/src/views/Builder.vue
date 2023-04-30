@@ -13,14 +13,14 @@
           v-if="getMenuModeStatus"
           class="panel-logo"
           :style="{ width: logo[layoutColorMode].image.size.sidepanel.width }"
-          :src="logo[layoutColorMode].image.target"
+          :src="logo[layoutColorMode].image.image"
           alt="horas"
         />
         <img
           v-if="!getMenuModeStatus"
           class="panel-logo2"
           :style="{ width: logo[layoutColorMode].icon.size.sidepanel.width }"
-          :src="logo[layoutColorMode].icon.target"
+          :src="logo[layoutColorMode].icon.image"
           alt="horas"
         />
       </div>
@@ -85,8 +85,22 @@ export default {
       darkMode: false,
       logo: {
         light: {
-          image: '',
-          icon: '',
+          image: {
+            size: {
+              sidepanel: {
+                width: '',
+                height: ''
+              }
+            }
+          },
+          icon: {
+            size: {
+              sidepanel: {
+                width: '',
+                height: ''
+              }
+            }
+          },
         },
         dark: {
           image: '',
@@ -145,20 +159,22 @@ export default {
     },
     refreshConfig: {
       handler(getData) {
-        this.logo.dark.image = getData.application.logo
-        this.logo.dark.icon = getData.application.icon
+        if(getData) {
+          this.logo.dark.image = getData['APPLICATION_LOGO']
+          this.logo.dark.icon = getData['APPLICATION_ICON']
 
-        this.logo.light.image = getData.application.logo
-        this.logo.light.icon = getData.application.icon
+          this.logo.light.image = getData['APPLICATION_LOGO']
+          this.logo.light.icon = getData['APPLICATION_ICON']
+        }
       },
     },
   },
   mounted() {
     this.darkMode = this.themeModeDark
-    this.logo.dark.image = this.application.application.logo
-    this.logo.dark.icon = this.application.application.icon
-    this.logo.light.image = this.application.application.logo
-    this.logo.light.icon = this.application.application.icon
+    this.logo.dark.image = this.application['APPLICATION_LOGO']
+    this.logo.dark.icon = this.application['APPLICATION_ICON']
+    this.logo.light.image = this.application['APPLICATION_LOGO']
+    this.logo.light.icon = this.application['APPLICATION_ICON']
 
     this.updatePageInfo()
     if (this.darkMode) {

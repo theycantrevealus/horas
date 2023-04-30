@@ -55,7 +55,7 @@
             :totalRecords="totalRecords"
             :loading="loading"
             filterDisplay="row"
-            :globalFilterFields="['code', 'supplier', 'created_by']"
+            :globalFilterFields="['code', 'supplier', 'total', 'created_by']"
             responsiveLayout="scroll"
             @page="onPage($event)"
             @sort="onSort($event)"
@@ -174,9 +174,9 @@
             </Column>
             <Column
               ref="supplier"
-              field="supplier.name"
+              field="supplier"
               header="Supplier Name"
-              filterField="supplier.name"
+              filterField="supplier"
               filterMatchMode="contains"
               :sortable="true"
             >
@@ -194,7 +194,7 @@
               </template>
             </Column>
             <Column
-              ref="supplier"
+              ref="total"
               field="total"
               header="Total"
               filterField="total"
@@ -322,6 +322,8 @@ export default {
       items: [],
       filters: {
         code: { value: '', matchMode: 'contains' },
+        supplier: { value: '', matchMode: 'contains' },
+        total: { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
       status: {

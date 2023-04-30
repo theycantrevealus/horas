@@ -6,22 +6,10 @@
   </router-view>
 </template>
 <script>
-import {mapActions, mapGetters} from "vuex"
+import {mapActions} from "vuex"
 
 export default {
   name: 'Builder',
-  computed: {
-    ...mapGetters({
-      refreshConfig: 'getSystemConfig'
-    }),
-  },
-  watch: {
-    refreshConfig: {
-      handler(getData) {
-        //
-      },
-    },
-  },
   async mounted() {
     await this.sockets.subscribe('configuration_update', async (request) => {
       await this.getAppsConfig()

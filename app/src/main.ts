@@ -94,17 +94,17 @@ app.directive('tooltip', Tooltip)
 
 app.mount('#app')
 
-Sentry.init({
-  app,
-  dsn: process.env.VUE_APP_SENTRY_DSN,
-  integrations: [
-    new Integrations.BrowserTracing({
-      routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: ['localhost', 'horas.com', /^\//],
-    }),
-  ],
-  tracesSampleRate: 1.0,
-})
+// Sentry.init({
+//   app,
+//   dsn: process.env.VUE_APP_SENTRY_DSN,
+//   integrations: [
+//     new Integrations.BrowserTracing({
+//       routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+//       tracingOrigins: ['localhost', 'horas.com', /^\//],
+//     }),
+//   ],
+//   tracesSampleRate: 1.0,
+// })
 
 if (window.parent.Cypress) {
   window.store = store

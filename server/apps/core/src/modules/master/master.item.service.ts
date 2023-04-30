@@ -91,7 +91,7 @@ export class MasterItemService {
           //
         })
         .catch((e: Error) => {
-          console.log(e.message)
+          //
         })
     }
   }

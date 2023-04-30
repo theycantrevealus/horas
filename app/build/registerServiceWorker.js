@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { register } from 'register-service-worker';
 if (process.env.NODE_ENV === 'production') {
-    register(`${process.env.BASE_URL}service-worker.js`, {
+    register(`${process.env.VUE_APP_APIGATEWAY}service-worker.js`, {
         ready() {
             //
         },

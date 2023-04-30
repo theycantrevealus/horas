@@ -33,6 +33,7 @@ import { Logger } from 'winston'
 
 import { CoreService } from './core.service'
 import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
+import { Config } from './schemas/config'
 
 @Controller()
 @ApiTags('AA - System')
@@ -98,6 +99,19 @@ export class CoreController {
     return await this.coreService.configured()
   }
 
+  @Get('configuration/tree')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Fetch configuration in tree mode',
+    description: 'Showing configuration',
+  })
+  async buildTree() {
+    return this.coreService.initTree()
+  }
+
   @Get('configuration/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
@@ -153,6 +167,51 @@ export class CoreController {
       }
       return response
     })
+  }
+
+  @Patch('configuration/batch')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @UseInterceptors(LoggingInterceptor)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Edit config bulk',
+    description: ``,
+  })
+  async editBulk(@Body() parameter: Config[], @Param() param, @Req() request) {
+    return await this.coreService
+      .editBulk(parameter)
+      .then(async (response) => {
+        if (/S0000/.test(response.statusCode)) {
+          await this.socketProxy
+            .reconnect({
+              extraHeaders: {
+                Authorization: request.headers.authorization,
+              },
+            })
+            .then(async (clientSet) => {
+              await clientSet
+                .emit('config', {
+                  sender: request.headers.authorization,
+                  receiver: null,
+                  payload: response,
+                } satisfies ProceedDataTrafficDTO)
+                .then(() => {
+                  clientSet.disconnect()
+                })
+            })
+            .catch((e: Error) => {
+              this.logger.warn('Failed to connect')
+            })
+        } else {
+          this.logger.verbose(response)
+        }
+        return response
+      })
+      .catch((e: Error) => {
+        this.logger.warn(e)
+      })
   }
 
   @Patch('configuration/:id')

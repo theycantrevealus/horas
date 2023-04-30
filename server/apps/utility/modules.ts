@@ -4,6 +4,7 @@ export const modCodes = {
     failed: 'F0000',
   },
   CoreService: 'CFG',
+  CoreConfigGroupService: 'CFG-G',
   AccountService: 'ACC',
   PatientService: 'PENT',
   MenuService: 'MNU',

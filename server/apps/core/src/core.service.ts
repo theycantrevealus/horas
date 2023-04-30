@@ -13,71 +13,51 @@ import { createLogger, Logger } from 'winston'
 
 import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
 import { Config, ConfigDocument, IConfig } from './schemas/config'
+import { ConfigGroup, ConfigGroupDocument } from './schemas/config.group'
 
 @Injectable()
 export class CoreService {
   constructor(
     @InjectModel(Config.name) private configModel: Model<ConfigDocument>,
+    @InjectModel(ConfigGroup.name)
+    private configGroupModel: Model<ConfigGroupDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @Inject(AccountService) private readonly accountService: AccountService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {}
 
-  loadConfiguration() {}
-
-  async configured() {
-    return {
-      tree: [
-        {
-          key: '0',
-          label: 'General',
-          data: 'General Configuration',
-          icon: 'pi pi-fw pi-desktop',
-          children: [
-            {
-              key: '0-0',
-              label: 'Profile',
-              icon: 'pi pi-fw pi-users',
-              data: 'application',
-            },
-            {
-              key: '0-1',
-              label: 'Logging',
-              icon: 'pi pi-fw pi-file',
-              data: 'logging',
-            },
-          ],
-        },
-      ],
-      config: await this.accountService.configMeta(),
-    }
+  async initTree(parent: any = {}) {
+    return this.configGroupModel.find({ parent: parent }).then((group) => {
+      return Promise.all(
+        group.map(async (e, f) => {
+          return new Promise(async (resolve, reject) => {
+            resolve({
+              key: e.level,
+              label: e.label,
+              data: e.name,
+              icon: e.icon,
+              fields: await this.buildTree({
+                id: e.id,
+                name: e.name,
+              }),
+              children: await this.initTree({
+                id: e.id,
+                name: e.name,
+              }),
+            })
+          })
+        })
+      )
+    })
   }
 
-  async configTree() {
-    return {
-      tree: {
-        key: '0',
-        label: 'General',
-        data: 'General Configuration',
-        icon: 'pi pi-fw pi-desktop',
-        children: [
-          {
-            key: '0-0',
-            label: 'Profile',
-            icon: 'pi pi-fw pi-users',
-            data: 'APPLICATION',
-          },
-          {
-            key: '0-1',
-            label: 'Logging',
-            icon: 'pi pi-fw pi-file',
-            data: 'LOGGING',
-          },
-        ],
-      },
-      config: await this.accountService.configMeta(),
-    }
+  async buildTree(parent: any) {
+    return await this.configModel.find({ group: parent }).exec()
+  }
+
+  async configured() {
+    return await this.accountService.configMeta()
   }
 
   async reloadConfig() {
@@ -145,8 +125,6 @@ export class CoreService {
         'YYYY-MM-DD'
       )
     }
-
-    console.log(files)
 
     const response = {
       statusCode: '',
@@ -262,12 +240,66 @@ export class CoreService {
     return response
   }
 
+  async editBulk(data: Config[]): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'CONFIG_EDIT',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const dataSet = []
+
+    data.map((e) => {
+      dataSet.push({
+        updateOne: {
+          filter: {
+            id: e.id,
+          },
+          update: {
+            setter: e.setter,
+          },
+          upsert: false,
+        },
+      })
+    })
+
+    this.logger.verbose(dataSet)
+
+    await this.configModel
+      .bulkWrite(dataSet)
+      .then((result) => {
+        this.logger.verbose(result)
+        if (result) {
+          response.message = 'Config updated successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.success
+          }`
+          response.payload = result
+        } else {
+          response.message = `Config failed to update 22`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Config failed to update. 222 ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+      })
+
+    return response
+  }
+
   async edit(data: ConfigEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'LOV_EDIT',
+      transaction_classify: 'CONFIG_EDIT',
       transaction_id: null,
     } satisfies GlobalResponse
 
@@ -280,6 +312,8 @@ export class CoreService {
         {
           name: data.name,
           setter: data.setter,
+          label: data.label,
+          group: data.group,
           remark: data.remark,
         }
       )
@@ -308,7 +342,7 @@ export class CoreService {
               response.payload = result
             })
         } else {
-          response.message = `Config failed to update. Invalid document`
+          response.message = `Config failed to update. Invalid document !!!`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
@@ -329,7 +363,7 @@ export class CoreService {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'LOV_DELETE',
+      transaction_classify: 'CONFIG_DELETE',
       transaction_id: null,
     } satisfies GlobalResponse
     await this.configModel

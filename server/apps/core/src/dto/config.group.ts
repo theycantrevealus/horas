@@ -1,10 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsNumber } from 'class-validator'
 
-import { IConfig } from '../schemas/config'
 import { CConfigGroup } from '../schemas/config.group'
 
-export class ConfigAddDTO {
+export class ConfigGroupAddDTO {
   @ApiProperty({
     example: '',
     description: 'Configiguration identifier',
@@ -21,18 +20,25 @@ export class ConfigAddDTO {
   label: string
 
   @ApiProperty({
-    required: false,
-    description: 'Configiguration grouper',
+    example: '0',
+    description: 'Level for primevue tree',
   })
   @IsNotEmpty()
-  group: CConfigGroup
+  level: string
 
   @ApiProperty({
-    example: ``,
-    description: 'Setter for configuration',
+    example: '0',
+    description: 'Level for primevue tree',
   })
   @IsNotEmpty()
-  setter: any
+  icon: string
+
+  @ApiProperty({
+    type: CConfigGroup,
+    description: 'Parent tree',
+  })
+  @IsNotEmpty()
+  parent: CConfigGroup
 
   @ApiProperty({
     example: '',
@@ -41,14 +47,17 @@ export class ConfigAddDTO {
   @IsNotEmpty()
   remark: string
 
-  constructor(parameter: IConfig) {
+  constructor(parameter: any) {
     this.name = parameter.name
-    this.setter = parameter.setter
+    this.label = parameter.label
+    this.level = parameter.level
+    this.icon = parameter.icon
+    this.parent = parameter.parent
     this.remark = parameter.remark
   }
 }
 
-export class ConfigEditDTO {
+export class ConfigGroupEditDTO {
   @ApiProperty({
     example: '',
     description: 'Configiguration identifier',
@@ -65,18 +74,25 @@ export class ConfigEditDTO {
   label: string
 
   @ApiProperty({
-    required: false,
-    description: 'Configiguration grouper',
+    example: '0',
+    description: 'Level for primevue tree',
   })
   @IsNotEmpty()
-  group: CConfigGroup
+  level: string
 
   @ApiProperty({
-    example: ``,
-    description: 'Setter for configuration',
+    example: '0',
+    description: 'Level for primevue tree',
   })
   @IsNotEmpty()
-  setter: any
+  icon: string
+
+  @ApiProperty({
+    type: CConfigGroup,
+    description: 'Parent tree',
+  })
+  @IsNotEmpty()
+  parent: CConfigGroup
 
   @ApiProperty({
     example: '',
@@ -93,9 +109,12 @@ export class ConfigEditDTO {
   @IsNumber()
   __v: number
 
-  constructor(parameter: IConfig) {
+  constructor(parameter: any) {
     this.name = parameter.name
-    this.setter = parameter.setter
+    this.label = parameter.label
+    this.level = parameter.level
+    this.icon = parameter.icon
+    this.parent = parameter.parent
     this.remark = parameter.remark
     this.__v = parameter.__v
   }
