@@ -106,7 +106,7 @@ export default {
   computed: {
     ...mapState(['credential']),
     ...mapGetters({
-      getMenuModeStatus: 'getMenuModeStatus',
+      getMenuModeStatus: 'storeApplication/Getter___sidePanelMode',
     }),
   },
   watch: {
@@ -121,8 +121,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      toogleMenuStatusOn: 'toggleMenuOn',
-      toogleMenuStatusOff: 'toggleMenuOff',
+      toogleMenuStatus: 'storeApplication/Action___toggleMenu',
     }),
     onMenuItemClick(event, item, index) {
       if (item.disabled) {
@@ -133,7 +132,7 @@ export default {
       if (!item.to && !item.url) {
         event.preventDefault()
       } else {
-        this.toogleMenuStatusOff()
+        this.toogleMenuStatus()
       }
 
       // execute command

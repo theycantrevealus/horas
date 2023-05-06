@@ -13,13 +13,20 @@ import { CoreModule } from './core.module'
 declare const module: any
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(CoreModule, {
+    cors: {
+      origin: '*',
+    },
     logger: ['verbose', 'error'],
   })
   const configService = app.get<ConfigService>(ConfigService)
+
   app.useStaticAssets(join(__dirname, './assets'))
   app.useStaticAssets(
     join(__dirname, configService.get<string>('application.images.core_dir')),
     {
+      setHeaders: (res, path, stat) => {
+        res.set('Access-Control-Allow-Origin', '*')
+      },
       prefix: `/${configService.get<string>('application.images.core_prefix')}`,
     }
   )

@@ -3,11 +3,11 @@ import {AxiosResponse} from "axios";
 import {CoreResponse} from "@/model/Response";
 
 class PurchaseOrderService {
-  getItemList(parsedData) {
+  getList(parameter) {
     return api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order`, {
         params: {
-          lazyEvent: JSON.stringify(parsedData)
+          lazyEvent: JSON.stringify(parameter)
         },
       })
       .then((response: any) => {
@@ -15,7 +15,19 @@ class PurchaseOrderService {
       })
   }
 
-  async getPurchaseOrderDetail(id) {
+  getUncompletedList(parameter) {
+    return api({ requiresAuth: true })
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/uncompleted`, {
+        params: {
+          lazyEvent: JSON.stringify(parameter)
+        },
+      })
+      .then((response: any) => {
+        return Promise.resolve(response)
+      })
+  }
+
+  async getDetail(id: string) {
     return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${id}`)
       .then((response: any) => {
@@ -23,7 +35,7 @@ class PurchaseOrderService {
       })
   }
 
-  async addPurchaseOrder(data): Promise<CoreResponse> {
+  async add(data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order`,data)
       .then((response:AxiosResponse) => {
@@ -32,7 +44,7 @@ class PurchaseOrderService {
       })
   }
 
-  async editPurchaseOrder(id, data): Promise<CoreResponse> {
+  async edit(id: string, data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
       .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${id}`,data)
       .then((response:AxiosResponse) => {

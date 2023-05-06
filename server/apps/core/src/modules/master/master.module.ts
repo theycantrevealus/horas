@@ -42,6 +42,7 @@ import { ConfigModule } from '@nestjs/config'
 import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { environmentIdentifier } from '@utility/environtment'
 import { KafkaConn } from '@utility/kafka'
 import { TimeManagement } from '@utility/time'
 
@@ -49,9 +50,7 @@ import { TimeManagement } from '@utility/time'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
-      }.env`,
+      envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig],
     }),
     ClientsModule.registerAsync([KafkaConn.m_item[0]]),

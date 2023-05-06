@@ -155,7 +155,7 @@
                               </div>
                             </template>
                             <template #editor="{ data, field }">
-                              <InputNumber v-model="data[field]" mode="currency" :currency="application.locale.currency" :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                              <InputNumber v-model="data[field]" mode="currency" :currency="`${application['APPLICATION_LOCALE'].currency}`" :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
                             </template>
                           </Column>
                           <Column field="discount_type" header="Discount Type" style="width: 10%">
@@ -252,8 +252,8 @@
                             class="p-inputtext-sm"
                             placeholder="Total"
                             mode="currency"
-                            :currency="application.locale.currency"
-                            :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                            :currency="application['APPLICATION_LOCALE'].currency"
+                            :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
                         </div>
                       </div>
                       <div class="col-3">
@@ -266,8 +266,8 @@
                             class="p-inputtext-sm"
                             placeholder="Grand Total"
                             mode="currency"
-                            :currency="application.locale.currency"
-                            :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                            :currency="application['APPLICATION_LOCALE'].currency"
+                            :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
                         </div>
                       </div>
                       <div class="col-12">
@@ -463,7 +463,7 @@ export default {
     },
     async reloadDetailData() {
       // const cal = Calendar.getInstance()
-      await PurchaseOrderService.getPurchaseOrderDetail(this.$route.query.id.toString()).then((response) => {
+      await PurchaseOrderService.getDetail(this.$route.query.id.toString()).then((response) => {
         this.openDisabler()
         const data = response.data
         this.formData.code = data.code
@@ -541,7 +541,7 @@ export default {
       }
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat(`${this.application.locale.language_code.toLowerCase()}-${this.application.locale.iso_2_digits.toUpperCase()}`, { style: 'currency', currency: this.application.locale.currency }).format(value);
+      return new Intl.NumberFormat(`${this.application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${this.application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`, { style: 'currency', currency: this.application['APPLICATION_LOCALE'].currency }).format(value);
     },
     allowAdd() {
       return (
@@ -677,7 +677,7 @@ export default {
 
             this.closeDisabler()
 
-            await PurchaseOrderService.editPurchaseOrder(this.$route.query.id.toString(), this.formData).then(() => {
+            await PurchaseOrderService.edit(this.$route.query.id.toString(), this.formData).then(() => {
 
             })
           },

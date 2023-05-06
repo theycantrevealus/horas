@@ -5,6 +5,7 @@ export const KafkaConfig = () => {
         item: {
           service: process.env.KAFKA_M_ITEM_SERVICE,
           topic: process.env.KAFKA_M_ITEM_TOPIC,
+          client: process.env.KAFKA_M_ITEM_CLIENT_ID,
           broker: process.env.KAFKA_M_ITEM_BROKER,
           cons_group: process.env.KAFKA_M_ITEM_CONSUMER_GROUP,
           ssl: {
@@ -21,7 +22,12 @@ export const KafkaConfig = () => {
       },
       inventory: {
         service: process.env.KAFKA_INVENTORY_SERVICE,
-        topic: process.env.KAFKA_INVENTORY_TOPIC,
+        topic: {
+          purchase_order: process.env.KAFKA_INVENTORY_TOPIC_PURCHASE_ORDER,
+          general_receive_note:
+            process.env.KAFKA_INVENTORY_TOPIC_GENERAL_RECEIVE_NOTE,
+        },
+        client: process.env.KAFKA_INVENTORY_CLIENT_ID,
         broker: process.env.KAFKA_INVENTORY_BROKER,
         cons_group: process.env.KAFKA_INVENTORY_CONSUMER_GROUP,
         ssl: {

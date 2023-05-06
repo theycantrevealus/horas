@@ -27,7 +27,6 @@
   </template>
 </template>
 <script>
-import {mapGetters, mapState} from "vuex"
 import { NumberParser } from '@/util/number'
 
 export default {
@@ -68,9 +67,6 @@ export default {
       formatted: {},
       lastLinerClass: 'last-liner'
     }
-  },
-  computed: {
-    ...mapGetters(['getBrowserLanguage'])
   },
   mounted() {
     this.formatted = this.format(this.number)

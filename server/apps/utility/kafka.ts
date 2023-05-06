@@ -8,20 +8,15 @@ import {
   ClientsModuleAsyncOptions,
   Transport,
 } from '@nestjs/microservices'
+import { environmentIdentifier } from '@utility/environtment'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 
 dotenv.config({
-  path:
-    !process.env.NODE_ENV || process.env.NODE_ENV === ''
-      ? `environment/.env`
-      : `environment/${process.env.NODE_ENV}.env`,
+  path: environmentIdentifier,
 })
 
-const devMode =
-  !process.env.NODE_ENV ||
-  process.env.NODE_ENV === '' ||
-  process.env.NODE_ENV === 'development'
+const devMode = environmentIdentifier
 
 const KafkaConnCoord = (devMode) => {
   if (devMode) {
@@ -32,9 +27,7 @@ const KafkaConnCoord = (devMode) => {
           imports: [
             ConfigModule.forRoot({
               isGlobal: true,
-              envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
-              }.env`,
+              envFilePath: environmentIdentifier,
               load: [ApplicationConfig, MongoConfig, KafkaConfig, SocketConfig],
             }),
           ],
@@ -45,7 +38,7 @@ const KafkaConnCoord = (devMode) => {
             transport: Transport.KAFKA,
             options: {
               client: {
-                clientId: configService.get<string>('kafka.inventory.topic'),
+                clientId: configService.get<string>('kafka.inventory.client'),
                 brokers: [configService.get<string>('kafka.inventory.broker')],
               },
               consumer: {
@@ -63,9 +56,7 @@ const KafkaConnCoord = (devMode) => {
           imports: [
             ConfigModule.forRoot({
               isGlobal: true,
-              envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
-              }.env`,
+              envFilePath: environmentIdentifier,
               load: [ApplicationConfig, MongoConfig, KafkaConfig],
             }),
           ],
@@ -76,7 +67,7 @@ const KafkaConnCoord = (devMode) => {
             transport: Transport.KAFKA,
             options: {
               client: {
-                clientId: configService.get<string>('kafka.master.item.topic'),
+                clientId: configService.get<string>('kafka.master.item.client'),
                 brokers: [
                   configService.get<string>('kafka.master.item.broker'),
                 ],
@@ -100,9 +91,7 @@ const KafkaConnCoord = (devMode) => {
           imports: [
             ConfigModule.forRoot({
               isGlobal: true,
-              envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
-              }.env`,
+              envFilePath: environmentIdentifier,
               load: [ApplicationConfig, MongoConfig, KafkaConfig],
             }),
           ],
@@ -113,7 +102,7 @@ const KafkaConnCoord = (devMode) => {
             transport: Transport.KAFKA,
             options: {
               client: {
-                clientId: configService.get<string>('kafka.inventory.topic'),
+                clientId: configService.get<string>('kafka.inventory.client'),
                 brokers: [configService.get<string>('kafka.inventory.broker')],
                 ssl: {
                   secureProtocol: configService.get<string>(
@@ -152,9 +141,7 @@ const KafkaConnCoord = (devMode) => {
           imports: [
             ConfigModule.forRoot({
               isGlobal: true,
-              envFilePath: `${process.cwd()}/environment/${
-                !process.env.NODE_ENV ? '' : process.env.NODE_ENV
-              }.env`,
+              envFilePath: environmentIdentifier,
               load: [ApplicationConfig, MongoConfig, KafkaConfig],
             }),
           ],
@@ -165,7 +152,7 @@ const KafkaConnCoord = (devMode) => {
             transport: Transport.KAFKA,
             options: {
               client: {
-                clientId: configService.get<string>('kafka.master.item.topic'),
+                clientId: configService.get<string>('kafka.master.item.client'),
                 brokers: [
                   configService.get<string>('kafka.master.item.broker'),
                 ],

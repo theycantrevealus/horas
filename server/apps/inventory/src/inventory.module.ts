@@ -42,6 +42,8 @@ import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
+import { DecoratorProcessorService } from '@utility/decorator'
+import { environmentIdentifier } from '@utility/environtment'
 import { KafkaConn } from '@utility/kafka'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
@@ -53,9 +55,7 @@ import { Logger } from 'winston'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
-      }.env`,
+      envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig, SocketConfig],
     }),
     ClientsModule.registerAsync([KafkaConn.m_item[0]]),
@@ -72,6 +72,19 @@ import { Logger } from 'winston'
           transports: [
             new winston.transports.Console({
               level: 'warn',
+              format: winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                winston.format.printf((data) => {
+                  return JSON.stringify({
+                    timestamp: data.timestamp,
+                    level: data.level,
+                    message: data.message,
+                  })
+                })
+              ),
+            }),
+            new winston.transports.Console({
+              level: 'error',
               format: winston.format.combine(
                 winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
                 winston.format.printf((data) => {
@@ -262,6 +275,7 @@ import { Logger } from 'winston'
     MasterStockPointService,
     SocketIoClientProvider,
     SocketIoClientProxyService,
+    DecoratorProcessorService,
   ],
   exports: [PurchaseOrderService, GeneralReceiveNoteService],
 })

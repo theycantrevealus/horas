@@ -18,7 +18,6 @@ import '@/assets/style/modal.css'
 import 'nprogress/nprogress.css'
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import { registerModules } from '@/modules/register'
-import New from '@/modules/new'
 import GetStarted from '@/modules/get_started'
 import Account from '@/modules/setting/account'
 import Authority from '@/modules/setting/authority'
@@ -41,7 +40,6 @@ import VueSocketIO from 'vue-3-socket.io'
 import {io} from "socket.io-client";
 
 registerModules({
-  newModule: New,
   getStarted: GetStarted,
   accountModule: Account,
   masterItem: MasterItem,
@@ -70,15 +68,15 @@ app
     connection: io(process.env.NODE_ENV === "production" ? "http://localhost:9900" : "http://localhost:9900", {
       withCredentials: true,
       auth: {
-        token: `Bearer ${store.state.credential.token}`
+        token: `Bearer ${store.getters['storeCredential/Getter___token']}`
       },
       extraHeaders: {
-        Authorization: `Bearer ${store.state.credential.token}`
+        Authorization: `Bearer ${store.getters['storeCredential/Getter___token']}`
       }
     }),
     vuex: {
       store,
-      actionPrefix: 'socket_',
+      actionPrefix: 'storeSocket/Action___socket_',
     },
   }))
   .use(PrimeVue)

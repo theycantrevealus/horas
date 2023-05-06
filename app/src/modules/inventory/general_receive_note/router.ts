@@ -40,7 +40,7 @@ const moduleRoute = [
             ),
       },
       {
-        path: 'add',
+        path: 'add/:id',
         name: `${moduleName}Add`,
         meta: {
           pageTitle: `${moduleCaption} Add`,
@@ -55,24 +55,6 @@ const moduleRoute = [
         component: () =>
           import(
             /* webpackChunkName: "general_receive_note" */ `@/modules/inventory/general_receive_note/views/Add.vue`
-            ),
-      },
-      {
-        path: 'edit/:id',
-        name: `${moduleName}Edit`,
-        meta: {
-          pageTitle: `${moduleCaption} Edit`,
-          requiresAuth: true,
-          breadcrumb: [
-            {
-              label: `${moduleCaption}`,
-              to: `${moduleUrl}`,
-            },
-          ],
-        },
-        component: () =>
-          import(
-            /* webpackChunkName: "general_receive_note" */ `@/modules/inventory/general_receive_note/views/Edit.vue`
             ),
       },
     ],

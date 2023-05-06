@@ -10,6 +10,7 @@ import {
   PurchaseOrderDocument,
 } from '@inventory/schemas/purchase.order'
 import { Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -21,6 +22,8 @@ import { Model, Types } from 'mongoose'
 @Injectable()
 export class PurchaseOrderService {
   constructor(
+    @Inject(ConfigService)
+    private readonly configService: ConfigService,
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
     @Inject(MasterItemService)
@@ -34,6 +37,14 @@ export class PurchaseOrderService {
 
   async detail(id: string): Promise<PurchaseOrder> {
     return this.purchaseOrderModel.findOne({ id: id, deleted_at: null }).exec()
+  }
+
+  async uncompletedDelivery(parameter: any) {
+    parameter.custom_filter = [
+      { $expr: { $ne: ['$detail.qty', '$detail.delivered'] } },
+      { status: 'approved' },
+    ]
+    return await prime_datatable(parameter, this.purchaseOrderModel)
   }
 
   async add(
@@ -51,13 +62,16 @@ export class PurchaseOrderService {
 
     const generatedID = new Types.ObjectId().toString()
 
-    const emitter = await this.clientInventory.emit('purchase_order', {
-      action: 'add',
-      id: generatedID,
-      data: data,
-      account: account,
-      token: token,
-    })
+    const emitter = await this.clientInventory.emit(
+      this.configService.get<string>('kafka.inventory.topic.purchase_order'),
+      {
+        action: 'add',
+        id: generatedID,
+        data: data,
+        account: account,
+        token: token,
+      }
+    )
 
     if (emitter) {
       response.message = 'Purchase Order created successfully'
@@ -96,13 +110,18 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit('purchase_order', {
-            action: 'ask_approval',
-            id: id,
-            data: data,
-            account: account,
-            token: token,
-          })
+          const emitter = await this.clientInventory.emit(
+            this.configService.get<string>(
+              'kafka.inventory.topic.purchase_order'
+            ),
+            {
+              action: 'ask_approval',
+              id: id,
+              data: data,
+              account: account,
+              token: token,
+            }
+          )
           if (emitter) {
             response.message = 'Purchase order proposed successfully'
             response.statusCode = `${modCodes[this.constructor.name]}_U_${
@@ -156,13 +175,18 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit('purchase_order', {
-            action: 'approve',
-            id: id,
-            data: data,
-            account: account,
-            token: token,
-          })
+          const emitter = await this.clientInventory.emit(
+            this.configService.get<string>(
+              'kafka.inventory.topic.purchase_order'
+            ),
+            {
+              action: 'approve',
+              id: id,
+              data: data,
+              account: account,
+              token: token,
+            }
+          )
           if (emitter) {
             response.message = 'Purchase order approved successfully'
             response.statusCode = `${modCodes[this.constructor.name]}_U_${
@@ -220,13 +244,18 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit('purchase_order', {
-            action: 'decline',
-            id: id,
-            data: data,
-            account: account,
-            token: token,
-          })
+          const emitter = await this.clientInventory.emit(
+            this.configService.get<string>(
+              'kafka.inventory.topic.purchase_order'
+            ),
+            {
+              action: 'decline',
+              id: id,
+              data: data,
+              account: account,
+              token: token,
+            }
+          )
           if (emitter) {
             response.message = 'Purchase order declined successfully'
             response.statusCode = `${modCodes[this.constructor.name]}_U_${
@@ -283,13 +312,18 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit('purchase_order', {
-            action: 'edit',
-            id: id,
-            data: data,
-            token: token,
-            account: account,
-          })
+          const emitter = await this.clientInventory.emit(
+            this.configService.get<string>(
+              'kafka.inventory.topic.purchase_order'
+            ),
+            {
+              action: 'edit',
+              id: id,
+              data: data,
+              token: token,
+              account: account,
+            }
+          )
           if (emitter) {
             response.message = 'Purchase Order updated successfully'
             response.statusCode = `${modCodes[this.constructor.name]}_U_${
@@ -344,13 +378,16 @@ export class PurchaseOrderService {
     if (data) {
       data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
 
-      const emitter = await this.clientInventory.emit('purchase_order', {
-        action: 'delete',
-        id: id,
-        data: data,
-        account: account,
-        token: token,
-      })
+      const emitter = await this.clientInventory.emit(
+        this.configService.get<string>('kafka.inventory.topic.purchase_order'),
+        {
+          action: 'delete',
+          id: id,
+          data: data,
+          account: account,
+          token: token,
+        }
+      )
       if (emitter) {
         response.message = 'Purchase order deleted successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_D_${

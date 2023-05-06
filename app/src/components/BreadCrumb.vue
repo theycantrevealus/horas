@@ -43,6 +43,7 @@
 <script>
 import Breadcrumb from 'primevue/breadcrumb'
 import Chip from 'primevue/chip'
+import {mapGetters, mapState} from "vuex"
 export default {
   name: 'BreadCrumb',
   components: {
@@ -65,15 +66,7 @@ export default {
     }
   },
   computed: {
-    profile_photo() {
-      return this.$store.state.credential.profile_photo
-    },
-    first_name() {
-      return this.$store.state.credential.first_name
-    },
-    last_name() {
-      return this.$store.state.credential.last_name
-    },
+    ...mapState('storeCredential', ['first_name', 'last_name', 'profile_photo']),
   },
 }
 </script>

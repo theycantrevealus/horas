@@ -10,13 +10,5 @@ import {mapActions} from "vuex"
 
 export default {
   name: 'Builder',
-  async mounted() {
-    await this.sockets.subscribe('configuration_update', async (request) => {
-      await this.getAppsConfig()
-    })
-  },
-  methods: {
-    ...mapActions(['getAppsConfig']),
-  },
 }
 </script>

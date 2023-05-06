@@ -42,8 +42,18 @@ table thead tr th {
     font-size: 6pt !important;
 }
 
-.p-treetable-thead tr th .p-sortable-column-icon {
+.p-treetable-thead tr th .p-sortable-column-icon, .p-datatable .p-sortable-column .p-sortable-column-icon {
     font-size: 6pt !important;
+    color: #fff !important;
+}
+
+.p-datatable .p-sortable-column .p-sortable-column-icon {
+    width: .5rem;
+}
+
+.p-datatable-table thead tr th.p-filter-column .p-column-filter .p-link svg {
+    width: .5rem;
+    color: #fff !important;
 }
 
 /*==============================================================*/

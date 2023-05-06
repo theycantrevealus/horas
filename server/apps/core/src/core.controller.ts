@@ -204,8 +204,6 @@ export class CoreController {
             .catch((e: Error) => {
               this.logger.warn('Failed to connect')
             })
-        } else {
-          this.logger.verbose(response)
         }
         return response
       })

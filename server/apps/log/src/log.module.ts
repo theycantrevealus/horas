@@ -4,6 +4,7 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { environmentIdentifier } from '@utility/environtment'
 import { WinstonModule } from '@utility/logger/module'
 import { TimeManagement } from '@utility/time'
 import * as winston from 'winston'
@@ -15,9 +16,7 @@ import { LogService } from './log.service'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
-      }.env`,
+      envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig],
     }),
     WinstonModule.forRootAsync({

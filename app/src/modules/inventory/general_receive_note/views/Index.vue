@@ -48,7 +48,7 @@
             :totalRecords="totalRecords"
             :loading="loading"
             filterDisplay="row"
-            :globalFilterFields="['code', 'supplier', 'created_by']"
+            :globalFilterFields="['code', 'supplier', 'total', 'created_by']"
             responsiveLayout="scroll"
             @page="onPage($event)"
             @sort="onSort($event)"
@@ -71,56 +71,15 @@
               <span class="p-buttonset">
                 <Button
                   class="p-button-info p-button-sm p-button-raised"
-                  @click="purchaseOrderDetail($event, slotProps.data.id)"
+                  @click="purchaseOrderDetail($event, slotProps.data)"
                 >
                   <span class="material-icons">remove_red_eye</span> View
                 </Button>
                 <Button
-                  v-if="permission.allowApprove && slotProps.data.status === 'need_approval'"
                   class="p-button-success p-button-sm p-button-raised"
-                  @click="approvePurchaseOrder($event, {
-                    id: slotProps.data.id,
-                    code: slotProps.data.code,
-                    __v: slotProps.data.__v
-                  })"
+                  @click="receivePurchaseOrder($event, slotProps.data.id)"
                 >
-                  <span class="material-icons">check</span> Approve
-                </Button>
-                <Button
-                  v-if="permission.allowDecline && slotProps.data.status === 'need_approval'"
-                  class="p-button-warning p-button-sm p-button-raised"
-                  @click="declinePurchaseOrder($event, {
-                    id: slotProps.data.id,
-                    code: slotProps.data.code,
-                    __v: slotProps.data.__v
-                  })"
-                >
-                  <span class="material-icons">close</span> Decline
-                </Button>
-                <Button
-                  v-if="permission.allowEdit && credential.id === slotProps.data.created_by.id && (slotProps.data.status === 'new' || slotProps.data.status === 'declined')"
-                  class="p-button-info p-button-sm p-button-raised"
-                  @click="purchaseOrderEdit(slotProps.data.id)"
-                >
-                  <span class="material-icons">edit</span> Edit
-                </Button>
-                <Button
-                  v-if="permission.allowDelete && credential.id === slotProps.data.created_by.id && slotProps.data.status === 'new'"
-                  class="p-button-danger p-button-sm p-button-raised"
-                  @click="purchaseOrderDelete($event, slotProps.data.id)"
-                >
-                  <span class="material-icons">delete</span> Delete
-                </Button>
-                <Button
-                  v-if="permission.allowAsk && credential.id === slotProps.data.created_by.id && slotProps.data.status === 'new'"
-                  class="p-button-success p-button-sm p-button-raised"
-                  @click="purchaseOrderAsk($event, {
-                    id: slotProps.data.id,
-                    code: slotProps.data.code,
-                    __v: slotProps.data.__v
-                  })"
-                >
-                  <span class="material-icons">back_hand</span> Ask Approval
+                  <span class="material-icons">receipt_long</span> Receive
                 </Button>
               </span>
               </template>
@@ -133,18 +92,6 @@
             >
               <template #body="slotProps">
                 <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}, <b class="text-purple-500">{{ formatDate(slotProps.data.created_at, 'HH:mm') }}</b></b>
-              </template>
-            </Column>
-            <Column
-              ref="status"
-              field="status"
-              header="Status"
-              :sortable="true"
-            >
-              <template #body="slotProps">
-                <div class="flex flex-wrap gap-2">
-                  <Tag icon="pi pi-tags" :severity="status[slotProps.data.status].severity" :value="status[slotProps.data.status].caption"></Tag>
-                </div>
               </template>
             </Column>
             <Column
@@ -167,9 +114,9 @@
             </Column>
             <Column
               ref="supplier"
-              field="supplier.name"
+              field="supplier"
               header="Supplier Name"
-              filterField="supplier.name"
+              filterField="supplier"
               filterMatchMode="contains"
               :sortable="true"
             >
@@ -187,30 +134,9 @@
               </template>
             </Column>
             <Column
-              ref="supplier"
-              field="total"
-              header="Total"
-              filterField="total"
-              filterMatchMode="contains"
-              :sortable="true"
-            >
-              <template #filter="{ filterModel, filterCallback }">
-                <InputText
-                  v-model="filterModel.value"
-                  type="text"
-                  class="column-filter"
-                  placeholder="Search by supplier"
-                  @keydown.enter="filterCallback()"
-                />
-              </template>
-              <template #body="slotProps">
-                <CurrencyLabel :number="parseFloat(slotProps.data.total)" :code="`id`" :currency="`IDR`" :lang="`ID`" />
-              </template>
-            </Column>
-            <Column
               ref="created_by"
               field="created_by"
-              header="Created By"
+              header="PO Created By"
               :sortable="true"
             >
               <template #body="slotProps">
@@ -240,14 +166,12 @@ import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Toolbar from 'primevue/toolbar'
-import Tag from 'primevue/tag'
-import CurrencyLabel from '@/components/currency/Label.vue'
 import PurchaseOrderService from '@/modules/inventory/purchase_order/service'
 import {mapGetters, mapState} from "vuex"
 import { markRaw, defineAsyncComponent } from 'vue'
 
-import FormPurchaseOrderApproval from '@/modules/inventory/purchase_order/components/Approval.vue'
-import ApprovalFooter from '@/modules/inventory/purchase_order/components/ApprovalFooter.vue'
+const DetailFooter = defineAsyncComponent(() => import('@/modules/inventory/purchase_order/components/DetailFooter.vue'))
+const Detail = defineAsyncComponent(() => import('@/modules/inventory/purchase_order/components/Detail.vue'))
 
 export default {
   components: {
@@ -258,12 +182,10 @@ export default {
     Toolbar,
     DynamicDialog,
     Card,
-    Tag,
     Panel,
     Message,
     ConfirmPopup,
     Dropdown,
-    CurrencyLabel,
   },
   data() {
     return {
@@ -309,6 +231,8 @@ export default {
       items: [],
       filters: {
         code: { value: '', matchMode: 'contains' },
+        supplier: { value: '', matchMode: 'contains' },
+        total: { value: '', matchMode: 'contains' },
       },
       lazyParams: {},
       status: {
@@ -335,7 +259,7 @@ export default {
       },
       columns: [
         { field: 'code', header: 'Code' },
-        { field: 'supplier.name', header: 'Name' },
+        { field: 'supplier', header: 'Name' },
         { field: 'created_at', header: 'Created Date' },
       ],
     }
@@ -378,12 +302,12 @@ export default {
     this.loadLazyData()
   },
   methods: {
-    toggleDialog(parameter) {
-      this.$dialog.open(FormPurchaseOrderApproval, {
+    purchaseOrderDetail(event, parameter) {
+      this.$dialog.open(Detail, {
         props: {
-          header: `${parameter.header} #${parameter.code}`,
+          header: 'Purchase Order Detail',
           style: {
-            width: '50vw'
+            width: '90vw'
           },
           breakpoints: {
             '960px': '75vw',
@@ -391,124 +315,46 @@ export default {
           },
           modal: true,
         },
+        data: {
+          payload: parameter
+        },
         templates: {
-          footer: markRaw(ApprovalFooter)
+          footer: markRaw(DetailFooter)
         },
         onClose: async (options) => {
           const data = options.data;
 
           if (data) {
             const buttonType = data.buttonType;
-            if(buttonType > 0) {
-              if(parameter.header === 'Approve') {
-                await PurchaseOrderService.approveApproval({
-                  id: parameter.id,
-                  remark: data.remark,
-                  __v: parameter.__v
-                }).then((response) => {
-                  this.loadLazyData()
-                  // this.loading = true
-                })
-              } else if(parameter.header === 'Decline') {
-                await PurchaseOrderService.declineApproval({
-                  id: parameter.id,
-                  remark: data.remark,
-                  __v: parameter.__v
-                }).then((response) => {
-                  this.loadLazyData()
-                  // this.loading = true
-                })
-              } else {
-                await PurchaseOrderService.askApproval({
-                  id: parameter.id,
-                  remark: data.remark,
-                  __v: parameter.__v
-                }).then((response) => {
-                  this.loadLazyData()
-                  // this.loading = true
-                })
+            if(buttonType === 0) {
+              let stylesHtml = '';
+              for (const node of [...document.querySelectorAll('link[rel="stylesheet"], style')]) {
+                stylesHtml += node.outerHTML;
               }
+
+              const WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+
+              WinPrint.document.write(`<!DOCTYPE html><html><head>${stylesHtml}</head><body>${data.print.html}</body></html>`);
+
+              WinPrint.document.close();
+              WinPrint.focus();
+              WinPrint.print();
+              WinPrint.close();
             }
           }
         }
       })
     },
-    purchaseOrderDelete(event, id) {
-      const target = event.target
-      const confirmation = this.$confirm
-      confirmation.require({
-        target: target,
-        message: `Approve Purchase Order?`,
-        icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'button-success',
-        acceptIcon: 'pi pi-check-circle',
-        acceptLabel: 'Yes',
-        rejectLabel: 'Abort',
-        rejectIcon: 'pi pi-times-circle',
-        accept: async () => {
-          //
-        },
-        reject: () => {
-          // callback to execute when user rejects the action
-        },
-      })
-    },
-    approvePurchaseOrder(event, data) {
-      this.toggleDialog({
-        ...data,
-        header: 'Approve'
-      })
-    },
-    declinePurchaseOrder(event, data) {
-      this.toggleDialog({
-        ...data,
-        header: 'Decline'
-      })
-    },
-    async purchaseOrderAsk (event, data) {
-      this.toggleDialog({
-        ...data,
-        header: 'Ask Approval'
-      })
-      // const target = event.target
-      // const confirmation = this.$confirm
-      // confirmation.require({
-      //   target: target,
-      //   message: `Ask for approval?`,
-      //   icon: 'pi pi-exclamation-triangle',
-      //   acceptClass: 'button-success',
-      //   acceptIcon: 'pi pi-check-circle',
-      //   acceptLabel: 'Yes',
-      //   rejectLabel: 'Abort',
-      //   rejectIcon: 'pi pi-times-circle',
-      //   accept: async () => {
-      //     this.ui.dialog.header = 'Ask Approval'
-      //
-      //   },
-      //   reject: () => {
-      //     // callback to execute when user rejects the action
-      //   },
-      // })
-    },
-    purchaseOrderDetail(event, id) {
-      //
-    },
     round(num, roundCount) {
       return parseFloat(num).toFixed(roundCount)
     },
-    purchaseOrderAdd() {
-      this.$router.push('/inventory/purchase_order/add')
-    },
-    purchaseOrderEdit(id) {
+    receivePurchaseOrder(event, id) {
       this.$router.push({
-        path: `/inventory/purchase_order/edit/${id}`,
+        path: `/inventory/general_receive_note/add/${id}`,
         query: {
           id: id
         }
       })
-    },
-    itemDelete(event, id) {
-      //
     },
     formatDate(date, format) {
       return DateManagement.formatDate(date, format)
@@ -547,7 +393,7 @@ export default {
 
 
 
-      PurchaseOrderService.getItemList(this.lazyParams).then((response) => {
+      PurchaseOrderService.getUncompletedList(this.lazyParams).then((response) => {
         if (response) {
           const data = response.data.payload.data
           const totalRecords = response.data.payload.totalRecords

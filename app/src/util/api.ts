@@ -16,7 +16,7 @@ export default ({ requiresAuth = true } = {}) => {
   instance.interceptors.request.use(
     (config) => {
       config.headers = config.headers ?? {}
-      const token = store.state.credential.token
+      const token = store.getters["storeCredential/Getter___token"]
       config.headers.common['Authorization'] = token ? `Bearer ${token}` : ''
 
       return config

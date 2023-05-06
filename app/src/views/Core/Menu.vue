@@ -379,7 +379,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      data: 'mCoreMenu/getData',
+      data: 'storeMenu/Getter___menuData',
     }),
   },
   mounted() {
@@ -387,7 +387,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions({
-      getMenu: 'mCoreMenu/getAllMenu',
+      getMenu: 'menuStore/fetchMenu',
       rebuildMenu: 'coreUpdateMenu',
     }),
     clearForm() {

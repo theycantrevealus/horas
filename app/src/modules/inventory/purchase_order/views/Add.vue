@@ -25,7 +25,7 @@
                             :disabled="disabler.code"
                             class="p-inputtext-sm"
                             placeholder="Code"
-                            @keyup="allowSubmit"
+                            @keyup="allowSubmit($event)"
                           />
                         </div>
                       </div>
@@ -41,7 +41,7 @@
                             placeholder="Supplier"
                             class="p-inputtext-sm"
                             filter
-                            @change="allowSubmit"
+                            @change="allowSubmit($event)"
                             @filter="searchSupplier($event.value)">
                             <template #option="slotProps">
                               {{ slotProps.option.code }} - {{ slotProps.option.name }}
@@ -62,7 +62,7 @@
                             dateFormat="yy-mm-dd"
                             class="p-inputtext-sm"
                             placeholder="Purchase Date"
-                            @update:modelValue="allowSubmit"/>
+                            @update:modelValue="allowSubmit($event)"/>
                         </div>
                       </div>
                     </div>
@@ -82,7 +82,7 @@
                           dataKey="id"
                           tableClass="editable-cells-table"
                           tableStyle="min-width: 50rem"
-                          @row-edit-save="onRowEditSave">
+                          @row-edit-save="onRowEditSave($event)">
                           <Column field="id" header="Action" style="width: 80px" class="wrap_content text-right">
                             <template #editor="{ data, field }">
                               <strong class="d-inline-flex">
@@ -154,7 +154,7 @@
                               </div>
                             </template>
                             <template #editor="{ data, field }">
-                              <InputNumber v-model="data[field]" mode="currency" :currency="application.locale.currency" :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                              <InputNumber v-model="data[field]" mode="currency" :currency="application['APPLICATION_LOCALE'].currency" :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
                             </template>
                           </Column>
                           <Column field="discount_type" header="Discount Type" style="width: 10%">
@@ -217,7 +217,7 @@
                             placeholder="General Discount Type"
                             aria-describedby="discount_type-help"
                             class="p-inputtext-sm"
-                            @change="allowSubmit">
+                            @change="allowSubmit($event)">
                             <template #option="slotProps">
                               {{ slotProps.option.label }}
                             </template>
@@ -237,7 +237,7 @@
                             :disabled="disabler.discount_value"
                             class="p-inputtext-sm"
                             placeholder="Discount Value"
-                            @keyup="allowSubmit"
+                            @keyup="allowSubmit($event)"
                           />
                         </div>
                       </div>
@@ -251,8 +251,8 @@
                             class="p-inputtext-sm"
                             placeholder="Total"
                             mode="currency"
-                            :currency="application.locale.currency"
-                            :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                            :currency="`${application['APPLICATION_LOCALE'].currency}`"
+                            :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
                         </div>
                       </div>
                       <div class="col-3">
@@ -265,8 +265,8 @@
                             class="p-inputtext-sm"
                             placeholder="Grand Total"
                             mode="currency"
-                            :currency="application.locale.currency"
-                            :locale="`${application.locale.language_code.toLowerCase()}-${application.locale.iso_2_digits.toUpperCase()}`" />
+                            :currency="application['APPLICATION_LOCALE'].currency"
+                            :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
                         </div>
                       </div>
                       <div class="col-12">
@@ -494,7 +494,7 @@ export default {
       }
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat(`${this.application.locale.language_code.toLowerCase()}-${this.application.locale.iso_2_digits.toUpperCase()}`, { style: 'currency', currency: this.application.locale.currency }).format(value);
+      return new Intl.NumberFormat(`${this.application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${this.application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`, { style: 'currency', currency: this.application[['APPLICATION_LOCALE']].currency }).format(value);
     },
     allowAdd() {
       return (
@@ -502,7 +502,7 @@ export default {
         this.products[this.products.length - 1].qty > 0
       )
     },
-    allowSubmit() {
+    allowSubmit(event) {
       this.calculateAll()
       let countProduct = 0
       this.products.map((e) => {
@@ -628,7 +628,7 @@ export default {
             this.formData.detail = parseDetail
             this.allowSave = false
             this.closeDisabler()
-            await PurchaseOrderService.addPurchaseOrder(this.formData).then(() => {
+            await PurchaseOrderService.add(this.formData).then(() => {
               // this.allowSave = true
             })
           },

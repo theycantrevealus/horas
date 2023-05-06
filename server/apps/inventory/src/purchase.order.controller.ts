@@ -1,10 +1,11 @@
 import { PurchaseOrderService } from '@inventory/purchase.order.service'
 import { Controller, Inject } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { MessagePattern, Payload } from '@nestjs/microservices'
+import { Payload } from '@nestjs/microservices'
 import { ApiTags } from '@nestjs/swagger'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
+import { KafkaTopic } from '@utility/decorator'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Logger } from 'winston'
 
@@ -14,7 +15,7 @@ export class PurchaseOrderController {
   constructor(
     @Inject(PurchaseOrderService)
     private readonly purchaseOrderService: PurchaseOrderService,
-    //@Inject(SocketIoClientProxyService)
+    @Inject(SocketIoClientProxyService)
     private readonly socketProxy: SocketIoClientProxyService,
     @Inject(ConfigService)
     private readonly configService: ConfigService,
@@ -24,8 +25,8 @@ export class PurchaseOrderController {
     //
   }
 
-  @MessagePattern('purchase_order')
-  async proceed(@Payload() payload) {
+  @KafkaTopic('KAFKA_TOPICS')
+  async purchase_order(@Payload() payload) {
     switch (payload.action) {
       case 'add':
         await this.purchaseOrderService
@@ -189,6 +190,8 @@ export class PurchaseOrderController {
               })
           })
         break
+      default:
+        this.logger.error(`Unknown message payload received: ${payload}`)
     }
   }
 }

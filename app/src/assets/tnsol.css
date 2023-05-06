@@ -1455,3 +1455,35 @@ label[for] {
     padding: 10px !important;
     border-bottom: solid 2px #ccc;
 }
+
+.print {
+    padding: .5cm;
+    font-size: 8pt !important;
+}
+
+.print img {
+    width: 100px;
+}
+
+.print table{
+    width: 100% !important;
+}
+
+.print h3 {
+    font-size: 12pt !important;
+}
+
+.print table tr td, .print table tr th {
+    padding: 1px 5px !important;
+    font-size: 7pt !important;
+}
+
+.print table tbody:last-child tr:first-child td{
+    border-top: solid 1px red;
+}
+
+@media print {
+    body {
+        /**/
+    }
+}

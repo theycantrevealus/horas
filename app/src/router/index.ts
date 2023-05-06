@@ -106,19 +106,17 @@ const router = createRouter({
     if (to.hash) {
       return { el: to.hash, behavior: 'smooth' }
     } else {
-      return { el: '#content-loader', top: 0 }
+      return { el: '#content-loader', top: 0, left: 0 }
     }
   },
 })
 
 router.beforeEach((to, from, next) => {
-  store.state.menuMode = false
+  store.commit('storeApplication/Mutation___toggleSideMenuOff')
   NProgress.start()
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    const isAuthed =
-      (<any>store.state).credential.token !== '' &&
-      (<any>store.state).credential.token !== null &&
-      (<any>store.state).credential.token !== undefined
+    const token = store.getters['storeCredential/Getter___token']
+    const isAuthed = token &&token !== ''
 
     if (isAuthed) {
       if (!to.matched.length) {
@@ -128,10 +126,10 @@ router.beforeEach((to, from, next) => {
         // return
         if(to.name) {
           if(
-            (<any>store.state).credential.routes.indexOf(to.name.toString()) < 0
+            store.getters['storeCredential/Getter___credential'].routes.indexOf(to.name.toString()) < 0
           ) {
-            if((<any>store.state).credential.routeMap[to.name.toString()]) {
-              const dispatches = (<any>store.state).credential.routeMap[to.name.toString()].permission
+            if(store.getters['storeCredential/Getter___credential'].routeMap[to.name.toString()]) {
+              const dispatches = store.getters['storeCredential/Getter___credential'].routeMap[to.name.toString()].permission
               if(dispatches && dispatches.indexOf(to.name.toString()) < 0) {
                 next({
                   path: '/403',
@@ -170,34 +168,6 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
-
-  // if (!to.matched.length) {
-  //   alert('Not match')
-  //   next('/404')
-  // } else {
-  //   if (to.matched.some((record) => record.meta.requiresAuth)) {
-  //     if (isAuthed) {
-  //       if ((<any>store.state).credential.routes.indexOf(to.name) < 0) {
-  //         alert('Not auth')
-  //         next('/403')
-  //       } else {
-  //         alert('Allowed')
-  //         // alert()
-  //         next()
-  //       }
-  //       return
-  //     }
-  //     if (to.name !== 'Login') next('/login')
-  //   } else {
-  //     if (isAuthed && to.matched.some((record) => record.path === '/login')) {
-  //       // next('/dashboard')
-  //       next
-  //     } else {
-  //       alert('Where')
-  //       next()
-  //     }
-  //   }
-  // }
 })
 
 router.afterEach(() => {

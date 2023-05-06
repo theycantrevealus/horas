@@ -11,6 +11,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
   UseGuards,
   UseInterceptors,
   Version,
@@ -90,8 +91,13 @@ export class GeneralReceiveNoteController {
   })
   async add(
     @Body() parameter: GeneralReceiveNoteAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account,
+    @Req() request
   ): Promise<GlobalResponse> {
-    return await this.generalReceiveNoteService.add(parameter, account)
+    return await this.generalReceiveNoteService.add(
+      parameter,
+      account,
+      request.headers.authorization
+    )
   }
 }

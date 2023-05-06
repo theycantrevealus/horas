@@ -22,6 +22,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AuthModule } from '@security/auth.module'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
+import { environmentIdentifier } from '@utility/environtment'
 import { gen_uuid } from '@utility/generator'
 import { testCaption } from '@utility/string'
 import { TimeManagement } from '@utility/time'
@@ -33,13 +34,7 @@ function createTestModule(providers, modules, controllers) {
     imports: [
       ConfigModule.forRoot({
         isGlobal: true,
-        envFilePath: `${process.cwd()}/environment/${
-          !process.env.NODE_ENV ||
-          process.env.NODE_ENV === 'development' ||
-          process.env.NODE_ENV === 'test'
-            ? ''
-            : process.env.NODE_ENV
-        }.env`,
+        envFilePath: environmentIdentifier,
         load: [ApplicationConfig, MongoConfig],
       }),
       ...modules,
@@ -67,13 +62,7 @@ describe('Logging Interceptor', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: `${process.cwd()}/environment/${
-            !process.env.NODE_ENV ||
-            process.env.NODE_ENV === 'development' ||
-            process.env.NODE_ENV === 'test'
-              ? ''
-              : process.env.NODE_ENV
-          }.env`,
+          envFilePath: environmentIdentifier,
           load: [ApplicationConfig, MongoConfig],
         }),
         AuthModule,

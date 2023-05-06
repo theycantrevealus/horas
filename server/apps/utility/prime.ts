@@ -7,6 +7,7 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
   const sortField = parameter.sortField ? parameter.sortField : 'created_at'
   const sortOrder = parameter.sortOrder ? parseInt(parameter.sortOrder) : 1
   const filters = parameter.filters
+  const custom_filter = parameter.custom_filter || []
   const query = []
   const sort_set = {}
 
@@ -52,6 +53,10 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
 
       filter_builder.$and.push(autoColumn)
     }
+  }
+
+  if (custom_filter && custom_filter.length > 0) {
+    filter_builder.$and.push(...custom_filter)
   }
 
   if (filter_builder.$and.length > 0) {

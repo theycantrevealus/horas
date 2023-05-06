@@ -29,16 +29,16 @@
                 <label for="loginEmail">Email</label>
                 <InputText
                   id="loginEmail"
-                  v-model.trim="$v.email.$model"
+                  v-model.trim="v$.email.$model"
                   autocomplete="off"
                 />
                 <Message
-                  v-if="$v.email.$errors.length > 0"
+                  v-if="v$.email.$errors.length > 0"
                   severity="error"
                   :closable="false"
                 >
                   <div
-                    v-for="(error, index) of $v.email.$errors"
+                    v-for="(error, index) of v$.email.$errors"
                     :key="index"
                     class="error-msg"
                   >{{ error.$message }}</div>
@@ -50,17 +50,17 @@
                 <label for="loginPassword">Password</label>
                 <Password
                   id="loginPassword"
-                  v-model="$v.password.$model"
+                  v-model="v$.password.$model"
                   type="password"
                   placeholder="Password"
                 />
                 <Message
-                  v-if="$v.password.$errors.length > 0"
+                  v-if="v$.password.$errors.length > 0"
                   severity="error"
                   :closable="false"
                 >
                   <div
-                    v-for="(error, index) of $v.password.$errors"
+                    v-for="(error, index) of v$.password.$errors"
                     :key="index"
                     class="error-msg"
                   >{{ error.$message }}</div>
@@ -80,7 +80,7 @@
               type="submit"
               label="Login"
               icon="pi pi-check"
-              :disabled="$v.$invalid"
+              :disabled="v$.$invalid"
             />
 
             <p style="padding: 20px">
@@ -104,7 +104,7 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
-import { mapActions } from 'vuex'
+import {mapActions, mapGetters, mapState} from 'vuex'
 
 export default {
   name: 'Login',
@@ -116,7 +116,7 @@ export default {
     Message,
   },
   setup() {
-    return { $v: useVuelidate() }
+    return { v$: useVuelidate() }
   },
   data() {
     return {
@@ -130,6 +130,24 @@ export default {
         message: '',
       },
     }
+  },
+  computed: {
+    ...mapGetters({
+      getToken: 'storeCredential/Getter___token',
+    }),
+    ...mapState({
+      tokenState: (state) => state.storeCredential,
+    })
+  },
+  watch: {
+    getToken: {
+      handler(data) {
+        if(data && data !== '') {
+          this.$socket.connect(this.$socket.io.opts)
+          this.$router.push('/dashboard')
+        }
+      }
+    },
   },
   validations: {
     email: {
@@ -145,22 +163,19 @@ export default {
       minLength: minLength(4),
     },
   },
+  mounted() {
+    this.signOut()
+  },
   methods: {
     ...mapActions({
-      accountLogin: 'coreLogin',
+      accountLogin: 'storeCredential/Action___signIn',
+      signOut: 'storeCredential/Action___signOut'
     }),
-    login() {
-      return this.accountLogin({
+    async login() {
+      await this.accountLogin({
         email: this.email,
         password: this.password,
       }).then((response) => {
-        if (response.statusCode === 'ACC_I_S0000') {
-          this.$socket.connect(this.$socket.io.opts)
-          this.$router.push('/dashboard')
-        } else {
-          this.response.message = response.message
-        }
-      }).catch((error) => {
         //
       })
     },

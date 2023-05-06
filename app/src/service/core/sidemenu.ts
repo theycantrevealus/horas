@@ -1,7 +1,7 @@
 import api from '@/util/api'
 
 class CoreService {
-  async generateMenu(token: String) {
+  async generateMenu() {
     return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree`)
       .then((response) => {
@@ -9,7 +9,7 @@ class CoreService {
       })
   }
 
-  async generateMenuManager(token: String) {
+  async generateMenuManager() {
     return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree/manager`)
       .then((response) => {

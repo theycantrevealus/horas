@@ -265,12 +265,9 @@ export class CoreService {
       })
     })
 
-    this.logger.verbose(dataSet)
-
     await this.configModel
       .bulkWrite(dataSet)
       .then((result) => {
-        this.logger.verbose(result)
         if (result) {
           response.message = 'Config updated successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_U_${

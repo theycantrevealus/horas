@@ -229,6 +229,7 @@
       </template>
       <template #footer></template>
     </Card>
+    <PrintModule ref="printModule" />
     <ConfirmPopup></ConfirmPopup>
     <Toast />
     <DynamicDialog />
@@ -257,12 +258,14 @@ import { markRaw, defineAsyncComponent } from 'vue'
 
 import FormPurchaseOrderApproval from '@/modules/inventory/purchase_order/components/Approval.vue'
 import ApprovalFooter from '@/modules/inventory/purchase_order/components/ApprovalFooter.vue'
+import PrintModule from "@/components/print/Print.vue"
 
 const DetailFooter = defineAsyncComponent(() => import('@/modules/inventory/purchase_order/components/DetailFooter.vue'))
 const Detail = defineAsyncComponent(() => import('@/modules/inventory/purchase_order/components/Detail.vue'))
 
 export default {
   components: {
+    PrintModule,
     DataTable,
     Column,
     InputText,
@@ -356,7 +359,9 @@ export default {
     }
   },
   computed: {
-    ...mapState(['credential', 'application']),
+    ...mapState('storeCredential', {
+      credential: state => state
+    }),
   },
   watch: {
     //
@@ -374,11 +379,11 @@ export default {
       }
 
     })
-    this.permission.allowAdd = !(!this.credential.permission.btnPurchaseOrderAdd)
-    this.permission.allowEdit = !(!this.credential.permission.btnPurchaseOrderEdit)
-    this.permission.allowDelete = !(!this.credential.permission.btnPurchaseOrderDelete)
-    this.permission.allowApprove = !(!this.credential.permission.btnPurchaseOrderApprove)
-    this.permission.allowDecline = !(!this.credential.permission.btnPurchaseOrderDecline)
+    this.permission.allowAdd = !(!this.credential.permission['btnPurchaseOrderAdd'])
+    this.permission.allowEdit = !(!this.credential.permission['btnPurchaseOrderEdit'])
+    this.permission.allowDelete = !(!this.credential.permission['btnPurchaseOrderDelete'])
+    this.permission.allowApprove = !(!this.credential.permission['btnPurchaseOrderApprove'])
+    this.permission.allowDecline = !(!this.credential.permission['btnPurchaseOrderDecline'])
 
     this.lazyParams = {
       first: 0,
@@ -521,22 +526,15 @@ export default {
         onClose: async (options) => {
           const data = options.data;
 
-          if (data) {
+          if (data && data.print) {
             const buttonType = data.buttonType;
             if(buttonType === 0) {
-              let stylesHtml = '';
-              for (const node of [...document.querySelectorAll('link[rel="stylesheet"], style')]) {
-                stylesHtml += node.outerHTML;
-              }
-
-              const WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
-
-              WinPrint.document.write(`<!DOCTYPE html><html><head>${stylesHtml}</head><body>${data.print.html}</body></html>`);
-
-              WinPrint.document.close();
-              WinPrint.focus();
-              WinPrint.print();
-              WinPrint.close();
+              await this.$refs.printModule.generateReport({
+                fileName: 'hello.pdf',
+                orientation: 'portrait',
+                quality: 2,
+                margin: 0,
+              }, data.print)
             }
           }
         }
@@ -596,7 +594,7 @@ export default {
 
 
 
-      PurchaseOrderService.getItemList(this.lazyParams).then((response) => {
+      PurchaseOrderService.getList(this.lazyParams).then((response) => {
         if (response) {
           const data = response.data.payload.data
           const totalRecords = response.data.payload.totalRecords

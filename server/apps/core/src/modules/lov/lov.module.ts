@@ -11,15 +11,14 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { environmentIdentifier } from '@utility/environtment'
 import { TimeManagement } from '@utility/time'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
-      }.env`,
+      envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig],
     }),
     MongooseModule.forFeatureAsync([

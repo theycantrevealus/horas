@@ -8,6 +8,7 @@ import {
   GeneralReceiveNoteDocument,
 } from '@inventory/schemas/general.receive.note'
 import { Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -18,6 +19,9 @@ import { Model, Types } from 'mongoose'
 @Injectable()
 export class GeneralReceiveNoteService {
   constructor(
+    @Inject(ConfigService)
+    private readonly configService: ConfigService,
+
     @InjectModel(GeneralReceiveNote.name)
     private generalReceiveNoteModel: Model<GeneralReceiveNoteDocument>,
 
@@ -43,13 +47,14 @@ export class GeneralReceiveNoteService {
 
   async add(
     data: GeneralReceiveNoteAddDTO,
-    account: Account
+    account: Account,
+    token: string
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'PURCHASE_ORDER_ADD',
+      transaction_classify: 'GENERAL_RECEIVE_NOTE_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
 
@@ -59,11 +64,15 @@ export class GeneralReceiveNoteService {
         if (purchaseOrder && purchaseOrder.status === 'approved') {
           const generatedID = new Types.ObjectId().toString()
           const emitter = await this.clientInventory.emit(
-            'general_receive_note',
+            this.configService.get<string>(
+              'kafka.inventory.topic.general_receive_not'
+            ),
             {
+              action: 'add',
               id: generatedID,
               data: data,
               account: account,
+              token: token,
             }
           )
           if (emitter) {

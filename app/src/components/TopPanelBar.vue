@@ -12,7 +12,7 @@
         <span
           v-if="!getThemeMode"
           class="material-icons-outlined dark-mode-switch"
-          @click="toggleDarkMode"
+            @click="toggleDarkMode"
         >
           wb_sunny
         </span>
@@ -265,23 +265,13 @@ export default {
     }
   },
   computed: {
+    ...mapState('storeCredential', ['first_name', 'last_name', 'profile_photo']),
     ...mapGetters({
-      getThemeMode: 'getThemeMode',
-      geti18n: 'mCorei18n/getData',
-      getSocketSession: 'getSocketSession',
+      getThemeMode: 'storeApplication/Getter___getThemeMode',
+      geti18n: 'storei18n/Getter___menuData',
+      getSelectedLanguage: 'storei18n/Getter___getLanguage',
+      getSocketSession: 'storeSocket/Getter___status',
     }),
-    getBrowserLanguage() {
-      return this.$store.state.language
-    },
-    profile_photo() {
-      return this.$store.state.credential.profile_photo
-    },
-    first_name() {
-      return this.$store.state.credential.first_name
-    },
-    last_name() {
-      return this.$store.state.credential.last_name
-    },
   },
   watch: {
     getSocketSession: {
@@ -300,6 +290,11 @@ export default {
         this.darkMode = getData
       },
     },
+    getSelectedLanguage: {
+      handler(getData) {
+        this.$i18n.locale = getData.lang
+      }
+    },
     geti18n: {
       handler(getData) {
         this.countries = []
@@ -317,16 +312,13 @@ export default {
   created() {},
   async mounted() {
     await this.initLanguage().then(() => {
-      this.socket.status = this.$store.state.socket.status
-      this.selectedLanguage = this.$store.state.language
-      this.$i18n.locale = this.selectedLanguage.lang
     })
   },
   methods: {
     ...mapActions({
-      initLanguage: 'setLanguange',
-      storeLanguage: 'changeLanguage',
-      toggleDarkMode: 'toggleDarkMode',
+      initLanguage: 'storei18n/Action___setLanguange',
+      storeLanguage: 'storei18n/Action___changeLanguage',
+      toggleDarkMode: 'storeApplication/Action___toggleDarkMode',
     }),
     changeLanguage() {
       this.storeLanguage(this.selectedLanguage).then(() => {

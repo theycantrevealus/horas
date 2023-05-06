@@ -5,8 +5,8 @@
     </div>
     <div
       :class="(getMenuModeStatus ? 'open' : '') + ' sidepanel'"
-      @mouseover="toogleMenuStatusOn"
-      @mouseleave="toogleMenuStatusOff"
+      @mouseover="toogleMenuModeOn"
+      @mouseleave="toogleMenuModeOff"
     >
       <div class="wrapper logo-container">
         <img
@@ -110,12 +110,19 @@ export default {
     }
   },
   computed: {
-    ...mapState(['menuMode', 'themeModeDark', 'application']),
+    ...mapState([
+      'menuMode',
+      'themeModeDark',
+    ]),
+    ...mapState({
+      application: 'storeApplication/configuration'
+    }),
     ...mapGetters({
-      getMenuModeStatus: 'getMenuModeStatus',
-      getThemeMode: 'getThemeMode',
-      geti18n: 'mCorei18n/getData',
-      refreshConfig: 'getSystemConfig',
+      application: 'storeApplication/Getter___applicationConfig',
+      getMenuModeStatus: 'storeApplication/Getter___sidePanelMode',
+      getThemeMode: 'storeApplication/Getter___getThemeMode',
+      geti18n: 'storei18n/Getter___menuData',
+      refreshConfig: 'storeApplication/Getter___applicationConfig',
     }),
   },
   watch: {
@@ -171,10 +178,13 @@ export default {
   },
   mounted() {
     this.darkMode = this.themeModeDark
-    this.logo.dark.image = this.application['APPLICATION_LOGO']
-    this.logo.dark.icon = this.application['APPLICATION_ICON']
-    this.logo.light.image = this.application['APPLICATION_LOGO']
-    this.logo.light.icon = this.application['APPLICATION_ICON']
+    if(this.application) {
+      this.logo.dark.image = this.application['APPLICATION_LOGO']
+      this.logo.dark.icon = this.application['APPLICATION_ICON']
+      this.logo.light.image = this.application['APPLICATION_LOGO']
+      this.logo.light.icon = this.application['APPLICATION_ICON']
+    }
+
 
     this.updatePageInfo()
     if (this.darkMode) {
@@ -186,9 +196,9 @@ export default {
   },
   methods: {
     ...mapActions({
-      toogleMenuStatusOn: 'toggleMenuOn',
-      toogleMenuStatusOff: 'toggleMenuOff',
-      loadLanguage: 'mCorei18n/get_all_i18n',
+      toogleMenuModeOn: 'storeApplication/Action___toggleMenuOn',
+      toogleMenuModeOff: 'storeApplication/Action___toggleMenuOff',
+      loadLanguage: 'storei18n/Action___setLanguange',
     }),
     updatePageInfo() {
       this.breadcrumb = this.$route.meta.breadcrumb

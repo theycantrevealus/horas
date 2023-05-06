@@ -6,6 +6,7 @@ import { MasterModule } from '@core/master/master.module'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { environmentIdentifier } from '@utility/environtment'
 
 import { ImportController } from './import.controller'
 import { ImportService } from './import.service'
@@ -14,9 +15,7 @@ import { ImportService } from './import.service'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
-      }.env`,
+      envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig, KafkaConfig],
     }),
     MongooseModule.forRootAsync({

@@ -41,6 +41,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
+import { environmentIdentifier } from '@utility/environtment'
 import { KafkaConn } from '@utility/kafka'
 import { WinstonModule } from '@utility/logger/module'
 import { TimeManagement } from '@utility/time'
@@ -50,11 +51,7 @@ import * as winston from 'winston'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `${process.cwd()}/environment/${
-        !process.env.NODE_ENV || process.env.NODE_ENV === ''
-          ? ''
-          : process.env.NODE_ENV
-      }.env`,
+      envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig, KafkaConfig, RedisConfig],
     }),
     ClientsModule.registerAsync([KafkaConn.inventory[0], KafkaConn.m_item[0]]),

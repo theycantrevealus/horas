@@ -58,8 +58,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSideMenu: 'getSideMenu',
-      getMenuModeStatus: 'getMenuModeStatus',
+      getSideMenu: 'storeApplication/Getter___sideMenu',
+      getMenuModeStatus: 'storeApplication/Getter___sidePanelMode',
     }),
   },
   watch: {
@@ -76,9 +76,8 @@ export default {
   },
   methods: {
     ...mapActions({
-      sLogout: 'coreLogout',
-      rebuildMenu: 'coreUpdateMenu',
-      // toogleMenuStatus: 'toggleMenu',
+      sLogout: 'storeCredential/Action___signOut',
+      rebuildMenu: 'storeApplication/Action___updateMenu',
     }),
     logout() {
       this.sLogout().then(() => {

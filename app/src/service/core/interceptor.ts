@@ -3,7 +3,7 @@ import instance from './api'
 
 export default function execute () {
   instance.interceptors.request.use(function (config: any) {
-    const token = store.state.credential.token
+    const token = store.getters["storeCredential/Getter___token"]
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
       return config

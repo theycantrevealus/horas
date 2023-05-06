@@ -10,14 +10,13 @@ import * as winston from 'winston'
 import { Logger } from 'winston'
 
 import { EventsModule } from './events/event.module'
+import { environmentIdentifier } from '@utility/environtment'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `${process.cwd()}/environment/${
-        process.env.NODE_ENV === '' ? '' : process.env.NODE_ENV
-      }.env`,
+      envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig, SocketConfig],
     }),
     WinstonModule.forRootAsync({

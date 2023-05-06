@@ -476,9 +476,9 @@ export default {
       'updateAccess',
     ]),
     ...mapActions({
-      sLogout: 'coreLogout',
-      rebuildMenu: 'coreUpdateMenu',
-      rebuildAccess: 'coreRefreshAccess',
+      sLogout: 'storeCredential/Action___signOut',
+      rebuildMenu: 'storeCredential/Action___updateMenu',
+      rebuildAccess: 'storeCredential/Action___updateAccess',
     }),
     back() {
       this.$router.push('/account')

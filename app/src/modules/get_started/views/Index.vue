@@ -20,30 +20,30 @@ export default defineComponent({
   name: 'GetStartedIndex',
   components: { Card },
   setup() {},
-  computed: {
-    ...mapGetters({
-      getPrivileges: 'getPrivileges',
-    }),
-  },
-  watch: {
-    getPrivileges: {
-      handler(getData) {
-        //
-      },
-    },
-  },
+  // computed: {
+  //   ...mapGetters({
+  //     getPrivileges: 'getPrivileges',
+  //   }),
+  // },
+  // watch: {
+  //   getPrivileges: {
+  //     handler(getData) {
+  //       //
+  //     },
+  //   },
+  // },
   async mounted() {
-    await this.rebuildMenu()
+    // await this.rebuildMenu()
     // await this.rebuildAccess()
   },
-  methods: {
-    ...mapActions({
-      sLogout: 'coreLogout',
-      rebuildMenu: 'coreUpdateMenu',
-      rebuildAccess: 'coreRefreshAccess',
-    }),
-    ...mapActions('accountModule', ['updateAccount', 'updatePermission']),
-  },
+  // methods: {
+  //   ...mapActions({
+  //     sLogout: 'coreLogout',
+  //     rebuildMenu: 'coreUpdateMenu',
+  //     rebuildAccess: 'coreRefreshAccess',
+  //   }),
+  //   ...mapActions('accountModule', ['updateAccount', 'updatePermission']),
+  // },
 })
 </script>
 

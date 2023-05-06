@@ -71,6 +71,34 @@ export class PurchaseOrderController {
     }
   }
 
+  @Get('purchase_order/uncompleted')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: 'Fetch all (uncompleted)',
+    description: 'Showing data uncompleted delivery',
+  })
+  @ApiQuery(ApiQueryGeneral.primeDT)
+  async uncompletedDelivery(@Query('lazyEvent') parameter: string) {
+    if (isJSON(parameter)) {
+      const parsedData = JSON.parse(parameter)
+      return await this.purchaseOrderService.uncompletedDelivery({
+        first: parsedData.first,
+        rows: parsedData.rows,
+        sortField: parsedData.sortField,
+        sortOrder: parsedData.sortOrder,
+        filters: parsedData.filters,
+      })
+    } else {
+      return {
+        message: 'filters is not a valid json',
+        payload: {},
+      }
+    }
+  }
+
   @Get('purchase_order/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)

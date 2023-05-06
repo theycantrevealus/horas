@@ -26,6 +26,7 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/no-reserved-component-names': 'off',
     'vue/no-v-model-argument': 'off',
+    'vue/no-deprecated-slot-attribute': 'off',
     'vue/attribute-hyphenation': 0,
     'vue/v-on-event-hyphenation': 0,
     'vue/require-valid-default-prop': 0,
