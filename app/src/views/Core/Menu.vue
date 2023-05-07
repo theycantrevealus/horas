@@ -387,7 +387,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions({
-      getMenu: 'menuStore/fetchMenu',
+      getMenu: 'storeMenu/fetchMenu',
       rebuildMenu: 'coreUpdateMenu',
     }),
     clearForm() {

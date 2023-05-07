@@ -266,6 +266,7 @@ export default {
   },
   computed: {
     ...mapState('storeCredential', ['first_name', 'last_name', 'profile_photo']),
+    ...mapState('storei18n', ['language']),
     ...mapGetters({
       getThemeMode: 'storeApplication/Getter___getThemeMode',
       geti18n: 'storei18n/Getter___menuData',
@@ -292,6 +293,9 @@ export default {
     },
     getSelectedLanguage: {
       handler(getData) {
+        console.clear()
+        console.log(getData)
+        this.selectedLanguage = getData
         this.$i18n.locale = getData.lang
       }
     },
@@ -311,12 +315,10 @@ export default {
   },
   created() {},
   async mounted() {
-    await this.initLanguage().then(() => {
-    })
+    this.selectedLanguage = this.language
   },
   methods: {
     ...mapActions({
-      initLanguage: 'storei18n/Action___setLanguange',
       storeLanguage: 'storei18n/Action___changeLanguage',
       toggleDarkMode: 'storeApplication/Action___toggleDarkMode',
     }),

@@ -121,7 +121,7 @@ export default {
       application: 'storeApplication/Getter___applicationConfig',
       getMenuModeStatus: 'storeApplication/Getter___sidePanelMode',
       getThemeMode: 'storeApplication/Getter___getThemeMode',
-      geti18n: 'storei18n/Getter___menuData',
+      geti18n: 'storei18n/Getter___getLanguageLib',
       refreshConfig: 'storeApplication/Getter___applicationConfig',
     }),
   },
@@ -134,22 +134,12 @@ export default {
     geti18n: {
       handler(getData) {
         if (getData) {
-          getData.map((e) => {
-            const messageCompound = {}
-
-            const componentMessage = e.components
-            componentMessage.map((f) => {
-              if (!messageCompound[f.component]) {
-                messageCompound[f.component] = ''
-              }
-              messageCompound[f.component] = f.translation
-            })
-
+          for(const a in getData) {
             this.$i18n.setLocaleMessage(
-              e.language_code.toLowerCase(),
-              messageCompound
+              a,
+              getData[a]
             )
-          })
+          }
         }
       },
     },
@@ -192,7 +182,7 @@ export default {
     } else {
       document.querySelector('body').classList.remove('dark')
     }
-    this.loadLanguage()
+    // this.loadLanguage()
   },
   methods: {
     ...mapActions({
