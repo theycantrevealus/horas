@@ -507,7 +507,7 @@ export default {
     purchaseOrderDetail(parameter) {
       this.$dialog.open(Detail, {
         props: {
-          header: 'Purchase Order Detail',
+          header: 'PO Detail',
           style: {
             width: '90vw'
           },
@@ -530,10 +530,20 @@ export default {
             const buttonType = data.buttonType;
             if(buttonType === 0) {
               await this.$refs.printModule.generateReport({
-                fileName: 'hello.pdf',
+                fileName: `purchase_order_${parameter.code}`,
                 orientation: 'portrait',
                 quality: 2,
                 margin: 0,
+                signer: [
+                  {
+                    surname: 'Hendry Tanaka',
+                    position: 'Warehouse Staff'
+                  },
+                  {
+                    surname: 'John Doe',
+                    position: 'Warehouse Manager'
+                  }
+                ]
               }, data.print)
             }
           }
