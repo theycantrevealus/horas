@@ -328,11 +328,13 @@ export class AccountService {
               .get(e)
               .then((getData: IConfig) => getData.setter)
             if (e === 'APPLICATION_ICON' || e === 'APPLICATION_LOGO') {
-              fields[e].image = `${this.configService.get<string>(
-                'application.host_port'
-              )}/${this.configService.get<string>(
-                'application.images.core_prefix'
-              )}/${fields[e].image}`
+              if (fields[e].image) {
+                fields[e].image = `${this.configService.get<string>(
+                  'application.host_port'
+                )}/${this.configService.get<string>(
+                  'application.images.core_prefix'
+                )}/${fields[e].image}`
+              }
             }
           })
         )

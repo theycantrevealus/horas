@@ -4,14 +4,9 @@
       <div class="purchase-order-detail-header">
         <div class="flex card-container indigo-container">
           <div class="flex-2 h-4rem font-bold text-center">
-            <img
-              :style="{ width: `${application['APPLICATION_LOGO'].size.print.width}` }"
-              :src="`${application['APPLICATION_LOGO'].image}`"
-              class="print-logo"
-              alt="horas"
-            />
+
           </div>
-          <div class="flex-1 h-4rem text-center mx-4">
+          <div class="flex-1 h-4rem mx-4">
             <h3>PURCHASE ORDER</h3>
             <small>{{ new Date(dialogRef.data.payload.created_at).toDateString() }}</small>
             <small>. Created by <strong>{{ dialogRef.data.payload.created_by.last_name }}, {{ dialogRef.data.payload.created_by.first_name }}</strong></small>
@@ -21,10 +16,10 @@
             <small>{{ dialogRef.data.payload.code }}</small>
           </div>
         </div>
-        <hr />
-        <small>{{ data.purchase_date }}</small><br />
+        <small>{{ data.purchase_date }}</small>
       </div>
-      <div class="purchase-order-items">
+      <hr />
+      <div class="purchase-order-items print-content">
         <table class="calculation">
           <thead>
           <tr>
@@ -95,9 +90,8 @@
           </tr>
           </tbody>
         </table>
-        <br /><br />
+        <hr />
         <div class="flex card-container indigo-container">
-          <div class="flex-1 p-4"></div>
           <div class="flex-1 p-4">
             <strong>Remark:</strong><br />
             <p>{{ dialogRef.data.payload.remark }}</p>
