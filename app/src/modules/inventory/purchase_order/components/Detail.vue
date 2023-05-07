@@ -140,12 +140,7 @@ export default {
 
   },
   mounted() {
-    // const rawHTML = this.$el.innerHTML
-    // const pattern = / class=".*?"|<!--.*?-->/gm
-    // const cleanedHTMLz = rawHTML.replace(pattern, '')
-    // console.log(`!!!!!!!!!!!!!!!!!!!!!!!!`)
-    // console.log(cleanedHTMLz)
-    // this.dialogRef.data.print = cleanedHTMLz
+    //
   },
   methods: {
     closeDialog(e) {

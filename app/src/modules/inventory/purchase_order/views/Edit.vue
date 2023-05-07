@@ -419,8 +419,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getTask']),
-    ...mapState(['application']),
+    ...mapGetters({
+      application: 'storeApplication/Getter___applicationConfig'
+    }),
   },
   watch: {
     getTask: {

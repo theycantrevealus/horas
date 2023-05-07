@@ -103,19 +103,15 @@ export default {
     },
     onProgress(progress) {
       this.progress = progress;
-      console.log(`PDF generation progress: ${progress}%`)
     },
     startPagination() {
-      console.log(`PDF has started pagination`)
     },
     hasPaginated () {
-      console.log(`PDF has been paginated`)
     },
     hasGenerated() {
       alert()
     },
     async beforeDownload ({ html2pdf, options, pdfContent }) {
-      console.log(`On Before PDF Generation`)
       // await html2pdf().set(options).from(pdfContent).toPdf().get('pdf').then((pdf) => {
       // 	const totalPages = pdf.internal.getNumberOfPages()
       // 	for (let i = 1; i <= totalPages; i++) {
@@ -128,7 +124,6 @@ export default {
     },
     hasDownloaded (blobPdf) {
       this.pdfDownloaded = true
-      console.log(blobPdf)
     },
     async validateControlValue() {
       if (this.quality > 2) {

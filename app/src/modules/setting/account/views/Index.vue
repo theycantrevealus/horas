@@ -47,14 +47,14 @@
                 <template #body="slotProps">
                   <span class="p-buttonset wrap_content">
                     <Button
-                      v-if="permission.btnAccountEdit !== undefined"
+                      v-if="credential.permission.btnAccountEdit !== undefined"
                       class="button p-button-success button-sm button-raised"
                       @click="accountEdit(slotProps.data.id)"
                     >
                       <span class="material-icons">edit</span> Edit
                     </Button>
                     <Button
-                      v-if="permission.btnAccountDelete !== undefined"
+                      v-if="credential.permission.btnAccountDelete !== undefined"
                       class="button button-danger button-sm button-raised"
                       @click="accountDelete($event, slotProps.data.id)"
                     >
@@ -136,13 +136,12 @@
 import DateManagement from '@/modules/function'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
-// import ConfirmPopup from 'primevue/confirmpopup'
-// import Toolbar from 'primevue/toolbar'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import AccountService from '@/modules/setting/account/service'
+import { mapGetters } from "vuex"
 
 export default {
   name: 'AccountList',
@@ -174,9 +173,9 @@ export default {
     }
   },
   computed: {
-    permission() {
-      return this.$store.state.credential.permission
-    },
+    ...mapGetters({
+      credential: 'storeCredential/Getter___credential'
+    })
   },
   mounted() {
     this.lazyParams = {

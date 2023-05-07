@@ -95,6 +95,7 @@ export const CredentialStore = {
       state.routes = routes
     },
     Mutation___updatePermission: (state, payload) => {
+      console.clear()
       const routeMap = {}
       const grantedPerm = payload.permission
       const buildPermission = {}
@@ -103,18 +104,21 @@ export const CredentialStore = {
           buildPermission[grantedPerm[a].domIdentity] = {}
         }
         buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
-        if(routeMap[grantedPerm[a].menu.identifier]) {
-          if(!routeMap[grantedPerm[a].menu.identifier].permission) {
-            routeMap[grantedPerm[a].menu.identifier].permission = []
-          }
 
-          if(routeMap[grantedPerm[a].menu.identifier].permission.indexOf(grantedPerm[a].dispatchName) < 0) {
-            routeMap[grantedPerm[a].menu.identifier].permission.push(grantedPerm[a].dispatchName)
-          }
+        if(!routeMap[grantedPerm[a].menu.identifier]) {
+          routeMap[grantedPerm[a].menu.identifier] = {}
+        }
 
-          if(!routeMap[grantedPerm[a].dispatchName]) {
-            routeMap[grantedPerm[a].dispatchName] = {}
-          }
+        if(!routeMap[grantedPerm[a].menu.identifier].permission) {
+          routeMap[grantedPerm[a].menu.identifier].permission = []
+        }
+
+        if(routeMap[grantedPerm[a].menu.identifier].permission.indexOf(grantedPerm[a].dispatchName) < 0) {
+          routeMap[grantedPerm[a].menu.identifier].permission.push(grantedPerm[a].dispatchName)
+        }
+
+        if(!routeMap[grantedPerm[a].dispatchName]) {
+          routeMap[grantedPerm[a].dispatchName] = {}
         }
       }
       state.permission = buildPermission
