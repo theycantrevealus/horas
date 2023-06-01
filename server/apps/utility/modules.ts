@@ -5,6 +5,7 @@ export const modCodes = {
   },
   CoreService: 'CFG',
   CoreConfigGroupService: 'CFG-G',
+  LicenseService: 'LCS',
   AccountService: 'ACC',
   PatientService: 'PENT',
   MenuService: 'MNU',

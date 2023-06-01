@@ -6,6 +6,7 @@ import { AccountModule } from '@core/account/account.module'
 import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { i18nModule } from '@core/i18n/i18n.module'
 import { GatewayInventoryModule } from '@core/inventory/inventory.module'
+import { LicenseModule } from '@core/license/license.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
@@ -150,6 +151,7 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     ]),
     AuthModule,
     AccountModule,
+    LicenseModule,
     LOVModule,
     PatientModule,
     MenuModule,
