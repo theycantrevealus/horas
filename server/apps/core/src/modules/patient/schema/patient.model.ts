@@ -9,7 +9,6 @@ import {
   PatientMedicalInfo,
 } from '@core/patient/schema/patient.medical'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type PatientDocument = HydratedDocument<Patient>
@@ -35,14 +34,14 @@ export class Patient {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

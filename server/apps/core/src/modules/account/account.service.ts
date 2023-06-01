@@ -254,7 +254,6 @@ export class AccountService {
                   log_meta: '',
                   iden_pass: idenPass,
                   token: token.set,
-                  logged_at: currentTime,
                   expired_at: token.expired_at,
                 })
 

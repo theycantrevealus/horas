@@ -2,7 +2,6 @@ import { AccountJoin } from '@core/account/schemas/account.join'
 import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export type MenuGroupDocument = HydratedDocument<MenuGroup>
@@ -22,14 +21,14 @@ export class MenuGroup {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

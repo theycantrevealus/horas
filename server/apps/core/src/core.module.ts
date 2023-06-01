@@ -22,14 +22,13 @@ import {
 import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
-import { environmentIdentifier } from '@utility/environtment'
+import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
-import { TimeManagement } from '@utility/time'
+import { WinstonCustomTransports } from '@utility/transport.winston'
 import { Cache } from 'cache-manager'
 import * as redisStore from 'cache-manager-ioredis'
 import { Model } from 'mongoose'
-import * as winston from 'winston'
 import { Logger } from 'winston'
 
 import { CoreConfigGroupController } from './core.config.group.controller'
@@ -64,111 +63,14 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     WinstonModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const today = new TimeManagement()
         return {
+          colorize: true,
           levels: {
             error: 0,
             warn: 1,
             verbose: 3,
           },
-          transports: [
-            // new winston.transports.Console({
-            //   level: configService
-            //     .get<string>('application.log.verbose')
-            //     .toString(),
-            //   format: winston.format.combine(
-            //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-            //     winston.format.printf((data) => {
-            //       return JSON.stringify({
-            //         timestamp: data.timestamp,
-            //         level: data.level,
-            //         message: data.message,
-            //       })
-            //     })
-            //   ),
-            // }),
-            // new winston.transports.Console({
-            //   level: 'error',
-            //   format: winston.format.combine(
-            //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-            //     winston.format.printf((data) => {
-            //       return JSON.stringify({
-            //         timestamp: data.timestamp,
-            //         level: data.level,
-            //         message: data.message,
-            //       })
-            //     })
-            //   ),
-            // }),
-            new winston.transports.Console({
-              level: 'warn',
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-            new winston.transports.File({
-              filename: `logs/${configService.get<string>(
-                'application.log.verbose'
-              )}/${today.getDate().toString()}.txt`,
-              level: configService
-                .get<string>('application.log.verbose')
-                .toString(),
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-            // new winston.transports.File({
-            //   filename: `logs/${configService.get<string>(
-            //     'application.log.warn'
-            //   )}/${today.getDate().toString()}.txt`,
-            //   level: configService
-            //     .get<string>('application.log.warn')
-            //     .toString(),
-            //   format: winston.format.combine(
-            //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-            //     winston.format.printf((data) => {
-            //       return JSON.stringify({
-            //         timestamp: data.timestamp,
-            //         level: data.level,
-            //         message: data.message,
-            //       })
-            //     })
-            //   ),
-            // }),
-            new winston.transports.File({
-              filename: `logs/${configService.get<string>(
-                'application.log.error'
-              )}/${today.getDate().toString()}.txt`,
-              level: configService
-                .get<string>('application.log.error')
-                .toString(),
-              handleExceptions: true,
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-          ],
+          transports: WinstonCustomTransports[environmentName],
         }
       },
       inject: [ConfigService],
@@ -268,15 +170,21 @@ export class CoreModule {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Config.name)
     private readonly configModel: Model<ConfigDocument>,
+    @Inject(ConfigService)
+    private readonly configService: ConfigService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {
+    this.logger.verbose(
+      `Application loaded with ${this.configService.get<string>(
+        'application.timezone'
+      )} localization`
+    )
     this.loadConfiguration().then(() => {
-      // this.logger.verbose('Verbose this')
-      // this.logger.warn('Warn this')
-      // this.logger.debug('Debug me')
-      // throw new Error('Test Error')
-      //
+      // setInterval(() => {
+      //   this.logger.warn('Testing Warning')
+      //   this.logger.error('Testing Error')
+      // }, 1000)
     })
   }
 
@@ -296,13 +204,14 @@ export class CoreModule {
               `Checking for [${e.name}] version (${keyCheck.__v}) -> ${e.__v}`
             )
             if (keyCheck.__v !== e.__v) {
-              this.logger.verbose(`Updating [${e.name}] configuration`)
+              this.logger.verbose(`[${e.name}] Updating configuration`)
               await this.cacheManager
                 .set(e.name, {
                   setter: e.setter,
                   __v: e.__v,
                 })
                 .then(() => {
+                  this.logger.warn(e.setter)
                   this.logger.verbose(`[${e.name}] configuration updated`)
                 })
             } else {
@@ -310,7 +219,7 @@ export class CoreModule {
             }
           } else {
             await this.cacheManager.set(e.name, e.setter).then(() => {
-              this.logger.verbose(`[${e.name}] configuration set`)
+              this.logger.verbose(`[${e.name} configuration set`)
             })
           }
         })

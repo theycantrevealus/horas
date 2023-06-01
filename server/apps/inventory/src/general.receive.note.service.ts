@@ -100,7 +100,6 @@ export class GeneralReceiveNoteService {
                       }
                     )
 
-                    // b
                     if (foundItem) {
                       let delivered = foundItem.delivered || 0
                       delivered += row.qty

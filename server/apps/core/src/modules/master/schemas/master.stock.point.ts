@@ -2,7 +2,6 @@ import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { TimeManagement } from '@utility/time'
 import { IsBoolean, IsNotEmpty } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
@@ -81,14 +80,14 @@ export class MasterStockPoint {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

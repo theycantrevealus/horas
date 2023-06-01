@@ -8,7 +8,6 @@ import {
   MenuPermissionJoin,
 } from '@core/menu/schemas/menu.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
@@ -67,13 +66,13 @@ export class Account {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
   })
   updated_at: Date
 

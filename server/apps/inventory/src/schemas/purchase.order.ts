@@ -10,7 +10,6 @@ import {
   PurchaseOrderDetail,
 } from '@inventory/schemas/purchase.order.detail'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export const PurchaseOrderJoin = raw({
@@ -33,7 +32,7 @@ export const PurchaseOrderApprovalHistory = raw({
   },
   logged_at: {
     type: Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   },
   remark: { type: SchemaTypes.String },
@@ -50,7 +49,7 @@ export class IPurchaseOrderApproval {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   logged_at: Date
@@ -138,14 +137,14 @@ export class PurchaseOrder {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

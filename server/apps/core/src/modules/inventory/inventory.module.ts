@@ -37,15 +37,12 @@ import { LogService } from '@log/log.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { environmentIdentifier } from '@utility/environtment'
 import { KafkaConn } from '@utility/kafka'
-import { WinstonModule } from '@utility/logger/module'
-import { TimeManagement } from '@utility/time'
-import * as winston from 'winston'
 
 @Module({
   imports: [
@@ -55,34 +52,6 @@ import * as winston from 'winston'
       load: [ApplicationConfig, MongoConfig, KafkaConfig, RedisConfig],
     }),
     ClientsModule.registerAsync([KafkaConn.inventory[0], KafkaConn.m_item[0]]),
-    WinstonModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const today = new TimeManagement()
-        return {
-          levels: {
-            error: 0,
-            warn: 1,
-            verbose: 3,
-          },
-          transports: [
-            new winston.transports.Console({
-              level: 'verbose',
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-          ],
-        }
-      },
-    }),
     MongooseModule.forFeature([
       { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },

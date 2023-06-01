@@ -6,13 +6,29 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 import * as CopyPlugin from 'copy-webpack-plugin'
 import { json } from 'express'
-import { join } from 'path'
+import * as fs from 'fs'
+import * as path from 'path'
 
 import { CoreModule } from './core.module'
 
 declare const module: any
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(CoreModule, {
+    httpsOptions: {
+      ca: fs.readFileSync(path.resolve(__dirname, 'certificates/CA.pem')),
+      pfx: fs.readFileSync(
+        path.resolve(__dirname, 'certificates/localhost.pfx')
+      ),
+      requestCert: true,
+      rejectUnauthorized: true,
+      key: fs.readFileSync(
+        path.resolve(__dirname, 'certificates/localhost.decrypted.key')
+      ),
+      cert: fs.readFileSync(
+        path.resolve(__dirname, 'certificates/localhost.crt')
+      ),
+      passphrase: process.env.CA_PASS,
+    },
     cors: {
       origin: '*',
     },
@@ -20,9 +36,12 @@ async function bootstrap() {
   })
   const configService = app.get<ConfigService>(ConfigService)
 
-  app.useStaticAssets(join(__dirname, './assets'))
+  app.useStaticAssets(path.join(__dirname, './assets'))
   app.useStaticAssets(
-    join(__dirname, configService.get<string>('application.images.core_dir')),
+    path.join(
+      __dirname,
+      configService.get<string>('application.images.core_dir')
+    ),
     {
       setHeaders: (res, path, stat) => {
         res.set('Access-Control-Allow-Origin', '*')

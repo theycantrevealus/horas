@@ -13,7 +13,6 @@ import {
   PurchaseOrderJoin,
 } from '@inventory/schemas/purchase.order'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type GeneralReceiveNoteDocument = HydratedDocument<GeneralReceiveNote>
@@ -48,14 +47,14 @@ export class GeneralReceiveNote {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

@@ -43,12 +43,12 @@ import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { DecoratorProcessorService } from '@utility/decorator'
-import { environmentIdentifier } from '@utility/environtment'
+import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { KafkaConn } from '@utility/kafka'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
 import { TimeManagement } from '@utility/time'
-import * as winston from 'winston'
+import { WinstonCustomTransports } from '@utility/transport.winston'
 import { Logger } from 'winston'
 
 @Module({
@@ -69,47 +69,7 @@ import { Logger } from 'winston'
             warn: 1,
             verbose: 3,
           },
-          transports: [
-            new winston.transports.Console({
-              level: 'warn',
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-            new winston.transports.Console({
-              level: 'error',
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-            new winston.transports.Console({
-              level: 'verbose',
-              format: winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-                winston.format.printf((data) => {
-                  return JSON.stringify({
-                    timestamp: data.timestamp,
-                    level: data.level,
-                    message: data.message,
-                  })
-                })
-              ),
-            }),
-          ],
+          transports: WinstonCustomTransports[environmentName],
         }
       },
       inject: [ConfigService],

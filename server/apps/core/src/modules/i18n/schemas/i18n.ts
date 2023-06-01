@@ -1,20 +1,20 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
+import { IMenu, MenuJoin } from '@core/menu/schemas/menu.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const i18nComponent = raw({
   component: { type: String },
   translation: { type: String },
-  // menu: { type: MenuJoin, _id: false },
+  menu: { type: MenuJoin, _id: false },
 })
 
 export interface Ii18nComponent {
   component: string
   translation: string
-  // menu: IMenu
+  menu: IMenu
 }
 
 export class Ci18nComponent {
@@ -30,10 +30,11 @@ export class Ci18nComponent {
   })
   translation: string
 
-  // @ApiProperty({
-  //   type: CMenu,
-  // })
-  // menu: CMenu
+  @ApiProperty({
+    type: MenuJoin,
+    required: false,
+  })
+  menu: IMenu
 }
 
 export const CurrencyJoin = raw({
@@ -188,14 +189,14 @@ export class i18n {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

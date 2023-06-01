@@ -3,7 +3,6 @@ import { AccountJoin } from '@core/account/schemas/account.join'
 import { IMenuGroup, MenuGroupJoin } from '@core/menu/schemas/menu.group.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export const MenuJoin = raw({
@@ -157,14 +156,14 @@ export class Menu {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

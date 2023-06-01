@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  dev:
+    container_name: core
+    image: horas:core
+    build:
+      context: .
+      target: development
+      dockerfile: apps/core/Dockerfile
+    command: npm run server:dev:core
+    networks:
+      - nestjs-network
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -29,10 +29,15 @@ export class TimeManagement {
   // }
 
   getTimezone(target) {
-    // return moment.tz(Date.now(), target).format('YYYY-MM-DD HH:mm:ss')
-    // return new Date(moment().utcOffset('+7').format('YYYY-MM-DD HH:mm:ss'))
     return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
-    //return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
+  }
+
+  getRaw(target) {
+    return moment.tz(target)
+  }
+
+  getUTC() {
+    return moment.utc()
   }
 
   getDate(format = 'YYYY-MM-DD') {

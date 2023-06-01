@@ -19,7 +19,6 @@ import {
 } from '@core/master/schemas/master.stock.point.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { TimeManagement } from '@utility/time'
 import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
@@ -141,14 +140,14 @@ export class MasterItem {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   updated_at: Date

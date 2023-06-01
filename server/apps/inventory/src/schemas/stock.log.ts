@@ -11,7 +11,6 @@ import {
   MasterStockPointJoin,
 } from '@core/master/schemas/master.stock.point.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type InventoryStockLogDocument = HydratedDocument<InventoryStockLog>
@@ -43,7 +42,7 @@ export class InventoryStockLog {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new TimeManagement().getTimezone('Asia/Jakarta'),
+    default: () => new Date(),
     required: true,
   })
   logged_at: Date

@@ -1,5 +1,9 @@
+import * as process from 'process'
+
 export const ApplicationConfig = () => ({
   application: {
+    node_env: process.env.NODE_ENV,
+    timezone: process.env.TZ,
     name: process.env.APP_NAME,
     host: process.env.APP_HOST,
     port: process.env.APP_PORT,
@@ -8,8 +12,6 @@ export const ApplicationConfig = () => ({
       core_dir: process.env.APP_CORE_DIR,
       core_prefix: process.env.APP_CORE_PREFIX,
     },
-    node_env: process.env.NODE_ENV,
-    timezone: parseInt(process.env.TIMEZONE) * 60 * 60 * 1000,
     jwt: 'TAKASHITANAKA0192',
     log: {
       info: process.env.LOG_INFO,

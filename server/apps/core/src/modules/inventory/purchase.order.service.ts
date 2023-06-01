@@ -244,32 +244,36 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit(
-            this.configService.get<string>(
-              'kafka.inventory.topic.purchase_order'
-            ),
-            {
-              action: 'decline',
-              id: id,
-              data: data,
-              account: account,
-              token: token,
-            }
-          )
-          if (emitter) {
-            response.message = 'Purchase order declined successfully'
-            response.statusCode = `${modCodes[this.constructor.name]}_U_${
-              modCodes.Global.success
-            }`
-            response.transaction_id = id
-            response.payload = result
-          } else {
-            response.message = `Purchase Order failed to decline`
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.failed
-            }`
-            response.transaction_id = id
-          }
+          this.clientInventory
+            .emit(
+              this.configService.get<string>(
+                'kafka.inventory.topic.purchase_order'
+              ),
+              {
+                action: 'decline',
+                id: id,
+                data: data,
+                account: account,
+                token: token,
+              }
+            )
+            .subscribe({
+              next: () => {
+                response.message = 'Purchase order declined successfully'
+                response.statusCode = `${modCodes[this.constructor.name]}_U_${
+                  modCodes.Global.success
+                }`
+                response.transaction_id = id
+                response.payload = result
+              },
+              error: (onError) => {
+                response.message = `Purchase Order failed to decline. ${onError.message}`
+                response.statusCode = `${modCodes[this.constructor.name]}_I_${
+                  modCodes.Global.failed
+                }`
+                response.transaction_id = id
+              },
+            })
         } else {
           response.message = `Purchase order failed to decline. Invalid document`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
