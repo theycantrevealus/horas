@@ -46,6 +46,13 @@ export class GeneralReceiveNote {
   created_by: IAccountCreatedBy
 
   @Prop({
+    type: SchemaTypes.String,
+    default: () => 'Asia/Jakarta',
+    required: true,
+  })
+  timezone: string
+
+  @Prop({
     type: SchemaTypes.Date,
     default: () => new Date(),
     required: true,

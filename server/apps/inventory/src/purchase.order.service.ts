@@ -15,6 +15,7 @@ import {
 import { IPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { LogService } from '@log/log.service'
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -30,14 +31,20 @@ import { IConfig } from '../../core/src/schemas/config'
 @Injectable()
 export class PurchaseOrderService {
   constructor(
+    @Inject(ConfigService)
+    private readonly configService: ConfigService,
+
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger,
+
     @Inject(LogService) private readonly logService: LogService,
+
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
     @Inject(MasterItemService)
     private readonly masterItemService: MasterItemService,
+
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 

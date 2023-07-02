@@ -41,6 +41,7 @@ export const CurrencyJoin = raw({
   language_code: { type: String },
   iso_2_digits: { type: String },
   currency: { type: String },
+  timezone: { type: String },
 })
 
 export class CCurrency {
@@ -61,12 +62,19 @@ export class CCurrency {
     example: '',
   })
   currency: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Asia/Jakarta',
+  })
+  timezone: string
 }
 
 export interface ICurrency {
   language_code: string
   iso_2_digits: string
   currency: string
+  timezone: string
 }
 
 export type i18nDocument = HydratedDocument<i18n>

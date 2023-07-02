@@ -2,6 +2,11 @@ import { HttpStatus } from '@nestjs/common'
 import { Model } from 'mongoose'
 
 export async function prime_datatable(parameter: any, model: Model<any>) {
+  /*
+   * Datetime parsing following to timezone will parse in client side due to performance issue
+   * For a specific reason it will just send to client and let the client parse as their condition
+   * */
+
   const first: number = parameter.first ? parseInt(parameter.first) : 0
   const rows: number = parameter.rows ? parseInt(parameter.rows) : 20
   const sortField = parameter.sortField ? parameter.sortField : 'created_at'
@@ -70,7 +75,6 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
       },
     })
   }
-  //---------------------------------------------------------------------------
 
   const allNoFilter = await model
     .aggregate([

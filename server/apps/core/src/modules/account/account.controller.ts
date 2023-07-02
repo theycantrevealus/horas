@@ -9,6 +9,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -34,11 +35,9 @@ import { AccountAddDTO } from './dto/account.add'
 @Controller('account')
 @ApiTags('Account Management')
 export class AccountController {
-  private accountService: AccountService
-
-  constructor(accountService: AccountService) {
-    this.accountService = accountService
-  }
+  constructor(
+    @Inject(AccountService) private readonly accountService: AccountService
+  ) {}
 
   @Get()
   @Version('1')
