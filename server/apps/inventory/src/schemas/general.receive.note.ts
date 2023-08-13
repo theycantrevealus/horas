@@ -45,6 +45,7 @@ export class GeneralReceiveNote {
   @Prop(raw(AccountJoin))
   created_by: IAccountCreatedBy
 
+  // TODO : Apply locale just like the purchase order
   @Prop({
     type: SchemaTypes.String,
     default: () => 'Asia/Jakarta',

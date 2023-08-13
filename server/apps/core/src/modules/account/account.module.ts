@@ -1,6 +1,7 @@
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import { CacheModule, Module } from '@nestjs/common'
+import { CacheModule } from '@nestjs/cache-manager'
+import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'

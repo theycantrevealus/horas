@@ -1,11 +1,18 @@
-import { VersioningType } from '@nestjs/common'
+import {
+  BadRequestException,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import { NestExpressApplication } from '@nestjs/platform-express'
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
+import { ValidationError } from 'class-validator'
 import * as CopyPlugin from 'copy-webpack-plugin'
-import { json } from 'express'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -13,53 +20,77 @@ import { CoreModule } from './core.module'
 
 declare const module: any
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(CoreModule, {
-    httpsOptions: {
-      ca: fs.readFileSync(path.resolve(__dirname, 'certificates/CA.pem')),
-      pfx: fs.readFileSync(
-        path.resolve(__dirname, 'certificates/localhost.pfx')
-      ),
-      requestCert: true,
-      rejectUnauthorized: true,
-      key: fs.readFileSync(
-        path.resolve(__dirname, 'certificates/localhost.decrypted.key')
-      ),
-      cert: fs.readFileSync(
-        path.resolve(__dirname, 'certificates/localhost.crt')
-      ),
-      passphrase: process.env.CA_PASS,
-    },
-    cors: {
-      origin: '*',
-    },
-    logger: ['verbose', 'error'],
-  })
-  const configService = app.get<ConfigService>(ConfigService)
-
-  app.useStaticAssets(path.join(__dirname, './assets'))
-  app.useStaticAssets(
-    path.join(
-      __dirname,
-      configService.get<string>('application.images.core_dir')
-    ),
-    {
-      setHeaders: (res, path, stat) => {
-        res.set('Access-Control-Allow-Origin', '*')
+  const app = await NestFactory.create<NestFastifyApplication>(
+    CoreModule,
+    new FastifyAdapter({
+      logger: true,
+      ignoreTrailingSlash: true,
+      ignoreDuplicateSlashes: true,
+      https: {
+        ca: fs.readFileSync(path.resolve(__dirname, 'certificates/CA.pem')),
+        pfx: fs.readFileSync(
+          path.resolve(__dirname, 'certificates/localhost.pfx')
+        ),
+        requestCert: true,
+        rejectUnauthorized: true,
+        key: fs.readFileSync(
+          path.resolve(__dirname, 'certificates/localhost.decrypted.key')
+        ),
+        cert: fs.readFileSync(
+          path.resolve(__dirname, 'certificates/localhost.crt')
+        ),
+        passphrase: process.env.CA_PASS,
       },
-      prefix: `/${configService.get<string>('application.images.core_prefix')}`,
+    }),
+    {
+      // bodyParser: false,
+      logger: ['verbose', 'error'],
     }
   )
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))
+
+  const configService = app.get<ConfigService>(ConfigService)
+
+  // app.useStaticAssets(path.join(__dirname, './assets'))
+  // app.useStaticAssets(
+  //   path.join(
+  //     __dirname,
+  //     configService.get<string>('application.images.core_dir')
+  //   ),
+  //   {
+  //     setHeaders: (res, path, stat) => {
+  //       res.set('Access-Control-Allow-Origin', '*')
+  //     },
+  //     prefix: `/${configService.get<string>('application.images.core_prefix')}`,
+  //   }
+  // )
+
+  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
+  logger.level = 'DEBUG'
+  app.useLogger(logger)
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      skipMissingProperties: true,
+      exceptionFactory: (validationErrors: ValidationError[] = []) => {
+        let messages = []
+        validationErrors.map((e) => {
+          messages = messages.concat(e.constraints)
+        })
+        return new BadRequestException(messages)
+      },
+    })
+  )
 
   app.enableVersioning({
     type: VersioningType.URI,
   })
-  app.use(json({ limit: '5mb' }))
+
   app.enableCors()
 
   const options = new DocumentBuilder()
     .setTitle('HORAS')
     .setVersion('1')
+    .addServer(configService.get<string>('application.host_port'))
     .addBearerAuth(
       {
         name: 'JWT Bearer',
@@ -72,6 +103,7 @@ async function bootstrap() {
       'JWT'
     )
     .build()
+
   const document = SwaggerModule.createDocument(app, options)
 
   const CaseInsensitiveFilterPlugin = function () {
@@ -90,9 +122,9 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document, {
     customCss: `
     @import url(https://fonts.googleapis.com/css?family=Handlee);
-    body { padding-top: 218px !important; background: url(\'./body.jpg\') no-repeat; background-attachment: fixed; background-size: cover; background-color: #f !important; }
-    .topbar { box-shadow: 0 -10px 10px 10px #f6f3f3 inset; width: 100%; margin: -20px auto; position:fixed; top: 0; left: 0; z-index: 100; background: url(\'./mbi.png\')no-repeat !important; background-size: 130px 25px !important; background-color: #fff !important; background-position: 1430px 30px !important; }
-    .topbar-wrapper img {content:url(\'./index.png\'); width:137px; height:auto; margin: 24px}
+    body { padding-top: 218px !important; background-attachment: fixed; background-size: cover; background-color: #f !important; }
+    .topbar { box-shadow: 0 -10px 10px 10px #f6f3f3 inset; width: 100%; margin: -20px auto; position:fixed; top: 0; left: 0; z-index: 100; background-color: #fff !important; }
+    .topbar-wrapper img { width:137px; height:auto; margin: 24px }
     .swagger-ui .topbar { background-color: #red !important; z-index: 100; }
     .scheme-container { position: fixed; top: 80px; width: 100%; padding: 15px 0 !important; z-index: 200; box-shadow: 0 2px 4px 0 rgba(0,0,0,.15) !important; }
     .information-container { position: fixed; right: 250px; top: 0; padding: 0 !important; z-index: 100; }
@@ -180,7 +212,6 @@ async function bootstrap() {
     },
   })
   const mode = configService.get<string>('application.node_env')
-
   await app.listen(parseInt(configService.get<string>('application.port')))
 
   if (mode === '' || mode === 'development') {
@@ -191,3 +222,4 @@ async function bootstrap() {
   }
 }
 bootstrap()
+// Cluster.clusterize(bootstrap())

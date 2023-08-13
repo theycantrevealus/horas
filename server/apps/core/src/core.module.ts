@@ -2,6 +2,7 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
+import { BpjsModule } from '@core/3rdparty/bpjs/bpjs.module'
 import { AccountModule } from '@core/account/account.module'
 import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { i18nModule } from '@core/i18n/i18n.module'
@@ -13,7 +14,8 @@ import { MenuModule } from '@core/menu/menu.module'
 import { PatientModule } from '@core/patient/patient.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import { CACHE_MANAGER, CacheModule, Inject, Module } from '@nestjs/common'
+import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager'
+import { Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import {
   InjectModel,
@@ -65,12 +67,7 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         return {
-          colorize: true,
-          levels: {
-            error: 0,
-            warn: 1,
-            verbose: 3,
-          },
+          colorize: configService.get<boolean>('application.log.colorize'),
           transports: WinstonCustomTransports[environmentName],
         }
       },
@@ -158,6 +155,7 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     MasterModule,
     i18nModule,
     GatewayInventoryModule,
+    BpjsModule,
   ],
   controllers: [CoreController, CoreConfigGroupController],
   providers: [

@@ -1,5 +1,4 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { Account } from '@core/account/schemas/account.model'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import { PatientEditDTO } from '@core/patient/dto/patient.edit'
 import { Patient, PatientDocument } from '@core/patient/schema/patient.model'
@@ -9,7 +8,7 @@ import { Types } from 'mongoose'
 
 export const mockPatientService = {
   all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest.fn().mockImplementation((dto: PatientAddDTO, account: Account) => {
+  add: jest.fn().mockImplementation((dto: PatientAddDTO) => {
     return Promise.resolve({
       payload: {
         ...dto,
@@ -25,7 +24,7 @@ export const mockPatientService = {
       },
     })
   }),
-  detail: jest.fn().mockResolvedValue((dto) => {
+  detail: jest.fn().mockResolvedValue(() => {
     return Promise.resolve({})
   }),
   delete: jest.fn().mockImplementation((id: string) => {
@@ -111,7 +110,7 @@ export const mockPatientDoc = (
     id_number: '1234567890123456',
     passport: '-',
     driving_license: '-',
-    title: mock?.basic_info?.first_name || faker.definitions.title,
+    title: mock?.basic_info?.title || faker.definitions.title.toString(),
     first_name: mock?.basic_info?.first_name || faker.name.firstName('male'),
     last_name: mock?.basic_info?.last_name || faker.name.lastName('male'),
     nick_name: mock?.basic_info?.nick_name || faker.name.firstName('male'),
@@ -153,7 +152,7 @@ export const patientArray = [
       id_number: '1234567890123457',
       passport: '-',
       driving_license: '-',
-      title: faker.definitions.title,
+      title: faker.definitions.title.toString(),
       first_name: faker.name.firstName('male'),
       last_name: faker.name.lastName('male'),
       nick_name: faker.name.firstName('male'),
@@ -181,7 +180,7 @@ export const patientArray = [
       id_number: '1234567890123458',
       passport: '-',
       driving_license: '-',
-      title: faker.definitions.title,
+      title: faker.definitions.title.toString(),
       first_name: faker.name.firstName('male'),
       last_name: faker.name.lastName('male'),
       nick_name: faker.name.firstName('male'),
@@ -213,7 +212,7 @@ export const patientDocArray = [
       id_number: '1234567890123457',
       passport: '-',
       driving_license: '-',
-      title: faker.definitions.title,
+      title: faker.definitions.title.toString(),
       first_name: faker.name.firstName('male'),
       last_name: faker.name.lastName('male'),
       nick_name: faker.name.firstName('male'),
@@ -241,7 +240,7 @@ export const patientDocArray = [
       id_number: '1234567890123458',
       passport: '-',
       driving_license: '-',
-      title: faker.definitions.title,
+      title: faker.definitions.title.toString(),
       first_name: faker.name.firstName('male'),
       last_name: faker.name.lastName('male'),
       nick_name: faker.name.firstName('male'),

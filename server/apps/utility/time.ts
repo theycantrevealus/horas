@@ -37,7 +37,26 @@ export class TimeManagement {
   }
 
   getUTC() {
-    return moment.utc()
+    return moment.utc().format('YYYY-MM-DD HH:mm:ss')
+  }
+
+  getMoment() {
+    return moment
+  }
+
+  parseDate(s) {
+    const re = /^(\d\d)-(\d\d)-(\d{4}) (\d\d):(\d\d):(\d\d)$/
+    const m = re.exec(s)
+    return m
+      ? new Date(
+          parseInt(m[3]),
+          parseInt(m[2]) - 1,
+          parseInt(m[1]),
+          parseInt(m[4]),
+          parseInt(m[5]),
+          parseInt(m[6])
+        )
+      : null
   }
 
   getDate(format = 'YYYY-MM-DD') {

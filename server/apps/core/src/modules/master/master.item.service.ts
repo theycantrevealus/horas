@@ -200,7 +200,7 @@ export class MasterItemService {
 
       await data
         .save()
-        .then((result) => {
+        .then(() => {
           response.message = 'Master item deleted successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.success

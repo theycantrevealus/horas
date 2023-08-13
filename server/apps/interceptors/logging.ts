@@ -9,7 +9,6 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  Logger,
   NestInterceptor,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
@@ -39,8 +38,6 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
   ) {
     //
   }
-
-  private logger = new Logger('HTTP')
 
   async intercept(
     context: ExecutionContext,

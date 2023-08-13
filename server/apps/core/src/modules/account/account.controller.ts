@@ -9,11 +9,13 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
   UseInterceptors,
   Version,
@@ -27,7 +29,10 @@ import {
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { isJSON } from 'class-validator'
+import { FastifyReply } from 'fastify'
+import { Logger } from 'winston'
 
 import { AccountService } from './account.service'
 import { AccountAddDTO } from './dto/account.add'
@@ -36,6 +41,8 @@ import { AccountAddDTO } from './dto/account.add'
 @ApiTags('Account Management')
 export class AccountController {
   constructor(
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
     @Inject(AccountService) private readonly accountService: AccountService
   ) {}
 
@@ -165,7 +172,14 @@ export class AccountController {
     summary: 'Generate account access token',
     description: ``,
   })
-  async signin(@Body() body: AccountSignInDTO) {
-    return this.accountService.signin(body)
+  async signin(@Body() body: AccountSignInDTO, @Res() response: FastifyReply) {
+    await this.accountService
+      .signin(body)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error)
+      })
   }
 }

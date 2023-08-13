@@ -2,7 +2,8 @@ import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { AuthService } from '@security/auth.service'
@@ -63,7 +64,7 @@ export class AccountService {
 
       await data
         .save()
-        .then((result) => {
+        .then(() => {
           response.message = 'Account deleted successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.success
@@ -215,12 +216,18 @@ export class AccountService {
             .compare(parameter.password, result.password)
             .then(async (passCheck) => {
               if (passCheck) {
+                const accountSet = {
+                  id: result.id,
+                  code: result.code,
+                  first_name: result.first_name,
+                  last_name: result.last_name,
+                }
                 const idenPass = gen_uuid()
                 const TM = new TimeManagement()
                 const currentTime = TM.getTimezone('Asia/Jakarta')
 
                 const oldToken = await this.token_coordinator(
-                  result,
+                  accountSet,
                   currentTime
                 )
 
@@ -239,7 +246,7 @@ export class AccountService {
                     .create_token({
                       id: idenPass,
                       currentTime: currentTime,
-                      account: result,
+                      account: accountSet,
                     })
                     .then((tokenSet) => {
                       token = {
@@ -257,20 +264,25 @@ export class AccountService {
                   expired_at: token.expired_at,
                 })
 
-                const config = await this.configMeta()
+                // const config = await this.configMeta()
 
                 await logLogin
                   .save()
-                  .then(async (loginResult: any) => {
+                  .then(async () => {
                     response.message = 'Sign in success'
                     response.statusCode = `${
                       modCodes[this.constructor.name]
                     }_I_${modCodes.Global.success}`
                     response.transaction_id = result.id
                     response.payload = {
-                      account: result,
+                      account: {
+                        id: result.id,
+                        code: result.code,
+                        first_name: result.first_name,
+                        last_name: result.last_name,
+                      },
                       token: token.set,
-                      config: config,
+                      // config: config, //TODO : Prefer to load by another endpoint on system startup preparation
                     }
                   })
                   .catch(() => {

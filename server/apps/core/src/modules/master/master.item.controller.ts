@@ -1,3 +1,5 @@
+// import { FileInterceptor } from '@nestjs/platform-express'
+import { FileInterceptor, UploadedFile } from '@blazity/nest-file-fastify'
 import {
   MasterItemAddDTO,
   MasterItemEditDTO,
@@ -16,12 +18,11 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
+  Request,
   UseGuards,
   UseInterceptors,
   Version,
 } from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
 import {
   ApiBearerAuth,
   ApiConsumes,
@@ -30,9 +31,11 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { FileDto } from '@utility/dto/file'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
+import * as fs from 'fs'
 import { diskStorage } from 'multer'
 import { extname } from 'path'
 
@@ -162,6 +165,20 @@ export class MasterItemController {
     return await this.masterItemService.delete(param.id)
   }
 
+  @Post('/upload')
+  public async upload2Files(@Request() request) {
+    const files = request.files()
+
+    for await (const file of files) {
+      const writeStream = fs.createWriteStream(
+        `./document-upload-storage/${file.filename}`
+      )
+
+      file.file.pipe(writeStream)
+    }
+    return { message: 'files uploaded' }
+  }
+
   @Post('item/import')
   @Version('1')
   @UseGuards(JwtAuthGuard)
@@ -187,9 +204,10 @@ export class MasterItemController {
   )
   @ApiConsumes('multipart/form-data')
   async upload_master_data(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: FileDto,
     @CredentialAccount() account
   ) {
+    return true
     return await this.masterItemService.import(file.path, account)
   }
 }

@@ -1,4 +1,5 @@
-import { CacheModule, Module } from '@nestjs/common'
+import { CacheModule } from '@nestjs/cache-manager'
+import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AuthModule } from '@security/auth.module'
 import * as redisStore from 'cache-manager-ioredis'

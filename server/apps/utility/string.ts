@@ -66,3 +66,51 @@ export function pad(pad, str, padLeft) {
     return (str + pad).substring(0, pad.length)
   }
 }
+
+export function checkBin(n) {
+  return /^[01]{1,64}$/.test(n)
+}
+export function checkDec(n) {
+  return /^[0-9]{1,64}$/.test(n)
+}
+export function checkHex(n) {
+  return /^[0-9A-Fa-f]{1,64}$/.test(n)
+}
+export function unpad(s) {
+  s = '' + s
+  return s.replace(/^0+/, '')
+}
+
+// === DECIMAL OPEARTIONS
+export function Dec2Bin(n) {
+  if (!checkDec(n) || n < 0) return 0
+  return n.toString(2)
+}
+export function Dec2Hex(n) {
+  if (!checkDec(n) || n < 0) return 0
+  return n.toString(16)
+}
+
+// === BINARY OPERATIONS
+export function Bin2Dec(n) {
+  if (!checkBin(n)) return 0
+  return parseInt(n, 2).toString(10)
+}
+export function Bin2Hex(n) {
+  if (!checkBin(n)) return 0
+  return parseInt(n, 2).toString(16)
+}
+
+// === HEXADECIMAL OPEARTIONS
+export function Hex2Bin(n) {
+  const length = n.length / 2
+  const result = new Uint8Array(length)
+  for (let i = 0; i < length; ++i) {
+    result[i] = parseInt(n.slice(i * 2, i * 2 + 2), 16)
+  }
+  return result
+}
+export function Hex2Dec(n) {
+  if (!checkHex(n)) return 0
+  return parseInt(n, 16).toString(10)
+}

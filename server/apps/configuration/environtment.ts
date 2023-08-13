@@ -14,6 +14,7 @@ export const ApplicationConfig = () => ({
     },
     jwt: 'TAKASHITANAKA0192',
     log: {
+      colorize: parseInt(process.env.LOG_COLORIZE) > 0,
       info: process.env.LOG_INFO,
       verbose: process.env.LOG_VERBOSE,
       warn: process.env.LOG_WARN,
