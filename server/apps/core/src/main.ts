@@ -20,33 +20,37 @@ import { CoreModule } from './core.module'
 
 declare const module: any
 async function bootstrap() {
+  const fastifyAdapter = new FastifyAdapter({
+    logger: true,
+    disableRequestLogging: true,
+    ignoreTrailingSlash: true,
+    ignoreDuplicateSlashes: true,
+    https: {
+      ca: fs.readFileSync(path.resolve(__dirname, 'certificates/CA.pem')),
+      pfx: fs.readFileSync(
+        path.resolve(__dirname, 'certificates/localhost.pfx')
+      ),
+      requestCert: true,
+      rejectUnauthorized: true,
+      key: fs.readFileSync(
+        path.resolve(__dirname, 'certificates/localhost.decrypted.key')
+      ),
+      cert: fs.readFileSync(
+        path.resolve(__dirname, 'certificates/localhost.crt')
+      ),
+      passphrase: process.env.CA_PASS,
+    },
+  })
+
   const app = await NestFactory.create<NestFastifyApplication>(
     CoreModule,
-    new FastifyAdapter({
-      logger: true,
-      ignoreTrailingSlash: true,
-      ignoreDuplicateSlashes: true,
-      https: {
-        ca: fs.readFileSync(path.resolve(__dirname, 'certificates/CA.pem')),
-        pfx: fs.readFileSync(
-          path.resolve(__dirname, 'certificates/localhost.pfx')
-        ),
-        requestCert: true,
-        rejectUnauthorized: true,
-        key: fs.readFileSync(
-          path.resolve(__dirname, 'certificates/localhost.decrypted.key')
-        ),
-        cert: fs.readFileSync(
-          path.resolve(__dirname, 'certificates/localhost.crt')
-        ),
-        passphrase: process.env.CA_PASS,
-      },
-    }),
+    fastifyAdapter,
     {
       // bodyParser: false,
       logger: ['verbose', 'error'],
     }
   )
+  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
 
   const configService = app.get<ConfigService>(ConfigService)
 
@@ -64,7 +68,6 @@ async function bootstrap() {
   //   }
   // )
 
-  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
   logger.level = 'DEBUG'
   app.useLogger(logger)
   app.useGlobalPipes(
