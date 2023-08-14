@@ -53,8 +53,8 @@ export class BPJSReferenceService {
           createSignature.decompress
         )
         response.payload = {
-          ...data.metaData,
-          ...parsedResponse,
+          metaData: data.metaData,
+          response: parsedResponse,
         }
         return response
       })
