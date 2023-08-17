@@ -9,16 +9,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { IsNotEmpty, IsString, ValidateNested } from 'class-validator'
 
-class SEPAddForm {
-  @ApiProperty({
-    description: 'Nomor Kartu BPJS',
-    type: String,
-    example: '',
-  })
-  @IsNotEmpty()
-  @IsString()
-  noKartu: string
-
+class SEPEditForm {
   @ApiProperty({
     type: KelasRawat,
   })
@@ -104,11 +95,11 @@ class SEPAddForm {
 
 export class SEPTEdit {
   @ApiProperty({
-    type: SEPAddForm,
+    type: SEPEditForm,
   })
-  @Type(() => SEPAddForm)
+  @Type(() => SEPEditForm)
   @IsNotEmpty()
-  t_sep: SEPAddForm
+  t_sep: SEPEditForm
 }
 export class SEPEdit {
   @ApiProperty({
