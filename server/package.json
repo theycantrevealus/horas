@@ -26,7 +26,6 @@
     "test:unit:cov": "jest --config ./jest-unit.json --watch --verbose --runInBand --coverage"
   },
   "dependencies": {
-    "@fastify/static": "^6.10.2",
     "@fastify/view": "^8.0.0",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/cache-manager": "^2.1.0",

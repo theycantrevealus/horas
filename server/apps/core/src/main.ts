@@ -15,32 +15,69 @@ import { ValidationError } from 'class-validator'
 import * as CopyPlugin from 'copy-webpack-plugin'
 import * as fs from 'fs'
 import * as path from 'path'
+import * as process from 'process'
 
 import { CoreModule } from './core.module'
 
 declare const module: any
 async function bootstrap() {
-  const fastifyAdapter = new FastifyAdapter({
-    logger: true,
-    disableRequestLogging: true,
-    ignoreTrailingSlash: true,
-    ignoreDuplicateSlashes: true,
-    https: {
-      ca: fs.readFileSync(path.resolve(__dirname, 'certificates/CA.pem')),
-      pfx: fs.readFileSync(
-        path.resolve(__dirname, 'certificates/localhost.pfx')
-      ),
-      requestCert: true,
-      rejectUnauthorized: true,
-      key: fs.readFileSync(
-        path.resolve(__dirname, 'certificates/localhost.decrypted.key')
-      ),
-      cert: fs.readFileSync(
-        path.resolve(__dirname, 'certificates/localhost.crt')
-      ),
-      passphrase: process.env.CA_PASS,
-    },
-  })
+  const now = new Date()
+  const protocol = parseInt(process.env.NODE_SECURE) > 0
+  let fastifyAdapter
+  if (protocol) {
+    fastifyAdapter = new FastifyAdapter({
+      logger: {
+        serializers: {
+          // res: (response) => {
+          //   return {
+          //     statusCode: response.statusCode,
+          //     payload: response.payload,
+          //   }
+          // },
+          // req: (request: any): any => {
+          //   const parsedDate = new Date(request.time)
+          //   return `${parsedDate.getFullYear()}-${parsedDate.getMonth()}-${parsedDate.getDate()} | ${
+          //     request.method
+          //   }`
+          // },
+        },
+        customLevels: {
+          log: 1,
+        },
+        file: `logs/gateway_${now.getFullYear()}_${now.getMonth()}_${now.getDate()}.log`,
+      },
+      // disableRequestLogging: true,
+      ignoreTrailingSlash: true,
+      ignoreDuplicateSlashes: true,
+      https: {
+        ca: fs.readFileSync(path.resolve(__dirname, 'certificates/CA.pem')),
+        pfx: fs.readFileSync(
+          path.resolve(__dirname, 'certificates/localhost.pfx')
+        ),
+        requestCert: true,
+        rejectUnauthorized: true,
+        key: fs.readFileSync(
+          path.resolve(__dirname, 'certificates/localhost.decrypted.key')
+        ),
+        cert: fs.readFileSync(
+          path.resolve(__dirname, 'certificates/localhost.crt')
+        ),
+        passphrase: process.env.CA_PASS,
+      },
+    })
+  } else {
+    fastifyAdapter = new FastifyAdapter({
+      logger: {
+        customLevels: {
+          log: 1,
+        },
+        file: `logs/gateway_${now.getFullYear()}_${now.getMonth()}_${now.getDate()}.log`,
+      },
+      // disableRequestLogging: true,
+      ignoreTrailingSlash: true,
+      ignoreDuplicateSlashes: true,
+    })
+  }
 
   const app = await NestFactory.create<NestFastifyApplication>(
     CoreModule,
@@ -50,23 +87,33 @@ async function bootstrap() {
       logger: ['verbose', 'error'],
     }
   )
-  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
 
   const configService = app.get<ConfigService>(ConfigService)
 
-  // app.useStaticAssets(path.join(__dirname, './assets'))
-  // app.useStaticAssets(
-  //   path.join(
+  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
+
+  // fastifyAdapter.register(require('@fastify/static'), {
+  //   root: path.join(
   //     __dirname,
   //     configService.get<string>('application.images.core_dir')
   //   ),
-  //   {
-  //     setHeaders: (res, path, stat) => {
-  //       res.set('Access-Control-Allow-Origin', '*')
-  //     },
-  //     prefix: `/${configService.get<string>('application.images.core_prefix')}`,
-  //   }
-  // )
+  //   prefix: `/${configService.get<string>('application.images.core_prefix')}`,
+  // })
+
+  // const fastifyInstance = app.getHttpAdapter().getInstance()
+  // fastifyInstance.childLoggerFactory
+  // fastifyInstance.addHook('onSend', async (request, reply, payload) => {
+  //   logger.verbose(payload)
+  //   next()
+  // })
+  // .decorateReply('setHeader', function (name: string, value: unknown) {
+  //   this.header(name, value)
+  // })
+  // .decorateReply('end', function () {
+  //   this.send('')
+  // })
+
+  // app.useStaticAssets(path.join(__dirname, './assets'))
 
   logger.level = 'DEBUG'
   app.useLogger(logger)

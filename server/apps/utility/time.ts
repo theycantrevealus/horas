@@ -28,6 +28,10 @@ export class TimeManagement {
   //   return moment().tz(target).format('L hh:mm:ss')
   // }
 
+  async validateFormat(format, input) {
+    return moment(input, format, true).isValid()
+  }
+
   getTimezone(target) {
     return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
   }
