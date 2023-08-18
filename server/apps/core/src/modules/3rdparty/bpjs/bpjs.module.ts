@@ -1,16 +1,18 @@
 import { BPJSConfig } from '@configuration/3rdparty/bpjs'
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
-import { BpjsSPRIController } from '@core/3rdparty/bpjs.spri.controller'
-import { BpjsMonitoringController } from '@core/3rdparty/bpjs/bpjs.monitoring.controller'
-import { BpjsReferensiController } from '@core/3rdparty/bpjs/bpjs.referensi.controller'
-import { BpjsSEPController } from '@core/3rdparty/bpjs/bpjs.sep.controller'
+import { BPJSVClaimSPRIController } from '@core/3rdparty/bpjs.spri.controller'
+import { BPJSApplicaresReferensiController } from '@core/3rdparty/bpjs/controllers/applicares/referensi.controller'
+import { BPJSVClaimMonitoringController } from '@core/3rdparty/bpjs/controllers/vclaim/monitoring.controller'
+import { BPJSVClaimReferensiController } from '@core/3rdparty/bpjs/controllers/vclaim/referensi.controller'
+import { BPJSVClaimSEPController } from '@core/3rdparty/bpjs/controllers/vclaim/sep.controller'
 import { SEP, SEPSchema } from '@core/3rdparty/bpjs/schemas/sep'
+import { BPJSApplicaresReferensiService } from '@core/3rdparty/bpjs/services/applicares/referensi.service'
 import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
-import { BPJSMonitoringService } from '@core/3rdparty/bpjs/services/monitoring.service'
-import { BPJSReferenceService } from '@core/3rdparty/bpjs/services/reference.service'
-import { BPJSSEPService } from '@core/3rdparty/bpjs/services/sep.service'
-import { BPJSSPRIService } from '@core/3rdparty/bpjs/services/spri.service'
+import { BPJSVClaimMonitoringService } from '@core/3rdparty/bpjs/services/vclaim/monitoring.service'
+import { BPJSVClaimReferensiService } from '@core/3rdparty/bpjs/services/vclaim/referensi.service'
+import { BPJSVClaimSEPService } from '@core/3rdparty/bpjs/services/vclaim/sep.service'
+import { BPJSVClaimSPRIService } from '@core/3rdparty/bpjs/services/vclaim/spri.service'
 import { HttpModule } from '@nestjs/axios'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -87,17 +89,19 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
     AuthModule,
   ],
   controllers: [
-    BpjsReferensiController,
-    BpjsSPRIController,
-    BpjsMonitoringController,
-    BpjsSEPController,
+    BPJSVClaimReferensiController,
+    BPJSVClaimSPRIController,
+    BPJSVClaimMonitoringController,
+    BPJSVClaimSEPController,
+    BPJSApplicaresReferensiController,
   ],
   providers: [
     BPJSAuthService,
-    BPJSReferenceService,
-    BPJSSPRIService,
-    BPJSMonitoringService,
-    BPJSSEPService,
+    BPJSVClaimReferensiService,
+    BPJSVClaimSPRIService,
+    BPJSVClaimMonitoringService,
+    BPJSVClaimSEPService,
+    BPJSApplicaresReferensiService,
   ],
 })
 export class BpjsModule {

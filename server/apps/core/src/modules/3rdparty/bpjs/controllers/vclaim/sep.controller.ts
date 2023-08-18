@@ -1,8 +1,7 @@
 import { SEPAdd } from '@core/3rdparty/bpjs/dto/sep/add'
 import { SEPEdit } from '@core/3rdparty/bpjs/dto/sep/edit'
 import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
-import { BPJSReferenceService } from '@core/3rdparty/bpjs/services/reference.service'
-import { BPJSSEPService } from '@core/3rdparty/bpjs/services/sep.service'
+import { BPJSVClaimSEPService } from '@core/3rdparty/bpjs/services/vclaim/sep.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
@@ -25,11 +24,11 @@ import { Logger } from 'winston'
 
 @Controller('bpjs')
 @ApiTags('Integration - Badan Penyelenggara Jaminan Sosial')
-export class BpjsSEPController {
+export class BPJSVClaimSEPController {
   constructor(
     @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
-    @Inject(BPJSSEPService) private readonly bpjsSEP: BPJSSEPService,
-    private readonly bpjsReference: BPJSReferenceService,
+    @Inject(BPJSVClaimSEPService)
+    private readonly bpjsVClaimSEPService: BPJSVClaimSEPService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {}
@@ -48,7 +47,7 @@ export class BpjsSEPController {
     @CredentialAccount() account,
     @Res() response: FastifyReply
   ) {
-    await this.bpjsSEP
+    await this.bpjsVClaimSEPService
       .create(parameter, account)
       .then((result) => {
         response.code(HttpStatus.OK).send(result)
@@ -78,7 +77,7 @@ export class BpjsSEPController {
     @CredentialAccount() account,
     @Res() response: FastifyReply
   ) {
-    await this.bpjsSEP
+    await this.bpjsVClaimSEPService
       .edit(parameter.id, body, account)
       .then((result) => {
         response.code(HttpStatus.OK).send(result)
@@ -107,7 +106,7 @@ export class BpjsSEPController {
     @CredentialAccount() account,
     @Res() response: FastifyReply
   ) {
-    await this.bpjsSEP
+    await this.bpjsVClaimSEPService
       .delete(parameter.id, account)
       .then((result) => {
         response.code(HttpStatus.OK).send(result)

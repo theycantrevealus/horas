@@ -1,5 +1,5 @@
 import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
-import { BPJSMonitoringService } from '@core/3rdparty/bpjs/services/monitoring.service'
+import { BPJSVClaimMonitoringService } from '@core/3rdparty/bpjs/services/vclaim/monitoring.service'
 import { Authorization } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
@@ -19,11 +19,11 @@ import { Logger } from 'winston'
 
 @Controller('bpjs')
 @ApiTags('Integration - Badan Penyelenggara Jaminan Sosial')
-export class BpjsMonitoringController {
+export class BPJSVClaimMonitoringController {
   constructor(
     @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
-    @Inject(BPJSMonitoringService)
-    private readonly bpjsMonitoring: BPJSMonitoringService,
+    @Inject(BPJSVClaimMonitoringService)
+    private readonly bpjsVClaimMonitoringService: BPJSVClaimMonitoringService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {}
@@ -52,7 +52,7 @@ export class BpjsMonitoringController {
     description: 'Tanggal pelayanan SEP (yyyy-mm-dd)',
   })
   async kunjungan(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsMonitoring
+    await this.bpjsVClaimMonitoringService
       .kunjungan({
         type: param.type,
         date: param.date,
@@ -97,7 +97,7 @@ export class BpjsMonitoringController {
     description: '1 = Proses Verifikasi, 2 = Pending Verifikasi, 3 = Klaim',
   })
   async klaim(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsMonitoring
+    await this.bpjsVClaimMonitoringService
       .klaim({
         type: param.type,
         date: param.date,
@@ -145,7 +145,7 @@ export class BpjsMonitoringController {
     description: 'Tanggal pelayanan SEP (yyyy-mm-dd)',
   })
   async klaimJasaRaharja(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsMonitoring
+    await this.bpjsVClaimMonitoringService
       .klaimJasaRaharja({
         type: param.type,
         date: param.date,
@@ -191,9 +191,9 @@ export class BpjsMonitoringController {
     },
     description: 'Tanggal pelayanan SEP (yyyy-mm-dd)',
   })
-  async histori_pelayanan(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsMonitoring
-      .histori_pelayanan({
+  async historiPelayanan(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimMonitoringService
+      .historiPelayanan({
         no_kartu: param.no_kartu,
         start_date: param.start_date,
         end_date: param.end_date,

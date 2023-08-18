@@ -15,10 +15,10 @@ import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 
-import { IConfig } from '../../../../schemas/config'
+import { IConfig } from '../../../../../schemas/config'
 
 @Injectable()
-export class BPJSSEPService {
+export class BPJSVClaimSEPService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,

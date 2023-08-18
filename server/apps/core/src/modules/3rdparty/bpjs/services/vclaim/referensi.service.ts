@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config'
 import { GlobalResponse } from '@utility/dto/response'
 
 @Injectable()
-export class BPJSReferenceService {
+export class BPJSVClaimReferensiService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
@@ -37,7 +37,7 @@ export class BPJSReferenceService {
     return response
   }
 
-  async diagnose(parameter): Promise<GlobalResponse> {
+  async diagnosa(parameter): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -87,7 +87,7 @@ export class BPJSReferenceService {
     return response
   }
 
-  async doctor_dpjp(parameter): Promise<GlobalResponse> {
+  async dokterDPJP(parameter): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -189,7 +189,7 @@ export class BPJSReferenceService {
     return response
   }
 
-  async diagnose_prb(): Promise<GlobalResponse> {
+  async diagnosaPRB(): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -214,7 +214,7 @@ export class BPJSReferenceService {
     return response
   }
 
-  async drub_prb(parameter): Promise<GlobalResponse> {
+  async obatPRB(parameter): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -239,7 +239,7 @@ export class BPJSReferenceService {
     return response
   }
 
-  async procedure(parameter): Promise<GlobalResponse> {
+  async prosedur(parameter): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -364,7 +364,7 @@ export class BPJSReferenceService {
     return response
   }
 
-  async doctor_lpk(parameter): Promise<GlobalResponse> {
+  async dokterLPK(parameter): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
@@ -389,7 +389,7 @@ export class BPJSReferenceService {
     return response
   }
 
-  async specialistic(): Promise<GlobalResponse> {
+  async spesialistik(): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',

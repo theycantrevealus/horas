@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config'
 import { GlobalResponse } from '@utility/dto/response'
 
 @Injectable()
-export class BPJSMonitoringService {
+export class BPJSVClaimMonitoringService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
@@ -95,7 +95,7 @@ export class BPJSMonitoringService {
     return response
   }
 
-  async histori_pelayanan(parameter): Promise<GlobalResponse> {
+  async historiPelayanan(parameter): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',

@@ -1,5 +1,5 @@
 import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
-import { BPJSReferenceService } from '@core/3rdparty/bpjs/services/reference.service'
+import { BPJSVClaimReferensiService } from '@core/3rdparty/bpjs/services/vclaim/referensi.service'
 import { Authorization } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
@@ -19,11 +19,11 @@ import { Logger } from 'winston'
 
 @Controller('bpjs')
 @ApiTags('Integration - Badan Penyelenggara Jaminan Sosial')
-export class BpjsReferensiController {
+export class BPJSVClaimReferensiController {
   constructor(
     @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
-    @Inject(BPJSReferenceService)
-    private readonly bpjsReference: BPJSReferenceService,
+    @Inject(BPJSVClaimReferensiService)
+    private readonly bpjsVClaimReferensiService: BPJSVClaimReferensiService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {}
@@ -42,7 +42,7 @@ export class BpjsReferensiController {
     example: 'ICU',
   })
   async poli(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+    await this.bpjsVClaimReferensiService
       .poli(param.search.toString() ?? '')
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -68,8 +68,8 @@ export class BpjsReferensiController {
     example: 'A04',
   })
   async diagnosa(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
-      .diagnose(param.search.toString() ?? '')
+    await this.bpjsVClaimReferensiService
+      .diagnosa(param.search.toString() ?? '')
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
         response.code(HttpStatus.OK).send(result)
@@ -99,8 +99,8 @@ export class BpjsReferensiController {
     enum: ['1', '2'],
     description: 'Type: 1 = Puskesmas / Klinik, 2 = Rumah Sakit',
   })
-  async prodecure(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+  async faskes(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
       .faskes(param.search.toString() ?? '', param.type.toString() ?? '2')
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -141,9 +141,9 @@ export class BpjsReferensiController {
     example: '',
     description: 'Kode spesialis / subspesialis',
   })
-  async doctor_dpjp(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
-      .doctor_dpjp({
+  async dokterDPJP(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
+      .dokterDPJP({
         type: param.type,
         date: param.date,
         specialist: param.specialist,
@@ -168,7 +168,7 @@ export class BpjsReferensiController {
     description: '',
   })
   async propinsi(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+    await this.bpjsVClaimReferensiService
       .propinsi()
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -194,8 +194,8 @@ export class BpjsReferensiController {
     summary: 'Kabupaten',
     description: '',
   })
-  async region(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+  async kabupaten(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
       .kabupaten(param.province)
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -221,8 +221,8 @@ export class BpjsReferensiController {
     summary: 'Kecamatan',
     description: '',
   })
-  async district(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+  async kecamatan(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
       .kecamatan(param.region)
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -243,9 +243,9 @@ export class BpjsReferensiController {
     summary: 'LPK - Dokter',
     description: 'Untuk pembuatan lembar pengajuan klaim',
   })
-  async diagnose_prb(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
-      .diagnose_prb()
+  async diagnosaPRB(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
+      .diagnosaPRB()
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
         response.code(HttpStatus.OK).send(result)
@@ -269,9 +269,9 @@ export class BpjsReferensiController {
     name: 'search',
     example: 'Para',
   })
-  async drub_prb(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
-      .drub_prb(param.search.toString() ?? '')
+  async obatPRB(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
+      .obatPRB(param.search.toString() ?? '')
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
         response.code(HttpStatus.OK).send(result)
@@ -295,9 +295,9 @@ export class BpjsReferensiController {
     name: 'search',
     example: '21.05',
   })
-  async procedure(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
-      .procedure(param.search.toString() ?? '')
+  async prosedur(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
+      .prosedur(param.search.toString() ?? '')
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
         response.code(HttpStatus.OK).send(result)
@@ -318,7 +318,7 @@ export class BpjsReferensiController {
     description: '',
   })
   async kelasRawat(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+    await this.bpjsVClaimReferensiService
       .kelasRawat()
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -344,9 +344,9 @@ export class BpjsReferensiController {
     name: 'search',
     example: 'fra',
   })
-  async doctor_lpk(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
-      .doctor_lpk(param.search.toString() ?? '')
+  async dokterLPK(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
+      .dokterLPK(param.search.toString() ?? '')
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
         response.code(HttpStatus.OK).send(result)
@@ -366,9 +366,9 @@ export class BpjsReferensiController {
     summary: 'Spesialistik',
     description: 'Untuk pembuatan lembar pengajuan klaim',
   })
-  async spesialistic(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
-      .specialistic()
+  async spesialistik(@Param() param, @Res() response: FastifyReply) {
+    await this.bpjsVClaimReferensiService
+      .spesialistik()
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
         response.code(HttpStatus.OK).send(result)
@@ -389,7 +389,7 @@ export class BpjsReferensiController {
     description: '',
   })
   async ruangRawat(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+    await this.bpjsVClaimReferensiService
       .ruangRawat()
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -411,7 +411,7 @@ export class BpjsReferensiController {
     description: '',
   })
   async caraKeluar(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+    await this.bpjsVClaimReferensiService
       .caraKeluar()
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
@@ -433,7 +433,7 @@ export class BpjsReferensiController {
     description: '',
   })
   async pascaPulang(@Param() param, @Res() response: FastifyReply) {
-    await this.bpjsReference
+    await this.bpjsVClaimReferensiService
       .pascaPulang()
       .then((result) => {
         this.logger.verbose(JSON.stringify(result))
