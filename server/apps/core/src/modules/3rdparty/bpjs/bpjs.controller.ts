@@ -1,4 +1,4 @@
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
+import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { Controller, Inject } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -8,7 +8,8 @@ import { Logger } from 'winston'
 @ApiTags('Integration - Badan Penyelenggara Jaminan Sosial')
 export class BpjsController {
   constructor(
-    @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
+    @Inject(BPJSVClaimAuthService)
+    private readonly bpjsAuth: BPJSVClaimAuthService,
 
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger

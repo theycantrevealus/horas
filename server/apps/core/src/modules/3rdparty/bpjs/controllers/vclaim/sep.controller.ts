@@ -1,6 +1,6 @@
 import { SEPAdd } from '@core/3rdparty/bpjs/dto/sep/add'
 import { SEPEdit } from '@core/3rdparty/bpjs/dto/sep/edit'
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
+import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimSEPService } from '@core/3rdparty/bpjs/services/vclaim/sep.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -26,7 +26,8 @@ import { Logger } from 'winston'
 @ApiTags('Integration - Badan Penyelenggara Jaminan Sosial')
 export class BPJSVClaimSEPController {
   constructor(
-    @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
+    @Inject(BPJSVClaimAuthService)
+    private readonly bpjsAuth: BPJSVClaimAuthService,
     @Inject(BPJSVClaimSEPService)
     private readonly bpjsVClaimSEPService: BPJSVClaimSEPService,
     @Inject(WINSTON_MODULE_PROVIDER)

@@ -1,8 +1,8 @@
 import { SEPAdd } from '@core/3rdparty/bpjs/dto/sep/add'
 import { SEPEdit } from '@core/3rdparty/bpjs/dto/sep/edit'
 import { SEP, SEPDocument } from '@core/3rdparty/bpjs/schemas/sep'
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
-import { BPJSRequest } from '@core/3rdparty/bpjs/services/request'
+import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
+import { BPJSVClaimRequest } from '@core/3rdparty/bpjs/services/vclaim/request.service'
 import { Account } from '@core/account/schemas/account.model'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -21,7 +21,8 @@ import { IConfig } from '../../../../../schemas/config'
 export class BPJSVClaimSEPService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
-    @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
+    @Inject(BPJSVClaimAuthService)
+    private readonly bpjsAuth: BPJSVClaimAuthService,
     @Inject(HttpService) private readonly httpService: HttpService,
     @InjectModel(SEP.name)
     private sepModel: Model<SEPDocument>,
@@ -36,7 +37,7 @@ export class BPJSVClaimSEPService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const BPJSReq = new BPJSRequest(
+    const BPJSReq = new BPJSVClaimRequest(
       this.configService,
       this.bpjsAuth,
       this.httpService
@@ -121,7 +122,7 @@ export class BPJSVClaimSEPService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const BPJSReq = new BPJSRequest(
+    const BPJSReq = new BPJSVClaimRequest(
       this.configService,
       this.bpjsAuth,
       this.httpService
@@ -197,7 +198,7 @@ export class BPJSVClaimSEPService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const BPJSReq = new BPJSRequest(
+    const BPJSReq = new BPJSVClaimRequest(
       this.configService,
       this.bpjsAuth,
       this.httpService

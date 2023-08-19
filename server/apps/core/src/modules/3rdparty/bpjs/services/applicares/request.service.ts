@@ -1,15 +1,15 @@
 import { BPJSResponse } from '@core/3rdparty/bpjs/dto/request'
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
+import { BPJSApplicaresAuthService } from '@core/3rdparty/bpjs/services/applicares/auth.service'
 import { HttpService } from '@nestjs/axios'
 import { ConfigService } from '@nestjs/config'
 import { GlobalResponse } from '@utility/dto/response'
 import * as https from 'https'
 
-export class BPJSRequest {
+export class BPJSApplicaresRequest {
   private createSignature: any
   constructor(
     private readonly configService: ConfigService,
-    private readonly bpjsAuth: BPJSAuthService,
+    private readonly bpjsAuth: BPJSApplicaresAuthService,
     private readonly httpService: HttpService
   ) {}
 
@@ -27,12 +27,12 @@ export class BPJSRequest {
       .delete<GlobalResponse>(targetURL, {
         data: JSON.stringify(parameter),
         headers: {
-          'X-cons-id': this.configService.get<string>('vclaim.api_id'),
+          'X-cons-id': this.configService.get<string>('applicares.api_id'),
           'X-timestamp': this.createSignature.timestamp,
           'X-signature': this.createSignature.signature,
           Accept: '*/*',
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8;',
-          user_key: this.configService.get<string>('vclaim.user_key'),
+          user_key: this.configService.get<string>('applicares.user_key'),
         },
         httpsAgent: new https.Agent({
           rejectUnauthorized: false,
@@ -47,7 +47,6 @@ export class BPJSRequest {
         return response
       })
       .catch((error) => {
-        console.log(error)
         response.metadata.message = error.message
         response.response = parameter
         return response
@@ -55,6 +54,7 @@ export class BPJSRequest {
   }
 
   async post(targetURL, parameter): Promise<BPJSResponse> {
+    console.log(parameter)
     this.createSignature = await this.bpjsAuth.signature()
     const response = {
       metadata: {
@@ -65,14 +65,13 @@ export class BPJSRequest {
     } satisfies BPJSResponse
 
     return await this.httpService.axiosRef
-      .post<BPJSResponse>(targetURL, JSON.stringify(parameter), {
+      .post<BPJSResponse>(targetURL, parameter, {
         headers: {
-          'X-cons-id': this.configService.get<string>('vclaim.api_id'),
+          'X-cons-id': this.configService.get<string>('applicares.api_id'),
           'X-timestamp': this.createSignature.timestamp,
           'X-signature': this.createSignature.signature,
           Accept: '*/*',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8;',
-          user_key: this.configService.get<string>('vclaim.user_key'),
+          'Content-Type': 'application/json; charset=UTF-8;',
         },
         httpsAgent: new https.Agent({
           rejectUnauthorized: false,
@@ -81,19 +80,14 @@ export class BPJSRequest {
       })
       .then(async (result: any) => {
         const { data } = result
-        response.metadata = data.metaData
-        if (parseInt(data.metaData.code) === 200) {
-          response.response = await this.bpjsAuth.decryptor(
-            data.response,
-            this.createSignature.decompress
-          )
+        response.metadata = data.metadata
+        if (parseInt(data.metadata.code) === 1) {
+          response.response = data.response
         }
-
         return response
       })
       .catch((error) => {
         response.metadata.message = error.message
-        response.response = parameter
         return response
       })
   }
@@ -111,12 +105,12 @@ export class BPJSRequest {
     return await this.httpService.axiosRef
       .put<BPJSResponse>(targetURL, JSON.stringify(parameter), {
         headers: {
-          'X-cons-id': this.configService.get<string>('vclaim.api_id'),
+          'X-cons-id': this.configService.get<string>('applicares.api_id'),
           'X-timestamp': this.createSignature.timestamp,
           'X-signature': this.createSignature.signature,
           Accept: '*/*',
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8;',
-          user_key: this.configService.get<string>('vclaim.user_key'),
+          user_key: this.configService.get<string>('applicares.user_key'),
         },
         httpsAgent: new https.Agent({
           rejectUnauthorized: false,
@@ -142,17 +136,24 @@ export class BPJSRequest {
       })
   }
 
-  async get(targetURL) {
+  async get(targetURL): Promise<BPJSResponse> {
     this.createSignature = await this.bpjsAuth.signature()
+    const response = {
+      metadata: {
+        code: '',
+        message: '',
+      },
+      response: {},
+    } satisfies BPJSResponse
     return await this.httpService.axiosRef
       .get<GlobalResponse>(targetURL, {
         headers: {
-          'X-cons-id': this.configService.get<string>('vclaim.api_id'),
+          'X-cons-id': this.configService.get<string>('applicares.api_id'),
           'X-timestamp': this.createSignature.timestamp,
           'X-signature': this.createSignature.signature,
           Accept: '*/*',
           'Content-Type': 'application/json; charset=UTF-8;',
-          user_key: this.configService.get<string>('vclaim.user_key'),
+          user_key: this.configService.get<string>('applicares.user_key'),
         },
         httpsAgent: new https.Agent({
           rejectUnauthorized: false,
@@ -161,20 +162,15 @@ export class BPJSRequest {
       })
       .then(async (result: any) => {
         const { data } = result
-        if (parseInt(data.metaData.code) === 200) {
-          const parsedResponse = await this.bpjsAuth.decryptor(
-            data.response,
-            this.createSignature.decompress
-          )
-          return {
-            metaData: data.metaData,
-            response: parsedResponse,
-          }
-        } else {
-          return {
-            metaData: data.metaData,
-          }
+        response.metadata = data.metadata
+        if (parseInt(data.metadata.code) === 1) {
+          response.response = data.response
         }
+        return response
+      })
+      .catch((error) => {
+        response.metadata.message = error.message
+        return response
       })
   }
 }

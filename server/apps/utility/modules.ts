@@ -19,5 +19,6 @@ export const modCodes = {
   LOVService: 'LOV',
   i18nService: 'I18N',
   BPJSReferenceService: 'BPJS_REF',
-  BPJSSEPService: 'BPJS_SEP',
+  BPJSSEPService: 'BPJS_VCLAIM_SEP',
+  BPJSApplicaresReferensiService: 'BPJS_APPLICARES_SEP',
 }

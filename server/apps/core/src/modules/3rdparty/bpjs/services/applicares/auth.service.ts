@@ -6,7 +6,7 @@ import * as crypto from 'crypto'
 import * as LZString from 'lz-string'
 
 @Injectable()
-export class BPJSAuthService {
+export class BPJSApplicaresAuthService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
@@ -17,24 +17,28 @@ export class BPJSAuthService {
     const now = TM.getMoment().utc()
     const timeStamp = now.diff(diff, 's').toString()
     const data = `${this.configService.get<number>(
-      'vclaim.api_id'
+      'applicares.api_id'
     )}&${timeStamp}`
 
     const hmac = crypto
-      .createHmac('sha256', this.configService.get<string>('vclaim.secret'), {})
+      .createHmac(
+        'sha256',
+        this.configService.get<string>('applicares.secret'),
+        {}
+      )
       .update(data)
       .digest()
 
     const decompress = `${this.configService.get<number>(
       'vclaim.api_id'
-    )}${this.configService.get<number>('vclaim.secret')}${timeStamp}`
+    )}${this.configService.get<number>('applicares.secret')}${timeStamp}`
 
     return {
       signature: Buffer.from(hmac).toString('base64'),
       timestamp: timeStamp,
       decompress: decompress,
       api_key: data,
-      secret: this.configService.get<string>('vclaim.secret'),
+      secret: this.configService.get<string>('applicares.secret'),
     }
   }
 

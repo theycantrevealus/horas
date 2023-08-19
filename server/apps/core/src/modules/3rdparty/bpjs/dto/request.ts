@@ -1,4 +1,4 @@
-export class BPJSRequest {
+export class BPJSVClaimRequest {
   request: any
 }
 

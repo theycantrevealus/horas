@@ -1,5 +1,5 @@
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
-import { BPJSRequest } from '@core/3rdparty/bpjs/services/request'
+import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
+import { BPJSVClaimRequest } from '@core/3rdparty/bpjs/services/vclaim/request.service'
 import { HttpService } from '@nestjs/axios'
 import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -9,7 +9,8 @@ import { GlobalResponse } from '@utility/dto/response'
 export class BPJSVClaimMonitoringService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
-    @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
+    @Inject(BPJSVClaimAuthService)
+    private readonly bpjsAuth: BPJSVClaimAuthService,
     @Inject(HttpService) private readonly httpService: HttpService
   ) {}
 
@@ -22,7 +23,7 @@ export class BPJSVClaimMonitoringService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const BPJSReq = new BPJSRequest(
+    const BPJSReq = new BPJSVClaimRequest(
       this.configService,
       this.bpjsAuth,
       this.httpService
@@ -50,7 +51,7 @@ export class BPJSVClaimMonitoringService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const BPJSReq = new BPJSRequest(
+    const BPJSReq = new BPJSVClaimRequest(
       this.configService,
       this.bpjsAuth,
       this.httpService
@@ -77,7 +78,7 @@ export class BPJSVClaimMonitoringService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const BPJSReq = new BPJSRequest(
+    const BPJSReq = new BPJSVClaimRequest(
       this.configService,
       this.bpjsAuth,
       this.httpService
@@ -104,7 +105,7 @@ export class BPJSVClaimMonitoringService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const BPJSReq = new BPJSRequest(
+    const BPJSReq = new BPJSVClaimRequest(
       this.configService,
       this.bpjsAuth,
       this.httpService

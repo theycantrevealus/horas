@@ -1,5 +1,5 @@
 import { SPRIAdd } from '@core/3rdparty/bpjs/dto/spri/add'
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
+import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { Authorization } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
@@ -18,7 +18,8 @@ import { Logger } from 'winston'
 @ApiTags('Integration - Badan Penyelenggara Jaminan Sosial')
 export class BPJSVClaimSPRIController {
   constructor(
-    @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
+    @Inject(BPJSVClaimAuthService)
+    private readonly bpjsAuth: BPJSVClaimAuthService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {}

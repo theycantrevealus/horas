@@ -1,14 +1,19 @@
 import { BPJSConfig } from '@configuration/3rdparty/bpjs'
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
-import { BPJSVClaimSPRIController } from '@core/3rdparty/bpjs.spri.controller'
 import { BPJSApplicaresReferensiController } from '@core/3rdparty/bpjs/controllers/applicares/referensi.controller'
+import { BPJSVClaimSPRIController } from '@core/3rdparty/bpjs/controllers/vclaim/bpjs.spri.controller'
 import { BPJSVClaimMonitoringController } from '@core/3rdparty/bpjs/controllers/vclaim/monitoring.controller'
 import { BPJSVClaimReferensiController } from '@core/3rdparty/bpjs/controllers/vclaim/referensi.controller'
 import { BPJSVClaimSEPController } from '@core/3rdparty/bpjs/controllers/vclaim/sep.controller'
+import {
+  ApplicaresKamar,
+  ApplicaresKamarSchema,
+} from '@core/3rdparty/bpjs/schemas/applicares/kamar'
 import { SEP, SEPSchema } from '@core/3rdparty/bpjs/schemas/sep'
+import { BPJSApplicaresAuthService } from '@core/3rdparty/bpjs/services/applicares/auth.service'
 import { BPJSApplicaresReferensiService } from '@core/3rdparty/bpjs/services/applicares/referensi.service'
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
+import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimMonitoringService } from '@core/3rdparty/bpjs/services/vclaim/monitoring.service'
 import { BPJSVClaimReferensiService } from '@core/3rdparty/bpjs/services/vclaim/referensi.service'
 import { BPJSVClaimSEPService } from '@core/3rdparty/bpjs/services/vclaim/sep.service'
@@ -84,6 +89,38 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
           return schema
         },
       },
+      {
+        name: ApplicaresKamar.name,
+        useFactory: () => {
+          const schema = ApplicaresKamarSchema
+          const time = new TimeManagement()
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `kamar-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', async function (next) {
+            const update = this.getUpdate()
+            const docToUpdate = await this.model.findOne(this.getQuery())
+            if (docToUpdate) {
+              update['updated_at'] = time.getTimezone('Asia/Jakarta')
+              update['$inc'] = { __v: 1 }
+            }
+            next()
+          })
+
+          return schema
+        },
+      },
     ]),
     HttpModule,
     AuthModule,
@@ -96,11 +133,13 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
     BPJSApplicaresReferensiController,
   ],
   providers: [
-    BPJSAuthService,
+    BPJSVClaimAuthService,
+    BPJSApplicaresAuthService,
     BPJSVClaimReferensiService,
-    BPJSVClaimSPRIService,
     BPJSVClaimMonitoringService,
     BPJSVClaimSEPService,
+    BPJSVClaimSPRIService,
+
     BPJSApplicaresReferensiService,
   ],
 })

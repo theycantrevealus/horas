@@ -1,4 +1,4 @@
-import { BPJSAuthService } from '@core/3rdparty/bpjs/services/auth.service'
+import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimReferensiService } from '@core/3rdparty/bpjs/services/vclaim/referensi.service'
 import { Authorization } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -21,7 +21,8 @@ import { Logger } from 'winston'
 @ApiTags('Integration - Badan Penyelenggara Jaminan Sosial')
 export class BPJSVClaimReferensiController {
   constructor(
-    @Inject(BPJSAuthService) private readonly bpjsAuth: BPJSAuthService,
+    @Inject(BPJSVClaimAuthService)
+    private readonly bpjsAuth: BPJSVClaimAuthService,
     @Inject(BPJSVClaimReferensiService)
     private readonly bpjsVClaimReferensiService: BPJSVClaimReferensiService,
     @Inject(WINSTON_MODULE_PROVIDER)
