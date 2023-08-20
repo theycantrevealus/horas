@@ -2,10 +2,10 @@ import { BPJSConfig } from '@configuration/3rdparty/bpjs'
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { BPJSApplicaresReferensiController } from '@core/3rdparty/bpjs/controllers/applicares/referensi.controller'
-import { BPJSVClaimSPRIController } from '@core/3rdparty/bpjs/controllers/vclaim/bpjs.spri.controller'
 import { BPJSVClaimMonitoringController } from '@core/3rdparty/bpjs/controllers/vclaim/monitoring.controller'
 import { BPJSVClaimReferensiController } from '@core/3rdparty/bpjs/controllers/vclaim/referensi.controller'
 import { BPJSVClaimSEPController } from '@core/3rdparty/bpjs/controllers/vclaim/sep.controller'
+import { BPJSVClaimSPRIController } from '@core/3rdparty/bpjs/controllers/vclaim/spri.controller'
 import {
   ApplicaresKamar,
   ApplicaresKamarSchema,

@@ -16,7 +16,7 @@ class SEPAddForm {
   @ApiProperty({
     description: 'Nomor Kartu BPJS',
     type: String,
-    example: '',
+    example: '0002083184032',
   })
   @IsNotEmpty()
   @IsString()
@@ -25,7 +25,9 @@ class SEPAddForm {
   @ApiProperty({
     description: 'Tanggal penerbitan SEP. format: yyyy-mm-dd',
     type: String,
-    example: '',
+    example: new TimeManagement()
+      .getRaw('Asia/Jakarta', 'YYYY-MM-DD')
+      .toString(),
   })
   @Validate((target) => {
     const TM = new TimeManagement()
@@ -56,7 +58,7 @@ class SEPAddForm {
   @ApiProperty({
     type: String,
     description: 'Nomor MR rumah sakit',
-    example: '',
+    example: '000005',
   })
   @IsNotEmpty()
   @IsString()
@@ -72,7 +74,7 @@ class SEPAddForm {
   @ApiProperty({
     type: String,
     description: 'Catatan peserta',
-    example: '',
+    example: 'Uji coba catatan peserta',
   })
   @IsNotEmpty()
   @IsString()
@@ -81,7 +83,7 @@ class SEPAddForm {
   @ApiProperty({
     type: String,
     description: 'Diagnosa awal ICD10. [Ref. Diagnosa]',
-    example: '',
+    example: 'E10',
   })
   @IsNotEmpty()
   @IsString()
@@ -190,7 +192,7 @@ class SEPAddForm {
     description:
       'Kode DPJP Pelayanan. Tidak diisi jika jnsPelayanan adalah rawat inap. [Ref. DPJP]',
     type: String,
-    example: '',
+    example: '436619',
   })
   @IsNotEmpty()
   @IsString()
@@ -199,7 +201,7 @@ class SEPAddForm {
   @ApiProperty({
     description: 'Nomor telepon',
     type: String,
-    example: '',
+    example: '085261510202',
   })
   @IsNotEmpty()
   @IsString()

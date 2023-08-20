@@ -1,5 +1,7 @@
 import { SEPAdd } from '@core/3rdparty/bpjs/dto/sep/add'
 import { SEPEdit } from '@core/3rdparty/bpjs/dto/sep/edit'
+import { SEPPulang } from '@core/3rdparty/bpjs/dto/sep/pemulangan'
+import { SEPPengajuan } from '@core/3rdparty/bpjs/dto/sep/pengajuan'
 import { SEP, SEPDocument } from '@core/3rdparty/bpjs/schemas/sep'
 import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimRequest } from '@core/3rdparty/bpjs/services/vclaim/request.service'
@@ -28,6 +30,30 @@ export class BPJSVClaimSEPService {
     private sepModel: Model<SEPDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
+
+  async cari(noSEP): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_CARI',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+    response.payload = await BPJSReq.get(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>('vclaim.service_name')}/SEP/${noSEP}`
+    )
+
+    return response
+  }
+
   async create(parameter: SEPAdd, account: Account): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -189,6 +215,111 @@ export class BPJSVClaimSEPService {
     return response
   }
 
+  async updatePulang(
+    parameter: SEPPulang,
+    account: Account
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_PULANG',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+
+    response.payload = await BPJSReq.put(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>(
+        'vclaim.service_name'
+      )}/SEP/2.0/updtglplg`,
+      {
+        request: {
+          t_sep: {
+            ...parameter.request.t_sep,
+            user: `${account.last_name}, ${account.first_name}`,
+          },
+        },
+      }
+    )
+      .then(async (bpjsResponse) => {
+        if (parseInt(bpjsResponse.metadata.code) === 200) {
+          await this.sepModel
+            .findOneAndUpdate(
+              {
+                noSep: parameter.request.t_sep.noSep,
+              },
+              {
+                tglPulang: parameter.request.t_sep.tglPulang,
+              }
+            )
+            .then((result) => {
+              response.message = 'SEP updated successfully'
+              response.statusCode = `${modCodes[this.constructor.name]}_U_${
+                modCodes.Global.success
+              }`
+              response.transaction_id = result._id
+              response.payload = result
+            })
+            .catch((error: Error) => {
+              response.message = `SEP failed to update. ${error.message}`
+              response.statusCode = `${modCodes[this.constructor.name]}_U_${
+                modCodes.Global.failed
+              }`
+              response.payload = error
+              return response
+            })
+        } else {
+          response.message = `SEP failed to update. ${bpjsResponse.metadata.message}`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+        }
+        return bpjsResponse
+      })
+      .catch((error: any) => {
+        response.message = error.message.metadata.message
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+        response.payload = error.message
+        return response
+      })
+
+    return response
+  }
+
+  async getPulang(month, year): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_PULANG',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+    response.payload = await BPJSReq.get(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>(
+        'vclaim.service_name'
+      )}/Sep/updtglplg/list/bulan/${month}/tahun/${year}/`
+    )
+
+    return response
+  }
+
   async delete(noSEP, account: Account): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
@@ -262,6 +393,142 @@ export class BPJSVClaimSEPService {
         response.payload = error.message
         return response
       })
+
+    return response
+  }
+
+  async internal(noSEP): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_INTERNAL',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+    response.payload = await BPJSReq.get(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>(
+        'vclaim.service_name'
+      )}/SEP/Internal/${noSEP}`
+    )
+
+    return response
+  }
+
+  async jasaRaharjaSuplesi(noKartu, tglPelayanan): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_SUPLESI',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+    response.payload = await BPJSReq.get(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>(
+        'vclaim.service_name'
+      )}/sep/JasaRaharja/Suplesi/${noKartu}/tglPelayanan/${tglPelayanan}`
+    )
+
+    return response
+  }
+
+  async jasaRaharjaDataIndukKecelakaan(noKartu): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_DATA_INDUK_KECELAKAAN',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+    response.payload = await BPJSReq.get(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>(
+        'vclaim.service_name'
+      )}/sep/KllInduk/List/${noKartu}`
+    )
+
+    return response
+  }
+
+  async persetujuan(month, year): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_PERSETUJUAN',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+    response.payload = await BPJSReq.get(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>(
+        'vclaim.service_name'
+      )}/sep/persetujuanSEP/list/bulan/${month}/tahun/${year}`
+    )
+
+    return response
+  }
+
+  async persetujuanPengajuan(
+    parameter: SEPPengajuan,
+    account: Account
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'BPJS_VCLAIM_SEP_PERSETUJUAN',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    const BPJSReq = new BPJSVClaimRequest(
+      this.configService,
+      this.bpjsAuth,
+      this.httpService
+    )
+    response.payload = await BPJSReq.post(
+      `${this.configService.get<string>(
+        'vclaim.host'
+      )}/${this.configService.get<string>(
+        'vclaim.service_name'
+      )}/Sep/pengajuanSEP`,
+      {
+        request: {
+          t_sep: {
+            ...parameter.request.t_sep,
+            user: `${account.last_name}, ${account.first_name}`,
+          },
+        },
+      }
+    )
 
     return response
   }

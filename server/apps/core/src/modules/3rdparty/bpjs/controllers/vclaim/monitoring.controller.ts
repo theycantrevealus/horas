@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { TimeManagement } from '@utility/time'
 import { FastifyReply } from 'fastify'
 import { Logger } from 'winston'
 
@@ -46,10 +47,9 @@ export class BPJSVClaimMonitoringController {
   })
   @ApiParam({
     name: 'date',
-    example: () => {
-      const now = new Date()
-      return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`
-    },
+    example: new TimeManagement()
+      .getRaw('Asia/Jakarta', 'YYYY-MM-DD')
+      .toString(),
     description: 'Tanggal pelayanan SEP (yyyy-mm-dd)',
   })
   async kunjungan(@Param() param, @Res() response: FastifyReply) {

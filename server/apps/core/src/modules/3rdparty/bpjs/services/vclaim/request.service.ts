@@ -47,7 +47,6 @@ export class BPJSVClaimRequest {
         return response
       })
       .catch((error) => {
-        console.log(error)
         response.metadata.message = error.message
         response.response = parameter
         return response
@@ -83,10 +82,12 @@ export class BPJSVClaimRequest {
         const { data } = result
         response.metadata = data.metaData
         if (parseInt(data.metaData.code) === 200) {
-          response.response = await this.bpjsAuth.decryptor(
-            data.response,
-            this.createSignature.decompress
-          )
+          if (data.response != null) {
+            response.response = await this.bpjsAuth.decryptor(
+              data.response,
+              this.createSignature.decompress
+            )
+          }
         }
 
         return response
@@ -127,10 +128,12 @@ export class BPJSVClaimRequest {
         const { data } = result
         response.metadata = data.metaData
         if (parseInt(data.metaData.code) === 200) {
-          response.response = await this.bpjsAuth.decryptor(
-            data.response,
-            this.createSignature.decompress
-          )
+          if (data.response != null) {
+            response.response = await this.bpjsAuth.decryptor(
+              data.response,
+              this.createSignature.decompress
+            )
+          }
         }
 
         return response

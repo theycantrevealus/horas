@@ -18,7 +18,7 @@ export const modCodes = {
   GeneralReceiveNoteService: 'GRN',
   LOVService: 'LOV',
   i18nService: 'I18N',
-  BPJSReferenceService: 'BPJS_REF',
-  BPJSSEPService: 'BPJS_VCLAIM_SEP',
+  BPJSVClaumReferenceService: 'BPJS_REF',
+  BPJSVClaimSEPService: 'BPJS_VCLAIM_SEP',
   BPJSApplicaresReferensiService: 'BPJS_APPLICARES_SEP',
 }

@@ -121,7 +121,7 @@ export class SEP {
   @IsString()
   noKartu: string
 
-  @Prop({ type: SchemaTypes.String })
+  @Prop({ type: SchemaTypes.String, unique: true })
   @IsNotEmpty()
   @IsString()
   noSep: string
@@ -225,6 +225,10 @@ export class SEP {
   @IsNotEmpty()
   @IsString()
   noTelp: string
+
+  @Prop({ type: SchemaTypes.Date, required: false, default: null })
+  @IsNotEmpty()
+  tlgPulang: Date
 
   @Prop({ type: SchemaTypes.Mixed })
   @IsNotEmpty()
