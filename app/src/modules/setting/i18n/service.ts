@@ -1,4 +1,6 @@
 import api from '@/util/api'
+import process from 'process'
+
 class Corei18nService {
   async i18nList(parsedData) {
     return await api({ requiresAuth: true })

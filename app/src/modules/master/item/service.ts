@@ -2,6 +2,7 @@ import api from '@/util/api'
 import {ISupplier} from "@/model/Supplier";
 import {CoreResponse} from "@/model/Response";
 import {AxiosResponse} from "axios";
+import process from 'process'
 
 class MasterItemService {
   getItemList(parsedData) {

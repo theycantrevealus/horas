@@ -1,6 +1,7 @@
-import api from "@/util/api";
-import {AxiosResponse} from "axios";
-import {CoreResponse} from "@/model/Response";
+import api from "@/util/api"
+import {AxiosResponse} from "axios"
+import {CoreResponse} from "@/model/Response"
+import process from 'process'
 
 class ConfigService {
   async getConfig() {

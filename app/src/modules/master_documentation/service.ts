@@ -1,5 +1,5 @@
 import axios from 'axios'
-
+import process from 'process'
 class MasterDocumentationService {
   getItemList(parsedData) {
     if (parsedData.request === undefined) {

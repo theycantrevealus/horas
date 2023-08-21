@@ -1,5 +1,5 @@
 import api from '@/util/api'
-
+import * as process from 'process'
 class CoreService {
   async generateMenu() {
     return await api({ requiresAuth: true })

@@ -1,1 +1,0 @@
-{"version":3,"file":"menu.d.ts","sourceRoot":"","sources":["../../../src/service/core/menu.ts"],"names":[],"mappings":"AAEA,cAAM,WAAW;IACT,OAAO,CAAC,QAAQ,EAAE,GAAG;IAQrB,iBAAiB,CAAC,QAAQ,EAAE,GAAG;IAQ/B,QAAQ,CAAC,EAAE,EAAE,MAAM,EAAE,QAAQ,EAAE,GAAG;IAQlC,UAAU,CAAC,QAAQ,EAAE,GAAG;IAQxB,UAAU,CAAC,EAAE,KAAA;IAQb,cAAc;IAQd,WAAW;CAOlB;;AAED,wBAAgC"}

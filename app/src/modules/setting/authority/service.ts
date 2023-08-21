@@ -1,5 +1,5 @@
 import axios from 'axios'
-
+import process from 'process'
 class AuthorityService {
   async getAuthorityList(parsedData) {
     // axios.defaults.headers.common.Authorization = `Bearer ${store.state.credential.token}`

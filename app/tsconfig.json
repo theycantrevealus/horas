@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["node"],
     "outDir": "./build",
     "rootDir": "./src",
     "target": "esnext",
@@ -17,16 +18,8 @@
     "declaration": true,
     "declarationMap": true,
     "baseUrl": ".",
-    "typeRoots": [ "../node_modules/@types" ],
-    "types": [
-      "webpack-env",
-      "jest"
-    ],
     "paths": {
-      "@/*": [
-        "src/*",
-        "./*"
-      ]
+      "@/*": ["src/*"]
     },
     "lib": [
       "esnext",
@@ -46,5 +39,5 @@
     "node_modules",
     "src/**/*.js", "src/**/*.jsx",
     "vue.config.js"
-  ]
+  ],
 }

@@ -1,6 +1,19 @@
 import api from '@/util/api'
+import * as process from "process";
 
 class CoreService {
+  async menuSearch(parameter:any) {
+    return await api({requiresAuth: true})
+      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu`, {
+        params: {
+          lazyEvent: JSON.stringify(parameter)
+        }
+      })
+      .then((response) => {
+        const data = response.data.payload.data
+        return Promise.resolve(data)
+      })
+  }
   async menuAdd(menuData: any) {
     return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/menu`, menuData)
