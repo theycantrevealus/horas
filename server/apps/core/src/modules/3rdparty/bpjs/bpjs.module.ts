@@ -20,6 +20,9 @@ import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WinstonModule } from '@utility/logger/module'
 import { TimeManagement } from '@utility/time'
 import { WinstonCustomTransports } from '@utility/transport.winston'
+import {BpjsPRBController} from "@core/3rdparty/bpjs/bpjs.prb.controller";
+import {BPJSPRBService} from "@core/3rdparty/bpjs/services/prb.service";
+import {PRB, PRBSchema} from "@core/3rdparty/bpjs/schemas/prb";
 
 @Module({
   imports: [
@@ -82,6 +85,39 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
           return schema
         },
       },
+
+      {
+        name: PRB.name,
+        useFactory: () => {
+          const schema = PRBSchema
+          const time = new TimeManagement()
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `prb-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', async function (next) {
+            const update = this.getUpdate()
+            const docToUpdate = await this.model.findOne(this.getQuery())
+            if (docToUpdate) {
+              update['updated_at'] = time.getTimezone('Asia/Jakarta')
+              update['$inc'] = { __v: 1 }
+            }
+            next()
+          })
+
+          return schema
+        },
+      },
     ]),
     HttpModule,
     AuthModule,
@@ -91,6 +127,7 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
     BpjsSPRIController,
     BpjsMonitoringController,
     BpjsSEPController,
+    BpjsPRBController,
   ],
   providers: [
     BPJSAuthService,
@@ -98,6 +135,7 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
     BPJSSPRIService,
     BPJSMonitoringService,
     BPJSSEPService,
+    BPJSPRBService,
   ],
 })
 export class BpjsModule {

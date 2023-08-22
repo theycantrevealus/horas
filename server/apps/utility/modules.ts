@@ -20,4 +20,5 @@ export const modCodes = {
   i18nService: 'I18N',
   BPJSReferenceService: 'BPJS_REF',
   BPJSSEPService: 'BPJS_SEP',
+  BPJSPRBService: 'BPJS_PRB',
 }

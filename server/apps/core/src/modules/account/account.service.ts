@@ -221,6 +221,7 @@ export class AccountService {
                   code: result.code,
                   first_name: result.first_name,
                   last_name: result.last_name,
+                  created_at: result.created_at,
                 }
                 const idenPass = gen_uuid()
                 const TM = new TimeManagement()
