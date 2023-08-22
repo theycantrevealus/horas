@@ -1,7 +1,7 @@
 import api from "@/util/api";
 import {AxiosResponse} from "axios";
 import {CoreResponse} from "@/model/Response";
-
+import process from 'process'
 class ApplicationConfiguration {
   async getApplicationConfig() {
     return await api({ requiresAuth: true })

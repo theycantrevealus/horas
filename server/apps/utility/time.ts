@@ -32,12 +32,12 @@ export class TimeManagement {
     return moment(input, format, true).isValid()
   }
 
-  getTimezone(target) {
-    return moment.utc(moment.tz(target).format('YYYY-MM-DDTHH:mm:ss')).toDate()
+  getTimezone(target, format = 'YYYY-MM-DDTHH:mm:ss') {
+    return moment.utc(moment.tz(target).format(format)).toDate()
   }
 
-  getRaw(target) {
-    return moment.tz(target)
+  getRaw(target, format = 'YYYY-MM-DDTHH:mm:ss') {
+    return moment.tz(target).format(format)
   }
 
   getUTC() {

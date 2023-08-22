@@ -1,6 +1,7 @@
 import store from '@/store'
 import axios from 'axios'
-import {CoreResponse} from "@/model/Response";
+import process from 'process'
+import https from 'https'
 
 export default ({ requiresAuth = true } = {}) => {
   const options = {
@@ -8,7 +9,22 @@ export default ({ requiresAuth = true } = {}) => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
     },
+    httpsAgent: new https.Agent({
+      rejectUnauthorized: true,
+
+      /*
+      * If server set to requiredCert: true
+      *
+      *
+      * ca: fs.readFileSync('certificates/CA.pem'),
+      * pfx: fs.readFileSync('certificates/localhost.pfx'),
+      * key: fs.readFileSync('certificates/localhost.decrypted.key'),
+      * cert: fs.readFileSync('certificates/localhost.crt'),
+      * passphrase: process.env.CA_PASS,
+      * */
+    }),
   }
 
   const instance = axios.create(options)
@@ -16,12 +32,14 @@ export default ({ requiresAuth = true } = {}) => {
   instance.interceptors.request.use(
     (config) => {
       config.headers = config.headers ?? {}
-      const token = store.getters["storeCredential/Getter___token"]
-      config.headers.common['Authorization'] = token ? `Bearer ${token}` : ''
-
+      if(requiresAuth) {
+        const token = store.getters["storeCredential/Getter___token"]
+        config.headers.set('Authorization', token ? `Bearer ${token}` : '', true)
+      }
       return config
     },
     (error) => {
+      console.log(error)
       return Promise.reject(error)
     }
   )
@@ -35,7 +53,7 @@ export default ({ requiresAuth = true } = {}) => {
       }
     },
     (error) => {
-      if (error.response.status) {
+      if (error.response && error.response.status) {
         switch (error.response.status) {
           case 400:
             //do something
@@ -50,6 +68,8 @@ export default ({ requiresAuth = true } = {}) => {
           case 502:
         }
         return Promise.reject(error.response)
+      } else {
+        return Promise.reject(error.message)
       }
     }
   )

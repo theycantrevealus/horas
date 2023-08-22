@@ -1,4 +1,0 @@
-export const DOCUMENTATION_LIST = 'DOCUMENTATION_LIST';
-export const DOCUMENTATION_ADD = 'DOCUMENTATION_ADD';
-export const DOCUMENTATION_REMOVE = 'DOCUMENTATION_REMOVE';
-//# sourceMappingURL=types.js.map

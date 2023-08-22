@@ -1,5 +1,5 @@
 import axios from 'axios'
-
+import process from 'process'
 class UserService {
   getList(parseData) {
     if (parseData.request === undefined) {

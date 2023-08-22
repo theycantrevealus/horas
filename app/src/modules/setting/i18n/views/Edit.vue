@@ -286,6 +286,16 @@
             <span class="p-inputgroup-addon">
               <span class="material-icons-outlined">view_in_ar</span>
             </span>
+            <Dropdown
+              v-model="selectedComponentData.menu"
+              filter
+              :options="formData.menuData"
+              optionLabel="name"
+              placeholder="Select menu"
+              filter-placeholder="Search menu"
+              @change="getSelectMenu"
+              @filter="loadMenu($event)"
+            />
             <InputText
               v-model="selectedComponentData.component"
               :disabled="selectedComponentData.editMode"
@@ -327,9 +337,11 @@ import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import ConfirmPopup from 'primevue/confirmpopup'
 import Dialog from 'primevue/dialog'
+import Dropdown from 'primevue/dropdown'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Tree from 'primevue/tree'
-import { deepen, parsedT } from '@/util/object'
+import CoreService from '@/service/core/menu'
+import {deepen, parsedT, sort} from '@/util/object'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
@@ -339,6 +351,7 @@ export default {
     Panel,
     InputText,
     Button,
+    Dropdown,
     ConfirmPopup,
     ConfirmDialog,
     Dialog,
@@ -365,6 +378,8 @@ export default {
           root: [],
         },
         componentIden: {},
+        menu: {},
+        menuData: [],
       },
       errorMessage: '',
       displayEditorDialog: false,
@@ -376,6 +391,7 @@ export default {
         component: '',
         key: '',
         editMode: false,
+        menu: {},
       },
       nodes: null,
       expandedKeys: {},
@@ -421,6 +437,62 @@ export default {
     onNodeSelect(node) {
       //
     },
+    reformatTree(data, condition, appendix) {
+      const result = []
+      for(const ab in data) {
+        const checkGroup = new RegExp(`^${condition}`).test(data[ab].data)
+        if(checkGroup) {
+          result.push({
+            ...data[ab],
+            ...appendix,
+            children: this.reformatTree(data[ab].children, condition, appendix)
+          })
+        } else {
+          result.push({
+            ...data[ab],
+            children: this.reformatTree(data[ab].children, condition, appendix),
+          })
+        }
+      }
+      return sort(result, 'label')
+    },
+    async getSelectMenu() {
+      const targetObject = this.formData.componentIden
+      const targetGroup = this.selectedComponentData.identifier
+      const _this = this
+      Object.keys(targetObject).some(function(key) {
+        const checkGroup = new RegExp(`^${targetGroup}`).test(key)
+        if(checkGroup) {
+          _this.formData.componentIden[key] = { ...targetObject[key], menu: _this.selectedComponentData.menu }
+        }
+      });
+      console.clear()
+
+      const resultTree = this.reformatTree(this.formData.componentTree.root, targetGroup, {
+        menu: this.selectedComponentData.menu
+      })
+
+      this.formData.componentIden = _this.formData.componentIden
+      this.formData.componentTree.root = resultTree
+      console.log(this.formData.componentIden)
+    },
+    async loadMenu(event = {value: ''}) {
+      const targetSearch = event.value ?? ''
+      await CoreService.menuSearch({
+        first:0,
+        rows:10,
+        sortField:"created_at",
+        sortOrder:1,
+        filters:{
+          name: {
+            matchMode: 'contains',
+            value: targetSearch
+          }
+        }
+      }).then((response) => {
+        this.formData.menuData = response
+      })
+    },
     closeComponentDialog() {
       this.displayEditorDialog = false
     },
@@ -439,13 +511,14 @@ export default {
         const dataSet = []
         if (this.selectedComponentData.editMode) {
           const currentParentIden = this.selectedComponentData.identifier
+          alert(currentParentIden)
 
           const mimicIden = this.formData.componentIden
           for (const ab in mimicIden) {
             const checkString = mimicIden[ab].component
             const position = checkString.indexOf(currentParentIden)
             if (position >= 0) {
-              var regex = new RegExp(`.${currentParentIden}.`, 'g')
+              // var regex = new RegExp(`.${currentParentIden}.`, 'g')
               const checkLevel = currentParentIden.split('.')
               checkLevel.splice(
                 checkLevel.length - 1,
@@ -453,7 +526,7 @@ export default {
                 this.selectedComponentData.translation
               )
 
-              var regex = new RegExp(`${currentParentIden}`, 'g')
+              const regex = new RegExp(`${currentParentIden}`, 'g')
 
               const newIdentifier = checkString.replace(
                 regex,
@@ -463,16 +536,16 @@ export default {
                 this.formData.componentIden[newIdentifier] = {}
               }
 
-              this.formData.componentIden[newIdentifier] =
-                this.formData.componentIden[checkString]
+              this.formData.componentIden[newIdentifier] = this.formData.componentIden[checkString]
 
-              delete this.formData.componentIden[checkString]
+              // delete this.formData.componentIden[checkString]
             }
           }
         } else {
           dataSet.push({
             component: this.selectedComponentData.component,
             translation: this.selectedComponentData.translation,
+            menu: this.selectedComponentData.menu ?? {},
           })
 
           if (
@@ -485,6 +558,7 @@ export default {
           this.formData.componentIden[this.selectedComponentData.component] = {
             component: this.selectedComponentData.component,
             translation: this.selectedComponentData.translation,
+            menu: this.selectedComponentData.menu ?? {},
           }
         }
 
@@ -557,6 +631,7 @@ export default {
         this.selectedComponentData = {
           identifier: node.data,
           translation: this.formData.componentIden[`${node.data}`].translation,
+          menu: this.formData.componentIden[`${node.data}`].menu ?? {},
           component: node.label,
           key: node.key,
           editMode: true,
@@ -566,6 +641,7 @@ export default {
         this.selectedComponentData = {
           identifier: node.data,
           translation: node.label,
+          menu: node.menu,
           component: node.label,
           key: node.key,
           editMode: true,

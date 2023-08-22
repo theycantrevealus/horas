@@ -389,6 +389,10 @@ body.dark .p-treenode .p-treenode-content:hover {
     padding-left: 40%;
 }
 
+.form-mode .p-treenode-label {
+    padding-left: 0;
+}
+
 .p-tree-filter-container input {
     box-shadow: 0px 0px 1px .5px #888;
 }

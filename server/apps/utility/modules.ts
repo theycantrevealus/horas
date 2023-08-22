@@ -21,4 +21,7 @@ export const modCodes = {
   BPJSReferenceService: 'BPJS_REF',
   BPJSSEPService: 'BPJS_SEP',
   BPJSPRBService: 'BPJS_PRB',
+  BPJSVClaumReferenceService: 'BPJS_REF',
+  BPJSVClaimSEPService: 'BPJS_VCLAIM_SEP',
+  BPJSApplicaresReferensiService: 'BPJS_APPLICARES_SEP',
 }

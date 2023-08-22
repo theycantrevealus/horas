@@ -45,37 +45,39 @@ export const i18nStore = {
     },
   },
   mutations: {
-    Mutation___initLanguage: (state: any, data) => {
+    Mutation___initLanguage: (state: any, data: any[]) => {
       const metaDataLanguage = {}
-      data.map((item) => {
-        const languageID = item.language_code.toLowerCase()
-        if(!metaDataLanguage[item.language_code.toLowerCase()]) {
-          metaDataLanguage[languageID] = {}
+      if(data) {
+        for(const a in data) {
+          const item = data[a]
+          const languageID = item.language_code.toLowerCase()
+          if(!metaDataLanguage[item.language_code.toLowerCase()]) {
+            metaDataLanguage[languageID] = {}
+          }
+
+          // item.components.map((componentData) => {
+          //   metaDataLanguage[languageID][componentData.component] = componentData.translation
+          // })
+
+          metaDataLanguage[languageID] = item.components.reduce((m, o) => {
+            const keys = o.component.split('.');
+            let cur = m;
+            keys.forEach((key, i) => {
+              if (i < keys.length - 1) {
+                cur[key] = cur[key] || {};
+                cur = cur[key];
+              } else {
+                cur[key] = o.translation;
+              }
+            });
+            return m;
+          }, {})
+
+          metaDataLanguage[languageID].message = {
+            hello: `hello world ${languageID}`
+          }
         }
-
-        // item.components.map((componentData) => {
-        //   metaDataLanguage[languageID][componentData.component] = componentData.translation
-        // })
-
-        metaDataLanguage[languageID] = item.components.reduce((m, o) => {
-          const keys = o.component.split('.');
-          let cur = m;
-          keys.forEach((key, i) => {
-            if (i < keys.length - 1) {
-              cur[key] = cur[key] || {};
-              cur = cur[key];
-            } else {
-              cur[key] = o.translation;
-            }
-          });
-          return m;
-        }, {})
-
-        metaDataLanguage[languageID].message = {
-          hello: `hello world ${languageID}`
-        }
-      })
-
+      }
 
       state.languageLib = metaDataLanguage
     },

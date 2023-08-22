@@ -1,5 +1,5 @@
 import axios from 'axios'
-
+import process from 'process'
 class MasterItemService {
   /**
    * @brief List all item data with pagination

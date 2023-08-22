@@ -52,7 +52,15 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
+**/certificates
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.csr
+**/*.crt
+**/*.env
+**/*.d.ts
+**/*.d.ts.map
 
 # Cypress test result
 **/__tests__/**/*.png

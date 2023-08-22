@@ -46,14 +46,14 @@
                 <template #body="slotProps">
                   <span class="buttonset wrap_content">
                     <Button
-                      v-if="permission.btni18nEdit !== undefined"
+                      v-if="credential.permission.btni18nEdit !== undefined"
                       class="button p-button-success button-sm button-raised m-1"
                       @click="dataEdit(slotProps.data.id)"
                     >
                       <span class="material-icons">edit</span> {{ $t('i18n.datatable.button.edit') }}
                     </Button>
                     <Button
-                      v-if="permission.btni18nDelete !== undefined"
+                      v-if="credential.permission.btni18nDelete !== undefined"
                       class="button p-button-danger button-sm button-raised m-1"
                       @click="dataDelete($event, slotProps.data.id)"
                     >
@@ -135,9 +135,10 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Corei18nService from '@/modules/setting/i18n/service'
+import {mapGetters} from "vuex"
 
 export default {
-  name: 'AccountList',
+  name: 'I18nList',
   components: {
     Card,
     DataTable,
@@ -165,9 +166,9 @@ export default {
     }
   },
   computed: {
-    permission() {
-      return this.$store.state.credential.permission
-    },
+    ...mapGetters({
+      credential: 'storeCredential/Getter___credential'
+    }),
   },
   mounted() {
     this.lazyParams = {
@@ -190,9 +191,6 @@ export default {
           this.items = data
           this.totalRecords = totalRecords
           this.loading = false
-        })
-        .error((e) => {
-          //
         })
     },
     formatDate(date, format) {

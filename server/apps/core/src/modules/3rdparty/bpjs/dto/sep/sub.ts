@@ -14,7 +14,7 @@ export class Rujukan {
 
   @ApiProperty({
     description: 'Tanggal rujukan. format: yyyy-mm-dd',
-    example: '',
+    example: new TimeManagement().getRaw('Asia/Jakarta', 'YYYY-MM-DD'),
     type: String,
   })
   @Validate((target) => {
@@ -36,7 +36,7 @@ export class Rujukan {
 
   @ApiProperty({
     description: 'Kode faskes rujukan',
-    example: '',
+    example: '0069R035',
     type: String,
   })
   @IsNotEmpty()
@@ -58,7 +58,7 @@ export class KelasRawat {
     description:
       '1 = Pribadi, 2 Pemberi Kerja, 3 = Asuransi kesehatan tambahan. Diisi jika naik kelas rawat',
     enum: ['', '1', '2', '3'],
-    example: '1',
+    example: '',
   })
   @IsNotEmpty()
   @IsString()
@@ -68,7 +68,7 @@ export class KelasRawat {
     description:
       'Sesuai dengan nama deskripsi di pembiayaan. Cth: Jika pembiayaan 1, maka penanggung jawab = Pribadi',
     type: String,
-    example: 'Pribadi',
+    example: '',
   })
   @IsNotEmpty()
   @IsString()
@@ -79,7 +79,7 @@ export class Poli {
   @ApiProperty({
     type: String,
     description: 'Kode poli tujuan. [Ref. Poli]',
-    example: '',
+    example: 'IGD',
   })
   @IsNotEmpty()
   @IsString()
@@ -223,7 +223,7 @@ export class LakaLantas {
   @ApiProperty({
     type: String,
     description: 'No LP',
-    example: '',
+    example: '12345',
   })
   @IsNotEmpty()
   @IsString()
@@ -251,7 +251,7 @@ export class SKDP {
   @ApiProperty({
     description: 'Kode dokter DPJP. [Ref. DPJP]',
     type: String,
-    example: '',
+    example: '436619',
   })
   @IsNotEmpty()
   @IsString()

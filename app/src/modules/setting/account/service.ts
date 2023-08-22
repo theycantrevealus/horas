@@ -1,6 +1,7 @@
 import axios from 'axios'
 import store from '@/store'
 import api from "@/util/api";
+import process from 'process'
 class AccountService {
   async getAccountList(parsedData) {
     return api({ requiresAuth: true })

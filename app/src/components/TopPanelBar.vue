@@ -293,8 +293,6 @@ export default {
     },
     getSelectedLanguage: {
       handler(getData) {
-        console.clear()
-        console.log(getData)
         this.selectedLanguage = getData
         this.$i18n.locale = getData.lang
       }
@@ -315,11 +313,13 @@ export default {
   },
   created() {},
   async mounted() {
-    this.selectedLanguage = this.language
+    // this.selectedLanguage = this.language
+    await this.initLanguage()
   },
   methods: {
     ...mapActions({
       storeLanguage: 'storei18n/Action___changeLanguage',
+      initLanguage: 'storei18n/Action___getLanguage',
       toggleDarkMode: 'storeApplication/Action___toggleDarkMode',
     }),
     changeLanguage() {

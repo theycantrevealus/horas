@@ -38,6 +38,7 @@ import DialogService from 'primevue/dialogservice'
 import { i18n } from '@/util/i18n/instances'
 import VueSocketIO from 'vue-3-socket.io'
 import {io} from "socket.io-client";
+import process from 'process'
 
 registerModules({
   getStarted: GetStarted,

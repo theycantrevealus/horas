@@ -4,8 +4,9 @@ import Builder from '@/views/Builder.vue'
 import Login from '@/views/Account/Login.vue'
 import PageNotFound from '@/views/Handling/404.vue'
 import PageUnauthorized from '@/views/Handling/403.vue'
+import * as NProgress from 'nprogress'
+import process from 'process'
 
-const NProgress = require('nprogress')
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -116,7 +117,7 @@ router.beforeEach((to, from, next) => {
   NProgress.start()
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     const token = store.getters['storeCredential/Getter___token']
-    const isAuthed = token &&token !== ''
+    const isAuthed = token &&token !== '' && token !== null
 
     if (isAuthed) {
       if (!to.matched.length) {
@@ -131,6 +132,7 @@ router.beforeEach((to, from, next) => {
             if(store.getters['storeCredential/Getter___credential'].routeMap[to.name.toString()]) {
               const dispatches = store.getters['storeCredential/Getter___credential'].routeMap[to.name.toString()].permission
               if(dispatches && dispatches.indexOf(to.name.toString()) < 0) {
+                alert()
                 next({
                   path: '/403',
                   query: {
@@ -142,6 +144,7 @@ router.beforeEach((to, from, next) => {
                 return
               }
             } else {
+              alert()
               next({
                 path: '/403',
                 query: {
