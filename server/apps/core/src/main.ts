@@ -54,7 +54,7 @@ async function bootstrap() {
         pfx: fs.readFileSync(
           path.resolve(__dirname, 'certificates/localhost.pfx')
         ),
-        requestCert: true,
+        // requestCert: true,
         rejectUnauthorized: true,
         key: fs.readFileSync(
           path.resolve(__dirname, 'certificates/localhost.decrypted.key')

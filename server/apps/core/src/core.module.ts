@@ -218,9 +218,14 @@ export class CoreModule {
               this.logger.verbose(`[${e.name}] configuration up to date`)
             }
           } else {
-            await this.cacheManager.set(e.name, e.setter).then(() => {
-              this.logger.verbose(`[${e.name} configuration set`)
-            })
+            await this.cacheManager
+              .set(e.name, {
+                setter: e.setter,
+                __v: e.__v,
+              })
+              .then(() => {
+                this.logger.verbose(`[${e.name} configuration set`)
+              })
           }
         })
       ).then(async () => {
