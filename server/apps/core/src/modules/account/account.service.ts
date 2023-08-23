@@ -264,7 +264,7 @@ export class AccountService {
                   expired_at: token.expired_at,
                 })
 
-                // const config = await this.configMeta()
+                const config = await this.configMeta()
 
                 await logLogin
                   .save()
@@ -280,9 +280,11 @@ export class AccountService {
                         code: result.code,
                         first_name: result.first_name,
                         last_name: result.last_name,
+                        permission: result.permission,
+                        access: result.access,
                       },
                       token: token.set,
-                      // config: config, //TODO : Prefer to load by another endpoint on system startup preparation
+                      config: config,
                     }
                   })
                   .catch(() => {
