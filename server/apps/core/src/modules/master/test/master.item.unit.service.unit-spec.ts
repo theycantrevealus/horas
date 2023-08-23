@@ -5,7 +5,6 @@ import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
 } from '@core/master/dto/master.item.unit'
-import { MasterItemUnitService } from '@core/master/master.item.unit.service'
 import {
   masterItemUnitDocArray,
   mockMasterItemUnit,
@@ -15,6 +14,7 @@ import {
   MasterItemUnit,
   MasterItemUnitDocument,
 } from '@core/master/schemas/master.item.unit'
+import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'

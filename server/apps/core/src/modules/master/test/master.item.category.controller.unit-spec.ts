@@ -1,16 +1,16 @@
 import { AccountService } from '@core/account/account.service'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemCategoryController } from '@core/master/controllers/master.item.category.controller'
 import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
 } from '@core/master/dto/master.item.category'
-import { MasterItemCategoryController } from '@core/master/master.item.category.controller'
-import { MasterItemCategoryService } from '@core/master/master.item.category.service'
 import {
   mockMasterItemCategory,
   mockMasterItemCategoryService,
 } from '@core/master/mock/master.item.category.mock'
+import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'

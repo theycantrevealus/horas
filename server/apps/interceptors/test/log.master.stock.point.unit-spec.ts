@@ -7,15 +7,15 @@ import {
   mockAccountService,
 } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterStockPointController } from '@core/master/controllers/master.stock.point.controller'
 import { MasterStockPointAddDTO } from '@core/master/dto/master.stock.point'
-import { MasterStockPointController } from '@core/master/master.stock.point.controller'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import {
   masterStockPointArray,
   mockMasterStockPointModel,
   mockMasterStockPointService,
 } from '@core/master/mock/master.stock.point.mock'
 import { MasterStockPoint } from '@core/master/schemas/master.stock.point'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   mockLogActivity,

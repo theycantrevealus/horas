@@ -7,15 +7,15 @@ import {
   mockAccountService,
 } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemCategoryController } from '@core/master/controllers/master.item.category.controller'
 import { MasterItemCategoryAddDTO } from '@core/master/dto/master.item.category'
-import { MasterItemCategoryController } from '@core/master/master.item.category.controller'
-import { MasterItemCategoryService } from '@core/master/master.item.category.service'
 import {
   masterItemCategoryArray,
   mockMasterItemCategoryModel,
   mockMasterItemCategoryService,
 } from '@core/master/mock/master.item.category.mock'
 import { MasterItemCategory } from '@core/master/schemas/master.item.category'
+import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   mockLogActivity,

@@ -5,7 +5,6 @@ import {
   MasterItemAddDTO,
   MasterItemEditDTO,
 } from '@core/master/dto/master.item'
-import { MasterItemService } from '@core/master/master.item.service'
 import {
   masterItemDocArray,
   mockMasterItem,
@@ -15,6 +14,7 @@ import {
   MasterItem,
   MasterItemDocument,
 } from '@core/master/schemas/master.item'
+import { MasterItemService } from '@core/master/services/master.item.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'

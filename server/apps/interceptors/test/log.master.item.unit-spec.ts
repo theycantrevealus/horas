@@ -7,15 +7,15 @@ import {
   mockAccountService,
 } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemController } from '@core/master/controllers/master.item.controller'
 import { MasterItemAddDTO } from '@core/master/dto/master.item'
-import { MasterItemController } from '@core/master/master.item.controller'
-import { MasterItemService } from '@core/master/master.item.service'
 import {
   masterItemArray,
   mockMasterItemModel,
   mockMasterItemService,
 } from '@core/master/mock/master.item.mock'
 import { MasterItem } from '@core/master/schemas/master.item'
+import { MasterItemService } from '@core/master/services/master.item.service'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   mockLogActivity,

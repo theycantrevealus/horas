@@ -11,6 +11,7 @@ import { LicenseModule } from '@core/license/license.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
+import { OperationQueueModule } from '@core/operation/queue/queue.module'
 import { PatientModule } from '@core/patient/patient.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -156,6 +157,7 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     i18nModule,
     GatewayInventoryModule,
     BpjsModule,
+    OperationQueueModule,
   ],
   controllers: [CoreController, CoreConfigGroupController],
   providers: [

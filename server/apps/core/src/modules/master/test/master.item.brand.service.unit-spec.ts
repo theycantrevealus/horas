@@ -5,7 +5,6 @@ import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
 } from '@core/master/dto/master.item.brand'
-import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import {
   masterItemBrandDocArray,
   mockMasterItemBrand,
@@ -15,6 +14,7 @@ import {
   MasterItemBrand,
   MasterItemBrandDocument,
 } from '@core/master/schemas/master.item.brand'
+import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'

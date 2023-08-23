@@ -5,7 +5,6 @@ import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import {
   masterStockPointDocArray,
   mockMasterStockPoint,
@@ -15,6 +14,7 @@ import {
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@core/master/schemas/master.stock.point'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'

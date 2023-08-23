@@ -1,16 +1,16 @@
 import { AccountService } from '@core/account/account.service'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterStockPointController } from '@core/master/controllers/master.stock.point.controller'
 import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
-import { MasterStockPointController } from '@core/master/master.stock.point.controller'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import {
   mockMasterStockPoint,
   mockMasterStockPointService,
 } from '@core/master/mock/master.stock.point.mock'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'

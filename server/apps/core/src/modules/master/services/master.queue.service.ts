@@ -1,12 +1,9 @@
 import { Account } from '@core/account/schemas/account.model'
 import {
-  MasterItemBrandAddDTO,
-  MasterItemBrandEditDTO,
-} from '@core/master/dto/master.item.brand'
-import {
-  MasterItemBrand,
-  MasterItemBrandDocument,
-} from '@core/master/schemas/master.item.brand'
+  MasterQueueAddDTO,
+  MasterQueueEditDTO,
+} from '@core/master/dto/master.queue'
+import { MasterQueue } from '@core/master/schemas/master.queue.machine'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -16,43 +13,39 @@ import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
-export class MasterItemBrandService {
+export class MasterQueueService {
   constructor(
-    @InjectModel(MasterItemBrand.name)
-    private masterItemBrandModel: Model<MasterItemBrandDocument>
+    @InjectModel(MasterQueue.name)
+    private masterQueueModel: Model<MasterQueue>
   ) {}
 
   async all(parameter: any) {
-    return await prime_datatable(parameter, this.masterItemBrandModel)
+    return await prime_datatable(parameter, this.masterQueueModel)
   }
 
-  async detail(id: string): Promise<MasterItemBrand> {
-    return this.masterItemBrandModel.findOne({ id: id }).exec()
+  async detail(id: string): Promise<MasterQueue> {
+    return this.masterQueueModel.findOne({ id: id }).exec()
   }
 
   async add(
-    data: MasterItemBrandAddDTO,
+    data: MasterQueueAddDTO,
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_ADD',
+      transaction_classify: 'MASTER_QUEUE_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
 
-    if (!data.code) {
-      data.code = `${modCodes[this.constructor.name]}-${new Date().getTime()}`
-    }
-
-    await this.masterItemBrandModel
+    await this.masterQueueModel
       .create({
         ...data,
         created_by: account,
       })
       .then((result) => {
-        response.message = 'Master item brand created successfully'
+        response.message = 'Master queue created successfully'
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.success
         }`
@@ -60,7 +53,7 @@ export class MasterItemBrandService {
         response.payload = result
       })
       .catch((error: Error) => {
-        response.message = `Master item brand failed to create. ${error.message}`
+        response.message = `Master queue failed to create. ${error.message}`
         response.statusCode = `${modCodes[this.constructor.name]}_I_${
           modCodes.Global.failed
         }`
@@ -70,19 +63,16 @@ export class MasterItemBrandService {
     return response
   }
 
-  async edit(
-    data: MasterItemBrandEditDTO,
-    id: string
-  ): Promise<GlobalResponse> {
+  async edit(data: MasterQueueEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_EDIT',
+      transaction_classify: 'MASTER_QUEUE_EDIT',
       transaction_id: null,
     } satisfies GlobalResponse
 
-    await this.masterItemBrandModel
+    await this.masterQueueModel
       .findOneAndUpdate(
         {
           id: id,
@@ -90,20 +80,19 @@ export class MasterItemBrandService {
         },
         {
           code: data.code,
-          name: data.name,
           remark: data.remark,
         }
       )
       .exec()
       .then((result) => {
         if (result) {
-          response.message = 'Master item brand updated successfully'
+          response.message = 'Master queue updated successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.success
           }`
           response.payload = result
         } else {
-          response.message = `Master item brand failed to update. Invalid document`
+          response.message = `Master queue failed to update. Invalid document`
           response.statusCode = `${modCodes[this.constructor.name]}_U_${
             modCodes.Global.failed
           }`
@@ -111,7 +100,7 @@ export class MasterItemBrandService {
         }
       })
       .catch((error: Error) => {
-        response.message = `Master item brand failed to update. ${error.message}`
+        response.message = `Master queue failed to update. ${error.message}`
         response.statusCode = `${modCodes[this.constructor.name]}_U_${
           modCodes.Global.failed
         }`
@@ -127,7 +116,7 @@ export class MasterItemBrandService {
       transaction_classify: 'MASTER_ITEM_BRAND_DELETE',
       transaction_id: null,
     } satisfies GlobalResponse
-    const data = await this.masterItemBrandModel.findOne({
+    const data = await this.masterQueueModel.findOne({
       id: id,
     })
 
@@ -136,21 +125,21 @@ export class MasterItemBrandService {
 
       await data
         .save()
-        .then((result) => {
-          response.message = 'Master item brand deleted successfully'
+        .then(() => {
+          response.message = 'Master queue deleted successfully'
           response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.success
           }`
         })
         .catch((error: Error) => {
-          response.message = `Master item brand failed to delete. ${error.message}`
+          response.message = `Master queue failed to delete. ${error.message}`
           response.statusCode = `${modCodes[this.constructor.name]}_D_${
             modCodes.Global.failed
           }`
           response.payload = error
         })
     } else {
-      response.message = `Master item brand failed to deleted. Invalid document`
+      response.message = `Master queue failed to deleted. Invalid document`
       response.statusCode = `${modCodes[this.constructor.name]}_D_${
         modCodes.Global.failed
       }`

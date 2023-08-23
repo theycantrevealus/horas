@@ -2,7 +2,7 @@ import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
 } from '@core/master/dto/master.item.category'
-import { MasterItemCategoryService } from '@core/master/master.item.category.service'
+import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'

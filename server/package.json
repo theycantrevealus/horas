@@ -11,6 +11,7 @@
     "start": "nest start",
     "start:dev:core": "nest build core --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:inventory": "nest build inventory --webpack --webpackPath ./webpack.config.js --watch",
+    "start:dev:queue": "nest build queue --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:import": "nest build import --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:socket": "nest build socket --webpack --webpackPath ./webpack.config.js --watch",
     "start:debug": "nest start --debug --watch",

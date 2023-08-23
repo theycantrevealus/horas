@@ -1,23 +1,23 @@
 import {
-  MasterItemBrandAddDTO,
-  MasterItemBrandEditDTO,
-} from '@core/master/dto/master.item.brand'
-import { MasterItemBrandService } from '@core/master/master.item.brand.service'
+  MasterQueueAddDTO,
+  MasterQueueEditDTO,
+} from '@core/master/dto/master.queue'
+import { MasterQueueService } from '@core/master/services/master.queue.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
-  UseInterceptors,
   Version,
 } from '@nestjs/common'
 import {
@@ -28,31 +28,31 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
+import { FastifyReply } from 'fastify'
 
 @Controller('master')
 @ApiTags('Master Data Management')
-export class MasterItemBrandController {
+export class MasterQueueController {
   constructor(
-    @Inject(MasterItemBrandService)
-    private readonly masterItemBrandService: MasterItemBrandService
+    @Inject(MasterQueueService)
+    private readonly masterQueueService: MasterQueueService
   ) {}
 
-  @Get('brand')
+  @Get('queue')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Fetch all account',
-    description: 'Showing brand data',
+    summary: 'Fetch all queue machine',
+    description: '',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterItemBrandService.all({
+      return await this.masterQueueService.all({
         first: parsedData.first,
         rows: parsedData.rows,
         sortField: parsedData.sortField,
@@ -67,7 +67,7 @@ export class MasterItemBrandController {
     }
   }
 
-  @Get('brand/:id')
+  @Get('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
@@ -80,31 +80,37 @@ export class MasterItemBrandController {
     description: '',
   })
   async detail(@Param() param) {
-    return await this.masterItemBrandService.detail(param.id)
+    return await this.masterQueueService.detail(param.id)
   }
 
-  @Post('brand')
+  @Post('queue')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Add new item brand',
     description: ``,
   })
   async add(
-    @Body() parameter: MasterItemBrandAddDTO,
-    @CredentialAccount() account
-  ): Promise<GlobalResponse> {
-    return await this.masterItemBrandService.add(parameter, account)
+    @Body() parameter: MasterQueueAddDTO,
+    @CredentialAccount() account,
+    @Res() response: FastifyReply
+  ) {
+    await this.masterQueueService
+      .add(parameter, account)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
-  @Patch('brand/:id')
+  @Patch('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit new item brand',
@@ -113,15 +119,25 @@ export class MasterItemBrandController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param) {
-    return await this.masterItemBrandService.edit(parameter, param.id)
+  async edit(
+    @Body() parameter: MasterQueueEditDTO,
+    @Param() param,
+    @Res() response: FastifyReply
+  ) {
+    await this.masterQueueService
+      .edit(parameter, param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
-  @Delete('brand/:id')
+  @Delete('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit new item brand',
@@ -130,7 +146,14 @@ export class MasterItemBrandController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterItemBrandService.delete(param.id)
+  async delete(@Param() param, @Res() response: FastifyReply) {
+    await this.masterQueueService
+      .delete(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 }

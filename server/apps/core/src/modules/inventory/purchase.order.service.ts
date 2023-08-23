@@ -1,5 +1,5 @@
 import { Account } from '@core/account/schemas/account.model'
-import { MasterItemService } from '@core/master/master.item.service'
+import { MasterItemService } from '@core/master/services/master.item.service'
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderApproval,

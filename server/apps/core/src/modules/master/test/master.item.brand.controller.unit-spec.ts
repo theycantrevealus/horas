@@ -1,16 +1,16 @@
 import { AccountService } from '@core/account/account.service'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemBrandController } from '@core/master/controllers/master.item.brand.controller'
 import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
 } from '@core/master/dto/master.item.brand'
-import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
-import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import {
   mockMasterItemBrand,
   mockMasterItemBrandService,
 } from '@core/master/mock/master.item.brand.mock'
+import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'

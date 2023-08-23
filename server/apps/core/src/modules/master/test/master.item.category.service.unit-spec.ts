@@ -5,7 +5,6 @@ import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
 } from '@core/master/dto/master.item.category'
-import { MasterItemCategoryService } from '@core/master/master.item.category.service'
 import {
   masterItemCategoryDocArray,
   mockMasterItemCategory,
@@ -15,6 +14,7 @@ import {
   MasterItemCategory,
   MasterItemCategoryDocument,
 } from '@core/master/schemas/master.item.category'
+import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'

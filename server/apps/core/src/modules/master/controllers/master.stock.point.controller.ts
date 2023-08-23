@@ -2,7 +2,7 @@ import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'

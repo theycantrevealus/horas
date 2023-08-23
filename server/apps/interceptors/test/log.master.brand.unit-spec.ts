@@ -7,15 +7,15 @@ import {
   mockAccountService,
 } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemBrandController } from '@core/master/controllers/master.item.brand.controller'
 import { MasterItemBrandAddDTO } from '@core/master/dto/master.item.brand'
-import { MasterItemBrandController } from '@core/master/master.item.brand.controller'
-import { MasterItemBrandService } from '@core/master/master.item.brand.service'
 import {
   masterItemBrandArray,
   mockMasterItemBrandModel,
   mockMasterItemBrandService,
 } from '@core/master/mock/master.item.brand.mock'
 import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
+import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   mockLogActivity,

@@ -4,7 +4,7 @@ import {
   MasterItemAddDTO,
   MasterItemEditDTO,
 } from '@core/master/dto/master.item'
-import { MasterItemService } from '@core/master/master.item.service'
+import { MasterItemService } from '@core/master/services/master.item.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
