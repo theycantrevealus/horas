@@ -8,6 +8,11 @@ export const accountStub = (): IAccount => {
     id: `account-${new Types.ObjectId().toString()}`,
     code: '',
     email: 'johndoe@example.com',
+    authority: {
+      id: '',
+      code: '',
+      name: '',
+    },
     first_name: 'John',
     last_name: 'Doe',
     phone: '0822996633112',
@@ -24,6 +29,7 @@ export const accountStub = (): IAccount => {
 
 export const accountAddStub = (): AccountAddDTO => {
   return {
+    authority: accountStub().authority,
     first_name: accountStub().first_name,
     last_name: accountStub().last_name,
     email: accountStub().email,

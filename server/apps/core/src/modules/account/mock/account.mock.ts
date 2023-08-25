@@ -2,6 +2,7 @@ import { AccountAddDTO } from '@core/account/dto/account.add'
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import { IAuthority } from '@core/account/schemas/authority'
 import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
 import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
@@ -40,6 +41,11 @@ export const mockAccountService = {
 export const mockAccount = (
   id = `account-${new Types.ObjectId().toString()}`,
   code = '',
+  authority: IAuthority = {
+    id: `authority-${new Types.ObjectId().toString()}`,
+    code: 'XXXX',
+    name: 'Example Authority',
+  },
   email = faker.internet.email(),
   first_name = faker.name.firstName(),
   last_name = faker.name.lastName(),
@@ -59,6 +65,7 @@ export const mockAccount = (
 ): Account => ({
   id,
   code,
+  authority,
   email,
   first_name,
   last_name,
@@ -89,6 +96,11 @@ export const mockAccountModel = {
 export const mockAccountDoc = (
   mock?: Partial<Account>
 ): Partial<AccountDocument> => ({
+  authority: {
+    id: `authority-${new Types.ObjectId().toString()}`,
+    code: 'XXXX',
+    name: 'Example Authority',
+  },
   first_name: mock?.first_name || faker.name.firstName(),
   last_name: mock?.last_name || faker.name.lastName(),
   email: mock?.email || faker.internet.email(),
@@ -113,6 +125,11 @@ export const accountArray = [
   mockAccount(
     `account-${new Types.ObjectId().toString()}`,
     'XX-XX',
+    {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),
@@ -128,6 +145,11 @@ export const accountArray = [
   mockAccount(
     `account-${new Types.ObjectId().toString()}`,
     'XX-XX',
+    {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
     faker.internet.email(),
     faker.name.firstName(),
     faker.name.lastName(),
@@ -145,6 +167,11 @@ export const accountArray = [
 export const accountDocArray = [
   mockAccountDoc(),
   mockAccountDoc({
+    authority: {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),
@@ -153,6 +180,11 @@ export const accountDocArray = [
     access: [],
   }),
   mockAccountDoc({
+    authority: {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     email: faker.internet.email(),

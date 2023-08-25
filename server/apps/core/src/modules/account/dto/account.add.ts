@@ -1,3 +1,4 @@
+import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
 import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
 import { ApiProperty } from '@nestjs/swagger'
 import {
@@ -9,6 +10,13 @@ import {
 } from 'class-validator'
 
 export class AccountAddDTO {
+  @ApiProperty({
+    type: AuthorityJoin,
+    description: '',
+  })
+  @IsNotEmpty()
+  authority: IAuthority
+
   @ApiProperty({
     example: 'johndoe@example.com',
     minLength: 8,

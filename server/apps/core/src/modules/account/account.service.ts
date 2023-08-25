@@ -1,6 +1,8 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { AccountSignInDTO } from '@core/account/dto/account.signin'
+import { AuthorityAddDTO, AuthorityEditDTO } from '@core/account/dto/authority'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { Authority, AuthorityDocument } from '@core/account/schemas/authority'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
@@ -25,6 +27,8 @@ import { Account, AccountDocument } from './schemas/account.model'
 @Injectable()
 export class AccountService {
   constructor(
+    @InjectModel(Authority.name)
+    private accountAuthorityModel: Model<AuthorityDocument>,
     @InjectModel(Account.name)
     private accountModel: Model<AccountDocument>,
     @InjectModel(LogLogin.name)
@@ -40,8 +44,16 @@ export class AccountService {
     return await prime_datatable(parameter, this.accountModel)
   }
 
+  async authorityAll(parameter: any) {
+    return await prime_datatable(parameter, this.accountAuthorityModel)
+  }
+
   async detail(id: string): Promise<Account> {
     return this.accountModel.findOne({ id: id })
+  }
+
+  async authorityDetail(id: string): Promise<Account> {
+    return this.accountAuthorityModel.findOne({ id: id })
   }
 
   async delete(id: string): Promise<GlobalResponse> {
@@ -79,6 +91,50 @@ export class AccountService {
         })
     } else {
       response.message = `Account failed to deleted. Invalid document`
+      response.statusCode = `${modCodes[this.constructor.name]}_D_${
+        modCodes.Global.failed
+      }`
+      response.payload = {}
+    }
+
+    return response
+  }
+
+  async authorityDelete(id: string): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: await this.accountAuthorityModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'AUTHORITY_DELETE',
+      transaction_id: id,
+    } satisfies GlobalResponse
+
+    const data = await this.accountAuthorityModel.findOne({
+      id: id,
+    })
+
+    if (data) {
+      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
+
+      await data
+        .save()
+        .then(() => {
+          response.message = 'Authority deleted successfully'
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
+            modCodes.Global.success
+          }`
+        })
+        .catch((error: Error) => {
+          response.message = `Authority failed to delete. ${error.message}`
+          response.statusCode = `${modCodes[this.constructor.name]}_D_${
+            modCodes.Global.failed
+          }`
+          response.payload = error
+        })
+    } else {
+      response.message = `Authority failed to deleted. Invalid document`
       response.statusCode = `${modCodes[this.constructor.name]}_D_${
         modCodes.Global.failed
       }`
@@ -146,6 +202,60 @@ export class AccountService {
     return response
   }
 
+  async authorityEdit(
+    parameter: AuthorityEditDTO,
+    id: string
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: await this.accountAuthorityModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'AUTHORITY_EDIT',
+      transaction_id: id,
+    } satisfies GlobalResponse
+
+    await this.accountAuthorityModel
+      .findOneAndUpdate(
+        {
+          id: id,
+          __v: parameter.__v,
+        },
+        {
+          code: parameter.code,
+          name: parameter.name,
+          remark: parameter.remark,
+        }
+      )
+      .exec()
+      .then((result) => {
+        if (!result) {
+          response.message = `Authority failed to update`
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.failed
+          }`
+          response.payload = result
+        } else {
+          result.__v++
+          response.message = 'Authority updated successfully'
+          response.payload = result
+          response.statusCode = `${modCodes[this.constructor.name]}_U_${
+            modCodes.Global.success
+          }`
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Authority failed to update. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_U_${
+          modCodes.Global.failed
+        }`
+        response.payload = error
+      })
+
+    return response
+  }
+
   async add(
     data: AccountAddDTO,
     credential: IAccountCreatedBy
@@ -189,6 +299,45 @@ export class AccountService {
     return response
   }
 
+  async authorityAdd(
+    data: AuthorityAddDTO,
+    credential: IAccountCreatedBy
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: '',
+      message: '',
+      payload: {},
+      transaction_classify: 'AUTHORITY_ADD',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    await this.accountAuthorityModel
+      .create({
+        ...data,
+        created_by: credential,
+      })
+      .then((result) => {
+        response.message = 'Authority created successfully'
+        response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          modCodes.Global.success
+        }`
+        response.transaction_id = result.id
+        response.payload = {
+          id: result.id,
+          ...data,
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Authority failed to create. ${error.message}`
+        response.statusCode = `${modCodes[this.constructor.name]}_I_${
+          modCodes.Global.failed
+        }`
+        response.payload = error
+      })
+
+    return response
+  }
+
   async token_coordinator(result: any, currentTime) {
     return this.logLoginModel.findOne({
       account: {
@@ -201,7 +350,7 @@ export class AccountService {
     })
   }
 
-  async signin(parameter: AccountSignInDTO): Promise<GlobalResponse> {
+  async signIn(parameter: AccountSignInDTO): Promise<GlobalResponse> {
     const response = {
       statusCode: '',
       message: '',

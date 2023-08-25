@@ -116,7 +116,7 @@ describe('Account Service', () => {
 
   it(testCaption('DATA', 'data', 'Should create a new account'), async () => {
     jest.spyOn(model, 'create').mockImplementationOnce(() => {
-      return Promise.resolve(accountDocArray[0])
+      return mockAccountDoc(accountDocArray[0])
     })
 
     const newAccount = (await service.add(

@@ -92,13 +92,13 @@ async function bootstrap() {
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
 
-  // fastifyAdapter.register(require('@fastify/static'), {
-  //   root: path.join(
-  //     __dirname,
-  //     configService.get<string>('application.images.core_dir')
-  //   ),
-  //   prefix: `/${configService.get<string>('application.images.core_prefix')}`,
-  // })
+  fastifyAdapter.register(require('@fastify/static'), {
+    root: path.join(
+      __dirname,
+      configService.get<string>('application.images.core_dir')
+    ),
+    prefix: `/${configService.get<string>('application.images.core_prefix')}`,
+  })
 
   // const fastifyInstance = app.getHttpAdapter().getInstance()
   // fastifyInstance.childLoggerFactory

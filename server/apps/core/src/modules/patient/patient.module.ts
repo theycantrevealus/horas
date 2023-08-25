@@ -1,5 +1,6 @@
 import { AccountService } from '@core/account/account.service'
 import { Account, AccountSchema } from '@core/account/schemas/account.model'
+import { Authority, AuthoritySchema } from '@core/account/schemas/authority'
 import { PatientController } from '@core/patient/patient.controller'
 import { PatientService } from '@core/patient/patient.service'
 import { Patient, PatientSchema } from '@core/patient/schema/patient.model'
@@ -47,6 +48,10 @@ import { TimeManagement } from '@utility/time'
       {
         name: Account.name,
         useFactory: () => AccountSchema,
+      },
+      {
+        name: Authority.name,
+        useFactory: () => AuthoritySchema,
       },
       {
         name: LogActivity.name,
