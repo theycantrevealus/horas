@@ -7,6 +7,7 @@ import {
   mockAccountModel,
 } from '@core/account/mock/account.mock'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import { Authority, AuthorityDocument } from '@core/account/schemas/authority'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -25,23 +26,17 @@ import { AccountService } from '../account.service'
 
 describe('Account Service', () => {
   let service: AccountService
-  let model: Model<Account>
+  let modelAccount: Model<Account>
+  let modelAuthority: Model<Authority>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
         AccountService,
-        AuthService,
         JwtService,
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              return null
-            }),
-          },
-        },
+        AuthService,
+        ConfigService,
         {
           provide: CACHE_MANAGER,
           useValue: {
@@ -62,18 +57,25 @@ describe('Account Service', () => {
           provide: getModelToken(Account.name),
           useValue: mockAccountModel,
         },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: Authority,
+        },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
       ],
     }).compile()
 
     service = module.get<AccountService>(AccountService)
-    model = module.get<Model<AccountDocument>>(getModelToken(Account.name))
-
-    jest.clearAllMocks()
+    modelAccount = module.get<Model<AccountDocument>>(
+      getModelToken(Account.name)
+    )
+    modelAuthority = module.get<Model<AuthorityDocument>>(
+      getModelToken(Authority.name)
+    )
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks()
   })
 
@@ -85,7 +87,7 @@ describe('Account Service', () => {
   )
 
   it(testCaption('DATA', 'data', 'Should list all account'), async () => {
-    jest.spyOn(model, 'aggregate').mockReturnValue({
+    jest.spyOn(modelAccount, 'aggregate').mockReturnValue({
       exec: jest.fn().mockReturnValue(accountDocArray),
     } as any)
 
@@ -101,7 +103,7 @@ describe('Account Service', () => {
   })
 
   it(testCaption('DATA', 'data', 'Should show account detail'), async () => {
-    jest.spyOn(model, 'findOne').mockReturnValueOnce(
+    jest.spyOn(modelAccount, 'findOne').mockReturnValueOnce(
       createMock<Query<AccountDocument, AccountDocument>>({
         exec: jest.fn().mockResolvedValueOnce(accountDocArray[0]),
       }) as any
@@ -115,9 +117,12 @@ describe('Account Service', () => {
   })
 
   it(testCaption('DATA', 'data', 'Should create a new account'), async () => {
-    jest.spyOn(model, 'create').mockImplementationOnce(() => {
-      return mockAccountDoc(accountDocArray[0])
+    const dataSet = mockAccountModel
+    modelAccount.create = jest.fn().mockImplementationOnce(() => {
+      return Promise.resolve(dataSet)
     })
+
+    jest.spyOn(modelAccount, 'create')
 
     const newAccount = (await service.add(
       new AccountAddDTO({ ...mockAccount(), __v: 0 }),
@@ -127,7 +132,7 @@ describe('Account Service', () => {
   })
 
   it(testCaption('DATA', 'data', 'Should edit account data'), async () => {
-    jest.spyOn(model, 'findOneAndUpdate').mockReturnValueOnce(
+    jest.spyOn(modelAccount, 'findOneAndUpdate').mockReturnValueOnce(
       createMock<Query<AccountDocument, AccountDocument>>({
         exec: jest.fn().mockResolvedValueOnce(mockAccountDoc()),
       }) as any

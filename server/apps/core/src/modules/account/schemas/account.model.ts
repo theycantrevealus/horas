@@ -38,10 +38,10 @@ export class Account {
   @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
   password: string
 
-  @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
+  @Prop({ type: SchemaTypes.String })
   first_name: string
 
-  @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
+  @Prop({ type: SchemaTypes.String })
   last_name: string
 
   @Prop({

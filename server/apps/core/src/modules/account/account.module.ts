@@ -43,9 +43,8 @@ import { Account, AccountSchema } from './schemas/account.model'
             }
 
             if (this.isModified()) {
-              // this.increment()
+              console.log('Here?')
               this.increment()
-              this.id = `account-${this._id}`
               this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
@@ -75,9 +74,7 @@ import { Account, AccountSchema } from './schemas/account.model'
             }
 
             if (this.isModified()) {
-              // this.increment()
               this.increment()
-              this.id = `authority-${this._id}`
               this.updated_at = time.getTimezone('Asia/Jakarta')
               return next()
             } else {
@@ -90,17 +87,6 @@ import { Account, AccountSchema } from './schemas/account.model'
             update['updated_at'] = time.getTimezone('Asia/Jakarta')
             update['$inc'] = { __v: 1 }
             next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: LogLogin.name,
-        useFactory: () => {
-          const schema = LogLoginSchema
-          schema.pre('save', function (next) {
-            return next()
           })
 
           return schema

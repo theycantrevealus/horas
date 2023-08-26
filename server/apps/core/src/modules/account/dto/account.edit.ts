@@ -1,5 +1,10 @@
 import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
-import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
+import {
+  IMenu,
+  IMenuPermission,
+  MenuJoin,
+  MenuPermissionJoin,
+} from '@core/menu/schemas/menu.model'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
@@ -8,7 +13,6 @@ import {
   IsString,
   MaxLength,
   MinLength,
-  ValidateNested,
 } from 'class-validator'
 
 export class AccountEditDTO {
@@ -33,24 +37,16 @@ export class AccountEditDTO {
 
   @ApiProperty({
     example: 'John',
-    minLength: 6,
-    maxLength: 24,
     description: '',
   })
-  @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   @IsString()
   first_name: string
 
   @ApiProperty({
     example: 'Doe',
-    minLength: 6,
-    maxLength: 24,
     description: '',
   })
-  @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   @IsString()
   last_name: string
@@ -68,20 +64,16 @@ export class AccountEditDTO {
   phone: string
 
   @ApiProperty({
-    type: CMenu,
-    isArray: true,
+    type: [MenuJoin],
   })
-  @ValidateNested({ each: true })
   @IsNotEmpty()
-  access: CMenu[]
+  access: IMenu[]
 
   @ApiProperty({
-    type: CMenuPermission,
-    isArray: true,
+    type: [MenuPermissionJoin],
   })
-  @ValidateNested({ each: true })
   @IsNotEmpty()
-  permission: CMenuPermission[]
+  permission: IMenuPermission[]
 
   @ApiProperty({
     example: 0,

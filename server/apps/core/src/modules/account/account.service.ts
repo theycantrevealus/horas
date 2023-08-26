@@ -158,7 +158,6 @@ export class AccountService {
       transaction_classify: 'ACCOUNT_EDIT',
       transaction_id: id,
     } satisfies GlobalResponse
-
     await this.accountModel
       .findOneAndUpdate(
         {
@@ -166,13 +165,15 @@ export class AccountService {
           __v: parameter.__v,
         },
         {
+          authority: parameter.authority,
           email: parameter.email,
           first_name: parameter.first_name,
           last_name: parameter.last_name,
           phone: parameter.phone,
           access: parameter.access,
           permission: parameter.permission,
-        }
+        },
+        { upsert: false }
       )
       .exec()
       .then((result) => {
