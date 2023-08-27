@@ -4,6 +4,7 @@ import { Account } from '@core/account/schemas/account.model'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import { PatientEditDTO } from '@core/patient/dto/patient.edit'
 import {
+  mockPatient,
   mockPatientModel,
   patientDocArray,
 } from '@core/patient/mock/patient.mock'
@@ -22,6 +23,7 @@ import { Model, Query, Types } from 'mongoose'
 describe('Patient Service', () => {
   let service: PatientService
   let model: Model<Patient>
+  const dataSet = mockPatient()
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,8 +44,6 @@ describe('Patient Service', () => {
 
     service = module.get<PatientService>(PatientService)
     model = module.get<Model<PatientDocument>>(getModelToken(Patient.name))
-
-    jest.clearAllMocks()
   })
 
   afterEach(() => {
@@ -86,9 +86,11 @@ describe('Patient Service', () => {
 
   it(testCaption('DATA', 'data', 'Should create a new patient'), async () => {
     const sample = patientDocArray[1]
-    jest.spyOn(model, 'create').mockImplementationOnce(() => {
-      return Promise.resolve(sample)
+    model.create = jest.fn().mockImplementationOnce(() => {
+      return Promise.resolve(dataSet)
     })
+
+    jest.spyOn(model, 'create')
 
     const newData = (await service.add(
       new PatientAddDTO({ ...sample, __v: 0 }),

@@ -7,18 +7,19 @@ import {
 import { MasterItemService } from '@core/master/services/master.item.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
   Request,
+  Res,
   UseGuards,
   UseInterceptors,
   Version,
@@ -33,8 +34,8 @@ import {
 } from '@nestjs/swagger'
 import { FileDto } from '@utility/dto/file'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
+import { FastifyReply } from 'fastify'
 import * as fs from 'fs'
 import { diskStorage } from 'multer'
 import { extname } from 'path'
@@ -57,21 +58,31 @@ export class MasterItemController {
     description: 'Showing data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
+  async all(
+    @Res() response: FastifyReply,
+    @Query('lazyEvent') parameter: string
+  ) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterItemService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
+      await this.masterItemService
+        .all({
+          first: parsedData.first,
+          rows: parsedData.rows,
+          sortField: parsedData.sortField,
+          sortOrder: parsedData.sortOrder,
+          filters: parsedData.filters,
+        })
+        .then((result) => {
+          response.code(HttpStatus.OK).send(result)
+        })
+        .catch((error) => {
+          response.code(HttpStatus.BAD_REQUEST).send(error.message)
+        })
     } else {
-      return {
+      response.code(HttpStatus.BAD_REQUEST).send({
         message: 'filters is not a valid json',
         payload: {},
-      }
+      })
     }
   }
 
@@ -94,11 +105,15 @@ export class MasterItemController {
     type: Number,
     required: true,
   })
-  async find(@Query() parameter) {
-    return await this.masterItemService.filter(
-      parameter.search,
-      parameter.limit
-    )
+  async find(@Res() response: FastifyReply, @Query() parameter) {
+    await this.masterItemService
+      .filter(parameter.search, parameter.limit)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Get('item/:id')
@@ -110,32 +125,45 @@ export class MasterItemController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
-    return await this.masterItemService.detail(param.id)
+  async detail(@Res() response: FastifyReply, @Param() param) {
+    await this.masterItemService
+      .detail(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Post('item')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Add new item',
     description: ``,
   })
   async add(
+    @Res() response: FastifyReply,
     @Body() parameter: MasterItemAddDTO,
     @CredentialAccount() account
-  ): Promise<GlobalResponse> {
-    return await this.masterItemService.add(parameter, account)
+  ) {
+    await this.masterItemService
+      .add(parameter, account)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Patch('item/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit item',
@@ -144,15 +172,25 @@ export class MasterItemController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemEditDTO, @Param() param) {
-    return await this.masterItemService.edit(parameter, param.id)
+  async edit(
+    @Res() response: FastifyReply,
+    @Body() parameter: MasterItemEditDTO,
+    @Param() param
+  ) {
+    await this.masterItemService
+      .edit(parameter, param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Delete('item/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit new item',
@@ -161,8 +199,15 @@ export class MasterItemController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterItemService.delete(param.id)
+  async delete(@Res() response: FastifyReply, @Param() param) {
+    await this.masterItemService
+      .delete(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Post('/upload')
@@ -183,7 +228,6 @@ export class MasterItemController {
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Import data',
@@ -208,6 +252,6 @@ export class MasterItemController {
     @CredentialAccount() account
   ) {
     return true
-    return await this.masterItemService.import(file.path, account)
+    // return await this.masterItemService.import(file.path, account)
   }
 }

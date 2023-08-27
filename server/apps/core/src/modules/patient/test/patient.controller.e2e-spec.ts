@@ -1,13 +1,13 @@
-import { AccountController } from '@core/account/account.controller'
-import { AccountAddDTO } from '@core/account/dto/account.add'
-import { AccountEditDTO } from '@core/account/dto/account.edit'
-import {
-  accountDocArray,
-  mockAccount,
-  mockAccountModel,
-  mockAccountService,
-} from '@core/account/mock/account.mock'
+import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
+import { PatientAddDTO } from '@core/patient/dto/patient.add'
+import { PatientEditDTO } from '@core/patient/dto/patient.edit'
+import {
+  mockPatient,
+  mockPatientService,
+} from '@core/patient/mock/patient.mock'
+import { PatientController } from '@core/patient/patient.controller'
+import { PatientService } from '@core/patient/patient.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CanActivate } from '@nestjs/common'
@@ -19,47 +19,34 @@ import {
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
 import { Types } from 'mongoose'
 
-import { AccountService } from '../account.service'
-
-describe('Account Controller', () => {
+describe('Patient Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let controller: AccountController
+  let controller: PatientController
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AccountController],
+      controllers: [PatientController],
       providers: [
-        {
-          provide: WINSTON_MODULE_PROVIDER,
-          useValue: {
-            log: jest.fn(),
-            warn: jest.fn(),
-            verbose: jest.fn(),
-            error: jest.fn(),
-          },
-        },
-        { provide: AccountService, useValue: mockAccountService },
+        { provide: PatientService, useValue: mockPatientService },
+        { provide: AccountService, useValue: {} },
         { provide: AuthService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: mockAccountModel },
+        { provide: getModelToken(Account.name), useValue: {} },
         { provide: getModelToken(LogActivity.name), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(mock_Guard)
       .compile()
-
     app = module.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter()
     )
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
-
-    controller = app.get<AccountController>(AccountController)
+    controller = app.get<PatientController>(PatientController)
 
     jest.clearAllMocks()
   })
@@ -83,7 +70,7 @@ describe('Account Controller', () => {
       return app
         .inject({
           method: 'GET',
-          url: '/account',
+          url: '/patient',
           query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
         })
         .then((result) => {
@@ -97,11 +84,11 @@ describe('Account Controller', () => {
       tab: 0,
     }),
     async () => {
-      const data = new AccountAddDTO(mockAccount())
+      const data = new PatientAddDTO(mockPatient())
       return app
         .inject({
           method: 'POST',
-          url: '/account',
+          url: '/patient',
           body: data,
         })
         .then((result) => {
@@ -111,19 +98,13 @@ describe('Account Controller', () => {
   )
 
   it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new AccountEditDTO({
-      email: accountDocArray[1].email,
-      first_name: accountDocArray[1].first_name,
-      last_name: accountDocArray[1].last_name,
-      phone: accountDocArray[1].phone,
-      __v: 0,
-    })
-    const id = `account-${new Types.ObjectId().toString()}`
+    const data = new PatientEditDTO(mockPatient())
+    const id = `patient-${new Types.ObjectId().toString()}`
 
     return app
       .inject({
         method: 'PATCH',
-        url: `/account/${id}`,
+        url: `/patient/${id}`,
         body: data,
       })
       .then((result) => {
@@ -131,26 +112,29 @@ describe('Account Controller', () => {
       })
   })
 
-  it(testCaption('FLOW', 'feature', 'Should return detail'), async () => {
-    const id = `account-${new Types.ObjectId().toString()}`
-    return app
-      .inject({
-        method: 'GET',
-        url: `/account/${id}`,
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(200)
-      })
-  })
+  it(
+    testCaption('FLOW', 'feature', 'Should pass detail to service'),
+    async () => {
+      const id = `patient-${new Types.ObjectId().toString()}`
+      return app
+        .inject({
+          method: 'GET',
+          url: `/patient/${id}`,
+        })
+        .then((result) => {
+          expect(result.statusCode).toEqual(200)
+        })
+    }
+  )
 
   it(
-    testCaption('FLOW', 'feature', 'Should return delete success'),
+    testCaption('FLOW', 'feature', 'Should pass delete to service'),
     async () => {
-      const id = `account-${new Types.ObjectId().toString()}`
+      const id = `patient-${new Types.ObjectId().toString()}`
       return app
         .inject({
           method: 'DELETE',
-          url: `/account/${id}`,
+          url: `/patient/${id}`,
         })
         .then((result) => {
           expect(result.statusCode).toEqual(200)

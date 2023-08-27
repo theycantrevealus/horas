@@ -1,13 +1,15 @@
-import { AccountController } from '@core/account/account.controller'
-import { AccountAddDTO } from '@core/account/dto/account.add'
-import { AccountEditDTO } from '@core/account/dto/account.edit'
-import {
-  accountDocArray,
-  mockAccount,
-  mockAccountModel,
-  mockAccountService,
-} from '@core/account/mock/account.mock'
+import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
+import { MasterItemUnitController } from '@core/master/controllers/master.item.unit.controller'
+import {
+  MasterItemUnitAddDTO,
+  MasterItemUnitEditDTO,
+} from '@core/master/dto/master.item.unit'
+import {
+  mockMasterItemUnit,
+  mockMasterItemUnitService,
+} from '@core/master/mock/master.item.unit.mock'
+import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CanActivate } from '@nestjs/common'
@@ -19,33 +21,25 @@ import {
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
 import { Types } from 'mongoose'
 
-import { AccountService } from '../account.service'
-
-describe('Account Controller', () => {
+describe('Master Item Unit Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let controller: AccountController
+  let controller: MasterItemUnitController
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AccountController],
+      controllers: [MasterItemUnitController],
       providers: [
         {
-          provide: WINSTON_MODULE_PROVIDER,
-          useValue: {
-            log: jest.fn(),
-            warn: jest.fn(),
-            verbose: jest.fn(),
-            error: jest.fn(),
-          },
+          provide: MasterItemUnitService,
+          useValue: mockMasterItemUnitService,
         },
-        { provide: AccountService, useValue: mockAccountService },
         { provide: AuthService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: mockAccountModel },
+        { provide: AccountService, useValue: {} },
+        { provide: getModelToken(Account.name), useValue: {} },
         { provide: getModelToken(LogActivity.name), useValue: {} },
       ],
     })
@@ -59,7 +53,7 @@ describe('Account Controller', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    controller = app.get<AccountController>(AccountController)
+    controller = app.get<MasterItemUnitController>(MasterItemUnitController)
 
     jest.clearAllMocks()
   })
@@ -83,7 +77,7 @@ describe('Account Controller', () => {
       return app
         .inject({
           method: 'GET',
-          url: '/account',
+          url: '/master/unit',
           query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
         })
         .then((result) => {
@@ -92,38 +86,26 @@ describe('Account Controller', () => {
     }
   )
 
-  it(
-    testCaption('FLOW', 'feature', 'Should return success add', {
-      tab: 0,
-    }),
-    async () => {
-      const data = new AccountAddDTO(mockAccount())
-      return app
-        .inject({
-          method: 'POST',
-          url: '/account',
-          body: data,
-        })
-        .then((result) => {
-          expect(result.statusCode).toEqual(200)
-        })
-    }
-  )
+  it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
+    const data = new MasterItemUnitAddDTO(mockMasterItemUnit())
+    return app
+      .inject({
+        method: 'POST',
+        url: '/master/unit',
+        body: data,
+      })
+      .then((result) => {
+        expect(result.statusCode).toEqual(200)
+      })
+  })
 
   it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new AccountEditDTO({
-      email: accountDocArray[1].email,
-      first_name: accountDocArray[1].first_name,
-      last_name: accountDocArray[1].last_name,
-      phone: accountDocArray[1].phone,
-      __v: 0,
-    })
-    const id = `account-${new Types.ObjectId().toString()}`
-
+    const data = new MasterItemUnitEditDTO(mockMasterItemUnit())
+    const id = `item_unit-${new Types.ObjectId().toString()}`
     return app
       .inject({
         method: 'PATCH',
-        url: `/account/${id}`,
+        url: `/master/unit/${id}`,
         body: data,
       })
       .then((result) => {
@@ -132,11 +114,11 @@ describe('Account Controller', () => {
   })
 
   it(testCaption('FLOW', 'feature', 'Should return detail'), async () => {
-    const id = `account-${new Types.ObjectId().toString()}`
+    const id = `item_unit-${new Types.ObjectId().toString()}`
     return app
       .inject({
         method: 'GET',
-        url: `/account/${id}`,
+        url: `/master/unit/${id}`,
       })
       .then((result) => {
         expect(result.statusCode).toEqual(200)
@@ -144,13 +126,13 @@ describe('Account Controller', () => {
   })
 
   it(
-    testCaption('FLOW', 'feature', 'Should return delete success'),
+    testCaption('FLOW', 'feature', 'Should return success delete'),
     async () => {
       const id = `account-${new Types.ObjectId().toString()}`
       return app
         .inject({
           method: 'DELETE',
-          url: `/account/${id}`,
+          url: `/master/unit/${id}`,
         })
         .then((result) => {
           expect(result.statusCode).toEqual(200)

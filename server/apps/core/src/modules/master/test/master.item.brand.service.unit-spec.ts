@@ -1,6 +1,8 @@
 import { AccountService } from '@core/account/account.service'
 import { mockAccount } from '@core/account/mock/account.mock'
+import { mockAuthorityModel } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
+import { Authority } from '@core/account/schemas/authority'
 import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
@@ -32,8 +34,9 @@ import { Model, Query, Types } from 'mongoose'
 describe('Master Item Brand Service', () => {
   let service: MasterItemBrandService
   let model: Model<MasterItemBrand>
+  const dataSet = mockMasterItemBrand()
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
@@ -72,6 +75,10 @@ describe('Master Item Brand Service', () => {
         {
           provide: getModelToken(Account.name),
           useValue: {},
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthorityModel,
         },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
@@ -131,9 +138,11 @@ describe('Master Item Brand Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master item brand'),
     async () => {
-      jest.spyOn(model, 'create').mockImplementationOnce(() => {
-        return Promise.resolve(masterItemBrandDocArray[0])
+      model.create = jest.fn().mockImplementationOnce(() => {
+        return Promise.resolve(dataSet)
       })
+
+      jest.spyOn(model, 'create')
 
       const newEntry = (await service.add(
         new MasterItemBrandAddDTO(mockMasterItemBrand()),

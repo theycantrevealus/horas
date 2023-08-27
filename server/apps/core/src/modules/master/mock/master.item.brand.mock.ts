@@ -51,8 +51,8 @@ export const mockMasterItemBrand = (
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -71,7 +71,6 @@ export const mockMasterItemBrand = (
 
 export const mockMasterItemBrandModel = {
   new: jest.fn().mockResolvedValue(mockMasterItemBrand()),
-  constructor: jest.fn().mockResolvedValue(mockMasterItemBrand()),
   find: jest.fn(),
   aggregate: jest.fn().mockReturnThis(),
   findOne: jest.fn(),
@@ -79,7 +78,6 @@ export const mockMasterItemBrandModel = {
   update: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
-  remove: jest.fn(),
   exec: jest.fn(),
 }
 
@@ -91,8 +89,8 @@ export const mockMasterItemBrandDoc = (
   remark: mock?.remark || '',
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at:
@@ -129,12 +127,12 @@ export const masterItemBrandDocArray = [
   mockMasterItemBrandDoc(),
   mockMasterItemBrandDoc({
     code: 'XX-002',
-    name: faker.name.firstName(),
+    name: faker.person.firstName(),
     remark: '',
   }),
   mockMasterItemBrandDoc({
     code: 'XX-001',
-    name: faker.name.firstName(),
+    name: faker.person.firstName(),
     remark: '',
   }),
 ]

@@ -6,7 +6,7 @@ import { LogService } from './log.service'
 describe('LogController', () => {
   let logController: LogController
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [LogController],
       providers: [LogService],

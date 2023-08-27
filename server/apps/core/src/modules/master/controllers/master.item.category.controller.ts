@@ -5,19 +5,19 @@ import {
 import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
-  UseInterceptors,
   Version,
 } from '@nestjs/common'
 import {
@@ -28,8 +28,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
+import { FastifyReply } from 'fastify'
 
 @Controller('master')
 @ApiTags('Master Data Management')
@@ -49,21 +49,31 @@ export class MasterItemCategoryController {
     description: 'Showing categories data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
+  async all(
+    @Res() response: FastifyReply,
+    @Query('lazyEvent') parameter: string
+  ) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterItemCategoryService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
+      await this.masterItemCategoryService
+        .all({
+          first: parsedData.first,
+          rows: parsedData.rows,
+          sortField: parsedData.sortField,
+          sortOrder: parsedData.sortOrder,
+          filters: parsedData.filters,
+        })
+        .then((result) => {
+          response.code(HttpStatus.OK).send(result)
+        })
+        .catch((error) => {
+          response.code(HttpStatus.BAD_REQUEST).send(error.message)
+        })
     } else {
-      return {
+      response.code(HttpStatus.BAD_REQUEST).send({
         message: 'filters is not a valid json',
         payload: {},
-      }
+      })
     }
   }
 
@@ -76,32 +86,45 @@ export class MasterItemCategoryController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
-    return await this.masterItemCategoryService.detail(param.id)
+  async detail(@Res() response: FastifyReply, @Param() param) {
+    await this.masterItemCategoryService
+      .detail(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Post('category')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Add new item category',
     description: ``,
   })
   async add(
+    @Res() response: FastifyReply,
     @Body() parameter: MasterItemCategoryAddDTO,
     @CredentialAccount() account
-  ): Promise<GlobalResponse> {
-    return await this.masterItemCategoryService.add(parameter, account)
+  ) {
+    await this.masterItemCategoryService
+      .add(parameter, account)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Patch('category/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit new item category',
@@ -110,15 +133,25 @@ export class MasterItemCategoryController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemCategoryEditDTO, @Param() param) {
-    return await this.masterItemCategoryService.edit(parameter, param.id)
+  async edit(
+    @Res() response: FastifyReply,
+    @Body() parameter: MasterItemCategoryEditDTO,
+    @Param() param
+  ) {
+    await this.masterItemCategoryService
+      .edit(parameter, param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Delete('category/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit new item category',
@@ -127,7 +160,14 @@ export class MasterItemCategoryController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterItemCategoryService.delete(param.id)
+  async delete(@Res() response: FastifyReply, @Param() param) {
+    await this.masterItemCategoryService
+      .delete(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 }

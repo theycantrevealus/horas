@@ -119,8 +119,11 @@ async function bootstrap() {
   app.useLogger(logger)
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
+      transform: true,
+      whitelist: false,
       skipMissingProperties: true,
+      forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         let messages = []
         validationErrors.map((e) => {

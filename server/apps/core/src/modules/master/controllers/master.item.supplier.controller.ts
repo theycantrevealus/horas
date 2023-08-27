@@ -5,18 +5,18 @@ import {
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
-  UseInterceptors,
   Version,
 } from '@nestjs/common'
 import {
@@ -27,8 +27,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
+import { FastifyReply } from 'fastify'
 
 @Controller('master')
 @ApiTags('Master Data Management')
@@ -48,21 +48,31 @@ export class MasterItemSupplierController {
     description: 'Showing supplier data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
+  async all(
+    @Res() response: FastifyReply,
+    @Query('lazyEvent') parameter: string
+  ) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterItemSupplierService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
+      await this.masterItemSupplierService
+        .all({
+          first: parsedData.first,
+          rows: parsedData.rows,
+          sortField: parsedData.sortField,
+          sortOrder: parsedData.sortOrder,
+          filters: parsedData.filters,
+        })
+        .then((result) => {
+          response.code(HttpStatus.OK).send(result)
+        })
+        .catch((error) => {
+          response.code(HttpStatus.BAD_REQUEST).send(error.message)
+        })
     } else {
-      return {
+      response.code(HttpStatus.BAD_REQUEST).send({
         message: 'filters is not a valid json',
         payload: {},
-      }
+      })
     }
   }
 
@@ -85,11 +95,15 @@ export class MasterItemSupplierController {
     type: Number,
     required: true,
   })
-  async find(@Query() parameter) {
-    return await this.masterItemSupplierService.find(
-      parameter.search,
-      parameter.limit
-    )
+  async find(@Res() response: FastifyReply, @Query() parameter) {
+    await this.masterItemSupplierService
+      .find(parameter.search, parameter.limit)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Get('supplier/:id')
@@ -101,32 +115,45 @@ export class MasterItemSupplierController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Query() param) {
-    return await this.masterItemSupplierService.detail(param.id)
+  async detail(@Res() response: FastifyReply, @Query() param) {
+    await this.masterItemSupplierService
+      .detail(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Post('supplier')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Add new item supplier',
     description: ``,
   })
   async add(
+    @Res() response: FastifyReply,
     @Body() parameter: MasterItemSupplierAddDTO,
     @CredentialAccount() account
-  ): Promise<GlobalResponse> {
-    return await this.masterItemSupplierService.add(parameter, account)
+  ) {
+    await this.masterItemSupplierService
+      .add(parameter, account)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Patch('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit new item supplier',
@@ -135,15 +162,25 @@ export class MasterItemSupplierController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemSupplierEditDTO, @Param() param) {
-    return await this.masterItemSupplierService.edit(parameter, param.id)
+  async edit(
+    @Res() response: FastifyReply,
+    @Body() parameter: MasterItemSupplierEditDTO,
+    @Param() param
+  ) {
+    await this.masterItemSupplierService
+      .edit(parameter, param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Delete('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Edit new item supplier',
@@ -152,7 +189,14 @@ export class MasterItemSupplierController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterItemSupplierService.delete(param.id)
+  async delete(@Res() response: FastifyReply, @Param() param) {
+    await this.masterItemSupplierService
+      .delete(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 }

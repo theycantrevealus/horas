@@ -6,7 +6,7 @@ import { ApiService } from './api.service'
 describe('ApiController', () => {
   let apiController: ApiController
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [ApiController],
       providers: [ApiService],

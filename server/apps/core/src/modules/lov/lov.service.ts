@@ -88,7 +88,6 @@ export class LOVService {
       transaction_classify: 'LOV_EDIT',
       transaction_id: null,
     } satisfies GlobalResponse
-
     await this.lovModel
       .findOneAndUpdate(
         {

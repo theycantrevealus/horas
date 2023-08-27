@@ -5,19 +5,19 @@ import {
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
-  UseInterceptors,
   Version,
 } from '@nestjs/common'
 import {
@@ -28,8 +28,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
+import { FastifyReply } from 'fastify'
 
 @Controller('master')
 @ApiTags('Master Data Management')
@@ -49,21 +49,31 @@ export class MasterStockPointController {
     description: 'Showing stock_point data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
+  async all(
+    @Res() response: FastifyReply,
+    @Query('lazyEvent') parameter: string
+  ) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.masterStockPointService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
+      await this.masterStockPointService
+        .all({
+          first: parsedData.first,
+          rows: parsedData.rows,
+          sortField: parsedData.sortField,
+          sortOrder: parsedData.sortOrder,
+          filters: parsedData.filters,
+        })
+        .then((result) => {
+          response.code(HttpStatus.OK).send(result)
+        })
+        .catch((error) => {
+          response.code(HttpStatus.BAD_REQUEST).send(error.message)
+        })
     } else {
-      return {
+      response.code(HttpStatus.BAD_REQUEST).send({
         message: 'filters is not a valid json',
         payload: {},
-      }
+      })
     }
   }
 
@@ -79,58 +89,88 @@ export class MasterStockPointController {
   @ApiParam({
     name: 'id',
   })
-  async detail(@Param() param) {
-    return await this.masterStockPointService.detail(param.id)
+  async detail(@Res() response: FastifyReply, @Param() param) {
+    await this.masterStockPointService
+      .detail(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Post('stock_point')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Add new item stock_point',
+    summary: 'Add stock point',
     description: ``,
   })
   async add(
+    @Res() response: FastifyReply,
     @Body() parameter: MasterStockPointAddDTO,
     @CredentialAccount() account
-  ): Promise<GlobalResponse> {
-    return await this.masterStockPointService.add(parameter, account)
+  ) {
+    await this.masterStockPointService
+      .add(parameter, account)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Patch('stock_point/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Edit new item stock_point',
+    summary: 'Edit stock point',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterStockPointEditDTO, @Param() param) {
-    return await this.masterStockPointService.edit(parameter, param.id)
+  async edit(
+    @Res() response: FastifyReply,
+    @Body() parameter: MasterStockPointEditDTO,
+    @Param() param
+  ) {
+    await this.masterStockPointService
+      .edit(parameter, param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 
   @Delete('stock_point/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Edit new item stock_point',
+    summary: 'Delete stock point',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param): Promise<GlobalResponse> {
-    return await this.masterStockPointService.delete(param.id)
+  async delete(@Res() response: FastifyReply, @Param() param) {
+    await this.masterStockPointService
+      .delete(param.id)
+      .then((result) => {
+        response.code(HttpStatus.OK).send(result)
+      })
+      .catch((error) => {
+        response.code(HttpStatus.BAD_REQUEST).send(error.message)
+      })
   }
 }

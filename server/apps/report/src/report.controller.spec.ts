@@ -6,7 +6,7 @@ import { ReportService } from './report.service'
 describe('ReportController', () => {
   let reportController: ReportController
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [ReportController],
       providers: [ReportService],

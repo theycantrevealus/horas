@@ -51,8 +51,8 @@ export const mockMasterItemCategory = (
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -71,7 +71,6 @@ export const mockMasterItemCategory = (
 
 export const mockMasterItemCategoryModel = {
   new: jest.fn().mockResolvedValue(mockMasterItemCategory()),
-  constructor: jest.fn().mockResolvedValue(mockMasterItemCategory()),
   find: jest.fn(),
   aggregate: jest.fn().mockReturnThis(),
   findOne: jest.fn(),
@@ -79,7 +78,6 @@ export const mockMasterItemCategoryModel = {
   update: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
-  remove: jest.fn(),
   exec: jest.fn(),
 }
 
@@ -92,8 +90,8 @@ export const mockMasterItemCategoryDoc = (
   remark: mock?.remark || '',
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at:

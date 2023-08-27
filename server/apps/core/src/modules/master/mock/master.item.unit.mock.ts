@@ -51,8 +51,8 @@ export const mockMasterItemUnit = (
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -91,8 +91,8 @@ export const mockMasterItemUnitDoc = (
   remark: mock?.remark || '',
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at:
@@ -129,12 +129,12 @@ export const masterItemUnitDocArray = [
   mockMasterItemUnitDoc(),
   mockMasterItemUnitDoc({
     code: 'XX-002',
-    name: faker.name.firstName(),
+    name: faker.person.firstName(),
     remark: '',
   }),
   mockMasterItemUnitDoc({
     code: 'XX-001',
-    name: faker.name.firstName(),
+    name: faker.person.firstName(),
     remark: '',
   }),
 ]

@@ -6,7 +6,7 @@ import { XxAuthService } from './xx_auth.service'
 describe('XxAuthController', () => {
   let xxAuthController: XxAuthController
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [XxAuthController],
       providers: [XxAuthService],
