@@ -27,6 +27,9 @@ import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WinstonModule } from '@utility/logger/module'
 import { TimeManagement } from '@utility/time'
 import { WinstonCustomTransports } from '@utility/transport.winston'
+import {PRB, PRBSchema} from "@core/3rdparty/bpjs/schemas/prb";
+import {BPJSVClaimPRBService} from "@core/3rdparty/bpjs/services/vclaim/prb.service";
+import {BPJSVClaimPRBController} from "@core/3rdparty/bpjs/controllers/vclaim/prb.controller";
 
 @Module({
   imports: [
@@ -121,6 +124,38 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
           return schema
         },
       },
+      {
+        name: PRB.name,
+        useFactory: () => {
+          const schema = PRBSchema
+          const time = new TimeManagement()
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              this.id = `prb-${this._id}`
+              this.__v = 0
+            }
+
+            if (this.isModified()) {
+              this.increment()
+              return next()
+            } else {
+              return next(new Error('Invalid document'))
+            }
+          })
+
+          schema.pre('findOneAndUpdate', async function (next) {
+            const update = this.getUpdate()
+            const docToUpdate = await this.model.findOne(this.getQuery())
+            if (docToUpdate) {
+              update['updated_at'] = time.getTimezone('Asia/Jakarta')
+              update['$inc'] = { __v: 1 }
+            }
+            next()
+          })
+
+          return schema
+        },
+      },
     ]),
     HttpModule,
     AuthModule,
@@ -131,6 +166,7 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
     BPJSVClaimMonitoringController,
     BPJSVClaimSEPController,
     BPJSApplicaresReferensiController,
+    BPJSVClaimPRBController,
   ],
   providers: [
     BPJSVClaimAuthService,
@@ -139,8 +175,8 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
     BPJSVClaimMonitoringService,
     BPJSVClaimSEPService,
     BPJSVClaimSPRIService,
-
     BPJSApplicaresReferensiService,
+    BPJSVClaimPRBService,
   ],
 })
 export class BpjsModule {
