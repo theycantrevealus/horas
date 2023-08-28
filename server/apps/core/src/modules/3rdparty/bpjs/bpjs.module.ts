@@ -29,7 +29,6 @@ import { TimeManagement } from '@utility/time'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 import {PRB, PRBSchema} from "@core/3rdparty/bpjs/schemas/prb";
 import {BPJSVClaimPRBService} from "@core/3rdparty/bpjs/services/vclaim/prb.service";
-import {BPJSVClaimSPRIService} from "@core/3rdparty/bpjs/services/vclaim/rc.service";
 import {BPJSVClaimPRBController} from "@core/3rdparty/bpjs/controllers/vclaim/prb.controller";
 
 @Module({
