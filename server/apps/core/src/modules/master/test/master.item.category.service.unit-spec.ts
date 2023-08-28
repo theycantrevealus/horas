@@ -1,11 +1,12 @@
 import { AccountService } from '@core/account/account.service'
-import { mockAccount } from '@core/account/mock/account.mock'
+import { mockAccount, mockAccountModel } from '@core/account/mock/account.mock'
+import { mockAuthorityModel } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
+import { Authority } from '@core/account/schemas/authority'
 import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
 } from '@core/master/dto/master.item.category'
-import { MasterItemCategoryService } from '@core/master/master.item.category.service'
 import {
   masterItemCategoryDocArray,
   mockMasterItemCategory,
@@ -15,6 +16,7 @@ import {
   MasterItemCategory,
   MasterItemCategoryDocument,
 } from '@core/master/schemas/master.item.category'
+import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -32,8 +34,9 @@ import { Model, Query, Types } from 'mongoose'
 describe('Master Item Category Service', () => {
   let service: MasterItemCategoryService
   let model: Model<MasterItemCategory>
+  const dataSet = mockMasterItemCategory()
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
@@ -71,7 +74,11 @@ describe('Master Item Category Service', () => {
         },
         {
           provide: getModelToken(Account.name),
-          useValue: {},
+          useValue: mockAccountModel,
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthorityModel,
         },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
@@ -133,9 +140,11 @@ describe('Master Item Category Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master item category'),
     async () => {
-      jest.spyOn(model, 'create').mockImplementationOnce(() => {
-        return Promise.resolve(masterItemCategoryDocArray[0])
+      model.create = jest.fn().mockImplementationOnce(() => {
+        return Promise.resolve(dataSet)
       })
+
+      jest.spyOn(model, 'create')
 
       const newEntry = (await service.add(
         new MasterItemCategoryAddDTO(mockMasterItemCategory()),

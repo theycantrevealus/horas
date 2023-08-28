@@ -54,7 +54,7 @@ async function bootstrap() {
         pfx: fs.readFileSync(
           path.resolve(__dirname, 'certificates/localhost.pfx')
         ),
-        requestCert: true,
+        // requestCert: true,
         rejectUnauthorized: true,
         key: fs.readFileSync(
           path.resolve(__dirname, 'certificates/localhost.decrypted.key')
@@ -92,13 +92,13 @@ async function bootstrap() {
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
 
-  // fastifyAdapter.register(require('@fastify/static'), {
-  //   root: path.join(
-  //     __dirname,
-  //     configService.get<string>('application.images.core_dir')
-  //   ),
-  //   prefix: `/${configService.get<string>('application.images.core_prefix')}`,
-  // })
+  fastifyAdapter.register(require('@fastify/static'), {
+    root: path.join(
+      __dirname,
+      configService.get<string>('application.images.core_dir')
+    ),
+    prefix: `/${configService.get<string>('application.images.core_prefix')}`,
+  })
 
   // const fastifyInstance = app.getHttpAdapter().getInstance()
   // fastifyInstance.childLoggerFactory
@@ -119,8 +119,11 @@ async function bootstrap() {
   app.useLogger(logger)
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
+      transform: true,
+      whitelist: false,
       skipMissingProperties: true,
+      forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         let messages = []
         validationErrors.map((e) => {

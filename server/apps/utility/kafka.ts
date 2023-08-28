@@ -81,6 +81,33 @@ const KafkaConnCoord = (devMode) => {
           }),
         },
       ] satisfies ClientsModuleAsyncOptions,
+      queue: [
+        {
+          name: process.env.KAFKA_QUEUE_SERVICE,
+          imports: [
+            ConfigModule.forRoot({
+              isGlobal: true,
+              envFilePath: environmentIdentifier,
+              load: [ApplicationConfig, MongoConfig, KafkaConfig],
+            }),
+          ],
+          inject: [ConfigService],
+          useFactory: async (
+            configService: ConfigService
+          ): Promise<ClientProvider> => ({
+            transport: Transport.KAFKA,
+            options: {
+              client: {
+                clientId: configService.get<string>('kafka.queue.client'),
+                brokers: [configService.get<string>('kafka.queue.broker')],
+              },
+              consumer: {
+                groupId: configService.get<string>('kafka.queue.cons_group'),
+              },
+            },
+          }),
+        },
+      ] satisfies ClientsModuleAsyncOptions,
     }
   } else {
     // PROD / PREPROD MODE
@@ -182,6 +209,54 @@ const KafkaConnCoord = (devMode) => {
                 groupId: configService.get<string>(
                   'kafka.master.item.cons_group'
                 ),
+              },
+            },
+          }),
+        },
+      ] satisfies ClientsModuleAsyncOptions,
+      queue: [
+        {
+          name: process.env.KAFKA_QUEUE_SERVICE,
+          imports: [
+            ConfigModule.forRoot({
+              isGlobal: true,
+              envFilePath: environmentIdentifier,
+              load: [ApplicationConfig, MongoConfig, KafkaConfig],
+            }),
+          ],
+          inject: [ConfigService],
+          useFactory: async (
+            configService: ConfigService
+          ): Promise<ClientProvider> => ({
+            transport: Transport.KAFKA,
+            options: {
+              client: {
+                clientId: configService.get<string>('kafka.queue.client'),
+                brokers: [configService.get<string>('kafka.queue.broker')],
+                ssl: {
+                  secureProtocol: configService.get<string>(
+                    'kafka.queue.ssl.protocol'
+                  ),
+                  rejectUnauthorized: false,
+                  cert: fs.readFileSync(
+                    configService.get<string>('kafka.queue.ssl.ca')
+                  ),
+                  passphrase: configService.get<string>(
+                    'kafka.queue.ssl.passphrase'
+                  ),
+                },
+                sasl: {
+                  mechanism: 'scram-sha-512',
+                  username: configService.get<string>(
+                    'kafka.queue.sasl.username'
+                  ),
+                  password: configService.get<string>(
+                    'kafka.queue.sasl.password'
+                  ),
+                },
+              },
+              consumer: {
+                groupId: configService.get<string>('kafka.queue.cons_group'),
               },
             },
           }),

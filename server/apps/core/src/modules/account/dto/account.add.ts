@@ -1,4 +1,10 @@
-import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
+import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
+import {
+  IMenu,
+  IMenuPermission,
+  MenuJoin,
+  MenuPermissionJoin,
+} from '@core/menu/schemas/menu.model'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
@@ -9,6 +15,13 @@ import {
 } from 'class-validator'
 
 export class AccountAddDTO {
+  @ApiProperty({
+    type: AuthorityJoin,
+    description: '',
+  })
+  @IsNotEmpty()
+  authority: IAuthority
+
   @ApiProperty({
     example: 'johndoe@example.com',
     minLength: 8,
@@ -35,24 +48,16 @@ export class AccountAddDTO {
 
   @ApiProperty({
     example: 'John',
-    minLength: 6,
-    maxLength: 24,
     description: '',
   })
-  @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   @IsString()
   first_name: string
 
   @ApiProperty({
     example: 'Doe',
-    minLength: 6,
-    maxLength: 24,
     description: '',
   })
-  @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   @IsString()
   last_name: string
@@ -71,18 +76,16 @@ export class AccountAddDTO {
   phone: string
 
   @ApiProperty({
-    type: CMenu,
-    isArray: true,
+    type: [MenuJoin],
   })
   @IsNotEmpty()
-  access: CMenu[]
+  access: IMenu[]
 
   @ApiProperty({
-    type: CMenuPermission,
-    isArray: true,
+    type: [MenuPermissionJoin],
   })
   @IsNotEmpty()
-  permission: CMenuPermission[]
+  permission: IMenuPermission[]
 
   constructor(data: any = {}) {
     this.email = data.email

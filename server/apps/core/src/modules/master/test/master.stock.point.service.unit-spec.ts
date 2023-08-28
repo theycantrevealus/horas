@@ -1,11 +1,12 @@
 import { AccountService } from '@core/account/account.service'
-import { mockAccount } from '@core/account/mock/account.mock'
+import { mockAccount, mockAccountModel } from '@core/account/mock/account.mock'
+import { mockAuthorityModel } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
+import { Authority } from '@core/account/schemas/authority'
 import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import {
   masterStockPointDocArray,
   mockMasterStockPoint,
@@ -15,6 +16,7 @@ import {
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@core/master/schemas/master.stock.point'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -32,8 +34,9 @@ import { Model, Query, Types } from 'mongoose'
 describe('Master Stock Point Service', () => {
   let service: MasterStockPointService
   let model: Model<MasterStockPoint>
+  const dataSet = mockMasterStockPoint()
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
@@ -71,7 +74,15 @@ describe('Master Stock Point Service', () => {
         },
         {
           provide: getModelToken(Account.name),
-          useValue: {},
+          useValue: mockAccountModel,
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthorityModel,
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthorityModel,
         },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
@@ -131,9 +142,11 @@ describe('Master Stock Point Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master stock point'),
     async () => {
-      jest.spyOn(model, 'create').mockImplementationOnce(() => {
-        return Promise.resolve(masterStockPointDocArray[0])
+      model.create = jest.fn().mockImplementationOnce(() => {
+        return Promise.resolve(dataSet)
       })
+
+      jest.spyOn(model, 'create')
 
       const newEntry = (await service.add(
         new MasterStockPointAddDTO(mockMasterStockPoint()),

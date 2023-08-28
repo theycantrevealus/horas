@@ -1,11 +1,12 @@
 import { AccountService } from '@core/account/account.service'
-import { mockAccount } from '@core/account/mock/account.mock'
+import { mockAccount, mockAccountModel } from '@core/account/mock/account.mock'
+import { mockAuthorityModel } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
+import { Authority } from '@core/account/schemas/authority'
 import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
 } from '@core/master/dto/master.item.unit'
-import { MasterItemUnitService } from '@core/master/master.item.unit.service'
 import {
   masterItemUnitDocArray,
   mockMasterItemUnit,
@@ -15,6 +16,7 @@ import {
   MasterItemUnit,
   MasterItemUnitDocument,
 } from '@core/master/schemas/master.item.unit'
+import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -32,8 +34,9 @@ import { Model, Query, Types } from 'mongoose'
 describe('Master Item Unit Service', () => {
   let service: MasterItemUnitService
   let model: Model<MasterItemUnit>
+  const dataSet = mockMasterItemUnit()
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
@@ -71,7 +74,11 @@ describe('Master Item Unit Service', () => {
         },
         {
           provide: getModelToken(Account.name),
-          useValue: {},
+          useValue: mockAccountModel,
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthorityModel,
         },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
@@ -131,9 +138,11 @@ describe('Master Item Unit Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master item unit'),
     async () => {
-      jest.spyOn(model, 'create').mockImplementationOnce(() => {
-        return Promise.resolve(masterItemUnitDocArray[0])
+      model.create = jest.fn().mockImplementationOnce(() => {
+        return Promise.resolve(dataSet)
       })
+
+      jest.spyOn(model, 'create')
 
       const newEntry = (await service.add(
         new MasterItemUnitAddDTO(mockMasterItemUnit()),

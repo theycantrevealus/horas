@@ -6,7 +6,7 @@ import { InventoryService } from './inventory.service'
 describe('InventoryController', () => {
   let inventoryController: InventoryController
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [InventoryController],
       providers: [InventoryService],

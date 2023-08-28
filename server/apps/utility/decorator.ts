@@ -22,8 +22,11 @@ export class DecoratorProcessorService {
           Reflect.get(type.target.prototype, prop)
         )
 
+        console.log(`${type.meta}.${prop}`)
+
         if (propValue) {
           const topic = this.configService.get<string>(`${type.meta}.${prop}`)
+          console.log(topic)
           this.logger.verbose(
             `Setting topic ${topic} for ${type.target.name}#${prop}`
           )

@@ -6,8 +6,7 @@ class Corei18nService {
     return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}v1/i18n/all`)
       .then((response) => {
-        // return response?.data
-        return {}
+        return response?.data
       })
       .catch((e) => {
         console.log(e)

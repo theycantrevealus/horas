@@ -9,8 +9,6 @@ import { GeneralReceiveNoteService } from '@core/inventory/general.receive.note.
 import { InventoryService } from '@core/inventory/inventory.service'
 import { PurchaseOrderController } from '@core/inventory/purchase.order.controller'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
-import { MasterItemService } from '@core/master/master.item.service'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import { MasterItem, MasterItemSchema } from '@core/master/schemas/master.item'
 import {
   MasterItemBatch,
@@ -20,6 +18,8 @@ import {
   MasterStockPoint,
   MasterStockPointSchema,
 } from '@core/master/schemas/master.stock.point'
+import { MasterItemService } from '@core/master/services/master.item.service'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import {
   GeneralReceiveNote,
   GeneralReceiveNoteSchema,

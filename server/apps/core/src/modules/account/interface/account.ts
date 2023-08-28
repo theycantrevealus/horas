@@ -4,6 +4,11 @@ import { Types } from 'mongoose'
 export interface IAccount {
   _id?: Types.ObjectId
   id: string
+  authority: {
+    id: string
+    code: string
+    name: string
+  }
   code: string
   email: string
   first_name: string

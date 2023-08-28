@@ -15,7 +15,7 @@ describe('MenuService', () => {
   let service: MenuService
   let connection: Connection
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [MenuService],
       imports: [

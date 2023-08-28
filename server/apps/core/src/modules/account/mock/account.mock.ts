@@ -2,6 +2,7 @@ import { AccountAddDTO } from '@core/account/dto/account.add'
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import { IAuthority } from '@core/account/schemas/authority'
 import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
 import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
@@ -40,17 +41,22 @@ export const mockAccountService = {
 export const mockAccount = (
   id = `account-${new Types.ObjectId().toString()}`,
   code = '',
+  authority: IAuthority = {
+    id: `authority-${new Types.ObjectId().toString()}`,
+    code: 'XXXX',
+    name: 'Example Authority',
+  },
   email = faker.internet.email(),
-  first_name = faker.name.firstName(),
-  last_name = faker.name.lastName(),
+  first_name = faker.person.firstName(),
+  last_name = faker.person.lastName(),
   password = '',
   phone = faker.phone.number(),
   access: IMenu[] = [],
   permission: IMenuPermission[] = [],
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -59,6 +65,7 @@ export const mockAccount = (
 ): Account => ({
   id,
   code,
+  authority,
   email,
   first_name,
   last_name,
@@ -74,31 +81,34 @@ export const mockAccount = (
 
 export const mockAccountModel = {
   new: jest.fn().mockResolvedValue(mockAccount()),
-  constructor: jest.fn().mockResolvedValue(mockAccount()),
-  find: jest.fn(),
-  aggregate: jest.fn().mockReturnThis(),
-  findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-  update: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  remove: jest.fn(),
-  exec: jest.fn(),
+  find: jest.fn().mockImplementation(),
+  aggregate: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockImplementation(),
+  findOneAndUpdate: jest.fn().mockImplementation(),
+  update: jest.fn().mockImplementation(),
+  create: jest.fn().mockImplementation(),
+  save: jest.fn().mockImplementation(),
+  exec: jest.fn().mockImplementation(),
 }
 
 export const mockAccountDoc = (
   mock?: Partial<Account>
 ): Partial<AccountDocument> => ({
-  first_name: mock?.first_name || faker.name.firstName(),
-  last_name: mock?.last_name || faker.name.lastName(),
+  authority: {
+    id: `authority-${new Types.ObjectId().toString()}`,
+    code: 'XXXX',
+    name: 'Example Authority',
+  },
+  first_name: mock?.first_name || faker.person.firstName(),
+  last_name: mock?.last_name || faker.person.lastName(),
   email: mock?.email || faker.internet.email(),
   password: mock?.password || '',
   phone: mock?.phone || faker.phone.number(),
   access: mock?.access || [],
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
   created_at:
@@ -113,9 +123,14 @@ export const accountArray = [
   mockAccount(
     `account-${new Types.ObjectId().toString()}`,
     'XX-XX',
+    {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
     faker.internet.email(),
-    faker.name.firstName(),
-    faker.name.lastName(),
+    faker.person.firstName(),
+    faker.person.lastName(),
     '12345678',
     '6285261516666',
     [],
@@ -128,9 +143,14 @@ export const accountArray = [
   mockAccount(
     `account-${new Types.ObjectId().toString()}`,
     'XX-XX',
+    {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
     faker.internet.email(),
-    faker.name.firstName(),
-    faker.name.lastName(),
+    faker.person.firstName(),
+    faker.person.lastName(),
     '12345678',
     '6285261517777',
     [],
@@ -145,16 +165,26 @@ export const accountArray = [
 export const accountDocArray = [
   mockAccountDoc(),
   mockAccountDoc({
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    authority: {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
     password: '123456',
     phone: faker.phone.number(),
     access: [],
   }),
   mockAccountDoc({
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    authority: {
+      id: `authority-${new Types.ObjectId().toString()}`,
+      code: 'XXXX',
+      name: 'Example Authority',
+    },
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     email: faker.internet.email(),
     password: '',
     phone: faker.phone.number(),

@@ -41,6 +41,25 @@ export const KafkaConfig = () => {
           password: process.env.KAFKA_INVENTORY_SASL_PASSWORD,
         },
       },
+      queue: {
+        service: process.env.KAFKA_QUEUE_SERVICE,
+        topic: {
+          queue: process.env.KAFKA_QUEUE_TOPIC_QUEUE,
+        },
+        client: process.env.KAFKA_QUEUE_CLIENT_ID,
+        broker: process.env.KAFKA_QUEUE_BROKER,
+        cons_group: process.env.KAFKA_QUEUE_CONSUMER_GROUP,
+        ssl: {
+          protocol: process.env.KAFKA_QUEUE_SSL_SCP,
+          ca: process.env.KAFKA_QUEUE_SSL_CA,
+          passphrase: process.env.KAFKA_QUEUE_SSL_PASSPHRASE,
+        },
+        sasl: {
+          mechanism: process.env.KAFKA_QUEUE_SASL_MECHANISM,
+          username: process.env.KAFKA_QUEUE_SASL_USERNAME,
+          password: process.env.KAFKA_QUEUE_SASL_PASSWORD,
+        },
+      },
     },
   }
 }

@@ -1,13 +1,14 @@
 import { IAccount } from '@core/account/interface/account'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
+import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
 import {
   IMenu,
   IMenuPermission,
   MenuJoin,
   MenuPermissionJoin,
 } from '@core/menu/schemas/menu.model'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
@@ -31,13 +32,16 @@ export class Account {
   })
   email: string
 
+  @Prop(AuthorityJoin)
+  authority: IAuthority
+
   @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
   password: string
 
-  @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
+  @Prop({ type: SchemaTypes.String })
   first_name: string
 
-  @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
+  @Prop({ type: SchemaTypes.String })
   last_name: string
 
   @Prop({
@@ -61,7 +65,7 @@ export class Account {
   })
   permission: IMenuPermission[]
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({

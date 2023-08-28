@@ -61,5 +61,5 @@ jobs:
         cache: 'npm'
     - run: npm i
     - run: npm ci
-    - run: npm run test:unit --if-present
+    - run: npm run test --if-present
     

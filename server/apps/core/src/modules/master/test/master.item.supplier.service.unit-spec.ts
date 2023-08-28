@@ -1,11 +1,12 @@
 import { AccountService } from '@core/account/account.service'
-import { mockAccount } from '@core/account/mock/account.mock'
+import { mockAccount, mockAccountModel } from '@core/account/mock/account.mock'
+import { mockAuthorityModel } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
+import { Authority } from '@core/account/schemas/authority'
 import {
   MasterItemSupplierAddDTO,
   MasterItemSupplierEditDTO,
 } from '@core/master/dto/master.item.supplier'
-import { MasterItemSupplierService } from '@core/master/master.item.supplier.service'
 import {
   masterItemSupplierDocArray,
   mockMasterItemSupplier,
@@ -15,6 +16,7 @@ import {
   MasterItemSupplier,
   MasterItemSupplierDocument,
 } from '@core/master/schemas/master.item.supplier'
+import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
 import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -32,8 +34,9 @@ import { Model, Query, Types } from 'mongoose'
 describe('Master Item Supplier Service', () => {
   let service: MasterItemSupplierService
   let model: Model<MasterItemSupplier>
+  const dataSet = mockMasterItemSupplier()
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
@@ -44,7 +47,7 @@ describe('Master Item Supplier Service', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
+            get: jest.fn(() => {
               return null
             }),
           },
@@ -71,7 +74,11 @@ describe('Master Item Supplier Service', () => {
         },
         {
           provide: getModelToken(Account.name),
-          useValue: {},
+          useValue: mockAccountModel,
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthorityModel,
         },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
@@ -136,9 +143,11 @@ describe('Master Item Supplier Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master item supplier'),
     async () => {
-      jest.spyOn(model, 'create').mockImplementationOnce(() => {
-        return Promise.resolve(masterItemSupplierDocArray[0])
+      model.create = jest.fn().mockImplementationOnce(() => {
+        return Promise.resolve(dataSet)
       })
+
+      jest.spyOn(model, 'create')
 
       const newEntry = (await service.add(
         new MasterItemSupplierAddDTO({ ...mockMasterItemSupplier(), __v: 0 }),

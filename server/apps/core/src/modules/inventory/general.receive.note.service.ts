@@ -1,7 +1,7 @@
 import { Account } from '@core/account/schemas/account.model'
 import { InventoryService } from '@core/inventory/inventory.service'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
 import {
   GeneralReceiveNote,

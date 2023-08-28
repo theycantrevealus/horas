@@ -12,6 +12,11 @@ export const SocketConfig = () => ({
       configuration: {
         update: 'configuration_update',
       },
+      queue: {
+        new: 'queue_new',
+        called: 'queue_called',
+        proceed: 'queue_proceed',
+      },
     },
   },
 })

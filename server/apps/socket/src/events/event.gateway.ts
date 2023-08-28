@@ -69,6 +69,7 @@ export class EventsGateway
     @MessageBody() data: ProceedDataTrafficDTO,
     @ConnectedSocket() client: Socket
   ) {
+    this.logger.verbose(`Emit proceed: ${JSON.stringify(data)}`)
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.notify_result.data'),
       data
@@ -81,9 +82,22 @@ export class EventsGateway
     @MessageBody() data: ProceedDataTrafficDTO,
     @ConnectedSocket() client: Socket
   ) {
-    this.logger.verbose('Emit configuration change')
+    this.logger.verbose(`Emit configuration change: ${JSON.stringify(data)}`)
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.configuration.update'),
+      data
+    )
+    return data
+  }
+
+  @SubscribeMessage('queue')
+  async queue_update(
+    @MessageBody() data: ProceedDataTrafficDTO,
+    @ConnectedSocket() client: Socket
+  ) {
+    this.logger.verbose(`Emit queue: ${JSON.stringify(data)}`)
+    this.io.sockets.emit(
+      this.configService.get<string>('neural.event.queue.new'),
       data
     )
     return data

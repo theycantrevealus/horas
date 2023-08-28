@@ -13,6 +13,7 @@ export const modCodes = {
   MasterItemUnitService: 'MSRI-UNT',
   MasterItemSupplierService: 'MSRI-SPP',
   MasterItemBrandService: 'MSRI-BRD',
+  MasterQueueService: 'MQ',
   MasterItemCategoryService: 'MSRI-CAT',
   PurchaseOrderService: 'PO',
   GeneralReceiveNoteService: 'GRN',
@@ -24,4 +25,5 @@ export const modCodes = {
   BPJSVClaumReferenceService: 'BPJS_REF',
   BPJSVClaimSEPService: 'BPJS_VCLAIM_SEP',
   BPJSApplicaresReferensiService: 'BPJS_APPLICARES_SEP',
+  OperationQueueService: 'OPR_QUEUE',
 }

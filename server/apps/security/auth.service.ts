@@ -23,7 +23,7 @@ export class AuthService implements JwtOptionsFactory {
         const expiresIn = 30 * 24 * 60 * 60
         // const expiresIn = 30
 
-        const token = this.jwtService.sign(data)
+        const token = this.jwtService.sign(data, { expiresIn: expiresIn })
 
         result = {
           account: data.account,
@@ -66,10 +66,8 @@ export class AuthService implements JwtOptionsFactory {
     token: string
   }): Promise<JWTTokenDecodeResponse> {
     let result: JWTTokenDecodeResponse
-    const TM = new TimeManagement()
     if (data && data.token) {
       try {
-        // const cleanToken = data.token.split('Bearer')[1].trim()
         const cleanToken = data.token.trim()
 
         await this.jwtService.verify(cleanToken)

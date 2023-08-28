@@ -3,8 +3,6 @@ import { MongoConfig } from '@configuration/mongo'
 import { SocketConfig } from '@configuration/socket'
 import { AccountModule } from '@core/account/account.module'
 import { Account, AccountSchema } from '@core/account/schemas/account.model'
-import { MasterItemService } from '@core/master/master.item.service'
-import { MasterStockPointService } from '@core/master/master.stock.point.service'
 import { MasterItem, MasterItemSchema } from '@core/master/schemas/master.item'
 import {
   MasterItemBatch,
@@ -14,6 +12,8 @@ import {
   MasterStockPoint,
   MasterStockPointSchema,
 } from '@core/master/schemas/master.stock.point'
+import { MasterItemService } from '@core/master/services/master.item.service'
+import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { GeneralReceiveNoteController } from '@inventory/general.receive.note.controller'
 import { GeneralReceiveNoteService } from '@inventory/general.receive.note.service'
 import { InventoryService } from '@inventory/inventory.service'
@@ -227,15 +227,15 @@ import { Logger } from 'winston'
   ],
   controllers: [PurchaseOrderController, GeneralReceiveNoteController],
   providers: [
+    DecoratorProcessorService,
+    SocketIoClientProvider,
+    SocketIoClientProxyService,
     LogService,
     InventoryService,
     PurchaseOrderService,
     GeneralReceiveNoteService,
     MasterItemService,
     MasterStockPointService,
-    SocketIoClientProvider,
-    SocketIoClientProxyService,
-    DecoratorProcessorService,
   ],
   exports: [PurchaseOrderService, GeneralReceiveNoteService],
 })

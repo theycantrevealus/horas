@@ -12,6 +12,7 @@ export class LOVAddDTO {
 
   @ApiProperty({
     example: `lov-${new Types.ObjectId().toString()}`,
+    required: false,
     description: 'Another lov as parent',
   })
   @IsNotEmpty()
@@ -19,6 +20,7 @@ export class LOVAddDTO {
 
   @ApiProperty({
     example: 'Extra remark',
+    required: false,
     description: 'Item brand extra remark',
   })
   @IsNotEmpty()
@@ -40,16 +42,16 @@ export class LOVEditDTO {
 
   @ApiProperty({
     example: `lov-${new Types.ObjectId().toString()}`,
+    required: false,
     description: 'Another lov as parent',
   })
-  @IsNotEmpty()
   parent: string
 
   @ApiProperty({
     example: 'Extra remark',
+    required: false,
     description: 'Item brand extra remark',
   })
-  @IsNotEmpty()
   remark: string
 
   @ApiProperty({
@@ -59,11 +61,4 @@ export class LOVEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(parameter: any) {
-    this.name = parameter.name
-    this.parent = parameter.parent
-    this.remark = parameter.remark
-    this.__v = parameter.__v
-  }
 }

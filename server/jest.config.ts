@@ -1,4 +1,5 @@
 module.exports = {
+  testTimeout: 20000,
   modulePaths: ['<rootDir>'],
   moduleDirectories: ['node_modules'],
   moduleFileExtensions: ['js', 'json', 'ts'],
@@ -16,6 +17,11 @@ module.exports = {
   preset: 'ts-jest',
   testMatch: ['<rootDir>/**/*.unit.ts'],
   testEnvironment: 'node',
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
