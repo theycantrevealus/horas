@@ -9,6 +9,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { AuthService } from '@security/auth.service'
+import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { gen_uuid } from '@utility/generator'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -29,22 +30,29 @@ export class AccountService {
   constructor(
     @InjectModel(Authority.name)
     private accountAuthorityModel: Model<AuthorityDocument>,
+
     @InjectModel(Account.name)
     private accountModel: Model<AccountDocument>,
+
     @InjectModel(LogLogin.name)
     private logLoginModel: Model<LogLoginDocument>,
+
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger,
+
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
+    @Inject(AuthService)
     private authService: AuthService,
+
     @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
-  async all(parameter: any) {
+  async all(parameter: PrimeParameter) {
     return await prime_datatable(parameter, this.accountModel)
   }
 
-  async authorityAll(parameter: any) {
+  async authorityAll(parameter: PrimeParameter) {
     return await prime_datatable(parameter, this.accountAuthorityModel)
   }
 
@@ -405,6 +413,8 @@ export class AccountService {
                       }
                     })
                 }
+
+                await this.cacheManager.set(token.set, accountSet)
 
                 const logLogin = new this.logLoginModel({
                   account: result,

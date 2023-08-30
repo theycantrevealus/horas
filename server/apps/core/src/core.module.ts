@@ -68,6 +68,8 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         return {
+          handleRejections: true,
+          handleExceptions: true,
           colorize: configService.get<boolean>('application.log.colorize'),
           transports: WinstonCustomTransports[environmentName],
         }

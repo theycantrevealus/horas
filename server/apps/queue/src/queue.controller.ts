@@ -8,7 +8,7 @@ import { Logger } from 'winston'
 
 import { ConsumerQueueService } from './queue.service'
 
-@Controller()
+@Controller('queue')
 export class ConsumerQueueController {
   constructor(
     @Inject(SocketIoClientProxyService)

@@ -1,10 +1,5 @@
 import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
-import {
-  IMenu,
-  IMenuPermission,
-  MenuJoin,
-  MenuPermissionJoin,
-} from '@core/menu/schemas/menu.model'
+import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
@@ -43,7 +38,6 @@ export class AccountAddDTO {
   @MinLength(8)
   @MaxLength(24)
   @IsNotEmpty()
-  @IsEmail()
   password: string
 
   @ApiProperty({
@@ -76,16 +70,18 @@ export class AccountAddDTO {
   phone: string
 
   @ApiProperty({
-    type: [MenuJoin],
+    type: CMenu,
+    isArray: true,
   })
   @IsNotEmpty()
-  access: IMenu[]
+  access: CMenu[]
 
   @ApiProperty({
-    type: [MenuPermissionJoin],
+    type: CMenuPermission,
+    isArray: true,
   })
   @IsNotEmpty()
-  permission: IMenuPermission[]
+  permission: CMenuPermission[]
 
   constructor(data: any = {}) {
     this.email = data.email
