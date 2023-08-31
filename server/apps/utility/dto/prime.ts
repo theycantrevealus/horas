@@ -126,7 +126,7 @@ export {
   TransactionErrorMsgResp,
 }
 
-export interface PrimeParameter {
+export class PrimeParameter {
   first: number
   rows: number
   sortField: string
