@@ -113,7 +113,7 @@ describe('Account Service', () => {
     const foundAccount = await service.find({
       first_name: accountDocArray[0].first_name,
     })
-    expect(foundAccount).toEqual(findMockAccount)
+    expect(foundAccount.payload).toEqual(findMockAccount)
   })
 
   it(testCaption('DATA', 'data', 'Should create a new account'), async () => {

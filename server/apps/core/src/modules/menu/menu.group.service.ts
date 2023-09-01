@@ -7,7 +7,7 @@ import {
   MenuGroup,
   MenuGroupDocument,
 } from '@core/menu/schemas/menu.group.model'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -35,7 +35,11 @@ export class MenuGroupService {
 
   async add(data: MenuGroupAddDTO, account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MENU_GROUP_ADD',
@@ -48,9 +52,6 @@ export class MenuGroupService {
       })
       .then((result) => {
         response.message = 'Menu group added successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.payload = {
           id: result.id,
           ...result,
@@ -58,17 +59,21 @@ export class MenuGroupService {
       })
       .catch((error: Error) => {
         response.message = `Menu group failed to add. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
 
   async edit(parameter: MenuGroupEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: await this.menuGroupModel.findOne({
         id: id,
@@ -90,27 +95,16 @@ export class MenuGroupService {
       )
       .exec()
       .then((result) => {
-        if (result === null) {
-          response.message = `Menu group failed to update`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = result
-        } else {
-          result.__v++
-          response.message = 'Menu group updated successfully'
-          response.payload = result
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
-        }
+        result.__v++
+        response.message = 'Menu group updated successfully'
+        response.payload = result
       })
       .catch((error: Error) => {
         response.message = `Menu group failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -118,7 +112,11 @@ export class MenuGroupService {
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: await this.menuGroupModel.findOne({
         id: id,
@@ -138,23 +136,19 @@ export class MenuGroupService {
         .save()
         .then((result) => {
           response.message = 'Menu group deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
+          response.payload = result
         })
         .catch((error: Error) => {
           response.message = `Menu group failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = error
+          throw new Error(JSON.stringify(response))
         })
     } else {
       response.message = `Menu group failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
 
     return response

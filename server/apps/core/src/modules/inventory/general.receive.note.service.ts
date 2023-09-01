@@ -7,7 +7,7 @@ import {
   GeneralReceiveNote,
   GeneralReceiveNoteDocument,
 } from '@inventory/schemas/general.receive.note'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
@@ -51,7 +51,11 @@ export class GeneralReceiveNoteService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'GENERAL_RECEIVE_NOTE_ADD',
@@ -77,29 +81,26 @@ export class GeneralReceiveNoteService {
           )
           if (emitter) {
             response.message = 'General receive note created successfully'
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.success
-            }`
             response.transaction_id = `general_receive_note-${generatedID}`
           } else {
             response.message = `General receive note failed to create. Purchase order is not valid`
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.failed
-            }`
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
+            throw new Error(JSON.stringify(response))
           }
         } else {
           response.message = `General receive note failed to create. Purchase order is not valid`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `General receive note failed to create. Purchase order error : ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response

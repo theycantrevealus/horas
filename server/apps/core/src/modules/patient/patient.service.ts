@@ -2,7 +2,7 @@ import { Account } from '@core/account/schemas/account.model'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import { PatientEditDTO } from '@core/patient/dto/patient.edit'
 import { Patient, PatientDocument } from '@core/patient/schema/patient.model'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -15,94 +15,145 @@ export class PatientService {
   constructor(
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>
   ) {}
-  async all(parameter: any) {
-    return await prime_datatable(parameter, this.patientModel)
-  }
-
-  async detail(code: string): Promise<Patient> {
-    return this.patientModel.findOne({ code: code }).exec()
-  }
-
-  async delete(code: string): Promise<GlobalResponse> {
+  async all(parameter: any): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
-      payload: await this.detail(code),
+      payload: {},
+      transaction_classify: 'PATIENT_SELECT',
+      transaction_id: '',
+    } satisfies GlobalResponse
+    return await prime_datatable(parameter, this.patientModel)
+      .then((result) => {
+        response.payload = result.payload.data
+        return response
+      })
+      .catch((error: Error) => {
+        response.message = `Patient not found. ${error.message}`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error.message
+        throw new Error(JSON.stringify(response))
+      })
+  }
+
+  async detail(code: string): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
+      message: '',
+      payload: {},
       transaction_classify: 'PATIENT_DELETE',
-      transaction_id: code,
+      transaction_id: '',
+    } satisfies GlobalResponse
+    return this.patientModel
+      .findOne({ code: code })
+      .exec()
+      .then((result) => {
+        response.payload = result
+        return response
+      })
+      .catch((error: Error) => {
+        response.message = `Patient not found. ${error.message}`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error.message
+        throw new Error(JSON.stringify(response))
+      })
+  }
+
+  async delete(id: string): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'PATIENT_DELETE',
+      transaction_id: id,
     } satisfies GlobalResponse
 
-    const data = await new this.patientModel(this.detail(code))
-
-    if (data) {
-      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
-
-      await data
-        .save()
-        .then((result) => {
-          response.message = 'Patient deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.success
-          }`
-        })
-        .catch((error: Error) => {
-          response.message = `Patient failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
-        })
-    } else {
-      response.message = `Patient failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
-    }
-
-    return response
+    return await this.patientModel
+      .findOneAndUpdate(
+        {
+          id: id,
+        },
+        {
+          deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+        }
+      )
+      .exec()
+      .then((result) => {
+        response.message = 'Patient deleted successfully'
+        response.payload = result
+        return response
+      })
+      .catch((error: Error) => {
+        response.message = `Patient failed to delete. ${error.message}`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error.message
+        throw new Error(JSON.stringify(response))
+      })
   }
 
   async add(data: PatientAddDTO, credential: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PATIENT_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
-    await this.patientModel
+    return await this.patientModel
       .create({
         ...data,
         created_by: credential,
       })
       .then((result) => {
         response.message = 'Patient created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.payload = result
         response.transaction_id = result.id
+        return response
       })
       .catch((error: Error) => {
         response.message = `Patient failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error.message
+        throw new Error(JSON.stringify(response))
       })
-    return response
   }
 
-  async edit(data: PatientEditDTO, code: string): Promise<GlobalResponse> {
+  async edit(data: PatientEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
-      payload: await this.detail(code),
+      payload: {},
       transaction_classify: 'PATIENT_EDIT',
-      transaction_id: code,
+      transaction_id: id,
     } satisfies GlobalResponse
-    await this.patientModel
+    return await this.patientModel
       .findOneAndUpdate(
         {
-          code: code,
+          code: id,
           __v: data.__v,
         },
         {
@@ -113,27 +164,17 @@ export class PatientService {
       )
       .exec()
       .then((result) => {
-        if (result === null) {
-          response.message = `Patient failed to update`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = result
-        } else {
-          result.__v++
-          response.message = 'Patient updated successfully'
-          response.payload = result
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
-        }
+        result.__v++
+        response.message = 'Patient updated successfully'
+        response.payload = result
+        return response
       })
       .catch((error: Error) => {
         response.message = `Patient failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error.message
+        throw new Error(JSON.stringify(response))
       })
-    return response
   }
 }

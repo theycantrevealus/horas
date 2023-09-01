@@ -1,11 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpStatus,
-  Inject,
-} from '@nestjs/common'
+import { ArgumentsHost, Catch, ExceptionFilter, Inject } from '@nestjs/common'
+import { GlobalResponse } from '@utility/dto/response'
 import { isExpressRequest } from '@utility/http'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { HorasLogging } from '@utility/logger/interfaces'
@@ -27,10 +22,12 @@ export class CommonErrorFilter implements ExceptionFilter {
     const method = isExpressRequest(request)
       ? request.method
       : (request as FastifyRequest).method
-    // TODO : Error code standarization
+
+    const parseError: GlobalResponse = JSON.parse(exception.message)
+
     const responseSet = {
-      code: `ERR_${HttpStatus.BAD_REQUEST}`,
-      message: exception.message,
+      code: parseError.statusCode,
+      message: parseError.message,
       description: exception.stack ?? '',
       timestamp: new Date().toISOString(),
       path: request.url,
@@ -52,10 +49,8 @@ export class CommonErrorFilter implements ExceptionFilter {
       time: TM.getTimezone('Asia/Jakarta'),
     }
 
-    console.log(dataSet)
-
     this.logger.error(dataSet)
 
-    response.status(HttpStatus.BAD_REQUEST).send(responseSet)
+    response.status(parseError.statusCode.defaultCode).send(responseSet)
   }
 }

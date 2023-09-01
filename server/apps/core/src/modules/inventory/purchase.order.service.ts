@@ -9,7 +9,7 @@ import {
   PurchaseOrder,
   PurchaseOrderDocument,
 } from '@inventory/schemas/purchase.order'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
@@ -66,7 +66,11 @@ export class PurchaseOrderService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_ADD',
@@ -88,15 +92,11 @@ export class PurchaseOrderService {
 
     if (emitter) {
       response.message = 'Purchase Order created successfully'
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.success
-      }`
       response.transaction_id = `purchase_order-${generatedID}`
     } else {
       response.message = `Purchase Order failed to create`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
 
     return response
@@ -109,7 +109,11 @@ export class PurchaseOrderService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_APPROVE',
@@ -137,31 +141,28 @@ export class PurchaseOrderService {
           )
           if (emitter) {
             response.message = 'Purchase order proposed successfully'
-            response.statusCode = `${modCodes[this.constructor.name]}_U_${
-              modCodes.Global.success
-            }`
             response.transaction_id = id
             response.payload = result
           } else {
             response.message = `Purchase Order failed to proposed`
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.failed
-            }`
             response.transaction_id = id
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
+            throw new Error(JSON.stringify(response))
           }
         } else {
           response.message = `Purchase order failed to proposed. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Purchase order failed to proposed. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -174,7 +175,11 @@ export class PurchaseOrderService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_APPROVE',
@@ -202,31 +207,28 @@ export class PurchaseOrderService {
           )
           if (emitter) {
             response.message = 'Purchase order approved successfully'
-            response.statusCode = `${modCodes[this.constructor.name]}_U_${
-              modCodes.Global.success
-            }`
             response.transaction_id = id
             response.payload = result
           } else {
             response.message = `Purchase Order failed to approved`
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.failed
-            }`
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
             response.transaction_id = id
+            throw new Error(JSON.stringify(response))
           }
         } else {
           response.message = `Purchase order failed to approve. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -239,7 +241,11 @@ export class PurchaseOrderService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_DECLINE',
@@ -273,33 +279,30 @@ export class PurchaseOrderService {
             .subscribe({
               next: () => {
                 response.message = 'Purchase order declined successfully'
-                response.statusCode = `${modCodes[this.constructor.name]}_U_${
-                  modCodes.Global.success
-                }`
                 response.transaction_id = id
                 response.payload = result
               },
               error: (onError) => {
                 response.message = `Purchase Order failed to decline. ${onError.message}`
-                response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                  modCodes.Global.failed
-                }`
+                response.statusCode =
+                  modCodes[this.constructor.name].error.databaseError
                 response.transaction_id = id
+                throw new Error(JSON.stringify(response))
               },
             })
         } else {
           response.message = `Purchase order failed to decline. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -312,7 +315,11 @@ export class PurchaseOrderService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_EDIT',
@@ -343,35 +350,29 @@ export class PurchaseOrderService {
           )
           if (emitter) {
             response.message = 'Purchase Order updated successfully'
-            response.statusCode = `${modCodes[this.constructor.name]}_U_${
-              modCodes.Global.success
-            }`
             response.transaction_id = id
             response.payload = result
           } else {
             response.message = `Purchase Order failed to update. Invalid document`
-            response.statusCode = `${modCodes[this.constructor.name]}_U_${
-              modCodes.Global.failed
-            }`
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
             response.transaction_id = id
-            response.payload = {}
+            throw new Error(JSON.stringify(response))
           }
         } else {
           response.message = `Purchase Order failed to update. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
           response.transaction_id = id
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Purchase Order failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
-        response.transaction_id = id
-        response.payload = {}
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
@@ -382,7 +383,11 @@ export class PurchaseOrderService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_DELETE',
@@ -407,25 +412,19 @@ export class PurchaseOrderService {
       )
       if (emitter) {
         response.message = 'Purchase order deleted successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_D_${
-          modCodes.Global.success
-        }`
         response.transaction_id = id
         response.payload = {}
       } else {
         response.message = 'Purchase order failed to delete'
-        response.statusCode = `${modCodes[this.constructor.name]}_D_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.transaction_id = id
-        response.payload = {}
+        throw new Error(JSON.stringify(response))
       }
     } else {
       response.message = `Purchase order failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
     return response
   }

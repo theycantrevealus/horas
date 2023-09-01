@@ -1,7 +1,7 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { LicenseAddDTO } from '@core/license/dto/license'
 import { License, LicenseDocument } from '@core/license/schemas/license'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -28,7 +28,11 @@ export class LicenseService {
   ): Promise<GlobalResponse> {
     const generateDir = path.resolve(`${process.cwd()}/certificates`)
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'LICENSE_ADD',
@@ -71,9 +75,6 @@ export class LicenseService {
 
     privateCertificate.on('error', (error) => {
       response.message = `License failed to create. ${error}`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
       response.payload = `Event child error : ${error}`
     })
 
@@ -153,9 +154,6 @@ export class LicenseService {
         })
         .then((result) => {
           response.message = 'License created successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.success
-          }`
           response.transaction_id = result.id
           response.payload = {
             id: result.id,
@@ -164,21 +162,20 @@ export class LicenseService {
         })
         .catch((error: Error) => {
           response.message = `License failed to create. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
-          response.payload = `Error save database : ${error.message}`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          response.payload = error
+          throw new Error(JSON.stringify(response))
         })
     } else {
       response.message = `License failed to create. ${JSON.stringify(
         resultCode
       )}`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
       response.payload = `Error creating license file : ${JSON.stringify(
         resultCode.digestLicense
       )}`
+      throw new Error(JSON.stringify(response))
     }
     return response
   }

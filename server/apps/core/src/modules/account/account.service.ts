@@ -5,7 +5,7 @@ import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Authority, AuthorityDocument } from '@core/account/schemas/authority'
 import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { AuthService } from '@security/auth.service'
@@ -66,7 +66,11 @@ export class AccountService {
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: await this.accountModel.findOne({
         id: id,
@@ -75,42 +79,35 @@ export class AccountService {
       transaction_id: id,
     } satisfies GlobalResponse
 
-    const data = await this.accountModel.findOne({
-      id: id,
-    })
-
-    if (data) {
-      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
-
-      await data
-        .save()
-        .then(() => {
-          response.message = 'Account deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
-        })
-        .catch((error: Error) => {
-          response.message = `Account failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
-          response.payload = error
-        })
-    } else {
-      response.message = `Account failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
-    }
-
-    return response
+    return await this.accountModel
+      .findOneAndUpdate(
+        {
+          id: id,
+        },
+        {
+          deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+        }
+      )
+      .then(() => {
+        response.message = 'Account deleted successfully'
+        return response
+      })
+      .catch((error: Error) => {
+        response.message = `Account failed to delete. ${error.message}`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
+      })
   }
 
   async authorityDelete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: await this.accountAuthorityModel.findOne({
         id: id,
@@ -119,46 +116,73 @@ export class AccountService {
       transaction_id: id,
     } satisfies GlobalResponse
 
-    const data = await this.accountAuthorityModel.findOne({
-      id: id,
-    })
-
-    if (data) {
-      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
-
-      await data
-        .save()
-        .then(() => {
-          response.message = 'Authority deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
-        })
-        .catch((error: Error) => {
-          response.message = `Authority failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
-          response.payload = error
-        })
-    } else {
-      response.message = `Authority failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
-    }
-
-    return response
+    return await this.accountAuthorityModel
+      .findOneAndUpdate(
+        {
+          id: id,
+        },
+        {
+          deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+        }
+      )
+      .then(async () => {
+        response.message = 'Authority deleted successfully'
+        return response
+      })
+      .catch((error: Error) => {
+        response.message = error.message
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
+      })
   }
 
-  async find(filter: any): Promise<Account | undefined> {
-    return this.accountModel.findOne(filter).exec()
+  async find(filter: any): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'ACCOUNT_FIND',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    return this.accountModel
+      .findOne(filter)
+      .exec()
+      .then((result) => {
+        if (result) {
+          response.message = 'Account found'
+          response.payload = result
+          return response
+        } else {
+          response.message = `Account not found`
+          response.statusCode = {
+            ...modCodes[this.constructor.name].error.isNotFound,
+          }
+          throw new Error(JSON.stringify(response))
+        }
+      })
+      .catch((error: Error) => {
+        response.message = error.message
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
+      })
   }
 
   async edit(parameter: AccountEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: await this.accountModel.findOne({
         id: id,
@@ -166,7 +190,7 @@ export class AccountService {
       transaction_classify: 'ACCOUNT_EDIT',
       transaction_id: id,
     } satisfies GlobalResponse
-    await this.accountModel
+    return await this.accountModel
       .findOneAndUpdate(
         {
           id: id,
@@ -185,30 +209,18 @@ export class AccountService {
       )
       .exec()
       .then((result) => {
-        if (!result) {
-          response.message = `Account failed to update`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = result
-        } else {
-          result.__v++
-          response.message = 'Account updated successfully'
-          response.payload = result
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
-        }
+        result.__v++
+        response.message = 'Account updated successfully'
+        response.payload = result
+        return response
       })
       .catch((error: Error) => {
         response.message = `Account failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
-
-    return response
   }
 
   async authorityEdit(
@@ -216,7 +228,11 @@ export class AccountService {
     id: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: await this.accountAuthorityModel.findOne({
         id: id,
@@ -225,7 +241,7 @@ export class AccountService {
       transaction_id: id,
     } satisfies GlobalResponse
 
-    await this.accountAuthorityModel
+    return await this.accountAuthorityModel
       .findOneAndUpdate(
         {
           id: id,
@@ -237,32 +253,19 @@ export class AccountService {
           remark: parameter.remark,
         }
       )
-      .exec()
       .then((result) => {
-        if (!result) {
-          response.message = `Authority failed to update`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = result
-        } else {
-          result.__v++
-          response.message = 'Authority updated successfully'
-          response.payload = result
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
-        }
+        result.__v++
+        response.message = 'Authority updated successfully'
+        response.payload = result
+        return response
       })
       .catch((error: Error) => {
         response.message = `Authority failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
-
-    return response
   }
 
   async add(
@@ -270,7 +273,11 @@ export class AccountService {
     credential: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'ACCOUNT_ADD',
@@ -281,31 +288,27 @@ export class AccountService {
     const password = data.password
     data.password = await bcrypt.hash(password, saltOrRounds)
 
-    await this.accountModel
+    return await this.accountModel
       .create({
         ...data,
         created_by: credential,
       })
       .then((result) => {
         response.message = 'Account created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.transaction_id = result.id
         response.payload = {
           id: result.id,
           ...data,
         }
+        return response
       })
       .catch((error: Error) => {
         response.message = `Account failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
-
-    return response
   }
 
   async authorityAdd(
@@ -313,38 +316,38 @@ export class AccountService {
     credential: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'AUTHORITY_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
 
-    await this.accountAuthorityModel
+    return await this.accountAuthorityModel
       .create({
         ...data,
         created_by: credential,
       })
       .then((result) => {
         response.message = 'Authority created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.transaction_id = result.id
         response.payload = {
           id: result.id,
           ...data,
         }
+        return response
       })
       .catch((error: Error) => {
         response.message = `Authority failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
-
-    return response
   }
 
   async token_coordinator(result: any, currentTime) {
@@ -361,7 +364,11 @@ export class AccountService {
 
   async signIn(parameter: AccountSignInDTO): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'ACCOUNT_SIGNIN',
@@ -369,119 +376,96 @@ export class AccountService {
     } satisfies GlobalResponse
     await this.find({ deleted_at: null, email: parameter.email })
       .then(async (result: any) => {
-        if (result) {
-          await bcrypt
-            .compare(parameter.password, result.password)
-            .then(async (passCheck) => {
-              if (passCheck) {
-                const accountSet = {
+        await bcrypt
+          .compare(parameter.password, result.password)
+          .then(async (passCheck) => {
+            if (passCheck) {
+              const accountSet = {
+                id: result.id,
+                code: result.code,
+                first_name: result.first_name,
+                last_name: result.last_name,
+              }
+              const idenPass = gen_uuid()
+              const TM = new TimeManagement()
+              const currentTime = TM.getTimezone('Asia/Jakarta')
+
+              const oldToken = await this.token_coordinator(
+                accountSet,
+                currentTime
+              )
+
+              let token = {
+                set: '',
+                expired_at: new Date(),
+              }
+
+              if (oldToken !== null) {
+                token = {
+                  set: oldToken.token,
+                  expired_at: oldToken.expired_at,
+                }
+              } else {
+                await this.authService
+                  .create_token({
+                    id: idenPass,
+                    currentTime: currentTime,
+                    account: accountSet,
+                  })
+                  .then((tokenSet) => {
+                    token = {
+                      set: tokenSet.token,
+                      expired_at: tokenSet.expired_at,
+                    }
+                  })
+                  .catch((error: Error) => {
+                    response.message = `Sign in failed. Account not found`
+                    response.statusCode =
+                      modCodes[this.constructor.name].error.databaseError
+                    response.payload = error.message
+                    throw new Error(JSON.stringify(response))
+                  })
+              }
+
+              await this.cacheManager.set(token.set, accountSet)
+
+              response.message = 'Sign in success'
+              response.transaction_id = result.id
+              response.payload = {
+                account: {
                   id: result.id,
                   code: result.code,
                   first_name: result.first_name,
                   last_name: result.last_name,
-                }
-                const idenPass = gen_uuid()
-                const TM = new TimeManagement()
-                const currentTime = TM.getTimezone('Asia/Jakarta')
-
-                const oldToken = await this.token_coordinator(
-                  accountSet,
-                  currentTime
-                )
-
-                let token = {
-                  set: '',
-                  expired_at: new Date(),
-                }
-
-                if (oldToken !== null) {
-                  token = {
-                    set: oldToken.token,
-                    expired_at: oldToken.expired_at,
-                  }
-                } else {
-                  await this.authService
-                    .create_token({
-                      id: idenPass,
-                      currentTime: currentTime,
-                      account: accountSet,
-                    })
-                    .then((tokenSet) => {
-                      token = {
-                        set: tokenSet.token,
-                        expired_at: tokenSet.expired_at,
-                      }
-                    })
-                }
-
-                await this.cacheManager.set(token.set, accountSet)
-
-                const logLogin = new this.logLoginModel({
-                  account: result,
-                  log_meta: '',
-                  iden_pass: idenPass,
-                  token: token.set,
-                  expired_at: token.expired_at,
-                })
-
-                const config = await this.configMeta()
-
-                await logLogin
-                  .save()
-                  .then(async () => {
-                    response.message = 'Sign in success'
-                    response.statusCode = `${
-                      modCodes[this.constructor.name]
-                    }_I_${modCodes.Global.success}`
-                    response.transaction_id = result.id
-                    response.payload = {
-                      account: {
-                        id: result.id,
-                        code: result.code,
-                        first_name: result.first_name,
-                        last_name: result.last_name,
-                        permission: result.permission,
-                        access: result.access,
-                      },
-                      token: token.set,
-                      config: config,
-                    }
-                  })
-                  .catch(() => {
-                    response.message = `Sign in failed. Account not found`
-                    response.statusCode = `${
-                      modCodes[this.constructor.name]
-                    }_I_${modCodes.Global.failed}`
-                    response.payload = {
-                      hell: 1,
-                    }
-                  })
-              } else {
-                response.message = `Sign in failed. Account not found`
-                response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                  modCodes.Global.failed
-                }`
-                response.payload = {
-                  hell: 2,
-                }
+                  permission: result.permission,
+                  access: result.access,
+                },
+                token: token.set,
+                config: await this.configMeta(),
               }
-            })
-        } else {
-          response.message = `Sign in failed. Account not found`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
-          response.payload = {
-            hell: 3,
-          }
-        }
+              return response
+            } else {
+              response.message = `Sign in failed. Account not found`
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              response.payload = {}
+              throw new Error(JSON.stringify(response))
+            }
+          })
+          .catch((error: Error) => {
+            response.message = `Sign in failed. Account not found`
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
+            response.payload = error.message
+            throw new Error(JSON.stringify(response))
+          })
       })
       .catch((error: Error) => {
         response.message = `Sign in failed. Account not found`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error.message
+        throw new Error(JSON.stringify(response))
       })
     return response
   }

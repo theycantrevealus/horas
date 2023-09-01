@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { CustomErrorCode } from '@utility/modules'
 import mongoose from 'mongoose'
 
 export class GlobalResponse {
   @ApiProperty({
-    example: '',
     description: '',
   })
-  statusCode: string
+  statusCode: CustomErrorCode
 
   @ApiProperty({
     example: 'Your request proceed successfully',
@@ -18,7 +18,7 @@ export class GlobalResponse {
     type: Object,
     description: 'Return data from process that may useful for you',
   })
-  payload: object
+  payload?: object
 
   @ApiProperty({
     example: 'TRANSACTION_NAME_FOR_CLASSIFICATION',

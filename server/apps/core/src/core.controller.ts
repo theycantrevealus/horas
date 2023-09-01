@@ -28,6 +28,7 @@ import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { modCodes } from '@utility/modules'
 import { isJSON } from 'class-validator'
 import { Logger } from 'winston'
 
@@ -143,7 +144,7 @@ export class CoreController {
     @Req() request
   ): Promise<GlobalResponse> {
     return await this.coreService.add(parameter).then(async (response) => {
-      if (/S0000/.test(response.statusCode)) {
+      if (/S0000/.test(response.statusCode.customCode)) {
         await this.socketProxy
           .reconnect({
             extraHeaders: {
@@ -161,8 +162,11 @@ export class CoreController {
                 clientSet.disconnect()
               })
           })
-          .catch((e: Error) => {
-            this.logger.warn('Failed to connect')
+          .catch((error: Error) => {
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
+            response.payload = error
+            throw new Error(JSON.stringify(response))
           })
       }
       return response
@@ -183,7 +187,7 @@ export class CoreController {
     return await this.coreService
       .editBulk(parameter)
       .then(async (response) => {
-        if (/S0000/.test(response.statusCode)) {
+        if (/S0000/.test(response.statusCode.customCode)) {
           await this.socketProxy
             .reconnect({
               extraHeaders: {
@@ -201,8 +205,11 @@ export class CoreController {
                   clientSet.disconnect()
                 })
             })
-            .catch((e: Error) => {
-              this.logger.warn('Failed to connect')
+            .catch((error: Error) => {
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              response.payload = error
+              throw new Error(JSON.stringify(response))
             })
         }
         return response
@@ -229,7 +236,7 @@ export class CoreController {
     return await this.coreService
       .edit(parameter, param.id)
       .then(async (response) => {
-        if (/S0000/.test(response.statusCode)) {
+        if (/S0000/.test(response.statusCode.customCode)) {
           await this.socketProxy
             .reconnect({
               extraHeaders: {
@@ -247,8 +254,11 @@ export class CoreController {
                   clientSet.disconnect()
                 })
             })
-            .catch((e: Error) => {
-              this.logger.warn('Failed to connect')
+            .catch((error: Error) => {
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              response.payload = error
+              throw new Error(JSON.stringify(response))
             })
         }
         return response
@@ -270,7 +280,7 @@ export class CoreController {
   })
   async delete(@Param() param, @Req() request): Promise<GlobalResponse> {
     return await this.coreService.delete(param.id).then(async (response) => {
-      if (/S0000/.test(response.statusCode)) {
+      if (/S0000/.test(response.statusCode.customCode)) {
         await this.socketProxy
           .reconnect({
             extraHeaders: {
@@ -288,8 +298,11 @@ export class CoreController {
                 clientSet.disconnect()
               })
           })
-          .catch((e: Error) => {
-            this.logger.warn('Failed to connect')
+          .catch((error: Error) => {
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
+            response.payload = error
+            throw new Error(JSON.stringify(response))
           })
       }
       return response

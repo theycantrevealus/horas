@@ -1,9 +1,10 @@
 import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimRequest } from '@core/3rdparty/bpjs/services/vclaim/request.service'
 import { HttpService } from '@nestjs/axios'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { GlobalResponse } from '@utility/dto/response'
+import { modCodes } from '@utility/modules'
 
 @Injectable()
 export class BPJSVClaimMonitoringService {
@@ -16,7 +17,11 @@ export class BPJSVClaimMonitoringService {
 
   async kunjungan(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_MON_KUNJUNGAN',
@@ -44,7 +49,11 @@ export class BPJSVClaimMonitoringService {
 
   async klaim(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_MON_KLAIM',
@@ -71,7 +80,11 @@ export class BPJSVClaimMonitoringService {
 
   async klaimJasaRaharja(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_MON_KLAIM_JASARAHARJA',
@@ -98,7 +111,11 @@ export class BPJSVClaimMonitoringService {
 
   async historiPelayanan(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_MON_HISTORI_PELAYANAN',

@@ -1,5 +1,5 @@
 import { Account } from '@core/account/schemas/account.model'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -29,7 +29,11 @@ export class CoreConfigGroupService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'CONFIG_GROUP_ADD',
@@ -43,18 +47,15 @@ export class CoreConfigGroupService {
       })
       .then(async (result) => {
         response.message = 'Config group created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.transaction_id = result._id
         response.payload = result
       })
       .catch((error: Error) => {
         response.message = `Config group failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -62,7 +63,11 @@ export class CoreConfigGroupService {
 
   async edit(id: string, data: ConfigGroupEditDTO): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'CONFIG_GROUP_EDIT',
@@ -87,30 +92,31 @@ export class CoreConfigGroupService {
       .then(async (result) => {
         if (result) {
           response.message = 'Config group updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
           response.payload = result
         } else {
           response.message = `Config group failed to update. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Config group failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'LOV_DELETE',
@@ -123,16 +129,14 @@ export class CoreConfigGroupService {
       .exec()
       .then(async (result) => {
         response.message = 'Config group deleted successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_D_${
-          modCodes.Global.success
-        }`
+        response.payload = result
       })
       .catch((error: Error) => {
         response.message = `Config group failed to delete. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_D_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
