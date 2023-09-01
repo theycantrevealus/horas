@@ -46,7 +46,11 @@ export class GeneralReceiveNoteService {
     const detailData: IGeneralReceiveNoteDetail[] = []
 
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_ADD',

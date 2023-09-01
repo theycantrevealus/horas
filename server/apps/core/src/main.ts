@@ -10,43 +10,26 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
+import { environmentName } from '@utility/environtment'
+import { WinstonCustomTransports } from '@utility/transport.winston'
 import { ValidationError } from 'class-validator'
 import * as CopyPlugin from 'copy-webpack-plugin'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as process from 'process'
+import * as winston from 'winston'
 
+import { CommonErrorFilter } from '../../filters/error'
 import { CoreModule } from './core.module'
 
 declare const module: any
 async function bootstrap() {
-  const now = new Date()
   const protocol = parseInt(process.env.NODE_SECURE) > 0
   let fastifyAdapter
   if (protocol) {
     fastifyAdapter = new FastifyAdapter({
-      logger: {
-        serializers: {
-          // res: (response) => {
-          //   return {
-          //     statusCode: response.statusCode,
-          //     payload: response.payload,
-          //   }
-          // },
-          // req: (request: any): any => {
-          //   const parsedDate = new Date(request.time)
-          //   return `${parsedDate.getFullYear()}-${parsedDate.getMonth()}-${parsedDate.getDate()} | ${
-          //     request.method
-          //   }`
-          // },
-        },
-        customLevels: {
-          log: 1,
-        },
-        file: `logs/gateway_${now.getFullYear()}_${now.getMonth()}_${now.getDate()}.log`,
-      },
-      // disableRequestLogging: true,
+      logger: false,
+      disableRequestLogging: true,
       ignoreTrailingSlash: true,
       ignoreDuplicateSlashes: true,
       https: {
@@ -67,13 +50,8 @@ async function bootstrap() {
     })
   } else {
     fastifyAdapter = new FastifyAdapter({
-      logger: {
-        customLevels: {
-          log: 1,
-        },
-        file: `logs/gateway_${now.getFullYear()}_${now.getMonth()}_${now.getDate()}.log`,
-      },
-      // disableRequestLogging: true,
+      logger: false,
+      disableRequestLogging: true,
       ignoreTrailingSlash: true,
       ignoreDuplicateSlashes: true,
     })
@@ -83,14 +61,17 @@ async function bootstrap() {
     CoreModule,
     fastifyAdapter,
     {
-      // bodyParser: false,
-      logger: ['verbose', 'error'],
+      logger: ['verbose', 'error', 'warn'],
     }
   )
 
   const configService = app.get<ConfigService>(ConfigService)
 
-  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER)
+  const logger = winston.createLogger({
+    transports: WinstonCustomTransports[environmentName],
+  })
+
+  logger.level = 'DEBUG'
 
   fastifyAdapter.register(require('@fastify/static'), {
     root: path.join(
@@ -100,23 +81,9 @@ async function bootstrap() {
     prefix: `/${configService.get<string>('application.images.core_prefix')}`,
   })
 
-  // const fastifyInstance = app.getHttpAdapter().getInstance()
-  // fastifyInstance.childLoggerFactory
-  // fastifyInstance.addHook('onSend', async (request, reply, payload) => {
-  //   logger.verbose(payload)
-  //   next()
-  // })
-  // .decorateReply('setHeader', function (name: string, value: unknown) {
-  //   this.header(name, value)
-  // })
-  // .decorateReply('end', function () {
-  //   this.send('')
-  // })
-
-  // app.useStaticAssets(path.join(__dirname, './assets'))
-
   logger.level = 'DEBUG'
-  app.useLogger(logger)
+  // app.useLogger(logger)
+  app.useGlobalFilters(new CommonErrorFilter(logger))
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

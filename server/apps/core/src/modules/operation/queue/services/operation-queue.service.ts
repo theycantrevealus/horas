@@ -1,6 +1,6 @@
 import { Account } from '@core/account/schemas/account.model'
 import { QueueAddDTO } from '@core/operation/queue/dto/queue'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ClientKafka } from '@nestjs/microservices'
 import { GlobalResponse } from '@utility/dto/response'
@@ -22,7 +22,11 @@ export class OperationQueueService {
     token: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'QUEUE',
@@ -41,18 +45,15 @@ export class OperationQueueService {
         account: account,
       }
     )
+
     if (emitter) {
       response.message = 'Queue created successfully'
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.success
-      }`
       response.transaction_id = `queue-${generatedID}`
+      return response
     } else {
       response.message = `Queue failed to create`
-      response.statusCode = `${modCodes[this.constructor.name]}_I_${
-        modCodes.Global.failed
-      }`
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
-    return response
   }
 }

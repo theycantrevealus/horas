@@ -2,6 +2,7 @@ import { AccountController } from '@core/account/account.controller'
 import { AccountAddDTO } from '@core/account/dto/account.add'
 import { AccountEditDTO } from '@core/account/dto/account.edit'
 import {
+  accountArray,
   accountDocArray,
   mockAccount,
   mockAccountModel,
@@ -10,7 +11,8 @@ import {
 import { Account } from '@core/account/schemas/account.model'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
-import { CanActivate } from '@nestjs/common'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { CanActivate, HttpStatus } from '@nestjs/common'
 import { getModelToken } from '@nestjs/mongoose'
 import {
   FastifyAdapter,
@@ -22,6 +24,7 @@ import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
 import { Types } from 'mongoose'
+import { Logger } from 'winston'
 
 import { AccountService } from '../account.service'
 
@@ -29,6 +32,7 @@ describe('Account Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
   let controller: AccountController
+  let logger: Logger
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,6 +45,13 @@ describe('Account Controller', () => {
             warn: jest.fn(),
             verbose: jest.fn(),
             error: jest.fn(),
+          },
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: () => accountArray[0],
+            set: () => jest.fn(),
           },
         },
         { provide: AccountService, useValue: mockAccountService },
@@ -60,6 +71,7 @@ describe('Account Controller', () => {
     await app.getHttpAdapter().getInstance().ready()
 
     controller = app.get<AccountController>(AccountController)
+    logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
 
     jest.clearAllMocks()
   })
@@ -83,11 +95,15 @@ describe('Account Controller', () => {
       return app
         .inject({
           method: 'GET',
+          headers: {
+            authorization: 'Bearer ey...',
+          },
           url: '/account',
           query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
         })
         .then((result) => {
-          expect(result.statusCode).toEqual(200)
+          expect(result.statusCode).toEqual(HttpStatus.OK)
+          expect(logger.verbose).toHaveBeenCalled()
         })
     }
   )
@@ -105,7 +121,8 @@ describe('Account Controller', () => {
           body: data,
         })
         .then((result) => {
-          expect(result.statusCode).toEqual(200)
+          expect(result.statusCode).toEqual(HttpStatus.CREATED)
+          expect(logger.verbose).toHaveBeenCalled()
         })
     }
   )
@@ -127,7 +144,8 @@ describe('Account Controller', () => {
         body: data,
       })
       .then((result) => {
-        expect(result.statusCode).toEqual(200)
+        expect(result.statusCode).toEqual(HttpStatus.OK)
+        expect(logger.verbose).toHaveBeenCalled()
       })
   })
 
@@ -139,7 +157,8 @@ describe('Account Controller', () => {
         url: `/account/${id}`,
       })
       .then((result) => {
-        expect(result.statusCode).toEqual(200)
+        expect(result.statusCode).toEqual(HttpStatus.OK)
+        expect(logger.verbose).toHaveBeenCalled()
       })
   })
 
@@ -153,7 +172,8 @@ describe('Account Controller', () => {
           url: `/account/${id}`,
         })
         .then((result) => {
-          expect(result.statusCode).toEqual(200)
+          expect(result.statusCode).toEqual(HttpStatus.OK)
+          expect(logger.verbose).toHaveBeenCalled()
         })
     }
   )

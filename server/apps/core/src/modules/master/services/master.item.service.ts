@@ -7,7 +7,7 @@ import {
   MasterItem,
   MasterItemDocument,
 } from '@core/master/schemas/master.item'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { M_ITEM_SERVICE } from '@utility/constants'
@@ -98,7 +98,11 @@ export class MasterItemService {
 
   async add(data: MasterItemAddDTO, account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_ITEM_ADD',
@@ -116,18 +120,15 @@ export class MasterItemService {
       })
       .then((result) => {
         response.message = 'Master item created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.transaction_id = result._id
         response.payload = result
       })
       .catch((error: Error) => {
         response.message = `Master item failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -135,7 +136,11 @@ export class MasterItemService {
 
   async edit(data: MasterItemEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_ITEM_EDIT',
@@ -162,30 +167,31 @@ export class MasterItemService {
       .then((result) => {
         if (result) {
           response.message = 'Master item updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
           response.payload = result
         } else {
           response.message = `Master item failed to update. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Master item failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_ITEM_DELETE',
@@ -202,30 +208,29 @@ export class MasterItemService {
         .save()
         .then(() => {
           response.message = 'Master item deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
         })
         .catch((error: Error) => {
           response.message = `Master item failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = error
+          throw new Error(JSON.stringify(response))
         })
     } else {
       response.message = `Master item failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
     return response
   }
 
   async import(file: string, account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_ITEM_IMPORT',
@@ -237,15 +242,10 @@ export class MasterItemService {
     })
     if (emitter) {
       response.message = 'Master item imported successfully'
-      response.statusCode = `${modCodes[this.constructor.name]}_G_${
-        modCodes.Global.success
-      }`
     } else {
       response.message = `Master item failed to import`
-      response.statusCode = `${modCodes[this.constructor.name]}_G_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
     return response
   }

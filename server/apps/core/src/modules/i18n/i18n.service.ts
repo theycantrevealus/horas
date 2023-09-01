@@ -1,7 +1,7 @@
 import { Account } from '@core/account/schemas/account.model'
 import { i18nAddDTO, i18nEditDTO } from '@core/i18n/dto/i18n'
 import { i18n, i18nDocument } from '@core/i18n/schemas/i18n'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -33,7 +33,11 @@ export class i18nService {
 
   async add(data: i18nAddDTO, account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'I18N_ADD',
@@ -47,18 +51,15 @@ export class i18nService {
       })
       .then((result) => {
         response.message = 'i18n created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.transaction_id = result._id
         response.payload = result
       })
       .catch((error: Error) => {
         response.message = `i18n failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -66,7 +67,11 @@ export class i18nService {
 
   async edit(data: i18nEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'I18N_EDIT',
@@ -102,30 +107,31 @@ export class i18nService {
       .then((result) => {
         if (result) {
           response.message = 'i18n updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
           response.payload = result
         } else {
           response.message = `i18n failed to update. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `i18n failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'I18N_DELETE',
@@ -142,23 +148,19 @@ export class i18nService {
         .save()
         .then((result) => {
           response.message = 'i18n deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
+          response.payload = result
         })
         .catch((error: Error) => {
           response.message = `i18n failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = error
+          throw new Error(JSON.stringify(response))
         })
     } else {
       response.message = `i18n failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
     return response
   }

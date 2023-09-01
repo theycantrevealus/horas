@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Type } from '@nestjs/common'
 import { ModuleMetadata } from '@nestjs/common/interfaces'
 import { Logger, LoggerOptions } from 'winston'
@@ -24,4 +25,16 @@ export interface WinstonModuleAsyncOptions
   ) => Promise<WinstonModuleOptions> | WinstonModuleOptions
   inject?: any[]
   useClass?: Type<WinstonModuleOptionsFactory>
+}
+
+export interface HorasLogging {
+  ip: string
+  path: string
+  url: string
+  method: string
+  payload: any
+  result: any
+  takeTime: number
+  account: IAccountCreatedBy
+  time: Date
 }

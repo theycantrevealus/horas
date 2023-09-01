@@ -8,7 +8,7 @@ import { BPJSVClaimRequest } from '@core/3rdparty/bpjs/services/vclaim/request.s
 import { Account } from '@core/account/schemas/account.model'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -33,7 +33,11 @@ export class BPJSVClaimSEPService {
 
   async cari(noSEP): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_CARI',
@@ -56,7 +60,11 @@ export class BPJSVClaimSEPService {
 
   async create(parameter: SEPAdd, account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_ADD',
@@ -101,35 +109,30 @@ export class BPJSVClaimSEPService {
             })
             .then((result) => {
               response.message = 'SEP created successfully'
-              response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                modCodes.Global.success
-              }`
               response.transaction_id = result._id
               response.payload = result
             })
             .catch((error: Error) => {
               response.message = `SEP failed to create. ${error.message}`
-              response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                modCodes.Global.failed
-              }`
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
               response.payload = error
-              return response
+              throw new Error(JSON.stringify(response))
             })
         } else {
           response.message = `SEP failed to create. ${bpjsResponse.metadata.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
         return bpjsResponse
       })
       .catch((error: any) => {
         response.message = error.message.metadata.message
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
-        response.payload = error.message
-        return response
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -141,7 +144,11 @@ export class BPJSVClaimSEPService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_EDIT',
@@ -181,35 +188,30 @@ export class BPJSVClaimSEPService {
             )
             .then((result) => {
               response.message = 'SEP updated successfully'
-              response.statusCode = `${modCodes[this.constructor.name]}_U_${
-                modCodes.Global.success
-              }`
               response.transaction_id = result._id
               response.payload = result
             })
             .catch((error: Error) => {
               response.message = `SEP failed to update. ${error.message}`
-              response.statusCode = `${modCodes[this.constructor.name]}_U_${
-                modCodes.Global.failed
-              }`
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
               response.payload = error
-              return response
+              throw new Error(JSON.stringify(response))
             })
         } else {
           response.message = `SEP failed to update. ${bpjsResponse.metadata.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
         return bpjsResponse
       })
       .catch((error: any) => {
         response.message = error.message.metadata.message
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
-        response.payload = error.message
-        return response
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -220,7 +222,11 @@ export class BPJSVClaimSEPService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_PULANG',
@@ -261,35 +267,30 @@ export class BPJSVClaimSEPService {
             )
             .then((result) => {
               response.message = 'SEP updated successfully'
-              response.statusCode = `${modCodes[this.constructor.name]}_U_${
-                modCodes.Global.success
-              }`
               response.transaction_id = result._id
               response.payload = result
             })
             .catch((error: Error) => {
               response.message = `SEP failed to update. ${error.message}`
-              response.statusCode = `${modCodes[this.constructor.name]}_U_${
-                modCodes.Global.failed
-              }`
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
               response.payload = error
-              return response
+              throw new Error(JSON.stringify(response))
             })
         } else {
           response.message = `SEP failed to update. ${bpjsResponse.metadata.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
         return bpjsResponse
       })
       .catch((error: any) => {
         response.message = error.message.metadata.message
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
-        response.payload = error.message
-        return response
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -297,7 +298,11 @@ export class BPJSVClaimSEPService {
 
   async getPulang(month, year): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_PULANG',
@@ -322,7 +327,11 @@ export class BPJSVClaimSEPService {
 
   async delete(noSEP, account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_DELETE',
@@ -363,35 +372,30 @@ export class BPJSVClaimSEPService {
             )
             .then((result) => {
               response.message = 'SEP deleted successfully'
-              response.statusCode = `${modCodes[this.constructor.name]}_D_${
-                modCodes.Global.success
-              }`
               response.transaction_id = result._id
               response.payload = result
             })
             .catch((error: Error) => {
               response.message = `SEP failed to delete. ${error.message}`
-              response.statusCode = `${modCodes[this.constructor.name]}_D_${
-                modCodes.Global.failed
-              }`
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
               response.payload = error
-              return response
+              throw new Error(JSON.stringify(response))
             })
         } else {
           response.message = `SEP failed to delete. ${bpjsResponse.metadata.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
         return bpjsResponse
       })
       .catch((error: any) => {
         response.message = error.message.metadata.message
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
-        response.payload = error.message
-        return response
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -399,7 +403,11 @@ export class BPJSVClaimSEPService {
 
   async internal(noSEP): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_INTERNAL',
@@ -424,7 +432,11 @@ export class BPJSVClaimSEPService {
 
   async jasaRaharjaSuplesi(noKartu, tglPelayanan): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_SUPLESI',
@@ -449,7 +461,11 @@ export class BPJSVClaimSEPService {
 
   async jasaRaharjaDataIndukKecelakaan(noKartu): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_DATA_INDUK_KECELAKAAN',
@@ -474,7 +490,11 @@ export class BPJSVClaimSEPService {
 
   async persetujuan(month, year): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_PERSETUJUAN',
@@ -502,7 +522,11 @@ export class BPJSVClaimSEPService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_SEP_PERSETUJUAN',

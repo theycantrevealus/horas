@@ -70,7 +70,7 @@ describe('Patient Service', () => {
       filters: {},
     })
 
-    expect(allData.payload.data).toEqual(patientDocArray)
+    expect(allData.payload).toEqual(patientDocArray)
   })
 
   it(testCaption('DATA', 'data', 'Should show patient detail'), async () => {
@@ -81,7 +81,7 @@ describe('Patient Service', () => {
       }) as any
     )
     const foundPatient = await service.detail(sample.id)
-    expect(foundPatient).toEqual(sample)
+    expect(foundPatient.payload).toEqual(sample)
   })
 
   it(testCaption('DATA', 'data', 'Should create a new patient'), async () => {

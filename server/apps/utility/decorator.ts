@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants'
 import { ConfigService } from '@nestjs/config'
 import { KAFKA_TOPICS } from '@utility/constants'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -52,4 +53,20 @@ export function KafkaTopic(variable: string): any {
     Reflect.defineMetadata(KAFKA_TOPICS, variable, descriptor.value)
     return descriptor
   }
+}
+
+export function getParamDecoratorFactory(Decorator) {
+  class MockCredentialAccount {
+    public getAccount(@Decorator() value) {}
+  }
+
+  const args = Reflect.getMetadata(
+    ROUTE_ARGS_METADATA,
+    MockCredentialAccount,
+    'getAccount'
+  )
+
+  console.log(args[Object.keys(args)[0]].factory)
+
+  return args[Object.keys(args)[0]].factory
 }

@@ -1,9 +1,10 @@
 import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimRequest } from '@core/3rdparty/bpjs/services/vclaim/request.service'
 import { HttpService } from '@nestjs/axios'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { GlobalResponse } from '@utility/dto/response'
+import { modCodes } from '@utility/modules'
 
 @Injectable()
 export class BPJSVClaimReferensiService {
@@ -15,7 +16,11 @@ export class BPJSVClaimReferensiService {
   ) {}
   async poli(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_POLI',
@@ -40,7 +45,11 @@ export class BPJSVClaimReferensiService {
 
   async diagnosa(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_DIAGNOSE',
@@ -65,7 +74,11 @@ export class BPJSVClaimReferensiService {
 
   async faskes(parameter, type): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_POLI',
@@ -90,7 +103,11 @@ export class BPJSVClaimReferensiService {
 
   async dokterDPJP(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_DPJP',
@@ -117,7 +134,11 @@ export class BPJSVClaimReferensiService {
 
   async propinsi(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_PROVINCE',
@@ -142,7 +163,11 @@ export class BPJSVClaimReferensiService {
 
   async kabupaten(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_REGION',
@@ -167,7 +192,11 @@ export class BPJSVClaimReferensiService {
 
   async kecamatan(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_DISTRICT',
@@ -192,7 +221,11 @@ export class BPJSVClaimReferensiService {
 
   async diagnosaPRB(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_DIAGNOSE_PRB',
@@ -217,7 +250,11 @@ export class BPJSVClaimReferensiService {
 
   async obatPRB(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_DRUG_PRB',
@@ -242,7 +279,11 @@ export class BPJSVClaimReferensiService {
 
   async prosedur(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_PROCEDURE',
@@ -267,7 +308,11 @@ export class BPJSVClaimReferensiService {
 
   async kelasRawat(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_CLASS',
@@ -292,7 +337,11 @@ export class BPJSVClaimReferensiService {
 
   async ruangRawat(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_CLASS',
@@ -317,7 +366,11 @@ export class BPJSVClaimReferensiService {
 
   async caraKeluar(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_CLASS',
@@ -342,7 +395,11 @@ export class BPJSVClaimReferensiService {
 
   async pascaPulang(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_CLASS',
@@ -367,7 +424,11 @@ export class BPJSVClaimReferensiService {
 
   async dokterLPK(parameter): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_DOCTOR_LPK',
@@ -392,7 +453,11 @@ export class BPJSVClaimReferensiService {
 
   async spesialistik(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_VCLAIM_REF_SPECIALIST',

@@ -1,10 +1,8 @@
 import {
   ExecutionContext,
-  HttpException,
-  HttpStatus,
+  ForbiddenException,
   Injectable,
   Logger,
-  UnauthorizedException,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
@@ -24,7 +22,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err, account, info) {
     if (err || !account) {
-      throw err || new UnauthorizedException()
+      throw err || new ForbiddenException()
     }
     return account
   }
@@ -41,19 +39,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest()
 
     if (!request.headers.authorization) {
-      throw new UnauthorizedException('Not authorized request')
+      throw new ForbiddenException({
+        message: 'Unauthorize',
+        data: null,
+        errors: null,
+      })
     }
 
     const header_token = request.headers.authorization
     if (!header_token) {
-      throw new HttpException(
-        {
-          message: 'UnAuthorized',
-          data: null,
-          errors: null,
-        },
-        HttpStatus.UNAUTHORIZED
-      )
+      throw new ForbiddenException({
+        message: 'Unauthorize',
+        data: null,
+        errors: null,
+      })
     }
     const token = header_token.split('Bearer')[1]
     const decodeTokenResponse: JWTTokenDecodeResponse =
@@ -64,14 +63,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     request.credential = decodeTokenResponse.account
 
     if (!decodeTokenResponse.account) {
-      throw new HttpException(
-        {
-          message: decodeTokenResponse.message,
-          data: null,
-          errors: null,
-        },
-        decodeTokenResponse.status
-      )
+      throw new ForbiddenException({
+        message: decodeTokenResponse.message,
+        data: null,
+        errors: null,
+      })
     }
 
     if (
@@ -79,14 +75,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       !decodeTokenResponse.token ||
       !decodeTokenResponse.account
     ) {
-      throw new HttpException(
-        {
-          message: decodeTokenResponse.message,
-          data: null,
-          errors: null,
-        },
-        decodeTokenResponse.status
-      )
+      throw new ForbiddenException({
+        message: decodeTokenResponse.message,
+        data: null,
+        errors: null,
+      })
     }
 
     return true

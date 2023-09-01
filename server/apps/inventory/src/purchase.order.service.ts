@@ -75,7 +75,11 @@ export class PurchaseOrderService {
     const detailData: IPurchaseOrderDetail[] = []
 
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_ADD',
@@ -177,7 +181,11 @@ export class PurchaseOrderService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_APPROVE',
@@ -227,7 +235,11 @@ export class PurchaseOrderService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_APPROVE',
@@ -278,7 +290,11 @@ export class PurchaseOrderService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_DECLINE',
@@ -328,7 +344,11 @@ export class PurchaseOrderService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_EDIT',
@@ -429,7 +449,11 @@ export class PurchaseOrderService {
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'PURCHASE_ORDER_DELETE',

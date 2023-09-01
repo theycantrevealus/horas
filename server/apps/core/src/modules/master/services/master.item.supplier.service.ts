@@ -7,7 +7,7 @@ import {
   MasterItemSupplier,
   MasterItemSupplierDocument,
 } from '@core/master/schemas/master.item.supplier'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -49,7 +49,11 @@ export class MasterItemSupplierService {
     creator: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_ITEM_SUPPLIER_ADD',
@@ -64,9 +68,6 @@ export class MasterItemSupplierService {
       })
       .then((result) => {
         response.message = 'Master item supplier created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.transaction_id = result.id
         response.payload = {
           ...data,
@@ -76,10 +77,10 @@ export class MasterItemSupplierService {
       })
       .catch((error: Error) => {
         response.message = `Master item supplier failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -90,7 +91,11 @@ export class MasterItemSupplierService {
     id: string
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_ITEM_SUPPLIER_EDIT',
@@ -117,23 +122,20 @@ export class MasterItemSupplierService {
       .then((result) => {
         if (result) {
           response.message = 'Master item supplier updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
           response.payload = result
         } else {
           response.message = `Master item supplier failed to update`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Master item supplier failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -141,7 +143,11 @@ export class MasterItemSupplierService {
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_ITEM_SUPPLIER_DELETE',
@@ -158,23 +164,19 @@ export class MasterItemSupplierService {
         .save()
         .then((result) => {
           response.message = 'Master item supplier deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
+          response.payload = result
         })
         .catch((error: Error) => {
           response.message = `Master item supplier failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = error
+          throw new Error(JSON.stringify(response))
         })
     } else {
       response.message = `Master item supplier failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
     return response
   }

@@ -1,6 +1,6 @@
 import { AccountService } from '@core/account/account.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -128,7 +128,11 @@ export class CoreService {
     }
 
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {
         data: [],
@@ -175,10 +179,6 @@ export class CoreService {
       }
     })
 
-    response.statusCode = `${modCodes[this.constructor.name]}_L_${
-      modCodes.Global.success
-    }`
-
     return response
   }
 
@@ -196,7 +196,11 @@ export class CoreService {
 
   async add(data: ConfigAddDTO): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'CONFIG_ADD',
@@ -214,28 +218,25 @@ export class CoreService {
           .then(() => {
             this.logger.verbose(`Create [${result.name}] configuration`)
             response.message = 'Config created successfully'
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.success
-            }`
             response.transaction_id = result._id
             response.payload = result
           })
-          .catch(() => {
+          .catch((error: Error) => {
             response.message =
               'Config created successfully. But failed to load to memory'
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.success
-            }`
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
+            response.payload = error
             response.transaction_id = result._id
-            response.payload = result
+            throw new Error(JSON.stringify(response))
           })
       })
       .catch((error: Error) => {
         response.message = `Config failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -243,7 +244,11 @@ export class CoreService {
 
   async editBulk(data: Config[]): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'CONFIG_EDIT',
@@ -271,22 +276,20 @@ export class CoreService {
       .then((result) => {
         if (result) {
           response.message = 'Config updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
           response.payload = result
         } else {
           response.message = `Config failed to update 22`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Config failed to update. 222 ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -294,7 +297,11 @@ export class CoreService {
 
   async edit(data: ConfigEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'CONFIG_EDIT',
@@ -326,39 +333,40 @@ export class CoreService {
             .then(() => {
               this.logger.verbose(`Update [${result.name}] configuration`)
               response.message = 'Config updated successfully'
-              response.statusCode = `${modCodes[this.constructor.name]}_U_${
-                modCodes.Global.success
-              }`
               response.payload = result
             })
-            .catch(() => {
+            .catch((error: Error) => {
               response.message =
                 'Config updated successfully. But failed to load to memory'
-              response.statusCode = `${modCodes[this.constructor.name]}_U_${
-                modCodes.Global.success
-              }`
-              response.payload = result
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              response.payload = error
+              throw new Error(JSON.stringify(response))
             })
         } else {
           response.message = `Config failed to update. Invalid document !!!`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `Config failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'CONFIG_DELETE',
@@ -373,16 +381,13 @@ export class CoreService {
         await this.cacheManager.del(result.name.toUpperCase())
         this.logger.verbose(`Deleting [${result.name}] configuration`)
         response.message = 'Config deleted successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_D_${
-          modCodes.Global.success
-        }`
       })
       .catch((error: Error) => {
         response.message = `Config failed to delete. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_D_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }

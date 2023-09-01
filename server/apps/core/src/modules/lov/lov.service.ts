@@ -2,7 +2,7 @@ import { Account } from '@core/account/schemas/account.model'
 import { LOVAddDTO, LOVEditDTO } from '@core/lov/dto/lov'
 import { LOV, LOVDocument } from '@core/lov/schemas/lov'
 import { ILOV } from '@core/lov/schemas/lov.join'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -49,7 +49,11 @@ export class LOVService {
 
   async add(data: LOVAddDTO, account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'LOV_ADD',
@@ -63,18 +67,15 @@ export class LOVService {
       })
       .then((result) => {
         response.message = 'LOV created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
         response.transaction_id = result._id
         response.payload = result
       })
       .catch((error: Error) => {
         response.message = `LOV failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -82,7 +83,11 @@ export class LOVService {
 
   async edit(data: LOVEditDTO, id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'LOV_EDIT',
@@ -104,30 +109,31 @@ export class LOVService {
       .then((result) => {
         if (result) {
           response.message = 'LOV updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
           response.payload = result
         } else {
           response.message = `LOV failed to update. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
-          response.payload = {}
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `LOV failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
     return response
   }
 
   async delete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'LOV_DELETE',
@@ -144,23 +150,19 @@ export class LOVService {
         .save()
         .then((result) => {
           response.message = 'LOV deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
+          response.payload = result
         })
         .catch((error: Error) => {
           response.message = `LOV failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = error
+          throw new Error(JSON.stringify(response))
         })
     } else {
       response.message = `LOV failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
-      response.payload = {}
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      throw new Error(JSON.stringify(response))
     }
     return response
   }

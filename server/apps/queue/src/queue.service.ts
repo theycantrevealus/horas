@@ -5,7 +5,7 @@ import {
   OperationQueueDocument,
 } from '@core/operation/queue/schemas/queue'
 import { LogService } from '@log/log.service'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -24,17 +24,21 @@ export class ConsumerQueueService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'QUEUE',
       transaction_id: null,
     } satisfies GlobalResponse
-    await this.operationQueueModel
+    return await this.operationQueueModel
       .countDocuments({ machine: data.machine })
       .then(async (result) => {
         const currentQueue = result + 1
-        await this.operationQueueModel
+        return await this.operationQueueModel
           .create({
             id: `queue-${generatedID}`,
             machine: data.machine,
@@ -44,27 +48,24 @@ export class ConsumerQueueService {
           .then(async (queueResult) => {
             await this.logService.updateTask(`queue-${generatedID}`, 'done')
             response.message = 'Queue created successfully'
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.success
-            }`
             response.transaction_id = queueResult._id
-            // response.payload = result
+            response.payload = queueResult
+            return response
           })
           .catch((error: Error) => {
-            response.message = `Queue failed to create. ${error.message}`
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.failed
-            }`
+            response.message = error.message
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
             response.payload = error
+            throw new Error(JSON.stringify(response))
           })
       })
       .catch((error: Error) => {
-        response.message = `Queue failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.message = error.message
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
+        throw new Error(JSON.stringify(response))
       })
-    return response
   }
 }

@@ -12,7 +12,7 @@ import { BPJSApplicaresRequest } from '@core/3rdparty/bpjs/services/applicares/r
 import { Account } from '@core/account/schemas/account.model'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -36,7 +36,11 @@ export class BPJSApplicaresReferensiService {
   ) {}
   async kamar(): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_APPLICARES_REF_KAMAR',
@@ -57,7 +61,11 @@ export class BPJSApplicaresReferensiService {
 
   async kamarTersedia(account: Account): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_APPLICARES_REF_KAMAR_TERSEDIA',
@@ -128,7 +136,11 @@ export class BPJSApplicaresReferensiService {
     account: Account
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_APPLICARES_REF_KAMAR_ADD',
@@ -162,34 +174,30 @@ export class BPJSApplicaresReferensiService {
             })
             .then((result) => {
               response.message = 'Applicares kamar created successfully'
-              response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                modCodes.Global.success
-              }`
               response.transaction_id = result._id
               response.payload = result
             })
             .catch((error: Error) => {
               response.message = `Applicares kamar failed to create. ${error.message}`
-              response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                modCodes.Global.failed
-              }`
-              return response
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              response.payload = error
+              throw new Error(JSON.stringify(response))
             })
         } else {
           response.message = `Applicares kamar failed to create. ${bpjsResponse.metadata.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
         return bpjsResponse
       })
       .catch((error: any) => {
         response.message = error.message.metadata.message
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
-        response.payload = error.message
-        return response
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -200,7 +208,11 @@ export class BPJSApplicaresReferensiService {
     parameter: ApplicaresKamarEdit
   ): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_APPLICARES_REF_KAMAR_EDIT',
@@ -226,37 +238,33 @@ export class BPJSApplicaresReferensiService {
             .findOneAndUpdate({ id: id }, parameter)
             .then((result) => {
               response.message = 'Applicares kamar updated successfully'
-              response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                modCodes.Global.success
-              }`
               response.transaction_id = result._id
               response.payload = result
             })
             .catch((error: Error) => {
               console.log('Debug here 1')
               response.message = `Applicares kamar failed to update. ${error.message}`
-              response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                modCodes.Global.failed
-              }`
-              return response
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              response.payload = error
+              throw new Error(JSON.stringify(response))
             })
         } else {
           console.log('Debug here 2')
           response.message = `Applicares kamar failed to update. ${bpjsResponse.metadata.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
         }
         return bpjsResponse
       })
       .catch((error: any) => {
         console.log('Debug here 3')
         response.message = error.message.metadata.message
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
-        response.payload = error.message
-        return response
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
@@ -264,7 +272,11 @@ export class BPJSApplicaresReferensiService {
 
   async kamarDelete(id: string): Promise<GlobalResponse> {
     const response = {
-      statusCode: '',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].default,
+      },
       message: '',
       payload: {},
       transaction_classify: 'BPJS_APPLICARES_REF_KAMAR_DELETE',
@@ -306,43 +318,38 @@ export class BPJSApplicaresReferensiService {
                 )
                 .then((result) => {
                   response.message = 'Applicares kamar deleted successfully'
-                  response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                    modCodes.Global.success
-                  }`
                   response.transaction_id = result._id
                   response.payload = result
                 })
                 .catch((error: Error) => {
                   response.message = `Applicares kamar failed to delete. ${error.message}`
-                  response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                    modCodes.Global.failed
-                  }`
-                  return response
+                  response.statusCode =
+                    modCodes[this.constructor.name].error.databaseError
+                  response.payload = error
+                  throw new Error(JSON.stringify(response))
                 })
             } else {
               response.message = `Applicares kamar failed to delete. ${bpjsResponse.metadata.message}`
-              response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                modCodes.Global.failed
-              }`
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              throw new Error(JSON.stringify(response))
             }
             return bpjsResponse
           })
           .catch((error: any) => {
             response.message = error.message.metadata.message
-            response.statusCode = `${modCodes[this.constructor.name]}_I_${
-              modCodes.Global.failed
-            }`
-            response.payload = error.message
-            return response
+            response.statusCode =
+              modCodes[this.constructor.name].error.databaseError
+            response.payload = error
+            throw new Error(JSON.stringify(response))
           })
       })
       .catch((error: any) => {
         response.message = error.message.metadata.message
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
-        response.payload = error.message
-        return response
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+        throw new Error(JSON.stringify(response))
       })
 
     return response
