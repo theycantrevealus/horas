@@ -1,6 +1,9 @@
 import { AccountService } from '@core/account/account.service'
 import { Account, AccountSchema } from '@core/account/schemas/account.model'
-import { Authority, AuthoritySchema } from '@core/account/schemas/authority'
+import {
+  Authority,
+  AuthoritySchema,
+} from '@core/account/schemas/authority.model'
 import { PatientController } from '@core/patient/patient.controller'
 import { PatientService } from '@core/patient/patient.service'
 import { Patient, PatientSchema } from '@core/patient/schema/patient.model'

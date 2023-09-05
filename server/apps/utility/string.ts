@@ -8,8 +8,8 @@ export function testCaption(
 ) {
   const lPadLib = [
     '                                         ',
-    '                                                        ',
-    '                                                                     ',
+    '                                             ',
+    '                                                 ',
   ]
   const lPad = lPadLib[option.tab]
   const typeLib = {

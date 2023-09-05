@@ -1,4 +1,7 @@
-import { Authority, AuthoritySchema } from '@core/account/schemas/authority'
+import {
+  Authority,
+  AuthoritySchema,
+} from '@core/account/schemas/authority.model'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { CacheModule } from '@nestjs/cache-manager'

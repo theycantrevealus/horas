@@ -1,7 +1,13 @@
-import { AuthorityAddDTO, AuthorityEditDTO } from '@core/account/dto/authority'
+import {
+  AuthorityAddDTO,
+  AuthorityEditDTO,
+} from '@core/account/dto/authority.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
-import { Authority, AuthorityDocument } from '@core/account/schemas/authority'
+import {
+  Authority,
+  AuthorityDocument,
+} from '@core/account/schemas/authority.model'
 import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
@@ -66,11 +72,10 @@ export const mockAuthorityModel = {
   find: jest.fn(),
   aggregate: jest.fn().mockReturnThis(),
   findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-  update: jest.fn(),
-  create: jest.fn(),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockAuthority()),
+  update: jest.fn().mockResolvedValue(mockAuthority()),
+  create: jest.fn().mockResolvedValue(mockAuthority()),
   save: jest.fn(),
-  remove: jest.fn(),
   exec: jest.fn(),
 }
 
@@ -93,7 +98,7 @@ export const mockAuthorityDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-export const masterStockPointArray = [
+export const authorityArray = [
   mockAuthority(),
   mockAuthority(
     `authority-${new Types.ObjectId().toString()}`,
@@ -107,7 +112,7 @@ export const masterStockPointArray = [
   ),
 ]
 
-export const masterStockPointDocArray = [
+export const authorityDocArray = [
   mockAuthorityDoc(),
   mockAuthorityDoc({
     code: 'XX-002',

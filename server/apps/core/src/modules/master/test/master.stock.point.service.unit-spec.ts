@@ -1,8 +1,8 @@
 import { AccountService } from '@core/account/account.service'
 import { mockAccount, mockAccountModel } from '@core/account/mock/account.mock'
-import { mockAuthorityModel } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
-import { Authority } from '@core/account/schemas/authority'
+import { Authority } from '@core/account/schemas/authority.model'
 import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
@@ -78,11 +78,11 @@ describe('Master Stock Point Service', () => {
         },
         {
           provide: getModelToken(Authority.name),
-          useValue: mockAuthorityModel,
+          useValue: mockAuthority,
         },
         {
           provide: getModelToken(Authority.name),
-          useValue: mockAuthorityModel,
+          useValue: mockAuthority,
         },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },

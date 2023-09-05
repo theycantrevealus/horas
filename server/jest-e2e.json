@@ -26,10 +26,6 @@
   "transform": {
     "^.+\\.ts?$": "ts-jest"
   },
-  "collectCoverageFrom": [
-    "__tests__/**/*.(t|j)s"
-  ],
-  "coverageDirectory": "../coverage",
   "transformIgnorePatterns": [
     "<rootDir>/node_modules/"
   ]

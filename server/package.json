@@ -19,13 +19,12 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest --config ./jest-all.json",
     "test:watch": "jest --config ./jest-all.json --watch --verbose --runInBand",
-    "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest-e2e.json",
     "test:e2e:watch": "jest --config ./jest-e2e.json --watch --verbose --runInBand",
     "test:unit": "jest --config ./jest-unit.json --verbose --runInBand",
-    "test:unit:watch": "jest --config ./jest-unit.json --watch --verbose --runInBand",
-    "test:unit:cov": "jest --config ./jest-unit.json --watch --verbose --runInBand --coverage"
+    "test:unit:watch": "jest --config ./jest-unit.json --watch --verbose --runInBand --coverage",
+    "test:cov": "jest --config ./jest-all.json --watch --verbose --runInBand --coverage --no-cache"
   },
   "dependencies": {
     "@fastify/view": "^8.0.0",
@@ -106,37 +105,5 @@
     "webpack-cli": "^5.1.4",
     "webpack-node-externals": "^3.0.0",
     "winston": "^3.10.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "moduleNameMapper": {
-      "^@core(.*)$": "<rootDir>/apps/core/src/modules$1",
-      "^@inventory(.*)$": "<rootDir>/apps/inventory/src$1",
-      "^@log(.*)$": "<rootDir>/apps/log/src$1",
-      "^@security(.*)$": "<rootDir>/apps/security$1",
-      "^@configuration(.*)$": "<rootDir>/apps/configuration$1",
-      "^@utility(.*)$": "<rootDir>/apps/utility$1",
-      "^@interceptors(.*)$": "<rootDir>/apps/interceptors$1",
-      "^@guards(.*)$": "<rootDir>/apps/guards$1",
-      "^@decorators(.*)$": "<rootDir>/apps/decorators$1"
-    },
-    "slowTestThreshold": 30,
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/apps/"
-    ]
   }
 }

@@ -3,7 +3,7 @@ import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
-import { prime_datatable } from '@utility/prime'
+import prime_datatable from '@utility/prime'
 import { Model } from 'mongoose'
 
 import { ConfigGroupAddDTO, ConfigGroupEditDTO } from './dto/config.group'
@@ -32,7 +32,7 @@ export class CoreConfigGroupService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -66,7 +66,7 @@ export class CoreConfigGroupService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -115,7 +115,7 @@ export class CoreConfigGroupService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},

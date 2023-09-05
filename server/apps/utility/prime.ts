@@ -1,11 +1,15 @@
 import { HttpStatus } from '@nestjs/common'
 import { Model } from 'mongoose'
 
-export async function prime_datatable(parameter: any, model: Model<any>) {
+const prime_datatable = async (parameter: any, model: Model<any>) => {
   /*
    * Datetime parsing following to timezone will parse in client side due to performance issue
    * For a specific reason it will just send to client and let the client parse as their condition
    * */
+
+  // if (!parameter.first || !parameter.rows) {
+  //   throw new Error('Unmatch filter')
+  // }
 
   const first: number = parameter.first ? parseInt(parameter.first) : 0
   const rows: number = parameter.rows ? parseInt(parameter.rows) : 20
@@ -121,22 +125,27 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
     },
   })
 
-  const data = await model.aggregate(query).exec()
-  if (allNoFilter && allNoFilter.length > 0) {
-    return {
-      message: HttpStatus.OK,
-      payload: {
-        totalRecords: allNoFilter[0].total ? allNoFilter[0].total : 0,
-        data: data,
-      },
+  try {
+    const data = await model.aggregate(query).exec()
+    if (allNoFilter && allNoFilter.length > 0) {
+      return {
+        message: HttpStatus.OK,
+        payload: {
+          totalRecords: allNoFilter[0].total ? allNoFilter[0].total : 0,
+          data: data,
+        },
+      }
+    } else {
+      return {
+        message: HttpStatus.NO_CONTENT,
+        payload: {
+          totalRecords: 0,
+          data: [],
+        },
+      }
     }
-  } else {
-    return {
-      message: HttpStatus.NO_CONTENT,
-      payload: {
-        totalRecords: 0,
-        data: [],
-      },
-    }
+  } catch (error) {
+    throw new Error(error.message)
   }
 }
+export default prime_datatable

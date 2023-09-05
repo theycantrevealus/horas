@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common'
 import { PATH_METADATA } from '@nestjs/common/constants'
 import { Reflector } from '@nestjs/core'
+import { GlobalResponse, GlobalResponseParsed } from '@utility/dto/response'
 import { isExpressRequest } from '@utility/http'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { HorasLogging } from '@utility/logger/interfaces'
@@ -37,6 +38,7 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     const TM = new TimeManagement()
     const http = context.switchToHttp()
     const request = http.getRequest()
+    const response = http.getResponse()
     const path = this.reflector.get<string[]>(
       PATH_METADATA,
       context.getHandler()
@@ -44,6 +46,7 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     const method = isExpressRequest(request)
       ? request.method
       : (request as FastifyRequest).method
+
     // const authorization = isExpressRequest(request)
     //   ? request.headers['Authorization']
     //   : (request as FastifyRequest).headers?.authorization
@@ -53,7 +56,8 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     const account: IAccountCreatedBy = request.credential
 
     return next.handle().pipe(
-      tap(async (response) => {
+      tap(async (result: GlobalResponse) => {
+        // Intercept response format
         const dataSet: HorasLogging = {
           ip: request.ip,
           path: path.toString(),
@@ -65,14 +69,20 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
             params: request.params,
             query: query,
           },
-          result: response,
+          result: result,
           account: account,
           time: TM.getTimezone('Asia/Jakarta'),
         }
 
         this.logger.verbose(dataSet)
 
-        return response
+        response.code(result.statusCode.defaultCode).send({
+          statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
+          message: result.message,
+          payload: result.payload,
+          transaction_classify: '',
+          transaction_id: result.transaction_id,
+        } satisfies GlobalResponseParsed)
       })
     )
   }

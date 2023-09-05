@@ -1,6 +1,6 @@
 import { AccountController } from '@core/account/account.controller'
-import { AccountAddDTO } from '@core/account/dto/account.add'
-import { AccountEditDTO } from '@core/account/dto/account.edit'
+import { AccountAddDTO } from '@core/account/dto/account.add.dto'
+import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import {
   accountArray,
   accountDocArray,

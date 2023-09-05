@@ -1,5 +1,5 @@
-import { AccountAddDTO } from '@core/account/dto/account.add'
-import { AccountSignInDTO } from '@core/account/dto/account.signin'
+import { AccountAddDTO } from '@core/account/dto/account.add.dto'
+import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import { IAccount } from '@core/account/interface/account'
 import { Types } from 'mongoose'
 

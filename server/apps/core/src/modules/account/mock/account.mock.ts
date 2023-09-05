@@ -1,8 +1,8 @@
-import { AccountAddDTO } from '@core/account/dto/account.add'
-import { AccountEditDTO } from '@core/account/dto/account.edit'
+import { AccountAddDTO } from '@core/account/dto/account.add.dto'
+import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
-import { IAuthority } from '@core/account/schemas/authority'
+import { IAuthority } from '@core/account/schemas/authority.model'
 import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
 import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
@@ -83,10 +83,10 @@ export const mockAccountModel = {
   new: jest.fn().mockResolvedValue(mockAccount()),
   find: jest.fn().mockImplementation(),
   aggregate: jest.fn().mockImplementation(),
-  findOne: jest.fn().mockImplementation(),
-  findOneAndUpdate: jest.fn().mockImplementation(),
-  update: jest.fn().mockImplementation(),
-  create: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockResolvedValue(mockAccount()),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockAccount()),
+  update: jest.fn().mockResolvedValue(mockAccount()),
+  create: jest.fn().mockResolvedValue(mockAccount()),
   save: jest.fn().mockImplementation(),
   exec: jest.fn().mockImplementation(),
 }

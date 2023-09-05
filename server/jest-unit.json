@@ -26,11 +26,26 @@
   "transform": {
     "^.+\\.ts?$": "ts-jest"
   },
-  "collectCoverageFrom": [
-    "__tests__/**/*.(t|j)s"
-  ],
-  "coverageDirectory": "../coverage",
   "transformIgnorePatterns": [
     "<rootDir>/node_modules/"
-  ]
+  ],
+  "collectCoverage": true,
+  "coveragePathIgnorePatterns": [
+    "<rootDir>/node_modules/",
+    ".(e2e|unit)-spec.(t|j)s",
+    ".controller.(t|j)s",
+    ".mock.(t|j)s",
+    ".stub.(t|j)s"
+  ],
+  "collectCoverageFrom": [
+    "<rootDir>/apps/core/src/modules/account/**/*.{js,jsx,ts,tsx}",
+    "!<rootDir>/node_modules/"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "lines": 90,
+      "statements": 90
+    }
+  },
+  "coverageDirectory": "./coverage"
 }

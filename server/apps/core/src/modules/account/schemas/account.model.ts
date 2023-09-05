@@ -1,7 +1,10 @@
 import { IAccount } from '@core/account/interface/account'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
+import {
+  AuthorityJoin,
+  IAuthority,
+} from '@core/account/schemas/authority.model'
 import {
   IMenu,
   IMenuPermission,

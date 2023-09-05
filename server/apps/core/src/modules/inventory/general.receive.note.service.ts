@@ -13,7 +13,7 @@ import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
-import { prime_datatable } from '@utility/prime'
+import prime_datatable from '@utility/prime'
 import { Model, Types } from 'mongoose'
 
 @Injectable()
@@ -54,7 +54,7 @@ export class GeneralReceiveNoteService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},

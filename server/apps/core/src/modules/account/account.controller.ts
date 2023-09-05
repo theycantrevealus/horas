@@ -1,6 +1,9 @@
-import { AccountEditDTO } from '@core/account/dto/account.edit'
-import { AccountSignInDTO } from '@core/account/dto/account.signin'
-import { AuthorityAddDTO, AuthorityEditDTO } from '@core/account/dto/authority'
+import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
+import {
+  AuthorityAddDTO,
+  AuthorityEditDTO,
+} from '@core/account/dto/authority.dto'
 import { Account } from '@core/account/schemas/account.model'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -33,7 +36,7 @@ import { isJSON } from 'class-validator'
 import { Logger } from 'winston'
 
 import { AccountService } from './account.service'
-import { AccountAddDTO } from './dto/account.add'
+import { AccountAddDTO } from './dto/account.add.dto'
 
 @Controller('account')
 @ApiTags('Account Management')
@@ -59,7 +62,7 @@ export class AccountController {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
       return await this.accountService
-        .all({
+        .accountAll({
           first: parsedData.first,
           rows: parsedData.rows,
           sortField: parsedData.sortField,
@@ -87,7 +90,7 @@ export class AccountController {
     return {
       statusCode: '200',
       message: 'Authenticated successfully',
-      payload: await this.accountService.detail(account.id),
+      payload: await this.accountService.accountDetail(account.id),
       transaction_classify: 'AUTHENTICATE',
       transaction_id: null,
     }
@@ -106,7 +109,7 @@ export class AccountController {
     description: '',
   })
   async detail(@Param() param) {
-    return await this.accountService.detail(param.id).catch((error) => {
+    return await this.accountService.accountDetail(param.id).catch((error) => {
       throw new Error(error)
     })
   }
@@ -126,9 +129,11 @@ export class AccountController {
     @Body() parameter: AccountAddDTO,
     @CredentialAccount() account: Account
   ) {
-    return await this.accountService.add(parameter, account).catch((error) => {
-      throw new Error(error)
-    })
+    return await this.accountService
+      .accountAdd(parameter, account)
+      .catch((error) => {
+        throw new Error(error)
+      })
   }
 
   @Patch(':id')
@@ -145,9 +150,11 @@ export class AccountController {
     description: ``,
   })
   async edit(@Body() body: AccountEditDTO, @Param() param) {
-    return await this.accountService.edit(body, param.id).catch((error) => {
-      throw new Error(error)
-    })
+    return await this.accountService
+      .accountEdit(body, param.id)
+      .catch((error) => {
+        throw new Error(error)
+      })
   }
 
   @Delete(':id')
@@ -165,7 +172,7 @@ export class AccountController {
     description: ``,
   })
   async delete(@Param() param) {
-    return await this.accountService.delete(param.id).catch((error) => {
+    return await this.accountService.accountDelete(param.id).catch((error) => {
       throw new Error(error)
     })
   }
