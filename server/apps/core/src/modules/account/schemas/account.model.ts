@@ -1,4 +1,3 @@
-import { IAccount } from '@core/account/interface/account'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import {
@@ -73,29 +72,18 @@ export class Account {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
   })
   updated_at: Date
 
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
-
-  constructor(parameter: IAccount) {
-    this.code = parameter.code
-    this.first_name = parameter.first_name
-    this.last_name = parameter.last_name
-    this.email = parameter.email
-    this.phone = parameter.phone
-    this.access = parameter.access
-    this.permission = parameter.permission
-    this.created_by = parameter.created_by
-  }
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account)

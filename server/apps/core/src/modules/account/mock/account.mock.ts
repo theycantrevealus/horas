@@ -1,3 +1,4 @@
+import { AccountService } from '@core/account/account.service'
 import { AccountAddDTO } from '@core/account/dto/account.add.dto'
 import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
@@ -5,29 +6,49 @@ import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { IAuthority } from '@core/account/schemas/authority.model'
 import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
 import { faker } from '@faker-js/faker'
+import { HttpStatus } from '@nestjs/common'
+import { GlobalResponse } from '@utility/dto/response'
+import { modCodes } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
 export const mockAccountService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest.fn().mockImplementation((dto: AccountAddDTO, account: Account) => {
+  accountAll: jest.fn().mockImplementation(() => {
     return Promise.resolve({
-      payload: {
-        ...dto,
-        id: `account-${new Types.ObjectId().toString()}`,
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[AccountService.name].defaultCode,
       },
-    })
+      message: '',
+      transaction_id: '',
+      transaction_classify: '',
+      payload: [mockAccount()],
+    } satisfies GlobalResponse)
   }),
-  edit: jest.fn().mockImplementation((dto: AccountEditDTO, id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  find: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
+  accountAdd: jest
+    .fn()
+    .mockImplementation((dto: AccountAddDTO, account: IAccountCreatedBy) => {
+      return Promise.resolve({
+        payload: {
+          ...dto,
+          id: `account-${new Types.ObjectId().toString()}`,
+          created_by: account,
+        },
+      })
+    }),
+  accountEdit: jest
+    .fn()
+    .mockImplementation((dto: AccountEditDTO, id: string) => {
+      return Promise.resolve({
+        payload: {
+          id: id,
+        },
+      })
+    }),
+  accountDetail: jest.fn().mockResolvedValue((dto) => dto),
+  accountFind: jest.fn().mockResolvedValue((dto) => dto),
+  accountDelete: jest.fn().mockImplementation((id: string) => {
     return Promise.resolve({
       payload: {
         id: id,

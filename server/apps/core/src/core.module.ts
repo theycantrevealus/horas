@@ -29,6 +29,7 @@ import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
+import { PrometheusModule } from '@utility/prometheus'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 import { Cache } from 'cache-manager'
 import * as redisStore from 'cache-manager-ioredis'
@@ -87,6 +88,11 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
         pass: configService.get<string>('mongo.db_password'),
       }),
       inject: [ConfigService],
+    }),
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
     }),
     MongooseModule.forFeatureAsync([
       {

@@ -17,13 +17,13 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/server/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest --config ./jest-all.json",
+    "test": "jest --config ./jest-all.json --runInBand --coverage --no-cache",
     "test:watch": "jest --config ./jest-all.json --watch --verbose --runInBand",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./jest-e2e.json",
-    "test:e2e:watch": "jest --config ./jest-e2e.json --watch --verbose --runInBand",
-    "test:unit": "jest --config ./jest-unit.json --verbose --runInBand",
-    "test:unit:watch": "jest --config ./jest-unit.json --watch --verbose --runInBand --coverage",
+    "test:e2e": "jest --config ./jest-e2e.json --runInBand --coverage --no-cache",
+    "test:e2e:watch": "jest --config ./jest-e2e.json --watchAll --verbose --runInBand --coverage --no-cache",
+    "test:unit": "jest --config ./jest-unit.json --runInBand --coverage --no-cache",
+    "test:unit:watch": "jest --config ./jest-unit.json --watchAll --verbose --runInBand --coverage --no-cache",
     "test:cov": "jest --config ./jest-all.json --watch --verbose --runInBand --coverage --no-cache"
   },
   "dependencies": {
@@ -52,6 +52,7 @@
     "moment-timezone": "^0.5.43",
     "mongoose": "^7.4.1",
     "path": "^0.12.7",
+    "prom-client": "^14.2.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "socket.io-client": "^4.7.1"

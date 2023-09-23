@@ -1,4 +1,3 @@
-import { IAccount } from '@core/account/interface/account'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
@@ -31,25 +30,18 @@ export class Authority {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
   })
   updated_at: Date
 
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
-
-  constructor(parameter: IAccount) {
-    this.code = parameter.code
-    this.name = parameter.first_name
-    this.remark = parameter.last_name
-    this.created_by = parameter.created_by
-  }
 }
 
 export const AuthorityJoin = raw({

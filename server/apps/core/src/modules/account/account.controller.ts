@@ -14,6 +14,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
   Patch,
@@ -31,7 +32,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
+import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { modCodes } from '@utility/modules'
 import { isJSON } from 'class-validator'
 import { Logger } from 'winston'
 
@@ -58,23 +61,8 @@ export class AccountController {
     description: 'Showing account data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await this.accountService
-        .accountAll({
-          first: parsedData.first,
-          rows: parsedData.rows,
-          sortField: parsedData.sortField,
-          sortOrder: parsedData.sortOrder,
-          filters: parsedData.filters,
-        })
-        .catch((error) => {
-          throw new Error(error)
-        })
-    } else {
-      throw new Error('filters is not a valid json')
-    }
+  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
+    return await this.accountService.accountAll(parameter)
   }
 
   @Get('authenticate')
@@ -88,7 +76,11 @@ export class AccountController {
   })
   async authenticate(@CredentialAccount() account: Account) {
     return {
-      statusCode: '200',
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
       message: 'Authenticated successfully',
       payload: await this.accountService.accountDetail(account.id),
       transaction_classify: 'AUTHENTICATE',

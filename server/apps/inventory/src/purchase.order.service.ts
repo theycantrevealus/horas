@@ -15,7 +15,7 @@ import {
 import { IPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { LogService } from '@log/log.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
@@ -158,17 +158,15 @@ export class PurchaseOrderService {
           'done'
         )
         response.message = 'Purchase Order created successfully'
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.success
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.transaction_id = result._id
         response.payload = result
       })
       .catch((error: Error) => {
         response.message = `Purchase Order failed to create. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
       })
 
@@ -207,23 +205,20 @@ export class PurchaseOrderService {
       .then((result) => {
         if (result) {
           response.message = 'Purchase order requested to review successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_N_${
-            modCodes.Global.success
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = result
         } else {
           response.message = `Purchase order failed to review request. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_N_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = {}
         }
       })
       .catch((error: Error) => {
         response.message = `Purchase order failed to review request. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_N_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
       })
 
     return response
@@ -261,23 +256,20 @@ export class PurchaseOrderService {
       .then((result) => {
         if (result) {
           response.message = 'Purchase order approved successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_A_${
-            modCodes.Global.success
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = result
         } else {
           response.message = `Purchase order failed to approve. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_A_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = {}
         }
       })
       .catch((error: Error) => {
         response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_A_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
       })
 
     console.log(response)
@@ -316,23 +308,20 @@ export class PurchaseOrderService {
       .then((result) => {
         if (result) {
           response.message = 'Purchase order declined successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_R_${
-            modCodes.Global.success
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = result
         } else {
           response.message = `Purchase order failed to decline. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_R_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = {}
         }
       })
       .catch((error: Error) => {
         response.message = `Purchase order failed to decline. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_R_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
       })
 
     return response
@@ -425,24 +414,21 @@ export class PurchaseOrderService {
       .then((result) => {
         if (result) {
           response.message = 'Purchase Order updated successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.success
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = result
         } else {
           response.message = `Purchase Order failed to update. Invalid document`
-          response.statusCode = `${modCodes[this.constructor.name]}_U_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = {}
         }
       })
       .catch((error: Error) => {
         response.payload = error
         response.message = `Purchase Order failed to update. ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_U_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
       })
     return response
   }
@@ -468,24 +454,20 @@ export class PurchaseOrderService {
 
       await data
         .save()
-        .then((result) => {
+        .then(() => {
           response.message = 'Purchase order deleted successfully'
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.success
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
         })
         .catch((error: Error) => {
           response.message = `Purchase order failed to delete. ${error.message}`
-          response.statusCode = `${modCodes[this.constructor.name]}_D_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
           response.payload = error
         })
     } else {
       response.message = `Purchase order failed to deleted. Invalid document`
-      response.statusCode = `${modCodes[this.constructor.name]}_D_${
-        modCodes.Global.failed
-      }`
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
       response.payload = {}
     }
     return response

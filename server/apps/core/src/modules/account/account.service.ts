@@ -54,7 +54,7 @@ export class AccountService {
     @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
-  async accountAll(parameter: PrimeParameter): Promise<GlobalResponse> {
+  async accountAll(payload: string): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -67,21 +67,28 @@ export class AccountService {
       transaction_id: '',
     } satisfies GlobalResponse
 
-    return await prime_datatable(parameter, this.accountModel)
-      .then((result) => {
-        response.payload = result.payload.data
-        response.message = 'Account fetch successfully'
-        return response
-      })
-      .catch((error: Error) => {
-        response.message = `Account failed to fetch`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+
+      return await prime_datatable(parameter, this.accountModel).then(
+        (result) => {
+          response.payload = result.payload.data
+          response.message = 'Account fetch successfully'
+          return response
         }
-        response.payload = error
-        throw new Error(JSON.stringify(response))
-      })
+      )
+    } catch (error) {
+      response.message = `Account failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      // response.payload = {
+      //   message: error.message,
+      //   stack: error.stack,
+      // }
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async authorityAll(parameter: PrimeParameter): Promise<GlobalResponse> {
@@ -109,7 +116,10 @@ export class AccountService {
           ...modCodes[this.constructor.name].error.databaseError,
           classCode: modCodes[this.constructor.name].defaultCode,
         }
-        response.payload = error
+        // response.payload = {
+        //   message: error.message,
+        //   stack: error.stack,
+        // }
         throw new Error(JSON.stringify(response))
       })
   }

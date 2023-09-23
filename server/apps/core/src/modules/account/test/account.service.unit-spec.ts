@@ -18,7 +18,6 @@ import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { mockResponse } from '@utility/mock/response'
 import { modCodes } from '@utility/modules'
-import * as prime_datatable from '@utility/prime'
 import { testCaption } from '@utility/string'
 import * as bcrypt from 'bcrypt'
 import { Cache } from 'cache-manager'
@@ -269,13 +268,15 @@ describe('Account Service', () => {
             exec: jest.fn().mockReturnValue(accountDocArray),
           } as any)
           await service
-            .accountAll({
-              first: 0,
-              rows: 10,
-              sortField: 'created_at',
-              sortOrder: 1,
-              filters: {},
-            })
+            .accountAll(
+              `{
+              "first": 0,
+              "rows": 10,
+              "sortField": "created_at",
+              "sortOrder": 1,
+              "filters": {}
+            }`
+            )
             .then((result: GlobalResponse) => {
               // Should classify transaction
               expect(result.transaction_classify).toEqual('ACCOUNT_GET')
@@ -310,18 +311,20 @@ describe('Account Service', () => {
             transaction_classify: 'ACCOUNT_GET',
           })
 
-          jest
-            .spyOn(prime_datatable, 'default')
-            .mockRejectedValue(new Error(JSON.stringify(mockError)))
+          jest.spyOn(modelAccount, 'aggregate').mockReturnValue({
+            exec: jest
+              .fn()
+              .mockRejectedValue(new Error(JSON.stringify(mockError))),
+          } as any)
 
           await expect(
-            service.accountAll({
-              first: 0,
-              rows: 10,
-              sortField: 'created_at',
-              sortOrder: 1,
-              filters: {},
-            })
+            service.accountAll(`{
+              "first": 0,
+              "rows": 10,
+              "sortField": "created_at",
+              "sortOrder": 1,
+              "filters": {}
+            }`)
           ).rejects.toThrowError(new Error(JSON.stringify(mockError)))
         }
       )

@@ -321,3 +321,15 @@ export interface CustomErrorCode {
   classCode: string
   customCode: string
 }
+
+export function isCustomErrorCode(object: any): object is CustomErrorCode {
+  return (
+    object &&
+    object.defaultCode &&
+    object.classCode &&
+    object.customCode &&
+    'defaultCode' in object &&
+    'classCode' in object &&
+    'customCode' in object
+  )
+}

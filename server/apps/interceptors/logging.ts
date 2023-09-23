@@ -2,6 +2,7 @@ import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   CallHandler,
   ExecutionContext,
+  HttpStatus,
   Inject,
   Injectable,
   NestInterceptor,
@@ -12,6 +13,7 @@ import { GlobalResponse, GlobalResponseParsed } from '@utility/dto/response'
 import { isExpressRequest } from '@utility/http'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { HorasLogging } from '@utility/logger/interfaces'
+import { isCustomErrorCode } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
 import { FastifyRequest } from 'fastify'
 import { Observable, tap } from 'rxjs'
@@ -57,7 +59,6 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
     return next.handle().pipe(
       tap(async (result: GlobalResponse) => {
-        // Intercept response format
         const dataSet: HorasLogging = {
           ip: request.ip,
           path: path.toString(),
@@ -76,13 +77,23 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
         this.logger.verbose(dataSet)
 
-        response.code(result.statusCode.defaultCode).send({
-          statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
-          message: result.message,
-          payload: result.payload,
-          transaction_classify: '',
-          transaction_id: result.transaction_id,
-        } satisfies GlobalResponseParsed)
+        if (isCustomErrorCode(result.statusCode)) {
+          response.code(result.statusCode.defaultCode).send({
+            statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
+            message: result.message,
+            payload: result.payload,
+            transaction_classify: '',
+            transaction_id: result.transaction_id,
+          } satisfies GlobalResponseParsed)
+        } else {
+          response.code(HttpStatus.BAD_REQUEST).send({
+            statusCode: `CORE_F0000`,
+            message: result.message,
+            payload: result.payload,
+            transaction_classify: '',
+            transaction_id: result.transaction_id,
+          } satisfies GlobalResponseParsed)
+        }
       })
     )
   }
