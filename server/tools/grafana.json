@@ -48,6 +48,102 @@
         "type": "loki",
         "uid": "5LMS2ZZSz"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 100,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "5LMS2ZZSz"
+          },
+          "editorMode": "code",
+          "expr": "sum by(taken) (count_over_time({job=\"varlogs\"} [5s]))",
+          "legendFormat": "ms",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Processing Time (ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "5LMS2ZZSz"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -61,8 +157,8 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "bars",
-            "fillOpacity": 100,
-            "gradientMode": "hue",
+            "fillOpacity": 80,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -99,12 +195,58 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "info"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warn"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
+        "h": 8,
+        "w": 12,
+        "x": 12,
         "y": 1
       },
       "id": 20,
@@ -127,7 +269,7 @@
             "uid": "5LMS2ZZSz"
           },
           "editorMode": "builder",
-          "expr": "sum by(level) (count_over_time({job=\"varlogs\"} | logfmt [5m]))",
+          "expr": "sum by(level) (count_over_time({job=\"varlogs\"} | logfmt [1m]))",
           "legendFormat": "{{level}}",
           "queryType": "range",
           "refId": "A"
@@ -145,7 +287,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 9
       },
       "id": 21,
       "options": {
@@ -181,7 +323,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 16
       },
       "id": 14,
       "panels": [],
@@ -208,7 +350,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 15
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 1,
@@ -306,7 +448,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 15
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 2,
@@ -404,7 +546,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 15
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 3,
@@ -500,7 +642,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 23
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 5,
@@ -596,7 +738,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 23
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 6,
@@ -692,7 +834,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 23
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 4,
@@ -776,7 +918,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 33
       },
       "id": 12,
       "panels": [],
@@ -789,51 +931,10 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": false,
-          "text": "localhost",
-          "value": "localhost"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "name": "host",
-        "options": [
-          {
-            "selected": true,
-            "text": "localhost",
-            "value": "localhost"
-          }
-        ],
-        "query": "localhost",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": "",
-          "value": ""
-        },
-        "hide": 0,
-        "name": "search",
-        "options": [
-          {
-            "selected": true,
-            "text": "",
-            "value": ""
-          }
-        ],
-        "query": "",
-        "skipUrlSync": false,
-        "type": "textbox"
-      }
-    ]
+    "list": []
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
@@ -864,6 +965,6 @@
   "timezone": "browser",
   "title": "HORAS",
   "uid": "86j2TVWSz",
-  "version": 19,
+  "version": 25,
   "weekStart": ""
 }
