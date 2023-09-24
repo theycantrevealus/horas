@@ -69,7 +69,7 @@
               "viz": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineWidth": 0,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -126,8 +126,8 @@
             "type": "loki",
             "uid": "5LMS2ZZSz"
           },
-          "editorMode": "code",
-          "expr": "sum by (level) (count_over_time({job=\"varlogs\"} | logfmt |= `$search`[$__interval]))",
+          "editorMode": "builder",
+          "expr": "sum by(level) (count_over_time({job=\"varlogs\"} | logfmt [5m]))",
           "legendFormat": "{{level}}",
           "queryType": "range",
           "refId": "A"
@@ -833,7 +833,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -864,6 +864,6 @@
   "timezone": "browser",
   "title": "HORAS",
   "uid": "86j2TVWSz",
-  "version": 17,
+  "version": 19,
   "weekStart": ""
 }
