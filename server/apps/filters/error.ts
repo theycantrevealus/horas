@@ -5,6 +5,7 @@ import { isExpressRequest } from '@utility/http'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { HorasLogging } from '@utility/logger/interfaces'
 import { TimeManagement } from '@utility/time'
+import { isJSON } from 'class-validator'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { Logger } from 'winston'
 
@@ -22,16 +23,28 @@ export class CommonErrorFilter implements ExceptionFilter {
     const method = isExpressRequest(request)
       ? request.method
       : (request as FastifyRequest).method
-
-    const parseError: GlobalResponse = JSON.parse(exception.message)
-
-    const responseSet = {
-      code: parseError.statusCode,
-      message: parseError.message,
-      description: exception.stack ?? '',
-      timestamp: new Date().toISOString(),
-      path: request.url,
+    let responseSet, statusCode
+    if (isJSON(exception.message)) {
+      const parseError: GlobalResponse = JSON.parse(exception.message)
+      responseSet = {
+        code: parseError.statusCode,
+        message: parseError.message,
+        description: exception.stack ?? '',
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      }
+      statusCode = parseError.statusCode.defaultCode
+    } else {
+      responseSet = {
+        code: response.statusCode,
+        message: JSON.stringify(exception.message),
+        description: exception.stack ?? '',
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      }
+      statusCode = response.statusCode
     }
+
     const account: IAccountCreatedBy = request.credential
     const dataSet: HorasLogging = {
       ip: request.ip,
@@ -51,6 +64,6 @@ export class CommonErrorFilter implements ExceptionFilter {
 
     this.logger.error(dataSet)
 
-    response.status(parseError.statusCode.defaultCode).send(responseSet)
+    response.status(statusCode).send(responseSet)
   }
 }

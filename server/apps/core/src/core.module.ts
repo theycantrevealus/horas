@@ -190,6 +190,7 @@ export class CoreModule {
         'application.timezone'
       )} localization`
     )
+    this.logger.verbose(`Mode ${environmentName}`)
     this.loadConfiguration().then(() => {
       // setInterval(() => {
       //   this.logger.warn('Testing Warning')

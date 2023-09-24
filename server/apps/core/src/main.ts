@@ -16,7 +16,6 @@ import { ValidationError } from 'class-validator'
 import * as CopyPlugin from 'copy-webpack-plugin'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as process from 'process'
 import * as winston from 'winston'
 
 import { CommonErrorFilter } from '../../filters/error'
@@ -81,7 +80,6 @@ async function bootstrap() {
     prefix: `/${configService.get<string>('application.images.core_prefix')}`,
   })
 
-  logger.level = 'DEBUG'
   // app.useLogger(logger)
   app.useGlobalFilters(new CommonErrorFilter(logger))
   app.useGlobalPipes(

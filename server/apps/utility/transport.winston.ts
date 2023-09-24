@@ -37,7 +37,7 @@ function clearLastLine() {
 export const WinstonCustomTransports = {
   development: [
     new winston.transports.Console({
-      level: 'verbose',
+      level: 'debug',
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
@@ -51,8 +51,51 @@ export const WinstonCustomTransports = {
         })
       ),
     }),
+    new winston.transports.File({
+      filename: `logs/journal.log`,
+      level: 'verbose',
+      format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+        winston.format.printf((data) => {
+          const levelSet = data.level === 'verbose' ? 'info' : data.level
+          if (typeof data.message === 'object') {
+            const logSet = data.message
+            return `time=${data.timestamp} ip=${logSet.ip} path=${
+              logSet.path
+            } method=${logSet.method} taken=${
+              logSet.takeTime
+            } level=${levelSet} code_default=${
+              logSet.result.statusCode.defaultCode
+            } code_class=${logSet.result.statusCode.classCode} code_custom=${
+              logSet.result.statusCode.customCode
+            } user=${logSet.account.id}-${logSet.account.last_name},${
+              logSet.account.first_name
+            } payload=${JSON.stringify(logSet.payload)} msg="${
+              logSet.result.message
+            }"`
+          } else {
+            return `time=${
+              data.timestamp
+            } ip=0.0.0.0 path=SYS method=SYS taken=0 level=${levelSet} code_default=000 code_class=000 code_custom=00000 user=SYS payload= msg=${JSON.stringify(
+              data.message
+            )}`
+          }
+        })
+      ),
+    }),
   ] satisfies winston.transport[],
-  prod: [
+  production: [
+    new winston.transports.File({
+      filename: `logs/journal.log`,
+      format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+        winston.format.printf((data) => {
+          return `${data.timestamp} ${data.level} ${data.message}`
+        })
+      ),
+    }),
+  ],
+  production2: [
     // new winston.transports.File({
     //   filename: `logs/${configService.get<string>(
     //     'application.log.verbose'

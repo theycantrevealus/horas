@@ -10,7 +10,6 @@ import * as child_process from 'child_process'
 import * as fs from 'fs'
 import { Model } from 'mongoose'
 import * as path from 'path'
-import * as process from 'process'
 import { Logger } from 'winston'
 
 @Injectable()

@@ -1,5 +1,3 @@
-import * as process from 'process'
-
 export const BPJSConfig = () => ({
   vclaim: {
     host: process.env.BPJS_VCLAIM_HOST,
