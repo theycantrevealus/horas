@@ -40,7 +40,7 @@
       },
       "id": 18,
       "panels": [],
-      "title": "SL Logger",
+      "title": "Logger and Performance",
       "type": "row"
     },
     {
@@ -965,6 +965,6 @@
   "timezone": "browser",
   "title": "HORAS",
   "uid": "86j2TVWSz",
-  "version": 25,
+  "version": 26,
   "weekStart": ""
 }
