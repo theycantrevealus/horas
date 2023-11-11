@@ -9,7 +9,9 @@ import {
   Transport,
 } from '@nestjs/microservices'
 import { environmentIdentifier } from '@utility/environtment'
+import { WinstonLogCreator } from '@utility/transport.winston'
 import * as dotenv from 'dotenv'
+import { logLevel } from 'kafkajs'
 
 dotenv.config({
   path: environmentIdentifier,
@@ -38,6 +40,8 @@ const KafkaConnCoord = (devMode) => {
             client: {
               clientId: configService.get<string>('kafka.inventory.client'),
               brokers: [configService.get<string>('kafka.inventory.broker')],
+              logLevel: logLevel.ERROR,
+              logCreator: WinstonLogCreator,
             },
             consumer: {
               groupId: configService.get<string>('kafka.inventory.cons_group'),

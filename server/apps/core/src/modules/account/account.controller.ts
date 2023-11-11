@@ -14,7 +14,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Inject,
   Param,
   Patch,
@@ -34,7 +33,6 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { modCodes } from '@utility/modules'
 import { isJSON } from 'class-validator'
 import { Logger } from 'winston'
 
@@ -61,31 +59,10 @@ export class AccountController {
     description: 'Showing account data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
+  async accountAll(
+    @Query('lazyEvent') parameter: string
+  ): Promise<GlobalResponse> {
     return await this.accountService.accountAll(parameter)
-  }
-
-  @Get('authenticate')
-  @Version('1')
-  @UseGuards(JwtAuthGuard)
-  @Authorization(true)
-  @ApiBearerAuth('JWT')
-  @ApiOperation({
-    summary: 'Authenticate token',
-    description: '',
-  })
-  async authenticate(@CredentialAccount() account: Account) {
-    return {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: 'Authenticated successfully',
-      payload: await this.accountService.accountDetail(account.id),
-      transaction_classify: 'AUTHENTICATE',
-      transaction_id: null,
-    }
   }
 
   @Get(':id')
@@ -124,6 +101,7 @@ export class AccountController {
     return await this.accountService
       .accountAdd(parameter, account)
       .catch((error) => {
+        console.log(error)
         throw new Error(error)
       })
   }
@@ -176,9 +154,7 @@ export class AccountController {
     description: ``,
   })
   async signIn(@Body() body: AccountSignInDTO) {
-    return await this.accountService.signIn(body).catch((error) => {
-      throw new Error(error)
-    })
+    return await this.accountService.signIn(body)
   }
 
   @Get('authority')
@@ -194,17 +170,16 @@ export class AccountController {
   async authorityAll(@Query('lazyEvent') parameter: string) {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      return await this.accountService
-        .authorityAll({
-          first: parsedData.first,
-          rows: parsedData.rows,
-          sortField: parsedData.sortField,
-          sortOrder: parsedData.sortOrder,
-          filters: parsedData.filters,
-        })
-        .catch((error) => {
-          throw new Error(error)
-        })
+      return await this.accountService.authorityAll({
+        first: parsedData.first,
+        rows: parsedData.rows,
+        sortField: parsedData.sortField,
+        sortOrder: parsedData.sortOrder,
+        filters: parsedData.filters,
+      })
+      // .catch((error) => {
+      //   throw new Error(error)
+      // })
     } else {
       throw new Error('filters is not a valid json')
     }

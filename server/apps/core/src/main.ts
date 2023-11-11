@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common'
+import { VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import {
@@ -12,7 +8,6 @@ import {
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { environmentName } from '@utility/environtment'
 import { WinstonCustomTransports } from '@utility/transport.winston'
-import { ValidationError } from 'class-validator'
 import * as CopyPlugin from 'copy-webpack-plugin'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -68,9 +63,14 @@ async function bootstrap() {
 
   const logger = winston.createLogger({
     transports: WinstonCustomTransports[environmentName],
+    levels: {
+      error: 0,
+      warn: 1,
+      info: 2,
+    },
   })
 
-  logger.level = 'DEBUG'
+  // logger.level = 'DEBUG'
 
   fastifyAdapter.register(require('@fastify/static'), {
     root: path.join(
@@ -82,22 +82,24 @@ async function bootstrap() {
 
   // app.useLogger(logger)
   app.useGlobalFilters(new CommonErrorFilter(logger))
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: false,
-      skipMissingProperties: true,
-      forbidNonWhitelisted: true,
-      forbidUnknownValues: true,
-      exceptionFactory: (validationErrors: ValidationError[] = []) => {
-        let messages = []
-        validationErrors.map((e) => {
-          messages = messages.concat(e.constraints)
-        })
-        return new BadRequestException(messages)
-      },
-    })
-  )
+  // app.useGlobalPipes(new GatewayPipe())
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     transform: true,
+  //     whitelist: false,
+  //     skipMissingProperties: true,
+  //     forbidNonWhitelisted: true,
+  //     forbidUnknownValues: true,
+  //     errorHttpStatusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //     exceptionFactory: (validationErrors: ValidationError[] = []) => {
+  //       let messages = []
+  //       validationErrors.map((e) => {
+  //         messages = messages.concat(e.constraints)
+  //       })
+  //       throw new Error(messages.join(';;'))
+  //     },
+  //   })
+  // )
 
   app.enableVersioning({
     type: VersioningType.URI,

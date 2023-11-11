@@ -143,7 +143,7 @@ describe('Account Service', () => {
       async () => {
         const mockError = mockResponse({
           code: modCodes[AccountService.name],
-          message: 'Sign in failed. Account not found',
+          message: 'Sign in failed',
           payload: {},
           transaction_id: '',
           transaction_classify: 'ACCOUNT_SIGNIN',
@@ -211,7 +211,7 @@ describe('Account Service', () => {
       async () => {
         const mockError = mockResponse({
           code: modCodes[AccountService.name],
-          message: 'Sign in failed. Account not found',
+          message: 'Sign in failed',
           payload: {},
           transaction_id: '',
           transaction_classify: 'ACCOUNT_SIGNIN',

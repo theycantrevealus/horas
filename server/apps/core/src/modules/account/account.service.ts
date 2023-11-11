@@ -111,15 +111,12 @@ export class AccountService {
         return response
       })
       .catch((error: Error) => {
-        response.message = `Authority failed to fetch`
+        response.message = error.message
         response.statusCode = {
           ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
+          classCode: modCodes[this.constructor.name].classCode,
         }
-        // response.payload = {
-        //   message: error.message,
-        //   stack: error.stack,
-        // }
+        response.payload = error.stack
         throw new Error(JSON.stringify(response))
       })
   }
@@ -428,11 +425,22 @@ export class AccountService {
           }
           return response
         })
+        .catch((error) => {
+          console.log(error)
+          response.message = error.message
+          response.statusCode = {
+            ...modCodes[this.constructor.name].error.databaseError,
+            classCode: modCodes[this.constructor.name].classCode,
+          }
+          response.payload = error
+          throw new Error(JSON.stringify(response))
+        })
     } catch (error) {
-      response.message = `Account failed to create`
+      response.message = error.message
+      console.log(error)
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
+        classCode: modCodes[this.constructor.name].classCode,
       }
       response.payload = error
       throw new Error(JSON.stringify(response))
@@ -533,7 +541,8 @@ export class AccountService {
                 response.message = `Sign in failed. Account not found`
                 response.statusCode = {
                   ...modCodes[this.constructor.name].error.databaseError,
-                  classCode: modCodes[this.constructor.name].defaultCode,
+                  classCode: modCodes[this.constructor.name].classCode,
+                  defaultCode: modCodes[this.constructor.name].defaultCode,
                 }
                 response.payload = authServiceError
                 throw new Error(JSON.stringify(response))
@@ -557,27 +566,29 @@ export class AccountService {
               }
               return response
             } else {
-              response.message = `Sign in failed. Account not found`
+              response.message = 'Sign in failed. Username / password incorect'
               response.statusCode = {
                 ...modCodes[this.constructor.name].error.databaseError,
-                classCode: modCodes[this.constructor.name].defaultCode,
+                classCode: modCodes[this.constructor.name].classCode,
+                defaultCode: modCodes[this.constructor.name].defaultCode,
               }
               response.payload = {}
               throw new Error(JSON.stringify(response))
             }
           })
           .catch((error: Error) => {
-            response.message = `Sign in failed. Account not found`
+            response.message = 'Sign in failed'
             response.statusCode = {
               ...modCodes[this.constructor.name].error.databaseError,
-              classCode: modCodes[this.constructor.name].defaultCode,
+              classCode: modCodes[this.constructor.name].classCode,
+              defaultCode: modCodes[this.constructor.name].defaultCode,
             }
             response.payload = error
             throw new Error(JSON.stringify(response))
           })
       })
       .catch((error: Error) => {
-        response.message = `Sign in failed. Account not found`
+        response.message = 'Sign in failed'
         response.statusCode = {
           ...modCodes[this.constructor.name].error.databaseError,
           classCode: modCodes[this.constructor.name].defaultCode,
@@ -591,7 +602,6 @@ export class AccountService {
   async configMeta() {
     const fields = {}
     const dataSet: any = await this.cacheManager.get('CONFIGURATION_META')
-
     if (dataSet.setter) {
       const setter = Object.keys(dataSet.setter)
       for await (const e of setter) {
@@ -601,7 +611,7 @@ export class AccountService {
 
         fields[e] = await this.cacheManager
           .get(e)
-          .then((getData: IConfig) => getData.setter)
+          .then((getData: IConfig) => getData?.setter)
 
         if (e === 'APPLICATION_ICON' || e === 'APPLICATION_LOGO') {
           if (!fields[e].image) {

@@ -235,7 +235,7 @@ export class CoreModule {
                 __v: e.__v,
               })
               .then(() => {
-                this.logger.verbose(`[${e.name} configuration set`)
+                this.logger.verbose(`[${e.name}] configuration set`)
               })
           }
         })

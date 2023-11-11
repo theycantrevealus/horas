@@ -1,5 +1,8 @@
+import { HorasLogging } from '@utility/logger/interfaces'
 import { pad } from '@utility/string'
 import { TimeManagement } from '@utility/time'
+import { logLevel } from 'kafkajs'
+import * as process from 'process'
 import * as winston from 'winston'
 
 const lPad = {
@@ -10,8 +13,11 @@ const lPad = {
 
 const today = new TimeManagement()
 
-const sPad = {
-  level: '                                  ',
+export const sPad = {
+  pid: '           ',
+  ip: '                ',
+  method: '       ',
+  level: '                        ',
   timestamp: '                          ',
   content: '',
 }
@@ -21,6 +27,36 @@ while (a <= tableLength) {
   lPad.content += '─'
   sPad.content += ' '
   a++
+}
+
+export const toWinstonLogLevel = (level) => {
+  switch (level) {
+    case logLevel.ERROR:
+    case logLevel.NOTHING:
+      return 'error'
+    case logLevel.WARN:
+      return 'warn'
+    case logLevel.INFO:
+      return 'info'
+    case logLevel.DEBUG:
+      return 'debug'
+  }
+}
+
+export const WinstonLogCreator = (logLevel) => {
+  const logger = winston.createLogger({
+    level: toWinstonLogLevel(logLevel),
+    transports: WinstonCustomTransports.development,
+  })
+
+  return ({ namespace, level, label, log }) => {
+    const { message, ...extra } = log
+    logger.log({
+      level: toWinstonLogLevel(level),
+      message,
+      extra,
+    })
+  }
 }
 
 const lastLine = `\n└${pad(lPad.level, '', false)}┴${pad(
@@ -34,55 +70,131 @@ function clearLastLine() {
   process.stdout.clearLine(1)
 }
 
+function delimitter() {
+  const line = '-'.repeat(process.stdout.columns)
+  console.warn(line)
+}
+
 export const WinstonCustomTransports = {
   development: [
     new winston.transports.Console({
-      level: 'debug',
+      level: 'verbose',
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
         winston.format.printf((data) => {
-          clearLastLine()
-          return `│ ${pad(sPad.level, data.level, true)} │ ${pad(
-            sPad.timestamp,
-            data.timestamp,
-            false
-          )} │ ${pad(sPad.content, data.message, false)} │${lastLine}`
-        })
-      ),
-    }),
-    new winston.transports.File({
-      filename: `logs/journal.log`,
-      level: 'verbose',
-      format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-        winston.format.printf((data) => {
-          const levelSet = data.level === 'verbose' ? 'info' : data.level
-          if (typeof data.message === 'object') {
-            const logSet = data.message
-            return `time=${data.timestamp} ip=${logSet.ip} path=${
-              logSet.path
-            } method=${logSet.method} taken=${
-              logSet.takeTime
-            } level=${levelSet} code_default=${
-              logSet.result.statusCode.defaultCode
-            } code_class=${logSet.result.statusCode.classCode} code_custom=${
-              logSet.result.statusCode.customCode
-            } user=${logSet.account.id}-${logSet.account.last_name},${
-              logSet.account.first_name
-            } payload=${JSON.stringify(logSet.payload)} msg="${
-              logSet.result.message
-            }"`
+          // Check format to show
+          const parsedResponseHorasLogging: HorasLogging = data.message
+          const ip = pad(
+            sPad.ip,
+            parsedResponseHorasLogging.ip ?? '0.0.0.0',
+            true
+          )
+          const pid = pad(sPad.pid, process.pid, true)
+          const method = pad(
+            sPad.method,
+            parsedResponseHorasLogging.method ?? '-',
+            true
+          )
+          if (parsedResponseHorasLogging.ip) {
+            return `${pad(sPad.level, data.level, true)} ${pad(
+              sPad.timestamp,
+              data.timestamp,
+              false
+            )} ${ip} ${pid} ${method} ${
+              parsedResponseHorasLogging.result.message
+            }`
           } else {
-            return `time=${
-              data.timestamp
-            } ip=0.0.0.0 path=SYS method=SYS taken=0 level=${levelSet} code_default=000 code_class=000 code_custom=00000 user=SYS payload= msg=${JSON.stringify(
-              data.message
-            )}`
+            return `${pad(sPad.level, data.level, true)} ${pad(
+              sPad.timestamp,
+              data.timestamp,
+              false
+            )} ${ip} ${pid} ${method} ${data.message}`
           }
         })
       ),
     }),
+    // new winston.transports.Console({
+    //   level: 'error',
+    //   format: winston.format.combine(
+    //     winston.format.colorize(),
+    //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+    //     winston.format.printf((data) => {
+    //       return `${pad(sPad.level, data.level, true)} ${pad(
+    //         sPad.timestamp,
+    //         data.timestamp,
+    //         false
+    //       )} ${data.message}`
+    //     })
+    //   ),
+    // }),
+    // new winston.transports.Console({
+    //   level: 'error',
+    //   format: winston.format.combine(
+    //     winston.format.colorize(),
+    //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+    //     winston.format.printf((data) => {
+    //       return `${pad(sPad.level, data.level, true)} ${pad(
+    //         sPad.timestamp,
+    //         data.timestamp,
+    //         false
+    //       )} ${data.message}`
+    //     })
+    //   ),
+    // }),
+    // new winston.transports.Console({
+    //   level: 'debug',
+    //   format: winston.format.combine(
+    //     winston.format.colorize(),
+    //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+    //     winston.format.printf((data) => {
+    //       // clearLastLine()
+    //       return `${pad(sPad.level, data.level, true)} ${pad(
+    //         sPad.timestamp,
+    //         data.timestamp,
+    //         false
+    //       )} ${data.message}`
+    //       // return `│ ${pad(sPad.level, data.level, true)} │ ${pad(
+    //       //   sPad.timestamp,
+    //       //   data.timestamp,
+    //       //   false
+    //       // )} │ ${pad(sPad.content, data.message, false)} │${lastLine}`
+    //     })
+    //   ),
+    // }),
+    // new winston.transports.File({
+    //   filename: `logs/journal.log`,
+    //   level: 'verbose',
+    //   format: winston.format.combine(
+    //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+    //     winston.format.printf((data) => {
+    //       const levelSet = data.level === 'verbose' ? 'info' : data.level
+    //       if (typeof data.message === 'object') {
+    //         const logSet = data.message
+    //         const account = logSet.account
+    //           ? `${logSet.account.id}-${logSet.account.last_name},${logSet.account.first_name}`
+    //           : ''
+    //         return `time=${data.timestamp} ip=${logSet.ip} path=${
+    //           logSet.path
+    //         } method=${logSet.method} taken=${
+    //           logSet.takeTime
+    //         } level=${levelSet} code_default=${
+    //           logSet.result.code.defaultCode
+    //         } code_class=${logSet.result.code.classCode} code_custom=${
+    //           logSet.result.code.customCode
+    //         } user=${account} payload=${JSON.stringify(logSet.payload)} msg="${
+    //           logSet.result.message
+    //         }"`
+    //       } else {
+    //         return `time=${
+    //           data.timestamp
+    //         } ip=0.0.0.0 path=SYS method=SYS taken=0 level=${levelSet} code_default=000 code_class=000 code_custom=00000 user=SYS payload= msg=${JSON.stringify(
+    //           data.message
+    //         )}`
+    //       }
+    //     })
+    //   ),
+    // }),
   ] satisfies winston.transport[],
   production: [
     new winston.transports.File({

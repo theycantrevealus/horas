@@ -7,6 +7,7 @@ import {
 import { MasterItemService } from '@core/master/services/master.item.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
+import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
@@ -34,7 +35,6 @@ import {
 } from '@nestjs/swagger'
 import { FileDto } from '@utility/dto/file'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { isJSON } from 'class-validator'
 import { FastifyReply } from 'fastify'
 import * as fs from 'fs'
 import { diskStorage } from 'multer'
@@ -57,33 +57,10 @@ export class MasterItemController {
     summary: 'Fetch all',
     description: 'Showing data',
   })
+  @UseInterceptors(LoggingInterceptor)
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(
-    @Res() response: FastifyReply,
-    @Query('lazyEvent') parameter: string
-  ) {
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      await this.masterItemService
-        .all({
-          first: parsedData.first,
-          rows: parsedData.rows,
-          sortField: parsedData.sortField,
-          sortOrder: parsedData.sortOrder,
-          filters: parsedData.filters,
-        })
-        .then((result) => {
-          response.code(HttpStatus.OK).send(result)
-        })
-        .catch((error) => {
-          response.code(HttpStatus.BAD_REQUEST).send(error.message)
-        })
-    } else {
-      response.code(HttpStatus.BAD_REQUEST).send({
-        message: 'filters is not a valid json',
-        payload: {},
-      })
-    }
+  async all(@Query('lazyEvent') parameter: string) {
+    return await this.masterItemService.all(parameter)
   }
 
   @Get('item/find')

@@ -1,5 +1,10 @@
 import { AccountController } from '@core/account/account.controller'
-import { accountArray } from '@core/account/mock/account.mock'
+import {
+  accountArray,
+  mockAccount,
+  mockAccountModel,
+  mockAccountService,
+} from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -32,7 +37,10 @@ describe('Account Controller', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AccountController],
       providers: [
-        AccountService,
+        {
+          provide: AccountService,
+          useValue: mockAccountService,
+        },
         {
           provide: ConfigService,
           useValue: {
@@ -57,7 +65,10 @@ describe('Account Controller', () => {
           },
         },
         { provide: AuthService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: {} },
+        {
+          provide: getModelToken(Account.name),
+          useValue: mockAccountModel,
+        },
         {
           provide: getModelToken(Authority.name),
           useValue: {},
@@ -116,47 +127,37 @@ describe('Account Controller', () => {
             })
         }
       )
-
-      it(
-        testCaption('HANDLING', 'data', 'Response error', {
-          tab: 1,
-        }),
-        async () => {
-          return app
-            .inject({
-              method: 'GET',
-              headers: {
-                authorization: 'Bearer ey...',
-              },
-              url: '/account',
-              query: `lazyEvent=${ApiQueryGeneral.primeDT.example}ss`,
-            })
-            .then((result) => {
-              console.log(result.body)
-            })
-        }
-      )
     }
   )
 
-  // it(
-  //   testCaption('FLOW', 'feature', 'Should return success add', {
-  //     tab: 0,
-  //   }),
-  //   async () => {
-  //     const data = new AccountAddDTO(mockAccount())
-  //     return app
-  //       .inject({
-  //         method: 'POST',
-  //         url: '/account',
-  //         body: data,
-  //       })
-  //       .then((result) => {
-  //         expect(result.statusCode).toEqual(HttpStatus.CREATED)
-  //         expect(logger.verbose).toHaveBeenCalled()
-  //       })
-  //   }
-  // )
+  it(
+    testCaption('FLOW', 'feature', 'Should return success add', {
+      tab: 0,
+    }),
+    async () => {
+      const data = mockAccount()
+      delete data.id
+      delete data.code
+      delete data.created_by
+      delete data.created_at
+      delete data.updated_at
+      delete data.deleted_at
+      delete data.access
+      delete data.permission
+      console.log(data)
+      return app
+        .inject({
+          method: 'POST',
+          url: '/account',
+          body: data,
+        })
+        .then((result) => {
+          console.log(result.body)
+          expect(result.statusCode).toEqual(HttpStatus.CREATED)
+          expect(logger.verbose).toHaveBeenCalled()
+        })
+    }
+  )
   //
   // it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
   //   const data = new AccountEditDTO({

@@ -24,12 +24,14 @@ export class CommonErrorFilter implements ExceptionFilter {
       ? request.method
       : (request as FastifyRequest).method
     let responseSet, statusCode
-    if (isJSON(exception.message)) {
-      const parseError: GlobalResponse = JSON.parse(exception.message)
+    const errorPayload = exception.message.replace('Error: ', '').trim()
+    if (isJSON(errorPayload)) {
+      const parseError: GlobalResponse = JSON.parse(errorPayload)
       responseSet = {
-        code: parseError.statusCode,
-        message: parseError.message,
-        description: exception.stack ?? '',
+        ...JSON.parse(parseError.message),
+        // code: parseError.statusCode,
+        // message: JSON.parse(parseError.message),
+        // description: exception.stack ?? '',
         timestamp: new Date().toISOString(),
         path: request.url,
       }
@@ -62,8 +64,7 @@ export class CommonErrorFilter implements ExceptionFilter {
       time: TM.getTimezone('Asia/Jakarta'),
     }
 
-    this.logger.error(dataSet)
-
-    response.status(statusCode).send(responseSet)
+    // TODO : Format this data set to default log view
+    response.status(statusCode).send(dataSet.result)
   }
 }

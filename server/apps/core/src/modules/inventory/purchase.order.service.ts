@@ -30,18 +30,7 @@ export class PurchaseOrderService {
     private readonly masterItemService: MasterItemService,
     @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
   ) {
-    this.testEmitter()
-  }
-
-  async testEmitter() {
-    for (let a = 0; a <= 10; a++) {
-      await this.clientInventory.emit(
-        this.configService.get<string>('kafka.inventory.topic.purchase_order'),
-        {
-          data: a,
-        }
-      )
-    }
+    //
   }
 
   async all(parameter: any) {

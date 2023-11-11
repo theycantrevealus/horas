@@ -31,22 +31,26 @@ export class CoreService {
   async initTree(parent: any = {}) {
     return this.configGroupModel.find({ parent: parent }).then((group) => {
       return Promise.all(
-        group.map(async (e, f) => {
+        group.map(async (e) => {
           return new Promise(async (resolve, reject) => {
-            resolve({
-              key: e.level,
-              label: e.label,
-              data: e.name,
-              icon: e.icon,
-              fields: await this.buildTree({
-                id: e.id,
-                name: e.name,
-              }),
-              children: await this.initTree({
-                id: e.id,
-                name: e.name,
-              }),
-            })
+            if (e.name) {
+              resolve({
+                key: e.level,
+                label: e.label,
+                data: e.name,
+                icon: e.icon,
+                fields: await this.buildTree({
+                  id: e.id,
+                  name: e.name,
+                }),
+                children: await this.initTree({
+                  id: e.id,
+                  name: e.name,
+                }),
+              })
+            } else {
+              reject()
+            }
           })
         })
       )

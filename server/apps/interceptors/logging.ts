@@ -75,16 +75,34 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
           time: TM.getTimezone('Asia/Jakarta'),
         }
 
-        this.logger.verbose(dataSet)
+        if (result.statusCode.defaultCode === HttpStatus.BAD_REQUEST) {
+          this.logger.warn(dataSet)
+        } else if (
+          result.statusCode.defaultCode === HttpStatus.INTERNAL_SERVER_ERROR
+        ) {
+          this.logger.error(dataSet)
+        } else {
+          this.logger.verbose(dataSet)
+        }
 
-        if (isCustomErrorCode(result.statusCode)) {
-          response.code(result.statusCode.defaultCode).send({
-            statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
-            message: result.message,
-            payload: result.payload,
-            transaction_classify: '',
-            transaction_id: result.transaction_id,
-          } satisfies GlobalResponseParsed)
+        if (result.statusCode) {
+          if (isCustomErrorCode(result.statusCode)) {
+            response.code(result.statusCode.defaultCode).send({
+              statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
+              message: result.message,
+              payload: result.payload,
+              transaction_classify: '',
+              transaction_id: result.transaction_id,
+            } satisfies GlobalResponseParsed)
+          } else {
+            response.code(HttpStatus.BAD_REQUEST).send({
+              statusCode: `CORE_F0000`,
+              message: result.message,
+              payload: result.payload,
+              transaction_classify: '',
+              transaction_id: result.transaction_id,
+            } satisfies GlobalResponseParsed)
+          }
         } else {
           response.code(HttpStatus.BAD_REQUEST).send({
             statusCode: `CORE_F0000`,

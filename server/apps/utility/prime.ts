@@ -15,6 +15,8 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
   const rows: number = parameter.rows ? parseInt(parameter.rows) : 20
   const sortField = parameter.sortField ? parameter.sortField : 'created_at'
   const sortOrder = parameter.sortOrder ? parseInt(parameter.sortOrder) : 1
+  const projection = parameter.projection ?? {}
+  const search_term = parameter.search_term ?? {}
   const filters = parameter.filters
   const custom_filter = parameter.custom_filter || []
   const query = []
@@ -69,6 +71,14 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
   }
 
   if (filter_builder.$and.length > 0) {
+    if (Object.keys(search_term).length) {
+      filter_builder.$and.push({
+        $text: {
+          $search: search_term.value,
+        },
+      })
+    }
+
     query.push({
       $match: filter_builder,
     })
@@ -124,6 +134,11 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
       },
     },
   })
+
+  if (Object.keys(projection).length)
+    query.push({
+      $project: projection,
+    })
 
   try {
     const data = await model.aggregate(query).exec()
