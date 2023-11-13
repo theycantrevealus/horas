@@ -51,13 +51,13 @@ export class MasterItemController {
   @Get('item')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Fetch all',
     description: 'Showing data',
   })
-  @UseInterceptors(LoggingInterceptor)
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
     return await this.masterItemService.all(parameter)

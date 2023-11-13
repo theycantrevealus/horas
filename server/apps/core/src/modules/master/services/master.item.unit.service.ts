@@ -14,6 +14,7 @@ import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
+import { isJSON } from 'class-validator'
 import { Model } from 'mongoose'
 
 @Injectable()
@@ -24,7 +25,33 @@ export class MasterItemUnitService {
   ) {}
 
   async all(parameter: any) {
-    return await prime_datatable(parameter, this.masterItemUnitModel)
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'MASTER_ITEM_BRAND_LIST',
+      transaction_id: null,
+    } satisfies GlobalResponse
+    if (isJSON(parameter)) {
+      const parsedData = JSON.parse(parameter)
+      response.payload = await prime_datatable(
+        parsedData,
+        this.masterItemUnitModel
+      )
+      response.message = 'Data query success'
+    } else {
+      response.statusCode = {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: modCodes.Global.failed,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.message = 'filters is not a valid json'
+    }
+    return response
   }
 
   async detail(id: string): Promise<MasterItemUnit> {

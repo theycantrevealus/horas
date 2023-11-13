@@ -19,6 +19,8 @@ export const sPad = {
   method: '       ',
   level: '                        ',
   timestamp: '                          ',
+  httpCode: '                  ',
+  account: '                ',
   content: '',
 }
 const tableLength = 100
@@ -70,9 +72,51 @@ function clearLastLine() {
   process.stdout.clearLine(1)
 }
 
-function delimitter() {
-  const line = '-'.repeat(process.stdout.columns)
-  console.warn(line)
+function delimitter(style = '-') {
+  return '\n' + style.repeat(process.stdout.columns)
+}
+
+function loggerParser(data) {
+  const parsedResponseHorasLogging: HorasLogging = data.message
+  const ip = pad(sPad.ip, parsedResponseHorasLogging.ip ?? '0.0.0.0', false)
+  const pid = pad(sPad.pid, process.pid, false)
+  const method = pad(
+    sPad.method,
+    parsedResponseHorasLogging.method ?? '-',
+    false
+  )
+
+  if (parsedResponseHorasLogging.ip) {
+    const account = pad(
+      sPad.account,
+      `${parsedResponseHorasLogging.account.last_name}, ${parsedResponseHorasLogging.account.first_name}` ??
+        '-',
+      false
+    )
+    const httpCode = pad(
+      sPad.httpCode,
+      `${parsedResponseHorasLogging.result.statusCode.classCode}_${parsedResponseHorasLogging.result.statusCode.customCode}` ??
+        '-',
+      false
+    )
+    return `${pad(sPad.level, data.level, true)} ${pad(
+      sPad.timestamp,
+      data.timestamp,
+      false
+    )} ${ip} ${pid} ${method} ${httpCode} ${account} ${JSON.stringify(
+      parsedResponseHorasLogging.result
+    ).substring(0, 175)}... ${delimitter('┅')}`
+  } else {
+    return `${pad(sPad.level, data.level, true)} ${pad(
+      sPad.timestamp,
+      data.timestamp,
+      false
+    )} ${ip} ${pid} ${method} ${pad(sPad.httpCode, '-', false)} ${pad(
+      sPad.account,
+      '-',
+      false
+    )} ${data.message}${delimitter('┅')}`
+  }
 }
 
 export const WinstonCustomTransports = {
@@ -83,85 +127,10 @@ export const WinstonCustomTransports = {
         winston.format.colorize(),
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
         winston.format.printf((data) => {
-          // Check format to show
-          const parsedResponseHorasLogging: HorasLogging = data.message
-          const ip = pad(
-            sPad.ip,
-            parsedResponseHorasLogging.ip ?? '0.0.0.0',
-            true
-          )
-          const pid = pad(sPad.pid, process.pid, true)
-          const method = pad(
-            sPad.method,
-            parsedResponseHorasLogging.method ?? '-',
-            true
-          )
-          if (parsedResponseHorasLogging.ip) {
-            return `${pad(sPad.level, data.level, true)} ${pad(
-              sPad.timestamp,
-              data.timestamp,
-              false
-            )} ${ip} ${pid} ${method} ${
-              parsedResponseHorasLogging.result.message
-            }`
-          } else {
-            return `${pad(sPad.level, data.level, true)} ${pad(
-              sPad.timestamp,
-              data.timestamp,
-              false
-            )} ${ip} ${pid} ${method} ${data.message}`
-          }
+          return loggerParser(data)
         })
       ),
     }),
-    // new winston.transports.Console({
-    //   level: 'error',
-    //   format: winston.format.combine(
-    //     winston.format.colorize(),
-    //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-    //     winston.format.printf((data) => {
-    //       return `${pad(sPad.level, data.level, true)} ${pad(
-    //         sPad.timestamp,
-    //         data.timestamp,
-    //         false
-    //       )} ${data.message}`
-    //     })
-    //   ),
-    // }),
-    // new winston.transports.Console({
-    //   level: 'error',
-    //   format: winston.format.combine(
-    //     winston.format.colorize(),
-    //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-    //     winston.format.printf((data) => {
-    //       return `${pad(sPad.level, data.level, true)} ${pad(
-    //         sPad.timestamp,
-    //         data.timestamp,
-    //         false
-    //       )} ${data.message}`
-    //     })
-    //   ),
-    // }),
-    // new winston.transports.Console({
-    //   level: 'debug',
-    //   format: winston.format.combine(
-    //     winston.format.colorize(),
-    //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-    //     winston.format.printf((data) => {
-    //       // clearLastLine()
-    //       return `${pad(sPad.level, data.level, true)} ${pad(
-    //         sPad.timestamp,
-    //         data.timestamp,
-    //         false
-    //       )} ${data.message}`
-    //       // return `│ ${pad(sPad.level, data.level, true)} │ ${pad(
-    //       //   sPad.timestamp,
-    //       //   data.timestamp,
-    //       //   false
-    //       // )} │ ${pad(sPad.content, data.message, false)} │${lastLine}`
-    //     })
-    //   ),
-    // }),
     // new winston.transports.File({
     //   filename: `logs/journal.log`,
     //   level: 'verbose',

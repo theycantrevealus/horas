@@ -42,6 +42,7 @@ export class MasterItemService {
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
       response.payload = await prime_datatable(parsedData, this.masterItemModel)
+      response.message = 'Data query success'
     } else {
       response.statusCode = {
         defaultCode: HttpStatus.BAD_REQUEST,
