@@ -114,7 +114,7 @@ export class AccountService {
         response.message = error.message
         response.statusCode = {
           ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].classCode,
+          classCode: modCodes[this.constructor.name].defaultCode,
         }
         response.payload = error.stack
         throw new Error(JSON.stringify(response))
@@ -410,41 +410,51 @@ export class AccountService {
     const password = data.password
     data.password = await bcrypt.hash(password, saltOrRounds)
 
-    try {
-      return await this.accountModel
-        .create({
+    return new Promise(async (resolve, reject) => {
+      try {
+        const document = new this.accountModel({
           ...data,
           created_by: credential,
         })
-        .then((result) => {
-          response.message = 'Account created successfully'
-          response.transaction_id = result.id
-          response.payload = {
-            id: result.id,
-            ...data,
-          }
-          return response
-        })
-        .catch((error) => {
-          console.log(error)
-          response.message = error.message
-          response.statusCode = {
-            ...modCodes[this.constructor.name].error.databaseError,
-            classCode: modCodes[this.constructor.name].classCode,
-          }
-          response.payload = error
-          throw new Error(JSON.stringify(response))
-        })
-    } catch (error) {
-      response.message = error.message
-      console.log(error)
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].classCode,
+        return await document
+          .save()
+          .then((result) => {
+            response.message = 'Account created successfully'
+            response.transaction_id = result.id
+            response.payload = {
+              id: result.id,
+              ...data,
+            }
+            resolve(response)
+          })
+          .catch((error) => {
+            response.message = error.message
+            response.statusCode = {
+              ...modCodes[this.constructor.name].error.databaseError,
+              classCode: modCodes[this.constructor.name].defaultCode,
+            }
+            response.payload = {}
+            reject(response)
+          })
+          .catch((error) => {
+            response.message = error.message
+            response.statusCode = {
+              ...modCodes[this.constructor.name].error.databaseError,
+              classCode: modCodes[this.constructor.name].defaultCode,
+            }
+            response.payload = error
+            reject(response)
+          })
+      } catch (error) {
+        response.message = error.message
+        response.statusCode = {
+          ...modCodes[this.constructor.name].error.databaseError,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
+        response.payload = error
+        reject(response)
       }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
-    }
+    })
   }
 
   async authorityAdd(
@@ -541,7 +551,7 @@ export class AccountService {
                 response.message = `Sign in failed. Account not found`
                 response.statusCode = {
                   ...modCodes[this.constructor.name].error.databaseError,
-                  classCode: modCodes[this.constructor.name].classCode,
+                  classCode: modCodes[this.constructor.name].defaultCode,
                   defaultCode: modCodes[this.constructor.name].defaultCode,
                 }
                 response.payload = authServiceError
@@ -569,7 +579,7 @@ export class AccountService {
               response.message = 'Sign in failed. Username / password incorect'
               response.statusCode = {
                 ...modCodes[this.constructor.name].error.databaseError,
-                classCode: modCodes[this.constructor.name].classCode,
+                classCode: modCodes[this.constructor.name].defaultCode,
                 defaultCode: modCodes[this.constructor.name].defaultCode,
               }
               response.payload = {}
@@ -580,7 +590,7 @@ export class AccountService {
             response.message = 'Sign in failed'
             response.statusCode = {
               ...modCodes[this.constructor.name].error.databaseError,
-              classCode: modCodes[this.constructor.name].classCode,
+              classCode: modCodes[this.constructor.name].defaultCode,
               defaultCode: modCodes[this.constructor.name].defaultCode,
             }
             response.payload = error

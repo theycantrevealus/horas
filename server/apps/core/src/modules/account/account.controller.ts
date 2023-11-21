@@ -19,6 +19,7 @@ import {
   Patch,
   Post,
   Query,
+  UseFilters,
   UseGuards,
   UseInterceptors,
   Version,
@@ -36,6 +37,7 @@ import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { isJSON } from 'class-validator'
 import { Logger } from 'winston'
 
+import { CommonErrorFilter } from '../../../../filters/error'
 import { AccountService } from './account.service'
 import { AccountAddDTO } from './dto/account.add.dto'
 
@@ -62,7 +64,9 @@ export class AccountController {
   async accountAll(
     @Query('lazyEvent') parameter: string
   ): Promise<GlobalResponse> {
-    return await this.accountService.accountAll(parameter)
+    return await this.accountService.accountAll(parameter).catch((error) => {
+      throw error
+    })
   }
 
   @Get(':id')
@@ -79,7 +83,7 @@ export class AccountController {
   })
   async detail(@Param() param) {
     return await this.accountService.accountDetail(param.id).catch((error) => {
-      throw new Error(error)
+      throw error
     })
   }
 
@@ -88,6 +92,7 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @UseInterceptors(LoggingInterceptor)
+  @UseFilters(CommonErrorFilter)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -101,8 +106,7 @@ export class AccountController {
     return await this.accountService
       .accountAdd(parameter, account)
       .catch((error) => {
-        console.log(error)
-        throw new Error(error)
+        throw error
       })
   }
 
@@ -123,7 +127,7 @@ export class AccountController {
     return await this.accountService
       .accountEdit(body, param.id)
       .catch((error) => {
-        throw new Error(error)
+        throw error
       })
   }
 
@@ -143,7 +147,7 @@ export class AccountController {
   })
   async delete(@Param() param) {
     return await this.accountService.accountDelete(param.id).catch((error) => {
-      throw new Error(error)
+      throw error
     })
   }
 
@@ -154,7 +158,9 @@ export class AccountController {
     description: ``,
   })
   async signIn(@Body() body: AccountSignInDTO) {
-    return await this.accountService.signIn(body)
+    return await this.accountService.signIn(body).catch((error) => {
+      throw error
+    })
   }
 
   @Get('authority')
@@ -201,7 +207,7 @@ export class AccountController {
     return await this.accountService
       .authorityDetail(param.id)
       .catch((error) => {
-        throw new Error(error)
+        throw error
       })
   }
 
@@ -221,7 +227,7 @@ export class AccountController {
     return await this.accountService
       .authorityAdd(parameter, account)
       .catch((error) => {
-        throw new Error(error)
+        throw error
       })
   }
 
@@ -241,7 +247,7 @@ export class AccountController {
     return await this.accountService
       .authorityEdit(body, param.id)
       .catch((error) => {
-        throw new Error(error)
+        throw error
       })
   }
   @Delete('authority/:id')
@@ -261,7 +267,7 @@ export class AccountController {
     return await this.accountService
       .authorityDelete(param.id)
       .catch((error) => {
-        throw new Error(error)
+        throw error
       })
   }
 }

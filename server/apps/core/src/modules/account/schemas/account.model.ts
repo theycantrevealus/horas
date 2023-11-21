@@ -11,6 +11,7 @@ import {
   MenuPermissionJoin,
 } from '@core/menu/schemas/menu.model'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
@@ -40,10 +41,10 @@ export class Account {
   @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
   password: string
 
-  @Prop({ type: SchemaTypes.String })
+  @Prop({ type: SchemaTypes.String, unique: false })
   first_name: string
 
-  @Prop({ type: SchemaTypes.String })
+  @Prop({ type: SchemaTypes.String, unique: false })
   last_name: string
 
   @Prop({
@@ -55,11 +56,13 @@ export class Account {
   @Prop({
     unique: false,
     type: [MenuJoin],
+    default: [],
     _id: false,
   })
   access: IMenu[]
 
   @Prop({
+    unique: false,
     type: [MenuPermissionJoin],
     default: [],
     required: false,
@@ -87,3 +90,26 @@ export class Account {
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account)
+AccountSchema.pre('save', function (next) {
+  const time = new TimeManagement()
+  if (this.isNew) {
+    this.id = `account-${this._id}`
+    this.__v = 0
+  }
+
+  if (this.isModified()) {
+    this.increment()
+    this.updated_at = time.getTimezone('Asia/Jakarta')
+    return next()
+  } else {
+    return next(new Error('Invalid document'))
+  }
+})
+
+AccountSchema.pre('findOneAndUpdate', function (next) {
+  const time = new TimeManagement()
+  const update = this.getUpdate()
+  update['updated_at'] = time.getTimezone('Asia/Jakarta')
+  update['$inc'] = { __v: 1 }
+  next()
+})
