@@ -4,7 +4,8 @@ import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { IAuthority } from '@core/account/schemas/authority.model'
-import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { faker } from '@faker-js/faker'
 import { HttpStatus } from '@nestjs/common'
 import { GlobalResponse } from '@utility/dto/response'
@@ -71,7 +72,7 @@ export const mockAccount = (
   first_name = faker.person.firstName(),
   last_name = faker.person.lastName(),
   password = faker.hacker.phrase(),
-  phone = faker.phone.number(),
+  phone = faker.helpers.replaceSymbolWithNumber(),
   access: IMenu[] = [],
   permission: IMenuPermission[] = [],
   created_by: IAccountCreatedBy = {
@@ -124,7 +125,7 @@ export const mockAccountDoc = (
   last_name: mock?.last_name || faker.person.lastName(),
   email: mock?.email || faker.internet.email(),
   password: mock?.password || '',
-  phone: mock?.phone || faker.phone.number(),
+  phone: mock?.phone || faker.helpers.replaceSymbolWithNumber(),
   access: mock?.access || [],
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -195,7 +196,7 @@ export const accountDocArray = [
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
     password: '123456',
-    phone: faker.phone.number(),
+    phone: faker.helpers.replaceSymbolWithNumber(),
     access: [],
   }),
   mockAccountDoc({
@@ -208,7 +209,7 @@ export const accountDocArray = [
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
     password: '',
-    phone: faker.phone.number(),
+    phone: faker.helpers.replaceSymbolWithNumber(),
     access: [],
   }),
 ]

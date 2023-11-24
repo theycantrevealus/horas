@@ -89,14 +89,16 @@ function loggerParser(data) {
   if (parsedResponseHorasLogging.ip) {
     const account = pad(
       sPad.account,
-      `${parsedResponseHorasLogging.account.last_name}, ${parsedResponseHorasLogging.account.first_name}` ??
-        '-',
+      `${parsedResponseHorasLogging?.account?.last_name ?? 'SYSTEM'}, ${
+        parsedResponseHorasLogging?.account?.first_name ?? 'SYSTEM'
+      }` ?? '-',
       false
     )
     const httpCode = pad(
       sPad.httpCode,
-      `${parsedResponseHorasLogging.result.statusCode.classCode}_${parsedResponseHorasLogging.result.statusCode.customCode}` ??
-        '-',
+      `${parsedResponseHorasLogging?.result?.statusCode?.classCode ?? 'xxx'}_${
+        parsedResponseHorasLogging?.result?.statusCode?.customCode ?? 'xxx'
+      }` ?? '-',
       false
     )
     return `${pad(sPad.level, data.level, true)} ${pad(

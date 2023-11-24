@@ -1,8 +1,7 @@
-import {
-  AuthorityJoin,
-  IAuthority,
-} from '@core/account/schemas/authority.model'
-import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
+import { CAuthority, IAuthority } from '@core/account/schemas/authority.model'
+import { CMenu, CMenuPermission } from '@core/menu/dto/menu'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsArray,
@@ -17,7 +16,7 @@ import {
 
 export class AccountEditDTO {
   @ApiProperty({
-    type: AuthorityJoin,
+    type: CAuthority,
     description: '',
     required: false,
   })
@@ -61,20 +60,22 @@ export class AccountEditDTO {
   phone: string
 
   @ApiProperty({
-    type: [CMenu],
     required: false,
+    isArray: true,
+    type: CMenu,
   })
   @IsArray()
   @IsOptional()
-  access?: CMenu[]
+  access?: IMenu[]
 
   @ApiProperty({
-    type: [CMenuPermission],
     required: false,
+    isArray: true,
+    type: CMenuPermission,
   })
   @IsArray()
   @IsOptional()
-  permission?: CMenuPermission[]
+  permission?: IMenuPermission[]
 
   @ApiProperty({
     example: 0,
@@ -83,14 +84,4 @@ export class AccountEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(data: any = {}) {
-    this.email = data.email
-    this.first_name = data.first_name
-    this.last_name = data.last_name
-    this.phone = data.phone
-    this.access = data.access
-    this.permission = data.permission
-    this.__v = data.__v
-  }
 }

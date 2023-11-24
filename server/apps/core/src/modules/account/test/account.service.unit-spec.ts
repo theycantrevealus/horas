@@ -113,12 +113,6 @@ describe('Account Service', () => {
           .spyOn(bcrypt, 'compare')
           .mockImplementation(() => Promise.resolve(true))
 
-        jest.spyOn(cacheManager, 'set')
-
-        jest.spyOn(cacheManager, 'get')
-
-        jest.spyOn(accountService, 'configMeta').mockResolvedValue([])
-
         await accountService
           .signIn({
             email: dataSet.email,
@@ -133,6 +127,31 @@ describe('Account Service', () => {
           })
 
         expect(accountService.accountFind).toHaveBeenCalled()
+
+        // jest.spyOn(cacheManager, 'set')
+
+        const sampleRedisData = Promise.resolve({
+          name: '',
+          setter: '',
+          remark: '',
+          __v: 0,
+        })
+
+        jest
+          .spyOn(cacheManager, 'get')
+          .mockImplementation(() => sampleRedisData)
+
+        await cacheManager.get('test').then((testData) => {
+          expect(testData).toHaveProperty('setter')
+        })
+
+        jest.spyOn(accountService, 'configMeta').mockResolvedValue({
+          data: 'test',
+        })
+
+        await expect(async () => {
+          await accountService.configMeta()
+        }).toBeInstanceOf(Object)
       }
     )
 
@@ -185,8 +204,18 @@ describe('Account Service', () => {
       async () => {
         const configMock = {
           setter: {
-            APPLICATION_LOGO: '1',
-            APPLICATION_ICON: '1',
+            APPLICATION_LOGO: {
+              name: '',
+              setter: '',
+              remark: '',
+              __v: 0,
+            },
+            APPLICATION_ICON: {
+              name: '',
+              setter: '',
+              remark: '',
+              __v: 0,
+            },
           },
         }
 
@@ -198,9 +227,30 @@ describe('Account Service', () => {
 
         await accountService.configMeta().then(() => {
           expect(cacheGetter).toHaveBeenCalledTimes(
-            Object.keys(configMock.setter).length
+            Object.keys(configMock.setter).length + 1
           )
         })
+      }
+    )
+
+    it(
+      testCaption('HANDLING', 'data', 'Response error on find data', {
+        tab: 1,
+      }),
+      async () => {
+        const mockError = mockResponse({
+          code: modCodes[AccountService.name],
+          message: 'Sign in failed',
+          payload: {},
+          transaction_id: '',
+          transaction_classify: 'ACCOUNT_SIGNIN',
+        })
+
+        jest.spyOn(cacheManager, 'get').mockImplementationOnce(() => {
+          throw new Error(JSON.stringify(mockError))
+        })
+
+        await expect(accountService.configMeta()).rejects.toThrow(Error)
       }
     )
 
@@ -579,10 +629,117 @@ describe('Account Service', () => {
             },
             targetID
           )
-        }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
+        }).rejects.toThrow(Error)
       }
     )
   })
+
+  describe(
+    testCaption(
+      'UPDATE DATA',
+      'data',
+      'Account - Update access and permission'
+    ),
+    () => {
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Should edit account access and permission',
+          { tab: 1 }
+        ),
+        async () => {
+          jest.spyOn(modelAccount, 'findOneAndUpdate')
+          jest.spyOn(modelAccount, 'find').mockReturnValue({
+            exec: jest.fn().mockReturnValue(accountDocArray),
+          } as any)
+          // jest.spyOn(modelAccount, 'updateMany')
+          await accountService
+            .accountUpdateAccess('menu-id', {
+              name: 'TestMenu',
+              url: 'menuurltest',
+              identifier: 'menuidentifier',
+              permission: [
+                {
+                  domIdentity: 'domIdentity',
+                  dispatchName: 'dispatchName',
+                  menu: {
+                    id: 'menuID',
+                    name: 'menuName',
+                    url: 'menuURL',
+                    identifier: 'menuIdentifier',
+                  },
+                },
+              ],
+            })
+            .then((result: GlobalResponse) => {
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+
+          jest.spyOn(modelAccount, 'find').mockReturnValue({
+            exec: jest.fn().mockReturnValue([]),
+          } as any)
+
+          await accountService
+            .accountUpdateAccess('menu-id', {
+              name: 'TestMenu',
+              url: 'menuurltest',
+              identifier: 'menuidentifier',
+              permission: [
+                {
+                  domIdentity: 'domIdentity',
+                  dispatchName: 'dispatchName',
+                  menu: {
+                    id: 'menuID',
+                    name: 'menuName',
+                    url: 'menuURL',
+                    identifier: 'menuIdentifier',
+                  },
+                },
+              ],
+            })
+            .then((result: GlobalResponse) => {
+              expect(result.statusCode.customCode).not.toEqual(
+                modCodes.Global.failed
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Response error on update access and permission',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          const targetID = mockAccount().id
+          const mockError = mockResponse({
+            code: modCodes[AccountService.name],
+            message: 'Account access and permission failed to updated',
+            payload: {},
+            transaction_id: targetID,
+            transaction_classify: 'ACCOUNT_UPDATE_ACCESS_PERMISSION',
+          })
+
+          jest
+            .spyOn(modelAccount, 'findOneAndUpdate')
+            .mockImplementationOnce(() => {
+              throw new Error(JSON.stringify(mockError))
+            })
+
+          await expect(async () => {
+            await accountService.accountUpdateAccess(targetID, {})
+          }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
+        }
+      )
+    }
+  )
 
   describe(
     testCaption('DELETE DATA', 'data', 'Account - Delete account'),

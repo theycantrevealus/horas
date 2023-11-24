@@ -1,7 +1,8 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument, SchemaTypes } from 'mongoose'
+import { ApiProperty } from '@nestjs/swagger'
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export type AuthorityDocument = HydratedDocument<Authority>
 @Schema({ collection: 'core_authority' })
@@ -49,6 +50,26 @@ export const AuthorityJoin = raw({
   code: { type: String },
   name: { type: String },
 })
+
+export class CAuthority {
+  @ApiProperty({
+    type: String,
+    example: `authority-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'xxxx',
+  })
+  code: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Authority Name',
+  })
+  name: string
+}
 
 export interface IAuthority {
   id: string

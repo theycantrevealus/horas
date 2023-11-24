@@ -242,7 +242,6 @@ export class BPJSApplicaresReferensiService {
               response.payload = result
             })
             .catch((error: Error) => {
-              console.log('Debug here 1')
               response.message = `Applicares kamar failed to update. ${error.message}`
               response.statusCode =
                 modCodes[this.constructor.name].error.databaseError
@@ -250,7 +249,6 @@ export class BPJSApplicaresReferensiService {
               throw new Error(JSON.stringify(response))
             })
         } else {
-          console.log('Debug here 2')
           response.message = `Applicares kamar failed to update. ${bpjsResponse.metadata.message}`
           response.statusCode =
             modCodes[this.constructor.name].error.databaseError
@@ -259,7 +257,6 @@ export class BPJSApplicaresReferensiService {
         return bpjsResponse
       })
       .catch((error: any) => {
-        console.log('Debug here 3')
         response.message = error.message.metadata.message
         response.statusCode =
           modCodes[this.constructor.name].error.databaseError

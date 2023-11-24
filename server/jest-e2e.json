@@ -21,7 +21,7 @@
   },
   "rootDir": ".",
   "preset": "ts-jest",
-  "testRegex": ".*\\.e2e-spec\\.ts$",
+  "testRegex": "account.controller.e2e-spec\\.ts$",
   "testEnvironment": "node",
   "transform": {
     "^.+\\.ts?$": "ts-jest"

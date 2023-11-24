@@ -1,26 +1,26 @@
-import {
-  AuthorityJoin,
-  IAuthority,
-} from '@core/account/schemas/authority.model'
-import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
+import { CAuthority, IAuthority } from '@core/account/schemas/authority.model'
+import { CMenu, CMenuPermission } from '@core/menu/dto/menu'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import {
-  IsArray,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
   MinLength,
+  ValidateNested,
 } from 'class-validator'
 
 export class AccountAddDTO {
   @ApiProperty({
-    type: AuthorityJoin,
+    type: CAuthority,
     description: '',
     required: false,
   })
   @IsOptional()
+  @ValidateNested({ each: true })
   authority?: IAuthority
 
   @ApiProperty({
@@ -70,29 +70,19 @@ export class AccountAddDTO {
 
   @ApiProperty({
     type: CMenu,
+    description: '',
     isArray: true,
     required: false,
   })
-  @IsArray()
   @IsOptional()
-  access?: CMenu[]
+  access?: IMenu[]
 
   @ApiProperty({
     type: CMenuPermission,
+    description: '',
     isArray: true,
     required: false,
   })
-  @IsArray()
   @IsOptional()
-  permission?: CMenuPermission[]
-
-  constructor(data: any = {}) {
-    this.email = data.email
-    this.first_name = data.first_name
-    this.last_name = data.last_name
-    this.password = data.password
-    this.phone = data.phone
-    this.access = data.access
-    this.permission = data.permission
-  }
+  permission?: IMenuPermission[]
 }

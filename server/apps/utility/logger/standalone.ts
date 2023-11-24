@@ -34,7 +34,7 @@ export const initLogger = (appname) => {
   }
 
   process.on('uncaughtException', function (err) {
-    console.log('UncaughtException processing: %s', err)
+    return err
   })
 
   //// PINO like, we link winston.containers to use only one instance of logger

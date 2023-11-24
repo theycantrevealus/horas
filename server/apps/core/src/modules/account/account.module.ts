@@ -1,7 +1,5 @@
-import {
-  Authority,
-  AuthoritySchema,
-} from '@core/account/schemas/authority.model'
+import { AccountModelProvider } from '@core/account/schemas/account.provider'
+import { AuthorityModelProvider } from '@core/account/schemas/authority.provider'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { CacheModule } from '@nestjs/cache-manager'
@@ -9,12 +7,10 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
-import { TimeManagement } from '@utility/time'
 import * as redisStore from 'cache-manager-ioredis'
 
 import { AccountController } from './account.controller'
 import { AccountService } from './account.service'
-import { Account, AccountSchema } from './schemas/account.model'
 
 @Module({
   imports: [
@@ -34,66 +30,8 @@ import { Account, AccountSchema } from './schemas/account.model'
       inject: [ConfigService],
     }),
     MongooseModule.forFeatureAsync([
-      {
-        name: Account.name,
-        useFactory: () => {
-          const schema = AccountSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `account-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: Authority.name,
-        useFactory: () => {
-          const schema = AuthoritySchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `authority-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
+      AccountModelProvider,
+      AuthorityModelProvider,
     ]),
     MongooseModule.forFeature([
       { name: LogLogin.name, schema: LogLoginSchema },

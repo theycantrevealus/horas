@@ -48,7 +48,7 @@ export const mockMasterItemSupplier = (
   id = `supplier-${new Types.ObjectId().toString()}`,
   code = 'SPP-0001',
   name = faker.company.name(),
-  phone = faker.phone.number(),
+  phone = faker.helpers.replaceSymbolWithNumber(),
   email = faker.internet.email(),
   sales_name = faker.person.firstName(),
   address = faker.location.streetAddress(),
@@ -96,7 +96,7 @@ export const mockMasterItemSupplierDoc = (
 ): Partial<MasterItemSupplierDocument> => ({
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   name: mock?.name || faker.company.name(),
-  phone: mock?.phone || faker.phone.number(),
+  phone: mock?.phone || faker.helpers.replaceSymbolWithNumber(),
   email: mock?.email || faker.internet.email(),
   sales_name: mock?.sales_name || faker.person.firstName(),
   address: mock?.address || faker.location.streetAddress(),
@@ -151,7 +151,7 @@ export const masterItemSupplierDocArray = [
   mockMasterItemSupplierDoc({
     code: 'XX-002',
     name: faker.person.firstName(),
-    phone: faker.phone.number(),
+    phone: faker.helpers.replaceSymbolWithNumber(),
     email: faker.internet.email(),
     sales_name: faker.person.firstName(),
     address: faker.location.streetAddress(),
@@ -160,7 +160,7 @@ export const masterItemSupplierDocArray = [
   mockMasterItemSupplierDoc({
     code: 'XX-001',
     name: faker.person.firstName(),
-    phone: faker.phone.number(),
+    phone: faker.helpers.replaceSymbolWithNumber(),
     email: faker.internet.email(),
     sales_name: faker.person.firstName(),
     address: faker.location.streetAddress(),

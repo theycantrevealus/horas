@@ -1,9 +1,10 @@
 import { IAccount } from '@core/account/interface/account'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { IMenuGroup, MenuGroupJoin } from '@core/menu/schemas/menu.group.model'
+import { IMenuGroup } from '@core/menu/interfaces/menu.group.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
+import { MenuGroupJoin } from '@core/menu/schemas/menu.group.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { ApiProperty } from '@nestjs/swagger'
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const MenuJoin = raw({
   id: { type: String },
@@ -12,92 +13,11 @@ export const MenuJoin = raw({
   identifier: { type: String },
 })
 
-export interface IMenu {
-  id: { type: string }
-  name: { type: string }
-  url: { type: string }
-  identifier: { type: string }
-}
-
-export interface IMenuTree {
-  id: string
-  name: string
-  url: string
-  icon: string
-  group_color: string
-  level: number
-  show_on_menu: boolean
-  show_order: number
-  items: IMenuTree[]
-}
-
-export interface IMenuTreeManager {
-  id: string
-  key: string
-  label: string
-  to: string
-  show_on_menu: boolean
-  data: any
-  icon: string
-  children: IMenuTreeManager[]
-}
-
-export class CMenu {
-  @ApiProperty({
-    type: String,
-    example: `menu-${new Types.ObjectId().toString()}`,
-  })
-  id: string
-
-  @ApiProperty({
-    type: String,
-    example: 'Menu Name',
-  })
-  name: string
-
-  @ApiProperty({
-    type: String,
-    example: '/',
-  })
-  url: string
-
-  @ApiProperty({
-    type: String,
-    example: '',
-  })
-  identifier: string
-}
-
-export interface IMenuPermission {
-  domIdentity: string
-  dispatchName: string
-  menu: IMenu
-}
-
 export const MenuPermissionJoin = raw({
   domIdentity: { type: String },
   dispatchName: { type: String },
   menu: { type: MenuJoin, _id: false },
 })
-
-export class CMenuPermission {
-  @ApiProperty({
-    type: String,
-    example: '',
-  })
-  domIdentity: string
-
-  @ApiProperty({
-    type: String,
-    example: '',
-  })
-  dispatchName: string
-
-  @ApiProperty({
-    type: CMenu,
-  })
-  menu: CMenu
-}
 
 export type MenuDocument = HydratedDocument<Menu>
 @Schema({ collection: 'core_menu' })

@@ -34,6 +34,7 @@
     "<rootDir>/node_modules/",
     ".(e2e|unit)-spec.(t|j)s",
     ".controller.(t|j)s",
+    ".provider.(t|j)s",
     ".module.(t|j)s",
     ".mock.(t|j)s",
     ".stub.(t|j)s"

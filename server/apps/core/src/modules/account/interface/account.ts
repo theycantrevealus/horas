@@ -1,4 +1,5 @@
-import { IMenu, IMenuPermission } from '@core/menu/schemas/menu.model'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { Types } from 'mongoose'
 
 export interface IAccount {

@@ -4,12 +4,9 @@ import {
   AuthorityJoin,
   IAuthority,
 } from '@core/account/schemas/authority.model'
-import {
-  IMenu,
-  IMenuPermission,
-  MenuJoin,
-  MenuPermissionJoin,
-} from '@core/menu/schemas/menu.model'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
+import { MenuJoin, MenuPermissionJoin } from '@core/menu/schemas/menu.model'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 

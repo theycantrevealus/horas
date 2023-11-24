@@ -272,7 +272,6 @@ export class PurchaseOrderService {
           modCodes[this.constructor.name].error.databaseError
       })
 
-    console.log(response)
     return response
   }
 

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsNumber } from 'class-validator'
+import { Types } from 'mongoose'
 
 export class MenuGroupAddDTO {
   @ApiProperty({
@@ -50,4 +51,18 @@ export class MenuGroupEditDTO {
     this.description = data.description
     this.__v = data.__v
   }
+}
+
+export class CMenuGroup {
+  @ApiProperty({
+    type: String,
+    example: `menu_group-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Menu Group Name',
+  })
+  name: string
 }

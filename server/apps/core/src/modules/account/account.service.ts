@@ -34,11 +34,11 @@ import { Account, AccountDocument } from './schemas/account.model'
 @Injectable()
 export class AccountService {
   constructor(
-    @InjectModel(Authority.name)
-    private accountAuthority: Model<AuthorityDocument>,
-
     @InjectModel(Account.name)
     private accountModel: Model<AccountDocument>,
+
+    @InjectModel(Authority.name)
+    private accountAuthority: Model<AuthorityDocument>,
 
     @InjectModel(LogLogin.name)
     private logLoginModel: Model<LogLoginDocument>,
@@ -142,6 +142,105 @@ export class AccountService {
       })
     } catch (error) {
       response.message = `Account detail failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
+  }
+
+  async accountUpdateAccess(
+    id: string,
+    parameter: any
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'ACCOUNT_UPDATE_ACCESS_PERMISSION',
+      transaction_id: id,
+    } satisfies GlobalResponse
+
+    try {
+      await this.accountModel.findOneAndUpdate(
+        {
+          'access.id': id,
+        },
+        {
+          $set: {
+            'access.$.name': parameter.name,
+            'access.$.url': parameter.url,
+            'access.$.identifier': parameter.identifier,
+          },
+        }
+      )
+
+      let updatedAccount = await this.accountModel
+        .find(
+          {
+            'permission.menu.id': id,
+          },
+          'id -_id'
+        )
+        .exec()
+
+      if (updatedAccount.length > 0) {
+        updatedAccount = updatedAccount.map(({ id }) => id)
+
+        parameter.permission = parameter.permission.map((e) => {
+          return {
+            domIdentity: e.domIdentity,
+            dispatchName: e.dispatchName,
+            menu: {
+              id: id,
+              name: parameter.name,
+              url: parameter.url,
+              identifier: parameter.identifier,
+            },
+          }
+        })
+
+        // response.payload = await this.accountModel
+        //   .updateMany(
+        //     {
+        //       id: {
+        //         $in: updatedAccount,
+        //       },
+        //     },
+        //     {
+        //       $pull: {
+        //         permission: {
+        //           'menu.id': id,
+        //         },
+        //       },
+        //       $push: {
+        //         permission: {
+        //           $each: parameter.permission,
+        //         },
+        //       },
+        //     }
+        //   )
+        //   .exec()
+        // TODO : Check this query
+        response.payload = {}
+        response.message = 'Account access and permission updated successfully'
+      } else {
+        response.message = `Account access and permission failed to updated`
+        response.statusCode = {
+          ...modCodes[this.constructor.name].error.databaseError,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
+        response.payload = {}
+      }
+      return response
+    } catch (error) {
+      response.message = `Account access and permission failed to updated`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -334,7 +433,7 @@ export class AccountService {
           return response
         })
     } catch (error) {
-      response.message = `Account failed to update`
+      response.message = `Account failed to update. ${error.message}`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -566,7 +665,7 @@ export class AccountService {
             }
           })
           .catch((error: Error) => {
-            response.message = 'Sign in failed'
+            response.message = `Sign in failed`
             response.statusCode = {
               ...modCodes[this.constructor.name].error.databaseError,
               classCode: modCodes[this.constructor.name].defaultCode,
@@ -577,7 +676,7 @@ export class AccountService {
           })
       })
       .catch((error: Error) => {
-        response.message = 'Sign in failed'
+        response.message = `Sign in failed`
         response.statusCode = {
           ...modCodes[this.constructor.name].error.databaseError,
           classCode: modCodes[this.constructor.name].defaultCode,
@@ -590,29 +689,31 @@ export class AccountService {
 
   async configMeta() {
     const fields = {}
-    const dataSet: any = await this.cacheManager.get('CONFIGURATION_META')
-    if (dataSet.setter) {
-      const setter = Object.keys(dataSet.setter)
-      for await (const e of setter) {
-        if (!fields[e]) {
-          fields[e] = {}
-        }
+    try {
+      const dataSet: any = await this.cacheManager.get('CONFIGURATION_META')
+      if (dataSet.setter) {
+        const setter = Object.keys(dataSet.setter)
+        for await (const e of setter) {
+          if (!fields[e]) {
+            fields[e] = {}
+          }
 
-        fields[e] = await this.cacheManager
-          .get(e)
-          .then((getData: IConfig) => getData?.setter)
+          fields[e] = (await this.cacheManager.get(e)) satisfies IConfig
 
-        if (e === 'APPLICATION_ICON' || e === 'APPLICATION_LOGO') {
-          if (!fields[e].image) {
-            fields[e].image = `${this.configService.get<string>(
-              'application.host_port'
-            )}/${this.configService.get<string>(
-              'application.images.core_prefix'
-            )}/${fields[e].image}`
+          if (e === 'APPLICATION_ICON' || e === 'APPLICATION_LOGO') {
+            if (!fields[e].image) {
+              fields[e].image = `${this.configService.get<string>(
+                'application.host_port'
+              )}/${this.configService.get<string>(
+                'application.images.core_prefix'
+              )}/${fields[e].image}`
+            }
           }
         }
       }
+      return fields
+    } catch (error) {
+      throw new Error(error)
     }
-    return fields
   }
 }

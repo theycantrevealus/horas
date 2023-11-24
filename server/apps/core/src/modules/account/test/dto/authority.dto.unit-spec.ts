@@ -97,7 +97,7 @@ describe('Authority DTO', () => {
     ],
   }
 
-  beforeEach(async () => {})
+  // beforeEach(async () => {})
 
   describe(testCaption('ADD', 'data', 'Authority add'), () => {
     for (const tKey of falseCasePayload.add) {

@@ -10,7 +10,6 @@ import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -90,7 +89,6 @@ export class AccountController {
   @Post()
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
   @UseInterceptors(LoggingInterceptor)
   @UseFilters(CommonErrorFilter)
   @Authorization(true)
@@ -102,7 +100,7 @@ export class AccountController {
   async add(
     @Body() parameter: AccountAddDTO,
     @CredentialAccount() account: Account
-  ) {
+  ): Promise<GlobalResponse> {
     return await this.accountService
       .accountAdd(parameter, account)
       .catch((error) => {
@@ -124,6 +122,7 @@ export class AccountController {
     description: ``,
   })
   async edit(@Body() body: AccountEditDTO, @Param() param) {
+    console.log(body)
     return await this.accountService
       .accountEdit(body, param.id)
       .catch((error) => {

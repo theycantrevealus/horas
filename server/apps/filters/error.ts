@@ -98,9 +98,9 @@ export async function errorHandler(
   }
 
   if (statusCode === HttpStatus.BAD_REQUEST) {
-    logger.warn(dataSet.result)
+    logger.warn(dataSet)
   } else {
-    logger.error(dataSet.result)
+    logger.error(dataSet)
   }
 
   response.status(statusCode).send(dataSet.result)

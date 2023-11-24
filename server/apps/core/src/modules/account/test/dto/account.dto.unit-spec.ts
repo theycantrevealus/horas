@@ -6,216 +6,213 @@ import { testCaption } from '@utility/string'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 
-describe('Account DTO', () => {
-  const falseCasePayload = {
-    add: [
-      {
-        expectedToContain: 'email should not be empty',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {},
+const falseCasePayload = {
+  add: [
+    {
+      expectedToContain: 'email should not be empty',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'email must be an email',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {
+        email: 'Hello there',
       },
-      {
-        expectedToContain: 'email must be an email',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {
-          email: 'Hello there',
-        },
+    },
+    {
+      expectedToContain: 'password should not be empty',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'password must be longer than or equal',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {
+        password: '1234567',
       },
-      {
-        expectedToContain: 'password should not be empty',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {},
+    },
+    {
+      expectedToContain: 'first_name should not be empty',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'first_name must be a string',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {
+        first_name: 123,
       },
-      {
-        expectedToContain: 'password must be longer than or equal',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {
-          password: '1234567',
-        },
+    },
+    {
+      expectedToContain: 'first_name must be longer than or equal to',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {
+        first_name: 'ab',
       },
-      {
-        expectedToContain: 'first_name should not be empty',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {},
+    },
+    {
+      expectedToContain: 'last_name must be a string',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {
+        last_name: 123,
       },
-      {
-        expectedToContain: 'first_name must be a string',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {
-          first_name: 123,
-        },
+    },
+    {
+      expectedToContain: 'phone should not be empty',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'phone must be a valid phone number',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {
+        phone: 'abc',
       },
-      {
-        expectedToContain: 'first_name must be longer than or equal to',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {
-          first_name: 'ab',
-        },
+    },
+    {
+      expectedToContain: 'Correct data',
+      targetClass: AccountAddDTO,
+      testType: 1,
+      data: {
+        email: faker.internet.email(),
+        password: faker.internet.password({ length: 24 }),
+        first_name: faker.person.firstName(),
+        last_name: faker.person.lastName(),
+        phone: faker.helpers.replaceSymbolWithNumber('+62###########'),
       },
-      {
-        expectedToContain: 'last_name must be a string',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {
-          last_name: 123,
-        },
+    },
+  ],
+  edit: [
+    {
+      expectedToContain: 'email should not be empty',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'email must be an email',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {
+        email: 'Hello there',
       },
-      {
-        expectedToContain: 'phone should not be empty',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {},
+    },
+    {
+      expectedToContain: 'first_name should not be empty',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'first_name must be a string',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {
+        first_name: 123,
       },
-      {
-        expectedToContain: 'phone must be a valid phone number',
-        targetClass: AccountAddDTO,
-        testType: -1,
-        data: {
-          phone: 'abc',
-        },
+    },
+    {
+      expectedToContain: 'first_name must be longer than or equal to',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {
+        first_name: 'ab',
       },
-      {
-        expectedToContain: 'Correct data',
-        targetClass: AccountAddDTO,
-        testType: 1,
-        data: {
-          email: faker.internet.email(),
-          password: faker.internet.password({ length: 24 }),
-          first_name: faker.person.firstName(),
-          last_name: faker.person.lastName(),
-          phone: faker.phone.number('+62###########'),
-        },
+    },
+    {
+      expectedToContain: 'last_name must be a string',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {
+        last_name: 123,
       },
-    ],
-    edit: [
-      {
-        expectedToContain: 'email should not be empty',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {},
+    },
+    {
+      expectedToContain: 'phone should not be empty',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'phone must be a valid phone number',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {
+        phone: 'abc',
       },
-      {
-        expectedToContain: 'email must be an email',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {
-          email: 'Hello there',
-        },
+    },
+    {
+      expectedToContain: '__v should not be empty',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: '__v must be a number',
+      targetClass: AccountEditDTO,
+      testType: -1,
+      data: {
+        __v: 'testing',
       },
-      {
-        expectedToContain: 'first_name should not be empty',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {},
+    },
+    {
+      expectedToContain: 'Correct data',
+      targetClass: AccountEditDTO,
+      testType: 1,
+      data: {
+        email: faker.internet.email(),
+        password: faker.internet.password({ length: 24 }),
+        first_name: faker.person.firstName(),
+        last_name: faker.person.lastName(),
+        phone: faker.helpers.replaceSymbolWithNumber('+62###########'),
+        __v: 0,
       },
-      {
-        expectedToContain: 'first_name must be a string',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {
-          first_name: 123,
-        },
+    },
+  ],
+  signIn: [
+    {
+      expectedToContain: 'email should not be empty',
+      targetClass: AccountSignInDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'email must be an email',
+      targetClass: AccountSignInDTO,
+      testType: -1,
+      data: {
+        email: 'Hello there',
       },
-      {
-        expectedToContain: 'first_name must be longer than or equal to',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {
-          first_name: 'ab',
-        },
+    },
+    {
+      expectedToContain: 'password should not be empty',
+      targetClass: AccountSignInDTO,
+      testType: -1,
+      data: {},
+    },
+    {
+      expectedToContain: 'Correct data',
+      targetClass: AccountSignInDTO,
+      testType: 1,
+      data: {
+        email: faker.internet.email(),
+        password: faker.internet.password({ length: 24 }),
       },
-      {
-        expectedToContain: 'last_name must be a string',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {
-          last_name: 123,
-        },
-      },
-      {
-        expectedToContain: 'phone should not be empty',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {},
-      },
-      {
-        expectedToContain: 'phone must be a valid phone number',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {
-          phone: 'abc',
-        },
-      },
-      {
-        expectedToContain: '__v should not be empty',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {},
-      },
-      {
-        expectedToContain: '__v must be a number',
-        targetClass: AccountEditDTO,
-        testType: -1,
-        data: {
-          __v: 'testing',
-        },
-      },
-      {
-        expectedToContain: 'Correct data',
-        targetClass: AccountEditDTO,
-        testType: 1,
-        data: {
-          email: faker.internet.email(),
-          password: faker.internet.password({ length: 24 }),
-          first_name: faker.person.firstName(),
-          last_name: faker.person.lastName(),
-          phone: faker.phone.number('+62###########'),
-          __v: 0,
-        },
-      },
-    ],
-    signIn: [
-      {
-        expectedToContain: 'email should not be empty',
-        targetClass: AccountSignInDTO,
-        testType: -1,
-        data: {},
-      },
-      {
-        expectedToContain: 'email must be an email',
-        targetClass: AccountSignInDTO,
-        testType: -1,
-        data: {
-          email: 'Hello there',
-        },
-      },
-      {
-        expectedToContain: 'password should not be empty',
-        targetClass: AccountSignInDTO,
-        testType: -1,
-        data: {},
-      },
-      {
-        expectedToContain: 'Correct data',
-        targetClass: AccountSignInDTO,
-        testType: 1,
-        data: {
-          email: faker.internet.email(),
-          password: faker.internet.password({ length: 24 }),
-        },
-      },
-    ],
-  }
-
-  beforeEach(async () => {})
-
+    },
+  ],
+}
+describe('Account DTO Test', () => {
   describe(testCaption('AUTH', 'data', 'Account Sign In'), () => {
     for (const tKey of falseCasePayload.signIn) {
       it(
@@ -291,3 +288,13 @@ describe('Account DTO', () => {
     }
   })
 })
+
+// describe('Account DTO', () => {
+
+//
+//   // beforeEach(async () => {})
+//
+
+//
+
+// })

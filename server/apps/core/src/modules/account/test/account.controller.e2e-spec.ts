@@ -144,7 +144,6 @@ describe('Account Controller', () => {
       delete data.deleted_at
       delete data.access
       delete data.permission
-      console.log(data)
       return app
         .inject({
           method: 'POST',
@@ -152,13 +151,12 @@ describe('Account Controller', () => {
           body: data,
         })
         .then((result) => {
-          console.log(result.body)
           expect(result.statusCode).toEqual(HttpStatus.CREATED)
           expect(logger.verbose).toHaveBeenCalled()
         })
     }
   )
-  //
+
   // it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
   //   const data = new AccountEditDTO({
   //     email: accountDocArray[1].email,

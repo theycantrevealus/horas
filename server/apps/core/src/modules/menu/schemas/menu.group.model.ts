@@ -1,8 +1,7 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { ApiProperty } from '@nestjs/swagger'
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MenuGroupDocument = HydratedDocument<MenuGroup>
 @Schema({ collection: 'core_menu_group' })
@@ -43,22 +42,3 @@ export const MenuGroupJoin = raw({
   id: { type: String },
   name: { type: String },
 })
-
-export interface IMenuGroup {
-  id: string
-  name: string
-}
-
-export class CMenuGroup {
-  @ApiProperty({
-    type: String,
-    example: `menu_group-${new Types.ObjectId().toString()}`,
-  })
-  id: string
-
-  @ApiProperty({
-    type: String,
-    example: 'Menu Group Name',
-  })
-  name: string
-}
