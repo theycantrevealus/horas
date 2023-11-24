@@ -26,7 +26,7 @@ import { Model } from 'mongoose'
 import { AccountService } from '../account.service'
 
 describe('Account Service', () => {
-  let service: AccountService
+  let accountService: AccountService
   let authService: AuthService
   let cacheManager: Cache
   let modelAccount: Model<Account>
@@ -74,7 +74,7 @@ describe('Account Service', () => {
       ],
     }).compile()
 
-    service = module.get<AccountService>(AccountService)
+    accountService = module.get<AccountService>(AccountService)
     authService = module.get<AuthService>(AuthService)
     cacheManager = module.get(CACHE_MANAGER)
     modelAccount = module.get<Model<AccountDocument>>(
@@ -85,7 +85,7 @@ describe('Account Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(accountService).toBeDefined()
     }
   )
 
@@ -97,7 +97,7 @@ describe('Account Service', () => {
       async () => {
         const dataSet = accountDocArray[0]
 
-        jest.spyOn(service, 'accountFind').mockReturnValue(
+        jest.spyOn(accountService, 'accountFind').mockReturnValue(
           Promise.resolve(
             mockResponse({
               code: modCodes[AccountService.name],
@@ -117,9 +117,9 @@ describe('Account Service', () => {
 
         jest.spyOn(cacheManager, 'get')
 
-        jest.spyOn(service, 'configMeta').mockResolvedValue([])
+        jest.spyOn(accountService, 'configMeta').mockResolvedValue([])
 
-        await service
+        await accountService
           .signIn({
             email: dataSet.email,
             password: dataSet.password,
@@ -132,7 +132,7 @@ describe('Account Service', () => {
             )
           })
 
-        expect(service.accountFind).toHaveBeenCalled()
+        expect(accountService.accountFind).toHaveBeenCalled()
       }
     )
 
@@ -151,7 +151,7 @@ describe('Account Service', () => {
 
         const dataSet = accountDocArray[0]
 
-        jest.spyOn(service, 'accountFind').mockReturnValue(
+        jest.spyOn(accountService, 'accountFind').mockReturnValue(
           Promise.resolve(
             mockResponse({
               code: modCodes[AccountService.name],
@@ -168,13 +168,13 @@ describe('Account Service', () => {
           .mockImplementation(() => Promise.resolve(false))
 
         await expect(async () => {
-          await service.signIn({
+          await accountService.signIn({
             email: dataSet.email,
             password: dataSet.password,
           })
         }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
 
-        expect(service.accountFind).toHaveBeenCalled()
+        expect(accountService.accountFind).toHaveBeenCalled()
       }
     )
 
@@ -196,7 +196,7 @@ describe('Account Service', () => {
 
         // const configGetter = jest.spyOn(configService, 'get')
 
-        await service.configMeta().then(() => {
+        await accountService.configMeta().then(() => {
           expect(cacheGetter).toHaveBeenCalledTimes(
             Object.keys(configMock.setter).length
           )
@@ -218,7 +218,7 @@ describe('Account Service', () => {
         })
         const dataSet = accountDocArray[0]
 
-        jest.spyOn(service, 'accountFind').mockReturnValue(
+        jest.spyOn(accountService, 'accountFind').mockReturnValue(
           Promise.resolve(
             mockResponse({
               code: modCodes[AccountService.name],
@@ -242,16 +242,16 @@ describe('Account Service', () => {
 
         jest.spyOn(cacheManager, 'get')
 
-        jest.spyOn(service, 'configMeta').mockResolvedValue([])
+        jest.spyOn(accountService, 'configMeta').mockResolvedValue([])
 
         await expect(async () => {
-          await service.signIn({
+          await accountService.signIn({
             email: dataSet.email,
             password: dataSet.password,
           })
         }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
 
-        expect(service.accountFind).toHaveBeenCalled()
+        expect(accountService.accountFind).toHaveBeenCalled()
       }
     )
   })
@@ -267,7 +267,7 @@ describe('Account Service', () => {
           jest.spyOn(modelAccount, 'aggregate').mockReturnValue({
             exec: jest.fn().mockReturnValue(accountDocArray),
           } as any)
-          await service
+          await accountService
             .accountAll(
               `{
               "first": 0,
@@ -299,7 +299,7 @@ describe('Account Service', () => {
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on find data', {
           tab: 1,
         }),
         async () => {
@@ -318,7 +318,7 @@ describe('Account Service', () => {
           } as any)
 
           await expect(
-            service.accountAll(`{
+            accountService.accountAll(`{
               "first": 0,
               "rows": 10,
               "sortField": "created_at",
@@ -344,7 +344,7 @@ describe('Account Service', () => {
             return Promise.resolve(findMockAccount)
           })
 
-          await service
+          await accountService
             .accountDetail(findMockAccount.id)
             .then((result: GlobalResponse) => {
               // Deep equality check
@@ -374,7 +374,7 @@ describe('Account Service', () => {
             return Promise.resolve(findMockAccount)
           })
 
-          await service
+          await accountService
             .accountFind({
               id: findMockAccount.id,
             })
@@ -397,7 +397,7 @@ describe('Account Service', () => {
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on find data', {
           tab: 1,
         }),
         async () => {
@@ -415,20 +415,20 @@ describe('Account Service', () => {
           })
 
           await expect(async () => {
-            await service.accountDetail(targetData.id)
+            await accountService.accountDetail(targetData.id)
           }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
         }
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on get data detail', {
           tab: 1,
         }),
         async () => {
           const targetData = mockAccount()
           const mockError = mockResponse({
             code: modCodes[AccountService.name],
-            message: 'Account not found',
+            message: 'Account detail failed to fetch',
             payload: {},
             transaction_id: '',
             transaction_classify: 'ACCOUNT_FIND',
@@ -439,7 +439,7 @@ describe('Account Service', () => {
           })
 
           await expect(async () => {
-            await service.accountFind({ id: targetData.id })
+            await accountService.accountFind({ id: targetData.id })
           }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
         }
       )
@@ -450,7 +450,7 @@ describe('Account Service', () => {
     it(testCaption('DATA', 'data', 'Should add new account'), async () => {
       jest.spyOn(modelAccount, 'create')
 
-      await service
+      await accountService
         .accountAdd(
           {
             first_name: mockAccount().first_name,
@@ -478,7 +478,7 @@ describe('Account Service', () => {
     })
 
     it(
-      testCaption('HANDLING', 'data', 'Response error', {
+      testCaption('HANDLING', 'data', 'Response error on create data', {
         tab: 1,
       }),
       async () => {
@@ -495,7 +495,7 @@ describe('Account Service', () => {
         })
 
         await expect(async () => {
-          await service.accountAdd(
+          await accountService.accountAdd(
             {
               email: mockAccount().email,
               phone: mockAccount().phone,
@@ -517,7 +517,7 @@ describe('Account Service', () => {
       async () => {
         jest.spyOn(modelAccount, 'findOneAndUpdate')
 
-        await service
+        await accountService
           .accountEdit(
             {
               email: accountDocArray[1].email,
@@ -548,7 +548,7 @@ describe('Account Service', () => {
     )
 
     it(
-      testCaption('HANDLING', 'data', 'Response error', {
+      testCaption('HANDLING', 'data', 'Response error on update data', {
         tab: 1,
       }),
       async () => {
@@ -568,7 +568,7 @@ describe('Account Service', () => {
           })
 
         await expect(async () => {
-          await service.accountEdit(
+          await accountService.accountEdit(
             {
               email: mockAccount().email,
               phone: mockAccount().phone,
@@ -594,7 +594,7 @@ describe('Account Service', () => {
         async () => {
           jest.spyOn(modelAccount, 'findOneAndUpdate')
 
-          await service
+          await accountService
             .accountDelete(accountDocArray[0].id)
             .then((result: GlobalResponse) => {
               // Should classify transaction
@@ -612,7 +612,7 @@ describe('Account Service', () => {
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on delete data', {
           tab: 1,
         }),
         async () => {
@@ -632,7 +632,7 @@ describe('Account Service', () => {
             })
 
           await expect(async () => {
-            await service.accountDelete(targetID)
+            await accountService.accountDelete(targetID)
           }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
         }
       )

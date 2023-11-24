@@ -28,12 +28,13 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model, Query, Types } from 'mongoose'
 
 describe('Master Item Supplier Service', () => {
-  let service: MasterItemSupplierService
-  let model: Model<MasterItemSupplier>
+  let masterItemSupplierService: MasterItemSupplierService
+  let masterItemSupplierModel: Model<MasterItemSupplier>
   const dataSet = mockMasterItemSupplier()
 
   beforeAll(async () => {
@@ -85,8 +86,10 @@ describe('Master Item Supplier Service', () => {
       ],
     }).compile()
 
-    service = module.get<MasterItemSupplierService>(MasterItemSupplierService)
-    model = module.get<Model<MasterItemSupplierDocument>>(
+    masterItemSupplierService = module.get<MasterItemSupplierService>(
+      MasterItemSupplierService
+    )
+    masterItemSupplierModel = module.get<Model<MasterItemSupplierDocument>>(
       getModelToken(MasterItemSupplier.name)
     )
 
@@ -100,33 +103,43 @@ describe('Master Item Supplier Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(masterItemSupplierService).toBeDefined()
     }
   )
 
   it(
     testCaption('DATA', 'data', 'Should list all master item supplier'),
     async () => {
-      jest.spyOn(model, 'aggregate').mockReturnValue({
+      jest.spyOn(masterItemSupplierModel, 'aggregate').mockReturnValue({
         exec: jest.fn().mockReturnValue(masterItemSupplierDocArray),
       } as any)
 
-      const getData = await service.all({
-        first: 0,
-        rows: 10,
-        sortField: 'created_at',
-        sortOrder: 1,
-        filters: {},
-      })
-
-      expect(getData.payload.data).toEqual(masterItemSupplierDocArray)
+      await masterItemSupplierService
+        .all(
+          `{
+              "first": 0,
+              "rows": 10,
+              "sortField": "created_at",
+              "sortOrder": 1,
+              "filters": {}
+            }`
+        )
+        .then((result) => {
+          expect(result.transaction_classify).toEqual(
+            'MASTER_ITEM_SUPPLIER_LIST'
+          )
+          expect(result.message).not.toBe('')
+          expect(result.statusCode.customCode).toEqual(modCodes.Global.success)
+          expect(result.payload).toBeInstanceOf(Array)
+          expect(result.payload).toEqual(masterItemSupplierDocArray)
+        })
     }
   )
 
   it(
     testCaption('DATA', 'data', 'Should show master item supplier detail'),
     async () => {
-      jest.spyOn(model, 'findOne').mockReturnValueOnce(
+      jest.spyOn(masterItemSupplierModel, 'findOne').mockReturnValueOnce(
         createMock<
           Query<MasterItemSupplierDocument, MasterItemSupplierDocument>
         >({
@@ -135,7 +148,9 @@ describe('Master Item Supplier Service', () => {
       )
 
       const findMock = masterItemSupplierDocArray[0]
-      const foundData = await service.detail(masterItemSupplierDocArray[0].id)
+      const foundData = await masterItemSupplierService.detail(
+        masterItemSupplierDocArray[0].id
+      )
       expect(foundData).toEqual(findMock)
     }
   )
@@ -143,13 +158,13 @@ describe('Master Item Supplier Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master item supplier'),
     async () => {
-      model.create = jest.fn().mockImplementationOnce(() => {
+      masterItemSupplierModel.create = jest.fn().mockImplementationOnce(() => {
         return Promise.resolve(dataSet)
       })
 
-      jest.spyOn(model, 'create')
+      jest.spyOn(masterItemSupplierModel, 'create')
 
-      const newEntry = (await service.add(
+      const newEntry = (await masterItemSupplierService.add(
         new MasterItemSupplierAddDTO({ ...mockMasterItemSupplier(), __v: 0 }),
         mockAccount()
       )) satisfies GlobalResponse
@@ -160,15 +175,19 @@ describe('Master Item Supplier Service', () => {
   it(
     testCaption('DATA', 'data', 'Should edit master item supplier data'),
     async () => {
-      jest.spyOn(model, 'findOneAndUpdate').mockReturnValueOnce(
-        createMock<
-          Query<MasterItemSupplierDocument, MasterItemSupplierDocument>
-        >({
-          exec: jest.fn().mockResolvedValueOnce(masterItemSupplierDocArray[0]),
-        }) as any
-      )
+      jest
+        .spyOn(masterItemSupplierModel, 'findOneAndUpdate')
+        .mockReturnValueOnce(
+          createMock<
+            Query<MasterItemSupplierDocument, MasterItemSupplierDocument>
+          >({
+            exec: jest
+              .fn()
+              .mockResolvedValueOnce(masterItemSupplierDocArray[0]),
+          }) as any
+        )
 
-      const data = (await service.edit(
+      const data = (await masterItemSupplierService.edit(
         new MasterItemSupplierEditDTO(masterItemSupplierDocArray[0]),
         `supplier-${new Types.ObjectId().toString()}`
       )) satisfies GlobalResponse

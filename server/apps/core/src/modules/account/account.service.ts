@@ -281,7 +281,7 @@ export class AccountService {
         return response
       })
     } catch (error) {
-      response.message = 'Account not found'
+      response.message = 'Account detail failed to fetch'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -410,51 +410,30 @@ export class AccountService {
     const password = data.password
     data.password = await bcrypt.hash(password, saltOrRounds)
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const document = new this.accountModel({
+    try {
+      return await this.accountModel
+        .create({
           ...data,
           created_by: credential,
         })
-        return await document
-          .save()
-          .then((result) => {
-            response.message = 'Account created successfully'
-            response.transaction_id = result.id
-            response.payload = {
-              id: result.id,
-              ...data,
-            }
-            resolve(response)
-          })
-          .catch((error) => {
-            response.message = error.message
-            response.statusCode = {
-              ...modCodes[this.constructor.name].error.databaseError,
-              classCode: modCodes[this.constructor.name].defaultCode,
-            }
-            response.payload = {}
-            reject(response)
-          })
-          .catch((error) => {
-            response.message = error.message
-            response.statusCode = {
-              ...modCodes[this.constructor.name].error.databaseError,
-              classCode: modCodes[this.constructor.name].defaultCode,
-            }
-            response.payload = error
-            reject(response)
-          })
-      } catch (error) {
-        response.message = error.message
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
-        reject(response)
+        .then((result) => {
+          response.message = 'Account created successfully'
+          response.transaction_id = result.id
+          response.payload = {
+            id: result.id,
+            ...data,
+          }
+          return response
+        })
+    } catch (error) {
+      response.message = 'Account failed to create'
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
       }
-    })
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async authorityAdd(

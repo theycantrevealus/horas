@@ -28,6 +28,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model, Query, Types } from 'mongoose'
 
@@ -109,15 +110,23 @@ describe('Master Item Brand Service', () => {
       exec: jest.fn().mockReturnValue(masterItemBrandDocArray),
     } as any)
 
-    const getData = await service.all({
-      first: 0,
-      rows: 10,
-      sortField: 'created_at',
-      sortOrder: 1,
-      filters: {},
-    })
-
-    expect(getData.payload.data).toEqual(masterItemBrandDocArray)
+    await service
+      .all(
+        `{
+              "first": 0,
+              "rows": 10,
+              "sortField": "created_at",
+              "sortOrder": 1,
+              "filters": {}
+            }`
+      )
+      .then((result) => {
+        expect(result.transaction_classify).toEqual('MASTER_ITEM_BRAND_LIST')
+        expect(result.message).not.toBe('')
+        expect(result.statusCode.customCode).toEqual(modCodes.Global.success)
+        expect(result.payload).toBeInstanceOf(Array)
+        expect(result.payload).toEqual(masterItemBrandDocArray)
+      })
   })
 
   it(

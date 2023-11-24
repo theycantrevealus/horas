@@ -33,16 +33,18 @@ export class MasterItemUnitService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_LIST',
+      transaction_classify: 'MASTER_ITEM_UNIT_LIST',
       transaction_id: null,
     } satisfies GlobalResponse
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      response.payload = await prime_datatable(
-        parsedData,
-        this.masterItemUnitModel
+      return await prime_datatable(parsedData, this.masterItemUnitModel).then(
+        (result) => {
+          response.payload = result.payload.data
+          response.message = 'Data query success'
+          return response
+        }
       )
-      response.message = 'Data query success'
     } else {
       response.statusCode = {
         defaultCode: HttpStatus.BAD_REQUEST,

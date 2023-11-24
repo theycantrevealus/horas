@@ -11,6 +11,7 @@ import { isExpressRequest } from '@utility/http'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { HorasLogging } from '@utility/logger/interfaces'
 import { TimeManagement } from '@utility/time'
+import { isJSON } from 'class-validator'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { Logger } from 'winston'
 
@@ -27,14 +28,39 @@ export async function errorHandler(
     ? request.method
     : (request as FastifyRequest).method
 
-  const responseSet = {
+  let responseSet = {
+    message: '',
     ...exception,
     timestamp: new Date().toISOString(),
     path: request.url,
   }
-  const statusCode = exception.statusCode.defaultCode
 
-  // const errorPayload = exception.message.replace('Error: ', '').trim()
+  let statusCode = HttpStatus.OK
+
+  const errorPayload = exception.message.replace('Error: ', '').trim()
+
+  if (isJSON(errorPayload)) {
+    const parseError: GlobalResponse = JSON.parse(errorPayload)
+    if (isJSON(parseError.message)) {
+      responseSet = {
+        ...JSON.parse(parseError.message),
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      }
+    } else {
+      responseSet = {
+        statusCode: parseError.statusCode,
+        message: parseError.message,
+        transaction_classify: parseError.transaction_classify,
+        transaction_id: parseError.transaction_id,
+        payload: parseError.payload,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      }
+    }
+
+    statusCode = parseError.statusCode.defaultCode
+  }
   // if (isJSON(errorPayload)) {
   //   const parseError: GlobalResponse = JSON.parse(errorPayload)
   //   responseSet = {
@@ -71,7 +97,7 @@ export async function errorHandler(
     time: TM.getTimezone('Asia/Jakarta'),
   }
 
-  if (exception.statusCode.defaultCode === HttpStatus.BAD_REQUEST) {
+  if (statusCode === HttpStatus.BAD_REQUEST) {
     logger.warn(dataSet.result)
   } else {
     logger.error(dataSet.result)

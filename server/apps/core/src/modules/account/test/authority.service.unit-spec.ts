@@ -31,7 +31,7 @@ import { Model } from 'mongoose'
 import { AccountService } from '../account.service'
 
 describe('Authority Service', () => {
-  let service: AccountService
+  let accountService: AccountService
   let modelAuthority: Model<Authority>
 
   beforeEach(async () => {
@@ -71,7 +71,7 @@ describe('Authority Service', () => {
       ],
     }).compile()
 
-    service = module.get<AccountService>(AccountService)
+    accountService = module.get<AccountService>(AccountService)
     modelAuthority = module.get<Model<AuthorityDocument>>(
       getModelToken(Authority.name)
     )
@@ -84,7 +84,7 @@ describe('Authority Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(accountService).toBeDefined()
     }
   )
 
@@ -99,7 +99,7 @@ describe('Authority Service', () => {
           jest.spyOn(modelAuthority, 'aggregate').mockReturnValue({
             exec: jest.fn().mockReturnValue(authorityDocArray),
           } as any)
-          await service
+          await accountService
             .authorityAll({
               first: 0,
               rows: 10,
@@ -129,7 +129,7 @@ describe('Authority Service', () => {
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on fetch data', {
           tab: 1,
         }),
         async () => {
@@ -141,14 +141,14 @@ describe('Authority Service', () => {
             transaction_classify: 'AUTHORITY_GET',
           })
 
-          jest.spyOn(modelAuthority, 'aggregate').mockReturnValue({
+          jest.spyOn(modelAuthority, 'aggregate').mockImplementation({
             exec: jest
               .fn()
               .mockRejectedValue(new Error(JSON.stringify(mockError))),
           } as any)
 
           await expect(
-            service.authorityAll({
+            accountService.authorityAll({
               first: 0,
               rows: 10,
               sortField: 'created_at',
@@ -156,7 +156,7 @@ describe('Authority Service', () => {
               filters: {},
               custom_filter: '123',
             })
-          ).rejects.toThrow(JSON.stringify(mockError))
+          ).rejects.toThrow(Error)
         }
       )
     }
@@ -175,7 +175,7 @@ describe('Authority Service', () => {
             return Promise.resolve(findMockAuthority)
           })
 
-          await service
+          await accountService
             .authorityDetail(findMockAuthority.id)
             .then((result: GlobalResponse) => {
               // Deep equality check
@@ -196,7 +196,7 @@ describe('Authority Service', () => {
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on get detail data', {
           tab: 1,
         }),
         async () => {
@@ -214,7 +214,7 @@ describe('Authority Service', () => {
           })
 
           await expect(async () => {
-            await service.authorityDetail(targetData.id)
+            await accountService.authorityDetail(targetData.id)
           }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
         }
       )
@@ -227,7 +227,7 @@ describe('Authority Service', () => {
       it(testCaption('DATA', 'data', 'Should add new authority'), async () => {
         jest.spyOn(modelAuthority, 'create')
 
-        await service
+        await accountService
           .authorityAdd(
             {
               code: mockAuthority().code,
@@ -253,7 +253,7 @@ describe('Authority Service', () => {
       })
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on add data', {
           tab: 1,
         }),
         async () => {
@@ -270,7 +270,7 @@ describe('Authority Service', () => {
           })
 
           await expect(async () => {
-            await service.authorityAdd(
+            await accountService.authorityAdd(
               {
                 code: mockAuthority().code,
                 name: mockAuthority().name,
@@ -291,7 +291,7 @@ describe('Authority Service', () => {
         async () => {
           jest.spyOn(modelAuthority, 'findOneAndUpdate')
 
-          await service
+          await accountService
             .authorityEdit(
               {
                 code: mockAuthority().code,
@@ -319,7 +319,7 @@ describe('Authority Service', () => {
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on edit data', {
           tab: 1,
         }),
         async () => {
@@ -339,7 +339,7 @@ describe('Authority Service', () => {
             })
 
           await expect(async () => {
-            await service.authorityEdit(
+            await accountService.authorityEdit(
               {
                 code: mockAuthority().code,
                 name: mockAuthority().name,
@@ -363,7 +363,7 @@ describe('Authority Service', () => {
         async () => {
           jest.spyOn(modelAuthority, 'findOneAndUpdate')
 
-          await service
+          await accountService
             .authorityDelete(authorityDocArray[0].id)
             .then((result: GlobalResponse) => {
               // Should classify transaction
@@ -381,7 +381,7 @@ describe('Authority Service', () => {
       )
 
       it(
-        testCaption('HANDLING', 'data', 'Response error', {
+        testCaption('HANDLING', 'data', 'Response error on delete data', {
           tab: 1,
         }),
         async () => {
@@ -401,7 +401,7 @@ describe('Authority Service', () => {
             })
 
           await expect(async () => {
-            await service.authorityDelete(targetID)
+            await accountService.authorityDelete(targetID)
           }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
         }
       )

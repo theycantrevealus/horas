@@ -38,11 +38,14 @@ export class MasterItemCategoryService {
     } satisfies GlobalResponse
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      response.payload = await prime_datatable(
+      return await prime_datatable(
         parsedData,
         this.masterItemCategoryModel
-      )
-      response.message = 'Data query success'
+      ).then((result) => {
+        response.payload = result.payload.data
+        response.message = 'Data query success'
+        return response
+      })
     } else {
       response.statusCode = {
         defaultCode: HttpStatus.BAD_REQUEST,

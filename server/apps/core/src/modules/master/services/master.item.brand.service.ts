@@ -37,11 +37,13 @@ export class MasterItemBrandService {
     } satisfies GlobalResponse
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      response.payload = await prime_datatable(
-        parsedData,
-        this.masterItemBrandModel
+      return await prime_datatable(parsedData, this.masterItemBrandModel).then(
+        (result) => {
+          response.payload = result.payload.data
+          response.message = 'Data query success'
+          return response
+        }
       )
-      response.message = 'Data query success'
     } else {
       response.statusCode = {
         defaultCode: HttpStatus.BAD_REQUEST,

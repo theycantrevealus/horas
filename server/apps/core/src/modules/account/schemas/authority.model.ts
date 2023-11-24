@@ -1,7 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type AuthorityDocument = HydratedDocument<Authority>
@@ -58,27 +57,3 @@ export interface IAuthority {
 }
 
 export const AuthoritySchema = SchemaFactory.createForClass(Authority)
-
-AuthoritySchema.pre('save', function (next) {
-  const time = new TimeManagement()
-  if (this.isNew) {
-    this.id = `authority-${this._id}`
-    this.__v = 0
-  }
-
-  if (this.isModified()) {
-    this.increment()
-    this.updated_at = time.getTimezone('Asia/Jakarta')
-    return next()
-  } else {
-    return next(new Error('Invalid document'))
-  }
-})
-
-AuthoritySchema.pre('findOneAndUpdate', function (next) {
-  const time = new TimeManagement()
-  const update = this.getUpdate()
-  update['updated_at'] = time.getTimezone('Asia/Jakarta')
-  update['$inc'] = { __v: 1 }
-  next()
-})
