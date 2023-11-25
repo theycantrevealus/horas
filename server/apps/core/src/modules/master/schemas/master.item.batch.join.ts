@@ -5,9 +5,3 @@ export const MasterItemBatchJoin = raw({
   code: { type: String },
   expired: { type: Date },
 })
-
-export interface IMasterItemBatch {
-  id: string
-  code: string
-  expired: Date
-}

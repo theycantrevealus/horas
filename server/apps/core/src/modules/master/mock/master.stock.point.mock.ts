@@ -5,8 +5,8 @@ import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
+import { IMasterStockPointConfiguration } from '@core/master/interface/master.stock.point.configuration'
 import {
-  IMasterStockPointConfiguration,
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@core/master/schemas/master.stock.point'

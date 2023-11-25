@@ -26,7 +26,7 @@ export class Authority {
   })
   remark: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({

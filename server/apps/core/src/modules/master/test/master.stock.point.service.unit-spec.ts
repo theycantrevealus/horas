@@ -4,10 +4,6 @@ import { mockAuthority } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
 import {
-  MasterStockPointAddDTO,
-  MasterStockPointEditDTO,
-} from '@core/master/dto/master.stock.point'
-import {
   masterStockPointDocArray,
   mockMasterStockPoint,
   mockMasterStockPointModel,
@@ -33,8 +29,8 @@ import { testCaption } from '@utility/string'
 import { Model, Query, Types } from 'mongoose'
 
 describe('Master Stock Point Service', () => {
-  let service: MasterStockPointService
-  let model: Model<MasterStockPoint>
+  let masterStockPointService: MasterStockPointService
+  let masterStockPointModel: Model<MasterStockPoint>
   const dataSet = mockMasterStockPoint()
 
   beforeAll(async () => {
@@ -90,8 +86,10 @@ describe('Master Stock Point Service', () => {
       ],
     }).compile()
 
-    service = module.get<MasterStockPointService>(MasterStockPointService)
-    model = module.get<Model<MasterStockPointDocument>>(
+    masterStockPointService = module.get<MasterStockPointService>(
+      MasterStockPointService
+    )
+    masterStockPointModel = module.get<Model<MasterStockPointDocument>>(
       getModelToken(MasterStockPoint.name)
     )
 
@@ -105,15 +103,15 @@ describe('Master Stock Point Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(masterStockPointService).toBeDefined()
     }
   )
 
   it(testCaption('DATA', 'data', 'Should list all data'), async () => {
-    jest.spyOn(model, 'aggregate').mockReturnValue({
+    jest.spyOn(masterStockPointModel, 'aggregate').mockReturnValue({
       exec: jest.fn().mockReturnValue(masterStockPointDocArray),
     } as any)
-    await service
+    await masterStockPointService
       .all(
         `{
               "first": 0,
@@ -137,14 +135,16 @@ describe('Master Stock Point Service', () => {
   it(
     testCaption('DATA', 'data', 'Should show master stock point detail'),
     async () => {
-      jest.spyOn(model, 'findOne').mockReturnValueOnce(
+      jest.spyOn(masterStockPointModel, 'findOne').mockReturnValueOnce(
         createMock<Query<MasterStockPointDocument, MasterStockPointDocument>>({
           exec: jest.fn().mockResolvedValueOnce(masterStockPointDocArray[0]),
         }) as any
       )
 
       const findMock = masterStockPointDocArray[0]
-      const foundData = await service.detail(masterStockPointDocArray[0].id)
+      const foundData = await masterStockPointService.detail(
+        masterStockPointDocArray[0].id
+      )
       expect(foundData).toEqual(findMock)
     }
   )
@@ -152,14 +152,14 @@ describe('Master Stock Point Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master stock point'),
     async () => {
-      model.create = jest.fn().mockImplementationOnce(() => {
+      masterStockPointModel.create = jest.fn().mockImplementationOnce(() => {
         return Promise.resolve(dataSet)
       })
 
-      jest.spyOn(model, 'create')
+      jest.spyOn(masterStockPointModel, 'create')
 
-      const newEntry = (await service.add(
-        new MasterStockPointAddDTO(mockMasterStockPoint()),
+      const newEntry = (await masterStockPointService.add(
+        mockMasterStockPoint(),
         mockAccount()
       )) satisfies GlobalResponse
       expect(newEntry.payload).toHaveProperty('code')
@@ -169,14 +169,17 @@ describe('Master Stock Point Service', () => {
   it(
     testCaption('DATA', 'data', 'Should edit master stock point data'),
     async () => {
-      jest.spyOn(model, 'findOneAndUpdate').mockReturnValueOnce(
+      jest.spyOn(masterStockPointModel, 'findOneAndUpdate').mockReturnValueOnce(
         createMock<Query<MasterStockPointDocument, MasterStockPointDocument>>({
           exec: jest.fn().mockResolvedValueOnce(masterStockPointDocArray[0]),
         }) as any
       )
 
-      const data = (await service.edit(
-        new MasterStockPointEditDTO(masterStockPointDocArray[0]),
+      const data = (await masterStockPointService.edit(
+        {
+          ...mockMasterStockPoint(),
+          __v: 0,
+        },
         `stock_point-${new Types.ObjectId().toString()}`
       )) satisfies GlobalResponse
       expect(data.payload).toHaveProperty('code')

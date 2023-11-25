@@ -32,7 +32,7 @@ import { AccountService } from '../account.service'
 
 describe('Authority Service', () => {
   let accountService: AccountService
-  let modelAuthority: Model<Authority>
+  let authorityModel: Model<Authority>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -72,7 +72,7 @@ describe('Authority Service', () => {
     }).compile()
 
     accountService = module.get<AccountService>(AccountService)
-    modelAuthority = module.get<Model<AuthorityDocument>>(
+    authorityModel = module.get<Model<AuthorityDocument>>(
       getModelToken(Authority.name)
     )
   })
@@ -96,7 +96,7 @@ describe('Authority Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(modelAuthority, 'aggregate').mockReturnValue({
+          jest.spyOn(authorityModel, 'aggregate').mockReturnValue({
             exec: jest.fn().mockReturnValue(authorityDocArray),
           } as any)
           await accountService
@@ -141,7 +141,7 @@ describe('Authority Service', () => {
             transaction_classify: 'AUTHORITY_GET',
           })
 
-          jest.spyOn(modelAuthority, 'aggregate').mockImplementation({
+          jest.spyOn(authorityModel, 'aggregate').mockImplementation({
             exec: jest
               .fn()
               .mockRejectedValue(new Error(JSON.stringify(mockError))),
@@ -171,7 +171,7 @@ describe('Authority Service', () => {
         }),
         async () => {
           const findMockAuthority = authorityDocArray[0]
-          modelAuthority.findOne = jest.fn().mockImplementationOnce(() => {
+          authorityModel.findOne = jest.fn().mockImplementationOnce(() => {
             return Promise.resolve(findMockAuthority)
           })
 
@@ -209,7 +209,7 @@ describe('Authority Service', () => {
             transaction_classify: 'AUTHORITY_GET',
           })
 
-          jest.spyOn(modelAuthority, 'findOne').mockImplementationOnce(() => {
+          jest.spyOn(authorityModel, 'findOne').mockImplementationOnce(() => {
             throw new Error(JSON.stringify(mockError))
           })
 
@@ -225,7 +225,7 @@ describe('Authority Service', () => {
     testCaption('ADD DATA', 'data', 'Authority - Add new authority'),
     () => {
       it(testCaption('DATA', 'data', 'Should add new authority'), async () => {
-        jest.spyOn(modelAuthority, 'create')
+        jest.spyOn(authorityModel, 'create')
 
         await accountService
           .authorityAdd(
@@ -265,7 +265,7 @@ describe('Authority Service', () => {
             transaction_classify: 'AUTHORITY_ADD',
           })
 
-          jest.spyOn(modelAuthority, 'create').mockImplementationOnce(() => {
+          jest.spyOn(authorityModel, 'create').mockImplementationOnce(() => {
             throw new Error(JSON.stringify(mockError))
           })
 
@@ -289,7 +289,7 @@ describe('Authority Service', () => {
       it(
         testCaption('HANDLING', 'data', 'Should edit authority', { tab: 1 }),
         async () => {
-          jest.spyOn(modelAuthority, 'findOneAndUpdate')
+          jest.spyOn(authorityModel, 'findOneAndUpdate')
 
           await accountService
             .authorityEdit(
@@ -333,7 +333,7 @@ describe('Authority Service', () => {
           })
 
           jest
-            .spyOn(modelAuthority, 'findOneAndUpdate')
+            .spyOn(authorityModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error(JSON.stringify(mockError))
             })
@@ -361,7 +361,7 @@ describe('Authority Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(modelAuthority, 'findOneAndUpdate')
+          jest.spyOn(authorityModel, 'findOneAndUpdate')
 
           await accountService
             .authorityDelete(authorityDocArray[0].id)
@@ -395,7 +395,7 @@ describe('Authority Service', () => {
           })
 
           jest
-            .spyOn(modelAuthority, 'findOneAndUpdate')
+            .spyOn(authorityModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error(JSON.stringify(mockError))
             })

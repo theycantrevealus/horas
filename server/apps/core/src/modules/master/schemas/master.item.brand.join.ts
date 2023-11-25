@@ -6,9 +6,3 @@ export const MasterItemBrandJoin = raw({
   code: { type: String, example: 'BRD00001' },
   name: { type: String, example: 'PHARMACON' },
 })
-
-export interface IMasterItemBrand {
-  id: string
-  code: string
-  name: string
-}

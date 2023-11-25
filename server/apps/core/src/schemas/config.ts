@@ -34,7 +34,7 @@ export class Config {
   @Prop({ type: SchemaTypes.String })
   remark: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 }
 export const ConfigSchema = SchemaFactory.createForClass(Config)

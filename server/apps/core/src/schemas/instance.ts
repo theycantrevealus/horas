@@ -40,7 +40,7 @@ export class Instance {
   })
   config: IConfig[]
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({

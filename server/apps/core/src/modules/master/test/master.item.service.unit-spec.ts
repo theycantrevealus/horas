@@ -26,8 +26,8 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
 describe('Master Item Service', () => {
-  let service: MasterItemService
-  let model: Model<MasterItem>
+  let masterItemService: MasterItemService
+  let masterItemModel: Model<MasterItem>
   const dataSet = mockMasterItem()
 
   beforeAll(async () => {
@@ -85,8 +85,8 @@ describe('Master Item Service', () => {
       ],
     }).compile()
 
-    service = module.get<MasterItemService>(MasterItemService)
-    model = module.get<Model<MasterItemDocument>>(
+    masterItemService = module.get<MasterItemService>(MasterItemService)
+    masterItemModel = module.get<Model<MasterItemDocument>>(
       getModelToken(MasterItem.name)
     )
 
@@ -100,7 +100,7 @@ describe('Master Item Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(masterItemService).toBeDefined()
     }
   )
 

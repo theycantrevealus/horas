@@ -1,9 +1,72 @@
-import {
-  CMasterStockPointConfiguration,
-  IMasterStockPointConfiguration,
-} from '@core/master/schemas/master.stock.point'
+import { IMasterStockPointConfiguration } from '@core/master/interface/master.stock.point.configuration'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, MaxLength, MinLength } from 'class-validator'
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  MaxLength,
+  MinLength,
+} from 'class-validator'
+import { Types } from 'mongoose'
+
+export class CMasterStockPointConfiguration {
+  @ApiProperty({
+    example: true,
+    type: Boolean,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  allow_grn: boolean
+
+  @ApiProperty({
+    example: true,
+    type: Boolean,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  allow_incoming: boolean
+
+  @ApiProperty({
+    example: true,
+    type: Boolean,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  allow_outgoing: boolean
+
+  @ApiProperty({
+    example: true,
+    type: Boolean,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  allow_destruction: boolean
+}
+
+export class CMasterStockPoint {
+  @ApiProperty({
+    type: String,
+    example: `stock_point-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Drugs',
+  })
+  name: string
+}
 
 export class MasterStockPointAddDTO {
   @ApiProperty({
@@ -34,15 +97,11 @@ export class MasterStockPointAddDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.remark = parameter.remark
-  }
+  @IsOptional()
+  remark?: string
 }
 
 export class MasterStockPointEditDTO {
@@ -74,9 +133,11 @@ export class MasterStockPointEditDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
+  @IsOptional()
+  remark?: string
 
   @ApiProperty({
     example: 0,
@@ -85,11 +146,4 @@ export class MasterStockPointEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.remark = parameter.remark
-    this.__v = parameter.__v
-  }
 }

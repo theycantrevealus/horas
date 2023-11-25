@@ -5,11 +5,11 @@ import {
   MasterItemAddDTO,
   MasterItemEditDTO,
 } from '@core/master/dto/master.item'
+import { IMasterItemConfiguration } from '@core/master/interface/master.item.configuration'
 import { masterItemBrandArray } from '@core/master/mock/master.item.brand.mock'
 import { masterItemCategoryArray } from '@core/master/mock/master.item.category.mock'
 import { masterItemUnitArray } from '@core/master/mock/master.item.unit.mock'
 import {
-  IMasterItemConfiguration,
   MasterItem,
   MasterItemDocument,
 } from '@core/master/schemas/master.item'

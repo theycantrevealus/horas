@@ -1,33 +1,55 @@
 import { CLOV, ILOV } from '@core/lov/schemas/lov.join'
-import {
-  CMasterItemConfiguration,
-  CMasterItemStoring,
-  IMasterItemConfiguration,
-  IMasterItemStoring,
-} from '@core/master/schemas/master.item'
-import { MasterItemBrand } from '@core/master/schemas/master.item.brand'
-import {
-  IMasterItemBrand,
-  MasterItemBrandJoin,
-} from '@core/master/schemas/master.item.brand.join'
-import { MasterItemCategory } from '@core/master/schemas/master.item.category'
-import { CMasterItemCategory } from '@core/master/schemas/master.item.category.join'
-import { MasterItemUnit } from '@core/master/schemas/master.item.unit'
-import {
-  IMasterItemUnit,
-  MasterItemUnitJoin,
-} from '@core/master/schemas/master.item.unit.join'
+import { CMasterItemBrand } from '@core/master/dto/master.item.brand'
+import { CMasterItemCategory } from '@core/master/dto/master.item.category'
+import { CMasterItemConfiguration } from '@core/master/dto/master.item.configuration'
+import { CMasterItemStoring } from '@core/master/dto/master.item.storing'
+import { CMasterItemUnit } from '@core/master/dto/master.item.unit'
+import { IMasterItemBrand } from '@core/master/interface/master.item.brand'
+import { IMasterItemCategory } from '@core/master/interface/master.item.category'
+import { IMasterItemConfiguration } from '@core/master/interface/master.item.configuration'
+import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
+import { IMasterItemUnit } from '@core/master/interface/master.item.unit'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsNotEmpty,
   IsNumber,
+  IsOptional,
+  IsString,
   MaxLength,
   MinLength,
   ValidateNested,
 } from 'class-validator'
+import { Types } from 'mongoose'
+
+export class CMasterItem {
+  @ApiProperty({
+    type: String,
+    example: `item-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Drugs',
+  })
+  name: string
+
+  @ApiProperty({
+    type: CMasterItemBrand,
+  })
+  @IsNotEmpty()
+  brand: IMasterItemBrand
+}
 
 export class MasterItemAddDTO {
   @ApiProperty({
+    type: String,
     example: 'xxx-xxxx',
     minLength: 8,
     maxLength: 24,
@@ -35,10 +57,12 @@ export class MasterItemAddDTO {
   })
   @MinLength(8)
   @MaxLength(24)
+  @IsString()
   @IsNotEmpty()
   code: string
 
   @ApiProperty({
+    type: String,
     example: 'Adidas',
     description: 'Item brand name',
   })
@@ -48,9 +72,11 @@ export class MasterItemAddDTO {
   @ApiProperty({
     example: 'Adidas ALias',
     description: 'Item alias name',
+    required: false,
   })
-  @IsNotEmpty()
-  alias: string
+  @IsOptional()
+  @IsString()
+  alias?: string
 
   @ApiProperty({
     type: CMasterItemConfiguration,
@@ -74,16 +100,16 @@ export class MasterItemAddDTO {
   })
   @ValidateNested({ each: true })
   @IsNotEmpty()
-  category: CMasterItemCategory[]
+  category: IMasterItemCategory[]
 
   @ApiProperty({
-    type: MasterItemUnitJoin,
+    type: CMasterItemUnit,
   })
   @IsNotEmpty()
   unit: IMasterItemUnit
 
   @ApiProperty({
-    type: MasterItemBrandJoin,
+    type: CMasterItemBrand,
   })
   @IsNotEmpty()
   brand: IMasterItemBrand
@@ -92,29 +118,25 @@ export class MasterItemAddDTO {
     type: CLOV,
     isArray: true,
     description: 'Stock point configuration',
+    required: false,
   })
+  @IsOptional()
   @IsNotEmpty()
   properties: ILOV[]
 
   @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.category = parameter.category
-    this.unit = parameter.unit
-    this.brand = parameter.brand
-    this.remark = parameter.remark
-  }
+  @IsOptional()
+  remark?: string
 }
 
 export class MasterItemEditDTO {
   @ApiProperty({
+    type: String,
     example: 'xxx-xxxx',
     minLength: 8,
     maxLength: 24,
@@ -122,12 +144,14 @@ export class MasterItemEditDTO {
   })
   @MinLength(8)
   @MaxLength(24)
+  @IsString()
   @IsNotEmpty()
   code: string
 
   @ApiProperty({
+    type: String,
     example: 'Adidas',
-    description: 'Item name',
+    description: 'Item brand name',
   })
   @IsNotEmpty()
   name: string
@@ -135,9 +159,11 @@ export class MasterItemEditDTO {
   @ApiProperty({
     example: 'Adidas ALias',
     description: 'Item alias name',
+    required: false,
   })
-  @IsNotEmpty()
-  alias: string
+  @IsOptional()
+  @IsString()
+  alias?: string
 
   @ApiProperty({
     type: CMasterItemConfiguration,
@@ -145,36 +171,6 @@ export class MasterItemEditDTO {
   })
   @IsNotEmpty()
   configuration: IMasterItemConfiguration
-
-  @ApiProperty({
-    type: MasterItemCategory,
-    isArray: true,
-  })
-  @ValidateNested({ each: true })
-  @IsNotEmpty()
-  category: MasterItemCategory[]
-
-  @ApiProperty({
-    type: MasterItemUnit,
-    isArray: true,
-  })
-  @ValidateNested({ each: true })
-  @IsNotEmpty()
-  unit: MasterItemUnit[]
-
-  @ApiProperty({
-    type: MasterItemBrand,
-  })
-  @IsNotEmpty()
-  brand: MasterItemBrand
-
-  @ApiProperty({
-    type: CLOV,
-    isArray: true,
-    description: 'Stock point configuration',
-  })
-  @IsNotEmpty()
-  properties: ILOV[]
 
   @ApiProperty({
     type: CMasterItemStoring,
@@ -186,11 +182,43 @@ export class MasterItemEditDTO {
   storing: IMasterItemStoring[]
 
   @ApiProperty({
-    example: 'Extra remark',
-    description: 'Item brand extra remark',
+    type: CMasterItemCategory,
+    isArray: true,
+  })
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  category: IMasterItemCategory[]
+
+  @ApiProperty({
+    type: CMasterItemUnit,
   })
   @IsNotEmpty()
-  remark: string
+  unit: IMasterItemUnit
+
+  @ApiProperty({
+    type: CMasterItemBrand,
+  })
+  @IsNotEmpty()
+  brand: IMasterItemBrand
+
+  @ApiProperty({
+    type: CLOV,
+    isArray: true,
+    description: 'Stock point configuration',
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmpty()
+  properties: ILOV[]
+
+  @ApiProperty({
+    example: 'Extra remark',
+    description: 'Item brand extra remark',
+    required: false,
+  })
+  @IsNotEmpty()
+  @IsOptional()
+  remark?: string
 
   @ApiProperty({
     example: 0,
@@ -199,14 +227,4 @@ export class MasterItemEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.alias = parameter.alias
-    this.category = parameter.category
-    this.unit = parameter.unit
-    this.brand = parameter.brand
-    this.remark = parameter.remark
-  }
 }

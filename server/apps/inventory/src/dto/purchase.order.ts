@@ -1,9 +1,7 @@
-import { CCurrency } from '@core/i18n/schemas/i18n'
-import {
-  IMasterItemSupplier,
-  MasterItemSupplierJoin,
-} from '@core/master/schemas/master.item.supplier.join'
-import { CPurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
+import { CCurrency, ICurrency } from '@core/i18n/schemas/i18n'
+import { CMasterItemSupplier } from '@core/master/dto/master.item.supplier'
+import { IMasterItemSupplier } from '@core/master/interface/master.item.supplier'
+import { CPurchaseOrderDetail } from '@inventory/dto/purchase.order.detail'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
@@ -13,6 +11,43 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator'
+import { Types } from 'mongoose'
+
+export class CPurchaseOrder {
+  @ApiProperty({
+    type: String,
+    example: `purchase_order-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+
+  @ApiProperty({
+    type: CMasterItemSupplier,
+  })
+  @Type(() => CMasterItemSupplier)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  supplier: IMasterItemSupplier
+
+  @ApiProperty({
+    example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
+    description: 'Purchase date',
+  })
+  @IsNotEmpty()
+  purchase_date: Date
+
+  @ApiProperty({
+    example: 'Extra description',
+    description: '',
+  })
+  @IsNotEmpty()
+  remark: string
+}
 
 export class PurchaseOrderAddDTO {
   @ApiProperty({
@@ -34,7 +69,7 @@ export class PurchaseOrderAddDTO {
   extras: any
 
   @ApiProperty({
-    type: MasterItemSupplierJoin,
+    type: CMasterItemSupplier,
     description: 'Supplier info',
   })
   @IsNotEmpty()
@@ -52,8 +87,9 @@ export class PurchaseOrderAddDTO {
     description: 'Currency',
   })
   @IsNotEmpty()
+  @Type(() => CCurrency)
   @ValidateNested({ each: true })
-  locale: CCurrency
+  locale: ICurrency
 
   @ApiProperty({
     type: CPurchaseOrderDetail,
@@ -109,7 +145,7 @@ export class PurchaseOrderEditDTO {
   extras: any
 
   @ApiProperty({
-    type: MasterItemSupplierJoin,
+    type: CMasterItemSupplier,
     description: 'Supplier info',
   })
   @IsNotEmpty()
@@ -127,8 +163,9 @@ export class PurchaseOrderEditDTO {
     description: 'Currency',
   })
   @IsNotEmpty()
+  @Type(() => CCurrency)
   @ValidateNested({ each: true })
-  locale: CCurrency
+  locale: ICurrency
 
   @ApiProperty({
     type: CPurchaseOrderDetail,

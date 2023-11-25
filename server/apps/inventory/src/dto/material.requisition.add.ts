@@ -1,6 +1,6 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { Account } from '@core/account/schemas/account.model'
-import { Prop, raw } from '@nestjs/mongoose'
+import { Prop } from '@nestjs/mongoose'
 import { SchemaTypes } from 'mongoose'
 
 import { MaterialRequisitionItemDTO } from './material.requisition.item'
@@ -11,7 +11,7 @@ export class MaterialRequisitionAddDTO {
   @Prop({ type: [MaterialRequisitionItemDTO] })
   items: MaterialRequisitionItemDTO[]
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: Account
 
   @Prop({

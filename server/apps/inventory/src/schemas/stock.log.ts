@@ -1,28 +1,23 @@
-import {
-  IMasterItemBatch,
-  MasterItemBatchJoin,
-} from '@core/master/schemas/master.item.batch.join'
-import {
-  IMasterItem,
-  MasterItemJoin,
-} from '@core/master/schemas/master.item.join'
-import {
-  IMasterStockPoint,
-  MasterStockPointJoin,
-} from '@core/master/schemas/master.stock.point.join'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { IMasterItem } from '@core/master/interface/master.item'
+import { IMasterItemBatch } from '@core/master/interface/master.item.batch'
+import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
+import { MasterItemBatchJoin } from '@core/master/schemas/master.item.batch.join'
+import { MasterItemJoin } from '@core/master/schemas/master.item.join'
+import { MasterStockPointJoin } from '@core/master/schemas/master.stock.point.join'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type InventoryStockLogDocument = HydratedDocument<InventoryStockLog>
+
 @Schema({ collection: 'inventory_stock_log' })
 export class InventoryStockLog {
-  @Prop(raw(MasterItemJoin))
+  @Prop(MasterItemJoin)
   item: IMasterItem
 
-  @Prop(raw(MasterItemBatchJoin))
+  @Prop(MasterItemBatchJoin)
   batch: IMasterItemBatch
 
-  @Prop(raw(MasterStockPointJoin))
+  @Prop(MasterStockPointJoin)
   stock_point: IMasterStockPoint;
 
   @Prop({ type: SchemaTypes.Number })
@@ -47,5 +42,6 @@ export class InventoryStockLog {
   })
   logged_at: Date
 }
+
 export const InventoryStockLogSchema =
   SchemaFactory.createForClass(InventoryStockLog)

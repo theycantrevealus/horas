@@ -1,13 +1,11 @@
-import {
-  IMasterQueue,
-  MasterQueueJoin,
-} from '@core/master/schemas/master.queue.machine'
+import { CMasterQueue } from '@core/master/dto/master.queue'
+import { IMasterQueue } from '@core/master/interface/master.queue'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty } from 'class-validator'
 
 export class QueueAddDTO {
   @ApiProperty({
-    type: MasterQueueJoin,
+    type: CMasterQueue,
   })
   @IsNotEmpty()
   machine: IMasterQueue

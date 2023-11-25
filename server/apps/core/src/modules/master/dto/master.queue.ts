@@ -1,5 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, MaxLength, MinLength } from 'class-validator'
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  MaxLength,
+  MinLength,
+} from 'class-validator'
+import { Types } from 'mongoose'
+
+export class CMasterQueue {
+  @ApiProperty({
+    type: String,
+    example: `queue-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+}
 
 export class MasterQueueAddDTO {
   @ApiProperty({
@@ -16,9 +37,11 @@ export class MasterQueueAddDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: '',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
+  @IsOptional()
+  remark?: string
 }
 
 export class MasterQueueEditDTO {
@@ -36,9 +59,11 @@ export class MasterQueueEditDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: '',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
+  @IsOptional()
+  remark?: string
 
   @ApiProperty({
     example: 0,

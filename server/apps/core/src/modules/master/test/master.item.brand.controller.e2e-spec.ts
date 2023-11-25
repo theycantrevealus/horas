@@ -2,10 +2,6 @@ import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterItemBrandController } from '@core/master/controllers/master.item.brand.controller'
 import {
-  MasterItemBrandAddDTO,
-  MasterItemBrandEditDTO,
-} from '@core/master/dto/master.item.brand'
-import {
   mockMasterItemBrand,
   mockMasterItemBrandService,
 } from '@core/master/mock/master.item.brand.mock'
@@ -26,7 +22,7 @@ import { Types } from 'mongoose'
 
 describe('Master Item Brand Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
-  let controller: MasterItemBrandController
+  let masterItemBrandController: MasterItemBrandController
   let app: NestFastifyApplication
 
   beforeEach(async () => {
@@ -53,7 +49,9 @@ describe('Master Item Brand Controller', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    controller = app.get<MasterItemBrandController>(MasterItemBrandController)
+    masterItemBrandController = app.get<MasterItemBrandController>(
+      MasterItemBrandController
+    )
 
     jest.clearAllMocks()
   })
@@ -65,7 +63,7 @@ describe('Master Item Brand Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(controller).toBeDefined()
+      expect(masterItemBrandController).toBeDefined()
     }
   )
 
@@ -87,7 +85,7 @@ describe('Master Item Brand Controller', () => {
   )
 
   it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
-    const data = new MasterItemBrandAddDTO(mockMasterItemBrand())
+    const data = mockMasterItemBrand()
     return app
       .inject({
         method: 'POST',
@@ -100,7 +98,10 @@ describe('Master Item Brand Controller', () => {
   })
 
   it(testCaption('FLOW', 'feature', 'Should return edit success'), async () => {
-    const data = new MasterItemBrandEditDTO(mockMasterItemBrand())
+    const data = {
+      ...mockMasterItemBrand(),
+      __v: 0,
+    }
     const id = `brand-${new Types.ObjectId().toString()}`
 
     return app

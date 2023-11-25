@@ -5,9 +5,3 @@ export const MasterItemUnitJoin = raw({
   code: { type: String },
   name: { type: String },
 })
-
-export interface IMasterItemUnit {
-  id: string
-  code: string
-  name: string
-}

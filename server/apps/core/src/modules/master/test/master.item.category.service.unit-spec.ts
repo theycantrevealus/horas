@@ -4,10 +4,6 @@ import { mockAuthority } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
 import {
-  MasterItemCategoryAddDTO,
-  MasterItemCategoryEditDTO,
-} from '@core/master/dto/master.item.category'
-import {
   masterItemCategoryDocArray,
   mockMasterItemCategory,
   mockMasterItemCategoryModel,
@@ -33,8 +29,8 @@ import { testCaption } from '@utility/string'
 import { Model, Query, Types } from 'mongoose'
 
 describe('Master Item Category Service', () => {
-  let service: MasterItemCategoryService
-  let model: Model<MasterItemCategory>
+  let masterItemCategoryService: MasterItemCategoryService
+  let masterItemCategoryModel: Model<MasterItemCategory>
   const dataSet = mockMasterItemCategory()
 
   beforeAll(async () => {
@@ -86,8 +82,10 @@ describe('Master Item Category Service', () => {
       ],
     }).compile()
 
-    service = module.get<MasterItemCategoryService>(MasterItemCategoryService)
-    model = module.get<Model<MasterItemCategoryDocument>>(
+    masterItemCategoryService = module.get<MasterItemCategoryService>(
+      MasterItemCategoryService
+    )
+    masterItemCategoryModel = module.get<Model<MasterItemCategoryDocument>>(
       getModelToken(MasterItemCategory.name)
     )
 
@@ -101,16 +99,16 @@ describe('Master Item Category Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(masterItemCategoryService).toBeDefined()
     }
   )
 
   it(testCaption('DATA', 'data', 'Should list all data'), async () => {
-    jest.spyOn(model, 'aggregate').mockReturnValue({
+    jest.spyOn(masterItemCategoryModel, 'aggregate').mockReturnValue({
       exec: jest.fn().mockReturnValue(masterItemCategoryDocArray),
     } as any)
 
-    await service
+    await masterItemCategoryService
       .all(
         `{
               "first": 0,
@@ -132,7 +130,7 @@ describe('Master Item Category Service', () => {
   it(
     testCaption('DATA', 'data', 'Should show master item category detail'),
     async () => {
-      jest.spyOn(model, 'findOne').mockReturnValueOnce(
+      jest.spyOn(masterItemCategoryModel, 'findOne').mockReturnValueOnce(
         createMock<
           Query<MasterItemCategoryDocument, MasterItemCategoryDocument>
         >({
@@ -141,7 +139,9 @@ describe('Master Item Category Service', () => {
       )
 
       const findMock = masterItemCategoryDocArray[0]
-      const foundData = await service.detail(masterItemCategoryDocArray[0].id)
+      const foundData = await masterItemCategoryService.detail(
+        masterItemCategoryDocArray[0].id
+      )
       expect(foundData).toEqual(findMock)
     }
   )
@@ -149,14 +149,14 @@ describe('Master Item Category Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master item category'),
     async () => {
-      model.create = jest.fn().mockImplementationOnce(() => {
+      masterItemCategoryModel.create = jest.fn().mockImplementationOnce(() => {
         return Promise.resolve(dataSet)
       })
 
-      jest.spyOn(model, 'create')
+      jest.spyOn(masterItemCategoryModel, 'create')
 
-      const newEntry = (await service.add(
-        new MasterItemCategoryAddDTO(mockMasterItemCategory()),
+      const newEntry = (await masterItemCategoryService.add(
+        mockMasterItemCategory(),
         mockAccount()
       )) satisfies GlobalResponse
       expect(newEntry.payload).toHaveProperty('code')
@@ -166,16 +166,23 @@ describe('Master Item Category Service', () => {
   it(
     testCaption('DATA', 'data', 'Should edit master item category data'),
     async () => {
-      jest.spyOn(model, 'findOneAndUpdate').mockReturnValueOnce(
-        createMock<
-          Query<MasterItemCategoryDocument, MasterItemCategoryDocument>
-        >({
-          exec: jest.fn().mockResolvedValueOnce(masterItemCategoryDocArray[0]),
-        }) as any
-      )
+      jest
+        .spyOn(masterItemCategoryModel, 'findOneAndUpdate')
+        .mockReturnValueOnce(
+          createMock<
+            Query<MasterItemCategoryDocument, MasterItemCategoryDocument>
+          >({
+            exec: jest
+              .fn()
+              .mockResolvedValueOnce(masterItemCategoryDocArray[0]),
+          }) as any
+        )
 
-      const data = (await service.edit(
-        new MasterItemCategoryEditDTO(masterItemCategoryDocArray[0]),
+      const data = (await masterItemCategoryService.edit(
+        {
+          ...mockMasterItemCategory(),
+          __v: 0,
+        },
         `category-${new Types.ObjectId().toString()}`
       )) satisfies GlobalResponse
       expect(data.payload).toHaveProperty('code')

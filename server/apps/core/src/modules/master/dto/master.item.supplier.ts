@@ -4,10 +4,31 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   MaxLength,
   MinLength,
 } from 'class-validator'
-import { SchemaTypes } from 'mongoose'
+import { SchemaTypes, Types } from 'mongoose'
+
+export class CMasterItemSupplier {
+  @ApiProperty({
+    type: String,
+    example: `supplier-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Drugs',
+  })
+  name: string
+}
 
 export class MasterItemSupplierAddDTO {
   @ApiProperty({
@@ -61,19 +82,11 @@ export class MasterItemSupplierAddDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: 'Item supplier extra remark',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.phone = parameter.phone
-    this.email = parameter.email
-    this.sales_name = parameter.sales_name
-    this.address = parameter.address
-    this.remark = parameter.remark
-  }
+  @IsOptional()
+  remark?: string
 }
 
 export class MasterItemSupplierEditDTO {
@@ -128,9 +141,11 @@ export class MasterItemSupplierEditDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: 'Item supplier extra remark',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
+  @IsOptional()
+  remark?: string
 
   @IsNotEmpty()
   @IsNumber()
@@ -139,15 +154,4 @@ export class MasterItemSupplierEditDTO {
     description: 'Document version',
   })
   __v: number
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.phone = parameter.phone
-    this.email = parameter.email
-    this.sales_name = parameter.sales_name
-    this.address = parameter.address
-    this.remark = parameter.remark
-    this.__v = parameter.__v
-  }
 }

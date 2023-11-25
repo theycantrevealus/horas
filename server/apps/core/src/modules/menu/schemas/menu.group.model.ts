@@ -15,7 +15,7 @@ export class MenuGroup {
   @Prop({ type: SchemaTypes.String })
   description: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: Account
 
   @Prop({

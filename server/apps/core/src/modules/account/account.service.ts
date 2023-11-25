@@ -264,7 +264,7 @@ export class AccountService {
     } satisfies GlobalResponse
 
     try {
-      return this.accountAuthority.findOne({ id: id }).then((result) => {
+      return await this.accountAuthority.findOne({ id: id }).then((result) => {
         response.payload = result
         response.message = 'Authority detail fetch successfully'
         return response

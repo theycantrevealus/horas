@@ -2,10 +2,6 @@ import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterItemUnitController } from '@core/master/controllers/master.item.unit.controller'
 import {
-  MasterItemUnitAddDTO,
-  MasterItemUnitEditDTO,
-} from '@core/master/dto/master.item.unit'
-import {
   mockMasterItemUnit,
   mockMasterItemUnitService,
 } from '@core/master/mock/master.item.unit.mock'
@@ -27,7 +23,7 @@ import { Types } from 'mongoose'
 describe('Master Item Unit Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let controller: MasterItemUnitController
+  let masterItemUnitController: MasterItemUnitController
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,7 +49,9 @@ describe('Master Item Unit Controller', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    controller = app.get<MasterItemUnitController>(MasterItemUnitController)
+    masterItemUnitController = app.get<MasterItemUnitController>(
+      MasterItemUnitController
+    )
 
     jest.clearAllMocks()
   })
@@ -65,7 +63,7 @@ describe('Master Item Unit Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(controller).toBeDefined()
+      expect(masterItemUnitController).toBeDefined()
     }
   )
 
@@ -87,7 +85,7 @@ describe('Master Item Unit Controller', () => {
   )
 
   it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
-    const data = new MasterItemUnitAddDTO(mockMasterItemUnit())
+    const data = mockMasterItemUnit()
     return app
       .inject({
         method: 'POST',
@@ -100,7 +98,10 @@ describe('Master Item Unit Controller', () => {
   })
 
   it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new MasterItemUnitEditDTO(mockMasterItemUnit())
+    const data = {
+      ...mockMasterItemUnit(),
+      __v: 0,
+    }
     const id = `item_unit-${new Types.ObjectId().toString()}`
     return app
       .inject({

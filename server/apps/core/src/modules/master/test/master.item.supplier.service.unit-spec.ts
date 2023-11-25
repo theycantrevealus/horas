@@ -4,10 +4,6 @@ import { mockAuthority } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
 import {
-  MasterItemSupplierAddDTO,
-  MasterItemSupplierEditDTO,
-} from '@core/master/dto/master.item.supplier'
-import {
   masterItemSupplierDocArray,
   mockMasterItemSupplier,
   mockMasterItemSupplierModel,
@@ -165,7 +161,7 @@ describe('Master Item Supplier Service', () => {
       jest.spyOn(masterItemSupplierModel, 'create')
 
       const newEntry = (await masterItemSupplierService.add(
-        new MasterItemSupplierAddDTO({ ...mockMasterItemSupplier(), __v: 0 }),
+        mockMasterItemSupplier(),
         mockAccount()
       )) satisfies GlobalResponse
       expect(newEntry.payload).toHaveProperty('code')
@@ -188,7 +184,10 @@ describe('Master Item Supplier Service', () => {
         )
 
       const data = (await masterItemSupplierService.edit(
-        new MasterItemSupplierEditDTO(masterItemSupplierDocArray[0]),
+        {
+          ...mockMasterItemSupplier(),
+          __v: 0,
+        },
         `supplier-${new Types.ObjectId().toString()}`
       )) satisfies GlobalResponse
       expect(data.payload).toHaveProperty('code')

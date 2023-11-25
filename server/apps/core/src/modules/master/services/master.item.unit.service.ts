@@ -3,11 +3,11 @@ import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
 } from '@core/master/dto/master.item.unit'
+import { IMasterItemUnit } from '@core/master/interface/master.item.unit'
 import {
   MasterItemUnit,
   MasterItemUnitDocument,
 } from '@core/master/schemas/master.item.unit'
-import { IMasterItemUnit } from '@core/master/schemas/master.item.unit.join'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'

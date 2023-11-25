@@ -71,7 +71,7 @@ export class Menu {
   @Prop({ type: SchemaTypes.String })
   parent: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccount
 
   @Prop({

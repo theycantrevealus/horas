@@ -1,81 +1,18 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { ILOV, LOVJoin } from '@core/lov/schemas/lov.join'
-import {
-  IMasterItemBrand,
-  MasterItemBrandJoin,
-} from '@core/master/schemas/master.item.brand.join'
-import {
-  IMasterItemCategory,
-  MasterItemCategoryJoin,
-} from '@core/master/schemas/master.item.category.join'
-import {
-  IMasterItemUnit,
-  MasterItemUnitJoin,
-} from '@core/master/schemas/master.item.unit.join'
-import {
-  IMasterStockPoint,
-  MasterStockPointJoin,
-} from '@core/master/schemas/master.stock.point.join'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { ApiProperty } from '@nestjs/swagger'
-import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator'
+import { IMasterItemBrand } from '@core/master/interface/master.item.brand'
+import { IMasterItemCategory } from '@core/master/interface/master.item.category'
+import { IMasterItemConfiguration } from '@core/master/interface/master.item.configuration'
+import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
+import { IMasterItemUnit } from '@core/master/interface/master.item.unit'
+import { MasterItemBrandJoin } from '@core/master/schemas/master.item.brand.join'
+import { MasterItemCategoryJoin } from '@core/master/schemas/master.item.category.join'
+import { MasterItemConfiguration } from '@core/master/schemas/master.item.configuration'
+import { MasterItemStoring } from '@core/master/schemas/master.item.storing'
+import { MasterItemUnitJoin } from '@core/master/schemas/master.item.unit.join'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
-
-// ==============================================================================Item Configuration
-export const MasterItemConfiguration = raw({
-  allow_grn: { type: Boolean, default: false },
-  allow_incoming: { type: Boolean, default: false },
-  allow_outgoing: { type: Boolean, default: false },
-  allow_destruction: { type: Boolean, default: false },
-})
-
-export interface IMasterItemConfiguration {
-  allow_sell: boolean
-}
-
-export class CMasterItemConfiguration {
-  @ApiProperty({
-    example: true,
-    type: Boolean,
-    description: '',
-  })
-  @IsNotEmpty()
-  @IsBoolean()
-  allow_sell: boolean
-}
-// ==============================================================================Item Storing Label
-export const MasterItemStoring = raw({
-  stock_point: { type: MasterStockPointJoin, _id: false },
-  storing_label: { type: String },
-  minimum: { type: Number },
-  maximum: { type: Number },
-})
-
-export interface IMasterItemStoring {
-  stock_point: IMasterStockPoint
-  storing_label: string
-  minimum: number
-  maximum: number
-}
-
-export class CMasterItemStoring {
-  @ApiProperty({
-    type: Number,
-    description: 'Minimum qty to alert',
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  minimum: number
-
-  @ApiProperty({
-    type: Number,
-    description: 'Maximum qty to alert',
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  maximum: number
-}
 
 export type MasterItemDocument = HydratedDocument<MasterItem>
 @Schema({ collection: 'master_item' })
@@ -92,7 +29,7 @@ export class MasterItem {
   @Prop({ type: SchemaTypes.String, required: false })
   alias: string
 
-  @Prop(raw(MasterItemConfiguration))
+  @Prop(MasterItemConfiguration)
   configuration: IMasterItemConfiguration
 
   @Prop({
@@ -135,19 +72,19 @@ export class MasterItem {
   @Prop({ type: SchemaTypes.String })
   remark: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
     required: true,
   })
   updated_at: Date

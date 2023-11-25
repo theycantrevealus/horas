@@ -193,7 +193,7 @@ export class i18n {
   })
   components: Ii18nComponent[]
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({

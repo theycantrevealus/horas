@@ -1,5 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsNumber, MaxLength, MinLength } from 'class-validator'
+import { Types } from 'mongoose'
+
+export class CMasterItemUnit {
+  @ApiProperty({
+    type: String,
+    example: `item_unit-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Ampole',
+  })
+  name: string
+}
 
 export class MasterItemUnitAddDTO {
   @ApiProperty({
@@ -26,12 +47,6 @@ export class MasterItemUnitAddDTO {
   })
   @IsNotEmpty()
   remark: string
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.remark = parameter.remark
-  }
 }
 
 export class MasterItemUnitEditDTO {
@@ -67,11 +82,4 @@ export class MasterItemUnitEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.remark = parameter.remark
-    this.__v = parameter.__v
-  }
 }

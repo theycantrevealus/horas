@@ -1,6 +1,6 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { Account } from '@core/account/schemas/account.model'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type LogLoginDocument = HydratedDocument<LogLogin>
@@ -8,7 +8,7 @@ export type LogLoginDocument = HydratedDocument<LogLogin>
 @Schema({ collection: 'core_log_login' })
 export class LogLogin {
   constructor() {}
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   account: Account
 
   @Prop({

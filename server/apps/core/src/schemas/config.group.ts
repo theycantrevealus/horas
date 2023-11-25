@@ -76,7 +76,7 @@ export class ConfigGroup {
   @Prop({ type: SchemaTypes.String })
   remark: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 }
 export const ConfigGroupSchema = SchemaFactory.createForClass(ConfigGroup)

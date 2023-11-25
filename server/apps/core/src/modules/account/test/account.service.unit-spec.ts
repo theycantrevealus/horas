@@ -29,7 +29,7 @@ describe('Account Service', () => {
   let accountService: AccountService
   let authService: AuthService
   let cacheManager: Cache
-  let modelAccount: Model<Account>
+  let accountModel: Model<Account>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -77,7 +77,7 @@ describe('Account Service', () => {
     accountService = module.get<AccountService>(AccountService)
     authService = module.get<AuthService>(AuthService)
     cacheManager = module.get(CACHE_MANAGER)
-    modelAccount = module.get<Model<AccountDocument>>(
+    accountModel = module.get<Model<AccountDocument>>(
       getModelToken(Account.name)
     )
   })
@@ -314,7 +314,7 @@ describe('Account Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(modelAccount, 'aggregate').mockReturnValue({
+          jest.spyOn(accountModel, 'aggregate').mockReturnValue({
             exec: jest.fn().mockReturnValue(accountDocArray),
           } as any)
           await accountService
@@ -361,7 +361,7 @@ describe('Account Service', () => {
             transaction_classify: 'ACCOUNT_GET',
           })
 
-          jest.spyOn(modelAccount, 'aggregate').mockReturnValue({
+          jest.spyOn(accountModel, 'aggregate').mockReturnValue({
             exec: jest
               .fn()
               .mockRejectedValue(new Error(JSON.stringify(mockError))),
@@ -390,7 +390,7 @@ describe('Account Service', () => {
         }),
         async () => {
           const findMockAccount = accountDocArray[0]
-          modelAccount.findOne = jest.fn().mockImplementationOnce(() => {
+          accountModel.findOne = jest.fn().mockImplementationOnce(() => {
             return Promise.resolve(findMockAccount)
           })
 
@@ -420,7 +420,7 @@ describe('Account Service', () => {
         }),
         async () => {
           const findMockAccount = mockAccount()
-          modelAccount.findOne = jest.fn().mockImplementationOnce(() => {
+          accountModel.findOne = jest.fn().mockImplementationOnce(() => {
             return Promise.resolve(findMockAccount)
           })
 
@@ -460,7 +460,7 @@ describe('Account Service', () => {
             transaction_classify: 'ACCOUNT_GET',
           })
 
-          jest.spyOn(modelAccount, 'findOne').mockImplementationOnce(() => {
+          jest.spyOn(accountModel, 'findOne').mockImplementationOnce(() => {
             throw new Error(JSON.stringify(mockError))
           })
 
@@ -484,7 +484,7 @@ describe('Account Service', () => {
             transaction_classify: 'ACCOUNT_FIND',
           })
 
-          jest.spyOn(modelAccount, 'findOne').mockImplementationOnce(() => {
+          jest.spyOn(accountModel, 'findOne').mockImplementationOnce(() => {
             throw new Error(JSON.stringify(mockError))
           })
 
@@ -498,7 +498,7 @@ describe('Account Service', () => {
 
   describe(testCaption('ADD DATA', 'data', 'Account - Add new account'), () => {
     it(testCaption('DATA', 'data', 'Should add new account'), async () => {
-      jest.spyOn(modelAccount, 'create')
+      jest.spyOn(accountModel, 'create')
 
       await accountService
         .accountAdd(
@@ -540,7 +540,7 @@ describe('Account Service', () => {
           transaction_classify: 'ACCOUNT_ADD',
         })
 
-        jest.spyOn(modelAccount, 'create').mockImplementationOnce(() => {
+        jest.spyOn(accountModel, 'create').mockImplementationOnce(() => {
           throw new Error(JSON.stringify(mockError))
         })
 
@@ -565,7 +565,7 @@ describe('Account Service', () => {
     it(
       testCaption('HANDLING', 'data', 'Should edit account data', { tab: 1 }),
       async () => {
-        jest.spyOn(modelAccount, 'findOneAndUpdate')
+        jest.spyOn(accountModel, 'findOneAndUpdate')
 
         await accountService
           .accountEdit(
@@ -612,7 +612,7 @@ describe('Account Service', () => {
         })
 
         jest
-          .spyOn(modelAccount, 'findOneAndUpdate')
+          .spyOn(accountModel, 'findOneAndUpdate')
           .mockImplementationOnce(() => {
             throw new Error(JSON.stringify(mockError))
           })
@@ -649,11 +649,11 @@ describe('Account Service', () => {
           { tab: 1 }
         ),
         async () => {
-          jest.spyOn(modelAccount, 'findOneAndUpdate')
-          jest.spyOn(modelAccount, 'find').mockReturnValue({
+          jest.spyOn(accountModel, 'findOneAndUpdate')
+          jest.spyOn(accountModel, 'find').mockReturnValue({
             exec: jest.fn().mockReturnValue(accountDocArray),
           } as any)
-          // jest.spyOn(modelAccount, 'updateMany')
+          // jest.spyOn(accountModel, 'updateMany')
           await accountService
             .accountUpdateAccess('menu-id', {
               name: 'TestMenu',
@@ -678,7 +678,7 @@ describe('Account Service', () => {
               )
             })
 
-          jest.spyOn(modelAccount, 'find').mockReturnValue({
+          jest.spyOn(accountModel, 'find').mockReturnValue({
             exec: jest.fn().mockReturnValue([]),
           } as any)
 
@@ -728,7 +728,7 @@ describe('Account Service', () => {
           })
 
           jest
-            .spyOn(modelAccount, 'findOneAndUpdate')
+            .spyOn(accountModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error(JSON.stringify(mockError))
             })
@@ -749,7 +749,7 @@ describe('Account Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(modelAccount, 'findOneAndUpdate')
+          jest.spyOn(accountModel, 'findOneAndUpdate')
 
           await accountService
             .accountDelete(accountDocArray[0].id)
@@ -783,7 +783,7 @@ describe('Account Service', () => {
           })
 
           jest
-            .spyOn(modelAccount, 'findOneAndUpdate')
+            .spyOn(accountModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error(JSON.stringify(mockError))
             })

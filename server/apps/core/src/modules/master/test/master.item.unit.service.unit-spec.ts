@@ -4,10 +4,6 @@ import { mockAuthority } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
 import {
-  MasterItemUnitAddDTO,
-  MasterItemUnitEditDTO,
-} from '@core/master/dto/master.item.unit'
-import {
   masterItemUnitDocArray,
   mockMasterItemUnit,
   mockMasterItemUnitModel,
@@ -33,8 +29,8 @@ import { testCaption } from '@utility/string'
 import { Model, Query, Types } from 'mongoose'
 
 describe('Master Item Unit Service', () => {
-  let service: MasterItemUnitService
-  let model: Model<MasterItemUnit>
+  let masterItemUnitService: MasterItemUnitService
+  let masterItemUnitModel: Model<MasterItemUnit>
   const dataSet = mockMasterItemUnit()
 
   beforeAll(async () => {
@@ -86,8 +82,10 @@ describe('Master Item Unit Service', () => {
       ],
     }).compile()
 
-    service = module.get<MasterItemUnitService>(MasterItemUnitService)
-    model = module.get<Model<MasterItemUnitDocument>>(
+    masterItemUnitService = module.get<MasterItemUnitService>(
+      MasterItemUnitService
+    )
+    masterItemUnitModel = module.get<Model<MasterItemUnitDocument>>(
       getModelToken(MasterItemUnit.name)
     )
 
@@ -101,16 +99,16 @@ describe('Master Item Unit Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(masterItemUnitService).toBeDefined()
     }
   )
 
   it(testCaption('DATA', 'data', 'Should list all data'), async () => {
-    jest.spyOn(model, 'aggregate').mockReturnValue({
+    jest.spyOn(masterItemUnitModel, 'aggregate').mockReturnValue({
       exec: jest.fn().mockReturnValue(masterItemUnitDocArray),
     } as any)
 
-    await service
+    await masterItemUnitService
       .all(
         `{
               "first": 0,
@@ -132,14 +130,16 @@ describe('Master Item Unit Service', () => {
   it(
     testCaption('DATA', 'data', 'Should show master item unit detail'),
     async () => {
-      jest.spyOn(model, 'findOne').mockReturnValueOnce(
+      jest.spyOn(masterItemUnitModel, 'findOne').mockReturnValueOnce(
         createMock<Query<MasterItemUnitDocument, MasterItemUnitDocument>>({
           exec: jest.fn().mockResolvedValueOnce(masterItemUnitDocArray[0]),
         }) as any
       )
 
       const findMock = masterItemUnitDocArray[0]
-      const foundData = await service.detail(masterItemUnitDocArray[0].id)
+      const foundData = await masterItemUnitService.detail(
+        masterItemUnitDocArray[0].id
+      )
       expect(foundData).toEqual(findMock)
     }
   )
@@ -147,14 +147,14 @@ describe('Master Item Unit Service', () => {
   it(
     testCaption('DATA', 'data', 'Should create a new master item unit'),
     async () => {
-      model.create = jest.fn().mockImplementationOnce(() => {
+      masterItemUnitModel.create = jest.fn().mockImplementationOnce(() => {
         return Promise.resolve(dataSet)
       })
 
-      jest.spyOn(model, 'create')
+      jest.spyOn(masterItemUnitModel, 'create')
 
-      const newEntry = (await service.add(
-        new MasterItemUnitAddDTO(mockMasterItemUnit()),
+      const newEntry = (await masterItemUnitService.add(
+        mockMasterItemUnit(),
         mockAccount()
       )) satisfies GlobalResponse
       expect(newEntry.payload).toHaveProperty('code')
@@ -164,14 +164,17 @@ describe('Master Item Unit Service', () => {
   it(
     testCaption('DATA', 'data', 'Should edit master item unit data'),
     async () => {
-      jest.spyOn(model, 'findOneAndUpdate').mockReturnValueOnce(
+      jest.spyOn(masterItemUnitModel, 'findOneAndUpdate').mockReturnValueOnce(
         createMock<Query<MasterItemUnitDocument, MasterItemUnitDocument>>({
           exec: jest.fn().mockResolvedValueOnce(masterItemUnitDocArray[0]),
         }) as any
       )
 
-      const data = (await service.edit(
-        new MasterItemUnitEditDTO(masterItemUnitDocArray[0]),
+      const data = (await masterItemUnitService.edit(
+        {
+          ...mockMasterItemUnit(),
+          __v: 0,
+        },
         `item_unit-${new Types.ObjectId().toString()}`
       )) satisfies GlobalResponse
       expect(data.payload).toHaveProperty('code')

@@ -234,7 +234,7 @@ export class SEP {
   @IsNotEmpty()
   response: any
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({

@@ -29,7 +29,7 @@ export class Patient {
   @Prop(raw(PatientBasicInfo))
   basic_info: IPatientBasicInfo
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({

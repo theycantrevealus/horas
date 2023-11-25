@@ -71,14 +71,14 @@ export const mockMasterItemCategory = (
 
 export const mockMasterItemCategoryModel = {
   new: jest.fn().mockResolvedValue(mockMasterItemCategory()),
-  find: jest.fn(),
-  aggregate: jest.fn().mockReturnThis(),
-  findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-  update: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  exec: jest.fn(),
+  find: jest.fn().mockImplementation(),
+  aggregate: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockResolvedValue(mockMasterItemCategory()),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterItemCategory()),
+  update: jest.fn().mockResolvedValue(mockMasterItemCategory()),
+  create: jest.fn().mockResolvedValue(mockMasterItemCategory()),
+  save: jest.fn().mockImplementation(),
+  exec: jest.fn().mockImplementation(),
 }
 
 export const mockMasterItemCategoryDoc = (

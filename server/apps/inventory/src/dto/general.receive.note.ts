@@ -1,12 +1,8 @@
-import {
-  IMasterStockPoint,
-  MasterStockPointJoin,
-} from '@core/master/schemas/master.stock.point.join'
-import { CGeneralReceiveNoteDetail } from '@inventory/schemas/general.receive.note.detail'
-import {
-  IPurchaseOrder,
-  PurchaseOrderJoin,
-} from '@inventory/schemas/purchase.order'
+import { CMasterStockPoint } from '@core/master/dto/master.stock.point'
+import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
+import { CGeneralReceiveNoteDetail } from '@inventory/dto/general.receive.note.detail'
+import { CPurchaseOrder } from '@inventory/dto/purchase.order'
+import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
@@ -37,16 +33,20 @@ export class GeneralReceiveNoteAddDTO {
   extras: any
 
   @ApiProperty({
-    type: MasterStockPointJoin,
+    type: CMasterStockPoint,
     description: 'Target stock point',
   })
+  @Type(() => CMasterStockPoint)
+  @ValidateNested({ each: true })
   @IsNotEmpty()
   stock_point: IMasterStockPoint
 
   @ApiProperty({
-    type: PurchaseOrderJoin,
+    type: CPurchaseOrder,
     description: 'Purchase Order',
   })
+  @Type(() => CPurchaseOrder)
+  @ValidateNested({ each: true })
   @IsNotEmpty()
   purchase_order: IPurchaseOrder
 
@@ -88,16 +88,18 @@ export class GeneralReceiveNoteEditDTO {
   extras: any
 
   @ApiProperty({
-    type: MasterStockPointJoin,
+    type: CMasterStockPoint,
     description: 'Target stock point',
   })
   @IsNotEmpty()
   stock_point: IMasterStockPoint
 
   @ApiProperty({
-    type: PurchaseOrderJoin,
+    type: CPurchaseOrder,
     description: 'Purchase Order',
   })
+  @Type(() => CPurchaseOrder)
+  @ValidateNested({ each: true })
   @IsNotEmpty()
   purchase_order: IPurchaseOrder
 
