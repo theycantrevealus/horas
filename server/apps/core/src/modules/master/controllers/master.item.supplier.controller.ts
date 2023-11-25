@@ -51,33 +51,6 @@ export class MasterItemSupplierController {
     return await this.masterItemSupplierService.all(parameter)
   }
 
-  @Get('supplier/find')
-  @Version('1')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
-  @Authorization(true)
-  @ApiBearerAuth('JWT')
-  @ApiOperation({
-    summary: 'Find data',
-    description: '',
-  })
-  @ApiQuery({
-    name: 'search',
-    type: String,
-    required: true,
-  })
-  @ApiQuery({
-    name: 'limit',
-    type: Number,
-    required: true,
-  })
-  async find(@Query() parameter) {
-    return await this.masterItemSupplierService.find(
-      parameter.search,
-      parameter.limit
-    )
-  }
-
   @Get('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)

@@ -30,7 +30,6 @@ import { Model } from 'mongoose'
 describe('Master Item Brand Service', () => {
   let masterItemBrandService: MasterItemBrandService
   let masterItemBrandModel: Model<MasterItemBrand>
-  const dataSet = mockMasterItemBrand()
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,9 +42,8 @@ describe('Master Item Brand Service', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
-              return null
-            }),
+            get: () => jest.fn().mockResolvedValue('Test'),
+            set: () => jest.fn().mockResolvedValue('Test'),
           },
         },
         {
@@ -162,7 +160,6 @@ describe('Master Item Brand Service', () => {
               sortField: 'created_at',
               sortOrder: 1,
               filters: {},
-              custom_filter: '123',
             })
           ).rejects.toThrow(Error)
         }

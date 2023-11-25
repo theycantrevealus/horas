@@ -41,8 +41,13 @@ export class MasterItemService {
     } satisfies GlobalResponse
     if (isJSON(parameter)) {
       const parsedData = JSON.parse(parameter)
-      response.payload = await prime_datatable(parsedData, this.masterItemModel)
-      response.message = 'Data query success'
+      return await prime_datatable(parsedData, this.masterItemModel).then(
+        (result) => {
+          response.payload = result.payload.data
+          response.message = 'Data query success'
+          return response
+        }
+      )
     } else {
       response.statusCode = {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -50,25 +55,38 @@ export class MasterItemService {
         classCode: modCodes[this.constructor.name].defaultCode,
       }
       response.message = 'filters is not a valid json'
+      throw new Error(JSON.stringify(response))
     }
-    return response
   }
 
-  async filter(search: string, limit: number): Promise<MasterItem[]> {
-    return await this.masterItemModel
-      .find({
-        $or: [
-          { code: new RegExp(search, 'i') },
-          { name: new RegExp(search, 'i') },
-          { alias: new RegExp(search, 'i') },
-        ],
+  async detail(id: string): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'MASTER_ITEM_GET',
+      transaction_id: id,
+    } satisfies GlobalResponse
+
+    try {
+      return await this.masterItemModel.findOne({ id: id }).then((result) => {
+        response.payload = result
+        response.message = 'Master item detail fetch successfully'
+        return response
       })
-      .limit(limit)
-      .exec()
-  }
-
-  async detail(id: string): Promise<MasterItem> {
-    return this.masterItemModel.findOne({ id: id }).exec()
+    } catch (error) {
+      response.message = `Master item detail failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async find(term: any) {
@@ -115,7 +133,7 @@ export class MasterItemService {
           //
         })
         .catch((e: Error) => {
-          //
+          throw e
         })
     }
   }
@@ -137,25 +155,24 @@ export class MasterItemService {
       data.code = `${modCodes[this.constructor.name]}-${new Date().getTime()}`
     }
 
-    await this.masterItemModel
-      .create({
-        ...data,
-        created_by: account,
-      })
-      .then((result) => {
-        response.message = 'Master item created successfully'
-        response.transaction_id = result._id
-        response.payload = result
-      })
-      .catch((error: Error) => {
-        response.message = `Master item failed to create. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
-      })
-
-    return response
+    try {
+      return await this.masterItemModel
+        .create({
+          ...data,
+          created_by: account,
+        })
+        .then((result) => {
+          response.message = 'Master item created successfully'
+          response.transaction_id = result._id
+          response.payload = result
+          return response
+        })
+    } catch (error) {
+      response.message = `Master item failed to create. ${error.message}`
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async edit(data: MasterItemEditDTO, id: string): Promise<GlobalResponse> {
@@ -171,42 +188,34 @@ export class MasterItemService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    await this.masterItemModel
-      .findOneAndUpdate(
-        {
-          id: id,
-          __v: data.__v,
-        },
-        {
-          code: data.code,
-          name: data.name,
-          brand: data.brand,
-          category: data.category,
-          unit: data.unit,
-          properties: data.properties,
-          remark: data.remark,
-        }
-      )
-      .exec()
-      .then((result) => {
-        if (result) {
+    try {
+      return await this.masterItemModel
+        .findOneAndUpdate(
+          {
+            id: id,
+            __v: data.__v,
+          },
+          {
+            code: data.code,
+            name: data.name,
+            brand: data.brand,
+            category: data.category,
+            unit: data.unit,
+            properties: data.properties,
+            remark: data.remark,
+          }
+        )
+        .then((result) => {
           response.message = 'Master item updated successfully'
           response.payload = result
-        } else {
-          response.message = `Master item failed to update. Invalid document`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          throw new Error(JSON.stringify(response))
-        }
-      })
-      .catch((error: Error) => {
-        response.message = `Master item failed to update. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
-      })
-    return response
+          return response
+        })
+    } catch (error) {
+      response.message = `Master item failed to update. ${error.message}`
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async delete(id: string): Promise<GlobalResponse> {
@@ -221,31 +230,30 @@ export class MasterItemService {
       transaction_classify: 'MASTER_ITEM_DELETE',
       transaction_id: null,
     } satisfies GlobalResponse
-    const data = await this.masterItemModel.findOne({
-      id: id,
-    })
 
-    if (data) {
-      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
-
-      await data
-        .save()
-        .then(() => {
+    try {
+      return await this.masterItemModel
+        .findOneAndUpdate(
+          {
+            id: id,
+          },
+          {
+            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+          }
+        )
+        .then(async () => {
           response.message = 'Master item deleted successfully'
+          return response
         })
-        .catch((error: Error) => {
-          response.message = `Master item failed to delete. ${error.message}`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          response.payload = error
-          throw new Error(JSON.stringify(response))
-        })
-    } else {
-      response.message = `Master item failed to deleted. Invalid document`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+    } catch (error) {
+      response.message = 'Master item failed to delete'
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
-    return response
   }
 
   async import(file: string, account: Account): Promise<GlobalResponse> {
@@ -260,6 +268,7 @@ export class MasterItemService {
       transaction_classify: 'MASTER_ITEM_IMPORT',
       transaction_id: null,
     } satisfies GlobalResponse
+
     const emitter = await this.mItemClient.emit('master_item', {
       file: file,
       account: account,

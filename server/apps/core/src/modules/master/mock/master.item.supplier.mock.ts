@@ -79,16 +79,14 @@ export const mockMasterItemSupplier = (
 
 export const mockMasterItemSupplierModel = {
   new: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
-  constructor: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
-  find: jest.fn(),
-  aggregate: jest.fn().mockReturnThis(),
-  findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-  update: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  remove: jest.fn(),
-  exec: jest.fn(),
+  find: jest.fn().mockImplementation(),
+  aggregate: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  update: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  create: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  save: jest.fn().mockImplementation(),
+  exec: jest.fn().mockImplementation(),
 }
 
 export const mockMasterItemSupplierDoc = (

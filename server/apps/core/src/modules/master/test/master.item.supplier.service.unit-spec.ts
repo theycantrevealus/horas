@@ -1,5 +1,9 @@
 import { AccountService } from '@core/account/account.service'
-import { mockAccount, mockAccountModel } from '@core/account/mock/account.mock'
+import {
+  accountDocArray,
+  mockAccount,
+  mockAccountModel,
+} from '@core/account/mock/account.mock'
 import { mockAuthority } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
@@ -13,7 +17,6 @@ import {
   MasterItemSupplierDocument,
 } from '@core/master/schemas/master.item.supplier'
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
-import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -26,12 +29,11 @@ import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
-import { Model, Query, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
 describe('Master Item Supplier Service', () => {
   let masterItemSupplierService: MasterItemSupplierService
   let masterItemSupplierModel: Model<MasterItemSupplier>
-  const dataSet = mockMasterItemSupplier()
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -103,94 +105,294 @@ describe('Master Item Supplier Service', () => {
     }
   )
 
-  it(
-    testCaption('DATA', 'data', 'Should list all master item supplier'),
-    async () => {
-      jest.spyOn(masterItemSupplierModel, 'aggregate').mockReturnValue({
-        exec: jest.fn().mockReturnValue(masterItemSupplierDocArray),
-      } as any)
-
-      await masterItemSupplierService
-        .all(
-          `{
+  describe(
+    testCaption('GET DATA', 'data', 'Master Item Supplier - Fetch list'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Response validity', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemSupplierModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterItemSupplierDocArray),
+          } as any)
+          await masterItemSupplierService
+            .all(
+              `{
               "first": 0,
               "rows": 10,
               "sortField": "created_at",
               "sortOrder": 1,
               "filters": {}
             }`
-        )
-        .then((result) => {
-          expect(result.transaction_classify).toEqual(
-            'MASTER_ITEM_SUPPLIER_LIST'
-          )
-          expect(result.message).not.toBe('')
-          expect(result.statusCode.customCode).toEqual(modCodes.Global.success)
-          expect(result.payload).toBeInstanceOf(Array)
-          expect(result.payload).toEqual(masterItemSupplierDocArray)
-        })
-    }
-  )
+            )
+            .then((result: GlobalResponse) => {
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_SUPPLIER_LIST'
+              )
 
-  it(
-    testCaption('DATA', 'data', 'Should show master item supplier detail'),
-    async () => {
-      jest.spyOn(masterItemSupplierModel, 'findOne').mockReturnValueOnce(
-        createMock<
-          Query<MasterItemSupplierDocument, MasterItemSupplierDocument>
-        >({
-          exec: jest.fn().mockResolvedValueOnce(masterItemSupplierDocArray[0]),
-        }) as any
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+
+              // Should be an array of data
+              expect(result.payload).toBeInstanceOf(Array)
+
+              // Data should be defined
+              expect(result.payload).toEqual(masterItemSupplierDocArray)
+            })
+        }
       )
 
-      const findMock = masterItemSupplierDocArray[0]
-      const foundData = await masterItemSupplierService.detail(
-        masterItemSupplierDocArray[0].id
+      it(
+        testCaption('HANDLING', 'data', 'Response error on fetch data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemSupplierModel, 'aggregate').mockImplementation({
+            exec: jest.fn().mockRejectedValue(new Error()),
+          } as any)
+
+          await expect(
+            masterItemSupplierService.all({
+              first: 0,
+              rows: 10,
+              sortField: 'created_at',
+              sortOrder: 1,
+              filters: {},
+            })
+          ).rejects.toThrow(Error)
+        }
       )
-      expect(foundData).toEqual(findMock)
     }
   )
 
-  it(
-    testCaption('DATA', 'data', 'Should create a new master item supplier'),
-    async () => {
-      masterItemSupplierModel.create = jest.fn().mockImplementationOnce(() => {
-        return Promise.resolve(dataSet)
-      })
+  describe(
+    testCaption('GET DETAIL', 'data', 'Master Item Supplier - Fetch detail'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Response validity', {
+          tab: 1,
+        }),
+        async () => {
+          const findMock = masterItemSupplierDocArray[0]
+          masterItemSupplierModel.findOne = jest
+            .fn()
+            .mockImplementationOnce(() => {
+              return Promise.resolve(findMock)
+            })
 
-      jest.spyOn(masterItemSupplierModel, 'create')
+          await masterItemSupplierService
+            .detail(findMock.id)
+            .then((result: GlobalResponse) => {
+              // Deep equality check
+              expect(result.payload).toEqual(findMock)
 
-      const newEntry = (await masterItemSupplierService.add(
-        mockMasterItemSupplier(),
-        mockAccount()
-      )) satisfies GlobalResponse
-      expect(newEntry.payload).toHaveProperty('code')
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_SUPPLIER_GET'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on get detail data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetData = masterItemSupplierDocArray[0]
+
+          jest
+            .spyOn(masterItemSupplierModel, 'findOne')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemSupplierService.detail(targetData.id)
+          }).rejects.toThrow(Error)
+        }
+      )
     }
   )
 
-  it(
-    testCaption('DATA', 'data', 'Should edit master item supplier data'),
-    async () => {
-      jest
-        .spyOn(masterItemSupplierModel, 'findOneAndUpdate')
-        .mockReturnValueOnce(
-          createMock<
-            Query<MasterItemSupplierDocument, MasterItemSupplierDocument>
-          >({
-            exec: jest
-              .fn()
-              .mockResolvedValueOnce(masterItemSupplierDocArray[0]),
-          }) as any
-        )
+  describe(
+    testCaption('ADD DATA', 'data', 'Master Item Supplier - Add new data'),
+    () => {
+      it(
+        testCaption('DATA', 'data', 'Should add new master item supplier'),
+        async () => {
+          jest.spyOn(masterItemSupplierModel, 'create')
 
-      const data = (await masterItemSupplierService.edit(
-        {
-          ...mockMasterItemSupplier(),
-          __v: 0,
-        },
-        `supplier-${new Types.ObjectId().toString()}`
-      )) satisfies GlobalResponse
-      expect(data.payload).toHaveProperty('code')
+          await masterItemSupplierService
+            .add(mockMasterItemSupplier(), mockAccount())
+            .then((result: GlobalResponse) => {
+              // Should create id
+              expect(result.payload).toHaveProperty('id')
+
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_SUPPLIER_ADD'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on add data', {
+          tab: 1,
+        }),
+        async () => {
+          jest
+            .spyOn(masterItemSupplierModel, 'create')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemSupplierService.add(
+              mockMasterItemSupplier(),
+              mockAccount()
+            )
+          }).rejects.toThrow(Error)
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('EDIT DATA', 'data', 'Master Item Supplier - Edit data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should edit master item supplier', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemSupplierModel, 'findOneAndUpdate')
+
+          await masterItemSupplierService
+            .edit(
+              {
+                ...mockMasterItemSupplier(),
+                __v: 0,
+              },
+              accountDocArray[0].id
+            )
+            .then((result: GlobalResponse) => {
+              // Should create id
+              expect(result.payload).toHaveProperty('id')
+
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_SUPPLIER_EDIT'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on edit data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetID = mockMasterItemSupplier().id
+          jest
+            .spyOn(masterItemSupplierModel, 'findOneAndUpdate')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemSupplierService.edit(
+              {
+                ...mockMasterItemSupplier(),
+                __v: 0,
+              },
+              targetID
+            )
+          }).rejects.toThrow(Error)
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('DELETE DATA', 'data', 'Master item supplier - Delete data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should delete master item supplier', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemSupplierModel, 'findOneAndUpdate')
+
+          await masterItemSupplierService
+            .delete(masterItemSupplierDocArray[0].id)
+            .then((result: GlobalResponse) => {
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_SUPPLIER_DELETE'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on delete data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetID = mockMasterItemSupplier().id
+
+          jest
+            .spyOn(masterItemSupplierModel, 'findOneAndUpdate')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemSupplierService.delete(targetID)
+          }).rejects.toThrow(Error)
+        }
+      )
     }
   )
 

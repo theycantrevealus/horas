@@ -63,36 +63,6 @@ export class MasterItemController {
     return await this.masterItemService.all(parameter)
   }
 
-  @Get('item/find')
-  @Version('1')
-  @UseGuards(JwtAuthGuard)
-  @Authorization(true)
-  @ApiBearerAuth('JWT')
-  @ApiOperation({
-    summary: 'Find data',
-    description: '',
-  })
-  @ApiQuery({
-    name: 'search',
-    type: String,
-    required: true,
-  })
-  @ApiQuery({
-    name: 'limit',
-    type: Number,
-    required: true,
-  })
-  async find(@Res() response: FastifyReply, @Query() parameter) {
-    await this.masterItemService
-      .filter(parameter.search, parameter.limit)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
-  }
-
   @Get('item/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)

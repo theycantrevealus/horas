@@ -2,38 +2,34 @@ import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
 import {
-  MasterItemUnitAddDTO,
-  MasterItemUnitEditDTO,
-} from '@core/master/dto/master.item.unit'
-import {
-  MasterItemUnit,
-  MasterItemUnitDocument,
-} from '@core/master/schemas/master.item.unit'
+  MasterQueueAddDTO,
+  MasterQueueEditDTO,
+} from '@core/master/dto/master.queue'
+import { MasterItemBrandDocument } from '@core/master/schemas/master.item.brand'
+import { MasterQueue } from '@core/master/schemas/master.queue.machine'
 import { faker } from '@faker-js/faker'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterItemUnitService = {
+export const mockMasterQueueService = {
   all: jest.fn().mockResolvedValue((dto) => dto),
   add: jest
     .fn()
-    .mockImplementation((dto: MasterItemUnitAddDTO, account: Account) => {
+    .mockImplementation((dto: MasterQueueAddDTO, account: Account) => {
       return Promise.resolve({
         payload: {
           ...dto,
-          id: `item_unit-${new Types.ObjectId().toString()}`,
+          id: `queue-${new Types.ObjectId().toString()}`,
         },
       })
     }),
-  edit: jest
-    .fn()
-    .mockImplementation((dto: MasterItemUnitEditDTO, id: string) => {
-      return Promise.resolve({
-        payload: {
-          id: id,
-        },
-      })
-    }),
+  edit: jest.fn().mockImplementation((dto: MasterQueueEditDTO, id: string) => {
+    return Promise.resolve({
+      payload: {
+        id: id,
+      },
+    })
+  }),
   detail: jest.fn().mockResolvedValue((dto) => dto),
   delete: jest.fn().mockImplementation((id: string) => {
     return Promise.resolve({
@@ -44,13 +40,12 @@ export const mockMasterItemUnitService = {
   }),
 }
 
-export const mockMasterItemUnit = (
-  id = `item_unit-${new Types.ObjectId().toString()}`,
-  code = 'BRD-0001',
-  name = faker.company.name(),
+export const mockMasterQueue = (
+  id = `queue-${new Types.ObjectId().toString()}`,
+  code = 'QUE-0001',
   remark = '',
   created_by: IAccountCreatedBy = {
-    id: `account-${new Types.ObjectId().toString()}`,
+    id: `queue-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
@@ -58,10 +53,9 @@ export const mockMasterItemUnit = (
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
-): MasterItemUnit => ({
+): MasterQueue => ({
   id,
   code,
-  name,
   remark,
   created_by,
   created_at,
@@ -69,23 +63,22 @@ export const mockMasterItemUnit = (
   deleted_at,
 })
 
-export const mockMasterItemUnitModel = {
-  new: jest.fn().mockResolvedValue(mockMasterItemUnit()),
+export const mockMasterQueueModel = {
+  new: jest.fn().mockResolvedValue(mockMasterQueue()),
   find: jest.fn().mockImplementation(),
   aggregate: jest.fn().mockImplementation(),
-  findOne: jest.fn().mockResolvedValue(mockMasterItemUnit()),
-  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterItemUnit()),
-  update: jest.fn().mockResolvedValue(mockMasterItemUnit()),
-  create: jest.fn().mockResolvedValue(mockMasterItemUnit()),
+  findOne: jest.fn().mockResolvedValue(mockMasterQueue()),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterQueue()),
+  update: jest.fn().mockResolvedValue(mockMasterQueue()),
+  create: jest.fn().mockResolvedValue(mockMasterQueue()),
   save: jest.fn().mockImplementation(),
   exec: jest.fn().mockImplementation(),
 }
 
-export const mockMasterItemUnitDoc = (
-  mock?: Partial<MasterItemUnit>
-): Partial<MasterItemUnitDocument> => ({
+export const mockMasterQueueDoc = (
+  mock?: Partial<MasterQueue>
+): Partial<MasterItemBrandDocument> => ({
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
-  name: mock?.name || faker.company.name(),
   remark: mock?.remark || '',
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -100,22 +93,20 @@ export const mockMasterItemUnitDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-export const masterItemUnitArray = [
-  mockMasterItemUnit(),
-  mockMasterItemUnit(
-    `item_unit-${new Types.ObjectId().toString()}`,
+export const masterQueueArray = [
+  mockMasterQueue(),
+  mockMasterQueue(
+    `brand-${new Types.ObjectId().toString()}`,
     'BRD-0001',
-    '',
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
     new TimeManagement().getTimezone('Asia/Jakarta'),
     null
   ),
-  mockMasterItemUnit(
-    `item_unit-${new Types.ObjectId().toString()}`,
+  mockMasterQueue(
+    `brand-${new Types.ObjectId().toString()}`,
     'BRD-0002',
-    '',
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -123,16 +114,14 @@ export const masterItemUnitArray = [
   ),
 ]
 
-export const masterItemUnitDocArray = [
-  mockMasterItemUnitDoc(),
-  mockMasterItemUnitDoc({
+export const masterQueueDocArray = [
+  mockMasterQueueDoc(),
+  mockMasterQueueDoc({
     code: 'XX-002',
-    name: faker.person.firstName(),
     remark: '',
   }),
-  mockMasterItemUnitDoc({
+  mockMasterQueueDoc({
     code: 'XX-001',
-    name: faker.person.firstName(),
     remark: '',
   }),
 ]

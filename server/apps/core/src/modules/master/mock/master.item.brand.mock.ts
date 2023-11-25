@@ -71,15 +71,14 @@ export const mockMasterItemBrand = (
 
 export const mockMasterItemBrandModel = {
   new: jest.fn().mockResolvedValue(mockMasterItemBrand()),
-  constructor: jest.fn().mockResolvedValue(mockMasterItemBrand()),
-  find: jest.fn(),
-  aggregate: jest.fn().mockReturnThis(),
-  findOne: jest.fn(),
+  find: jest.fn().mockImplementation(),
+  aggregate: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockResolvedValue(mockMasterItemBrand()),
   findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterItemBrand()),
   update: jest.fn().mockResolvedValue(mockMasterItemBrand()),
   create: jest.fn().mockResolvedValue(mockMasterItemBrand()),
-  save: jest.fn(),
-  exec: jest.fn(),
+  save: jest.fn().mockImplementation(),
+  exec: jest.fn().mockImplementation(),
 }
 
 export const mockMasterItemBrandDoc = (

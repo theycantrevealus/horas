@@ -7,16 +7,17 @@ import {
 import { mockAuthority } from '@core/account/mock/authority,mock'
 import { Account } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
+import { mockMasterItemUnit } from '@core/master/mock/master.item.unit.mock'
 import {
-  masterItemDocArray,
-  mockMasterItem,
-  mockMasterItemModel,
-} from '@core/master/mock/master.item.mock'
+  masterQueueDocArray,
+  mockMasterQueue,
+  mockMasterQueueModel,
+} from '@core/master/mock/master.queue.mock'
 import {
-  MasterItem,
-  MasterItemDocument,
-} from '@core/master/schemas/master.item'
-import { MasterItemService } from '@core/master/services/master.item.service'
+  MasterQueue,
+  MasterQueueDocument,
+} from '@core/master/schemas/master.queue.machine'
+import { MasterQueueService } from '@core/master/services/master.queue.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -25,22 +26,21 @@ import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
-import { M_ITEM_SERVICE } from '@utility/constants'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
-describe('Master Item Service', () => {
-  let masterItemService: MasterItemService
-  let masterItemModel: Model<MasterItem>
+describe('Master Queue Service', () => {
+  let masterQueueService: MasterQueueService
+  let masterQueueModel: Model<MasterQueue>
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
-        MasterItemService,
+        MasterQueueService,
         AccountService,
         AuthService,
         JwtService,
@@ -59,12 +59,6 @@ describe('Master Item Service', () => {
           },
         },
         {
-          provide: M_ITEM_SERVICE,
-          useValue: {
-            emit: jest.fn(),
-          },
-        },
-        {
           provide: WINSTON_MODULE_PROVIDER,
           useValue: {
             log: jest.fn(),
@@ -74,12 +68,16 @@ describe('Master Item Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItem.name),
-          useValue: mockMasterItemModel,
+          provide: getModelToken(MasterQueue.name),
+          useValue: mockMasterQueueModel,
         },
         {
           provide: getModelToken(Account.name),
           useValue: mockAccountModel,
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthority,
         },
         {
           provide: getModelToken(Authority.name),
@@ -90,9 +88,9 @@ describe('Master Item Service', () => {
       ],
     }).compile()
 
-    masterItemService = module.get<MasterItemService>(MasterItemService)
-    masterItemModel = module.get<Model<MasterItemDocument>>(
-      getModelToken(MasterItem.name)
+    masterQueueService = module.get<MasterQueueService>(MasterQueueService)
+    masterQueueModel = module.get<Model<MasterQueueDocument>>(
+      getModelToken(MasterQueue.name)
     )
 
     jest.clearAllMocks()
@@ -105,20 +103,20 @@ describe('Master Item Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(masterItemService).toBeDefined()
+      expect(masterQueueService).toBeDefined()
     }
   )
 
-  describe(testCaption('GET DATA', 'data', 'Master Item - Fetch list'), () => {
+  describe(testCaption('GET DATA', 'data', 'Master Queue - Fetch list'), () => {
     it(
       testCaption('HANDLING', 'data', 'Response validity', {
         tab: 1,
       }),
       async () => {
-        jest.spyOn(masterItemModel, 'aggregate').mockReturnValue({
-          exec: jest.fn().mockReturnValue(masterItemDocArray),
+        jest.spyOn(masterQueueModel, 'aggregate').mockReturnValue({
+          exec: jest.fn().mockReturnValue(masterQueueDocArray),
         } as any)
-        await masterItemService
+        await masterQueueService
           .all(
             `{
               "first": 0,
@@ -130,7 +128,7 @@ describe('Master Item Service', () => {
           )
           .then((result: GlobalResponse) => {
             // Should classify transaction
-            expect(result.transaction_classify).toEqual('MASTER_ITEM_LIST')
+            expect(result.transaction_classify).toEqual('MASTER_QUEUE_LIST')
 
             // Not an empty string so be informative
             expect(result.message).not.toBe('')
@@ -144,7 +142,7 @@ describe('Master Item Service', () => {
             expect(result.payload).toBeInstanceOf(Array)
 
             // Data should be defined
-            expect(result.payload).toEqual(masterItemDocArray)
+            expect(result.payload).toEqual(masterQueueDocArray)
           })
       }
     )
@@ -154,12 +152,12 @@ describe('Master Item Service', () => {
         tab: 1,
       }),
       async () => {
-        jest.spyOn(masterItemModel, 'aggregate').mockImplementation({
+        jest.spyOn(mockMasterQueueModel, 'aggregate').mockImplementation({
           exec: jest.fn().mockRejectedValue(new Error()),
         } as any)
 
         await expect(
-          masterItemService.all({
+          masterQueueService.all({
             first: 0,
             rows: 10,
             sortField: 'created_at',
@@ -172,26 +170,26 @@ describe('Master Item Service', () => {
   })
 
   describe(
-    testCaption('GET DETAIL', 'data', 'Master Item - Fetch detail'),
+    testCaption('GET DETAIL', 'data', 'Master Queue - Fetch detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Response validity', {
           tab: 1,
         }),
         async () => {
-          const findMock = masterItemDocArray[0]
-          masterItemModel.findOne = jest.fn().mockImplementationOnce(() => {
+          const findMock = masterQueueDocArray[0]
+          masterQueueModel.findOne = jest.fn().mockImplementationOnce(() => {
             return Promise.resolve(findMock)
           })
 
-          await masterItemService
+          await masterQueueService
             .detail(findMock.id)
             .then((result: GlobalResponse) => {
               // Deep equality check
               expect(result.payload).toEqual(findMock)
 
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_ITEM_GET')
+              expect(result.transaction_classify).toEqual('MASTER_QUEUE_GET')
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
@@ -201,19 +199,6 @@ describe('Master Item Service', () => {
                 modCodes.Global.success
               )
             })
-
-          const findAll = masterItemDocArray
-          jest.spyOn(masterItemModel, 'findOne').mockReturnValue({
-            exec: jest.fn().mockReturnValue(findAll),
-          } as any)
-
-          await masterItemService
-            .find({
-              name: findMock.name,
-            })
-            .then((result) => {
-              expect(result).toEqual(findAll)
-            })
         }
       )
 
@@ -222,14 +207,14 @@ describe('Master Item Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetData = masterItemDocArray[0]
+          const targetData = masterQueueDocArray[0]
 
-          jest.spyOn(masterItemModel, 'findOne').mockImplementationOnce(() => {
+          jest.spyOn(masterQueueModel, 'findOne').mockImplementationOnce(() => {
             throw new Error()
           })
 
           await expect(async () => {
-            await masterItemService.detail(targetData.id)
+            await masterQueueService.detail(targetData.id)
           }).rejects.toThrow(Error)
         }
       )
@@ -237,21 +222,21 @@ describe('Master Item Service', () => {
   )
 
   describe(
-    testCaption('ADD DATA', 'data', 'Master Item - Add new data'),
+    testCaption('ADD DATA', 'data', 'Master Queue - Add new data'),
     () => {
       it(
-        testCaption('DATA', 'data', 'Should add new master item'),
+        testCaption('DATA', 'data', 'Should add new master queue'),
         async () => {
-          jest.spyOn(masterItemModel, 'create')
+          jest.spyOn(masterQueueModel, 'create')
 
-          await masterItemService
-            .add(mockMasterItem(), mockAccount())
+          await masterQueueService
+            .add(mockMasterQueue(), mockAccount())
             .then((result: GlobalResponse) => {
               // Should create id
               expect(result.payload).toHaveProperty('id')
 
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_ITEM_ADD')
+              expect(result.transaction_classify).toEqual('MASTER_QUEUE_ADD')
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
@@ -267,10 +252,10 @@ describe('Master Item Service', () => {
       it(
         testCaption('DATA', 'data', 'Should replace code if not defined'),
         async () => {
-          jest.spyOn(masterItemService, 'add')
-          const dataTest = mockMasterItem()
+          jest.spyOn(masterQueueService, 'add')
+          const dataTest = mockMasterQueue()
           delete dataTest.code
-          await masterItemService
+          await masterQueueService
             .add(dataTest, mockAccount())
             .then((result: GlobalResponse) => {
               // Should create id
@@ -281,7 +266,7 @@ describe('Master Item Service', () => {
               expect(result.payload['code']).not.toBe('')
 
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_ITEM_ADD')
+              expect(result.transaction_classify).toEqual('MASTER_QUEUE_ADD')
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
@@ -299,30 +284,30 @@ describe('Master Item Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemModel, 'create').mockImplementationOnce(() => {
+          jest.spyOn(masterQueueModel, 'create').mockImplementationOnce(() => {
             throw new Error()
           })
 
           await expect(async () => {
-            await masterItemService.add(mockMasterItem(), mockAccount())
+            await masterQueueService.add(mockMasterQueue(), mockAccount())
           }).rejects.toThrow(Error)
         }
       )
     }
   )
 
-  describe(testCaption('EDIT DATA', 'data', 'Master Item - Edit data'), () => {
+  describe(testCaption('EDIT DATA', 'data', 'Master Queue - Edit data'), () => {
     it(
-      testCaption('HANDLING', 'data', 'Should edit master item', {
+      testCaption('HANDLING', 'data', 'Should edit master queue', {
         tab: 1,
       }),
       async () => {
-        jest.spyOn(masterItemModel, 'findOneAndUpdate')
+        jest.spyOn(masterQueueModel, 'findOneAndUpdate')
 
-        await masterItemService
+        await masterQueueService
           .edit(
             {
-              ...mockMasterItem(),
+              ...mockMasterQueue(),
               __v: 0,
             },
             accountDocArray[0].id
@@ -332,7 +317,7 @@ describe('Master Item Service', () => {
             expect(result.payload).toHaveProperty('id')
 
             // Should classify transaction
-            expect(result.transaction_classify).toEqual('MASTER_ITEM_EDIT')
+            expect(result.transaction_classify).toEqual('MASTER_QUEUE_EDIT')
 
             // Not an empty string so be informative
             expect(result.message).not.toBe('')
@@ -350,17 +335,17 @@ describe('Master Item Service', () => {
         tab: 1,
       }),
       async () => {
-        const targetID = mockMasterItem().id
+        const targetID = mockMasterItemUnit().id
         jest
-          .spyOn(masterItemModel, 'findOneAndUpdate')
+          .spyOn(masterQueueModel, 'findOneAndUpdate')
           .mockImplementationOnce(() => {
             throw new Error()
           })
 
         await expect(async () => {
-          await masterItemService.edit(
+          await masterQueueService.edit(
             {
-              ...mockMasterItem(),
+              ...mockMasterQueue(),
               __v: 0,
             },
             targetID
@@ -371,20 +356,20 @@ describe('Master Item Service', () => {
   })
 
   describe(
-    testCaption('DELETE DATA', 'data', 'Master item - Delete data'),
+    testCaption('DELETE DATA', 'data', 'Master Queue - Delete data'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should delete master item', {
+        testCaption('HANDLING', 'data', 'Should delete master queue', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemModel, 'findOneAndUpdate')
+          jest.spyOn(masterQueueModel, 'findOneAndUpdate')
 
-          await masterItemService
-            .delete(masterItemDocArray[0].id)
+          await masterQueueService
+            .delete(masterQueueDocArray[0].id)
             .then((result: GlobalResponse) => {
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_ITEM_DELETE')
+              expect(result.transaction_classify).toEqual('MASTER_QUEUE_DELETE')
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
@@ -402,16 +387,16 @@ describe('Master Item Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockMasterItem().id
+          const targetID = mockMasterItemUnit().id
 
           jest
-            .spyOn(masterItemModel, 'findOneAndUpdate')
+            .spyOn(masterQueueModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await masterItemService.delete(targetID)
+            await masterQueueService.delete(targetID)
           }).rejects.toThrow(Error)
         }
       )
