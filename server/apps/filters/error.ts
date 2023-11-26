@@ -29,7 +29,7 @@ export async function errorHandler(
     : (request as FastifyRequest).method
 
   let responseSet = {
-    message: '',
+    message: exception.message,
     ...exception,
     timestamp: new Date().toISOString(),
     path: request.url,
@@ -100,6 +100,7 @@ export async function errorHandler(
   if (statusCode === HttpStatus.BAD_REQUEST) {
     logger.warn(dataSet)
   } else {
+    statusCode = HttpStatus.INTERNAL_SERVER_ERROR
     logger.error(dataSet)
   }
 

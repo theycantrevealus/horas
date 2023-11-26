@@ -75,14 +75,18 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
           time: TM.getTimezone('Asia/Jakarta'),
         }
 
-        if (result.statusCode.defaultCode === HttpStatus.BAD_REQUEST) {
-          this.logger.warn(dataSet)
-        } else if (
-          result.statusCode.defaultCode === HttpStatus.INTERNAL_SERVER_ERROR
-        ) {
-          this.logger.error(dataSet)
+        if (result.statusCode) {
+          if (result.statusCode.defaultCode === HttpStatus.BAD_REQUEST) {
+            this.logger.warn(dataSet)
+          } else if (
+            result.statusCode.defaultCode === HttpStatus.INTERNAL_SERVER_ERROR
+          ) {
+            this.logger.error(dataSet)
+          } else {
+            this.logger.verbose(dataSet)
+          }
         } else {
-          this.logger.verbose(dataSet)
+          this.logger.warn(dataSet)
         }
 
         if (result.statusCode) {
@@ -108,7 +112,7 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
             statusCode: `CORE_F0000`,
             message: result.message,
             payload: result.payload,
-            transaction_classify: '',
+            transaction_classify: 'UNKNOWN',
             transaction_id: result.transaction_id,
           } satisfies GlobalResponseParsed)
         }
