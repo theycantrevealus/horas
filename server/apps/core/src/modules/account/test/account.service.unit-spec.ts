@@ -527,6 +527,41 @@ describe('Account Service', () => {
         })
     })
 
+    it(testCaption('DATA', 'data', 'Should add new account'), async () => {
+      jest.spyOn(accountService, 'accountAdd')
+
+      await accountService
+        .accountAdd(
+          {
+            first_name: mockAccount().first_name,
+            last_name: mockAccount().last_name,
+            phone: mockAccount().phone,
+            email: mockAccount().email,
+            password: '',
+            authority: mockAccount().authority,
+          },
+          mockAccount()
+        )
+        .then((result: GlobalResponse) => {
+          expect(result.payload).toHaveProperty('password')
+
+          const passwordIfEmpty = result.payload['password']
+          expect(passwordIfEmpty).not.toEqual('')
+
+          // Should create id
+          expect(result.payload).toHaveProperty('id')
+
+          // Should classify transaction
+          expect(result.transaction_classify).toEqual('ACCOUNT_ADD')
+
+          // Not an empty string so be informative
+          expect(result.message).not.toBe('')
+
+          // Should return success code
+          expect(result.statusCode.customCode).toEqual(modCodes.Global.success)
+        })
+    })
+
     it(
       testCaption('HANDLING', 'data', 'Response error on create data', {
         tab: 1,
