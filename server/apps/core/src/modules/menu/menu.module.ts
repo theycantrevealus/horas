@@ -1,9 +1,6 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
-import { AccountService } from '@core/account/account.service'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
-import { Authority, AuthoritySchema } from '@core/account/schemas/authority'
 import { MenuController } from '@core/menu/menu.controller'
 import { MenuGroupController } from '@core/menu/menu.group.controller'
 import { MenuGroupService } from '@core/menu/menu.group.service'
@@ -26,6 +23,8 @@ import { TimeManagement } from '@utility/time'
       envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig],
     }),
+    AuthModule,
+    AccountModule,
     MongooseModule.forFeatureAsync([
       {
         name: MenuGroup.name,
@@ -93,16 +92,12 @@ import { TimeManagement } from '@utility/time'
       },
     ]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
-      { name: Authority.name, schema: AuthoritySchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),
-    AuthModule,
-    AccountModule,
   ],
   controllers: [MenuGroupController, MenuController],
-  providers: [MenuGroupService, AccountService, MenuService],
+  providers: [MenuGroupService, MenuService],
   exports: [MenuGroupService, MenuService],
 })
 export class MenuModule {}

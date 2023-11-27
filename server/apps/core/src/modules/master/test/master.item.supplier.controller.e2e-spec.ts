@@ -2,10 +2,6 @@ import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterItemSupplierController } from '@core/master/controllers/master.item.supplier.controller'
 import {
-  MasterItemSupplierAddDTO,
-  MasterItemSupplierEditDTO,
-} from '@core/master/dto/master.item.supplier'
-import {
   mockMasterItemSupplier,
   mockMasterItemSupplierService,
 } from '@core/master/mock/master.item.supplier.mock'
@@ -27,7 +23,7 @@ import { Types } from 'mongoose'
 describe('Master Item Supplier Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let controller: MasterItemSupplierController
+  let masterItemSupplierController: MasterItemSupplierController
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,7 +49,7 @@ describe('Master Item Supplier Controller', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    controller = app.get<MasterItemSupplierController>(
+    masterItemSupplierController = app.get<MasterItemSupplierController>(
       MasterItemSupplierController
     )
 
@@ -67,7 +63,7 @@ describe('Master Item Supplier Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(controller).toBeDefined()
+      expect(masterItemSupplierController).toBeDefined()
     }
   )
 
@@ -89,7 +85,7 @@ describe('Master Item Supplier Controller', () => {
   )
 
   it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
-    const data = new MasterItemSupplierAddDTO(mockMasterItemSupplier())
+    const data = mockMasterItemSupplier()
     return app
       .inject({
         method: 'POST',
@@ -102,7 +98,10 @@ describe('Master Item Supplier Controller', () => {
   })
 
   it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new MasterItemSupplierEditDTO(mockMasterItemSupplier())
+    const data = {
+      ...mockMasterItemSupplier(),
+      __v: 0,
+    }
     const id = `supplier-${new Types.ObjectId().toString()}`
     return app
       .inject({

@@ -20,7 +20,7 @@ export class BPJSVClaimMonitoringService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -52,7 +52,7 @@ export class BPJSVClaimMonitoringService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -83,7 +83,7 @@ export class BPJSVClaimMonitoringService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -114,7 +114,7 @@ export class BPJSVClaimMonitoringService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},

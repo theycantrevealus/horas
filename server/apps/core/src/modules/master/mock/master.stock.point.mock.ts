@@ -5,8 +5,8 @@ import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
+import { IMasterStockPointConfiguration } from '@core/master/interface/master.stock.point.configuration'
 import {
-  IMasterStockPointConfiguration,
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@core/master/schemas/master.stock.point'
@@ -79,16 +79,14 @@ export const mockMasterStockPoint = (
 
 export const mockMasterStockPointModel = {
   new: jest.fn().mockResolvedValue(mockMasterStockPoint()),
-  constructor: jest.fn().mockResolvedValue(mockMasterStockPoint()),
-  find: jest.fn(),
-  aggregate: jest.fn().mockReturnThis(),
-  findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-  update: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  remove: jest.fn(),
-  exec: jest.fn(),
+  find: jest.fn().mockImplementation(),
+  aggregate: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockResolvedValue(mockMasterStockPoint()),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterStockPoint()),
+  update: jest.fn().mockResolvedValue(mockMasterStockPoint()),
+  create: jest.fn().mockResolvedValue(mockMasterStockPoint()),
+  save: jest.fn().mockImplementation(),
+  exec: jest.fn().mockImplementation(),
 }
 
 export const mockMasterStockPointDoc = (

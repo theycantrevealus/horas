@@ -1,5 +1,3 @@
-import * as process from 'process'
-
 export const ApplicationConfig = () => ({
   application: {
     node_env: process.env.NODE_ENV,

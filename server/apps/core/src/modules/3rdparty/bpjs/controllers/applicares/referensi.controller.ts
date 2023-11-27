@@ -108,7 +108,6 @@ export class BPJSApplicaresReferensiController {
     @CredentialAccount() account: Account,
     @Res() response: FastifyReply
   ) {
-    console.log(parameter)
     await this.bpjsApplicaresReference
       .kamarCreate(parameter, account)
       .then((result) => {
@@ -139,7 +138,6 @@ export class BPJSApplicaresReferensiController {
     @Body() body: ApplicaresKamarEdit,
     @Res() response: FastifyReply
   ) {
-    console.log(parameter)
     await this.bpjsApplicaresReference
       .kamarUpdate(parameter.id, body)
       .then((result) => {
@@ -166,7 +164,6 @@ export class BPJSApplicaresReferensiController {
     description: '',
   })
   async kamarDelete(@Param() parameter, @Res() response: FastifyReply) {
-    console.log(parameter)
     await this.bpjsApplicaresReference
       .kamarDelete(parameter.id)
       .then((result) => {

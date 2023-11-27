@@ -39,7 +39,7 @@ export class LicenseController {
     return await this.licenseService
       .add(parameter, credential)
       .catch((e: Error) => {
-        this.logger.error(`Error : ${e.message}`)
+        this.logger.error(e.message)
       })
   }
 }

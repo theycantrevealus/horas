@@ -1,16 +1,22 @@
 import { HttpStatus } from '@nestjs/common'
 import { Model } from 'mongoose'
 
-export async function prime_datatable(parameter: any, model: Model<any>) {
+const prime_datatable = async (parameter: any, model: Model<any>) => {
   /*
    * Datetime parsing following to timezone will parse in client side due to performance issue
    * For a specific reason it will just send to client and let the client parse as their condition
    * */
 
+  // if (!parameter.first || !parameter.rows) {
+  //   throw new Error('Unmatch filter')
+  // }
+
   const first: number = parameter.first ? parseInt(parameter.first) : 0
   const rows: number = parameter.rows ? parseInt(parameter.rows) : 20
   const sortField = parameter.sortField ? parameter.sortField : 'created_at'
   const sortOrder = parameter.sortOrder ? parseInt(parameter.sortOrder) : 1
+  const projection = parameter.projection ?? {}
+  const search_term = parameter.search_term ?? {}
   const filters = parameter.filters
   const custom_filter = parameter.custom_filter || []
   const query = []
@@ -65,6 +71,14 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
   }
 
   if (filter_builder.$and.length > 0) {
+    if (Object.keys(search_term).length) {
+      filter_builder.$and.push({
+        $text: {
+          $search: search_term.value,
+        },
+      })
+    }
+
     query.push({
       $match: filter_builder,
     })
@@ -121,22 +135,32 @@ export async function prime_datatable(parameter: any, model: Model<any>) {
     },
   })
 
-  const data = await model.aggregate(query).exec()
-  if (allNoFilter && allNoFilter.length > 0) {
-    return {
-      message: HttpStatus.OK,
-      payload: {
-        totalRecords: allNoFilter[0].total ? allNoFilter[0].total : 0,
-        data: data,
-      },
+  if (Object.keys(projection).length)
+    query.push({
+      $project: projection,
+    })
+
+  try {
+    const data = await model.aggregate(query).exec()
+    if (allNoFilter && allNoFilter.length > 0) {
+      return {
+        message: HttpStatus.OK,
+        payload: {
+          totalRecords: allNoFilter[0].total ? allNoFilter[0].total : 0,
+          data: data,
+        },
+      }
+    } else {
+      return {
+        message: HttpStatus.NO_CONTENT,
+        payload: {
+          totalRecords: 0,
+          data: [],
+        },
+      }
     }
-  } else {
-    return {
-      message: HttpStatus.NO_CONTENT,
-      payload: {
-        totalRecords: 0,
-        data: [],
-      },
-    }
+  } catch (error) {
+    throw new Error(error.message)
   }
 }
+export default prime_datatable

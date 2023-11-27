@@ -1,9 +1,10 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterItemUnitDocument = HydratedDocument<MasterItemUnit>
+
 @Schema({ collection: 'master_item_unit' })
 export class MasterItemUnit {
   @Prop({ type: SchemaTypes.String, unique: true })
@@ -18,19 +19,19 @@ export class MasterItemUnit {
   @Prop({ type: SchemaTypes.String })
   remark: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
     required: true,
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
     required: true,
   })
   updated_at: Date

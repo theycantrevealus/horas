@@ -1,12 +1,14 @@
 import { AccountService } from '@core/account/account.service'
-import { mockAccount, mockAccountModel } from '@core/account/mock/account.mock'
-import { mockAuthorityModel } from '@core/account/mock/authority,mock'
-import { Account } from '@core/account/schemas/account.model'
-import { Authority } from '@core/account/schemas/authority'
 import {
-  MasterItemUnitAddDTO,
-  MasterItemUnitEditDTO,
-} from '@core/master/dto/master.item.unit'
+  accountDocArray,
+  mockAccount,
+  mockAccountModel,
+} from '@core/account/mock/account.mock'
+import { mockAuthority } from '@core/account/mock/authority,mock'
+import { Account } from '@core/account/schemas/account.model'
+import { Authority } from '@core/account/schemas/authority.model'
+import { IMasterItemCategory } from '@core/master/interface/master.item.category'
+import { mockMasterItemCategory } from '@core/master/mock/master.item.category.mock'
 import {
   masterItemUnitDocArray,
   mockMasterItemUnit,
@@ -17,7 +19,6 @@ import {
   MasterItemUnitDocument,
 } from '@core/master/schemas/master.item.unit'
 import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
-import { createMock } from '@golevelup/ts-jest'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -28,13 +29,13 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
+import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
-import { Model, Query, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
 describe('Master Item Unit Service', () => {
-  let service: MasterItemUnitService
-  let model: Model<MasterItemUnit>
-  const dataSet = mockMasterItemUnit()
+  let masterItemUnitService: MasterItemUnitService
+  let masterItemUnitModel: Model<MasterItemUnit>
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,9 +48,8 @@ describe('Master Item Unit Service', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
-              return null
-            }),
+            get: () => jest.fn().mockResolvedValue('Test'),
+            set: () => jest.fn().mockResolvedValue('Test'),
           },
         },
         {
@@ -78,15 +78,17 @@ describe('Master Item Unit Service', () => {
         },
         {
           provide: getModelToken(Authority.name),
-          useValue: mockAuthorityModel,
+          useValue: mockAuthority,
         },
         { provide: getModelToken(LogActivity.name), useValue: {} },
         { provide: getModelToken(LogLogin.name), useValue: {} },
       ],
     }).compile()
 
-    service = module.get<MasterItemUnitService>(MasterItemUnitService)
-    model = module.get<Model<MasterItemUnitDocument>>(
+    masterItemUnitService = module.get<MasterItemUnitService>(
+      MasterItemUnitService
+    )
+    masterItemUnitModel = module.get<Model<MasterItemUnitDocument>>(
       getModelToken(MasterItemUnit.name)
     )
 
@@ -100,72 +102,395 @@ describe('Master Item Unit Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(service).toBeDefined()
+      expect(masterItemUnitService).toBeDefined()
     }
   )
 
-  it(testCaption('DATA', 'data', 'Should list all data'), async () => {
-    jest.spyOn(model, 'aggregate').mockReturnValue({
-      exec: jest.fn().mockReturnValue(masterItemUnitDocArray),
-    } as any)
+  describe(
+    testCaption('GET DATA', 'data', 'Master Item Unit - Fetch list'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Response validity', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemUnitModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterItemUnitDocArray),
+          } as any)
+          await masterItemUnitService
+            .all(
+              `{
+              "first": 0,
+              "rows": 10,
+              "sortField": "created_at",
+              "sortOrder": 1,
+              "filters": {}
+            }`
+            )
+            .then((result: GlobalResponse) => {
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_UNIT_LIST'
+              )
 
-    const getData = await service.all({
-      first: 0,
-      rows: 10,
-      sortField: 'created_at',
-      sortOrder: 1,
-      filters: {},
-    })
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
 
-    expect(getData.payload.data).toEqual(masterItemUnitDocArray)
-  })
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
 
-  it(
-    testCaption('DATA', 'data', 'Should show master item unit detail'),
-    async () => {
-      jest.spyOn(model, 'findOne').mockReturnValueOnce(
-        createMock<Query<MasterItemUnitDocument, MasterItemUnitDocument>>({
-          exec: jest.fn().mockResolvedValueOnce(masterItemUnitDocArray[0]),
-        }) as any
+              // Should be an array of data
+              expect(result.payload).toBeInstanceOf(Array)
+
+              // Data should be defined
+              expect(result.payload).toEqual(masterItemUnitDocArray)
+            })
+        }
       )
 
-      const findMock = masterItemUnitDocArray[0]
-      const foundData = await service.detail(masterItemUnitDocArray[0].id)
-      expect(foundData).toEqual(findMock)
+      it(
+        testCaption('HANDLING', 'data', 'Response error on fetch data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemUnitModel, 'aggregate').mockImplementation({
+            exec: jest.fn().mockRejectedValue(new Error()),
+          } as any)
+
+          await expect(
+            masterItemUnitService.all({
+              first: 0,
+              rows: 10,
+              sortField: 'created_at',
+              sortOrder: 1,
+              filters: {},
+            })
+          ).rejects.toThrow(Error)
+        }
+      )
     }
   )
 
-  it(
-    testCaption('DATA', 'data', 'Should create a new master item unit'),
-    async () => {
-      model.create = jest.fn().mockImplementationOnce(() => {
-        return Promise.resolve(dataSet)
-      })
+  describe(
+    testCaption('GET DETAIL', 'data', 'Master Item Unit - Fetch detail'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Response validity', {
+          tab: 1,
+        }),
+        async () => {
+          const findMock = masterItemUnitDocArray[0]
+          masterItemUnitModel.findOne = jest.fn().mockImplementationOnce(() => {
+            return Promise.resolve(findMock)
+          })
 
-      jest.spyOn(model, 'create')
+          await masterItemUnitService
+            .detail(findMock.id)
+            .then((result: GlobalResponse) => {
+              // Deep equality check
+              expect(result.payload).toEqual(findMock)
 
-      const newEntry = (await service.add(
-        new MasterItemUnitAddDTO(mockMasterItemUnit()),
-        mockAccount()
-      )) satisfies GlobalResponse
-      expect(newEntry.payload).toHaveProperty('code')
-    }
-  )
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_UNIT_GET'
+              )
 
-  it(
-    testCaption('DATA', 'data', 'Should edit master item unit data'),
-    async () => {
-      jest.spyOn(model, 'findOneAndUpdate').mockReturnValueOnce(
-        createMock<Query<MasterItemUnitDocument, MasterItemUnitDocument>>({
-          exec: jest.fn().mockResolvedValueOnce(masterItemUnitDocArray[0]),
-        }) as any
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
       )
 
-      const data = (await service.edit(
-        new MasterItemUnitEditDTO(masterItemUnitDocArray[0]),
-        `item_unit-${new Types.ObjectId().toString()}`
-      )) satisfies GlobalResponse
-      expect(data.payload).toHaveProperty('code')
+      it(
+        testCaption('HANDLING', 'data', 'Response error on get detail data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetData = masterItemUnitDocArray[0]
+
+          jest
+            .spyOn(masterItemUnitModel, 'findOne')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemUnitService.detail(targetData.id)
+          }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response validity', {
+          tab: 1,
+        }),
+        async () => {
+          const findMock = masterItemUnitDocArray[0]
+          masterItemUnitModel.findOne = jest.fn().mockImplementationOnce(() => {
+            return Promise.resolve(findMock)
+          })
+
+          await masterItemUnitService
+            .find({ code: findMock.code })
+            .then((result: GlobalResponse) => {
+              // Deep equality check
+              expect(result.payload).toEqual(findMock)
+
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_UNIT_GET'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on get detail data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetData = masterItemUnitDocArray[0]
+
+          jest
+            .spyOn(masterItemUnitModel, 'findOne')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemUnitService.find({ code: targetData.code })
+          }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response validity', {
+          tab: 1,
+        }),
+        async () => {
+          // const addCall = jest.spyOn(masterItemCategoryService, 'add')
+          const findMock = masterItemUnitDocArray[0]
+          masterItemUnitModel.findOne = jest.fn().mockImplementationOnce(() => {
+            return Promise.resolve(findMock)
+          })
+
+          await masterItemUnitService
+            .upsert({ name: mockMasterItemCategory().name }, mockAccount())
+            .then((result: IMasterItemCategory) => {
+              expect(result).not.toBe('')
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('ADD DATA', 'data', 'Master Item Unit - Add new data'),
+    () => {
+      it(
+        testCaption('DATA', 'data', 'Should add new master item unit'),
+        async () => {
+          jest.spyOn(masterItemUnitModel, 'create')
+
+          await masterItemUnitService
+            .add(mockMasterItemUnit(), mockAccount())
+            .then((result: GlobalResponse) => {
+              // Should create id
+              expect(result.payload).toHaveProperty('id')
+
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_UNIT_ADD'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('DATA', 'data', 'Should replace code if not defined'),
+        async () => {
+          jest.spyOn(masterItemUnitService, 'add')
+          const dataTest = mockMasterItemUnit()
+          delete dataTest.code
+          await masterItemUnitService
+            .add(dataTest, mockAccount())
+            .then((result: GlobalResponse) => {
+              // Should create id
+              expect(result.payload).toHaveProperty('id')
+
+              expect(result.payload).toHaveProperty('code')
+
+              expect(result.payload['code']).not.toBe('')
+
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_UNIT_ADD'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on add data', {
+          tab: 1,
+        }),
+        async () => {
+          jest
+            .spyOn(masterItemUnitModel, 'create')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemUnitService.add(mockMasterItemUnit(), mockAccount())
+          }).rejects.toThrow(Error)
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('EDIT DATA', 'data', 'Master Item Unit - Edit data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should edit master item unit', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemUnitModel, 'findOneAndUpdate')
+
+          await masterItemUnitService
+            .edit(
+              {
+                ...mockMasterItemUnit(),
+                __v: 0,
+              },
+              accountDocArray[0].id
+            )
+            .then((result: GlobalResponse) => {
+              // Should create id
+              expect(result.payload).toHaveProperty('id')
+
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_UNIT_EDIT'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on edit data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetID = mockMasterItemUnit().id
+          jest
+            .spyOn(masterItemUnitModel, 'findOneAndUpdate')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemUnitService.edit(
+              {
+                ...mockMasterItemUnit(),
+                __v: 0,
+              },
+              targetID
+            )
+          }).rejects.toThrow(Error)
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('DELETE DATA', 'data', 'Master item unit - Delete data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should delete master item unit', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterItemUnitModel, 'findOneAndUpdate')
+
+          await masterItemUnitService
+            .delete(masterItemUnitDocArray[0].id)
+            .then((result: GlobalResponse) => {
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_ITEM_UNIT_DELETE'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on delete data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetID = mockMasterItemUnit().id
+
+          jest
+            .spyOn(masterItemUnitModel, 'findOneAndUpdate')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterItemUnitService.delete(targetID)
+          }).rejects.toThrow(Error)
+        }
+      )
     }
   )
 

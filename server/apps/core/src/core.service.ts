@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
-import { prime_datatable } from '@utility/prime'
+import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
@@ -31,22 +31,26 @@ export class CoreService {
   async initTree(parent: any = {}) {
     return this.configGroupModel.find({ parent: parent }).then((group) => {
       return Promise.all(
-        group.map(async (e, f) => {
+        group.map(async (e) => {
           return new Promise(async (resolve, reject) => {
-            resolve({
-              key: e.level,
-              label: e.label,
-              data: e.name,
-              icon: e.icon,
-              fields: await this.buildTree({
-                id: e.id,
-                name: e.name,
-              }),
-              children: await this.initTree({
-                id: e.id,
-                name: e.name,
-              }),
-            })
+            if (e.name) {
+              resolve({
+                key: e.level,
+                label: e.label,
+                data: e.name,
+                icon: e.icon,
+                fields: await this.buildTree({
+                  id: e.id,
+                  name: e.name,
+                }),
+                children: await this.initTree({
+                  id: e.id,
+                  name: e.name,
+                }),
+              })
+            } else {
+              reject()
+            }
           })
         })
       )
@@ -131,7 +135,7 @@ export class CoreService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {
@@ -199,7 +203,7 @@ export class CoreService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -247,7 +251,7 @@ export class CoreService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -300,7 +304,7 @@ export class CoreService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -365,7 +369,7 @@ export class CoreService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},

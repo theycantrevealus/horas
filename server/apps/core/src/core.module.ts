@@ -4,7 +4,6 @@ import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { BpjsModule } from '@core/3rdparty/bpjs/bpjs.module'
 import { AccountModule } from '@core/account/account.module'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { i18nModule } from '@core/i18n/i18n.module'
 import { GatewayInventoryModule } from '@core/inventory/inventory.module'
 import { LicenseModule } from '@core/license/license.module'
@@ -29,6 +28,7 @@ import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
+import { PrometheusModule } from '@utility/prometheus'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 import { Cache } from 'cache-manager'
 import * as redisStore from 'cache-manager-ioredis'
@@ -88,6 +88,11 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
       }),
       inject: [ConfigService],
     }),
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
+    }),
     MongooseModule.forFeatureAsync([
       {
         name: Config.name,
@@ -145,7 +150,6 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
       },
     ]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),
@@ -184,6 +188,7 @@ export class CoreModule {
         'application.timezone'
       )} localization`
     )
+    this.logger.verbose(`Mode ${environmentName}`)
     this.loadConfiguration().then(() => {
       // setInterval(() => {
       //   this.logger.warn('Testing Warning')
@@ -228,7 +233,7 @@ export class CoreModule {
                 __v: e.__v,
               })
               .then(() => {
-                this.logger.verbose(`[${e.name} configuration set`)
+                this.logger.verbose(`[${e.name}] configuration set`)
               })
           }
         })

@@ -1,6 +1,6 @@
-import { IMasterItemBatch } from '@core/master/schemas/master.item.batch.join'
-import { IMasterItem } from '@core/master/schemas/master.item.join'
-import { IMasterStockPoint } from '@core/master/schemas/master.stock.point.join'
+import { IMasterItem } from '@core/master/interface/master.item'
+import { IMasterItemBatch } from '@core/master/interface/master.item.batch'
+import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
 
 export class StockDTO {
   item: IMasterItem

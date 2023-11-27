@@ -2,7 +2,6 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { SocketConfig } from '@configuration/socket'
 import { AccountModule } from '@core/account/account.module'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { MasterItem, MasterItemSchema } from '@core/master/schemas/master.item'
 import {
   MasterItemBatch,
@@ -214,7 +213,6 @@ import { Logger } from 'winston'
       },
     ]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
       { name: MasterItem.name, schema: MasterItemSchema },

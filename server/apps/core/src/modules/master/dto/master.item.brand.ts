@@ -1,5 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, MaxLength, MinLength } from 'class-validator'
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  MaxLength,
+  MinLength,
+} from 'class-validator'
+import { Types } from 'mongoose'
+
+export class CMasterItemBrand {
+  @ApiProperty({
+    type: String,
+    example: `brand-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Dumin Rectal',
+  })
+  name: string
+}
 
 export class MasterItemBrandAddDTO {
   @ApiProperty({
@@ -23,15 +50,11 @@ export class MasterItemBrandAddDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.remark = parameter.remark
-  }
+  @IsOptional()
+  remark?: string
 }
 
 export class MasterItemBrandEditDTO {
@@ -56,9 +79,11 @@ export class MasterItemBrandEditDTO {
   @ApiProperty({
     example: 'Extra remark',
     description: 'Item brand extra remark',
+    required: false,
   })
   @IsNotEmpty()
-  remark: string
+  @IsOptional()
+  remark?: string
 
   @ApiProperty({
     example: 0,
@@ -67,11 +92,4 @@ export class MasterItemBrandEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(parameter: any) {
-    this.code = parameter.code
-    this.name = parameter.name
-    this.remark = parameter.remark
-    this.__v = parameter.__v
-  }
 }

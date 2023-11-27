@@ -1,13 +1,12 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import {
-  IMasterItem,
-  MasterItemJoin,
-} from '@core/master/schemas/master.item.join'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { IMasterItem } from '@core/master/interface/master.item'
+import { MasterItemJoin } from '@core/master/schemas/master.item.join'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterItemBatchDocument = HydratedDocument<MasterItemBatch>
+
 @Schema({ collection: 'master_item_batch' })
 export class MasterItemBatch {
   @Prop({ type: SchemaTypes.String, unique: true })
@@ -16,7 +15,7 @@ export class MasterItemBatch {
   @Prop({ type: SchemaTypes.String, required: true })
   code: string
 
-  @Prop(raw(MasterItemJoin))
+  @Prop(MasterItemJoin)
   item: IMasterItem
 
   @Prop({
@@ -29,7 +28,7 @@ export class MasterItemBatch {
   @Prop({ type: SchemaTypes.String })
   remark: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({
@@ -49,5 +48,6 @@ export class MasterItemBatch {
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
 }
+
 export const MasterItemBatchSchema =
   SchemaFactory.createForClass(MasterItemBatch)

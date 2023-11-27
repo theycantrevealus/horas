@@ -1,7 +1,6 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { LOVController } from '@core/lov/lov.controller'
 import { LOVService } from '@core/lov/lov.service'
 import { LOV, LOVSchema } from '@core/lov/schemas/lov'
@@ -54,7 +53,6 @@ import { TimeManagement } from '@utility/time'
       },
     ]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),

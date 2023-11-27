@@ -1,36 +1,32 @@
-import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
-import {
-  IMenu,
-  IMenuPermission,
-  MenuJoin,
-  MenuPermissionJoin,
-} from '@core/menu/schemas/menu.model'
+import { CAuthority, IAuthority } from '@core/account/schemas/authority.model'
+import { CMenu, CMenuPermission } from '@core/menu/dto/menu'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import {
+  IsArray,
   IsEmail,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
+  IsPhoneNumber,
   IsString,
-  MaxLength,
   MinLength,
 } from 'class-validator'
 
 export class AccountEditDTO {
   @ApiProperty({
-    type: AuthorityJoin,
+    type: CAuthority,
     description: '',
+    required: false,
   })
-  @IsNotEmpty()
-  authority: IAuthority
+  @IsOptional()
+  authority?: IAuthority
 
   @ApiProperty({
     example: 'johndoe@example.com',
-    minLength: 8,
-    maxLength: 24,
     description: '',
   })
-  @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   @IsEmail()
   email: string
@@ -39,17 +35,19 @@ export class AccountEditDTO {
     example: 'John',
     description: '',
   })
+  @MinLength(3)
   @IsNotEmpty()
   @IsString()
   first_name: string
 
   @ApiProperty({
     example: 'Doe',
+    required: false,
     description: '',
   })
-  @IsNotEmpty()
   @IsString()
-  last_name: string
+  @IsOptional()
+  last_name?: string
 
   @ApiProperty({
     example: '0822996633111',
@@ -57,23 +55,27 @@ export class AccountEditDTO {
     maxLength: 13,
     description: 'Contact number',
   })
-  @MinLength(8)
-  @MaxLength(13)
   @IsNotEmpty()
-  @IsString()
+  @IsPhoneNumber()
   phone: string
 
   @ApiProperty({
-    type: [MenuJoin],
+    required: false,
+    isArray: true,
+    type: CMenu,
   })
-  @IsNotEmpty()
-  access: IMenu[]
+  @IsArray()
+  @IsOptional()
+  access?: IMenu[]
 
   @ApiProperty({
-    type: [MenuPermissionJoin],
+    required: false,
+    isArray: true,
+    type: CMenuPermission,
   })
-  @IsNotEmpty()
-  permission: IMenuPermission[]
+  @IsArray()
+  @IsOptional()
+  permission?: IMenuPermission[]
 
   @ApiProperty({
     example: 0,
@@ -82,14 +84,4 @@ export class AccountEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(data: any = {}) {
-    this.email = data.email
-    this.first_name = data.first_name
-    this.last_name = data.last_name
-    this.phone = data.phone
-    this.access = data.access
-    this.permission = data.permission
-    this.__v = data.__v
-  }
 }

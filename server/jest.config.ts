@@ -15,17 +15,10 @@ module.exports = {
   },
   rootDir: '.',
   preset: 'ts-jest',
-  testMatch: ['<rootDir>/**/*.unit.ts'],
+  testRegex: '.*\\.(unit)-spec\\.ts$',
   testEnvironment: 'node',
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-    },
-  },
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
-  collectCoverageFrom: ['__tests__/**/*.(t|j)s'],
-  coverageDirectory: '../coverage',
   transformIgnorePatterns: ['<rootDir>/node_modules/'],
 }

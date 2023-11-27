@@ -1,18 +1,35 @@
 import { AccountController } from '@core/account/account.controller'
-import { AccountAddDTO } from '@core/account/dto/account.add'
-import { AccountEditDTO } from '@core/account/dto/account.edit'
+import { AuthorityController } from '@core/account/authority.controller'
+import { AccountAddDTO } from '@core/account/dto/account.add.dto'
+import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
+import {
+  AuthorityAddDTO,
+  AuthorityEditDTO,
+} from '@core/account/dto/authority.dto'
 import {
   accountArray,
   accountDocArray,
   mockAccount,
   mockAccountModel,
-  mockAccountService,
 } from '@core/account/mock/account.mock'
-import { Account } from '@core/account/schemas/account.model'
+import {
+  authorityDocArray,
+  mockAuthority,
+  mockAuthorityModel,
+} from '@core/account/mock/authority,mock'
+import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import {
+  Authority,
+  AuthorityDocument,
+} from '@core/account/schemas/authority.model'
+import { faker } from '@faker-js/faker'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
+import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { CanActivate, HttpStatus } from '@nestjs/common'
+import { CanActivate, ExecutionContext, HttpStatus } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { getModelToken } from '@nestjs/mongoose'
 import {
   FastifyAdapter,
@@ -23,21 +40,40 @@ import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
-import { Types } from 'mongoose'
+import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
+import { CommonErrorFilter } from '../../../../../filters/error'
+import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
 import { AccountService } from '../account.service'
 
 describe('Account Controller', () => {
-  const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
+  const mock_Guard: CanActivate = {
+    canActivate: jest.fn((context: ExecutionContext) => {
+      const request = context.switchToHttp().getRequest()
+      request.credential = mockAccount()
+      return true
+    }),
+  }
   let app: NestFastifyApplication
-  let controller: AccountController
+  let accountController: AccountController
+  let authorityController: AuthorityController
   let logger: Logger
+  let accountModel: Model<Account>
+  let authorityModel: Model<Authority>
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AccountController],
+      controllers: [AccountController, AuthorityController],
       providers: [
+        AccountService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: () => jest.fn().mockResolvedValue('Test'),
+            set: () => jest.fn().mockResolvedValue('Test'),
+          },
+        },
         {
           provide: WINSTON_MODULE_PROVIDER,
           useValue: {
@@ -54,9 +90,16 @@ describe('Account Controller', () => {
             set: () => jest.fn(),
           },
         },
-        { provide: AccountService, useValue: mockAccountService },
         { provide: AuthService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: mockAccountModel },
+        {
+          provide: getModelToken(Account.name),
+          useValue: mockAccountModel,
+        },
+        {
+          provide: getModelToken(Authority.name),
+          useValue: mockAuthorityModel,
+        },
+        { provide: getModelToken(LogLogin.name), useValue: {} },
         { provide: getModelToken(LogActivity.name), useValue: {} },
       ],
     })
@@ -65,13 +108,26 @@ describe('Account Controller', () => {
       .compile()
 
     app = module.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
+      new FastifyAdapter({
+        logger: false,
+        disableRequestLogging: true,
+        ignoreTrailingSlash: true,
+        ignoreDuplicateSlashes: true,
+      })
     )
+    logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
+    accountController = app.get<AccountController>(AccountController)
+    authorityController = app.get<AuthorityController>(AuthorityController)
+    accountModel = module.get<Model<AccountDocument>>(
+      getModelToken(Account.name)
+    )
+    authorityModel = module.get<Model<AuthorityDocument>>(
+      getModelToken(Authority.name)
+    )
+    await app.useGlobalFilters(new CommonErrorFilter(logger))
+    app.useGlobalPipes(new GatewayPipe())
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
-
-    controller = app.get<AccountController>(AccountController)
-    logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
 
     jest.clearAllMocks()
   })
@@ -83,100 +139,526 @@ describe('Account Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(controller).toBeDefined()
+      expect(accountController).toBeDefined()
+      expect(authorityController).toBeDefined()
     }
   )
 
-  it(
-    testCaption('FLOW', 'feature', 'Should return data', {
-      tab: 0,
-    }),
-    async () => {
-      return app
-        .inject({
-          method: 'GET',
-          headers: {
-            authorization: 'Bearer ey...',
-          },
-          url: '/account',
-          query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
-        })
-        .then((result) => {
-          expect(result.statusCode).toEqual(HttpStatus.OK)
-          expect(logger.verbose).toHaveBeenCalled()
-        })
-    }
-  )
+  describe(testCaption('FLOW', 'feature', 'Account - Sign in'), () => {
+    it(
+      testCaption('HANDLING', 'data', 'Should return success sign in', {
+        tab: 1,
+      }),
+      async () => {
+        const data = {
+          email: mockAccount().email,
+          password: mockAccount().password,
+        } satisfies AccountSignInDTO
 
-  it(
-    testCaption('FLOW', 'feature', 'Should return success add', {
-      tab: 0,
-    }),
-    async () => {
-      const data = new AccountAddDTO(mockAccount())
-      return app
-        .inject({
-          method: 'POST',
-          url: '/account',
-          body: data,
-        })
-        .then((result) => {
-          expect(result.statusCode).toEqual(HttpStatus.CREATED)
-          expect(logger.verbose).toHaveBeenCalled()
-        })
-    }
-  )
-
-  it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new AccountEditDTO({
-      email: accountDocArray[1].email,
-      first_name: accountDocArray[1].first_name,
-      last_name: accountDocArray[1].last_name,
-      phone: accountDocArray[1].phone,
-      __v: 0,
-    })
-    const id = `account-${new Types.ObjectId().toString()}`
-
-    return app
-      .inject({
-        method: 'PATCH',
-        url: `/account/${id}`,
-        body: data,
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(HttpStatus.OK)
-        expect(logger.verbose).toHaveBeenCalled()
-      })
+        return app
+          .inject({
+            method: 'POST',
+            url: `/account/signin`,
+            body: data,
+          })
+          .then((result) => {
+            expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+          })
+      }
+    )
   })
 
-  it(testCaption('FLOW', 'feature', 'Should return detail'), async () => {
-    const id = `account-${new Types.ObjectId().toString()}`
-    return app
-      .inject({
-        method: 'GET',
-        url: `/account/${id}`,
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(HttpStatus.OK)
-        expect(logger.verbose).toHaveBeenCalled()
-      })
-  })
+  describe(
+    testCaption('FLOW', 'feature', 'Account - Get account data lazy loaded'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(accountModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(accountDocArray),
+          } as any)
 
-  it(
-    testCaption('FLOW', 'feature', 'Should return delete success'),
-    async () => {
-      const id = `account-${new Types.ObjectId().toString()}`
-      return app
-        .inject({
-          method: 'DELETE',
-          url: `/account/${id}`,
-        })
-        .then((result) => {
-          expect(result.statusCode).toEqual(HttpStatus.OK)
-          expect(logger.verbose).toHaveBeenCalled()
-        })
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: '/account',
+              query: `lazyEvent=abc`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(accountModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(accountDocArray),
+          } as any)
+
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: '/account',
+              query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
     }
   )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Account - Get account data detail'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should return data', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: `/account/${mockAccount().id}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(testCaption('FLOW', 'feature', 'Account - Add account data'), () => {
+    it(
+      testCaption('HANDLING', 'feature', 'Should handle invalid format', {
+        tab: 1,
+      }),
+      async () => {
+        return app
+          .inject({
+            method: 'POST',
+            url: '/account',
+            body: 'abc',
+          })
+          .then((result) => {
+            expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+            expect(logger.warn).toHaveBeenCalled()
+          })
+      }
+    )
+
+    it(
+      testCaption('HANDLING', 'feature', 'Should handle invalid data', {
+        tab: 1,
+      }),
+      async () => {
+        const data = {
+          email: mockAccount().email,
+          first_name: mockAccount().first_name,
+          last_name: mockAccount().last_name,
+          password: faker.internet.password({ length: 24 }),
+          phone: mockAccount().phone,
+          authority: mockAccount().authority,
+        } satisfies AccountAddDTO
+
+        delete data.email
+
+        return app
+          .inject({
+            method: 'POST',
+            url: '/account',
+            body: data,
+          })
+          .then((result) => {
+            expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+            expect(logger.warn).toHaveBeenCalled()
+          })
+      }
+    )
+
+    it(
+      testCaption('HANDLING', 'data', 'Should return success add', {
+        tab: 1,
+      }),
+      async () => {
+        const data = {
+          email: mockAccount().email,
+          first_name: mockAccount().first_name,
+          last_name: mockAccount().last_name,
+          password: faker.internet.password({ length: 24 }),
+          phone: mockAccount().phone,
+          authority: mockAccount().authority,
+        } satisfies AccountAddDTO
+
+        return app
+          .inject({
+            method: 'POST',
+            url: '/account',
+            body: data,
+          })
+          .then((result) => {
+            expect(result.statusCode).toEqual(HttpStatus.OK)
+            expect(logger.verbose).toHaveBeenCalled()
+          })
+      }
+    )
+  })
+
+  describe(
+    testCaption('FLOW', 'feature', 'Account - Edit account data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid format', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/account/${mockAccount().id}`,
+              body: 'abc',
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid data', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/account/${mockAccount().id}`,
+              body: {},
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return success edit', {
+          tab: 1,
+        }),
+        async () => {
+          const data = {
+            email: mockAccount().email,
+            first_name: mockAccount().first_name,
+            last_name: mockAccount().last_name,
+            phone: mockAccount().phone,
+            authority: mockAccount().authority,
+            __v: 0,
+          } satisfies AccountEditDTO
+
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/account/${mockAccount().id}`,
+              body: data,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Account - Delete account data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should return success delete', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'DELETE',
+              url: `/account/${mockAccount().id}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption(
+      'FLOW',
+      'feature',
+      'Authority - Get authority data lazy loaded'
+    ),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(authorityModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(authorityDocArray),
+          } as any)
+
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: '/authority',
+              query: `lazyEvent=abc`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(authorityModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(authorityDocArray),
+          } as any)
+
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: '/authority',
+              query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Authority - Get authority data detail'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should return data', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: `/authority/${mockAuthority().id}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Authority - Add authority data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid format', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'POST',
+              url: '/authority',
+              body: 'abc',
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid data', {
+          tab: 1,
+        }),
+        async () => {
+          const data = {
+            code: mockAuthority().code,
+            name: mockAuthority().name,
+          } satisfies AuthorityAddDTO
+
+          delete data.name
+
+          return app
+            .inject({
+              method: 'POST',
+              url: '/authority',
+              body: data,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return success add', {
+          tab: 1,
+        }),
+        async () => {
+          const data = {
+            code: mockAuthority().code,
+            name: mockAuthority().name,
+          } satisfies AuthorityAddDTO
+
+          return app
+            .inject({
+              method: 'POST',
+              url: '/authority',
+              body: data,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Authority - Edit authority data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid format', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/authority/${mockAuthority().id}`,
+              body: 'abc',
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid data', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/authority/${mockAuthority().id}`,
+              body: {},
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return success edit', {
+          tab: 1,
+        }),
+        async () => {
+          const data = {
+            code: mockAuthority().code,
+            name: mockAuthority().name,
+            __v: 0,
+          } satisfies AuthorityEditDTO
+
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/authority/${mockAuthority().id}`,
+              body: data,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Authority - Delete authority data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should return success delete', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'DELETE',
+              url: `/authority/${mockAuthority().id}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  afterEach(async () => {
+    jest.clearAllMocks()
+  })
 
   afterAll(async () => {
     await app.close()

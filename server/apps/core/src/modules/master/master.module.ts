@@ -1,7 +1,6 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { MasterItemBrandController } from '@core/master/controllers/master.item.brand.controller'
 import { MasterItemCategoryController } from '@core/master/controllers/master.item.category.controller'
 import { MasterItemController } from '@core/master/controllers/master.item.controller'
@@ -274,7 +273,6 @@ import { TimeManagement } from '@utility/time'
       },
     ]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),

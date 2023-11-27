@@ -1,21 +1,16 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import {
-  IMasterStockPoint,
-  MasterStockPointJoin,
-} from '@core/master/schemas/master.stock.point.join'
-import {
-  GeneralReceiveNoteDetail,
-  IGeneralReceiveNoteDetail,
-} from '@inventory/schemas/general.receive.note.detail'
-import {
-  IPurchaseOrder,
-  PurchaseOrderJoin,
-} from '@inventory/schemas/purchase.order'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
+import { MasterStockPointJoin } from '@core/master/schemas/master.stock.point.join'
+import { IGeneralReceiveNoteDetail } from '@inventory/interface/general.receive.note.detail'
+import { IPurchaseOrder } from '@inventory/interface/purchase.order'
+import { GeneralReceiveNoteDetail } from '@inventory/schemas/general.receive.note.detail'
+import { PurchaseOrderJoin } from '@inventory/schemas/purchase.order.join'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type GeneralReceiveNoteDocument = HydratedDocument<GeneralReceiveNote>
+
 @Schema({ collection: 'inventory_general_receive_note' })
 export class GeneralReceiveNote {
   @Prop({ type: SchemaTypes.String, unique: true })
@@ -27,10 +22,10 @@ export class GeneralReceiveNote {
   @Prop({ type: SchemaTypes.Mixed, required: false })
   extras: any
 
-  @Prop(raw(MasterStockPointJoin))
+  @Prop(MasterStockPointJoin)
   stock_point: IMasterStockPoint
 
-  @Prop(raw(PurchaseOrderJoin))
+  @Prop(PurchaseOrderJoin)
   purchase_order: IPurchaseOrder
 
   @Prop({
@@ -42,10 +37,9 @@ export class GeneralReceiveNote {
   @Prop({ type: SchemaTypes.String })
   remark: string
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
-  // TODO : Apply locale just like the purchase order
   @Prop({
     type: SchemaTypes.String,
     default: () => 'Asia/Jakarta',

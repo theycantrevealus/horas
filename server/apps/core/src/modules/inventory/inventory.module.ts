@@ -3,7 +3,6 @@ import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { AccountModule } from '@core/account/account.module'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { GeneralReceiveNoteController } from '@core/inventory/general.receive.note.controller'
 import { GeneralReceiveNoteService } from '@core/inventory/general.receive.note.service'
 import { InventoryService } from '@core/inventory/inventory.service'
@@ -53,7 +52,6 @@ import { KafkaConn } from '@utility/kafka'
     }),
     ClientsModule.registerAsync([KafkaConn.inventory[0], KafkaConn.m_item[0]]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
       { name: MasterItem.name, schema: MasterItemSchema },

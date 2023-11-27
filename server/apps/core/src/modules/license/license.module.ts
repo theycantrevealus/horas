@@ -3,7 +3,6 @@ import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { AccountModule } from '@core/account/account.module'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { LicenseController } from '@core/license/license.controller'
 import { LicenseService } from '@core/license/license.service'
 import { License, LicenseSchema } from '@core/license/schemas/license'
@@ -61,7 +60,6 @@ import { TimeManagement } from '@utility/time'
       },
     ]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),

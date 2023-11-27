@@ -135,7 +135,6 @@ export class LOVController {
     @Body() parameter: LOVEditDTO,
     @Param() param
   ) {
-    console.log(parameter)
     await this.lovService
       .edit(parameter, param.id)
       .then((result) => {

@@ -7,9 +7,3 @@ export const MasterItemSupplierJoin = raw({
   code: { type: String, example: 'SUP00001' },
   name: { type: String, example: faker.company.name() },
 })
-
-export interface IMasterItemSupplier {
-  id: string
-  code: string
-  name: string
-}

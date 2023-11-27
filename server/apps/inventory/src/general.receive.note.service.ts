@@ -8,7 +8,7 @@ import {
   GeneralReceiveNoteDocument,
 } from '@inventory/schemas/general.receive.note'
 import { IGeneralReceiveNoteDetail } from '@inventory/schemas/general.receive.note.detail'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -49,7 +49,7 @@ export class GeneralReceiveNoteService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -188,40 +188,33 @@ export class GeneralReceiveNoteService {
                       ).then(() => {
                         response.message =
                           'General receive note created successfully'
-                        response.statusCode = `${
-                          modCodes[this.constructor.name]
-                        }_I_${modCodes.Global.success}`
                         response.transaction_id = result._id
                         // response.payload = result
                       })
                     })
                     .catch((error: Error) => {
                       response.message = `General receive note failed to create. ${error.message}`
-                      response.statusCode = `${
-                        modCodes[this.constructor.name]
-                      }_I_${modCodes.Global.failed}`
+                      response.statusCode =
+                        modCodes[this.constructor.name].error.databaseError
                       response.payload = error
                     })
                 })
               } else {
                 response.message = `General receive note failed to create. Stock point is unrecognized`
-                response.statusCode = `${modCodes[this.constructor.name]}_I_${
-                  modCodes.Global.failed
-                }`
+                response.statusCode =
+                  modCodes[this.constructor.name].error.databaseError
               }
             })
         } else {
           response.message = `General receive note failed to create. Purchase order is not valid`
-          response.statusCode = `${modCodes[this.constructor.name]}_I_${
-            modCodes.Global.failed
-          }`
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
         }
       })
       .catch((error: Error) => {
         response.message = `General receive note failed to create. Purchase order error : ${error.message}`
-        response.statusCode = `${modCodes[this.constructor.name]}_I_${
-          modCodes.Global.failed
-        }`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
         response.payload = error
       })
 

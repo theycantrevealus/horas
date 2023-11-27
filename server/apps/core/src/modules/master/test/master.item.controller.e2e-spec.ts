@@ -2,10 +2,6 @@ import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterItemController } from '@core/master/controllers/master.item.controller'
 import {
-  MasterItemAddDTO,
-  MasterItemEditDTO,
-} from '@core/master/dto/master.item'
-import {
   mockMasterItem,
   mockMasterItemService,
 } from '@core/master/mock/master.item.mock'
@@ -27,7 +23,7 @@ import { Types } from 'mongoose'
 describe('Master Item Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let controller: MasterItemController
+  let masterItemController: MasterItemController
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,7 +49,7 @@ describe('Master Item Controller', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    controller = app.get<MasterItemController>(MasterItemController)
+    masterItemController = app.get<MasterItemController>(MasterItemController)
 
     jest.clearAllMocks()
   })
@@ -65,7 +61,7 @@ describe('Master Item Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(controller).toBeDefined()
+      expect(masterItemController).toBeDefined()
     }
   )
 
@@ -87,7 +83,7 @@ describe('Master Item Controller', () => {
   )
 
   it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
-    const data = new MasterItemAddDTO(mockMasterItem())
+    const data = mockMasterItem()
     return app
       .inject({
         method: 'POST',
@@ -100,7 +96,10 @@ describe('Master Item Controller', () => {
   })
 
   it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new MasterItemEditDTO(mockMasterItem())
+    const data = {
+      ...mockMasterItem(),
+      __v: 0,
+    }
     const id = `item-${new Types.ObjectId().toString()}`
     return app
       .inject({

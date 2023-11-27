@@ -5,19 +5,19 @@ import {
 import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
+import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
-  Res,
   UseGuards,
+  UseInterceptors,
   Version,
 } from '@nestjs/common'
 import {
@@ -28,8 +28,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { isJSON } from 'class-validator'
-import { FastifyReply } from 'fastify'
 
 @Controller('master')
 @ApiTags('Master Data Management')
@@ -42,6 +40,7 @@ export class MasterItemUnitController {
   @Get('unit')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -49,57 +48,28 @@ export class MasterItemUnitController {
     description: 'Showing unit data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(
-    @Res() response: FastifyReply,
-    @Query('lazyEvent') parameter: string
-  ) {
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      await this.masterItemUnitService
-        .all({
-          first: parsedData.first,
-          rows: parsedData.rows,
-          sortField: parsedData.sortField,
-          sortOrder: parsedData.sortOrder,
-          filters: parsedData.filters,
-        })
-        .then((result) => {
-          response.code(HttpStatus.OK).send(result)
-        })
-        .catch((error) => {
-          response.code(HttpStatus.BAD_REQUEST).send(error.message)
-        })
-    } else {
-      response.code(HttpStatus.BAD_REQUEST).send({
-        message: 'filters is not a valid json',
-        payload: {},
-      })
-    }
+  async all(@Query('lazyEvent') parameter: string) {
+    return await this.masterItemUnitService.all(parameter)
   }
 
   @Get('unit/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Res() response: FastifyReply, @Param() param) {
-    await this.masterItemUnitService
-      .detail(param.id)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+  async detail(@Param() param) {
+    return await this.masterItemUnitService.detail(param.id)
   }
 
   @Post('unit')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -107,23 +77,16 @@ export class MasterItemUnitController {
     description: ``,
   })
   async add(
-    @Res() response: FastifyReply,
     @Body() parameter: MasterItemUnitAddDTO,
     @CredentialAccount() account
   ) {
-    await this.masterItemUnitService
-      .add(parameter, account)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+    return await this.masterItemUnitService.add(parameter, account)
   }
 
   @Patch('unit/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -133,24 +96,14 @@ export class MasterItemUnitController {
   @ApiParam({
     name: 'id',
   })
-  async edit(
-    @Res() response: FastifyReply,
-    @Body() parameter: MasterItemUnitEditDTO,
-    @Param() param
-  ) {
-    await this.masterItemUnitService
-      .edit(parameter, param.id)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+  async edit(@Body() parameter: MasterItemUnitEditDTO, @Param() param) {
+    return await this.masterItemUnitService.edit(parameter, param.id)
   }
 
   @Delete('unit/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -160,14 +113,7 @@ export class MasterItemUnitController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Res() response: FastifyReply, @Param() param) {
-    await this.masterItemUnitService
-      .delete(param.id)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+  async delete(@Param() param) {
+    return await this.masterItemUnitService.delete(param.id)
   }
 }

@@ -1,26 +1,25 @@
-import { Account, AccountDocument } from '@core/account/schemas/account.model'
+import { AccountService } from '@core/account/account.service'
+import { Account } from '@core/account/schemas/account.model'
 import { MenuAddDTO, MenuEditDTO } from '@core/menu/dto/menu'
+import {
+  IMenuTree,
+  IMenuTreeManager,
+} from '@core/menu/interfaces/menu.tree.interface'
 import {
   MenuGroup,
   MenuGroupDocument,
 } from '@core/menu/schemas/menu.group.model'
-import {
-  IMenuTree,
-  IMenuTreeManager,
-  Menu,
-  MenuDocument,
-} from '@core/menu/schemas/menu.model'
-import { HttpStatus, Injectable, Logger } from '@nestjs/common'
+import { Menu, MenuDocument } from '@core/menu/schemas/menu.model'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
-import { prime_datatable } from '@utility/prime'
+import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
 export class MenuService {
-  private readonly logger: Logger = new Logger(MenuService.name)
   constructor(
     @InjectModel(Menu.name)
     private menuModel: Model<MenuDocument>,
@@ -28,15 +27,15 @@ export class MenuService {
     @InjectModel(MenuGroup.name)
     private menuGroupModel: Model<MenuGroupDocument>,
 
-    @InjectModel(Account.name)
-    private accountModel: Model<AccountDocument>
+    @Inject(AccountService)
+    private readonly accountService: AccountService
   ) {}
   async all(parameter: any): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -63,7 +62,7 @@ export class MenuService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -91,7 +90,7 @@ export class MenuService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -120,7 +119,7 @@ export class MenuService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -306,7 +305,7 @@ export class MenuService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
@@ -347,7 +346,7 @@ export class MenuService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: await this.menuModel.findOne({
@@ -381,84 +380,7 @@ export class MenuService {
       .exec()
       .then(async (result) => {
         if (result) {
-          // Update all account with current access and permission
-          return await this.accountModel
-            .findOneAndUpdate(
-              {
-                'access.id': id,
-              },
-              {
-                $set: {
-                  'access.$.name': parameter.name,
-                  'access.$.url': parameter.url,
-                  'access.$.identifier': parameter.identifier,
-                },
-              }
-            )
-            .exec()
-            .catch((e) => {
-              this.logger.debug(e)
-            })
-
-          // Reset all permission
-          let updatedAccount = await this.accountModel
-            .find(
-              {
-                'permission.menu.id': id,
-              },
-              'id -_id'
-            )
-            .exec()
-
-          updatedAccount = updatedAccount.map(({ id }) => id)
-
-          await this.accountModel
-            .updateMany(
-              {
-                id: {
-                  $in: updatedAccount,
-                },
-              },
-              {
-                $pull: {
-                  permission: {
-                    'menu.id': id,
-                  },
-                },
-              }
-            )
-            .exec()
-
-          parameter.permission = parameter.permission.map((e) => {
-            return {
-              domIdentity: e.domIdentity,
-              dispatchName: e.dispatchName,
-              menu: {
-                id: id,
-                name: parameter.name,
-                url: parameter.url,
-                identifier: parameter.identifier,
-              },
-            }
-          })
-
-          await this.accountModel
-            .updateMany(
-              {
-                id: {
-                  $in: updatedAccount,
-                },
-              },
-              {
-                $push: {
-                  permission: {
-                    $each: parameter.permission,
-                  },
-                },
-              }
-            )
-            .exec()
-
+          await this.accountService.accountUpdateAccess(id, parameter)
           result.__v++
           response.message = 'Menu group updated successfully'
           response.payload = result
@@ -487,7 +409,7 @@ export class MenuService {
       statusCode: {
         defaultCode: HttpStatus.OK,
         customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].default,
+        classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: await this.menuModel.findOne({

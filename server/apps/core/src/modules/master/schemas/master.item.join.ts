@@ -1,7 +1,4 @@
-import {
-  IMasterItemBrand,
-  MasterItemBrandJoin,
-} from '@core/master/schemas/master.item.brand.join'
+import { MasterItemBrandJoin } from '@core/master/schemas/master.item.brand.join'
 import { raw } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
 
@@ -11,10 +8,3 @@ export const MasterItemJoin = raw({
   name: { type: String, example: 'Any Item' },
   brand: { type: MasterItemBrandJoin, _id: false },
 })
-
-export interface IMasterItem {
-  id: string
-  code: string
-  name: string
-  brand: IMasterItemBrand
-}

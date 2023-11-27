@@ -48,7 +48,10 @@ module.exports = (options, webpack) => {
         },
       ],
     },
-    mode: 'development',
+    mode:
+      process.env.NODE_ENV && process.env.NODE_ENV !== ''
+        ? process.env.NODE_ENV
+        : 'development',
     resolve: {
       alias: {
         '@core': path.resolve(__dirname, 'apps/core/src/modules'),

@@ -1,13 +1,12 @@
-import { IAccount } from '@core/account/interface/account'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
 import {
-  IMenu,
-  IMenuPermission,
-  MenuJoin,
-  MenuPermissionJoin,
-} from '@core/menu/schemas/menu.model'
+  AuthorityJoin,
+  IAuthority,
+} from '@core/account/schemas/authority.model'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
+import { MenuJoin, MenuPermissionJoin } from '@core/menu/schemas/menu.model'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
@@ -38,10 +37,10 @@ export class Account {
   @Prop({ type: SchemaTypes.String, min: 8, max: 24 })
   password: string
 
-  @Prop({ type: SchemaTypes.String })
+  @Prop({ type: SchemaTypes.String, unique: false })
   first_name: string
 
-  @Prop({ type: SchemaTypes.String })
+  @Prop({ type: SchemaTypes.String, unique: false })
   last_name: string
 
   @Prop({
@@ -53,11 +52,13 @@ export class Account {
   @Prop({
     unique: false,
     type: [MenuJoin],
+    default: [],
     _id: false,
   })
   access: IMenu[]
 
   @Prop({
+    unique: false,
     type: [MenuPermissionJoin],
     default: [],
     required: false,
@@ -70,29 +71,18 @@ export class Account {
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
   })
   created_at: Date
 
   @Prop({
     type: SchemaTypes.Date,
-    default: () => new Date(),
+    default: new Date(),
   })
   updated_at: Date
 
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
-
-  constructor(parameter: IAccount) {
-    this.code = parameter.code
-    this.first_name = parameter.first_name
-    this.last_name = parameter.last_name
-    this.email = parameter.email
-    this.phone = parameter.phone
-    this.access = parameter.access
-    this.permission = parameter.permission
-    this.created_by = parameter.created_by
-  }
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account)

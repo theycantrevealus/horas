@@ -54,7 +54,6 @@ export class BPJSApplicaresRequest {
   }
 
   async post(targetURL, parameter): Promise<BPJSResponse> {
-    console.log(parameter)
     this.createSignature = await this.bpjsAuth.signature()
     const response = {
       metadata: {

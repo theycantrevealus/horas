@@ -5,9 +5,3 @@ export const MasterStockPointJoin = raw({
   code: { type: String },
   name: { type: String },
 })
-
-export interface IMasterStockPoint {
-  id: string
-  code: string
-  name: string
-}

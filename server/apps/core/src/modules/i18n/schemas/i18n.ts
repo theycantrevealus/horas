@@ -1,6 +1,7 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { IMenu, MenuJoin } from '@core/menu/schemas/menu.model'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { MenuJoin } from '@core/menu/schemas/menu.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -192,7 +193,7 @@ export class i18n {
   })
   components: Ii18nComponent[]
 
-  @Prop(raw(AccountJoin))
+  @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
   @Prop({

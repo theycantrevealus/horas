@@ -1,30 +1,32 @@
-import { AuthorityJoin, IAuthority } from '@core/account/schemas/authority'
-import { CMenu, CMenuPermission } from '@core/menu/schemas/menu.model'
+import { CAuthority, IAuthority } from '@core/account/schemas/authority.model'
+import { CMenu, CMenuPermission } from '@core/menu/dto/menu'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
+import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
   IsString,
-  MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator'
 
 export class AccountAddDTO {
   @ApiProperty({
-    type: AuthorityJoin,
+    type: CAuthority,
     description: '',
+    required: false,
   })
-  @IsNotEmpty()
-  authority: IAuthority
+  @IsOptional()
+  @ValidateNested({ each: true })
+  authority?: IAuthority
 
   @ApiProperty({
     example: 'johndoe@example.com',
-    minLength: 8,
-    maxLength: 24,
     description: '',
   })
-  @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   @IsEmail()
   email: string
@@ -32,11 +34,9 @@ export class AccountAddDTO {
   @ApiProperty({
     example: '12345678',
     minLength: 8,
-    maxLength: 24,
     description: '',
   })
   @MinLength(8)
-  @MaxLength(24)
   @IsNotEmpty()
   password: string
 
@@ -44,52 +44,45 @@ export class AccountAddDTO {
     example: 'John',
     description: '',
   })
+  @MinLength(3)
   @IsNotEmpty()
   @IsString()
   first_name: string
 
   @ApiProperty({
     example: 'Doe',
+    required: false,
     description: '',
   })
-  @IsNotEmpty()
   @IsString()
-  last_name: string
+  @IsOptional()
+  last_name?: string
 
   @ApiProperty({
     example: '0822996633111',
     minLength: 8,
     maxLength: 13,
-    required: true, // Not neccessary. It will be always true if not defined
     description: 'Contact number',
   })
-  @MinLength(8)
-  @MaxLength(13)
   @IsNotEmpty()
-  @IsString()
+  @IsPhoneNumber()
   phone: string
 
   @ApiProperty({
     type: CMenu,
+    description: '',
     isArray: true,
+    required: false,
   })
-  @IsNotEmpty()
-  access: CMenu[]
+  @IsOptional()
+  access?: IMenu[]
 
   @ApiProperty({
     type: CMenuPermission,
+    description: '',
     isArray: true,
+    required: false,
   })
-  @IsNotEmpty()
-  permission: CMenuPermission[]
-
-  constructor(data: any = {}) {
-    this.email = data.email
-    this.first_name = data.first_name
-    this.last_name = data.last_name
-    this.password = data.password
-    this.phone = data.phone
-    this.access = data.access
-    this.permission = data.permission
-  }
+  @IsOptional()
+  permission?: IMenuPermission[]
 }

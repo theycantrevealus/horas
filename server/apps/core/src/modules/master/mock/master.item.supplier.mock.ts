@@ -48,7 +48,7 @@ export const mockMasterItemSupplier = (
   id = `supplier-${new Types.ObjectId().toString()}`,
   code = 'SPP-0001',
   name = faker.company.name(),
-  phone = faker.phone.number(),
+  phone = `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
   email = faker.internet.email(),
   sales_name = faker.person.firstName(),
   address = faker.location.streetAddress(),
@@ -79,16 +79,14 @@ export const mockMasterItemSupplier = (
 
 export const mockMasterItemSupplierModel = {
   new: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
-  constructor: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
-  find: jest.fn(),
-  aggregate: jest.fn().mockReturnThis(),
-  findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-  update: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  remove: jest.fn(),
-  exec: jest.fn(),
+  find: jest.fn().mockImplementation(),
+  aggregate: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  update: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  create: jest.fn().mockResolvedValue(mockMasterItemSupplier()),
+  save: jest.fn().mockImplementation(),
+  exec: jest.fn().mockImplementation(),
 }
 
 export const mockMasterItemSupplierDoc = (
@@ -96,7 +94,9 @@ export const mockMasterItemSupplierDoc = (
 ): Partial<MasterItemSupplierDocument> => ({
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   name: mock?.name || faker.company.name(),
-  phone: mock?.phone || faker.phone.number(),
+  phone:
+    mock?.phone ||
+    `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
   email: mock?.email || faker.internet.email(),
   sales_name: mock?.sales_name || faker.person.firstName(),
   address: mock?.address || faker.location.streetAddress(),
@@ -151,7 +151,7 @@ export const masterItemSupplierDocArray = [
   mockMasterItemSupplierDoc({
     code: 'XX-002',
     name: faker.person.firstName(),
-    phone: faker.phone.number(),
+    phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
     email: faker.internet.email(),
     sales_name: faker.person.firstName(),
     address: faker.location.streetAddress(),
@@ -160,7 +160,7 @@ export const masterItemSupplierDocArray = [
   mockMasterItemSupplierDoc({
     code: 'XX-001',
     name: faker.person.firstName(),
-    phone: faker.phone.number(),
+    phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
     email: faker.internet.email(),
     sales_name: faker.person.firstName(),
     address: faker.location.streetAddress(),

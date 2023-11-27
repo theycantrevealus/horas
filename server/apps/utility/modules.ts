@@ -9,7 +9,7 @@ export const modCodes = {
   CoreConfigGroupService: 'CFG-G',
   LicenseService: 'LCS',
   AccountService: {
-    default: 'ACC',
+    defaultCode: 'ACC',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -26,7 +26,7 @@ export const modCodes = {
     },
   },
   PatientService: {
-    default: 'PENT',
+    defaultCode: 'PENT',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -43,7 +43,7 @@ export const modCodes = {
     },
   },
   MenuService: {
-    default: 'MNU',
+    defaultCode: 'MNU',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -60,7 +60,7 @@ export const modCodes = {
     },
   },
   MasterItemService: {
-    default: 'MSRI',
+    defaultCode: 'MSRI',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -77,7 +77,7 @@ export const modCodes = {
     },
   },
   MasterStockPointService: {
-    default: 'MSRI-STCK',
+    defaultCode: 'MSRI-STCK',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -94,7 +94,7 @@ export const modCodes = {
     },
   },
   MasterItemUnitService: {
-    default: 'MSRI-UNT',
+    defaultCode: 'MSRI-UNT',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -111,7 +111,7 @@ export const modCodes = {
     },
   },
   MasterItemSupplierService: {
-    default: 'MSRI-SPP',
+    defaultCode: 'MSRI-SPP',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -128,7 +128,7 @@ export const modCodes = {
     },
   },
   MasterItemBrandService: {
-    default: 'MSRI-BRD',
+    defaultCode: 'MSRI-BRD',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -145,7 +145,7 @@ export const modCodes = {
     },
   },
   MasterQueueService: {
-    default: 'MQ',
+    defaultCode: 'MQ',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -162,7 +162,7 @@ export const modCodes = {
     },
   },
   MasterItemCategoryService: {
-    default: 'MSRI-CAT',
+    defaultCode: 'MSRI-CAT',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -179,7 +179,7 @@ export const modCodes = {
     },
   },
   PurchaseOrderService: {
-    default: 'PO',
+    defaultCode: 'PO',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -196,7 +196,7 @@ export const modCodes = {
     },
   },
   GeneralReceiveNoteService: {
-    default: 'GRN',
+    defaultCode: 'GRN',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -213,7 +213,7 @@ export const modCodes = {
     },
   },
   LOVService: {
-    default: 'LOV',
+    defaultCode: 'LOV',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -230,7 +230,7 @@ export const modCodes = {
     },
   },
   i18nService: {
-    default: 'I18N',
+    defaultCode: 'I18N',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -247,7 +247,7 @@ export const modCodes = {
     },
   },
   BPJSVClaumReferenceService: {
-    default: 'BPJS_REF',
+    defaultCode: 'BPJS_REF',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -264,7 +264,7 @@ export const modCodes = {
     },
   },
   BPJSVClaimSEPService: {
-    default: 'BPJS_VCLAIM_SEP',
+    defaultCode: 'BPJS_VCLAIM_SEP',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -281,7 +281,7 @@ export const modCodes = {
     },
   },
   BPJSApplicaresReferensiService: {
-    default: 'BPJS_APPLICARES_SEP',
+    defaultCode: 'BPJS_APPLICARES_SEP',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -298,7 +298,7 @@ export const modCodes = {
     },
   },
   OperationQueueService: {
-    default: 'OPR_QUEUE',
+    defaultCode: 'OPR_QUEUE',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,
@@ -313,6 +313,23 @@ export const modCodes = {
         customCode: 'E0003',
       },
     },
+    VisitService: {
+      defaultCode: 'VST',
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
   },
 }
 
@@ -320,4 +337,16 @@ export interface CustomErrorCode {
   defaultCode: number
   classCode: string
   customCode: string
+}
+
+export function isCustomErrorCode(object: any): object is CustomErrorCode {
+  return (
+    object &&
+    object.defaultCode &&
+    object.classCode &&
+    object.customCode &&
+    'defaultCode' in object &&
+    'classCode' in object &&
+    'customCode' in object
+  )
 }

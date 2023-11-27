@@ -2,10 +2,6 @@ import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterStockPointController } from '@core/master/controllers/master.stock.point.controller'
 import {
-  MasterStockPointAddDTO,
-  MasterStockPointEditDTO,
-} from '@core/master/dto/master.stock.point'
-import {
   mockMasterStockPoint,
   mockMasterStockPointService,
 } from '@core/master/mock/master.stock.point.mock'
@@ -27,7 +23,7 @@ import { Types } from 'mongoose'
 describe('Master Stock Point Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let controller: MasterStockPointController
+  let masterStockPointController: MasterStockPointController
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,7 +49,9 @@ describe('Master Stock Point Controller', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    controller = app.get<MasterStockPointController>(MasterStockPointController)
+    masterStockPointController = app.get<MasterStockPointController>(
+      MasterStockPointController
+    )
 
     jest.clearAllMocks()
   })
@@ -65,7 +63,7 @@ describe('Master Stock Point Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(controller).toBeDefined()
+      expect(masterStockPointController).toBeDefined()
     }
   )
 
@@ -87,7 +85,7 @@ describe('Master Stock Point Controller', () => {
   )
 
   it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
-    const data = new MasterStockPointAddDTO(mockMasterStockPoint())
+    const data = mockMasterStockPoint()
     return app
       .inject({
         method: 'POST',
@@ -100,7 +98,10 @@ describe('Master Stock Point Controller', () => {
   })
 
   it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new MasterStockPointEditDTO(mockMasterStockPoint())
+    const data = {
+      ...mockMasterStockPoint(),
+      __v: 0,
+    }
     const id = `stock_point-${new Types.ObjectId().toString()}`
     return app
       .inject({

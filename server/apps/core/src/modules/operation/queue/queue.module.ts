@@ -1,5 +1,4 @@
 import { AccountModule } from '@core/account/account.module'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { OperationQueueController } from '@core/operation/queue/controllers/queue.controller'
 import {
   OperationQueue,
@@ -60,7 +59,6 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
       },
     ]),
     MongooseModule.forFeature([
-      { name: Account.name, schema: AccountSchema },
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),

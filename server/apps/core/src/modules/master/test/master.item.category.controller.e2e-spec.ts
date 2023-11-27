@@ -2,10 +2,6 @@ import { AccountService } from '@core/account/account.service'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterItemCategoryController } from '@core/master/controllers/master.item.category.controller'
 import {
-  MasterItemCategoryAddDTO,
-  MasterItemCategoryEditDTO,
-} from '@core/master/dto/master.item.category'
-import {
   mockMasterItemCategory,
   mockMasterItemCategoryService,
 } from '@core/master/mock/master.item.category.mock'
@@ -27,7 +23,7 @@ import { Types } from 'mongoose'
 describe('Master Item Category Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let controller: MasterItemCategoryController
+  let masterItemCategoryController: MasterItemCategoryController
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,7 +49,7 @@ describe('Master Item Category Controller', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    controller = app.get<MasterItemCategoryController>(
+    masterItemCategoryController = app.get<MasterItemCategoryController>(
       MasterItemCategoryController
     )
 
@@ -67,7 +63,7 @@ describe('Master Item Category Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(controller).toBeDefined()
+      expect(masterItemCategoryController).toBeDefined()
     }
   )
 
@@ -89,7 +85,7 @@ describe('Master Item Category Controller', () => {
   )
 
   it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
-    const data = new MasterItemCategoryAddDTO(mockMasterItemCategory())
+    const data = mockMasterItemCategory()
     return app
       .inject({
         method: 'POST',
@@ -102,7 +98,10 @@ describe('Master Item Category Controller', () => {
   })
 
   it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = new MasterItemCategoryEditDTO(mockMasterItemCategory())
+    const data = {
+      ...mockMasterItemCategory(),
+      __v: 0,
+    }
     const id = `category-${new Types.ObjectId().toString()}`
 
     return app

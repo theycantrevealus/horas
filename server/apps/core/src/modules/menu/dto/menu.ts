@@ -1,8 +1,56 @@
-import { CMenuGroup, IMenuGroup } from '@core/menu/schemas/menu.group.model'
-import { CMenuPermission } from '@core/menu/schemas/menu.model'
+import { CMenuGroup } from '@core/menu/dto/menu.group.add'
+import { IMenuGroup } from '@core/menu/interfaces/menu.group.interface'
+import { IMenu } from '@core/menu/interfaces/menu.interface'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber } from 'class-validator'
+import { IsNotEmpty, IsNumber, ValidateNested } from 'class-validator'
 import { Types } from 'mongoose'
+
+export class CMenu {
+  @ApiProperty({
+    type: String,
+    example: `menu-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Menu Name',
+  })
+  name: string
+
+  @ApiProperty({
+    type: String,
+    example: '/',
+  })
+  url: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  identifier: string
+}
+
+export class CMenuPermission {
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  domIdentity: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  dispatchName: string
+
+  @ApiProperty({
+    description: '',
+  })
+  // @Type(() => CMenu)
+  @ValidateNested({ each: true })
+  menu: IMenu
+}
 
 export class MenuAddDTO {
   @ApiProperty({

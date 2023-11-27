@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class AuthorityAddDTO {
   @ApiProperty({
@@ -21,10 +21,10 @@ export class AuthorityAddDTO {
   @ApiProperty({
     type: String,
     description: '',
+    required: false,
   })
-  @IsString()
-  @IsNotEmpty()
-  remark: string
+  @IsOptional()
+  remark?: string
 
   constructor(data: any = {}) {
     this.code = data.code
@@ -53,10 +53,11 @@ export class AuthorityEditDTO {
   @ApiProperty({
     type: String,
     description: '',
+    required: false,
   })
   @IsString()
-  @IsNotEmpty()
-  remark: string
+  @IsOptional()
+  remark?: string
 
   @ApiProperty({
     example: 0,

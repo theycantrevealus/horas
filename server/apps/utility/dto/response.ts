@@ -33,6 +33,37 @@ export class GlobalResponse {
   transaction_id: string | null
 }
 
+export class GlobalResponseParsed {
+  @ApiProperty({
+    description: '',
+  })
+  statusCode: string
+
+  @ApiProperty({
+    example: 'Your request proceed successfully',
+    description: 'Returning message of created',
+  })
+  message: string
+
+  @ApiProperty({
+    type: Object,
+    description: 'Return data from process that may useful for you',
+  })
+  payload?: object
+
+  @ApiProperty({
+    example: 'TRANSACTION_NAME_FOR_CLASSIFICATION',
+    description: 'Transaction classification',
+  })
+  transaction_classify: string
+
+  @ApiProperty({
+    example: `any-${new mongoose.Types.ObjectId()}`,
+    description: 'Transaction ID',
+  })
+  transaction_id: string | null
+}
+
 export class GlobalErrorResponse {
   @ApiProperty({
     example: 666,
