@@ -16,7 +16,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -29,7 +29,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -41,7 +41,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -66,7 +66,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
       },
@@ -78,7 +78,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         address: faker.location.streetAddress(),
       },
@@ -90,7 +90,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
       },
@@ -102,7 +102,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -117,7 +117,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -131,7 +131,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -144,7 +144,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -171,7 +171,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
         __v: 0,
@@ -184,7 +184,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         address: faker.location.streetAddress(),
         __v: 0,
@@ -197,7 +197,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         __v: 0,
@@ -210,7 +210,7 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: faker.helpers.replaceSymbolWithNumber('xxxxxxxxxx'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),

@@ -14,6 +14,7 @@ import * as path from 'path'
 import * as winston from 'winston'
 
 import { CommonErrorFilter } from '../../filters/error'
+import { GatewayPipe } from '../../pipes/gateway.pipe'
 import { CoreModule } from './core.module'
 
 declare const module: any
@@ -70,8 +71,6 @@ async function bootstrap() {
     },
   })
 
-  // logger.level = 'DEBUG'
-
   fastifyAdapter.register(require('@fastify/static'), {
     root: path.join(
       __dirname,
@@ -80,26 +79,8 @@ async function bootstrap() {
     prefix: `/${configService.get<string>('application.images.core_prefix')}`,
   })
 
-  // app.useLogger(logger)
   app.useGlobalFilters(new CommonErrorFilter(logger))
-  // app.useGlobalPipes(new GatewayPipe())
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     transform: true,
-  //     whitelist: false,
-  //     skipMissingProperties: true,
-  //     forbidNonWhitelisted: true,
-  //     forbidUnknownValues: true,
-  //     errorHttpStatusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-  //     exceptionFactory: (validationErrors: ValidationError[] = []) => {
-  //       let messages = []
-  //       validationErrors.map((e) => {
-  //         messages = messages.concat(e.constraints)
-  //       })
-  //       throw new Error(messages.join(';;'))
-  //     },
-  //   })
-  // )
+  app.useGlobalPipes(new GatewayPipe())
 
   app.enableVersioning({
     type: VersioningType.URI,

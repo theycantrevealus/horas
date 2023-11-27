@@ -40,7 +40,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     if (!request.headers.authorization) {
       throw new ForbiddenException({
-        message: 'Unauthorize',
+        message: 'Unauthorized',
         data: null,
         errors: null,
       })
@@ -49,7 +49,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const header_token = request.headers.authorization
     if (!header_token) {
       throw new ForbiddenException({
-        message: 'Unauthorize',
+        message: 'Unauthorized',
         data: null,
         errors: null,
       })

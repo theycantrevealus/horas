@@ -10,6 +10,7 @@ import { GlobalResponse } from '@utility/dto/response'
 import { isExpressRequest } from '@utility/http'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { HorasLogging } from '@utility/logger/interfaces'
+import { modCodes } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
 import { isJSON } from 'class-validator'
 import { FastifyReply, FastifyRequest } from 'fastify'
@@ -60,25 +61,23 @@ export async function errorHandler(
     }
 
     statusCode = parseError.statusCode.defaultCode
+  } else {
+    responseSet = {
+      statusCode: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: modCodes.Global.success,
+        classCode: 'CORE_F0000',
+      },
+      message: exception.message,
+      transaction_classify: '',
+      transaction_id: '',
+      payload: {},
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    }
+
+    statusCode = HttpStatus.BAD_REQUEST
   }
-  // if (isJSON(errorPayload)) {
-  //   const parseError: GlobalResponse = JSON.parse(errorPayload)
-  //   responseSet = {
-  //     ...JSON.parse(parseError.message),
-  //     timestamp: new Date().toISOString(),
-  //     path: request.url,
-  //   }
-  //   statusCode = parseError.statusCode.defaultCode
-  // } else {
-  //   responseSet = {
-  //     code: response.statusCode,
-  //     message: exception.message,
-  //     description: exception.stack ?? '',
-  //     timestamp: new Date().toISOString(),
-  //     path: request.url,
-  //   }
-  //   statusCode = response.statusCode
-  // }
 
   const account: IAccountCreatedBy = request.credential
   const dataSet: HorasLogging = {
@@ -100,7 +99,6 @@ export async function errorHandler(
   if (statusCode === HttpStatus.BAD_REQUEST) {
     logger.warn(dataSet)
   } else {
-    statusCode = HttpStatus.INTERNAL_SERVER_ERROR
     logger.error(dataSet)
   }
 

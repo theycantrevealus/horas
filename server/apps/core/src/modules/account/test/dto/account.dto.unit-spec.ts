@@ -89,7 +89,7 @@ const falseCasePayload = {
         password: faker.internet.password({ length: 24 }),
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
-        phone: faker.helpers.replaceSymbolWithNumber('+62###########'),
+        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
       },
     },
   ],

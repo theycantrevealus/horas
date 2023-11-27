@@ -54,7 +54,7 @@ export class AccountService {
     @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
-  async accountAll(payload: string): Promise<GlobalResponse> {
+  async accountAll(payload: any): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -83,15 +83,12 @@ export class AccountService {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
       }
-      // response.payload = {
-      //   message: error.message,
-      //   stack: error.stack,
-      // }
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
   }
 
-  async authorityAll(parameter: PrimeParameter): Promise<GlobalResponse> {
+  async authorityAll(payload: any): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -104,21 +101,25 @@ export class AccountService {
       transaction_id: '',
     } satisfies GlobalResponse
 
-    return await prime_datatable(parameter, this.accountAuthority)
-      .then((result) => {
-        response.payload = result.payload.data
-        response.message = 'Authority fetch successfully'
-        return response
-      })
-      .catch((error: Error) => {
-        response.message = error.message
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+
+      return await prime_datatable(parameter, this.accountAuthority).then(
+        (result) => {
+          response.payload = result.payload.data
+          response.message = 'Authority fetch successfully'
+          return response
         }
-        response.payload = error.stack
-        throw new Error(JSON.stringify(response))
-      })
+      )
+    } catch (error) {
+      response.message = `Authority failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async accountDetail(id: string): Promise<GlobalResponse> {
@@ -495,8 +496,7 @@ export class AccountService {
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
+        ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
@@ -517,6 +517,11 @@ export class AccountService {
         })
         .then((result) => {
           response.message = 'Account created successfully'
+          response.statusCode = {
+            defaultCode: HttpStatus.OK,
+            customCode: modCodes.Global.success,
+            classCode: modCodes[this.constructor.name].defaultCode,
+          }
           response.transaction_id = result.id
           response.payload = {
             id: result.id,

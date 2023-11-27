@@ -68,15 +68,14 @@ export const mockAuthority = (
 
 export const mockAuthorityModel = {
   new: jest.fn().mockResolvedValue(mockAuthority()),
-  constructor: jest.fn().mockResolvedValue(mockAuthority()),
-  find: jest.fn(),
-  aggregate: jest.fn().mockReturnThis(),
-  findOne: jest.fn(),
+  find: jest.fn().mockImplementation(),
+  aggregate: jest.fn().mockImplementation(),
+  findOne: jest.fn().mockResolvedValue(mockAuthority()),
   findOneAndUpdate: jest.fn().mockResolvedValue(mockAuthority()),
   update: jest.fn().mockResolvedValue(mockAuthority()),
   create: jest.fn().mockResolvedValue(mockAuthority()),
-  save: jest.fn(),
-  exec: jest.fn(),
+  save: jest.fn().mockImplementation(),
+  exec: jest.fn().mockImplementation(),
 }
 
 export const mockAuthorityDoc = (

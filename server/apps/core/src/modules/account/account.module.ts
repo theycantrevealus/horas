@@ -1,3 +1,4 @@
+import { AuthorityController } from '@core/account/authority.controller'
 import { AccountModelProvider } from '@core/account/schemas/account.provider'
 import { AuthorityModelProvider } from '@core/account/schemas/authority.provider'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
@@ -39,7 +40,7 @@ import { AccountService } from './account.service'
     ]),
     AuthModule,
   ],
-  controllers: [AccountController],
+  controllers: [AccountController, AuthorityController],
   providers: [AccountService],
   exports: [AccountService],
 })

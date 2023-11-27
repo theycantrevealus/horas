@@ -100,13 +100,15 @@ describe('Authority Service', () => {
             exec: jest.fn().mockReturnValue(authorityDocArray),
           } as any)
           await accountService
-            .authorityAll({
-              first: 0,
-              rows: 10,
-              sortField: 'created_at',
-              sortOrder: 1,
-              filters: {},
-            })
+            .authorityAll(
+              `{
+              "first": 0,
+              "rows": 10,
+              "sortField": "created_at",
+              "sortOrder": 1,
+              "filters": {}
+            }`
+            )
             .then((result: GlobalResponse) => {
               // Should classify transaction
               expect(result.transaction_classify).toEqual('AUTHORITY_GET')

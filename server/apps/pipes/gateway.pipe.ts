@@ -1,4 +1,10 @@
-import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common'
+import {
+  ArgumentMetadata,
+  HttpStatus,
+  Injectable,
+  PipeTransform,
+} from '@nestjs/common'
+import { modCodes } from '@utility/modules'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 
@@ -11,7 +17,24 @@ export class GatewayPipe implements PipeTransform<any> {
     const object = plainToInstance(metatype, value)
     const errors = await validate(object)
     if (errors.length > 0) {
-      throw new Error('Validation failed')
+      const errorList = []
+      errors.forEach((e) => {
+        errorList.push(e.constraints)
+      })
+
+      throw new Error(
+        JSON.stringify({
+          statusCode: {
+            defaultCode: HttpStatus.BAD_REQUEST,
+            customCode: modCodes.Global.success,
+            classCode: 'CORE_F0000',
+          },
+          message: 'Validation issue',
+          payload: errorList,
+          transaction_classify: '',
+          transaction_id: '',
+        })
+      )
     }
     return value
   }
