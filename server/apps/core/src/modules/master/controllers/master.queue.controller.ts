@@ -5,19 +5,19 @@ import {
 import { MasterQueueService } from '@core/master/services/master.queue.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
+import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
-  Res,
   UseGuards,
+  UseInterceptors,
   Version,
 } from '@nestjs/common'
 import {
@@ -28,8 +28,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { isJSON } from 'class-validator'
-import { FastifyReply } from 'fastify'
 
 @Controller('master')
 @ApiTags('Master Data Management')
@@ -42,6 +40,7 @@ export class MasterQueueController {
   @Get('queue')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -50,26 +49,13 @@ export class MasterQueueController {
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await this.masterQueueService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
-    } else {
-      return {
-        message: 'filters is not a valid json',
-        payload: {},
-      }
-    }
+    return await this.masterQueueService.all(parameter)
   }
 
   @Get('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiParam({
@@ -86,74 +72,51 @@ export class MasterQueueController {
   @Post('queue')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Add new item brand',
+    summary: 'Add queue',
     description: ``,
   })
   async add(
     @Body() parameter: MasterQueueAddDTO,
-    @CredentialAccount() account,
-    @Res() response: FastifyReply
+    @CredentialAccount() account
   ) {
-    await this.masterQueueService
-      .add(parameter, account)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+    return await this.masterQueueService.add(parameter, account)
   }
 
   @Patch('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Edit new item brand',
+    summary: 'Edit queue',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
-  async edit(
-    @Body() parameter: MasterQueueEditDTO,
-    @Param() param,
-    @Res() response: FastifyReply
-  ) {
-    await this.masterQueueService
-      .edit(parameter, param.id)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+  async edit(@Body() parameter: MasterQueueEditDTO, @Param() param) {
+    return await this.masterQueueService.edit(parameter, param.id)
   }
 
   @Delete('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Edit new item brand',
+    summary: 'Delete queue',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param, @Res() response: FastifyReply) {
-    await this.masterQueueService
-      .delete(param.id)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+  async delete(@Param() param) {
+    return await this.masterQueueService.delete(param.id)
   }
 }

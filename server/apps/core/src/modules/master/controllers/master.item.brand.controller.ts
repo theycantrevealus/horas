@@ -106,6 +106,7 @@ export class MasterItemBrandController {
   @Delete('brand/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({

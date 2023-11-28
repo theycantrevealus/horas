@@ -203,16 +203,16 @@ describe('Master Item Service', () => {
             })
 
           const findAll = masterItemDocArray
-          jest.spyOn(masterItemModel, 'findOne').mockReturnValue({
-            exec: jest.fn().mockReturnValue(findAll),
-          } as any)
+          masterItemModel.findOne = jest.fn().mockImplementationOnce(() => {
+            return Promise.resolve(findAll)
+          })
 
           await masterItemService
             .find({
               name: findMock.name,
             })
             .then((result) => {
-              expect(result).toEqual(findAll)
+              expect(result.payload).toEqual(findAll)
             })
         }
       )

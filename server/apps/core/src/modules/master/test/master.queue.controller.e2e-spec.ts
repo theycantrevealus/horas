@@ -1,21 +1,20 @@
-import { AccountService } from '@core/account/account.service'
 import { accountArray } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
-import { MasterItemController } from '@core/master/controllers/master.item.controller'
+import { MasterQueueController } from '@core/master/controllers/master.queue.controller'
 import {
-  MasterItemAddDTO,
-  MasterItemEditDTO,
-} from '@core/master/dto/master.item'
+  MasterQueueAddDTO,
+  MasterQueueEditDTO,
+} from '@core/master/dto/master.queue'
 import {
-  masterItemDocArray,
-  mockMasterItem,
-  mockMasterItemModel,
-} from '@core/master/mock/master.item.mock'
+  masterQueueDocArray,
+  mockMasterQueue,
+  mockMasterQueueModel,
+} from '@core/master/mock/master.queue.mock'
 import {
-  MasterItem,
-  MasterItemDocument,
-} from '@core/master/schemas/master.item'
-import { MasterItemService } from '@core/master/services/master.item.service'
+  MasterQueue,
+  MasterQueueDocument,
+} from '@core/master/schemas/master.queue.machine'
+import { MasterQueueService } from '@core/master/services/master.queue.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -28,7 +27,6 @@ import {
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
-import { M_ITEM_SERVICE } from '@utility/constants'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
@@ -38,29 +36,23 @@ import { Logger } from 'winston'
 import { CommonErrorFilter } from '../../../../../filters/error'
 import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
 
-describe('Master Item Controller', () => {
+describe('Master Queue Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let masterItemController: MasterItemController
-  let masterItemModel: Model<MasterItem>
+  let masterQueueController: MasterQueueController
+  let masterQueueModel: Model<MasterQueue>
   let logger: Logger
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MasterItemController],
+      controllers: [MasterQueueController],
       providers: [
-        MasterItemService,
+        MasterQueueService,
         {
           provide: ConfigService,
           useValue: {
             get: () => jest.fn().mockResolvedValue('Test'),
             set: () => jest.fn().mockResolvedValue('Test'),
-          },
-        },
-        {
-          provide: M_ITEM_SERVICE,
-          useValue: {
-            emit: jest.fn(),
           },
         },
         {
@@ -80,11 +72,10 @@ describe('Master Item Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterItem.name),
-          useValue: mockMasterItemModel,
+          provide: getModelToken(MasterQueue.name),
+          useValue: mockMasterQueueModel,
         },
         { provide: AuthService, useValue: {} },
-        { provide: AccountService, useValue: {} },
         { provide: getModelToken(Account.name), useValue: {} },
         { provide: getModelToken(LogActivity.name), useValue: {} },
       ],
@@ -102,9 +93,11 @@ describe('Master Item Controller', () => {
       })
     )
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
-    masterItemController = app.get<MasterItemController>(MasterItemController)
-    masterItemModel = module.get<Model<MasterItemDocument>>(
-      getModelToken(MasterItem.name)
+    masterQueueController = app.get<MasterQueueController>(
+      MasterQueueController
+    )
+    masterQueueModel = module.get<Model<MasterQueueDocument>>(
+      getModelToken(MasterQueue.name)
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -121,20 +114,20 @@ describe('Master Item Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(masterItemController).toBeDefined()
+      expect(masterQueueController).toBeDefined()
     }
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Item - Get data lazy loaded'),
+    testCaption('FLOW', 'feature', 'Master Queue - Get data lazy loaded'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(masterItemDocArray),
+          jest.spyOn(masterQueueModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterQueueDocArray),
           } as any)
 
           return app
@@ -143,7 +136,7 @@ describe('Master Item Controller', () => {
               headers: {
                 authorization: 'Bearer ey...',
               },
-              url: '/master/item',
+              url: '/master/queue',
               query: `lazyEvent=abc`,
             })
             .then((result) => {
@@ -158,8 +151,8 @@ describe('Master Item Controller', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(masterItemDocArray),
+          jest.spyOn(masterQueueModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterQueueDocArray),
           } as any)
 
           return app
@@ -168,7 +161,7 @@ describe('Master Item Controller', () => {
               headers: {
                 authorization: 'Bearer ey...',
               },
-              url: '/master/item',
+              url: '/master/queue',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
@@ -181,7 +174,7 @@ describe('Master Item Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Item - Get data detail'),
+    testCaption('FLOW', 'feature', 'Master Queue - Get data detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return data', {
@@ -194,7 +187,7 @@ describe('Master Item Controller', () => {
               headers: {
                 authorization: 'Bearer ey...',
               },
-              url: `/master/item/${mockMasterItem().id}`,
+              url: `/master/queue/${mockMasterQueue().id}`,
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.OK)
@@ -205,7 +198,7 @@ describe('Master Item Controller', () => {
     }
   )
 
-  describe(testCaption('FLOW', 'feature', 'Master Item - Add data'), () => {
+  describe(testCaption('FLOW', 'feature', 'Master Queue - Add data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -214,7 +207,7 @@ describe('Master Item Controller', () => {
         return app
           .inject({
             method: 'POST',
-            url: '/master/item',
+            url: '/master/queue',
             body: 'abc',
           })
           .then((result) => {
@@ -230,23 +223,15 @@ describe('Master Item Controller', () => {
       }),
       async () => {
         const data = {
-          code: mockMasterItem().code,
-          name: mockMasterItem().name,
-          alias: mockMasterItem().alias,
-          configuration: mockMasterItem().configuration,
-          storing: mockMasterItem().storing,
-          category: mockMasterItem().category,
-          unit: mockMasterItem().unit,
-          brand: mockMasterItem().brand,
-          properties: mockMasterItem().properties,
-        } satisfies MasterItemAddDTO
+          code: mockMasterQueue().code,
+        } satisfies MasterQueueAddDTO
 
-        delete data.name
+        delete data.code
 
         return app
           .inject({
             method: 'POST',
-            url: '/master/item',
+            url: '/master/queue',
             body: data,
           })
           .then((result) => {
@@ -262,21 +247,13 @@ describe('Master Item Controller', () => {
       }),
       async () => {
         const data = {
-          code: mockMasterItem().code,
-          name: mockMasterItem().name,
-          alias: mockMasterItem().alias,
-          configuration: mockMasterItem().configuration,
-          storing: mockMasterItem().storing,
-          category: mockMasterItem().category,
-          unit: mockMasterItem().unit,
-          brand: mockMasterItem().brand,
-          properties: mockMasterItem().properties,
-        } satisfies MasterItemAddDTO
+          code: mockMasterQueue().code,
+        } satisfies MasterQueueAddDTO
 
         return app
           .inject({
             method: 'POST',
-            url: '/master/item',
+            url: '/master/queue',
             body: data,
           })
           .then((result) => {
@@ -287,7 +264,7 @@ describe('Master Item Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Master Item - Edit data'), () => {
+  describe(testCaption('FLOW', 'feature', 'Master Queue - Edit data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -296,7 +273,7 @@ describe('Master Item Controller', () => {
         return app
           .inject({
             method: 'PATCH',
-            url: `/master/item/${mockMasterItem().id}`,
+            url: `/master/queue/${mockMasterQueue().id}`,
             body: 'abc',
           })
           .then((result) => {
@@ -314,7 +291,7 @@ describe('Master Item Controller', () => {
         return app
           .inject({
             method: 'PATCH',
-            url: `/master/item/${mockMasterItem().id}`,
+            url: `/master/queue/${mockMasterQueue().id}`,
             body: {},
           })
           .then((result) => {
@@ -330,22 +307,14 @@ describe('Master Item Controller', () => {
       }),
       async () => {
         const data = {
-          code: mockMasterItem().code,
-          name: mockMasterItem().name,
-          alias: mockMasterItem().alias,
-          configuration: mockMasterItem().configuration,
-          storing: mockMasterItem().storing,
-          category: mockMasterItem().category,
-          unit: mockMasterItem().unit,
-          brand: mockMasterItem().brand,
-          properties: mockMasterItem().properties,
+          code: mockMasterQueue().code,
           __v: 0,
-        } satisfies MasterItemEditDTO
+        } satisfies MasterQueueEditDTO
 
         return app
           .inject({
             method: 'PATCH',
-            url: `/master/item/${mockMasterItem().id}`,
+            url: `/master/queue/${mockMasterQueue().id}`,
             body: data,
           })
           .then((result) => {
@@ -356,7 +325,7 @@ describe('Master Item Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Master Item - Delete data'), () => {
+  describe(testCaption('FLOW', 'feature', 'Master Queue - Delete data'), () => {
     it(
       testCaption('HANDLING', 'data', 'Should return success delete', {
         tab: 1,
@@ -365,7 +334,7 @@ describe('Master Item Controller', () => {
         return app
           .inject({
             method: 'DELETE',
-            url: `/master/item/${mockMasterItem().id}`,
+            url: `/master/queue/${mockMasterQueue().id}`,
           })
           .then((result) => {
             expect(result.statusCode).toEqual(HttpStatus.OK)

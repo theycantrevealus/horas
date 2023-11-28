@@ -111,8 +111,11 @@ export class MasterQueueService {
           return response
         })
     } catch (error) {
-      response.message = `Master queue failed to create. ${error.message}`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.message = `Master queue failed to create`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
       response.payload = error
       throw new Error(JSON.stringify(response))
     }
@@ -149,8 +152,11 @@ export class MasterQueueService {
           return response
         })
     } catch (error) {
-      response.message = `Master queue failed to update. ${error.message}`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.message = `Master queue failed to update`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
       response.payload = error
       throw new Error(JSON.stringify(response))
     }

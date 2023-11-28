@@ -89,8 +89,34 @@ export class MasterItemService {
     }
   }
 
-  async find(term: any) {
-    return this.masterItemModel.findOne(term).exec()
+  async find(term: any): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'MASTER_ITEM_GET',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    try {
+      return await this.masterItemModel.findOne(term).then((result) => {
+        response.payload = result
+        response.message = 'Master item detail fetch successfully'
+        return response
+      })
+    } catch (error) {
+      response.message = `Master item detail failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async bulk(bulkData = []) {
@@ -99,7 +125,7 @@ export class MasterItemService {
         bulkData.map(async (data) => {
           let prepareData = await this.find({
             $and: [{ code: data.code }],
-          })
+          }).then((r) => r)['payload']
           if (!prepareData) {
             prepareData = new this.masterItemModel({
               code: data.code,
@@ -168,8 +194,11 @@ export class MasterItemService {
           return response
         })
     } catch (error) {
-      response.message = `Master item failed to create. ${error.message}`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.message = `Master item failed to create`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
       response.payload = error
       throw new Error(JSON.stringify(response))
     }
@@ -211,8 +240,11 @@ export class MasterItemService {
           return response
         })
     } catch (error) {
-      response.message = `Master item failed to update. ${error.message}`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.message = `Master item failed to update`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
       response.payload = error
       throw new Error(JSON.stringify(response))
     }
@@ -277,7 +309,10 @@ export class MasterItemService {
       response.message = 'Master item imported successfully'
     } else {
       response.message = `Master item failed to import`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
       throw new Error(JSON.stringify(response))
     }
     return response

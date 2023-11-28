@@ -1,14 +1,26 @@
 import { AccountService } from '@core/account/account.service'
+import { accountArray } from '@core/account/mock/account.mock'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterStockPointController } from '@core/master/controllers/master.stock.point.controller'
 import {
+  MasterStockPointAddDTO,
+  MasterStockPointEditDTO,
+} from '@core/master/dto/master.stock.point'
+import {
+  masterStockPointDocArray,
   mockMasterStockPoint,
-  mockMasterStockPointService,
+  mockMasterStockPointModel,
 } from '@core/master/mock/master.stock.point.mock'
+import {
+  MasterStockPoint,
+  MasterStockPointDocument,
+} from '@core/master/schemas/master.stock.point'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
-import { CanActivate } from '@nestjs/common'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { CanActivate, HttpStatus } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { getModelToken } from '@nestjs/mongoose'
 import {
   FastifyAdapter,
@@ -17,21 +29,52 @@ import {
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
-import { Types } from 'mongoose'
+import { Model } from 'mongoose'
+import { Logger } from 'winston'
+
+import { CommonErrorFilter } from '../../../../../filters/error'
+import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
 
 describe('Master Stock Point Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
   let masterStockPointController: MasterStockPointController
+  let masterStockPointModel: Model<MasterStockPoint>
+  let logger: Logger
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MasterStockPointController],
       providers: [
+        MasterStockPointService,
         {
-          provide: MasterStockPointService,
-          useValue: mockMasterStockPointService,
+          provide: ConfigService,
+          useValue: {
+            get: () => jest.fn().mockResolvedValue('Test'),
+            set: () => jest.fn().mockResolvedValue('Test'),
+          },
+        },
+        {
+          provide: WINSTON_MODULE_PROVIDER,
+          useValue: {
+            log: jest.fn(),
+            warn: jest.fn(),
+            verbose: jest.fn(),
+            error: jest.fn(),
+          },
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: () => accountArray[0],
+            set: () => jest.fn(),
+          },
+        },
+        {
+          provide: getModelToken(MasterStockPoint.name),
+          useValue: mockMasterStockPointModel,
         },
         { provide: AuthService, useValue: {} },
         { provide: AccountService, useValue: {} },
@@ -44,14 +87,24 @@ describe('Master Stock Point Controller', () => {
       .compile()
 
     app = module.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter()
+      new FastifyAdapter({
+        logger: false,
+        disableRequestLogging: true,
+        ignoreTrailingSlash: true,
+        ignoreDuplicateSlashes: true,
+      })
     )
-    await app.init()
-    await app.getHttpAdapter().getInstance().ready()
-
+    logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
     masterStockPointController = app.get<MasterStockPointController>(
       MasterStockPointController
     )
+    masterStockPointModel = module.get<Model<MasterStockPointDocument>>(
+      getModelToken(MasterStockPoint.name)
+    )
+    await app.useGlobalFilters(new CommonErrorFilter(logger))
+    app.useGlobalPipes(new GatewayPipe())
+    await app.init()
+    await app.getHttpAdapter().getInstance().ready()
 
     jest.clearAllMocks()
   })
@@ -67,77 +120,244 @@ describe('Master Stock Point Controller', () => {
     }
   )
 
-  it(
-    testCaption('FLOW', 'feature', 'Should return data', {
-      tab: 0,
-    }),
-    async () => {
-      return app
-        .inject({
-          method: 'GET',
-          url: '/master/stock_point',
-          query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
-        })
-        .then((result) => {
-          expect(result.statusCode).toEqual(200)
-        })
+  describe(
+    testCaption('FLOW', 'feature', 'Master Stock Point - Get data lazy loaded'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterStockPointModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterStockPointDocArray),
+          } as any)
+
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: '/master/stock_point',
+              query: `lazyEvent=abc`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(masterStockPointModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterStockPointDocArray),
+          } as any)
+
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: '/master/stock_point',
+              query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
     }
   )
 
-  it(testCaption('FLOW', 'feature', 'Should return success add'), async () => {
-    const data = mockMasterStockPoint()
-    return app
-      .inject({
-        method: 'POST',
-        url: '/master/stock_point',
-        body: data,
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(200)
-      })
-  })
-
-  it(testCaption('FLOW', 'feature', 'Should return success edit'), async () => {
-    const data = {
-      ...mockMasterStockPoint(),
-      __v: 0,
+  describe(
+    testCaption('FLOW', 'feature', 'Master Stock Point - Get data detail'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should return data', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+              },
+              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
     }
-    const id = `stock_point-${new Types.ObjectId().toString()}`
-    return app
-      .inject({
-        method: 'PATCH',
-        url: `/master/stock_point/${id}`,
-        body: data,
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(200)
-      })
-  })
+  )
 
-  it(testCaption('FLOW', 'feature', 'Should return detail'), async () => {
-    const id = `stock_point-${new Types.ObjectId().toString()}`
-    return app
-      .inject({
-        method: 'GET',
-        url: `/master/stock_point/${id}`,
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(200)
-      })
-  })
+  describe(
+    testCaption('FLOW', 'feature', 'Master Stock Point - Add data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid format', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'POST',
+              url: '/master/stock_point',
+              body: 'abc',
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
 
-  it(
-    testCaption('FLOW', 'feature', 'Should pass delete to service'),
-    async () => {
-      const id = `stock_point-${new Types.ObjectId().toString()}`
-      return app
-        .inject({
-          method: 'DELETE',
-          url: `/master/stock_point/${id}`,
-        })
-        .then((result) => {
-          expect(result.statusCode).toEqual(200)
-        })
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid data', {
+          tab: 1,
+        }),
+        async () => {
+          const data = {
+            code: mockMasterStockPoint().code,
+            name: mockMasterStockPoint().name,
+            configuration: mockMasterStockPoint().configuration,
+          } satisfies MasterStockPointAddDTO
+
+          delete data.name
+
+          return app
+            .inject({
+              method: 'POST',
+              url: '/master/stock_point',
+              body: data,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return success add', {
+          tab: 1,
+        }),
+        async () => {
+          const data = {
+            code: mockMasterStockPoint().code,
+            name: mockMasterStockPoint().name,
+            configuration: mockMasterStockPoint().configuration,
+          } satisfies MasterStockPointAddDTO
+
+          return app
+            .inject({
+              method: 'POST',
+              url: '/master/stock_point',
+              body: data,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Master Item Brand - Edit data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid format', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              body: 'abc',
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'feature', 'Should handle invalid data', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              body: {},
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
+              expect(logger.warn).toHaveBeenCalled()
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return success edit', {
+          tab: 1,
+        }),
+        async () => {
+          const data = {
+            code: mockMasterStockPoint().code,
+            name: mockMasterStockPoint().name,
+            configuration: mockMasterStockPoint().configuration,
+            __v: 0,
+          } satisfies MasterStockPointEditDTO
+
+          return app
+            .inject({
+              method: 'PATCH',
+              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              body: data,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Master Stock Point - Delete data'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Should return success delete', {
+          tab: 1,
+        }),
+        async () => {
+          return app
+            .inject({
+              method: 'DELETE',
+              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+            })
+            .then((result) => {
+              expect(result.statusCode).toEqual(HttpStatus.OK)
+              expect(logger.verbose).toHaveBeenCalled()
+            })
+        }
+      )
     }
   )
 

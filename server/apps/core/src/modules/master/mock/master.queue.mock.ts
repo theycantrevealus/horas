@@ -42,7 +42,7 @@ export const mockMasterQueueService = {
 
 export const mockMasterQueue = (
   id = `queue-${new Types.ObjectId().toString()}`,
-  code = 'QUE-0001',
+  code = 'QUE',
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `queue-${new Types.ObjectId().toString()}`,
