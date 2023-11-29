@@ -1,13 +1,13 @@
 import { Account } from '@core/account/schemas/account.model'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
+import { IGeneralReceiveNoteDetail } from '@inventory/interface/general.receive.note.detail'
 import { InventoryService } from '@inventory/inventory.service'
 import { PurchaseOrderService } from '@inventory/purchase.order.service'
 import {
   GeneralReceiveNote,
   GeneralReceiveNoteDocument,
 } from '@inventory/schemas/general.receive.note'
-import { IGeneralReceiveNoteDetail } from '@inventory/schemas/general.receive.note.detail'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'

@@ -16,6 +16,7 @@ export class ConsumerQueueService {
   constructor(
     @InjectModel(OperationQueue.name)
     private operationQueueModel: Model<OperationQueueDocument>,
+
     @Inject(LogService) private readonly logService: LogService
   ) {}
   async add(
@@ -34,38 +35,34 @@ export class ConsumerQueueService {
       transaction_classify: 'QUEUE',
       transaction_id: null,
     } satisfies GlobalResponse
-    return await this.operationQueueModel
-      .countDocuments({ machine: data.machine })
-      .then(async (result) => {
-        const currentQueue = result + 1
-        return await this.operationQueueModel
-          .create({
-            id: `queue-${generatedID}`,
-            machine: data.machine,
-            queue_number: currentQueue,
-            created_by: account,
-          })
-          .then(async (queueResult) => {
-            await this.logService.updateTask(`queue-${generatedID}`, 'done')
-            response.message = 'Queue created successfully'
-            response.transaction_id = queueResult._id
-            response.payload = queueResult
-            return response
-          })
-          .catch((error: Error) => {
-            response.message = error.message
-            response.statusCode =
-              modCodes[this.constructor.name].error.databaseError
-            response.payload = error
-            throw new Error(JSON.stringify(response))
-          })
-      })
-      .catch((error: Error) => {
-        response.message = error.message
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
-      })
+    try {
+      return await this.operationQueueModel
+        .countDocuments({ machine: data.machine })
+        .then(async (result) => {
+          const currentQueue = result + 1
+          return await this.operationQueueModel
+            .create({
+              id: `queue-${generatedID}`,
+              machine: data.machine,
+              queue_number: currentQueue,
+              created_by: account,
+            })
+            .then(async (queueResult) => {
+              await this.logService.updateTask(`queue-${generatedID}`, 'done')
+              response.message = 'Queue created successfully'
+              response.transaction_id = queueResult._id
+              response.payload = queueResult
+              return response
+            })
+        })
+    } catch (error) {
+      response.message = error.message
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 }

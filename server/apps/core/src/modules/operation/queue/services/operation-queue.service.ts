@@ -6,6 +6,7 @@ import { ClientKafka } from '@nestjs/microservices'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { Types } from 'mongoose'
+import { lastValueFrom } from 'rxjs'
 
 @Injectable()
 export class OperationQueueService {
@@ -33,26 +34,31 @@ export class OperationQueueService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const generatedID = new Types.ObjectId().toString()
-
-    const emitter = await this.clientInventory.emit(
-      this.configService.get<string>('kafka.queue.topic.queue'),
-      {
-        action: 'add',
-        id: generatedID,
-        data: parameter,
-        token: token,
-        account: account,
-      }
-    )
-
-    if (emitter) {
-      response.message = 'Queue created successfully'
-      response.transaction_id = `queue-${generatedID}`
-      return response
-    } else {
+    try {
+      const generatedID = new Types.ObjectId().toString()
+      return await lastValueFrom(
+        this.clientInventory.emit(
+          this.configService.get<string>('kafka.queue.topic.queue'),
+          {
+            action: 'add',
+            id: generatedID,
+            data: parameter,
+            token: token,
+            account: account,
+          }
+        )
+      ).then(async () => {
+        response.message = 'Queue created successfully'
+        response.transaction_id = `queue-${generatedID}`
+        return response
+      })
+    } catch (error) {
       response.message = `Queue failed to create`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
   }

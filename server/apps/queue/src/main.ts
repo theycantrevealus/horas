@@ -28,6 +28,6 @@ async function bootstrap() {
     },
   ])
   appContext.useLogger(appContext.get(WINSTON_MODULE_NEST_PROVIDER))
-  app.listen()
+  await app.listen()
 }
 bootstrap()

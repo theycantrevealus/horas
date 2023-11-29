@@ -24,10 +24,13 @@ export class PurchaseOrderService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
+
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
+
     @Inject(MasterItemService)
     private readonly masterItemService: MasterItemService,
+
     @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
   ) {
     //

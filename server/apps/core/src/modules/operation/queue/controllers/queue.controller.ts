@@ -2,19 +2,19 @@ import { QueueAddDTO } from '@core/operation/queue/dto/queue'
 import { OperationQueueService } from '@core/operation/queue/services/operation-queue.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
+import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Body,
   Controller,
-  HttpStatus,
   Inject,
   Post,
   Req,
-  Res,
   UseGuards,
+  UseInterceptors,
   Version,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyRequest } from 'fastify'
 
 @Controller('queue')
 @ApiTags('Frontdesk')
@@ -26,6 +26,7 @@ export class OperationQueueController {
   @Post()
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -35,16 +36,12 @@ export class OperationQueueController {
   async add(
     @Req() request: FastifyRequest,
     @Body() parameter: QueueAddDTO,
-    @CredentialAccount() account,
-    @Res() response: FastifyReply
+    @CredentialAccount() account
   ) {
-    await this.operationQueueService
-      .add(parameter, account, request.headers.authorization)
-      .then((result) => {
-        response.code(HttpStatus.OK).send(result)
-      })
-      .catch((error) => {
-        response.code(HttpStatus.BAD_REQUEST).send(error.message)
-      })
+    return await this.operationQueueService.add(
+      parameter,
+      account,
+      request.headers.authorization
+    )
   }
 }

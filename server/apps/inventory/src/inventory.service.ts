@@ -1,6 +1,9 @@
 import { Account } from '@core/account/schemas/account.model'
+import { IMasterItem } from '@core/master/interface/master.item'
+import { IMasterItemBatch } from '@core/master/interface/master.item.batch'
+import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
+import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
 import {
-  IMasterItemStoring,
   MasterItem,
   MasterItemDocument,
 } from '@core/master/schemas/master.item'
@@ -8,9 +11,6 @@ import {
   MasterItemBatch,
   MasterItemBatchDocument,
 } from '@core/master/schemas/master.item.batch'
-import { IMasterItemBatch } from '@core/master/schemas/master.item.batch.join'
-import { IMasterItem } from '@core/master/schemas/master.item.join'
-import { IMasterStockPoint } from '@core/master/schemas/master.stock.point.join'
 import { StockDTO } from '@inventory/dto/stock'
 import {
   InventoryStock,

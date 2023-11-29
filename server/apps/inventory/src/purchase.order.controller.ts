@@ -15,10 +15,13 @@ export class PurchaseOrderController {
   constructor(
     @Inject(PurchaseOrderService)
     private readonly purchaseOrderService: PurchaseOrderService,
+
     @Inject(SocketIoClientProxyService)
     private readonly socketProxy: SocketIoClientProxyService,
+
     @Inject(ConfigService)
     private readonly configService: ConfigService,
+
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {

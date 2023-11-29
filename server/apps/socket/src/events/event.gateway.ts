@@ -41,9 +41,12 @@ export class EventsGateway
 
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
+
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger,
+
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
     @Inject(AuthService) private readonly authService: AuthService
   ) {
     //

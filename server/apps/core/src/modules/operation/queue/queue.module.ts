@@ -1,9 +1,6 @@
 import { AccountModule } from '@core/account/account.module'
 import { OperationQueueController } from '@core/operation/queue/controllers/queue.controller'
-import {
-  OperationQueue,
-  OperationQueueSchema,
-} from '@core/operation/queue/schemas/queue'
+import { OperationQueueModelProvider } from '@core/operation/queue/schemas/queue.provider'
 import { OperationQueueService } from '@core/operation/queue/services/operation-queue.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -29,35 +26,7 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
       },
       inject: [ConfigService],
     }),
-    MongooseModule.forFeatureAsync([
-      {
-        name: OperationQueue.name,
-        useFactory: () => {
-          const schema = OperationQueueSchema
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `queue-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-    ]),
+    MongooseModule.forFeatureAsync([OperationQueueModelProvider]),
     MongooseModule.forFeature([
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
