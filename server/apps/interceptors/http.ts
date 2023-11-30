@@ -9,11 +9,13 @@ import { isCustomErrorCode } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
 import { FastifyRequest } from 'fastify'
 import { tap } from 'rxjs'
+import { Logger } from 'winston'
 
 export async function httpInterceptor(
   context: ExecutionContext,
   next: CallHandler,
-  reflector: Reflector
+  reflector: Reflector,
+  logger: Logger
 ) {
   const TM = new TimeManagement()
   const http = context.switchToHttp()
@@ -52,16 +54,16 @@ export async function httpInterceptor(
 
       if (result.statusCode) {
         if (result.statusCode.defaultCode === HttpStatus.BAD_REQUEST) {
-          this.logger.warn(dataSet)
+          logger.warn(dataSet)
         } else if (
           result.statusCode.defaultCode === HttpStatus.INTERNAL_SERVER_ERROR
         ) {
-          this.logger.error(dataSet)
+          logger.error(dataSet)
         } else {
-          this.logger.verbose(dataSet)
+          logger.verbose(dataSet)
         }
       } else {
-        this.logger.warn(dataSet)
+        logger.warn(dataSet)
       }
 
       if (result.statusCode) {

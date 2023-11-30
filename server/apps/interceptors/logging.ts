@@ -31,11 +31,11 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     next: CallHandler
   ): Promise<Observable<any>> {
     if (context.getType() === 'http') {
-      return await httpInterceptor(context, next, this.reflector)
+      return await httpInterceptor(context, next, this.reflector, this.logger)
     } else if (context.getType() === 'rpc') {
-      return await rpcInterceptor(context, next, this.reflector)
+      return await rpcInterceptor(context, next, this.reflector, this.logger)
     } else if (context.getType() === 'ws') {
-      return await wsInterceptor(context, next, this.reflector)
+      return await wsInterceptor(context, next, this.reflector, this.logger)
     }
   }
 }

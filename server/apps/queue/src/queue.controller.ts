@@ -1,4 +1,11 @@
-import { Controller, HttpStatus, Inject, UseFilters } from '@nestjs/common'
+import { LoggingInterceptor } from '@interceptors/logging'
+import {
+  Controller,
+  HttpStatus,
+  Inject,
+  UseFilters,
+  UseInterceptors,
+} from '@nestjs/common'
 import { Payload } from '@nestjs/microservices'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
@@ -26,6 +33,7 @@ export class ConsumerQueueController {
 
   @KafkaTopic('KAFKA_TOPICS')
   @UseFilters(CommonErrorFilter)
+  @UseInterceptors(LoggingInterceptor)
   async queue(@Payload() payload) {
     const response = {
       statusCode: {
