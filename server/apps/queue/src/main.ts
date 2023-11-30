@@ -31,3 +31,4 @@ async function bootstrap() {
   await app.listen()
 }
 bootstrap()
+// Cluster.clusterize(bootstrap())

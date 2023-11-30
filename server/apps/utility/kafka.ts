@@ -39,7 +39,9 @@ const KafkaConnCoord = (devMode) => {
           options: {
             client: {
               clientId: configService.get<string>('kafka.inventory.client'),
-              brokers: [configService.get<string>('kafka.inventory.broker')],
+              brokers: configService
+                .get<string>('kafka.inventory.broker')
+                .split(','),
               logLevel: logLevel.ERROR,
               logCreator: WinstonLogCreator,
             },
@@ -68,7 +70,9 @@ const KafkaConnCoord = (devMode) => {
           options: {
             client: {
               clientId: configService.get<string>('kafka.master.item.client'),
-              brokers: [configService.get<string>('kafka.master.item.broker')],
+              brokers: configService
+                .get<string>('kafka.master.item.broker')
+                .split(','),
             },
             consumer: {
               groupId: configService.get<string>(
@@ -97,7 +101,9 @@ const KafkaConnCoord = (devMode) => {
           options: {
             client: {
               clientId: configService.get<string>('kafka.queue.client'),
-              brokers: [configService.get<string>('kafka.queue.broker')],
+              brokers: configService
+                .get<string>('kafka.queue.broker')
+                .split(','),
             },
             consumer: {
               groupId: configService.get<string>('kafka.queue.cons_group'),

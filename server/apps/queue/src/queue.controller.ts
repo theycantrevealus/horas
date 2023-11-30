@@ -13,9 +13,11 @@ import { KafkaTopic } from '@utility/decorator'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
+import { Socket } from 'socket.io-client'
 import { Logger } from 'winston'
 
 import { CommonErrorFilter } from '../../filters/error'
+import { ConsumerQueueDTO } from './dto/queue.dto'
 import { ConsumerQueueService } from './queue.service'
 
 @Controller('queue')
@@ -34,7 +36,7 @@ export class ConsumerQueueController {
   @KafkaTopic('KAFKA_TOPICS')
   @UseFilters(CommonErrorFilter)
   @UseInterceptors(LoggingInterceptor)
-  async queue(@Payload() payload) {
+  async queue(@Payload() payload: ConsumerQueueDTO) {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -59,18 +61,20 @@ export class ConsumerQueueController {
                     Authorization: payload.token,
                   },
                 })
-                .then(async (clientSet) => {
+                .then(async (clientSet: Socket) => {
                   response.message = 'New queue created'
-                  await clientSet
-                    .emit('queue', {
+                  return clientSet.emit(
+                    'queue',
+                    {
                       sender: payload.account,
                       receiver: null,
                       payload: response,
-                    } satisfies ProceedDataTrafficDTO)
-                    .then(async () => {
+                    } satisfies ProceedDataTrafficDTO,
+                    async () => {
                       await clientSet.disconnect()
                       return response
-                    })
+                    }
+                  )
                 })
             })
           break
@@ -81,7 +85,10 @@ export class ConsumerQueueController {
       }
     } catch (error) {
       response.message = error.message
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
       response.payload = error
       throw new Error(JSON.stringify(error))
     }

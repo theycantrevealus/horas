@@ -1,4 +1,4 @@
-import { Account } from '@core/account/schemas/account.model'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { QueueAddDTO } from '@core/operation/queue/dto/queue'
 import {
   OperationQueue,
@@ -22,7 +22,7 @@ export class ConsumerQueueService {
   async add(
     generatedID: string,
     data: QueueAddDTO,
-    account: Account
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -54,6 +54,15 @@ export class ConsumerQueueService {
               response.payload = queueResult
               return response
             })
+        })
+        .catch((error: Error) => {
+          response.message = error.message
+          response.statusCode = {
+            ...modCodes[this.constructor.name].error.databaseError,
+            classCode: modCodes[this.constructor.name].defaultCode,
+          }
+          response.payload = error
+          throw new Error(JSON.stringify(response))
         })
     } catch (error) {
       response.message = error.message

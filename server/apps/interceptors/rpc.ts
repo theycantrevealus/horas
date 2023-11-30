@@ -1,14 +1,10 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { CallHandler, ExecutionContext, HttpStatus } from '@nestjs/common'
-import { PATH_METADATA } from '@nestjs/common/constants'
+import { CallHandler, ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { GlobalResponse, GlobalResponseParsed } from '@utility/dto/response'
-import { isExpressRequest } from '@utility/http'
+import { KafkaContext } from '@nestjs/microservices'
 import { HorasLogging } from '@utility/logger/interfaces'
-import { isCustomErrorCode } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
-import { FastifyRequest } from 'fastify'
-import { tap } from 'rxjs'
+import { isJSON } from 'class-validator'
 import { Logger } from 'winston'
 
 export async function rpcInterceptor(
@@ -18,81 +14,38 @@ export async function rpcInterceptor(
   logger: Logger
 ) {
   const TM = new TimeManagement()
-  const http = context.switchToHttp()
-  const request = http.getRequest()
-  const response = http.getResponse()
-  const path = reflector.get<string[]>(PATH_METADATA, context.getHandler())
-  const method = isExpressRequest(request)
-    ? request.method
-    : (request as FastifyRequest).method
+  const ctx = context.switchToRpc()
+  const response = ctx.getData()
+  const request = ctx.getContext()
+  // const path = reflector.get<string[]>(PATH_METADATA, context.getHandler())
+  const method = 'RPC'
 
-  // const authorization = isExpressRequest(request)
-  //   ? request.headers['Authorization']
-  //   : (request as FastifyRequest).headers?.authorization
+  const kafkaContext = request.getArgByIndex(0) satisfies KafkaContext
+  const path = kafkaContext.topic
+  const partition = kafkaContext.partition
+  const offset = kafkaContext.offset
+
   const now = Date.now()
-  const { url } = request
-  const query = request.query ? JSON.parse(JSON.stringify(request.query)) : ''
-  const account: IAccountCreatedBy = request.credential
+  const account: IAccountCreatedBy = response.account
 
-  return next.handle().pipe(
-    tap(async (result: GlobalResponse) => {
-      const dataSet: HorasLogging = {
-        ip: request.ip ?? '',
-        path: path.toString(),
-        url: url,
-        method: method,
-        takeTime: Date.now() - now,
-        payload: {
-          body: request.body ?? {},
-          params: request.params ?? '',
-          query: query,
-        },
-        result: result,
-        account: account,
-        time: TM.getTimezone('Asia/Jakarta'),
-      }
+  const dataSet: HorasLogging = {
+    ip: `${path}_${partition}_${offset}`,
+    path: path ?? '',
+    url: `${partition}_${offset}`,
+    method: method,
+    takeTime: Date.now() - now,
+    payload: {
+      body: response.data,
+      params: response.id,
+      query: response.data,
+    },
+    result: isJSON(response.data)
+      ? JSON.stringify(response.data)
+      : response.data,
+    account: account,
+    time: TM.getTimezone('Asia/Jakarta'),
+  }
 
-      if (result.statusCode) {
-        if (result.statusCode.defaultCode === HttpStatus.BAD_REQUEST) {
-          logger.warn(dataSet)
-        } else if (
-          result.statusCode.defaultCode === HttpStatus.INTERNAL_SERVER_ERROR
-        ) {
-          logger.error(dataSet)
-        } else {
-          logger.verbose(dataSet)
-        }
-      } else {
-        logger.warn(dataSet)
-      }
-
-      if (result.statusCode) {
-        if (isCustomErrorCode(result.statusCode)) {
-          response.code(result.statusCode.defaultCode).send({
-            statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
-            message: result.message,
-            payload: result.payload,
-            transaction_classify: result.transaction_classify,
-            transaction_id: result.transaction_id,
-          } satisfies GlobalResponseParsed)
-        } else {
-          response.code(HttpStatus.BAD_REQUEST).send({
-            statusCode: `CORE_F0000`,
-            message: result.message,
-            payload: result.payload,
-            transaction_classify: result.transaction_classify,
-            transaction_id: result.transaction_id,
-          } satisfies GlobalResponseParsed)
-        }
-      } else {
-        response.code(HttpStatus.BAD_REQUEST).send({
-          statusCode: `CORE_F0000`,
-          message: result.message,
-          payload: result.payload,
-          transaction_classify: 'UNKNOWN',
-          transaction_id: result.transaction_id,
-        } satisfies GlobalResponseParsed)
-      }
-    })
-  )
+  logger.verbose(dataSet)
+  return next.handle()
 }
