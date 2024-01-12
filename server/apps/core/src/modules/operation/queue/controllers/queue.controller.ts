@@ -23,6 +23,7 @@ export class OperationQueueController {
     @Inject(OperationQueueService)
     private readonly operationQueueService: OperationQueueService
   ) {}
+
   @Post()
   @Version('1')
   @UseGuards(JwtAuthGuard)

@@ -18,6 +18,7 @@ import { AuthService } from '@security/auth.service'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { gen_uuid } from '@utility/generator'
+import { KafkaService } from '@utility/kafka/avro/service'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -51,7 +52,10 @@ export class AccountService {
     @Inject(AuthService)
     private authService: AuthService,
 
-    @Inject(ConfigService) private readonly configService: ConfigService
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
+    @Inject('ACCOUNT_SERVICE')
+    private readonly accountProducer: KafkaService
   ) {}
 
   async accountAll(payload: any): Promise<GlobalResponse> {
@@ -69,6 +73,36 @@ export class AccountService {
 
     try {
       const parameter: PrimeParameter = JSON.parse(payload)
+
+      const result = await this.accountProducer.send({
+        topic: 'account',
+        messages: [
+          {
+            key: {
+              id: '',
+              email: '',
+              created_at: '',
+            },
+            value: {
+              code: '',
+              email: '',
+              authority: [
+                {
+                  id: '',
+                  code: '',
+                  name: '',
+                },
+              ],
+              first_name: '',
+              last_name: '',
+              phone: '',
+            },
+          },
+        ],
+      })
+      this.logger.warn(
+        `Come with this result: ${JSON.stringify(result, null, 2)}`
+      )
 
       return await prime_datatable(parameter, this.accountModel).then(
         (result) => {

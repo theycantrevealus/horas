@@ -6,7 +6,7 @@ import {
   UseFilters,
   UseInterceptors,
 } from '@nestjs/common'
-import { Payload } from '@nestjs/microservices'
+import { Ctx, KafkaContext, Payload } from '@nestjs/microservices'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { KafkaTopic } from '@utility/decorator'
@@ -36,7 +36,12 @@ export class ConsumerQueueController {
   @KafkaTopic('KAFKA_TOPICS')
   @UseFilters(CommonErrorFilter)
   @UseInterceptors(LoggingInterceptor)
-  async queue(@Payload() payload: ConsumerQueueDTO) {
+  async queue(
+    @Payload() payload: ConsumerQueueDTO,
+    @Ctx() context: KafkaContext
+  ) {
+    const heartbeat = context.getHeartbeat()
+
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -50,11 +55,18 @@ export class ConsumerQueueController {
     } satisfies GlobalResponse
 
     try {
+      const { offset } = context.getMessage()
+      const partition = context.getPartition()
+      const topic = context.getTopic()
+
+      await heartbeat()
+
       switch (payload.action) {
         case 'add':
           return await this.consumerQueueService
             .add(payload.id, payload.data, payload.account)
             .then(async (response) => {
+              await heartbeat()
               return await this.socketProxy
                 .reconnect({
                   extraHeaders: {

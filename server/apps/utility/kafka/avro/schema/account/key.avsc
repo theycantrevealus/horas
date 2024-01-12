@@ -1,0 +1,19 @@
+{
+    "type": "record",
+    "name": "Account",
+    "namespace": "com.horas.account",
+    "fields": [
+        {
+            "name": "id",
+            "type"": "string"
+        },
+        {
+            "name": "email",
+            "type"": "string"
+        },
+        {
+            "name": "created_at",
+            "type"": "string"
+        }
+    ]
+}

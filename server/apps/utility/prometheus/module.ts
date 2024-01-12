@@ -3,16 +3,17 @@ import {
   FactoryProvider,
   Module,
   Provider,
-} from "@nestjs/common";
-import * as promClient from "prom-client";
-import { PROMETHEUS_OPTIONS, PROM_CLIENT } from "./constants";
-import { PrometheusController } from "./controller";
+} from '@nestjs/common'
+import * as promClient from 'prom-client'
+
+import { PROM_CLIENT, PROMETHEUS_OPTIONS } from './constants'
+import { PrometheusController } from './controller'
 import {
   PrometheusAsyncOptions,
   PrometheusOptions,
   PrometheusOptionsFactory,
   PrometheusOptionsWithDefaults,
-} from "./interfaces";
+} from './interfaces'
 
 /**
  * The primary entrypoint. This should be registered once in the root application module.
@@ -22,21 +23,21 @@ import {
 @Module({})
 export class PrometheusModule {
   public static register(options?: PrometheusOptions): DynamicModule {
-    const opts = PrometheusModule.makeDefaultOptions(options);
+    const opts = PrometheusModule.makeDefaultOptions(options)
 
-    PrometheusModule.configureServer(opts);
+    PrometheusModule.configureServer(opts)
 
-    const providers: Provider[] = [];
+    const providers: Provider[] = []
     if (options?.pushgateway !== undefined) {
-      const { url, options: gatewayOptions, registry } = options.pushgateway;
+      const { url, options: gatewayOptions, registry } = options.pushgateway
       providers.push({
         provide: promClient.Pushgateway,
         useValue: PrometheusModule.configurePushgateway(
           url,
           gatewayOptions,
-          registry,
+          registry
         ),
-      });
+      })
     }
 
     return {
@@ -44,12 +45,12 @@ export class PrometheusModule {
       providers,
       controllers: [opts.controller],
       exports: providers,
-    };
+    }
   }
 
   public static registerAsync(options: PrometheusAsyncOptions): DynamicModule {
-    const providers = this.createAsyncProviders(options);
-    const controller = options.controller ?? PrometheusController;
+    const providers = this.createAsyncProviders(options)
+    const controller = options.controller ?? PrometheusController
 
     return {
       module: PrometheusModule,
@@ -61,30 +62,30 @@ export class PrometheusModule {
           provide: PROM_CLIENT,
           inject: [PROMETHEUS_OPTIONS],
           useFactory(userOptions: PrometheusOptions) {
-            const opts = PrometheusModule.makeDefaultOptions(userOptions);
+            const opts = PrometheusModule.makeDefaultOptions(userOptions)
 
-            PrometheusModule.configureServer(opts);
+            PrometheusModule.configureServer(opts)
 
-            return promClient;
+            return promClient
           },
         },
       ],
       exports: [...providers],
-    };
+    }
   }
 
   public static createAsyncProviders(
-    options: PrometheusAsyncOptions,
+    options: PrometheusAsyncOptions
   ): Provider[] {
     if (options.useExisting || options.useFactory) {
       return [
         this.createAsyncOptionsProvider(options),
         PrometheusModule.createPushgatewayProvider(),
-      ];
+      ]
     } else if (!options.useClass) {
       throw new Error(
-        "Invalid configuration. Must provide useClass or useExisting",
-      );
+        'Invalid configuration. Must provide useClass or useExisting'
+      )
     }
 
     return [
@@ -94,11 +95,11 @@ export class PrometheusModule {
         useClass: options.useClass,
       },
       PrometheusModule.createPushgatewayProvider(),
-    ];
+    ]
   }
 
   public static createAsyncOptionsProvider(
-    options: PrometheusAsyncOptions,
+    options: PrometheusAsyncOptions
   ): Provider {
     if (options.useFactory) {
       return {
@@ -106,46 +107,46 @@ export class PrometheusModule {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         useFactory: options.useFactory,
         inject: options.inject || [],
-      };
+      }
     }
 
-    const inject = options.useClass || options.useExisting;
+    const inject = options.useClass || options.useExisting
 
     if (!inject) {
       throw new Error(
-        "Invalid configuration. Must provide useClass or useExisting",
-      );
+        'Invalid configuration. Must provide useClass or useExisting'
+      )
     }
 
     return {
       provide: PROMETHEUS_OPTIONS,
       async useFactory(
-        optionsFactory: PrometheusOptionsFactory,
+        optionsFactory: PrometheusOptionsFactory
       ): Promise<PrometheusOptions> {
-        return optionsFactory.createPrometheusOptions();
+        return optionsFactory.createPrometheusOptions()
       },
       inject: [inject],
-    };
+    }
   }
 
   private static configureServer(options: PrometheusOptionsWithDefaults): void {
     if (options.defaultMetrics.enabled) {
-      promClient.collectDefaultMetrics(options.defaultMetrics.config);
+      promClient.collectDefaultMetrics(options.defaultMetrics.config)
     }
 
     if (Object.keys(options.defaultLabels).length > 0) {
-      promClient.register.setDefaultLabels(options.defaultLabels);
+      promClient.register.setDefaultLabels(options.defaultLabels)
     }
 
-    Reflect.defineMetadata("path", options.path, options.controller);
+    Reflect.defineMetadata('path', options.path, options.controller)
   }
 
   private static configurePushgateway(
     url: string,
     options?: unknown,
-    registry?: promClient.Registry,
+    registry?: promClient.Registry
   ): promClient.Pushgateway {
-    return new promClient.Pushgateway(url, options, registry);
+    return new promClient.Pushgateway(url, options, registry)
   }
 
   private static createPushgatewayProvider(): FactoryProvider {
@@ -154,29 +155,25 @@ export class PrometheusModule {
       inject: [PROMETHEUS_OPTIONS],
       useFactory(options: PrometheusOptions) {
         if (options?.pushgateway !== undefined) {
-          const {
-            url,
-            options: gatewayOptions,
-            registry,
-          } = options.pushgateway;
+          const { url, options: gatewayOptions, registry } = options.pushgateway
 
           return PrometheusModule.configurePushgateway(
             url,
             gatewayOptions,
-            registry,
-          );
+            registry
+          )
         }
 
-        return null;
+        return null
       },
-    };
+    }
   }
 
   private static makeDefaultOptions(
-    options?: PrometheusOptions,
+    options?: PrometheusOptions
   ): PrometheusOptionsWithDefaults {
     return {
-      path: "/metrics",
+      path: '/metrics',
       defaultMetrics: {
         enabled: true,
         config: {},
@@ -184,6 +181,6 @@ export class PrometheusModule {
       controller: PrometheusController,
       defaultLabels: {},
       ...options,
-    };
+    }
   }
 }

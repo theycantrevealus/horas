@@ -1,4 +1,3 @@
-import { PurchaseOrderService } from '@inventory/purchase.order.service'
 import { Controller, Inject } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Payload } from '@nestjs/microservices'
@@ -8,6 +7,8 @@ import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { KafkaTopic } from '@utility/decorator'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Logger } from 'winston'
+
+import { PurchaseOrderService } from './purchase.order.service'
 
 @Controller('inventory')
 @ApiTags('Purchase Order')
@@ -54,7 +55,7 @@ export class PurchaseOrderController {
                   })
               })
               .catch((e: Error) => {
-                this.logger.warn('Failed to connect')
+                this.logger.warn('Failed to connect: ', e.message)
               })
           })
         break
@@ -81,7 +82,7 @@ export class PurchaseOrderController {
                   })
               })
               .catch((e: Error) => {
-                this.logger.warn('Failed to connect')
+                this.logger.warn('Failed to connect: ', e.message)
               })
           })
         break
@@ -108,7 +109,7 @@ export class PurchaseOrderController {
                   })
               })
               .catch((e: Error) => {
-                this.logger.warn('Failed to connect')
+                this.logger.warn('Failed to connect: ', e.message)
               })
           })
         break

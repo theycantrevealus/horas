@@ -39,7 +39,6 @@ export class VisitService {
         return response
       })
       .catch((error) => {
-        console.log(error)
         response.message = error.message
         response.statusCode = {
           ...modCodes[this.constructor.name].error.databaseError,

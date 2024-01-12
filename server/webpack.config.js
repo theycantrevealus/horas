@@ -64,6 +64,7 @@ module.exports = (options, webpack) => {
         '@interceptors': path.resolve(__dirname, 'apps/interceptors'),
         '@guards': path.resolve(__dirname, 'apps/guards'),
         '@decorators': path.resolve(__dirname, 'apps/decorators'),
+        '@shared': path.resolve(__dirname, 'apps/shared'),
       },
       extensions: ['.tsx', '.ts', '.js'],
     },

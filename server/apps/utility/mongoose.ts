@@ -1,4 +1,10 @@
-import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import {
+  MongooseModule,
+  MongooseModuleOptions,
+  MongooseOptionsFactory,
+} from '@nestjs/mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 
@@ -28,6 +34,24 @@ const clear = async () => {
 
   for (const key in collections) {
     await collections[key].deleteMany({})
+  }
+}
+
+@Injectable()
+export class MongodbConfigService implements MongooseOptionsFactory {
+  constructor(private readonly configService: ConfigService) {}
+
+  //You can retrun promise as well
+  public createMongooseOptions(): MongooseModuleOptions {
+    return {
+      uri: `mongodb://${this.configService.get<string>(
+        'mongo.host'
+      )}:${this.configService.get<string>('mongo.port')}`,
+      dbName: this.configService.get<string>('mongo.db_name'),
+      authSource: 'admin',
+      directConnection: true,
+      // replicaSet: this.configService.get<string>('MONGO_REPL_SET'),
+    }
   }
 }
 

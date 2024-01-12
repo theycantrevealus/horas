@@ -13,11 +13,26 @@ export const ApplicationConfig = () => ({
     jwt: 'TAKASHITANAKA0192',
     log: {
       colorize: parseInt(process.env.LOG_COLORIZE) > 0,
-      info: process.env.LOG_INFO,
-      verbose: process.env.LOG_VERBOSE,
-      warn: process.env.LOG_WARN,
-      debug: process.env.LOG_DEBUG,
-      error: process.env.LOG_ERROR,
+      info: {
+        name: process.env.LOG_INFO,
+        level: process.env.LOG_INFO_LEVEL,
+      },
+      verbose: {
+        name: process.env.LOG_VERBOSE,
+        level: process.env.LOG_VERBOSE_LEVEL,
+      },
+      warn: {
+        name: process.env.LOG_WARN,
+        level: process.env.LOG_WARN_LEVEL,
+      },
+      debug: {
+        name: process.env.LOG_DEBUG,
+        level: process.env.LOG_DEBUG_LEVEL,
+      },
+      error: {
+        name: process.env.LOG_ERROR,
+        level: process.env.LOG_ERROR_LEVEL,
+      },
     },
     token: '',
   },

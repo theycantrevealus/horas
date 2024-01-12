@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { MessagePattern, MicroserviceOptions } from '@nestjs/microservices'
+import { Cluster } from '@utility/cluster'
 import { KAFKA_TOPICS } from '@utility/constants'
 import { DecoratorProcessorService } from '@utility/decorator'
 import { KafkaConn } from '@utility/kafka'
@@ -12,13 +13,14 @@ import { ConsumerQueueModule } from './queue.module'
 
 async function bootstrap() {
   const appContext = await NestFactory.createApplicationContext(CoreModule, {
-    logger: ['verbose', 'error'],
+    logger: ['error', 'verbose', 'debug', 'warn'],
   })
   const configService = appContext.get(ConfigService)
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     ConsumerQueueModule,
     await KafkaConn.queue[0].useFactory(configService)
   )
+
   app.get(DecoratorProcessorService).processDecorators([
     {
       target: ConsumerQueueController,
@@ -27,8 +29,13 @@ async function bootstrap() {
       decorator: MessagePattern,
     },
   ])
+
   appContext.useLogger(appContext.get(WINSTON_MODULE_NEST_PROVIDER))
   await app.listen()
 }
-bootstrap()
-// Cluster.clusterize(bootstrap())
+
+if (process.env.NODE_CLUSTER && parseInt(process.env.NODE_CLUSTER) > 0) {
+  Cluster.clusterize(bootstrap)
+} else {
+  bootstrap()
+}

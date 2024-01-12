@@ -63,7 +63,7 @@ export function getParamDecoratorFactory(Decorator) {
     'getAccount'
   )
 
-  console.log(args[Object.keys(args)[0]].factory)
+  // console.log(args[Object.keys(args)[0]].factory)
 
   return args[Object.keys(args)[0]].factory
 }

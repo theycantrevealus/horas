@@ -1,5 +1,6 @@
 import { Account } from '@core/account/schemas/account.model'
 import { QueueAddDTO } from '@core/operation/queue/dto/queue'
+import { KafkaClient } from '@decorators/kafka/client'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ClientKafka } from '@nestjs/microservices'
@@ -10,11 +11,12 @@ import { lastValueFrom } from 'rxjs'
 
 @Injectable()
 export class OperationQueueService {
+  @KafkaClient('KAFKA_CLIENTS')
+  private readonly clientQueue: ClientKafka
+
   constructor(
     @Inject(ConfigService)
-    private readonly configService: ConfigService,
-
-    @Inject('QUEUE_SERVICE') private readonly clientInventory: ClientKafka
+    private readonly configService: ConfigService
   ) {}
 
   async add(
@@ -37,14 +39,17 @@ export class OperationQueueService {
     try {
       const generatedID = new Types.ObjectId().toString()
       return await lastValueFrom(
-        this.clientInventory.emit(
+        this.clientQueue.emit(
           this.configService.get<string>('kafka.queue.topic.queue'),
           {
-            action: 'add',
-            id: generatedID,
-            data: parameter,
-            token: token,
-            account: account,
+            key: 'test',
+            value: {
+              action: 'add',
+              id: generatedID,
+              data: parameter,
+              token: token,
+              account: account,
+            },
           }
         )
       ).then(async () => {

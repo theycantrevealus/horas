@@ -1,6 +1,6 @@
-import { Type } from "@nestjs/common";
-import { ModuleMetadata } from "@nestjs/common/interfaces";
-import * as client from "prom-client";
+import { Type } from '@nestjs/common'
+import { ModuleMetadata } from '@nestjs/common/interfaces'
+import * as client from 'prom-client'
 
 /**
  * Configuration for the defaultMetrics collected by `prom-client`.
@@ -13,11 +13,12 @@ export interface PrometheusDefaultMetrics {
    *
    * @defaultValue true
    */
-  enabled: boolean;
+  enabled: boolean
   /**
    * {@link https://github.com/siimon/prom-client#default-metrics | Default Metrics}
    */
-  config?: client.DefaultMetricsCollectorConfiguration;
+  // config?: client.DefaultMetricsCollectorConfiguration;
+  config?: any
 }
 
 /**
@@ -47,15 +48,15 @@ export interface PrometheusOptions {
    * }
    * ```
    */
-  controller?: Type<unknown>;
+  controller?: Type<unknown>
   /**
    * The URL at which Prometheus metrics will be available
    *
    * @defaultValue /metrics
    */
-  path?: string;
+  path?: string
   /** {@inheritDoc PrometheusDefaultMetrics} */
-  defaultMetrics?: PrometheusDefaultMetrics;
+  defaultMetrics?: PrometheusDefaultMetrics
   /**
    * Will be passed into `setDefaultLabels`
    *
@@ -63,23 +64,23 @@ export interface PrometheusOptions {
    */
   // Using this type to match what prom-client specifies.
   // eslint-disable-next-line @typescript-eslint/ban-types
-  defaultLabels?: Object;
+  defaultLabels?: Object
   pushgateway?: {
-    url: string;
-    options?: unknown;
-    registry?: client.Registry;
-  };
+    url: string
+    options?: unknown
+    registry?: client.Registry
+  }
 }
 
 export type PrometheusOptionsWithDefaults = Required<
-  Omit<PrometheusOptions, "pushgateway">
->;
+  Omit<PrometheusOptions, 'pushgateway'>
+>
 
 /**
  * @internal
  */
 export interface PrometheusOptionsFactory {
-  createPrometheusOptions(): Promise<PrometheusOptions> | PrometheusOptions;
+  createPrometheusOptions(): Promise<PrometheusOptions> | PrometheusOptions
 }
 
 /**
@@ -88,15 +89,15 @@ export interface PrometheusOptionsFactory {
  * @public
  */
 export interface PrometheusAsyncOptions
-  extends Pick<ModuleMetadata, "imports"> {
-  useExisting?: Type<PrometheusOptionsFactory>;
-  useClass?: Type<PrometheusOptionsFactory>;
+  extends Pick<ModuleMetadata, 'imports'> {
+  useExisting?: Type<PrometheusOptionsFactory>
+  useClass?: Type<PrometheusOptionsFactory>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inject?: any[];
+  inject?: any[]
 
   /** {@inheritDoc PrometheusOptions.controller} */
-  controller?: PrometheusOptions["controller"];
+  controller?: PrometheusOptions['controller']
   useFactory?(
     ...args: unknown[]
-  ): Promise<PrometheusOptions> | PrometheusOptions;
+  ): Promise<PrometheusOptions> | PrometheusOptions
 }

@@ -1,11 +1,15 @@
+import { OperationQueueService } from '@core/operation/queue/services/operation-queue.service'
+import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
+import { Client } from '@nestjs/microservices'
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { KAFKA_CLIENTS } from '@utility/constants'
 import { environmentName } from '@utility/environtment'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 import * as CopyPlugin from 'copy-webpack-plugin'
@@ -81,11 +85,9 @@ async function bootstrap() {
 
   app.useGlobalFilters(new CommonErrorFilter(logger))
   app.useGlobalPipes(new GatewayPipe())
-
   app.enableVersioning({
     type: VersioningType.URI,
   })
-
   app.enableCors()
 
   const options = new DocumentBuilder()
@@ -212,7 +214,18 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   })
+
   const mode = configService.get<string>('application.node_env')
+
+  app.get(ClientDecoratorProcessorService).processDecorators([
+    {
+      target: OperationQueueService,
+      constant: KAFKA_CLIENTS,
+      meta: `kafka.queue`,
+      decorator: Client,
+    },
+  ])
+
   await app.listen(parseInt(configService.get<string>('application.port')))
 
   if (mode === '' || mode === 'development') {

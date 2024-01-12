@@ -1,5 +1,10 @@
+import * as process from 'process'
+
 export const KafkaConfig = () => {
   return {
+    schema_registry: {
+      host: process.env.KAFKA_SCHEMA_REGISTRY_SERVER,
+    },
     kafka: {
       master: {
         item: {
@@ -18,6 +23,26 @@ export const KafkaConfig = () => {
             username: process.env.KAFKA_M_ITEM_SASL_USERNAME,
             password: process.env.KAFKA_M_ITEM_SASL_PASSWORD,
           },
+        },
+      },
+      account: {
+        service: process.env.KAFKA_ACCOUNT_SERVICE,
+        topic: {
+          account: process.env.KAFKA_ACCOUNT_TOPIC_ACCOUNT,
+        },
+        client: process.env.KAFKA_ACCOUNT_CLIENT_ID,
+        broker: process.env.KAFKA_ACCOUNT_BROKER,
+        cons_group: process.env.KAFKA_ACCOUNT_CONSUMER_GROUP,
+        ssl: {
+          protocol: process.env.KAFKA_ACCOUNT_SSL_SCP,
+          ca: process.env.KAFKA_ACCOUNT_SSL_CA,
+          key: process.env.KAFKA_ACCOUNT_SSL_KEY,
+          passphrase: process.env.KAFKA_ACCOUNT_SSL_PASSPHRASE,
+        },
+        sasl: {
+          mechanism: process.env.KAFKA_ACCOUNT_SASL_MECHANISM,
+          username: process.env.KAFKA_ACCOUNT_SASL_USERNAME,
+          password: process.env.KAFKA_ACCOUNT_SASL_PASSWORD,
         },
       },
       inventory: {

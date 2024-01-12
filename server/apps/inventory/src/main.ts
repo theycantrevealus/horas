@@ -10,7 +10,6 @@ import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 import { CoreModule } from '../../core/src/core.module'
 import { InventoryModule } from './inventory.module'
 
-declare const module: any
 async function bootstrap() {
   const appContext = await NestFactory.createApplicationContext(CoreModule, {
     logger: ['verbose', 'error'],

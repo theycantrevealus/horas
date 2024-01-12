@@ -22,10 +22,10 @@ import {
 import { LogService } from '@log/log.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import { Module } from '@nestjs/common'
+import { Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ClientsModule } from '@nestjs/microservices'
-import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
@@ -33,6 +33,7 @@ import { DecoratorProcessorService } from '@utility/decorator'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { KafkaConn } from '@utility/kafka'
 import { WinstonModule } from '@utility/logger/module'
+import { MongodbConfigService } from '@utility/mongoose'
 import { TimeManagement } from '@utility/time'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 
@@ -46,33 +47,24 @@ import { ConsumerQueueService } from './queue.service'
       envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig, SocketConfig],
     }),
-    ClientsModule.registerAsync([KafkaConn.m_item[0]]),
+    ClientsModule.registerAsync([KafkaConn.queue[0]]),
     WinstonModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const today = new TimeManagement()
+      useFactory: async (configService: ConfigService) => {
         return {
-          levels: {
-            error: 0,
-            warn: 1,
-            verbose: 3,
-          },
+          // levels: {
+          //   error: await configService.get<number>('log.error.level'),
+          //   warn: await configService.get<number>('log.error.warn'),
+          //   verbose: await configService.get<number>('log.error.verbose'),
+          // },
           transports: WinstonCustomTransports[environmentName],
         }
       },
       inject: [ConfigService],
     }),
     MongooseModule.forRootAsync({
+      useClass: MongodbConfigService,
       imports: [ConfigModule],
-      useFactory: async (
-        configService: ConfigService
-      ): Promise<MongooseModuleOptions> => ({
-        uri: configService.get<string>('mongo.uri'),
-        dbName: configService.get<string>('mongo.db_name'),
-        user: configService.get<string>('mongo.db_user'),
-        pass: configService.get<string>('mongo.db_password'),
-      }),
-      inject: [ConfigService],
     }),
     MongooseModule.forFeatureAsync([
       {
@@ -127,4 +119,8 @@ import { ConsumerQueueService } from './queue.service'
     ConsumerQueueService,
   ],
 })
-export class ConsumerQueueModule {}
+export class ConsumerQueueModule {
+  constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService
+  ) {}
+}

@@ -19,6 +19,7 @@ export class ConsumerQueueService {
 
     @Inject(LogService) private readonly logService: LogService
   ) {}
+
   async add(
     generatedID: string,
     data: QueueAddDTO,
