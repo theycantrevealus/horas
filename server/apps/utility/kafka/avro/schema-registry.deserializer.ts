@@ -23,9 +23,10 @@ export class KafkaAvroResponseDeserializer
   }
 
   async deserialize(message: any): Promise<KafkaResponse> {
-    const { value, key, timestamp, offset } = message
+    const { headers, value, key, timestamp, offset } = message
     const decodeResponse = {
       response: value,
+      headers: headers,
       key,
       timestamp,
       offset,
@@ -37,8 +38,10 @@ export class KafkaAvroResponseDeserializer
       decodeResponse.response = message.value
         ? await this.registry.decode(message.value)
         : message.value
+
+      // TODO : Log every request
+      // TODO : Add header to pass credential token
     } catch (e) {
-      console.log(e)
       const msg = this.fallback.deserialize(message)
       Object.assign(decodeResponse, msg)
     }

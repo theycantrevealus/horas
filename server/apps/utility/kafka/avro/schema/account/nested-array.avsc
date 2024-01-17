@@ -14,22 +14,25 @@
     {
       "name": "authority",
       "type": {
-        "type": "record",
-        "name": "child",
-        "fields": [
-          {
-            "name": "id",
-            "type": "string"
-          },
-          {
-            "name": "code",
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "type": "string"
-          }
-        ]
+        "type": "array",
+        "items": {
+          "name": "child",
+          "type": "record",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "code",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        }
       }
     },
     {

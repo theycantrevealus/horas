@@ -149,7 +149,7 @@ export class LicenseService {
       await this.licenseModel
         .create({
           ...parameter,
-          created_bt: credential,
+          created_by: credential,
         })
         .then((result) => {
           response.message = 'License created successfully'

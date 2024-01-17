@@ -51,6 +51,35 @@ import { KafkaConn } from '@utility/kafka'
       load: [ApplicationConfig, MongoConfig, KafkaConfig, RedisConfig],
     }),
     ClientsModule.registerAsync([KafkaConn.inventory[0], KafkaConn.m_item[0]]),
+    // KafkaProvider(
+    //   ['INVENTORY_SERVICE', 'M_ITEM_SERVICE'],
+    //   [
+    //     {
+    //       configClass: 'kafka.inventory',
+    //       producerModeOnly: false,
+    //       schema: [
+    //         {
+    //           topic: 'inventory',
+    //           headers: 'header.avsc',
+    //           key: 'key.avsc',
+    //           value: 'value.avsc',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       configClass: 'kafka.master.item',
+    //       producerModeOnly: false,
+    //       schema: [
+    //         {
+    //           topic: 'master.item',
+    //           headers: 'header.avsc',
+    //           key: 'key.avsc',
+    //           value: 'value.avsc',
+    //         },
+    //       ],
+    //     },
+    //   ]
+    // ),
     MongooseModule.forFeature([
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },

@@ -1,10 +1,10 @@
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import { MessagePattern, MicroserviceOptions } from '@nestjs/microservices'
+import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { SharedModule } from '@shared/src/shared.module'
 import { KAFKA_TOPICS } from '@utility/constants'
 import { DecoratorProcessorService } from '@utility/decorator'
-import { KafkaConn } from '@utility/kafka'
+import { SubscribeTo } from '@utility/kafka/avro/decorator'
 import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 
 import { AccountController } from './account.controller'
@@ -15,20 +15,29 @@ async function bootstrap() {
     logger: ['verbose', 'error'],
   })
   const configService = appContext.get(ConfigService)
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AccountModule,
-    await KafkaConn.account[0].useFactory(configService)
+  const app = await NestFactory.create(AccountModule)
+
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.TCP,
+      options: {
+        port: configService.get<number>('kafka.account.port.transport'),
+      },
+    },
+    { inheritAppConfig: true }
   )
+
   app.get(DecoratorProcessorService).processDecorators([
     {
       target: AccountController,
       constant: KAFKA_TOPICS,
       meta: `kafka.account.topic`,
-      decorator: MessagePattern,
+      decorator: SubscribeTo,
     },
   ])
 
   appContext.useLogger(appContext.get(WINSTON_MODULE_NEST_PROVIDER))
-  app.listen()
+  await app.startAllMicroservices()
+  app.listen(configService.get<number>('kafka.account.port.service'))
 }
 bootstrap()

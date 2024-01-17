@@ -25,7 +25,7 @@ import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
 import * as bcrypt from 'bcrypt'
 import { Cache } from 'cache-manager'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { Logger } from 'winston'
 
 import { IConfig } from '../../schemas/config'
@@ -73,37 +73,6 @@ export class AccountService {
 
     try {
       const parameter: PrimeParameter = JSON.parse(payload)
-
-      const result = await this.accountProducer.send({
-        topic: 'account',
-        messages: [
-          {
-            key: {
-              id: '',
-              email: '',
-              created_at: '',
-            },
-            value: {
-              code: '',
-              email: '',
-              authority: [
-                {
-                  id: '',
-                  code: '',
-                  name: '',
-                },
-              ],
-              first_name: '',
-              last_name: '',
-              phone: '',
-            },
-          },
-        ],
-      })
-      this.logger.warn(
-        `Come with this result: ${JSON.stringify(result, null, 2)}`
-      )
-
       return await prime_datatable(parameter, this.accountModel).then(
         (result) => {
           response.payload = result.payload.data
@@ -544,25 +513,60 @@ export class AccountService {
     data.password = await bcrypt.hash(password, saltOrRounds)
 
     try {
-      return await this.accountModel
-        .create({
-          ...data,
-          created_by: credential,
+      const generatedID = new Types.ObjectId().toString()
+      return await this.accountProducer
+        .send({
+          topic: 'account',
+          messages: [
+            {
+              headers: {
+                ...credential,
+              },
+              key: {
+                id: generatedID,
+                email: data.email,
+              },
+              value: {
+                code: generatedID,
+                ...data,
+              },
+            },
+          ],
         })
-        .then((result) => {
+        .then(() => {
           response.message = 'Account created successfully'
           response.statusCode = {
             defaultCode: HttpStatus.OK,
             customCode: modCodes.Global.success,
             classCode: modCodes[this.constructor.name].defaultCode,
           }
-          response.transaction_id = result.id
+          response.transaction_id = generatedID
           response.payload = {
-            id: result.id,
+            id: generatedID,
             ...data,
           }
           return response
         })
+
+      // return await this.accountModel
+      //   .create({
+      //     ...data,
+      //     created_by: credential,
+      //   })
+      //   .then((result) => {
+      //     response.message = 'Account created successfully'
+      //     response.statusCode = {
+      //       defaultCode: HttpStatus.OK,
+      //       customCode: modCodes.Global.success,
+      //       classCode: modCodes[this.constructor.name].defaultCode,
+      //     }
+      //     response.transaction_id = result.id
+      //     response.payload = {
+      //       id: result.id,
+      //       ...data,
+      //     }
+      //     return response
+      //   })
     } catch (error) {
       response.message = 'Account failed to create'
       response.statusCode = {

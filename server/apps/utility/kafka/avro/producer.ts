@@ -26,6 +26,10 @@ export class KafkaProducer implements OnModuleInit, OnApplicationShutdown {
       schemas: [
         {
           topic: 'account',
+          headers: join(
+            __dirname,
+            `../apps/utility/kafka/avro/schema/account/header.avsc`
+          ),
           key: join(
             __dirname,
             'apps/utility/kafka/avro/schema/account/key.avsc'
@@ -37,6 +41,7 @@ export class KafkaProducer implements OnModuleInit, OnApplicationShutdown {
         },
       ],
     })
+
     this.kafka = new Kafka({
       clientId: this.configService.get<string>('kafka.account.client'),
       brokers: this.configService

@@ -44,7 +44,8 @@ export async function errorHttpHandler(
     } else {
       responseSet = {
         statusCode: parseError.statusCode,
-        message: `${parseError.message.substring(0, 175)}...`,
+        // message: `${parseError.message.substring(0, 175)}...`,
+        message: `${parseError.message}`,
         transaction_classify: parseError.transaction_classify,
         transaction_id: parseError.transaction_id,
         payload: parseError.payload,
@@ -61,7 +62,8 @@ export async function errorHttpHandler(
         customCode: modCodes.Global.success,
         classCode: 'CORE_F0000',
       },
-      message: `${exception.message.substring(0, 175)}...`,
+      // message: `${exception.message.substring(0, 175)}...`,
+      message: `${exception.message}`,
       transaction_classify: '',
       transaction_id: '',
       payload: {},

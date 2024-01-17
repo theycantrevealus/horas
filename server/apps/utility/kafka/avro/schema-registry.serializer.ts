@@ -41,10 +41,14 @@ export class KafkaAvroRequestSerializer
    * @param schema
    */
   private async getSchemaId(schema): Promise<void | Error> {
+    const headersSuffix = schema.headersSuffix ?? 'headers'
     const keySuffix = schema.keySuffix ?? 'key'
     const valueSuffix = schema.valueSuffix ?? 'value'
 
     try {
+      const headersId = await this.registry.getLatestSchemaId(
+        `${schema.topic}-${headersSuffix}`
+      )
       const keyId =
         (await this.registry.getLatestSchemaId(
           `${schema.topic}-${keySuffix}`
@@ -54,14 +58,17 @@ export class KafkaAvroRequestSerializer
       )
 
       this.schemas.set(schema.topic, {
+        headersId,
         keyId,
         valueId,
+        headersSuffix,
         keySuffix,
         valueSuffix,
       })
 
       this.lastSchemaFetchInterval.set(schema.topic, Date.now())
     } catch (e) {
+      console.error(e)
       throw e
     }
   }
@@ -86,20 +93,27 @@ export class KafkaAvroRequestSerializer
 
   async serialize(value: KafkaMessageSend): Promise<KafkaMessageSend> {
     const outgoingMessage = value
-
     try {
       await this.updateSchemas(value.topic)
 
-      const schema = this.schemas.get(value.topic)
-      const { keyId, valueId } = schema
+      const schema: KafkaSchemaMap = this.schemas.get(value.topic)
+      const { keyId, valueId, headersId } = schema
 
       const messages: Promise<KafkaMessageObject>[] = value.messages.map(
         async (origMessage) => {
+          const encodedHeader: any = origMessage.headers
           let encodedKey = origMessage.key
           const encodedValue = await this.registry.encode(
             valueId,
             origMessage.value
           )
+
+          // if (headersId) {
+          //   encodedHeader = await this.registry.encode(
+          //     headersId,
+          //     origMessage.headers
+          //   )
+          // }
 
           if (keyId) {
             encodedKey = await this.registry.encode(keyId, origMessage.key)
@@ -107,18 +121,17 @@ export class KafkaAvroRequestSerializer
 
           return {
             ...origMessage,
+            headers: encodedHeader,
             value: encodedValue,
             key: encodedKey,
           }
         }
       )
 
-      const results = await Promise.all(messages)
-      outgoingMessage.messages = results
+      outgoingMessage.messages = await Promise.all(messages)
     } catch (e) {
       throw e
     }
-
     return outgoingMessage
   }
 }

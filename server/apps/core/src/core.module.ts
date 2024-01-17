@@ -27,6 +27,7 @@ import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
+import { KafkaProvider } from '@utility/kafka'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
 import { WinstonCustomTransports } from '@utility/transport.winston'
@@ -88,11 +89,6 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
       }),
       inject: [ConfigService],
     }),
-    // PrometheusModule.register({
-    //   defaultMetrics: {
-    //     enabled: true,
-    //   },
-    // }),
     MongooseModule.forFeatureAsync([
       {
         name: Config.name,
@@ -153,6 +149,23 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),
+    KafkaProvider(
+      ['ACCOUNT_SERVICE'],
+      [
+        {
+          configClass: 'kafka.account',
+          producerModeOnly: true,
+          schema: [
+            {
+              topic: 'account',
+              headers: 'header.avsc',
+              key: 'key.avsc',
+              value: 'value.avsc',
+            },
+          ],
+        },
+      ]
+    ),
     AuthModule,
     AccountModule,
     LicenseModule,

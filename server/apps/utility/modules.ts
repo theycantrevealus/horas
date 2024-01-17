@@ -8,6 +8,23 @@ export const modCodes = {
   CoreService: 'CFG',
   CoreConfigGroupService: 'CFG-G',
   LicenseService: 'LCS',
+  KafkaService: {
+    defaultCode: 'KAF',
+    error: {
+      databaseError: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: 'E0001',
+      },
+      isNotFound: {
+        defaultCode: HttpStatus.NOT_FOUND,
+        customCode: 'E0002',
+      },
+      isNoAccess: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: 'E0003',
+      },
+    },
+  },
   AccountService: {
     defaultCode: 'ACC',
     error: {

@@ -27,6 +27,7 @@ export interface KafkaResponse<T = any> {
 }
 
 export interface KafkaMessageObject extends Message {
+  headers: any | Buffer | string | null
   value: any | Buffer | string | null
   key: any
 }
@@ -37,16 +38,20 @@ export interface KafkaMessageSend extends Omit<ProducerRecord, 'topic'> {
 }
 
 export interface KafkaSchemaMap {
+  headersId: number | null
   keyId: number | null
   valueId: number
+  headersSuffix: string
   keySuffix: string
   valueSuffix: string
 }
 
 type KafkaAvroRequestSerializerSchema = {
   topic: string
+  headers?: string | any
   key?: string
   value?: string
+  headersSuffix?: string
   keySuffix?: string
   valueSuffix?: string
 }
@@ -76,7 +81,21 @@ export interface KafkaModuleOption {
     consumeFromBeginning?: boolean
     seek?: Record<string, number | 'earliest' | Date>
     autoConnect?: boolean
+    producerModeOnly: boolean
   }
+}
+
+interface KafkaProviderConfigSchema {
+  topic: string
+  headers?: string
+  key: string
+  value: string
+}
+
+export interface KafkaProviderConfig {
+  configClass: string
+  producerModeOnly: boolean
+  schema: KafkaProviderConfigSchema[]
 }
 
 export interface KafkaOptionsFactory {

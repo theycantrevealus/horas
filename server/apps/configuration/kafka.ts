@@ -26,6 +26,10 @@ export const KafkaConfig = () => {
         },
       },
       account: {
+        port: {
+          transport: process.env.KAFKA_ACCOUNT_PORT_TRANSPORT,
+          service: process.env.KAFKA_ACCOUNT_PORT_SERVICE,
+        },
         service: process.env.KAFKA_ACCOUNT_SERVICE,
         topic: {
           account: process.env.KAFKA_ACCOUNT_TOPIC_ACCOUNT,

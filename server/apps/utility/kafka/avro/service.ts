@@ -12,6 +12,8 @@ import {
   KafkaModuleOption,
   KafkaTransaction,
 } from '@utility/kafka/avro/interface'
+import { HorasLogging } from '@utility/logger/interfaces'
+import { TimeManagement } from '@utility/time'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 import {
   Admin,
@@ -59,15 +61,19 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     })
 
     const { groupId } = consumerConfig
-    const consumerOptions = Object.assign(
-      {
-        groupId: this.getGroupIdSuffix(groupId),
-      },
-      consumerConfig
-    )
+
+    if (!options.producerModeOnly) {
+      const consumerOptions = Object.assign(
+        {
+          groupId: this.getGroupIdSuffix(groupId),
+        },
+        consumerConfig
+      )
+      this.consumer = this.kafka.consumer(consumerOptions)
+    }
 
     this.autoConnect = options.autoConnect ?? true
-    this.consumer = this.kafka.consumer(consumerOptions)
+
     this.producer = this.kafka.producer(producerConfig)
     this.admin = this.kafka.admin()
 
@@ -79,10 +85,12 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     await this.connect()
     await this.getTopicOffsets()
-    SUBSCRIBER_MAP.forEach((functionRef, topic) => {
-      this.subscribe(topic)
-    })
-    this.bindAllTopicToConsumer()
+    if (!this.options.producerModeOnly) {
+      SUBSCRIBER_MAP.forEach((functionRef, topic) => {
+        this.subscribe(topic)
+      })
+      this.bindAllTopicToConsumer()
+    }
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -98,7 +106,9 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     }
 
     await this.producer.connect()
-    await this.consumer.connect()
+    if (!this.options.producerModeOnly) {
+      await this.consumer.connect()
+    }
     await this.admin.connect()
   }
 
@@ -107,7 +117,9 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
    */
   async disconnect(): Promise<void> {
     await this.producer.disconnect()
-    await this.consumer.disconnect()
+    if (!this.options.producerModeOnly) {
+      await this.consumer.disconnect()
+    }
     await this.admin.disconnect()
   }
 
@@ -145,20 +157,17 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
    * @param message
    */
   async send(message: KafkaMessageSend): Promise<RecordMetadata[]> {
-    if (!this.producer) {
-      this.logger.error('There is no producer, unable to send message.')
-      return
+    try {
+      if (!this.producer) {
+        this.logger.error('There is no producer, unable to send message.')
+        return
+      }
+
+      const serializedPacket = await this.serializer.serialize(message)
+      return await this.producer.send(serializedPacket)
+    } catch (e) {
+      throw e
     }
-
-    this.logger.verbose('Got in here')
-
-    const serializedPacket = await this.serializer.serialize(message)
-
-    this.logger.verbose(serializedPacket)
-
-    // @todo - rather than have a producerRecord,
-    // most of this can be done when we create the controller.
-    return await this.producer.send(serializedPacket)
   }
 
   /**
@@ -266,6 +275,33 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
         try {
           const { timestamp, response, offset, key, headers } =
             await this.deserializer.deserialize(message, { topic })
+          const TM = new TimeManagement()
+          const dataSet: HorasLogging = {
+            ip: `${topic}/${partition}/${offset}`,
+            path: topic,
+            url: topic,
+            method: 'KAFKA',
+            takeTime: 0, // TODO : Now - emit time
+            payload: response,
+            result: response,
+            account: headers,
+            time: TM.getTimezone('Asia/Jakarta'),
+          }
+          this.logger.verbose(dataSet)
+
+          // console.log('=======================================================')
+          // console.log(`Timestamp            : ${timestamp}`)
+          // console.log(`Response             : ${response}`)
+          // console.log(`Partition            : ${partition}`)
+          // console.log(`Offset               : ${offset}`)
+          // console.log(`Key                  : ${key}`)
+          // console.log(`Headers ID           : ${headers.id}`)
+          // console.log(`Headers code         : ${headers.code}`)
+          // console.log(`Headers first name   : ${headers.first_name}`)
+          // console.log(`Headers last name    : ${headers.last_name}`)
+          // console.log(`Headers created at   : ${headers.created_at}`)
+          // console.log('=======================================================')
+
           await callback.apply(objectRef, [
             response,
             key,
