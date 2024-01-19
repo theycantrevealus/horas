@@ -7,10 +7,8 @@ import {
   MasterItem,
   MasterItemDocument,
 } from '@core/master/schemas/master.item'
-import { HttpStatus, Inject, Injectable } from '@nestjs/common'
-import { ClientKafka } from '@nestjs/microservices'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { M_ITEM_SERVICE } from '@utility/constants'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -22,9 +20,7 @@ import { Model } from 'mongoose'
 export class MasterItemService {
   constructor(
     @InjectModel(MasterItem.name)
-    private masterItemModel: Model<MasterItemDocument>,
-
-    @Inject(M_ITEM_SERVICE) private readonly mItemClient: ClientKafka
+    private masterItemModel: Model<MasterItemDocument>
   ) {}
 
   async all(parameter: any): Promise<GlobalResponse> {
@@ -301,10 +297,20 @@ export class MasterItemService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    const emitter = await this.mItemClient.emit('master_item', {
-      file: file,
-      account: account,
-    })
+    // const emitter = await this.mItemClient.send({
+    //   topic: 'master_item',
+    //   messages: [
+    //     {
+    //       headers: {},
+    //       key: {},
+    //       value: {
+    //         file: file,
+    //         account: account,
+    //       },
+    //     },
+    //   ],
+    // })
+    const emitter = true
     if (emitter) {
       response.message = 'Master item imported successfully'
     } else {

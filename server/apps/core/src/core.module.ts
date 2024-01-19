@@ -5,13 +5,10 @@ import { RedisConfig } from '@configuration/redis'
 import { BpjsModule } from '@core/3rdparty/bpjs/bpjs.module'
 import { AccountModule } from '@core/account/account.module'
 import { i18nModule } from '@core/i18n/i18n.module'
-import { GatewayInventoryModule } from '@core/inventory/inventory.module'
 import { LicenseModule } from '@core/license/license.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
 import { MenuModule } from '@core/menu/menu.module'
-import { OperationQueueModule } from '@core/operation/queue/queue.module'
-import { PatientModule } from '@core/patient/patient.module'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -170,13 +167,13 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     AccountModule,
     LicenseModule,
     LOVModule,
-    PatientModule,
+    // PatientModule,
     MenuModule,
     MasterModule,
     i18nModule,
-    GatewayInventoryModule,
+    // GatewayInventoryModule,
     BpjsModule,
-    OperationQueueModule,
+    // OperationQueueModule,
   ],
   controllers: [CoreController, CoreConfigGroupController],
   providers: [

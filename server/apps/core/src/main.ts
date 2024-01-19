@@ -10,14 +10,10 @@ import {
 } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { KAFKA_CLIENTS } from '@utility/constants'
-import { environmentName } from '@utility/environtment'
-import { WinstonCustomTransports } from '@utility/transport.winston'
 import * as CopyPlugin from 'copy-webpack-plugin'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as winston from 'winston'
 
-import { CommonErrorFilter } from '../../filters/error'
 import { GatewayPipe } from '../../pipes/gateway.pipe'
 import { CoreModule } from './core.module'
 
@@ -66,14 +62,14 @@ async function bootstrap() {
 
   const configService = app.get<ConfigService>(ConfigService)
 
-  const logger = winston.createLogger({
-    transports: WinstonCustomTransports[environmentName],
-    levels: {
-      error: 0,
-      warn: 1,
-      info: 2,
-    },
-  })
+  // const logger = winston.createLogger({
+  //   transports: WinstonCustomTransports[environmentName],
+  //   levels: {
+  //     error: 0,
+  //     warn: 1,
+  //     info: 2,
+  //   },
+  // })
 
   fastifyAdapter.register(require('@fastify/static'), {
     root: path.join(
@@ -83,7 +79,7 @@ async function bootstrap() {
     prefix: `/${configService.get<string>('application.images.core_prefix')}`,
   })
 
-  app.useGlobalFilters(new CommonErrorFilter(logger))
+  // app.useGlobalFilters(new CommonErrorFilter(logger))
   app.useGlobalPipes(new GatewayPipe())
   app.enableVersioning({
     type: VersioningType.URI,

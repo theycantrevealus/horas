@@ -4,7 +4,6 @@ import { NestFactory } from '@nestjs/core'
 import { MessagePattern, MicroserviceOptions } from '@nestjs/microservices'
 import { KAFKA_TOPICS } from '@utility/constants'
 import { DecoratorProcessorService } from '@utility/decorator'
-import { KafkaConn } from '@utility/kafka'
 import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 
 import { CoreModule } from '../../core/src/core.module'
@@ -17,7 +16,7 @@ async function bootstrap() {
   const configService = appContext.get(ConfigService)
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     InventoryModule,
-    await KafkaConn.inventory[0].useFactory(configService)
+    {}
   )
   app.get(DecoratorProcessorService).processDecorators([
     {

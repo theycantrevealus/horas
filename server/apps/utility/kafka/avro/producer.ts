@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { KafkaAvroRequestSerializer } from '@utility/kafka/avro/schema-registry.serializer'
+import { WinstonLogCreator } from '@utility/transport.winston'
 import * as fs from 'fs'
 import { Kafka, ProducerRecord } from 'kafkajs'
 import { join } from 'path'
@@ -43,6 +44,7 @@ export class KafkaProducer implements OnModuleInit, OnApplicationShutdown {
     })
 
     this.kafka = new Kafka({
+      logCreator: WinstonLogCreator,
       clientId: this.configService.get<string>('kafka.account.client'),
       brokers: this.configService
         .get<string>('kafka.account.broker')

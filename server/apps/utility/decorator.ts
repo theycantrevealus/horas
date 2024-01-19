@@ -54,7 +54,9 @@ export function KafkaTopic(variable: string): any {
 
 export function getParamDecoratorFactory(Decorator) {
   class MockCredentialAccount {
-    public getAccount(@Decorator() value) {}
+    public getAccount(@Decorator() value) {
+      console.log(`Account decorator : ${value}`)
+    }
   }
 
   const args = Reflect.getMetadata(
@@ -62,8 +64,6 @@ export function getParamDecoratorFactory(Decorator) {
     MockCredentialAccount,
     'getAccount'
   )
-
-  console.log(args[Object.keys(args)[0]].factory)
 
   return args[Object.keys(args)[0]].factory
 }

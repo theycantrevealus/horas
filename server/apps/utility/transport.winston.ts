@@ -1,3 +1,4 @@
+import { environmentName } from '@utility/environtment'
 import { HorasLogging } from '@utility/logger/interfaces'
 import { pad } from '@utility/string'
 import { TimeManagement } from '@utility/time'
@@ -34,6 +35,7 @@ while (a <= tableLength) {
 export const toWinstonLogLevel = (level) => {
   switch (level) {
     case logLevel.ERROR:
+      return 'error'
     case logLevel.NOTHING:
       return 'error'
     case logLevel.WARN:
@@ -48,16 +50,60 @@ export const toWinstonLogLevel = (level) => {
 export const WinstonLogCreator = (logLevel) => {
   const logger = winston.createLogger({
     level: toWinstonLogLevel(logLevel),
-    transports: WinstonCustomTransports.development,
+    transports: WinstonCustomTransports[environmentName],
   })
 
   return ({ namespace, level, label, log }) => {
     const { message, ...extra } = log
-    logger.log({
-      level: toWinstonLogLevel(level),
-      message,
-      extra,
-    })
+    if (level === logLevel.WARN) {
+      logger.warn({
+        namespace: namespace,
+        label: label,
+        level: toWinstonLogLevel(level),
+        message,
+        extra,
+      })
+    } else if (level === logLevel.ERROR) {
+      logger.error({
+        namespace: namespace,
+        label: label,
+        level: toWinstonLogLevel(level),
+        message,
+        extra,
+      })
+    } else if (level === logLevel.NOTHING) {
+      logger.error({
+        namespace: namespace,
+        label: label,
+        level: toWinstonLogLevel(level),
+        message,
+        extra,
+      })
+    } else if (level === logLevel.INFO) {
+      logger.verbose({
+        namespace: namespace,
+        label: label,
+        level: toWinstonLogLevel(level),
+        message,
+        extra,
+      })
+    } else if (level === logLevel.DEBUG) {
+      logger.debug({
+        namespace: namespace,
+        label: label,
+        level: toWinstonLogLevel(level),
+        message,
+        extra,
+      })
+    } else {
+      logger.warn({
+        namespace: namespace,
+        label: label,
+        level: toWinstonLogLevel(level),
+        message,
+        extra,
+      })
+    }
   }
 }
 
@@ -85,7 +131,6 @@ function loggerParser(data) {
     parsedResponseHorasLogging.method ?? '-',
     false
   )
-
   if (parsedResponseHorasLogging.ip) {
     const account = pad(
       sPad.account,

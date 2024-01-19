@@ -11,7 +11,6 @@ import {
 } from '@inventory/schemas/purchase.order'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -29,10 +28,9 @@ export class PurchaseOrderService {
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
     @Inject(MasterItemService)
-    private readonly masterItemService: MasterItemService,
-
-    @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
+    private readonly masterItemService: MasterItemService
   ) {
+    // @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
     //
   }
 
@@ -71,16 +69,17 @@ export class PurchaseOrderService {
 
     const generatedID = new Types.ObjectId().toString()
 
-    const emitter = await this.clientInventory.emit(
-      this.configService.get<string>('kafka.inventory.topic.purchase_order'),
-      {
-        action: 'add',
-        id: generatedID,
-        data: data,
-        account: account,
-        token: token,
-      }
-    )
+    // const emitter = await this.clientInventory.emit(
+    //   this.configService.get<string>('kafka.inventory.topic.purchase_order'),
+    //   {
+    //     action: 'add',
+    //     id: generatedID,
+    //     data: data,
+    //     account: account,
+    //     token: token,
+    //   }
+    // )
+    const emitter = true
 
     if (emitter) {
       response.message = 'Purchase Order created successfully'
@@ -119,18 +118,19 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit(
-            this.configService.get<string>(
-              'kafka.inventory.topic.purchase_order'
-            ),
-            {
-              action: 'ask_approval',
-              id: id,
-              data: data,
-              account: account,
-              token: token,
-            }
-          )
+          // const emitter = await this.clientInventory.emit(
+          //   this.configService.get<string>(
+          //     'kafka.inventory.topic.purchase_order'
+          //   ),
+          //   {
+          //     action: 'ask_approval',
+          //     id: id,
+          //     data: data,
+          //     account: account,
+          //     token: token,
+          //   }
+          // )
+          const emitter = true
           if (emitter) {
             response.message = 'Purchase order proposed successfully'
             response.transaction_id = id
@@ -185,18 +185,19 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit(
-            this.configService.get<string>(
-              'kafka.inventory.topic.purchase_order'
-            ),
-            {
-              action: 'approve',
-              id: id,
-              data: data,
-              account: account,
-              token: token,
-            }
-          )
+          // const emitter = await this.clientInventory.emit(
+          //   this.configService.get<string>(
+          //     'kafka.inventory.topic.purchase_order'
+          //   ),
+          //   {
+          //     action: 'approve',
+          //     id: id,
+          //     data: data,
+          //     account: account,
+          //     token: token,
+          //   }
+          // )
+          const emitter = true
           if (emitter) {
             response.message = 'Purchase order approved successfully'
             response.transaction_id = id
@@ -255,33 +256,33 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          this.clientInventory
-            .emit(
-              this.configService.get<string>(
-                'kafka.inventory.topic.purchase_order'
-              ),
-              {
-                action: 'decline',
-                id: id,
-                data: data,
-                account: account,
-                token: token,
-              }
-            )
-            .subscribe({
-              next: () => {
-                response.message = 'Purchase order declined successfully'
-                response.transaction_id = id
-                response.payload = result
-              },
-              error: (onError) => {
-                response.message = `Purchase Order failed to decline. ${onError.message}`
-                response.statusCode =
-                  modCodes[this.constructor.name].error.databaseError
-                response.transaction_id = id
-                throw new Error(JSON.stringify(response))
-              },
-            })
+          // this.clientInventory
+          //   .emit(
+          //     this.configService.get<string>(
+          //       'kafka.inventory.topic.purchase_order'
+          //     ),
+          //     {
+          //       action: 'decline',
+          //       id: id,
+          //       data: data,
+          //       account: account,
+          //       token: token,
+          //     }
+          //   )
+          //   .subscribe({
+          //     next: () => {
+          //       response.message = 'Purchase order declined successfully'
+          //       response.transaction_id = id
+          //       response.payload = result
+          //     },
+          //     error: (onError) => {
+          //       response.message = `Purchase Order failed to decline. ${onError.message}`
+          //       response.statusCode =
+          //         modCodes[this.constructor.name].error.databaseError
+          //       response.transaction_id = id
+          //       throw new Error(JSON.stringify(response))
+          //     },
+          //   })
         } else {
           response.message = `Purchase order failed to decline. Invalid document`
           response.statusCode =
@@ -328,18 +329,19 @@ export class PurchaseOrderService {
       .exec()
       .then(async (result) => {
         if (result) {
-          const emitter = await this.clientInventory.emit(
-            this.configService.get<string>(
-              'kafka.inventory.topic.purchase_order'
-            ),
-            {
-              action: 'edit',
-              id: id,
-              data: data,
-              token: token,
-              account: account,
-            }
-          )
+          // const emitter = await this.clientInventory.emit(
+          //   this.configService.get<string>(
+          //     'kafka.inventory.topic.purchase_order'
+          //   ),
+          //   {
+          //     action: 'edit',
+          //     id: id,
+          //     data: data,
+          //     token: token,
+          //     account: account,
+          //   }
+          // )
+          const emitter = true
           if (emitter) {
             response.message = 'Purchase Order updated successfully'
             response.transaction_id = id
@@ -392,16 +394,17 @@ export class PurchaseOrderService {
     if (data) {
       data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
 
-      const emitter = await this.clientInventory.emit(
-        this.configService.get<string>('kafka.inventory.topic.purchase_order'),
-        {
-          action: 'delete',
-          id: id,
-          data: data,
-          account: account,
-          token: token,
-        }
-      )
+      // const emitter = await this.clientInventory.emit(
+      //   this.configService.get<string>('kafka.inventory.topic.purchase_order'),
+      //   {
+      //     action: 'delete',
+      //     id: id,
+      //     data: data,
+      //     account: account,
+      //     token: token,
+      //   }
+      // )
+      const emitter = true
       if (emitter) {
         response.message = 'Purchase order deleted successfully'
         response.transaction_id = id

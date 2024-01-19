@@ -9,7 +9,11 @@ export const KafkaConfig = () => {
       master: {
         item: {
           service: process.env.KAFKA_M_ITEM_SERVICE,
-          topic: process.env.KAFKA_M_ITEM_TOPIC,
+          topic: {
+            master: {
+              item: process.env.KAFKA_M_ITEM_TOPIC,
+            },
+          },
           client: process.env.KAFKA_M_ITEM_CLIENT_ID,
           broker: process.env.KAFKA_M_ITEM_BROKER,
           cons_group: process.env.KAFKA_M_ITEM_CONSUMER_GROUP,

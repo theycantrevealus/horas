@@ -14,11 +14,15 @@ import {
 } from '@utility/kafka/avro/interface'
 import { HorasLogging } from '@utility/logger/interfaces'
 import { TimeManagement } from '@utility/time'
-import { WinstonCustomTransports } from '@utility/transport.winston'
+import {
+  WinstonCustomTransports,
+  WinstonLogCreator,
+} from '@utility/transport.winston'
 import {
   Admin,
   Consumer,
   Kafka,
+  logLevel,
   Offsets,
   Producer,
   RecordMetadata,
@@ -57,7 +61,8 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
 
     this.kafka = new Kafka({
       ...client,
-      // logCreator: KafkaLogger.bind(null, this.logger),
+      logLevel: logLevel.ERROR,
+      logCreator: WinstonLogCreator,
     })
 
     const { groupId } = consumerConfig
@@ -73,10 +78,8 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     }
 
     this.autoConnect = options.autoConnect ?? true
-
     this.producer = this.kafka.producer(producerConfig)
     this.admin = this.kafka.admin()
-
     this.initializeDeserializer(options)
     this.initializeSerializer(options)
     this.options = options

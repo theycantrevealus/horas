@@ -44,11 +44,9 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { environmentIdentifier } from '@utility/environtment'
-import { KafkaConn } from '@utility/kafka'
 import { TimeManagement } from '@utility/time'
 
 @Module({
@@ -58,7 +56,6 @@ import { TimeManagement } from '@utility/time'
       envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig],
     }),
-    ClientsModule.registerAsync([KafkaConn.m_item[0]]),
     MongooseModule.forFeatureAsync([
       {
         name: MasterItem.name,

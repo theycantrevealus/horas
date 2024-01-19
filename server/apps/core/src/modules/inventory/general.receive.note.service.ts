@@ -9,7 +9,6 @@ import {
 } from '@inventory/schemas/general.receive.note'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { ClientKafka } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -32,10 +31,10 @@ export class GeneralReceiveNoteService {
     private readonly masterStockPointService: MasterStockPointService,
 
     @Inject(InventoryService)
-    private readonly inventoryService: InventoryService,
-
-    @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
-  ) {}
+    private readonly inventoryService: InventoryService
+  ) {
+    // @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
+  }
 
   async all(parameter: any) {
     return await prime_datatable(parameter, this.generalReceiveNoteModel)
@@ -67,18 +66,19 @@ export class GeneralReceiveNoteService {
       .then(async (purchaseOrder) => {
         if (purchaseOrder && purchaseOrder.status === 'approved') {
           const generatedID = new Types.ObjectId().toString()
-          const emitter = await this.clientInventory.emit(
-            this.configService.get<string>(
-              'kafka.inventory.topic.general_receive_not'
-            ),
-            {
-              action: 'add',
-              id: generatedID,
-              data: data,
-              account: account,
-              token: token,
-            }
-          )
+          // const emitter = await this.clientInventory.emit(
+          //   this.configService.get<string>(
+          //     'kafka.inventory.topic.general_receive_not'
+          //   ),
+          //   {
+          //     action: 'add',
+          //     id: generatedID,
+          //     data: data,
+          //     account: account,
+          //     token: token,
+          //   }
+          // )
+          const emitter = true
           if (emitter) {
             response.message = 'General receive note created successfully'
             response.transaction_id = `general_receive_note-${generatedID}`

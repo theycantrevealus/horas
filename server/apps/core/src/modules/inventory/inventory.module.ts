@@ -37,11 +37,9 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { environmentIdentifier } from '@utility/environtment'
-import { KafkaConn } from '@utility/kafka'
 
 @Module({
   imports: [
@@ -50,7 +48,6 @@ import { KafkaConn } from '@utility/kafka'
       envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig, KafkaConfig, RedisConfig],
     }),
-    ClientsModule.registerAsync([KafkaConn.inventory[0], KafkaConn.m_item[0]]),
     // KafkaProvider(
     //   ['INVENTORY_SERVICE', 'M_ITEM_SERVICE'],
     //   [

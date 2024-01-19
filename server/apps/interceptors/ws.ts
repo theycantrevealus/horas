@@ -66,6 +66,8 @@ export async function wsInterceptor(
         logger.warn(dataSet)
       }
 
+      console.log('WS Logger')
+
       if (result.statusCode) {
         if (isCustomErrorCode(result.statusCode)) {
           response.code(result.statusCode.defaultCode).send({

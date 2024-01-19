@@ -7,11 +7,9 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { environmentName } from '@utility/environtment'
-import { KafkaConn } from '@utility/kafka'
 import { WinstonModule } from '@utility/logger/module'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 
@@ -32,7 +30,6 @@ import { WinstonCustomTransports } from '@utility/transport.winston'
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),
-    ClientsModule.registerAsync([KafkaConn.queue[0]]),
     AuthModule,
     AccountModule,
   ],

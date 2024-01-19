@@ -24,14 +24,12 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { DecoratorProcessorService } from '@utility/decorator'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
-import { KafkaConn } from '@utility/kafka'
 import { WinstonModule } from '@utility/logger/module'
 import { MongodbConfigService } from '@utility/mongoose'
 import { TimeManagement } from '@utility/time'
@@ -47,7 +45,6 @@ import { ConsumerQueueService } from './queue.service'
       envFilePath: environmentIdentifier,
       load: [ApplicationConfig, MongoConfig, SocketConfig],
     }),
-    ClientsModule.registerAsync([KafkaConn.queue[0]]),
     WinstonModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {

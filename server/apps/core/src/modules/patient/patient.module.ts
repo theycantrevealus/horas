@@ -10,16 +10,13 @@ import { Patient, PatientSchema } from '@core/patient/schema/patient.model'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
-import { ClientsModule } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
-import { KafkaConn } from '@utility/kafka'
 import { KafkaProducer } from '@utility/kafka/avro/producer'
 import { TimeManagement } from '@utility/time'
 
 @Module({
   imports: [
-    ClientsModule.registerAsync([KafkaConn.account[0]]),
     MongooseModule.forFeatureAsync([
       {
         name: Patient.name,

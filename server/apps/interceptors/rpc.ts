@@ -46,6 +46,6 @@ export async function rpcInterceptor(
     time: TM.getTimezone('Asia/Jakarta'),
   }
 
-  logger.verbose(dataSet)
+  logger.verbose(`RPC logger : ${dataSet}`)
   return next.handle()
 }
