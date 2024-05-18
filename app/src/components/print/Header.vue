@@ -2,8 +2,8 @@
   <div class="flex card-container indigo-container">
     <div class="flex-2 h-4rem font-bold text-center">
       <img
-        :style="{ width: `${application['APPLICATION_LOGO'].size.print.width}` }"
-        :src="`${application['APPLICATION_LOGO'].image}`"
+        :style="{ width: `${application['APPLICATION_LOGO'].size.print.width ?? '0px'}` }"
+        :src="`${application['APPLICATION_LOGO'].image ?? ''}`"
         class="print-logo"
         alt="horas"
       />

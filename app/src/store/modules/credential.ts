@@ -26,7 +26,9 @@ export const CredentialStore = {
   actions: {
     Action___signIn: async ({ state, commit, rootState }, payload) => {
       return await AccountService.signIn(payload).then((response: CoreResponse) => {
-        if (response.statusCode === CoreResponseLib.Login.success) {
+        console.log(`Status code received is ${`${response.statusCode['classCode']}_I_${response.statusCode['customCode']}`}`)
+        console.log(`Expected ${CoreResponseLib.Login.success}`)
+        if (`${response.statusCode['classCode']}_I_${response.statusCode['customCode']}` === CoreResponseLib.Login.success) {
           commit('Mutation___updateToken', response.payload.token)
           commit('Mutation___updateSession', response.payload.account)
           commit('Mutation___updatePermission', response.payload.account)
@@ -95,7 +97,6 @@ export const CredentialStore = {
       state.routes = routes
     },
     Mutation___updatePermission: (state, payload) => {
-      console.clear()
       const routeMap = {}
       const grantedPerm = payload.permission
       const buildPermission = {}

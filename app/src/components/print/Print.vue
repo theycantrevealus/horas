@@ -29,8 +29,8 @@
           <div class="print-right-2" :style="{'background-image': `url(${server_image}dotted.png)`}"></div>
           <div class="print-logo">
             <img
-              :style="{ width: `${application['APPLICATION_LOGO'].size.print.width}` }"
-              :src="`${application['APPLICATION_LOGO'].image}`"
+              :style="{ width: `${application['APPLICATION_LOGO'].setter.size.print.width}` }"
+              :src="`${application['APPLICATION_LOGO'].setter.image}`"
               class="print-logo"
               alt="horas"
             />
@@ -50,7 +50,7 @@
           </div>
           <div ref="printFooter">
             <div class="print-footer">
-              Powered by : {{ application['APPLICATION_NAME'] }} {{ application['APPLICATION_VERSION'] }}
+              Powered by : {{ application['APPLICATION_NAME'].setter }} {{ application['APPLICATION_VERSION'].setter }}
             </div>
           </div>
         </div>

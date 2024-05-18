@@ -466,7 +466,6 @@ export default {
           _this.formData.componentIden[key] = { ...targetObject[key], menu: _this.selectedComponentData.menu }
         }
       });
-      console.clear()
 
       const resultTree = this.reformatTree(this.formData.componentTree.root, targetGroup, {
         menu: this.selectedComponentData.menu

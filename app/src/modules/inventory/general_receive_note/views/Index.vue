@@ -265,7 +265,9 @@ export default {
     }
   },
   computed: {
-    ...mapState(['credential']),
+    ...mapGetters({
+      credential: 'storeCredential/Getter___credential',
+    }),
   },
   watch: {
     //
@@ -283,11 +285,11 @@ export default {
       }
 
     })
-    this.permission.allowAdd = !(!this.credential.permission.btnPurchaseOrderAdd)
-    this.permission.allowEdit = !(!this.credential.permission.btnPurchaseOrderEdit)
-    this.permission.allowDelete = !(!this.credential.permission.btnPurchaseOrderDelete)
-    this.permission.allowApprove = !(!this.credential.permission.btnPurchaseOrderApprove)
-    this.permission.allowDecline = !(!this.credential.permission.btnPurchaseOrderDecline)
+    this.permission.allowAdd = !(!this.credential.permission['btnPurchaseOrderAdd'])
+    this.permission.allowEdit = !(!this.credential.permission['btnPurchaseOrderEdit'])
+    this.permission.allowDelete = !(!this.credential.permission['btnPurchaseOrderDelete'])
+    this.permission.allowApprove = !(!this.credential.permission['btnPurchaseOrderApprove'])
+    this.permission.allowDecline = !(!this.credential.permission['btnPurchaseOrderDecline'])
 
     this.lazyParams = {
       first: 0,

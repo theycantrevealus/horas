@@ -31,10 +31,16 @@ export const ApplicationStore = {
       },
       sideMenu: []
     },
+    toast: {
+      severity: 'warn',
+      summary: 'Menu Manager',
+      detail: 'Hello',
+      life: 3000,
+    }
   },
   getters: {
     Getter___applicationConfig: (state: any) => {
-      return state.configuration;
+      return state.configuration
     },
     Getter___sidePanelMode: (state: any):Promise<boolean> => {
       return state.ui.sidePanel.mode
@@ -45,6 +51,9 @@ export const ApplicationStore = {
     Getter___getThemeMode: (state: any):Promise<boolean> => {
       return state.ui.theme.dark
     },
+    Getter___getToast: (state: any):Promise<boolean> => {
+      return state.toast
+    }
   },
   actions: {
     Action___updateConfiguration: async ({commit}) => {
@@ -68,6 +77,9 @@ export const ApplicationStore = {
     },
     Action___toggleDarkMode: async({ commit }) => {
       commit('Mutation___themeDark')
+    },
+    Action___setToast: async({ commit }, meta) => {
+      commit('Mutation___setToast', meta)
     }
   },
   mutations: {
@@ -85,6 +97,9 @@ export const ApplicationStore = {
     },
     Mutation___themeDark: (state) => {
       state.ui.theme.dark = !state.ui.theme.dark
+    },
+    Mutation___setToast: (state, payload) => {
+      state.toast = payload
     }
   }
-};
+}

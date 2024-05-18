@@ -10,7 +10,6 @@ class AccountService {
       .post(`${process.env.VUE_APP_APIGATEWAY}v1/account/signin`, accountData)
       .then(async (response: AxiosResponse) => {
         const data: CoreResponse = response.data
-        console.log(data)
         return Promise.resolve(data)
       })
       .catch((e: Error) => {

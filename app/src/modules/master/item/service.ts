@@ -26,25 +26,23 @@ class MasterItemService {
   }
 
   async findItem(search: string): Promise<ISupplier[]> {
-    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/find`, {
+    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item`, {
       params: {
-        limit: 20,
-        search: search,
+        lazyEvent: `{"first":0,"rows":10,"projection": {}, "sortField":"created_at","sortOrder":1,"filters":{"name":{"value":"${search}", "matchMode": "contains"}},"search_term": {}}`,
       }
     }).then((response: AxiosResponse) => {
-      return response.data
+      return Promise.resolve(response.data)
     })
   }
 
   // ====================================== MASTER SUPPLIER
   async findSupplier(search: string): Promise<ISupplier[]> {
-    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}v1/master/supplier/find`, {
+    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}v1/master/supplier`, {
       params: {
-        limit: 10,
-        search: search,
+        lazyEvent: `{"first":0,"rows":10,"projection": {}, "sortField":"created_at","sortOrder":1,"filters":{"name":{"value":"${search}", "matchMode": "contains"}},"search_term": {}}`,
       }
     }).then((response: AxiosResponse) => {
-      return response.data
+      return Promise.resolve(response.data)
     })
   }
 }

@@ -29,7 +29,6 @@ describe('Login Page', () => {
     cy.get('button#submitButton')
       .click()
       .then(() => {
-        console.clear()
         const credential = getStore().its('state.credential.token')
       })
 

@@ -1,0 +1,185 @@
+{
+  "type": "record",
+  "name": "PurchaseOrder",
+  "namespace": "com.horas.purchase_order",
+  "fields": [
+    {
+      "name": "code",
+      "type": "string"
+    },
+    {
+      "name": "supplier",
+      "type": {
+        "type": "record",
+        "name": "supplier.child",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "purchase_date",
+      "type": "string"
+    },
+    {
+      "name": "locale",
+      "type": {
+        "type": "record",
+        "name": "locale.child",
+        "fields": [
+          {
+            "name": "language_code",
+            "type": "string"
+          },
+          {
+            "name": "iso_2_digits",
+            "type": "string"
+          },
+          {
+            "name": "currency",
+            "type": "string"
+          },
+          {
+            "name": "timezone",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "detail",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "detail.child",
+          "type": "record",
+          "fields": [
+            {
+              "name": "item",
+              "type": {
+                "type": "record",
+                "name": "item.child",
+                "fields": [
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "code",
+                    "type": "string"
+                  },
+                  {
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "brand",
+                    "type": {
+                      "type": "record",
+                      "name": "brand.child",
+                      "fields": [
+                        {
+                          "name": "id",
+                          "type": "string"
+                        },
+                        {
+                          "name": "code",
+                          "type": "string"
+                        },
+                        {
+                          "name": "name",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "qty",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2
+              }
+            },
+            {
+              "name": "delivered",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2
+              }
+            },
+            {
+              "name": "price",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2
+              }
+            },
+            {
+              "name": "total",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2
+              }
+            },
+            {
+              "name": "discount_type",
+              "type": "string"
+            },
+            {
+              "name": "discount_value",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2
+              }
+            },
+            {
+              "name": "remark",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "discount_type",
+      "type": "string"
+    },
+    {
+      "name": "discount_value",
+      "type": {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 4,
+        "scale": 2
+      }
+    },
+    {
+      "name": "remark",
+      "type": "string"
+    }
+  ]
+}

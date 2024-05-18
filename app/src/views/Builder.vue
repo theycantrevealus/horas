@@ -13,7 +13,7 @@
           v-if="getMenuModeStatus"
           class="panel-logo"
           :style="{ width: logo[layoutColorMode].image.size.sidepanel.width }"
-          :src="logo[layoutColorMode].image.image"
+          :src="logo[layoutColorMode].image.image ?? ''"
           alt="horas"
         />
         <img
@@ -103,8 +103,22 @@ export default {
           },
         },
         dark: {
-          image: '',
-          icon: '',
+          image: {
+            size: {
+              sidepanel: {
+                width: '',
+                height: ''
+              }
+            }
+          },
+          icon: {
+            size: {
+              sidepanel: {
+                width: '',
+                height: ''
+              }
+            }
+          }
         }
       }
     }
@@ -157,22 +171,22 @@ export default {
     refreshConfig: {
       handler(getData) {
         if(getData) {
-          this.logo.dark.image = getData['APPLICATION_LOGO']
-          this.logo.dark.icon = getData['APPLICATION_ICON']
+          this.logo.dark.image = getData['APPLICATION_LOGO'] ?? ''
+          this.logo.dark.icon = getData['APPLICATION_ICON'] ?? ''
 
-          this.logo.light.image = getData['APPLICATION_LOGO']
-          this.logo.light.icon = getData['APPLICATION_ICON']
+          this.logo.light.image = getData['APPLICATION_LOGO'] ?? ''
+          this.logo.light.icon = getData['APPLICATION_ICON'] ?? ''
         }
       },
     },
   },
   mounted() {
     this.darkMode = this.themeModeDark
-    if(this.application) {
-      this.logo.dark.image = this.application['APPLICATION_LOGO']
-      this.logo.dark.icon = this.application['APPLICATION_ICON']
-      this.logo.light.image = this.application['APPLICATION_LOGO']
-      this.logo.light.icon = this.application['APPLICATION_ICON']
+    if(this.application && this.application['APPLICATION_LOGO']) {
+      this.logo.dark.image = this.application['APPLICATION_LOGO'].setter ?? this.logo.dark.image
+      this.logo.dark.icon = this.application['APPLICATION_ICON'].setter ?? this.logo.dark.icon
+      this.logo.light.image = this.application['APPLICATION_LOGO'].setter ?? this.logo.light.image
+      this.logo.light.icon = this.application['APPLICATION_ICON'].setter ?? this.logo.light.icon
     }
 
 

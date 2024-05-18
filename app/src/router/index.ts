@@ -13,7 +13,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Builder',
     component: Builder,
     meta: {
-      requiresAuth: true,
+      requiresAuth: false,
     },
     redirect: '/dashboard',
     children: [
@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Dashboard',
         meta: {
           pageTitle: 'Dashboard',
-          requiresAuth: true,
+          requiresAuth: false,
         },
         component: () =>
           import(/* webpackChunkName: "dashboard" */ '../views/Dashboard.vue'),
@@ -32,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'About',
         meta: {
           pageTitle: 'About',
-          requiresAuth: true,
+          requiresAuth: false,
           breadcrumb: [
             {
               label: 'About',
@@ -52,7 +52,7 @@ const routes: Array<RouteRecordRaw> = [
             name: 'Menu',
             meta: {
               pageTitle: 'Menu Management',
-              requiresAuth: true,
+              requiresAuth: false,
               breadcrumb: [
                 {
                   label: 'Menu',

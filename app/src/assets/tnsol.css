@@ -1316,11 +1316,15 @@ td.wrap_content, th.wrap_content {
 }
 
 .p-dropdown-label.p-inputtext {
-    padding: 10px !important;
+    padding: 7.5px !important;
+}
+
+.p-datatable-table tbody tr td .p-inputnumber {
+    margin-top: -10px !important;
 }
 
 .form-mode .p-dropdown-label.p-inputtext.p-placeholder {
-    margin-top: 4px;
+    margin-top: 0px;
 }
 
 .p-chip.sm {

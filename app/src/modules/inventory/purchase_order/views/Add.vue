@@ -83,10 +83,10 @@
                           tableClass="editable-cells-table"
                           tableStyle="min-width: 50rem"
                           @row-edit-save="onRowEditSave($event)">
-                          <Column field="id" header="Action" style="width: 80px" class="wrap_content text-right">
+                          <Column field="id" header="#" class="text-right" style="width: 2%">
                             <template #editor="{ data, field }">
-                              <strong class="d-inline-flex">
-                                <span class="material-icons-outlined">hashtag</span>{{ data[field] }}
+                              <strong class="text-center">
+                                {{ data[field] }}
                               </strong>
                             </template>
                             <template #body="{ data, index }">
@@ -102,11 +102,12 @@
                               </div>
                             </template>
                           </Column>
-                          <Column field="item" header="Name">
+                          <Column field="item" header="Name" style="width: 50%">
                             <template #editor="{ data, field }">
                               <div class="p-inputgroup">
                                 <Dropdown
                                   v-model="data[field]"
+                                  style="width: 300px"
                                   :options="dropdown.item"
                                   optionLabel="name"
                                   placeholder="Select an item"
@@ -120,7 +121,9 @@
                                   </template>
                                   <template #value="slotProps">
                                     <div v-if="slotProps.value" class="flex align-items-center">
-                                      <div><Tag v-if="slotProps.value.code" :value="slotProps.value.code" severity="info" /> {{ slotProps.value.name }}</div>
+                                      <div>
+                                        <Tag v-if="slotProps.value.code" :value="slotProps.value.code" severity="info" /> {{ slotProps.value.name }}
+                                      </div>
                                     </div>
                                     <div v-else>
                                       {{ slotProps.placeholder }}
@@ -130,10 +133,16 @@
                               </div>
                             </template>
                             <template #body="slotProps">
-                              <div><Tag v-if="slotProps.data.item.code" :value="slotProps.data.item.code" severity="info" /> {{ slotProps.data.item.name }}</div>
+                              <div class="wrap_content">
+                                <Tag v-if="slotProps.data.item.code" :value="slotProps.data.item.code" severity="info" />
+                                <br />
+                                <div class="pl-6">
+                                  {{ slotProps.data.item.name }}
+                                </div>
+                              </div>
                             </template>
                           </Column>
-                          <Column field="qty" header="Qty" style="width: 150px" class="wrap_content text-right">
+                          <Column field="qty" header="Qty" style="width: 15%" class="text-right">
                             <template #editor="{ data, field }">
                               <div class="p-inputgroup">
                                 <InputText
@@ -154,7 +163,7 @@
                               </div>
                             </template>
                             <template #editor="{ data, field }">
-                              <InputNumber v-model="data[field]" mode="currency" :currency="application['APPLICATION_LOCALE'].currency" :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
+                              <InputNumber v-model="data[field]" mode="currency" :currency="application.configuration['APPLICATION_LOCALE'].setter.currency" :locale="`${application.configuration['APPLICATION_LOCALE'].setter.language_code.toLowerCase()}-${application.configuration['APPLICATION_LOCALE'].setter.iso_2_digits.toUpperCase()}`" />
                             </template>
                           </Column>
                           <Column field="discount_type" header="Discount Type" style="width: 10%">
@@ -251,8 +260,8 @@
                             class="p-inputtext-sm"
                             placeholder="Total"
                             mode="currency"
-                            :currency="`${application['APPLICATION_LOCALE'].currency}`"
-                            :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
+                            :currency="`${application.configuration['APPLICATION_LOCALE'].setter.currency}`"
+                            :locale="`${application.configuration['APPLICATION_LOCALE'].setter.language_code.toLowerCase()}-${application.configuration['APPLICATION_LOCALE'].setter.iso_2_digits.toUpperCase()}`" />
                         </div>
                       </div>
                       <div class="col-3">
@@ -265,8 +274,8 @@
                             class="p-inputtext-sm"
                             placeholder="Grand Total"
                             mode="currency"
-                            :currency="application['APPLICATION_LOCALE'].currency"
-                            :locale="`${application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`" />
+                            :currency="application.configuration['APPLICATION_LOCALE'].setter.currency"
+                            :locale="`${application.configuration['APPLICATION_LOCALE'].setter.language_code.toLowerCase()}-${application.configuration['APPLICATION_LOCALE'].setter.iso_2_digits.toUpperCase()}`" />
                         </div>
                       </div>
                       <div class="col-12">
@@ -314,6 +323,15 @@
                   </Button>
                 </div>
               </div>
+              <Message v-if="errorList.length > 0" :closable="false" severity="warn">
+                Warning Message
+                <br />
+                <ol>
+                  <li v-for="(errorValue, errorKey) in errorList" :key="errorKey">
+                    {{ errorValue[Object.keys(errorValue)[0]] }}
+                  </li>
+                </ol>
+              </Message>
             </div>
           </div>
         </template>
@@ -339,10 +357,11 @@ import TabPanel from 'primevue/tabpanel'
 import DataTable from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import BlockUI from 'primevue/blockui'
+import Message from 'primevue/message'
 import MasterItemService from '@/modules/master/item/service'
 import PurchaseOrderService from '@/modules/inventory/purchase_order/service'
 import Calendar from 'primevue/calendar'
-import { mapGetters, mapState } from 'vuex'
+import {mapActions, mapGetters, mapState} from 'vuex'
 export default {
   name: 'PurchaseOrderAdd',
   components: {
@@ -362,6 +381,7 @@ export default {
     InputNumber,
     Calendar,
     Textarea,
+    Message,
   },
   data() {
     return {
@@ -416,6 +436,7 @@ export default {
         remark: '',
         __v: 0,
       },
+      errorList: [],
       disabler: {
         code: true,
         purchase_date: true,
@@ -430,7 +451,10 @@ export default {
   },
   computed: {
     ...mapGetters(['getTask']),
-    ...mapState(['application']),
+    //...mapState(['application']),
+    ...mapState('storeApplication', {
+      application: state => state
+    })
   },
   watch: {
     getTask: {
@@ -467,6 +491,9 @@ export default {
     this.allowSave = false
   },
   methods: {
+    ...mapActions('storeApplication', [
+      'Action___setToast'
+    ]),
     back() {
       this.$router.push('/inventory/purchase_order')
     },
@@ -494,7 +521,8 @@ export default {
       }
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat(`${this.application['APPLICATION_LOCALE'].language_code.toLowerCase()}-${this.application['APPLICATION_LOCALE'].iso_2_digits.toUpperCase()}`, { style: 'currency', currency: this.application[['APPLICATION_LOCALE']].currency }).format(value);
+      // return value
+      return new Intl.NumberFormat(`${this.application.configuration['APPLICATION_LOCALE'].setter.language_code.toLowerCase()}-${this.application.configuration['APPLICATION_LOCALE'].setter.iso_2_digits.toUpperCase()}`, { style: 'currency', currency: this.application.configuration[['APPLICATION_LOCALE']].setter.currency }).format(value);
     },
     allowAdd() {
       return (
@@ -525,31 +553,27 @@ export default {
     },
     onRowEditSave(event) {
       let { newData, index } = event;
-      const discount_type = newData.discount_type
-      const totalPre = newData.qty * newData.price
-      if(discount_type === 'v') {
-        newData.total = totalPre - newData.discount_value
-      } else if(discount_type === 'p') {
-        newData.total = totalPre - (totalPre * newData.discount_value / 100)
-      } else {
-        newData.total = totalPre
-      }
-
-      this.computer.total += newData.total
-
-      let totalAfterDiscount = newData.total
-      if(this.formData.discount_type.value === 'v') {
-        totalAfterDiscount = totalAfterDiscount - newData.discount_value
-      } else if(this.formData.discount_type.value === 'p') {
-        totalAfterDiscount = totalAfterDiscount - (totalAfterDiscount * newData.discount_value / 100)
-      } else {
-        totalAfterDiscount = this.computer.total
-      }
-
-      this.computer.final_total += totalAfterDiscount
-
       this.products[index] = newData
       this.addItem()
+      let totalAll = 0
+      this.computer.total = 0
+      for (const a in this.products) {
+        if(this.products[a].price > 0) {
+          const discount_type = this.products[a].discount_type
+          const totalPre = this.products[a].qty * this.products[a].price
+          if(discount_type === 'v') {
+            this.products[a].total = totalPre - this.products[a].discount_value
+          } else if(discount_type === 'p') {
+            this.products[a].total = totalPre - (totalPre * this.products[a].discount_value / 100)
+          } else {
+            this.products[a].total = totalPre
+          }
+
+          this.computer.total += this.products[a].total
+          totalAll += this.products[a].total
+        }
+      }
+      this.computer.final_total = totalAll
       this.allowSubmit()
     },
     deleteDetail(data) {
@@ -624,12 +648,31 @@ export default {
               }
             })
 
-            this.formData.discount_type = this.formData.discount_type.value
+            // this.formData.discount_type = this.formData.discount_type.value
             this.formData.detail = parseDetail
             this.allowSave = false
             this.closeDisabler()
-            await PurchaseOrderService.add(this.formData).then(() => {
+            await PurchaseOrderService.add({
+              ...this.formData,
+              locale: {
+                language_code: this.application.configuration['APPLICATION_LOCALE'].setter.language_code,
+                iso_2_digits: this.application.configuration['APPLICATION_LOCALE'].setter.iso_2_digits.toUpperCase(),
+                currency: this.application.configuration[['APPLICATION_LOCALE']].setter.currency,
+                timezone: this.application.configuration[['APPLICATION_LOCALE']].setter.timezone
+              },
+              discount_type: this.formData.discount_type.value
+            }).then(() => {
               // this.allowSave = true
+            }).catch(error => {
+              this.errorList = error.payload
+              this.allowSave = true
+              this.openDisabler()
+              this.Action___setToast({
+                severity: 'warn',
+                summary: error.statusCode['classCode'],
+                detail: error.message,
+                life: 5000,
+              })
             })
           },
           reject: () => {
@@ -640,13 +683,17 @@ export default {
     },
     async searchSupplier(search) {
       await MasterItemService.findSupplier(search).then((response) => {
-        this.dropdown.supplier = response
+        this.dropdown.supplier = response.payload
       })
     },
     async searchItem(search) {
-      await MasterItemService.findItem(search).then((response) => {
-        this.dropdown.item = response
-      })
+      if(search === '') {
+        this.dropdown.item = []
+      } else {
+        await MasterItemService.findItem(search).then((response) => {
+          this.dropdown.item = response.payload
+        })
+      }
     }
   },
 }

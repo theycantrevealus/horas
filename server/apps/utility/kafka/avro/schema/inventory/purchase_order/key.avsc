@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "PurchaseOrder",
+  "namespace": "com.horas.purchase_order",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "code",
+      "type": "string"
+    },
+    {
+      "name": "service",
+      "type": "string"
+    },
+    {
+      "name": "method",
+      "type": "string"
+    }
+  ]
+}

@@ -82,12 +82,6 @@
               icon="pi pi-check"
               :disabled="v$.$invalid"
             />
-
-            <p style="padding: 20px">
-              "Dimana-mana masuk sistem itu login lae. Maka dari itu login kau, unang mangalo"
-              <br />
-              <b>Tanaka, 2021</b>
-            </p>
           </template>
         </Card>
       </form>
