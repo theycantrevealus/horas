@@ -191,13 +191,19 @@ export default {
   methods: {
     loadLazyData() {
       this.loading = true
-      AccountService.getAccountList(JSON.stringify(this.lazyParams)).then((response) => {
-        const data = response.data.payload.data
-        const totalRecords = response.data.totalRecords
-        this.items = data
-        this.totalRecords = totalRecords
+      try {
+        AccountService.getAccountList(JSON.stringify(this.lazyParams)).then((response) => {
+          const data = response.payload.data
+          const totalRecords = response.payload.totalRecords
+          this.items = data
+          this.totalRecords = totalRecords
+          this.loading = false
+        })
+      } catch(e) {
+        this.items = []
+        this.totalRecords = 0
         this.loading = false
-      })
+      }
     },
     formatDate(date, format) {
       return DateManagement.formatDate(date, format)

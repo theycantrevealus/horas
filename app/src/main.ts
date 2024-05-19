@@ -27,6 +27,7 @@ import MasterItem from '@/modules/master/item'
 import PurchaseOrder from '@/modules/inventory/purchase_order'
 import GeneralReceiveNote from '@/modules/inventory/general_receive_note'
 import Service from '@/modules/service'
+import FrontDesk from '@/modules/front_desk'
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 import { createI18n } from 'vue-i18n'
@@ -50,6 +51,7 @@ registerModules({
   serviceModule: Service,
   inventory__PurchaseOrder: PurchaseOrder,
   inventory__GeneralReceiveNote: GeneralReceiveNote,
+  frontDesk: FrontDesk,
 })
 // localStorage.clear()
 setupInterceptors()

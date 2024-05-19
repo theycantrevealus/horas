@@ -5,7 +5,7 @@ import process from 'process'
 class PurchaseOrderService {
   getList(parameter) {
     return api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order`, {
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order`, {
         params: {
           lazyEvent: JSON.stringify(parameter)
         },
@@ -17,7 +17,7 @@ class PurchaseOrderService {
 
   getUncompletedList(parameter) {
     return api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/uncompleted`, {
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order/uncompleted`, {
         params: {
           lazyEvent: JSON.stringify(parameter)
         },
@@ -29,7 +29,7 @@ class PurchaseOrderService {
 
   async getDetail(id: string) {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${id}`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order/${id}`)
       .then((response: any) => {
         return Promise.resolve(response)
       })
@@ -37,7 +37,7 @@ class PurchaseOrderService {
 
   async add(data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
-      .post(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order`,data)
+      .post(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order`,data)
       .then((response:AxiosResponse) => {
         const data:CoreResponse = response.data
         return data
@@ -46,7 +46,7 @@ class PurchaseOrderService {
 
   async edit(id: string, data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
-      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${id}`,data)
+      .patch(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order/${id}`,data)
       .then((response:AxiosResponse) => {
         const data:CoreResponse = response.data
         return data
@@ -55,7 +55,7 @@ class PurchaseOrderService {
 
   async askApproval(data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
-      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/ask_approval/${data.id}`, {
+      .patch(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order/ask_approval/${data.id}`, {
         status: 'need_approval',
         remark: data.remark,
         __v: data.__v
@@ -68,7 +68,7 @@ class PurchaseOrderService {
 
   async approveApproval(data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
-      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/approve/${data.id}`, {
+      .patch(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order/approve/${data.id}`, {
         status: 'approved',
         remark: data.remark,
         __v: data.__v
@@ -81,7 +81,7 @@ class PurchaseOrderService {
 
   async declineApproval(data): Promise<CoreResponse> {
     return await api({requiresAuth: true})
-      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/decline/${data.id}`, {
+      .patch(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order/decline/${data.id}`, {
         status: 'declined',
         remark: data.remark,
         __v: data.__v
@@ -93,7 +93,7 @@ class PurchaseOrderService {
   }
 
   async deletePurchaseOrder(data): Promise<CoreResponse> {
-    return await api({requiresAuth: true}).delete(`${process.env.VUE_APP_APIGATEWAY}v1/inventory/purchase_order/${data.id}`).then((response: AxiosResponse) => {
+    return await api({requiresAuth: true}).delete(`${process.env.VUE_APP_APIGATEWAY}/v1/inventory/purchase_order/${data.id}`).then((response: AxiosResponse) => {
       const data:CoreResponse = response.data
       return data
     })

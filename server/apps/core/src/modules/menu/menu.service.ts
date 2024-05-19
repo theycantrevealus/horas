@@ -11,6 +11,7 @@ import {
 } from '@core/menu/schemas/menu.group.model'
 import { Menu, MenuDocument } from '@core/menu/schemas/menu.model'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -28,7 +29,10 @@ export class MenuService {
     private menuGroupModel: Model<MenuGroupDocument>,
 
     @Inject(AccountService)
-    private readonly accountService: AccountService
+    private readonly accountService: AccountService,
+
+    @Inject(ConfigService)
+    private readonly configService: ConfigService
   ) {}
   async all(parameter: any): Promise<GlobalResponse> {
     const response = {
@@ -319,9 +323,11 @@ export class MenuService {
       menu_group: data.menu_group,
     })
     data.show_order = getLateOrder.payload['data'].length + 1
+    console.log(this.configService.get<string>('application.timezone'))
     return await this.menuModel
       .create({
         ...data,
+        timezone: this.configService.get<string>('application.timezone'),
         created_by: account,
       })
       .then((result) => {
@@ -333,7 +339,7 @@ export class MenuService {
         return response
       })
       .catch((error: Error) => {
-        response.message = `Account failed to delete. ${error.message}`
+        response.message = `Account failed to add. ${error.message}`
         response.statusCode =
           modCodes[this.constructor.name].error.databaseError
         response.payload = error

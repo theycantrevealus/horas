@@ -5,6 +5,7 @@ import { RedisConfig } from '@configuration/redis'
 import { BpjsModule } from '@core/3rdparty/bpjs/bpjs.module'
 import { AccountModule } from '@core/account/account.module'
 import { i18nModule } from '@core/i18n/i18n.module'
+import { GatewayInventoryModule } from '@core/inventory/inventory.module'
 import { LicenseModule } from '@core/license/license.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
@@ -147,7 +148,7 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
       { name: LogActivity.name, schema: LogActivitySchema },
     ]),
     KafkaProvider(
-      ['ACCOUNT_SERVICE'],
+      ['ACCOUNT_SERVICE', 'INVENTORY_SERVICE'],
       [
         {
           configClass: 'kafka.account',
@@ -155,9 +156,21 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
           schema: [
             {
               topic: 'account',
-              headers: 'header.avsc',
-              key: 'key.avsc',
-              value: 'value.avsc',
+              headers: 'account/header.avsc',
+              key: 'global/key.avsc',
+              value: 'account/value.avsc',
+            },
+          ],
+        },
+        {
+          configClass: 'kafka.inventory',
+          producerModeOnly: true,
+          schema: [
+            {
+              topic: 'purchase_order',
+              headers: 'inventory/purchase_order/header.avsc',
+              key: 'global/key.avsc',
+              value: 'inventory/purchase_order/value.avsc',
             },
           ],
         },
@@ -171,7 +184,7 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     MenuModule,
     MasterModule,
     i18nModule,
-    // GatewayInventoryModule,
+    GatewayInventoryModule,
     BpjsModule,
     // OperationQueueModule,
   ],
@@ -200,12 +213,7 @@ export class CoreModule {
       )} localization`
     )
     this.logger.verbose(`Mode ${environmentName}`)
-    this.loadConfiguration().then(() => {
-      // setInterval(() => {
-      //   this.logger.warn('Testing Warning')
-      //   this.logger.error('Testing Error')
-      // }, 1000)
-    })
+    this.loadConfiguration().then(() => {})
   }
 
   async loadConfiguration() {
@@ -218,6 +226,7 @@ export class CoreModule {
           if (configSet.indexOf(e.name) < 0) {
             configSet.push(e.name)
           }
+
           const keyCheck: IConfig = await this.cacheManager.get(e.name)
           if (keyCheck) {
             this.logger.verbose(
@@ -235,7 +244,7 @@ export class CoreModule {
                   this.logger.verbose(`[${e.name}] configuration updated`)
                 })
             } else {
-              this.logger.verbose(`[${e.name}] configuration up to date`)
+              this.logger.verbose(`[${e.name}] configuration up to date}`)
             }
           } else {
             await this.cacheManager

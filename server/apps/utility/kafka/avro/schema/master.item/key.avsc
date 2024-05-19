@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "Global",
+  "namespace": "com.horas.global",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "code",
+      "type": "string"
+    }
+  ]
+}

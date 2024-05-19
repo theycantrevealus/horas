@@ -126,7 +126,7 @@ module.exports = {
     // }),
     new TsconfigPathsPlugin({
       configFile: './tsconfig.json',
-      extensions: ['.ts', '.js', '.vue']
+      // extensions: ['.ts', '.js', '.vue']
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'public', 'index.html'),
@@ -145,7 +145,7 @@ module.exports = {
   ],
   externals: [nodeExternals()],
   resolve: {
-    extensions: ['', '.ts', '.js', '.vue', '.json', '.jsx'],
+    // extensions: ['', '.ts', '.js', '.vue', '.json', '.jsx'],
     fallback: {
       https: false,
       path: false
@@ -156,5 +156,3 @@ module.exports = {
     }
   }
 }
-
-console.log(`${__dirname}/src`)

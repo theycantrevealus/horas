@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account } from '@core/account/schemas/account.model'
 import { MasterItemService } from '@core/master/services/master.item.service'
 import {
@@ -12,7 +13,10 @@ import {
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
+import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
+import { KafkaGlobalKey } from '@utility/kafka/avro/schema/global/key'
+import { KafkaService } from '@utility/kafka/avro/service'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
@@ -28,14 +32,46 @@ export class PurchaseOrderService {
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
     @Inject(MasterItemService)
-    private readonly masterItemService: MasterItemService
+    private readonly masterItemService: MasterItemService,
+
+    @Inject('INVENTORY_SERVICE')
+    private readonly clientInventory: KafkaService
   ) {
     // @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
     //
   }
 
-  async all(parameter: any) {
-    return await prime_datatable(parameter, this.purchaseOrderModel)
+  async all(payload: any): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'PURCHASE_ORDER_GET',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+      return await prime_datatable(parameter, this.purchaseOrderModel).then(
+        (result) => {
+          response.payload = result.payload
+          response.message = 'Purchase order fetch successfully'
+          return response
+        }
+      )
+    } catch (error) {
+      response.message = `Purchase order failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async detail(id: string): Promise<PurchaseOrder> {
@@ -52,7 +88,7 @@ export class PurchaseOrderService {
 
   async add(
     data: PurchaseOrderAddDTO,
-    account: Account,
+    credential: IAccountCreatedBy,
     token: string
   ): Promise<GlobalResponse> {
     const response = {
@@ -69,28 +105,42 @@ export class PurchaseOrderService {
 
     const generatedID = new Types.ObjectId().toString()
 
-    // const emitter = await this.clientInventory.emit(
-    //   this.configService.get<string>('kafka.inventory.topic.purchase_order'),
-    //   {
-    //     action: 'add',
-    //     id: generatedID,
-    //     data: data,
-    //     account: account,
-    //     token: token,
-    //   }
-    // )
-    const emitter = true
-
-    if (emitter) {
-      response.message = 'Purchase Order created successfully'
-      response.transaction_id = `purchase_order-${generatedID}`
-    } else {
-      response.message = `Purchase Order failed to create`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
+    try {
+      return await this.clientInventory
+        .send({
+          topic: this.configService.get<string>(
+            'kafka.inventory.topic.purchase_order'
+          ),
+          messages: [
+            {
+              headers: {
+                ...credential,
+                token: token,
+              },
+              key: {
+                id: `purchase_order-${generatedID}`,
+                code: data.code,
+                service: 'account',
+                method: 'create',
+              } satisfies KafkaGlobalKey,
+              value: data,
+            },
+          ],
+        })
+        .then(() => {
+          response.message = 'Purchase Order created successfully'
+          response.transaction_id = `purchase_order-${generatedID}`
+          return response
+        })
+    } catch (error) {
+      response.message = 'Account failed to create'
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
-
-    return response
   }
 
   async askApproval(

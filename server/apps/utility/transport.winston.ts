@@ -124,14 +124,14 @@ function delimitter(style = '-') {
 
 function loggerParser(data) {
   const parsedResponseHorasLogging: HorasLogging = data.message
-  const ip = pad(sPad.ip, parsedResponseHorasLogging.ip ?? '0.0.0.0', false)
+  const ip = pad(sPad.ip, parsedResponseHorasLogging?.ip ?? '0.0.0.0', false)
   const pid = pad(sPad.pid, process.pid, false)
   const method = pad(
     sPad.method,
-    parsedResponseHorasLogging.method ?? '-',
+    parsedResponseHorasLogging?.method ?? '-',
     false
   )
-  if (parsedResponseHorasLogging.ip) {
+  if (parsedResponseHorasLogging?.ip) {
     const account = pad(
       sPad.account,
       `${parsedResponseHorasLogging?.account?.last_name ?? 'SYSTEM'}, ${

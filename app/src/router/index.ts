@@ -13,7 +13,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Builder',
     component: Builder,
     meta: {
-      requiresAuth: false,
+      requiresAuth: true,
     },
     redirect: '/dashboard',
     children: [
@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Dashboard',
         meta: {
           pageTitle: 'Dashboard',
-          requiresAuth: false,
+          requiresAuth: true,
         },
         component: () =>
           import(/* webpackChunkName: "dashboard" */ '../views/Dashboard.vue'),
@@ -32,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'About',
         meta: {
           pageTitle: 'About',
-          requiresAuth: false,
+          requiresAuth: true,
           breadcrumb: [
             {
               label: 'About',
@@ -52,7 +52,7 @@ const routes: Array<RouteRecordRaw> = [
             name: 'Menu',
             meta: {
               pageTitle: 'Menu Management',
-              requiresAuth: false,
+              requiresAuth: true,
               breadcrumb: [
                 {
                   label: 'Menu',
@@ -132,7 +132,6 @@ router.beforeEach((to, from, next) => {
             if(store.getters['storeCredential/Getter___credential'].routeMap[to.name.toString()]) {
               const dispatches = store.getters['storeCredential/Getter___credential'].routeMap[to.name.toString()].permission
               if(dispatches && dispatches.indexOf(to.name.toString()) < 0) {
-                alert()
                 next({
                   path: '/403',
                   query: {
@@ -144,7 +143,6 @@ router.beforeEach((to, from, next) => {
                 return
               }
             } else {
-              alert()
               next({
                 path: '/403',
                 query: {

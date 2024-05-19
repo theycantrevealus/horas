@@ -32,6 +32,14 @@ export class AccountAddDTO {
   email: string
 
   @ApiProperty({
+    example: 'xxxxx',
+    description: '',
+    required: false,
+  })
+  @IsString()
+  code?: string
+
+  @ApiProperty({
     example: '12345678',
     minLength: 8,
     description: '',

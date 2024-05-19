@@ -1,5 +1,9 @@
 export type CoreResponse = {
-  statusCode: string
+  statusCode: {
+    customCode: string
+    defaultCode: string
+    classCode: string
+  }
   message: string
   payload: any
   transaction_classify: string

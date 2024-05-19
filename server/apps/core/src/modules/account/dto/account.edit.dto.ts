@@ -32,6 +32,14 @@ export class AccountEditDTO {
   email: string
 
   @ApiProperty({
+    example: 'xxxxx',
+    description: '',
+    required: false,
+  })
+  @IsString()
+  code?: string
+
+  @ApiProperty({
     example: 'John',
     description: '',
   })

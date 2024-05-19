@@ -58,12 +58,12 @@ export async function errorHttpHandler(
   } else {
     responseSet = {
       statusCode: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: modCodes.Global.success,
-        classCode: 'CORE_F0000',
+        defaultCode: exception['response'].statusCode,
+        customCode: modCodes.Global.failed,
+        classCode: 'CORE',
       },
       // message: `${exception.message.substring(0, 175)}...`,
-      message: `${exception.message}`,
+      message: `${exception}`,
       transaction_classify: '',
       transaction_id: '',
       payload: {},
@@ -71,7 +71,8 @@ export async function errorHttpHandler(
       path: request.url,
     }
 
-    statusCode = HttpStatus.BAD_REQUEST
+    // statusCode = HttpStatus.BAD_REQUEST
+    statusCode = exception['response'].statusCode
   }
 
   const account: IAccountCreatedBy = request.credential

@@ -1,4 +1,4 @@
-import { ICurrency } from '@core/i18n/schemas/i18n'
+import { ICurrency } from '@core/i18n/interface/i18n'
 import { IMasterItemSupplier } from '@core/master/interface/master.item.supplier'
 import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'

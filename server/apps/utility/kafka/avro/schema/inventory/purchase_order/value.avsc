@@ -109,39 +109,11 @@
             },
             {
               "name": "qty",
-              "type": {
-                "type": "bytes",
-                "logicalType": "decimal",
-                "precision": 4,
-                "scale": 2
-              }
-            },
-            {
-              "name": "delivered",
-              "type": {
-                "type": "bytes",
-                "logicalType": "decimal",
-                "precision": 4,
-                "scale": 2
-              }
+              "type": "double"
             },
             {
               "name": "price",
-              "type": {
-                "type": "bytes",
-                "logicalType": "decimal",
-                "precision": 4,
-                "scale": 2
-              }
-            },
-            {
-              "name": "total",
-              "type": {
-                "type": "bytes",
-                "logicalType": "decimal",
-                "precision": 4,
-                "scale": 2
-              }
+              "type": "double"
             },
             {
               "name": "discount_type",
@@ -149,12 +121,7 @@
             },
             {
               "name": "discount_value",
-              "type": {
-                "type": "bytes",
-                "logicalType": "decimal",
-                "precision": 4,
-                "scale": 2
-              }
+              "type": "double"
             },
             {
               "name": "remark",
@@ -170,12 +137,7 @@
     },
     {
       "name": "discount_value",
-      "type": {
-        "type": "bytes",
-        "logicalType": "decimal",
-        "precision": 4,
-        "scale": 2
-      }
+      "type": "double"
     },
     {
       "name": "remark",

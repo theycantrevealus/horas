@@ -287,6 +287,7 @@ import Cropper from '@/components/Cropper.vue'
 import Timeline from 'primevue/timeline'
 import Calendar from 'primevue/calendar'
 import { getCurrentTimestamp } from '@/util/time'
+import AccountService from '@/modules/setting/account/service'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
@@ -459,6 +460,10 @@ export default {
   },
   async mounted() {
     this.allowSave = false
+    // TODO : Set this to latest structure
+    AccountService.getAccountDetail(this.$route.query.id).then((response) => {
+      console.log(response)
+    })
     await this.$store.dispatch(
       'accountModule/fetchAccountDetail',
       this.$route.query.id

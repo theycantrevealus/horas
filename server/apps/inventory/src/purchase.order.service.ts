@@ -1,15 +1,16 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account } from '@core/account/schemas/account.model'
-import { MasterItemService } from '@core/master/services/master.item.service'
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderApproval,
   PurchaseOrderEditDTO,
 } from '@inventory/dto/purchase.order'
+import { IPurchaseOrder } from '@inventory/interface/purchase.order'
+import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import {
   PurchaseOrder,
   PurchaseOrderDocument,
 } from '@inventory/schemas/purchase.order'
-import { LogService } from '@log/log.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -17,9 +18,13 @@ import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
+import { pad } from '@utility/string'
+import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
+
+import { IConfig } from '../../core/src/schemas/config'
 
 @Injectable()
 export class PurchaseOrderService {
@@ -30,13 +35,8 @@ export class PurchaseOrderService {
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger,
 
-    @Inject(LogService) private readonly logService: LogService,
-
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
-
-    @Inject(MasterItemService)
-    private readonly masterItemService: MasterItemService,
 
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
@@ -45,11 +45,30 @@ export class PurchaseOrderService {
     return this.purchaseOrderModel.findOne({ id: id, deleted_at: null }).exec()
   }
 
+  async simple() {}
+
   async add(
     generatedID: string,
     payload: PurchaseOrderAddDTO,
-    account: Account
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
+    /*
+     * #1. Prepare for the data
+     *     a. Prepare code
+     *     b. Calculate price
+     * #2. Save the data
+     * */
+    const data: IPurchaseOrder = {
+      id: `purchase_order-${generatedID}`,
+      ...payload,
+      approval_history: [],
+      total: 0,
+      grand_total: 0,
+      status: 'new',
+    }
+
+    const detailData: IPurchaseOrderDetail[] = []
+
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -62,128 +81,90 @@ export class PurchaseOrderService {
       transaction_id: null,
     } satisfies GlobalResponse
 
+    // #1
+    if (!data.code) {
+      const now = new Date()
+      await this.purchaseOrderModel
+        .countDocuments({
+          created_at: {
+            $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+            $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+          },
+        })
+        .then((counter) => {
+          data.code = `${modCodes[this.constructor.name]}-${new Date()
+            .toJSON()
+            .slice(0, 7)
+            .replace(/-/g, '/')}/${pad('000000', counter + 1, true)}`
+        })
+    }
+
+    data.detail.forEach((row, e) => {
+      const detail = {
+        ...row,
+        delivered: 0,
+        total: 0,
+      }
+
+      const itemTotal = row.qty * row.price
+      let totalRow = 0
+      if (row.discount_type === 'n') {
+        totalRow = itemTotal
+      } else if (row.discount_type === 'p') {
+        totalRow = itemTotal - (itemTotal * row.discount_value) / 100
+      } else if (row.discount_type === 'v') {
+        totalRow = itemTotal - row.discount_value
+      }
+
+      detail.total = totalRow
+      data.total += totalRow
+      detailData.push(detail)
+    })
+
+    data.detail = detailData
+
+    if (data.discount_type === 'p') {
+      data.grand_total = data.total - (data.total * data.discount_value) / 100
+    } else if (data.discount_type === 'v') {
+      data.grand_total = data.total - data.discount_value
+    }
+
+    data.approval_history = [
+      {
+        status: 'new',
+        remark: data.remark,
+        created_by: account,
+        logged_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+      },
+    ]
+
+    // #2
+    await this.purchaseOrderModel
+      .create({
+        ...data,
+        locale: await this.cacheManager
+          .get('APPLICATION_LOCALE')
+          .then((response: IConfig) => {
+            return response.setter
+          }),
+        created_by: account,
+      })
+      .then(async (result) => {
+        response.message = 'Purchase Order created successfully'
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.transaction_id = result._id
+        response.payload = result
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase Order failed to create. ${error.message}`
+        response.statusCode =
+          modCodes[this.constructor.name].error.databaseError
+        response.payload = error
+      })
+
     return response
   }
-
-  // async add(
-  //   generatedID: string,
-  //   payload: PurchaseOrderAddDTO,
-  //   account: Account
-  // ): Promise<GlobalResponse> {
-  //   /*
-  //    * #1. Prepare for the data
-  //    *     a. Prepare code
-  //    *     b. Calculate price
-  //    * #2. Save the data
-  //    * */
-  //   const data: IPurchaseOrder = new IPurchaseOrder({
-  //     id: `purchase_order-${generatedID}`,
-  //     ...payload,
-  //     total: 0,
-  //     grand_total: 0,
-  //     status: 'new',
-  //   })
-  //
-  //   const detailData: IPurchaseOrderDetail[] = []
-  //
-  //   const response = {
-  //     statusCode: {
-  //       defaultCode: HttpStatus.OK,
-  //       customCode: modCodes.Global.success,
-  //       classCode: modCodes[this.constructor.name].defaultCode,
-  //     },
-  //     message: '',
-  //     payload: {},
-  //     transaction_classify: 'PURCHASE_ORDER_ADD',
-  //     transaction_id: null,
-  //   } satisfies GlobalResponse
-  //
-  //   // #1
-  //   if (!data.code) {
-  //     const now = new Date()
-  //     await this.purchaseOrderModel
-  //       .count({
-  //         created_at: {
-  //           $gte: new Date(now.getFullYear(), now.getMonth(), 1),
-  //           $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0),
-  //         },
-  //       })
-  //       .then((counter) => {
-  //         data.code = `${modCodes[this.constructor.name]}-${new Date()
-  //           .toJSON()
-  //           .slice(0, 7)
-  //           .replace(/-/g, '/')}/${pad('000000', counter + 1, true)}`
-  //       })
-  //   }
-  //
-  //   data.detail.forEach((row, e) => {
-  //     const detail: IPurchaseOrderDetail = new IPurchaseOrderDetail({
-  //       ...row,
-  //       total: 0,
-  //     })
-  //
-  //     const itemTotal = row.qty * row.price
-  //     let totalRow = 0
-  //     if (row.discount_type === 'n') {
-  //       totalRow = itemTotal
-  //     } else if (row.discount_type === 'p') {
-  //       totalRow = itemTotal - (itemTotal * row.discount_value) / 100
-  //     } else if (row.discount_type === 'v') {
-  //       totalRow = itemTotal - row.discount_value
-  //     }
-  //
-  //     detail.total = totalRow
-  //     data.total += totalRow
-  //     detailData.push(detail)
-  //   })
-  //
-  //   data.detail = detailData
-  //
-  //   if (data.discount_type === 'p') {
-  //     data.grand_total = data.total - (data.total * data.discount_value) / 100
-  //   } else if (data.discount_type === 'v') {
-  //     data.grand_total = data.total - data.discount_value
-  //   }
-  //
-  //   data.approval_history = [
-  //     new IPurchaseOrderApproval({
-  //       status: 'new',
-  //       remark: data.remark,
-  //       created_by: account,
-  //     }),
-  //   ]
-  //
-  //   // #2
-  //   await this.purchaseOrderModel
-  //     .create({
-  //       ...data,
-  //       locale: await this.cacheManager
-  //         .get('APPLICATION_LOCALE')
-  //         .then((response: IConfig) => {
-  //           return response.setter
-  //         }),
-  //       created_by: account,
-  //     })
-  //     .then(async (result) => {
-  //       await this.logService.updateTask(
-  //         `purchase_order-${generatedID}`,
-  //         'done'
-  //       )
-  //       response.message = 'Purchase Order created successfully'
-  //       response.statusCode =
-  //         modCodes[this.constructor.name].error.databaseError
-  //       response.transaction_id = result._id
-  //       response.payload = result
-  //     })
-  //     .catch((error: Error) => {
-  //       response.message = `Purchase Order failed to create. ${error.message}`
-  //       response.statusCode =
-  //         modCodes[this.constructor.name].error.databaseError
-  //       response.payload = error
-  //     })
-  //
-  //   return response
-  // }
 
   async askApproval(
     data: PurchaseOrderApproval,

@@ -1,5 +1,6 @@
+import { LoggingInterceptor } from '@interceptors/logging'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject } from '@nestjs/common'
+import { Inject, UseInterceptors } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
   ConnectedSocket,
@@ -68,11 +69,12 @@ export class EventsGateway
   // }
 
   @SubscribeMessage('proceed')
+  @UseInterceptors(LoggingInterceptor)
   async process_result(
-    @MessageBody() data: ProceedDataTrafficDTO,
-    @ConnectedSocket() client: Socket
+    @MessageBody() data: ProceedDataTrafficDTO
+    // @ConnectedSocket() client: Socket
   ) {
-    this.logger.verbose(`Emit proceed: ${JSON.stringify(data)}`)
+    // this.logger.verbose(`Data from ${client.id} : ${JSON.stringify(data)}`)
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.notify_result.data'),
       data
@@ -85,7 +87,7 @@ export class EventsGateway
     @MessageBody() data: ProceedDataTrafficDTO,
     @ConnectedSocket() client: Socket
   ) {
-    this.logger.verbose(`Emit configuration change: ${JSON.stringify(data)}`)
+    this.logger.verbose(`Config from ${client.id} : ${JSON.stringify(data)}`)
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.configuration.update'),
       data
@@ -98,7 +100,7 @@ export class EventsGateway
     @MessageBody() data: ProceedDataTrafficDTO,
     @ConnectedSocket() client: Socket
   ) {
-    this.logger.verbose(`Emit queue: ${JSON.stringify(data)}`)
+    this.logger.verbose(`Queue from ${client.id} : ${JSON.stringify(data)}`)
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.queue.new'),
       data
@@ -108,22 +110,27 @@ export class EventsGateway
 
   async afterInit() {
     this.io.use(async (socket, next) => {
-      if (
-        socket.handshake.headers.authorization &&
-        socket.handshake.headers.authorization
-      ) {
-        const token: string = socket.handshake.headers.authorization
-          .split('Bearer')[1]
-          .trim()
-        const decodeTokenResponse: JWTTokenDecodeResponse =
-          await this.authService.validate_token({
-            token: token,
-          })
-        if (!decodeTokenResponse.account)
-          return next(new Error('Authentication error'))
-        next()
-      } else {
-        next(new Error('Authentication error'))
+      try {
+        if (
+          socket.handshake.headers.authorization &&
+          socket.handshake.headers.authorization
+        ) {
+          const token: string = socket.handshake.headers.authorization
+            .toString()
+            .split('Bearer')[1]
+            .trim()
+          const decodeTokenResponse: JWTTokenDecodeResponse =
+            await this.authService.validate_token({
+              token: token,
+            })
+          if (!decodeTokenResponse.account)
+            return next(new Error('Not authorized'))
+          next()
+        } else {
+          next(new Error('No token found / Malformed token'))
+        }
+      } catch (e) {
+        next(new Error('No token found / Malformed token'))
       }
     })
   }

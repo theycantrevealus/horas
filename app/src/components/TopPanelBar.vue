@@ -313,7 +313,7 @@ export default {
   },
   created() {},
   async mounted() {
-    // this.selectedLanguage = this.language
+    this.selectedLanguage = this.language
     await this.initLanguage()
   },
   methods: {

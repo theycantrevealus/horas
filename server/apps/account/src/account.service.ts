@@ -1,10 +1,12 @@
 import { AccountAddDTO } from '@core/account/dto/account.add.dto'
+import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
+import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
@@ -14,8 +16,9 @@ export class AccountService {
     private accountModel: Model<AccountDocument>
   ) {}
 
-  async create(
+  async accountAdd(
     data: AccountAddDTO,
+    generatedID: string,
     credential: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
@@ -30,10 +33,10 @@ export class AccountService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    return response
     return await this.accountModel
       .create({
         ...data,
+        id: generatedID,
         created_by: credential,
       })
       .then((result) => {
@@ -50,5 +53,98 @@ export class AccountService {
         }
         return response
       })
+      .catch((error) => {
+        throw new Error(JSON.stringify(error))
+      })
+  }
+
+  async accountEdit(parameter: AccountEditDTO, id: string) {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: await this.accountModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'ACCOUNT_EDIT',
+      transaction_id: id,
+    } satisfies GlobalResponse
+
+    try {
+      return await this.accountModel
+        .findOneAndUpdate(
+          {
+            id: id,
+            __v: parameter.__v,
+          },
+          {
+            authority: parameter.authority,
+            email: parameter.email,
+            first_name: parameter.first_name,
+            last_name: parameter.last_name,
+            phone: parameter.phone,
+            access: parameter.access,
+            permission: parameter.permission,
+          },
+          { upsert: false, new: true }
+        )
+        .then((result) => {
+          result.__v++
+          response.message = 'Account updated successfully'
+          response.payload = result
+          return response
+        })
+    } catch (error) {
+      response.message = `Account failed to update. ${error.message}`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
+  }
+
+  async accountDelete(id: string): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: await this.accountModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'ACCOUNT_DELETE',
+      transaction_id: id,
+    } satisfies GlobalResponse
+
+    try {
+      return await this.accountModel
+        .findOneAndUpdate(
+          {
+            id: id,
+          },
+          {
+            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+          }
+        )
+        .then(() => {
+          response.message = 'Account deleted successfully'
+          return response
+        })
+    } catch (error) {
+      response.message = `Account failed to delete`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 }

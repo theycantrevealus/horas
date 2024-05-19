@@ -7,7 +7,7 @@ import process from 'process'
 class AccountService {
   async signIn(accountData: TAccountLogin):Promise<CoreResponse> {
     return await api({ requiresAuth: false })
-      .post(`${process.env.VUE_APP_APIGATEWAY}v1/account/signin`, accountData)
+      .post(`${process.env.VUE_APP_APIGATEWAY}/v1/account/signin`, accountData)
       .then(async (response: AxiosResponse) => {
         const data: CoreResponse = response.data
         return Promise.resolve(data)

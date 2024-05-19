@@ -47,9 +47,10 @@ export const i18nStore = {
   mutations: {
     Mutation___initLanguage: (state: any, data: any[]) => {
       const metaDataLanguage = {}
-      if(data) {
-        for(const a in data) {
-          const item = data[a]
+      const payload = data['payload']
+      if(payload) {
+        for(const a in payload) {
+          const item = payload[a]
           const languageID = item.language_code.toLowerCase()
           if(!metaDataLanguage[item.language_code.toLowerCase()]) {
             metaDataLanguage[languageID] = {}

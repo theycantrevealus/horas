@@ -1,24 +1,29 @@
-import axios from 'axios'
+import axios, {AxiosResponse} from 'axios'
 import store from '@/store'
 import api from "@/util/api";
 import process from 'process'
+import {CoreResponse} from "@/model/Response";
 class AccountService {
   async getAccountList(parsedData) {
     return api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account`, {
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/account`, {
         params: {
           lazyEvent: parsedData
         },
       })
-      .then(async (response: any) => {
-        return await Promise.resolve(response)
+      .then(async (response: AxiosResponse) => {
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
+      })
+      .catch((e: Error) => {
+        return Promise.reject(e)
       })
   }
 
   async updatePermission(parsedData) {
     return api({requiresAuth: true})
       .post(
-        `${process.env.VUE_APP_APIGATEWAY}v1/account/grant_permission`,
+        `${process.env.VUE_APP_APIGATEWAY}/v1/account/grant_permission`,
         parsedData
       )
       .then(async (response: any) => {
@@ -29,7 +34,7 @@ class AccountService {
   async updateAccess(parsedData) {
     return api({requiresAuth: true})
       .post(
-        `${process.env.VUE_APP_APIGATEWAY}v1/account/grant_access`,
+        `${process.env.VUE_APP_APIGATEWAY}/v1/account/grant_access`,
         parsedData
       )
       .then(async (response: any) => {
@@ -40,7 +45,7 @@ class AccountService {
   async updateAccount(parsedData) {
     return api({requiresAuth: true})
       .patch(
-        `${process.env.VUE_APP_APIGATEWAY}v1/account/${parsedData.id}`,
+        `${process.env.VUE_APP_APIGATEWAY}/v1/account/${parsedData.id}`,
         {
           email: parsedData.email,
           first_name: parsedData.first_name,
@@ -57,7 +62,7 @@ class AccountService {
 
   async getAccountDetail(id) {
     return api({requiresAuth: true})
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/account/${id}`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/account/${id}`)
       .then(async (response: any) => {
         return await Promise.resolve(response)
       })
@@ -69,7 +74,7 @@ class AccountService {
 
   async getMenu() {
     return api({requiresAuth: true})
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/menu`)
       .then(async (response) => {
         return await Promise.resolve(response)
       })
@@ -77,7 +82,7 @@ class AccountService {
 
   async getAuthorityList() {
     return api({requiresAuth: true})
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/authority`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/authority`)
       .then(async (response) => {
         return await Promise.resolve(response)
       })
@@ -85,7 +90,7 @@ class AccountService {
 
   async menuTree() {
     return api({requiresAuth: true})
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu/tree/manager`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/menu/tree/manager`)
       .then(async (response) => {
         return await Promise.resolve(response)
       })
@@ -93,7 +98,7 @@ class AccountService {
 
   async menuList() {
     return api({requiresAuth: true})
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/menu?lazyEvent={"first":0,"rows":200,"sortField":"created_at","sortOrder":1,"filters":{}}`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/menu?lazyEvent={"first":0,"rows":200,"sortField":"created_at","sortOrder":1,"filters":{}}`)
       .then(async (response) => {
         return await Promise.resolve(response)
       })

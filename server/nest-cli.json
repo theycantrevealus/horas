@@ -117,6 +117,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/shared/tsconfig.app.json"
       }
+    },
+    "master.item": {
+      "type": "application",
+      "root": "apps/master.item",
+      "entryFile": "main",
+      "sourceRoot": "apps/master.item/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/master.item/tsconfig.app.json"
+      }
     }
   }
 }

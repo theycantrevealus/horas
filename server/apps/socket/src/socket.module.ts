@@ -1,13 +1,12 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
+import { RedisConfig } from '@configuration/redis'
 import { SocketConfig } from '@configuration/socket'
-import { Inject, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { WinstonModule } from '@utility/logger/module'
 import { WinstonCustomTransports } from '@utility/transport.winston'
-import { Logger } from 'winston'
 
 import { EventsModule } from './events/event.module'
 
@@ -16,18 +15,15 @@ import { EventsModule } from './events/event.module'
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: environmentIdentifier,
-      load: [ApplicationConfig, MongoConfig, SocketConfig],
+      load: [ApplicationConfig, MongoConfig, SocketConfig, RedisConfig],
     }),
     WinstonModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         return {
-          colorize: true,
-          levels: {
-            error: 0,
-            warn: 1,
-            verbose: 3,
-          },
+          handleRejections: true,
+          handleExceptions: true,
+          colorize: configService.get<boolean>('application.log.colorize'),
           transports: WinstonCustomTransports[environmentName],
         }
       },
@@ -36,11 +32,4 @@ import { EventsModule } from './events/event.module'
     EventsModule,
   ],
 })
-export class SocketModule {
-  constructor(
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger
-  ) {
-    //
-  }
-}
+export class SocketModule {}

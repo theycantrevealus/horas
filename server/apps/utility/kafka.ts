@@ -31,15 +31,12 @@ export function KafkaProvider(
             ),
             headers: join(
               __dirname,
-              `../apps/utility/kafka/avro/schema/${b.topic}/${b.headers}`
+              `../apps/utility/kafka/avro/schema/${b.headers}`
             ),
-            key: join(
-              __dirname,
-              `../apps/utility/kafka/avro/schema/${b.topic}/${b.key}`
-            ),
+            key: join(__dirname, `../apps/utility/kafka/avro/schema/${b.key}`),
             value: join(
               __dirname,
-              `../apps/utility/kafka/avro/schema/${b.topic}/${b.value}`
+              `../apps/utility/kafka/avro/schema/${b.value}`
             ),
           })
         })

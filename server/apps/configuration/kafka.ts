@@ -54,6 +54,10 @@ export const KafkaConfig = () => {
         },
       },
       inventory: {
+        port: {
+          transport: process.env.KAFKA_INVENTORY_PORT_TRANSPORT,
+          service: process.env.KAFKA_INVENTORY_PORT_SERVICE,
+        },
         service: process.env.KAFKA_INVENTORY_SERVICE,
         topic: {
           purchase_order: process.env.KAFKA_INVENTORY_TOPIC_PURCHASE_ORDER,
@@ -66,6 +70,7 @@ export const KafkaConfig = () => {
         ssl: {
           protocol: process.env.KAFKA_INVENTORY_SSL_SCP,
           ca: process.env.KAFKA_INVENTORY_SSL_CA,
+          key: process.env.KAFKA_INVENTORY_SSL_KEY,
           passphrase: process.env.KAFKA_INVENTORY_SSL_PASSPHRASE,
         },
         sasl: {

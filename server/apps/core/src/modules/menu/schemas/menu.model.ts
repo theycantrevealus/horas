@@ -57,6 +57,9 @@ export class Menu {
   group_color: string
 
   @Prop({ type: SchemaTypes.String })
+  timezone: string
+
+  @Prop({ type: SchemaTypes.String })
   remark: string
 
   @Prop({

@@ -9,6 +9,8 @@ import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { SocketIoClientProvider } from '@socket/socket.provider'
+import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { DecoratorProcessorService } from '@utility/decorator'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { KafkaProvider } from '@utility/kafka'
@@ -66,9 +68,9 @@ import { AccountService } from './account.service'
           schema: [
             {
               topic: 'account',
-              headers: 'header.avsc',
-              key: 'key.avsc',
-              value: 'value.avsc',
+              headers: 'account/header.avsc',
+              key: 'global/key.avsc',
+              value: 'account/value.avsc',
             },
           ],
         },
@@ -76,6 +78,11 @@ import { AccountService } from './account.service'
     ),
   ],
   controllers: [AccountController],
-  providers: [AccountService, DecoratorProcessorService],
+  providers: [
+    AccountService,
+    DecoratorProcessorService,
+    SocketIoClientProvider,
+    SocketIoClientProxyService,
+  ],
 })
 export class AccountModule {}

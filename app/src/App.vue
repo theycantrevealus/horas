@@ -29,7 +29,7 @@ export default {
     }
   },
   async mounted() {
-    await this.generateLocalization()
+    // await this.generateLocalization()
   },
   methods: {
     ...mapActions({

@@ -605,7 +605,6 @@ export default {
 
 
       PurchaseOrderService.getList(this.lazyParams).then((response) => {
-        console.log(response)
         if (response) {
           const data = response.data.payload.data
           const totalRecords = response.data.payload.totalRecords

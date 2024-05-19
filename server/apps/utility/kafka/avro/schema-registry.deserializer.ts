@@ -27,25 +27,31 @@ export class KafkaAvroResponseDeserializer
     const decodeResponse = {
       response: value,
       headers: headers,
-      key,
+      key: key,
       timestamp,
       offset,
     }
 
     try {
+      const parsedHeader = {}
+      if (decodeResponse.headers) {
+        for (const a in decodeResponse.headers) {
+          if (!parsedHeader[a]) {
+            parsedHeader[a] = ''
+          }
+          parsedHeader[a] = decodeResponse.headers[a].toString()
+        }
+      }
+      decodeResponse.headers = parsedHeader
       decodeResponse.key =
         message.key?.length > 0 ? await this.registry.decode(message.key) : null
       decodeResponse.response = message.value
         ? await this.registry.decode(message.value)
         : message.value
-
-      // TODO : Log every request
-      // TODO : Add header to pass credential token
     } catch (e) {
       const msg = this.fallback.deserialize(message)
       Object.assign(decodeResponse, msg)
     }
-
     return decodeResponse
   }
 }

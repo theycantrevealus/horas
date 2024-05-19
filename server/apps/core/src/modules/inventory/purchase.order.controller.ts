@@ -1,5 +1,10 @@
+import { Account } from '@core/account/schemas/account.model'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
-import { Authorization, CredentialAccount } from '@decorators/authorization'
+import {
+  AccountToken,
+  Authorization,
+  CredentialAccount,
+} from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -46,6 +51,7 @@ export class PurchaseOrderController {
   @Get('purchase_order')
   @Version('1')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
@@ -53,22 +59,23 @@ export class PurchaseOrderController {
     description: 'Showing data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await this.purchaseOrderService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
-    } else {
-      return {
-        message: 'filters is not a valid json',
-        payload: {},
-      }
-    }
+  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
+    return await this.purchaseOrderService.all(parameter)
+    // if (isJSON(parameter)) {
+    //   const parsedData = JSON.parse(parameter)
+    //   return await this.purchaseOrderService.all({
+    //     first: parsedData.first,
+    //     rows: parsedData.rows,
+    //     sortField: parsedData.sortField,
+    //     sortOrder: parsedData.sortOrder,
+    //     filters: parsedData.filters,
+    //   })
+    // } else {
+    //   return {
+    //     message: 'filters is not a valid json',
+    //     payload: {},
+    //   }
+    // }
   }
 
   @Get('purchase_order/uncompleted')
@@ -124,14 +131,10 @@ export class PurchaseOrderController {
   })
   async add(
     @Body() parameter: PurchaseOrderAddDTO,
-    @CredentialAccount() account,
-    @Req() request
+    @CredentialAccount() account: Account,
+    @AccountToken() token: string
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.add(
-      parameter,
-      account,
-      request.headers.authorization
-    )
+    return await this.purchaseOrderService.add(parameter, account, token)
   }
 
   @Patch('purchase_order/ask_approval/:id')

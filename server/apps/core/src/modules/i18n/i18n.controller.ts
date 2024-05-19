@@ -26,7 +26,6 @@ import {
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
-import { isJSON } from 'class-validator'
 
 @Controller('i18n')
 @ApiTags('i18n Management')
@@ -47,21 +46,7 @@ export class i18nController {
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await this.i18nService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
-    } else {
-      return {
-        message: 'filters is not a valid json',
-        payload: {},
-      }
-    }
+    return await this.i18nService.all(parameter)
   }
 
   @Get('all')

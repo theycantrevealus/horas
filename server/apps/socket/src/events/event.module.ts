@@ -1,8 +1,10 @@
 import { CacheModule } from '@nestjs/cache-manager'
-import { Module } from '@nestjs/common'
+import { Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AuthModule } from '@security/auth.module'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import * as redisStore from 'cache-manager-ioredis'
+import { Logger } from 'winston'
 
 import { EventsGateway } from './event.gateway'
 
@@ -26,4 +28,14 @@ import { EventsGateway } from './event.gateway'
   ],
   providers: [EventsGateway],
 })
-export class EventsModule {}
+export class EventsModule {
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
+
+    @Inject(ConfigService)
+    private readonly configService: ConfigService
+  ) {
+    //
+  }
+}

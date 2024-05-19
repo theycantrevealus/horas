@@ -1,32 +1,42 @@
+import { InventoryModule } from '@inventory/inventory.module'
 import { PurchaseOrderController } from '@inventory/purchase.order.controller'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import { MessagePattern, MicroserviceOptions } from '@nestjs/microservices'
+import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { SharedModule } from '@shared/src/shared.module'
 import { KAFKA_TOPICS } from '@utility/constants'
 import { DecoratorProcessorService } from '@utility/decorator'
+import { SubscribeTo } from '@utility/kafka/avro/decorator'
 import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 
-import { CoreModule } from '../../core/src/core.module'
-import { InventoryModule } from './inventory.module'
-
 async function bootstrap() {
-  const appContext = await NestFactory.createApplicationContext(CoreModule, {
+  const appContext = await NestFactory.createApplicationContext(SharedModule, {
     logger: ['verbose', 'error'],
   })
   const configService = appContext.get(ConfigService)
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    InventoryModule,
-    {}
+  const app = await NestFactory.create(InventoryModule)
+
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.TCP,
+      options: {
+        port: configService.get<number>('kafka.inventory.port.transport'),
+      },
+    },
+    { inheritAppConfig: true }
   )
+
   app.get(DecoratorProcessorService).processDecorators([
     {
       target: PurchaseOrderController,
       constant: KAFKA_TOPICS,
       meta: `kafka.inventory.topic`,
-      decorator: MessagePattern,
+      decorator: SubscribeTo,
     },
   ])
+
   appContext.useLogger(appContext.get(WINSTON_MODULE_NEST_PROVIDER))
-  app.listen()
+  await app.startAllMicroservices()
+  app.listen(configService.get<number>('kafka.inventory.port.service'))
 }
 bootstrap()

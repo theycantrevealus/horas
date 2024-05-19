@@ -37,7 +37,7 @@ export class GlobalResponseParsed {
   @ApiProperty({
     description: '',
   })
-  statusCode: string
+  statusCode: CustomErrorCode
 
   @ApiProperty({
     example: 'Your request proceed successfully',

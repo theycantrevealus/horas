@@ -1,13 +1,14 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { AccountJoin } from '@core/account/schemas/account.join'
-import { CurrencyJoin, ICurrency } from '@core/i18n/schemas/i18n'
+import { ICurrency } from '@core/i18n/interface/i18n'
+import { CurrencyJoin } from '@core/i18n/schemas/i18n.join'
 import { IMasterItemSupplier } from '@core/master/interface/master.item.supplier'
 import { MasterItemSupplierJoin } from '@core/master/schemas/master.item.supplier.join'
 import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { PurchaseOrderApproval } from '@inventory/schemas/purchase.order.approval'
 import { PurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
@@ -23,7 +24,7 @@ export class PurchaseOrder {
   @Prop({ type: SchemaTypes.Mixed, required: false })
   extras: any
 
-  @Prop(raw(MasterItemSupplierJoin))
+  @Prop(MasterItemSupplierJoin)
   supplier: IMasterItemSupplier
 
   @Prop({
@@ -31,9 +32,6 @@ export class PurchaseOrder {
     required: true,
   })
   purchase_date: Date
-
-  @Prop(raw(CurrencyJoin))
-  locale: ICurrency
 
   @Prop({
     type: [PurchaseOrderDetail],
@@ -78,6 +76,9 @@ export class PurchaseOrder {
 
   @Prop(AccountJoin)
   created_by: IAccountCreatedBy
+
+  @Prop(CurrencyJoin)
+  locale: ICurrency
 
   @Prop({
     type: SchemaTypes.Date,

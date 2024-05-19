@@ -1,4 +1,5 @@
-import { CCurrency, ICurrency } from '@core/i18n/schemas/i18n'
+import { ICurrency } from '@core/i18n/interface/i18n'
+import { CCurrency } from '@core/i18n/schemas/i18n'
 import { CMasterItemSupplier } from '@core/master/dto/master.item.supplier'
 import { IMasterItemSupplier } from '@core/master/interface/master.item.supplier'
 import { CPurchaseOrderDetail } from '@inventory/dto/purchase.order.detail'
@@ -7,6 +8,7 @@ import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   MaxLength,
   MinLength,
   ValidateNested,
@@ -64,8 +66,9 @@ export class PurchaseOrderAddDTO {
   @ApiProperty({
     example: '',
     description: 'Any extra object',
+    required: false,
   })
-  @IsNotEmpty()
+  @IsOptional()
   extras: any
 
   @ApiProperty({

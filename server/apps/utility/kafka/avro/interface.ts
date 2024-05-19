@@ -3,6 +3,7 @@ import { SchemaRegistryAPIClientArgs } from '@kafkajs/confluent-schema-registry/
 import { Type } from '@nestjs/common'
 import { ModuleMetadata } from '@nestjs/common/interfaces'
 import { Deserializer, Serializer } from '@nestjs/microservices'
+import { KafkaGlobalKey } from '@utility/kafka/avro/schema/global/key'
 import {
   ConsumerConfig,
   ConsumerRunConfig,
@@ -29,7 +30,7 @@ export interface KafkaResponse<T = any> {
 export interface KafkaMessageObject extends Message {
   headers: any | Buffer | string | null
   value: any | Buffer | string | null
-  key: any
+  key: any | KafkaGlobalKey
 }
 
 export interface KafkaMessageSend extends Omit<ProducerRecord, 'topic'> {

@@ -7,7 +7,7 @@ import process from 'process'
 class MasterItemService {
   getItemList(parsedData) {
     return api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item`, {
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/master/item`, {
         params: {
           lazyEvent: JSON.stringify(parsedData)
         },
@@ -19,14 +19,14 @@ class MasterItemService {
 
   async getItemDetail(id) {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item/${id}`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/master/item/${id}`)
       .then((response: any) => {
         return Promise.resolve(response)
       })
   }
 
   async findItem(search: string): Promise<ISupplier[]> {
-    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}v1/master/item`, {
+    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}/v1/master/item`, {
       params: {
         lazyEvent: `{"first":0,"rows":10,"projection": {}, "sortField":"created_at","sortOrder":1,"filters":{"name":{"value":"${search}", "matchMode": "contains"}},"search_term": {}}`,
       }
@@ -37,7 +37,7 @@ class MasterItemService {
 
   // ====================================== MASTER SUPPLIER
   async findSupplier(search: string): Promise<ISupplier[]> {
-    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}v1/master/supplier`, {
+    return await api({requiresAuth: true}).get(`${process.env.VUE_APP_APIGATEWAY}/v1/master/supplier`, {
       params: {
         lazyEvent: `{"first":0,"rows":10,"projection": {}, "sortField":"created_at","sortOrder":1,"filters":{"name":{"value":"${search}", "matchMode": "contains"}},"search_term": {}}`,
       }

@@ -38,7 +38,7 @@ export async function httpInterceptor(
     tap(async (result: GlobalResponse) => {
       const dataSet: HorasLogging = {
         ip: request.ip ?? '',
-        path: path.toString(),
+        path: path?.toString(),
         url: url,
         method: method,
         takeTime: Date.now() - now,
@@ -69,7 +69,8 @@ export async function httpInterceptor(
       if (result.statusCode) {
         if (isCustomErrorCode(result.statusCode)) {
           response.code(result.statusCode.defaultCode).send({
-            statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
+            // statusCode: `${result.statusCode.classCode}_${result.statusCode.customCode}`,
+            statusCode: result.statusCode,
             message: result.message,
             payload: result.payload,
             transaction_classify: result.transaction_classify,
@@ -77,7 +78,11 @@ export async function httpInterceptor(
           } satisfies GlobalResponseParsed)
         } else {
           response.code(HttpStatus.BAD_REQUEST).send({
-            statusCode: `CORE_F0000`,
+            statusCode: {
+              classCode: `CORE`,
+              customCode: `F0000`,
+              defaultCode: 400,
+            },
             message: result.message,
             payload: result.payload,
             transaction_classify: result.transaction_classify,
@@ -86,7 +91,11 @@ export async function httpInterceptor(
         }
       } else {
         response.code(HttpStatus.BAD_REQUEST).send({
-          statusCode: `CORE_F0000`,
+          statusCode: {
+            classCode: `CORE`,
+            customCode: `F0000`,
+            defaultCode: 400,
+          },
           message: result.message,
           payload: result.payload,
           transaction_classify: 'UNKNOWN',

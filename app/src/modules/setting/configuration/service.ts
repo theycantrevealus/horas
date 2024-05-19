@@ -5,7 +5,7 @@ import process from 'process'
 class ApplicationConfiguration {
   async getApplicationConfig() {
     return await api({ requiresAuth: true })
-      .get(`${process.env.VUE_APP_APIGATEWAY}v1/configuration/tree`)
+      .get(`${process.env.VUE_APP_APIGATEWAY}/v1/configuration/tree`)
       .then(async (response: AxiosResponse) => {
         const data: CoreResponse = response.data
         return Promise.resolve(data)
@@ -17,7 +17,7 @@ class ApplicationConfiguration {
 
   async updateConfiguration(data) {
     return await api({requiresAuth: true})
-      .patch(`${process.env.VUE_APP_APIGATEWAY}v1/configuration/batch`, data)
+      .patch(`${process.env.VUE_APP_APIGATEWAY}/v1/configuration/batch`, data)
       .then(async (response: AxiosResponse) => {
         const data: CoreResponse = response.data
         return Promise.resolve(data)

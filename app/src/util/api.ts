@@ -4,9 +4,13 @@ import process from 'process'
 import https from 'https'
 
 export interface GlobalResponse {
+  statusCode: {
+    customCode: string
+    defaultCode: string
+    classCode: string
+  }
   message: string
   payload: any
-  statusCode: string
   transaction_classify: string
   transaction_id: string | null
 }
@@ -20,7 +24,7 @@ export default ({ requiresAuth = true } = {}) => {
       'Access-Control-Allow-Origin': '*',
     },
     httpsAgent: new https.Agent({
-      rejectUnauthorized: true,
+      rejectUnauthorized: false,
 
       /*
       * If server set to requiredCert: true
@@ -47,7 +51,6 @@ export default ({ requiresAuth = true } = {}) => {
       return config
     },
     (error) => {
-      console.log(error)
       return Promise.reject(error)
     }
   )
@@ -55,20 +58,19 @@ export default ({ requiresAuth = true } = {}) => {
   instance.interceptors.response.use(
     (response) => {
       if (response.status === 200 || response.status === 201) {
-        /*
-        * TODO : Tidy response  for i18n (Currently is not GlobalResponse form)
-        *  For now it will check if array then it is i18n
-        * */
-
         if(response.data.length === undefined) {
           const responseParsed: GlobalResponse = response.data
-          // TODO : Handling statusCode
-          const statusCodeIdentifier = responseParsed.statusCode.split('_')
-          if(statusCodeIdentifier[statusCodeIdentifier.length - 1] !== 'S0000') {
-            // TODO : Handling if not success
-            return Promise.reject(response)
+          const statusCodeIdentifier = responseParsed.statusCode.customCode
+          if(statusCodeIdentifier) {
+            if(statusCodeIdentifier !== 'S0000') {
+              // TODO : Handling if not success
+              return Promise.reject(response)
+            } else {
+              return Promise.resolve(response)
+            }
           } else {
-            return Promise.resolve(response)
+            // TODO : Handle if response is not acceptable
+            return Promise.reject(response)
           }
         } else {
           return Promise.resolve(response)

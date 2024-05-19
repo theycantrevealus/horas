@@ -473,7 +473,6 @@ export default {
 
       this.formData.componentIden = _this.formData.componentIden
       this.formData.componentTree.root = resultTree
-      console.log(this.formData.componentIden)
     },
     async loadMenu(event = {value: ''}) {
       const targetSearch = event.value ?? ''

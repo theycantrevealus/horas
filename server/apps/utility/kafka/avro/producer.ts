@@ -33,7 +33,7 @@ export class KafkaProducer implements OnModuleInit, OnApplicationShutdown {
           ),
           key: join(
             __dirname,
-            'apps/utility/kafka/avro/schema/account/key.avsc'
+            'apps/utility/kafka/avro/schema/global/key.avsc'
           ),
           value: join(
             __dirname,

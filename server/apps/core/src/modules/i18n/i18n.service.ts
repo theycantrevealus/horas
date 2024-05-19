@@ -3,6 +3,7 @@ import { i18nAddDTO, i18nEditDTO } from '@core/i18n/dto/i18n'
 import { i18n, i18nDocument } from '@core/i18n/schemas/i18n'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -15,12 +16,61 @@ export class i18nService {
     @InjectModel(i18n.name) private readonly i18nModel: Model<i18nDocument>
   ) {}
 
-  async all(parameter: any) {
-    return await prime_datatable(parameter, this.i18nModel)
+  async all(payload: any) {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'I18N_GET',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+      return await prime_datatable(parameter, this.i18nModel).then((result) => {
+        response.payload = result.payload
+        response.message = 'i18n fetch successfully'
+        return response
+      })
+    } catch (error) {
+      response.message = `i18n failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async noFilter() {
-    return await this.i18nModel.find().exec()
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: await this.i18nModel.find().exec(),
+      transaction_classify: 'I18N_GET',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    try {
+      return response
+    } catch (error) {
+      response.message = `i18n failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
   }
 
   async detail(id: string): Promise<i18n> {

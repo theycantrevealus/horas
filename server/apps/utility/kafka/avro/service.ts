@@ -284,27 +284,16 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             path: topic,
             url: topic,
             method: 'KAFKA',
-            takeTime: 0, // TODO : Now - emit time
-            payload: response,
+            takeTime: Date.now() - timestamp,
+            payload: {
+              response: response,
+              key: key,
+            },
             result: response,
             account: headers,
             time: TM.getTimezone('Asia/Jakarta'),
           }
           this.logger.verbose(dataSet)
-
-          // console.log('=======================================================')
-          // console.log(`Timestamp            : ${timestamp}`)
-          // console.log(`Response             : ${response}`)
-          // console.log(`Partition            : ${partition}`)
-          // console.log(`Offset               : ${offset}`)
-          // console.log(`Key                  : ${key}`)
-          // console.log(`Headers ID           : ${headers.id}`)
-          // console.log(`Headers code         : ${headers.code}`)
-          // console.log(`Headers first name   : ${headers.first_name}`)
-          // console.log(`Headers last name    : ${headers.last_name}`)
-          // console.log(`Headers created at   : ${headers.created_at}`)
-          // console.log('=======================================================')
-
           await callback.apply(objectRef, [
             response,
             key,
@@ -314,8 +303,8 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             headers,
           ])
         } catch (e) {
-          this.logger.error(`Error for message ${topic}: ${e}`)
-          throw e
+          this.logger.error(`Error processing data: ${e} from topic ${topic}`)
+          throw new Error(`Error for message ${topic}: ${e}`)
         }
       },
     })

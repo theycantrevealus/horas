@@ -1,0 +1,158 @@
+{
+  "type": "record",
+  "name": "MasterItem",
+  "namespace": "com.horas.master.item",
+  "fields": [
+    {
+      "name": "code",
+      "type": "string"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "alias",
+      "type": "string"
+    },
+    {
+      "name": "category",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "child",
+          "type": "record",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "code",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "unit",
+      "type": {
+        "type": "record",
+        "name": "child",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "brand",
+      "type": {
+        "type": "record",
+        "name": "child",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "properties",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "child",
+          "type": "record",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "storing",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "child",
+          "type": "record",
+          "fields": [
+            {
+              "name": "storing_point",
+              "type": {
+                "type": "record",
+                "name": "child",
+                "fields": [
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "code",
+                    "type": "string"
+                  },
+                  {
+                    "name": "name",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "storing_label",
+              "type": "string"
+            },
+            {
+              "name": "maximum",
+              "type": "number"
+            },
+            {
+              "name": "minimum",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "remark",
+      "type": "string"
+    }
+  ]
+}

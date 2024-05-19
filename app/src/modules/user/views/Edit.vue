@@ -326,6 +326,8 @@ export default {
         this.permissionList.push(allPermission[a])
       }
 
+      console.log(permissionList)
+
       const allRole = response.rolenperm
       for (const c in allRole) {
         this.checkedPermission[`menu_${allRole[c].permission}`] = true

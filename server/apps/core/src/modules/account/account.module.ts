@@ -8,7 +8,6 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthModule } from '@security/auth.module'
-import { KafkaProducer } from '@utility/kafka/avro/producer'
 import * as redisStore from 'cache-manager-ioredis'
 
 import { AccountController } from './account.controller'
@@ -42,7 +41,7 @@ import { AccountService } from './account.service'
     AuthModule,
   ],
   controllers: [AccountController, AuthorityController],
-  providers: [AccountService, KafkaProducer],
+  providers: [AccountService],
   exports: [AccountService],
 })
 export class AccountModule {}

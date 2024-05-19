@@ -8,7 +8,15 @@
       "type": "string"
     },
     {
-      "name": "email",
+      "name": "code",
+      "type": "string"
+    },
+    {
+      "name": "service",
+      "type": "string"
+    },
+    {
+      "name": "method",
       "type": "string"
     }
   ]

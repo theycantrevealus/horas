@@ -142,23 +142,6 @@ export class MenuAddDTO {
     type: CMenuGroup,
   })
   menu_group: IMenuGroup
-
-  constructor(data: any) {
-    this.name = data.name
-    this.identifier = data.identifier
-    this.url = data.url
-    this.url = data.url
-    this.icon = data.icon
-    this.show_on_menu = data.show_on_menu
-    this.show_order = data.show_order
-    this.level = data.level
-    this.group_color = data.group_color
-    this.remark = data.remark
-    this.channel = data.channel
-    this.menu_group = data.menu_group
-    this.parent = data.parent
-    this.permission = data.permission
-  }
 }
 
 export class MenuEditDTO {
