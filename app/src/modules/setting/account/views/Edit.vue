@@ -28,6 +28,16 @@
                 <div class="col-8 form-mode">
                   <div class="p-inputgroup">
                     <span class="p-inputgroup-addon">
+                      <span class="material-icons-outlined">badge</span>
+                    </span>
+                    <InputText
+                      v-model="formData.code"
+                      class="inputtext-sm"
+                      placeholder="Code"
+                    />
+                  </div>
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
                       <span class="material-icons-outlined">mail</span>
                     </span>
                     <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
@@ -36,6 +46,16 @@
                       v-model="formData.email"
                       class="inputtext-sm"
                       placeholder="Email"
+                    />
+                  </div>
+                  <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
+                      <span class="material-icons-outlined">call</span>
+                    </span>
+                    <InputText
+                      v-model="formData.phone"
+                      class="inputtext-sm"
+                      placeholder="Contact"
                     />
                   </div>
                   <div class="p-inputgroup">
@@ -316,6 +336,7 @@ export default {
       formData: {
         id: '',
         email: '',
+        phone: '',
         first_name: '',
         last_name: '',
         authority: '',
@@ -422,67 +443,79 @@ export default {
         }
       },
     },
-    accountDetail: {
-      handler(getDetail) {
-        if (getDetail) {
-          this.allowSave = !!getDetail.id;
-
-          this.formData.id = getDetail.id
-          this.formData.email = getDetail.email
-          this.formData.first_name = getDetail.first_name
-          this.formData.last_name = getDetail.last_name
-          this.formData.__v = getDetail.__v
-          // this.formData.authority = getDetail.authority.id
-          this.selectedAccess = []
-          this.formData.selectedAccess = []
-          for (const a in getDetail.access) {
-            if(this.selectedAccess.indexOf(getDetail.access[a]) < 0) {
-              this.selectedAccess.push(getDetail.access[a].id)
-            }
-          }
-
-          this.selectedPermission = []
-          this.formData.selectedPermission = []
-          for (const a in getDetail.permission) {
-            const targetPermission = `${getDetail.permission[a].menu.id}__${getDetail.permission[a].domIdentity}`
-
-            if (getDetail.permission[a].menu.id && getDetail.permission[a].domIdentity && this.selectedPermission.indexOf(targetPermission) < 0) {
-              this.selectedPermission.push(targetPermission)
-            }
-          }
-
-        } else {
-          this.allowSave = false
-        }
-      },
-      immediate: true,
-    },
+    // accountDetail: {
+    //   handler(getDetail) {
+    //     if (getDetail) {
+    //       this.allowSave = !!getDetail.id;
+    //
+    //       this.formData.id = getDetail.id
+    //       this.formData.email = getDetail.email
+    //       this.formData.first_name = getDetail.first_name
+    //       this.formData.last_name = getDetail.last_name
+    //       this.formData.__v = getDetail.__v
+    //       // this.formData.authority = getDetail.authority.id
+    //       this.selectedAccess = []
+    //       this.formData.selectedAccess = []
+    //       for (const a in getDetail.access) {
+    //         if(this.selectedAccess.indexOf(getDetail.access[a]) < 0) {
+    //           this.selectedAccess.push(getDetail.access[a].id)
+    //         }
+    //       }
+    //
+    //       this.selectedPermission = []
+    //       this.formData.selectedPermission = []
+    //       for (const a in getDetail.permission) {
+    //         const targetPermission = `${getDetail.permission[a].menu.id}__${getDetail.permission[a].domIdentity}`
+    //
+    //         if (getDetail.permission[a].menu.id && getDetail.permission[a].domIdentity && this.selectedPermission.indexOf(targetPermission) < 0) {
+    //           this.selectedPermission.push(targetPermission)
+    //         }
+    //       }
+    //
+    //     } else {
+    //       this.allowSave = false
+    //     }
+    //   },
+    //   immediate: true,
+    // },
   },
   async mounted() {
     this.allowSave = false
-    // TODO : Set this to latest structure
-    AccountService.getAccountDetail(this.$route.query.id).then((response) => {
-      console.log(response)
-    })
-    await this.$store.dispatch(
-      'accountModule/fetchAccountDetail',
-      this.$route.query.id
-    )
-
-    await this.$store.dispatch('accountModule/fetchMenuTree')
-    await this.$store.dispatch('accountModule/fetchMenuList')
-
+    await this.reloadDetail(this.$route.query.id)
     this.displayEditorImage = false
   },
   methods: {
-    ...mapActions('accountModule', [
-      'updateAccount',
-      'updatePermission',
-      'updateAccess',
-    ]),
+    async reloadDetail(id) {
+      AccountService.getAccountDetail(id).then(async (response) => {
+        const payload = response.payload
+        this.allowSave = !!payload.id;
+        this.formData = payload
+
+        this.selectedAccess = []
+        this.formData.selectedAccess = []
+        for (const a in payload.access) {
+          if(this.selectedAccess.indexOf(payload.access[a]) < 0) {
+            this.selectedAccess.push(payload.access[a].id)
+          }
+        }
+
+        this.selectedPermission = []
+        this.formData.selectedPermission = []
+        for (const a in payload.permission) {
+          const targetPermission = `${payload.permission[a].menu.id}__${payload.permission[a].domIdentity}`
+
+          if (payload.permission[a].menu.id && payload.permission[a].domIdentity && this.selectedPermission.indexOf(targetPermission) < 0) {
+            this.selectedPermission.push(targetPermission)
+          }
+        }
+
+        await this.$store.dispatch('accountModule/fetchMenuTree')
+        await this.$store.dispatch('accountModule/fetchMenuList')
+      })
+    },
     ...mapActions({
       sLogout: 'storeCredential/Action___signOut',
-      rebuildMenu: 'storeCredential/Action___updateMenu',
+      rebuildMenu: 'storeApplication/Action___updateMenu',
       rebuildAccess: 'storeCredential/Action___updateAccess',
     }),
     back() {
@@ -510,7 +543,7 @@ export default {
           acceptLabel: 'Yes',
           rejectLabel: 'Abort',
           rejectIcon: 'pi pi-times-circle',
-          accept: () => {
+          accept: async () => {
             for(const a in this.selectedAccess) {
               if(this.raw.access[this.selectedAccess[a]]) {
                 if(this.formData.selectedAccess.indexOf(this.raw.access[this.selectedAccess[a]]) < 0) {
@@ -533,43 +566,38 @@ export default {
               }
             }
 
-            this.updateAccount(this.formData).then(async (response) => {
-              if (response.status === 200 || response.status === 201) {
-                await this.$store.dispatch(
-                  'accountModule/fetchAccountDetail',
-                  this.$route.query.id
-                )
+            await AccountService.updateAccount(this.formData).then(async (response) => {
+              await this.reloadDetail(this.$route.query.id)
 
-                await this.$store.dispatch('accountModule/fetchMenuTree')
-                await this.$store.dispatch('accountModule/fetchMenuList')
+              await this.rebuildMenu().then(() => {
+                this.rebuildAccess()
+              })
 
-                await this.rebuildMenu().then(() => {
-                  this.rebuildAccess()
-                })
-
-                this.$confirm.require({
-                  group: 'keep_editing',
-                  message: `${response.data.message}. Back to account list?`,
-                  header: 'Confirmation',
-                  icon: 'pi pi-exclamation-triangle',
-                  acceptClass: 'p-button-success',
-                  rejectClass: 'p-button-warning',
-                  acceptLabel: 'Yes',
-                  acceptIcon: 'pi pi-check-circle',
-                  rejectLabel: 'Keep Editing',
-                  rejectIcon: 'pi pi-times-circle',
-                  accept: () => {
-                    this.$router.push('/account')
-                  },
-                  reject: () => {
-                    //callback to execute when user rejects the action
-                  },
-                  onHide: () => {
-                    //Callback to execute when dialog is hidden
-                  },
-                })
-              }
+              this.$confirm.require({
+                group: 'keep_editing',
+                message: `${response.message}. Back to account list?`,
+                header: 'Confirmation',
+                icon: 'pi pi-exclamation-triangle',
+                acceptClass: 'p-button-success',
+                rejectClass: 'p-button-warning',
+                acceptLabel: 'Yes',
+                acceptIcon: 'pi pi-check-circle',
+                rejectLabel: 'Keep Editing',
+                rejectIcon: 'pi pi-times-circle',
+                accept: () => {
+                  this.$router.push('/account')
+                },
+                reject: () => {
+                  //callback to execute when user rejects the action
+                },
+                onHide: () => {
+                  //Callback to execute when dialog is hidden
+                },
+              })
             })
+              .catch((error) => {
+                // Common specific action
+              })
           },
           reject: () => {
             // callback to execute when user rejects the action

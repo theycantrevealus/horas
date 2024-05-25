@@ -20,12 +20,6 @@ import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 //
 //   @Prop(AccountJoin)
 //   created_by: IAccountCreatedBy
-//
-//   constructor(data: any) {
-//     this.status = data.status
-//     this.remark = data.remark
-//     this.created_by = data.created_at
-//   }
 // }
 
 export interface IPurchaseOrderApproval {

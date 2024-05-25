@@ -16,11 +16,6 @@ export class MenuGroupAddDTO {
     description: 'Menu group name',
   })
   description: string
-
-  constructor(data: any) {
-    this.name = data.name
-    this.description = data.description
-  }
 }
 
 export class MenuGroupEditDTO {
@@ -45,12 +40,6 @@ export class MenuGroupEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(data: any) {
-    this.name = data.name
-    this.description = data.description
-    this.__v = data.__v
-  }
 }
 
 export class CMenuGroup {

@@ -56,6 +56,7 @@ export async function errorHttpHandler(
 
     statusCode = parseError.statusCode.defaultCode
   } else {
+    console.error(exception)
     responseSet = {
       statusCode: {
         defaultCode: exception['response'].statusCode,

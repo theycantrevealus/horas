@@ -242,21 +242,4 @@ export class MenuEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(data: any) {
-    this.name = data.name
-    this.identifier = data.identifier
-    this.url = data.url
-    this.icon = data.icon
-    this.show_on_menu = data.show_on_menu
-    this.show_order = data.show_order
-    this.level = data.level
-    this.group_color = data.group_color
-    this.remark = data.remark
-    this.channel = data.channel
-    this.permission = data.permission
-    this.menu_group = data.menu_group
-    this.parent = data.parent
-    this.__v = data.__v
-  }
 }

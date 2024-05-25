@@ -4,7 +4,7 @@
       <component :is="Component" />
     </transition>
   </router-view>
-  <Toast />
+  <Toast :position="toast.position" />
 </template>
 <script>
 import {mapActions, mapGetters, mapState} from "vuex"
@@ -19,11 +19,13 @@ export default {
     ...mapState('storeApplication', {
       application: state => state
     }),
-    ...mapGetters(['storeApplication/Getter___getToast']),
+    ...mapGetters({
+      toast: 'storeApplication/Getter___getToast'
+    }),
   },
   watch: {
-    'storeApplication/Getter___getToast': {
-      handler(getData) {
+    toast: {
+      handler() {
         this.$toast.add(this.application.toast)
       }
     }

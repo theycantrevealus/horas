@@ -307,7 +307,9 @@ export class AccountService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(() => {
@@ -347,7 +349,9 @@ export class AccountService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(async () => {
@@ -421,6 +425,7 @@ export class AccountService {
             __v: parameter.__v,
           },
           {
+            code: parameter.code,
             authority: parameter.authority,
             email: parameter.email,
             first_name: parameter.first_name,
@@ -432,9 +437,17 @@ export class AccountService {
           { upsert: false, new: true }
         )
         .then((result) => {
-          result.__v++
-          response.message = 'Account updated successfully'
-          response.payload = result
+          if (!result) {
+            response.statusCode = {
+              ...modCodes[this.constructor.name].error.isNotFound,
+              classCode: modCodes[this.constructor.name].defaultCode,
+            }
+            response.message = 'Account failed to update'
+            response.payload = {}
+          } else {
+            response.message = 'Account updated successfully'
+            response.payload = result
+          }
           return response
         })
     } catch (error) {
@@ -478,9 +491,18 @@ export class AccountService {
           }
         )
         .then((result) => {
-          result.__v++
-          response.message = 'Authority updated successfully'
-          response.payload = result
+          if (!result) {
+            response.statusCode = {
+              ...modCodes[this.constructor.name].error.isNotFound,
+              classCode: modCodes[this.constructor.name].defaultCode,
+            }
+            response.message = 'Authority failed to update'
+            response.payload = {}
+          } else {
+            result.__v++
+            response.message = 'Authority updated successfully'
+            response.payload = result
+          }
           return response
         })
     } catch (error) {
@@ -635,7 +657,9 @@ export class AccountService {
               }
               const idenPass = gen_uuid()
               const TM = new TimeManagement()
-              const currentTime = TM.getTimezone('Asia/Jakarta')
+              const currentTime = TM.getTimezone(
+                await this.configService.get<string>('application.timezone')
+              )
 
               let token = {
                 set: '',

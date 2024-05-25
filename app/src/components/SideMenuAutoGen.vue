@@ -21,7 +21,7 @@
         </template>
         <template v-else>
           <router-link
-            v-if="item.to && credential.pages[`page_${item.id}`] !== undefined"
+            v-if="item.to && getCredential.pages[`page_${item.id}`] !== undefined"
             v-tooltip.right="item.name"
             :to="item.to"
             :class="[item.class, { 'disabled': item.disabled }]"
@@ -104,17 +104,25 @@ export default {
     }
   },
   computed: {
-    ...mapState(['credential']),
     ...mapGetters({
       getMenuModeStatus: 'storeApplication/Getter___sidePanelMode',
+      getCredential: 'storeCredential/Getter___credential'
     }),
   },
   watch: {
     getMenuModeStatus: {
-      handler(getData) {
+      handler() {
         //
       },
     },
+    getCredential: {
+      handler() {
+        //
+      }
+    }
+  },
+  mounted() {
+    //
   },
   created() {
     //

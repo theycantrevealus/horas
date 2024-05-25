@@ -32,6 +32,7 @@ export const ApplicationStore = {
       sideMenu: []
     },
     toast: {
+      position: 'top-right',
       severity: 'warn',
       summary: 'Menu Manager',
       detail: 'Hello',

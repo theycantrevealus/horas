@@ -388,21 +388,24 @@ export class MenuService {
         if (result) {
           await this.accountService.accountUpdateAccess(id, parameter)
           result.__v++
-          response.message = 'Menu group updated successfully'
+          response.message = 'Menu updated successfully'
           response.payload = result
         } else {
-          response.message = 'Menu group failed to update'
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          result.__v = parameter.__v
+          response.message = 'Menu failed to update'
+          response.statusCode = {
+            ...modCodes[this.constructor.name].error.databaseError,
+            classCode: modCodes[this.constructor.name].defaultCode,
+          }
           response.payload = result
           throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
-        response.message = `Menu group failed to update. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
+        response.message = `Menu failed to update. ${error.message}`
+        response.statusCode = {
+          ...modCodes[this.constructor.name].error.databaseError,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
         response.payload = error
         throw new Error(JSON.stringify(response))
       })
@@ -440,8 +443,10 @@ export class MenuService {
         })
         .catch((error: Error) => {
           response.message = `Menu failed to delete. ${error.message}`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
+          response.statusCode = {
+            ...modCodes[this.constructor.name].error.databaseError,
+            classCode: modCodes[this.constructor.name].defaultCode,
+          }
           response.payload = error
           throw new Error(JSON.stringify(response))
         })

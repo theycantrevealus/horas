@@ -46,15 +46,6 @@ export class ConfigGroupAddDTO {
   })
   @IsNotEmpty()
   remark: string
-
-  constructor(parameter: any) {
-    this.name = parameter.name
-    this.label = parameter.label
-    this.level = parameter.level
-    this.icon = parameter.icon
-    this.parent = parameter.parent
-    this.remark = parameter.remark
-  }
 }
 
 export class ConfigGroupEditDTO {
@@ -108,14 +99,4 @@ export class ConfigGroupEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(parameter: any) {
-    this.name = parameter.name
-    this.label = parameter.label
-    this.level = parameter.level
-    this.icon = parameter.icon
-    this.parent = parameter.parent
-    this.remark = parameter.remark
-    this.__v = parameter.__v
-  }
 }

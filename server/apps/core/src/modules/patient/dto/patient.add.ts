@@ -24,10 +24,4 @@ export class PatientAddDTO {
     example: 0,
   })
   __v: number
-
-  constructor(data: any) {
-    this.medical_info = data.medical_info
-    this.basic_info = data.basic_info
-    this.__v = data.__v
-  }
 }

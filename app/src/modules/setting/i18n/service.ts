@@ -1,5 +1,6 @@
 import api from '@/util/api'
 import process from 'process'
+import {CoreResponse} from "@/model/Response";
 
 class Corei18nService {
   async i18nList(parsedData) {
@@ -15,12 +16,16 @@ class Corei18nService {
 
   async i18nUpdate(parsedData) {
     return await api({ requiresAuth: true })
-      .put(
-        `${process.env.VUE_APP_APIGATEWAY}/v1/i18n/${parsedData.id}/edit`,
+      .patch(
+        `${process.env.VUE_APP_APIGATEWAY}/v1/i18n/${parsedData.id}`,
         parsedData
       )
       .then((response) => {
-        return Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
+      })
+      .catch((e) => {
+        //
       })
   }
 
@@ -28,7 +33,11 @@ class Corei18nService {
     return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}/v1/i18n/add`, parsedData)
       .then((response) => {
-        return Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
+      })
+      .catch((e) => {
+        //
       })
   }
 
@@ -36,7 +45,11 @@ class Corei18nService {
     return await api({ requiresAuth: true })
       .get(`${process.env.VUE_APP_APIGATEWAY}/v1/i18n/${id}`)
       .then((response) => {
-        return Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
+      })
+      .catch((e) => {
+        //
       })
   }
 
@@ -44,7 +57,11 @@ class Corei18nService {
     return await api({ requiresAuth: true })
       .delete(`${process.env.VUE_APP_APIGATEWAY}/v1/i18n/${id}/delete`)
       .then((response) => {
-        return Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
+      })
+      .catch((e) => {
+        //
       })
   }
 }

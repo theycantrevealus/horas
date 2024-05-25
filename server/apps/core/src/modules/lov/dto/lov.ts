@@ -25,11 +25,6 @@ export class LOVAddDTO {
   })
   @IsNotEmpty()
   remark: string
-
-  constructor(parameter: any) {
-    this.name = parameter.name
-    ;(this.parent = parameter.parent), (this.remark = parameter.remark)
-  }
 }
 
 export class LOVEditDTO {

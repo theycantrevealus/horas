@@ -160,15 +160,19 @@ export class i18nService {
           response.payload = result
         } else {
           response.message = `i18n failed to update. Invalid document`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
+          response.statusCode = {
+            ...modCodes[this.constructor.name].error.databaseError,
+            classCode: modCodes[this.constructor.name].defaultCode,
+          }
           throw new Error(JSON.stringify(response))
         }
       })
       .catch((error: Error) => {
         response.message = `i18n failed to update. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
+        response.statusCode = {
+          ...modCodes[this.constructor.name].error.databaseError,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
         response.payload = error
         throw new Error(JSON.stringify(response))
       })

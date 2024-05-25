@@ -47,6 +47,8 @@ class AccountService {
       .patch(
         `${process.env.VUE_APP_APIGATEWAY}/v1/account/${parsedData.id}`,
         {
+          code: parsedData.code,
+          phone: parsedData.phone,
           email: parsedData.email,
           first_name: parsedData.first_name,
           last_name: parsedData.last_name,
@@ -56,7 +58,11 @@ class AccountService {
         }
       )
       .then(async (response: any) => {
-        return await Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
+      })
+      .catch((e: Error) => {
+        return Promise.reject(e)
       })
   }
 
@@ -64,7 +70,8 @@ class AccountService {
     return api({requiresAuth: true})
       .get(`${process.env.VUE_APP_APIGATEWAY}/v1/account/${id}`)
       .then(async (response: any) => {
-        return await Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
       })
   }
 

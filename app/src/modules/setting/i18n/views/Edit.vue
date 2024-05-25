@@ -341,6 +341,7 @@ import Dropdown from 'primevue/dropdown'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Tree from 'primevue/tree'
 import CoreService from '@/service/core/menu'
+import Corei18nService from '@/modules/setting/i18n/service'
 import {deepen, parsedT, sort} from '@/util/object'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -400,40 +401,59 @@ export default {
       duplicateCompsMode: false,
     }
   },
-
-  computed: {
-    ...mapGetters({
-      getDetail: 'corei18N/fetchi18nDetail',
-    }),
-  },
-  watch: {
-    getDetail: {
-      handler(getData) {
-        if (getData) {
-          if (this.duplicateCompsMode) {
-            this.formData.components = getData.components
-            this.formData.componentTree = getData.componentTree
-            this.formData.componentIden = getData.componentIden
-          } else {
-            this.formData = getData
-          }
-          getData.componentTree.root.map((e) => {
-            this.expandNode(e)
-          })
-        }
-      },
-    },
-  },
+  // computed: {
+  //   ...mapGetters({
+  //     getDetail: 'corei18N/fetchi18nDetail',
+  //   }),
+  // },
+  // watch: {
+  //   getDetail: {
+  //     handler(getData) {
+  //       if (getData) {
+  //
+  //       }
+  //     },
+  //   },
+  // },
   async mounted() {
     this.allowSave = false
     this.displayEditorDialog = false
-    await this.$store.dispatch(
-      'corei18N/fetchi18nDetail',
-      this.$route.params.id
-    )
+    await this.getDetail(this.$route.params.id)
   },
   methods: {
-    ...mapActions('corei18N', ['__update']),
+    async getDetail(id) {
+      await Corei18nService.i18nDetail(id)
+        .then((response) => {
+          const components = response.components
+          const ab = {}
+          const Objectidentifier = {}
+          components.map((e) => {
+            const b = e.component
+            if (!Objectidentifier[b]) {
+              Objectidentifier[b] = {}
+            }
+
+            Objectidentifier[b] = e
+
+            if (!ab[b]) {
+              ab[b] = {}
+            }
+
+            ab[b] = {}
+          })
+
+          response.componentTree = { root: parsedT(deepen(ab)) }
+          response.componentIden = Objectidentifier
+
+          if (this.duplicateCompsMode) {
+            this.formData.components = components
+            this.formData.componentTree = { root: parsedT(deepen(ab)) }
+            this.formData.componentIden = Objectidentifier
+          } else {
+            this.formData = response
+          }
+        })
+    },
     onNodeSelect(node) {
       //
     },
@@ -488,7 +508,7 @@ export default {
           }
         }
       }).then((response) => {
-        this.formData.menuData = response
+        this.formData.menuData = response.payload.data
       })
     },
     closeComponentDialog() {
@@ -668,11 +688,11 @@ export default {
         rejectLabel: 'Abort',
         rejectIcon: 'pi pi-times-circle',
         accept: async () => {
-          await this.__update(this.formData).then(async (response) => {
-            if (response.status === 200) {
+          await Corei18nService.i18nUpdate(this.formData)
+            .then(async (response) => {
               this.$confirm.require({
                 group: 'keep_editing',
-                message: `${response.data.message}. Back to language list?`,
+                message: `${response.message}. Back to language list?`,
                 header: 'Keep editting?',
                 icon: 'pi pi-exclamation-triangle',
                 acceptClass: 'p-button-success',
@@ -691,11 +711,10 @@ export default {
                   //
                 },
               })
-            } else {
-              this.errorMessage = response.message
-              this.displayResponseError = true
-            }
-          })
+            })
+            .catch(() => {
+              //
+            })
         },
         reject: () => {
           //

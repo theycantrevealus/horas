@@ -286,7 +286,6 @@
         </Button>
       </template>
     </Dialog>
-    <Toast />
     <ConfirmPopup></ConfirmPopup>
   </div>
 </template>
@@ -299,7 +298,6 @@ import TreeTable from 'primevue/treetable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import Toast from 'primevue/toast'
 import InputText from 'primevue/inputtext'
 import ToggleButton from 'primevue/togglebutton'
 import DataTable from 'primevue/datatable'
@@ -318,7 +316,6 @@ export default defineComponent({
     InputText,
     Dialog,
     ToggleButton,
-    Toast,
     DataTable,
     ConfirmPopup,
     Panel,
@@ -416,7 +413,7 @@ export default defineComponent({
     reloadMenu() {
       this.getMenu().then((data: any) => {
         this.nodes = data.data
-        this.expandAll(data.data)
+        // this.expandAll(data.data)
       })
     },
     expandAll(children) {
@@ -444,18 +441,8 @@ export default defineComponent({
         acceptLabel: 'Yes. Delete it!',
         rejectLabel: 'Cancel',
         accept: () => {
-          return CoreService.menuDelete(target).then((response: any) => {
-            if (response.status === 200) {
-              response = response.data
-              this.$toast.add({
-                severity: 'success',
-                summary: 'Menu Manager',
-                detail: response.message,
-                life: 3000,
-              })
-              this.reloadMenu()
-              this.rebuildMenu()
-            }
+          return CoreService.menuDelete(target).then(() => {
+            this.reloadMenu()
           })
         },
         reject: () => {
@@ -489,7 +476,15 @@ export default defineComponent({
       this.formMode = 'add'
 
       this.form.targetParent = data.id
-      this.form.targetGroup = data.menu_group
+      if(data.menu_group === '') {
+        this.form.targetGroup = {
+          id: data.id,
+          name: data.label
+        }
+      } else {
+        this.form.targetGroup = data.menu_group
+      }
+
       this.form.__v = 0
 
       this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
@@ -522,29 +517,15 @@ export default defineComponent({
         permission: this.setterPermission,
         show_on_menu: showMenu,
         __v: this.form.__v,
-      }).then((response: any) => {
-        if ((response.status === 200 || response.status === 201)) {
-          if(response.data.statusCode === 'MNU_U_S0000') {
-            this.$toast.add({
-              severity: 'success',
-              summary: 'Menu Manager',
-              detail: response.data.message,
-              life: 3000,
-            })
-          } else {
-            this.$toast.add({
-              severity: 'warn',
-              summary: 'Menu Manager',
-              detail: response.data.message,
-              life: 3000,
-            })
-          }
+      })
+        .then((response) => {
           this.reloadMenu()
-          this.rebuildMenu()
           this.clearForm()
           this.ui.modal.manageMenu.state = false
-        }
-      })
+        })
+        .catch((e) => {
+          //
+        })
     },
     processForm() {
       if (this.formMode === 'add') {
@@ -589,7 +570,8 @@ export default defineComponent({
 
       return CoreService.menuAdd({
         name: label,
-        menu_group: (checkParent[0] === 'menu_group') ? this.form.targetParent : this.form.targetGroup,
+        // menu_group: (checkParent[0] === 'menu_group') ? this.form.targetParent : this.form.targetGroup,
+        menu_group: this.form.targetGroup,
         identifier: routeTo,
         url: routeToUrl,
         remark: '',
@@ -598,28 +580,14 @@ export default defineComponent({
         icon: icon,
         show_order: 1,
         show_on_menu: showMenu,
-      }).then(async (response: any) => {
-        if ((response.status === 201 || response.status === 200)) {
-          if(response.data.statusCode === 'MNU_I_S0000') {
-            this.$toast.add({
-              severity: 'success',
-              summary: 'Menu Manager',
-              detail: response.data.message,
-              life: 3000,
-            })
-          } else {
-            this.$toast.add({
-              severity: 'warn',
-              summary: 'Menu Manager',
-              detail: response.data.message,
-              life: 3000,
-            })
-          }
-          await this.reloadMenu()
-          await this.rebuildMenu()
+      })
+        .then(() => {
+          this.reloadMenu()
           this.clearForm()
           this.ui.modal.manageMenu.state = false
-        }
+        })
+        .catch(() => {
+        //
       })
     },
   },

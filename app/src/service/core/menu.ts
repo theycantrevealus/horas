@@ -1,5 +1,6 @@
 import api from '@/util/api'
 import * as process from "process";
+import {CoreResponse} from "@/model/Response";
 
 class CoreService {
   async menuSearch(parameter:any) {
@@ -10,7 +11,8 @@ class CoreService {
         }
       })
       .then((response) => {
-        const data = response.data.payload.data
+        console.log(response)
+        const data: CoreResponse = response.data
         return Promise.resolve(data)
       })
   }
@@ -18,7 +20,8 @@ class CoreService {
     return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}/v1/menu`, menuData)
       .then((response) => {
-        return Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
       })
   }
 
@@ -26,7 +29,8 @@ class CoreService {
     return await api({ requiresAuth: true })
       .post(`${process.env.VUE_APP_APIGATEWAY}/v1/menu_permission/add`, menuData)
       .then((response) => {
-        return Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
       })
   }
 
@@ -34,10 +38,11 @@ class CoreService {
     return await api({ requiresAuth: true })
       .patch(`${process.env.VUE_APP_APIGATEWAY}/v1/menu/${id}`, menuData)
       .then((response) => {
-        return Promise.resolve(response)
+        const data: CoreResponse = response.data
+        return Promise.resolve(data)
       })
       .catch((e) => {
-        //
+        return Promise.reject(e)
       })
   }
 
@@ -45,7 +50,11 @@ class CoreService {
     return await api({ requiresAuth: true })
       .delete(`${process.env.VUE_APP_APIGATEWAY}/v1/menu/${menuData}`)
       .then((response) => {
-        return Promise.resolve(response)
+        const data = response.data.payload.data
+        return Promise.resolve(data)
+      })
+      .catch((e) => {
+        //
       })
   }
 
