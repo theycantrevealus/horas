@@ -68,7 +68,7 @@
             >
               <template #body="slotProps">
                 <strong class="d-inline-flex">
-                  <span class="material-icons-outlined">hashtag</span>
+                  <span class="material-icons-outlined material-symbols-outlined">tag</span>
                   {{ slotProps.data.autonum }}
                 </strong>
               </template>

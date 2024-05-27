@@ -28,7 +28,7 @@
                 <div class="col-8 form-mode">
                   <div class="p-inputgroup">
                     <span class="p-inputgroup-addon">
-                      <span class="material-icons-outlined">badge</span>
+                      <span class="material-icons-outlined material-symbols-outlined">badge</span>
                     </span>
                     <InputText
                       v-model="formData.code"
@@ -38,7 +38,7 @@
                   </div>
                   <div class="p-inputgroup">
                     <span class="p-inputgroup-addon">
-                      <span class="material-icons-outlined">mail</span>
+                      <span class="material-icons-outlined material-symbols-outlined">mail</span>
                     </span>
                     <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
                   placeholder="Email" /> -->
@@ -50,7 +50,7 @@
                   </div>
                   <div class="p-inputgroup">
                     <span class="p-inputgroup-addon">
-                      <span class="material-icons-outlined">call</span>
+                      <span class="material-icons-outlined material-symbols-outlined">call</span>
                     </span>
                     <InputText
                       v-model="formData.phone"
@@ -60,7 +60,7 @@
                   </div>
                   <div class="p-inputgroup">
                     <span class="p-inputgroup-addon">
-                      <span class="material-icons-outlined">person</span>
+                      <span class="material-icons-outlined material-symbols-outlined">person</span>
                     </span>
                     <InputText
                       v-model="formData.first_name"
@@ -75,7 +75,7 @@
                   </div>
                   <div class="p-inputgroup">
                     <span class="p-inputgroup-addon">
-                      <span class="material-icons-outlined">supervised_user_circle</span>
+                      <span class="material-icons-outlined material-symbols-outlined">supervised_user_circle</span>
                     </span>
                     <Dropdown
                       v-model="formData.authority"
@@ -200,7 +200,7 @@
                     class="button-raised button-sm button-info px-3"
                     @click="cariLogActivity($event)"
                   >
-                    <span class="material-icons-outlined">search</span> Cari Activity
+                    <span class="material-icons-outlined material-symbols-outlined">search</span> Cari Activity
                   </Button>
                 </div>
               </div>
@@ -245,7 +245,7 @@
                     class="button-raised button-sm p-button-danger px-3"
                     @click="back()"
                   >
-                    <span class="material-icons-outlined">arrow_back</span> Back
+                    <span class="material-icons-outlined material-symbols-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div class="flex-grow-1 flex align-items-center justify-content-center m-2 px-5 py-3"></div>
@@ -258,7 +258,7 @@
                     class="button-raised button-sm p-button-info px-3"
                     @click="updateAccountData($event)"
                   >
-                    <span class="material-icons-outlined">check_circle</span> Save Data
+                    <span class="material-icons-outlined material-symbols-outlined">check_circle</span> Save Data
                   </Button>
                 </div>
               </div>

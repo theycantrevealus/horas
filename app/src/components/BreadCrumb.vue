@@ -12,7 +12,7 @@
           />
         </div>
         <h6 class="text-right pageName">
-          <span class="material-icons">hashtag</span> {{ pageName }}
+          <span class="material-icons">tag</span> {{ pageName }}
         </h6>
 
       </div>

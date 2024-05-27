@@ -12,13 +12,13 @@
                 type="button"
                 class="button-raised button-sm p-button-info px-3 m-1"
                 @click="duplicateComponent($event)"
-              ><span class="material-icons-outlined">add</span> {{ $t('i18n.button.duplicate_component') }}
+              ><span class="material-icons-outlined material-symbols-outlined">add</span> {{ $t('i18n.button.duplicate_component') }}
               </Button>
               <Button
                 type="button"
                 class="button-raised button-sm p-button-info px-3 m-1"
                 @click="addGrouper($event)"
-              ><span class="material-icons-outlined">add</span> {{ $t('i18n.button.add_grouper') }}
+              ><span class="material-icons-outlined material-symbols-outlined">add</span> {{ $t('i18n.button.add_grouper') }}
               </Button>
             </template>
           </Panel>
@@ -26,7 +26,7 @@
             <div class="col-4 form-mode">
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">map</span>
+                  <span class="material-icons-outlined material-symbols-outlined">map</span>
                   &nbsp;
                   <small>{{ $t('i18n.input.name.caption') }}</small>
                 </span>
@@ -38,7 +38,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">public</span>
+                  <span class="material-icons-outlined material-symbols-outlined">public</span>
                   &nbsp;
                   <small>{{ $t('i18n.input.language_code.caption') }}</small>
                 </span>
@@ -50,7 +50,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">map</span>
+                  <span class="material-icons-outlined material-symbols-outlined">map</span>
                   &nbsp;
                   <small>{{ $t('i18n.input.iso_3_digits.caption') }}</small>
                 </span>
@@ -62,7 +62,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">map</span>
+                  <span class="material-icons-outlined material-symbols-outlined">map</span>
                   &nbsp;
                   <small>{{ $t('i18n.input.iso_2_digits.caption') }}</small>
                 </span>
@@ -74,7 +74,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">calendar_month</span>
+                  <span class="material-icons-outlined material-symbols-outlined">calendar_month</span>
                   &nbsp;
                   <small>Weekday</small>
                 </span>
@@ -86,7 +86,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">calendar_month</span>
+                  <span class="material-icons-outlined material-symbols-outlined">calendar_month</span>
                   &nbsp;
                   <small>Era</small>
                 </span>
@@ -98,7 +98,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">calendar_month</span>
+                  <span class="material-icons-outlined material-symbols-outlined">calendar_month</span>
                   &nbsp;
                   <small>Year</small>
                 </span>
@@ -110,7 +110,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">calendar_month</span>
+                  <span class="material-icons-outlined material-symbols-outlined">calendar_month</span>
                   &nbsp;
                   <small>Month</small>
                 </span>
@@ -122,7 +122,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">calendar_month</span>
+                  <span class="material-icons-outlined material-symbols-outlined">calendar_month</span>
                   &nbsp;
                   <small>Day</small>
                 </span>
@@ -134,7 +134,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">schedule</span>
+                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
                   &nbsp;
                   <small>Hour</small>
                 </span>
@@ -146,7 +146,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">schedule</span>
+                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
                   &nbsp;
                   <small>Minute</small>
                 </span>
@@ -158,7 +158,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">schedule</span>
+                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
                   &nbsp;
                   <small>Second</small>
                 </span>
@@ -171,7 +171,7 @@
               </div>
               <div class="p-inputgroup">
                 <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined">schedule</span>
+                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
                   &nbsp;
                   <small>Timezone</small>
                 </span>
@@ -236,7 +236,7 @@
                     class="button-raised button-sm p-button-danger px-3"
                     @click="back()"
                   >
-                    <span class="material-icons-outlined">arrow_back</span> Back
+                    <span class="material-icons-outlined material-symbols-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div class="flex-grow-1 flex align-items-center justify-content-center m-2 px-5 py-3"></div>
@@ -246,7 +246,7 @@
                     class="button-raised button-sm p-button-success px-3"
                     @click="submitLanguage($event)"
                   >
-                    <span class="material-icons-outlined">check_circle</span> Save Data
+                    <span class="material-icons-outlined material-symbols-outlined">check_circle</span> Save Data
                   </Button>
                 </div>
               </div>
@@ -284,7 +284,7 @@
         <div class="col-12 form-mode">
           <div class="p-inputgroup">
             <span class="p-inputgroup-addon">
-              <span class="material-icons-outlined">view_in_ar</span>
+              <span class="material-icons-outlined material-symbols-outlined">view_in_ar</span>
             </span>
             <Dropdown
               v-model="selectedComponentData.menu"
@@ -303,7 +303,7 @@
               :placeholder="$t('i18n.form.name')"
             />
             <span class="p-inputgroup-addon">
-              <span class="material-icons-outlined">public</span>
+              <span class="material-icons-outlined material-symbols-outlined">public</span>
             </span>
             <InputText
               v-model="selectedComponentData.translation"

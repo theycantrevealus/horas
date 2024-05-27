@@ -61,6 +61,10 @@ table thead tr th {
     border: none !important;
 }
 
+.p-datatable {
+
+}
+
 .p-datatable .p-datatable-thead > tr > th {
     border: none !important;
 }
@@ -74,6 +78,22 @@ table thead tr th {
     color: #fff !important;
 }
 
+.p-datatable .p-datatable-thead > tr > th.wrap_content {
+    word-wrap: break-word !important;
+    white-space: nowrap !important;
+    width: 1% !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td.wrap_content {
+    word-wrap: break-word !important;
+    white-space: nowrap !important;
+    width: 1% !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th.text-right {
+    text-align: left !important;
+}
+
 .p-datatable-table thead tr th .pi {
     color: #fff !important;
 }
@@ -85,6 +105,11 @@ table thead tr th {
 
 .p-datatable-table thead tr th .p-column-filter-menu-button-active .pi {
     color: #fff !important;
+}
+
+.p-datatable .p-datatable-footer {
+    margin-bottom: -100px !important;
+    margin-top: 10px !important;
 }
 
 tbody tr:nth-child(even) td {

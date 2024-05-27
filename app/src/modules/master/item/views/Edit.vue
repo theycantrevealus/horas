@@ -13,7 +13,7 @@
           >
             <TabPanel>
               <template #header>
-                <span class="material-icons-outlined">info</span>
+                <span class="material-icons-outlined material-symbols-outlined">info</span>
                 <span>Basic Information</span>
               </template>
               <div class="grid p-fluid">
@@ -183,7 +183,7 @@
                   >
                     <TabPanel>
                       <template #header>
-                        <span class="material-icons-outlined">science</span>
+                        <span class="material-icons-outlined material-symbols-outlined">science</span>
                         <span>OMOP</span>
                       </template>
                       <DataTable
@@ -229,7 +229,7 @@
                     </TabPanel>
                     <TabPanel>
                       <template #header>
-                        <span class="material-icons-outlined">science</span>
+                        <span class="material-icons-outlined material-symbols-outlined">science</span>
                         <span>Protein Data Bank</span>
                       </template>
                       <DataTable
@@ -283,7 +283,7 @@
                     </TabPanel>
                     <TabPanel>
                       <template #header>
-                        <span class="material-icons-outlined">science</span>
+                        <span class="material-icons-outlined material-symbols-outlined">science</span>
                         <span>Pharma Class</span>
                       </template>
                       <DataTable
@@ -329,7 +329,7 @@
                     </TabPanel>
                     <TabPanel>
                       <template #header>
-                        <span class="material-icons-outlined">science</span>
+                        <span class="material-icons-outlined material-symbols-outlined">science</span>
                         <span>
                           pK
                           <sub>a</sub>
@@ -374,7 +374,7 @@
                     </TabPanel>
                     <TabPanel>
                       <template #header>
-                        <span class="material-icons-outlined">science</span>
+                        <span class="material-icons-outlined material-symbols-outlined">science</span>
                         <span>Identifier</span>
                       </template>
                       <DataTable

@@ -33,6 +33,14 @@
                   :placeholder="$t('menu.datatable.column.label.placeholder')"
                 />
               </template>
+              <template #body="slotProps">
+                <Chip class="py-0 pl-0 pr-3">
+                  <span class="bg-cyan-300 text-white border-circle w-2rem h-2rem flex align-items-center justify-content-center">
+                    <span class="material-icons-outlined material-symbols-outlined">{{ slotProps.node.data.icon === '' ? 'account_tree' : slotProps.node.data.icon }}</span>
+                  </span>
+                  <span class="ml-2 font-medium">{{ slotProps.node.data.label }}</span>
+                </Chip>
+              </template>
             </Column>
             <Column
               field="to"
@@ -161,7 +169,7 @@
               type="text"
             />
             <span class="p-inputgroup-addon">
-              <span class="material-icons-outlined">{{ form.txt_icon }}</span>
+              <span class="material-icons-outlined material-symbols-outlined">{{ form.txt_icon }}</span>
             </span>
           </div>
         </div>
@@ -294,6 +302,7 @@
 import { defineComponent } from 'vue'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
+import Chip from 'primevue/chip'
 import TreeTable from 'primevue/treetable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -310,6 +319,7 @@ export default defineComponent({
   name: 'Module',
   components: {
     Card,
+    Chip,
     TreeTable,
     Column,
     Button,

@@ -13,7 +13,11 @@ class MasterItemService {
         },
       })
       .then((response: any) => {
-        return Promise.resolve(response)
+        const data:CoreResponse = response.data
+        return data
+      })
+      .catch((e) => {
+        return Promise.reject(e)
       })
   }
 

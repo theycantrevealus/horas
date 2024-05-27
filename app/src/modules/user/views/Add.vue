@@ -10,80 +10,80 @@
         </template>
         <template #content>
           <TabView
-            class="tabview-custom"
             ref="tabview4"
+            class="tabview-custom"
           >
             <TabPanel>
               <template #header>
-                <span class="material-icons-outlined">account_circle</span>
+                <span class="material-icons-outlined material-symbols-outlined">account_circle</span>
                 <span>Basic Information</span>
               </template>
               <div class="p-fluid formgrid grid">
                 <div class="field col-12 md-4">
                   <label for="userFormEmail">Email</label>
                   <InputText
-                    placeholder="example@domain.com"
                     id="userFormEmail"
-                    type="text"
                     v-model.trim="$v.email.$model"
+                    placeholder="example@domain.com"
+                    type="text"
                   />
                   <Message
-                    severity="error"
                     v-if="$v.email.$errors.length > 0"
+                    severity="error"
                     :closable="false"
                   >
                     <div
-                      class="error-msg"
                       v-for="(error, index) of $v.email.$errors"
                       :key="index"
+                      class="error-msg"
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
                 <div class="field col-12 md-4">
                   <label for="userFormFirstName">Firstname</label>
                   <InputText
-                    placeholder="Jhonny"
                     id="userFormFirstName"
-                    type="text"
                     v-model.trim="$v.first_name.$model"
+                    placeholder="Jhonny"
+                    type="text"
                   />
                   <Message
-                    severity="error"
                     v-if="$v.first_name.$errors.length > 0"
+                    severity="error"
                     :closable="false"
                   >
                     <div
-                      class="error-msg"
                       v-for="(error, index) of $v.first_name.$errors"
                       :key="index"
+                      class="error-msg"
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
                 <div class="field col-12 md-4">
                   <label for="userFormLastName">Lastname</label>
                   <InputText
-                    placeholder="Sins"
                     id="userFormLastName"
-                    type="text"
                     v-model.trim="$v.last_name.$model"
+                    placeholder="Sins"
+                    type="text"
                   />
                   <Message
-                    severity="error"
                     v-if="$v.last_name.$errors.length > 0"
+                    severity="error"
                     :closable="false"
                   >
                     <div
-                      class="error-msg"
                       v-for="(error, index) of $v.last_name.$errors"
                       :key="index"
+                      class="error-msg"
                     >{{ error.$message }}</div>
                   </Message>
                 </div>
                 <div class="field col-12">
                   <label for="userFormAddress">Address</label>
                   <Textarea
-                    v-model.trim="$v.address.$model"
                     id="userFormAddress"
+                    v-model.trim="$v.address.$model"
                     placeholder="4th Avenue"
                     rows="4"
                   />
@@ -91,8 +91,8 @@
                 <div class="field col-12 md-6">
                   <label for="userFormContact">Contact</label>
                   <InputText
-                    v-model.trim="$v.contact.$model"
                     id="userFormContact"
+                    v-model.trim="$v.contact.$model"
                     placeholder="000-00000"
                     type="text"
                   />
@@ -101,14 +101,14 @@
             </TabPanel>
             <TabPanel>
               <template #header>
-                <span class="material-icons-outlined">vpn_key</span>
+                <span class="material-icons-outlined material-symbols-outlined">vpn_key</span>
                 <span>Role and Permission</span>
               </template>
               <DataTable
+                v-model:expandedRows="expandedRows"
                 :value="permissionList"
                 data-key="id"
                 responsiveLayout="scroll"
-                v-model:expandedRows="expandedRows"
               >
                 <template #header>All Permission</template>
                 <Column
@@ -128,8 +128,8 @@
                   <template #body="slotProps">
                     {{ slotProps.data.label }}
                     <Badge
-                      severity="info"
                       v-if="slotProps.data.permission.length > 0"
+                      severity="info"
                       :value="slotProps.data.permission.length"
                     ></Badge>
                   </template>
@@ -140,9 +140,9 @@
                     <div class="col-10">
                       <div v-if="slotProps.data.permission !== undefined">
                         <div
-                          class="field-checkbox"
                           v-for="perPermission in slotProps.data.permission"
                           :key="perPermission"
+                          class="field-checkbox"
                         >
                           <InputSwitch v-model="checkedPermission[`menu_${perPermission.id}`]" />
                           <label>{{ perPermission.domiden }}</label>
@@ -221,11 +221,6 @@ export default {
   setup() {
     return { $v: useVuelidate() }
   },
-  mounted() {
-    CoreService.menuPermission().then((response) => {
-      this.permissionList = response.data.response_package
-    })
-  },
   data() {
     return {
       expandedRows: [],
@@ -247,6 +242,11 @@ export default {
         message: '',
       },
     }
+  },
+  mounted() {
+    CoreService.menuPermission().then((response) => {
+      this.permissionList = response.data.response_package
+    })
   },
   validations: {
     email: {

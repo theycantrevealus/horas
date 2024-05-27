@@ -9,7 +9,7 @@
       >
         <template v-if="root">
           <div :class="(getMenuModeStatus ? 'open' : '') + ' layout-menuitem-root-text'"><b>{{ getMenuModeStatus ? item.name : '' }}</b>
-            <span class="material-icons-outlined">
+            <span class="material-icons-outlined material-symbols-outlined">
               more_horiz
             </span>
           </div>
@@ -31,7 +31,7 @@
             @click="onMenuItemClick($event, item, i)"
           >
             <i :class="item.icon"></i>
-            <span class="material-icons-outlined">{{ item.icon }}</span>
+            <span class="material-icons-outlined material-symbols-outlined">{{ item.icon }}</span>
             <!-- This is a label -->
             <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.name }}</span>
             <span
@@ -52,7 +52,7 @@
             role="menuitem"
             @click="onMenuItemClick($event, item, i)"
           >
-            <span class="material-icons-outlined">{{ item.icon }}</span>
+            <span class="material-icons-outlined material-symbols-outlined">{{ item.icon }}</span>
             <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">{{ item.name }}</span>
             <i
               v-if="item.items && getMenuModeStatus"

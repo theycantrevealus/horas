@@ -24,7 +24,7 @@
                 role="menuitem"
                 @click="logout"
               >
-                <span class="material-icons-outlined">logout</span>
+                <span class="material-icons-outlined material-symbols-outlined">logout</span>
                 <span :class="(getMenuModeStatus ? 'open' : '') + ' caption'">Logout</span>
               </a>
               <ul style="display: none;"></ul>

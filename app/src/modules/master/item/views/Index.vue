@@ -5,7 +5,7 @@
         <Toolbar>
           <template #left>
             <Button
-              v-if="permission.btnAddItem !== undefined"
+              v-if="credential.btnAddItem !== undefined"
               label="New"
               icon="pi pi-plus"
               class="mr-2 button-rounded"
@@ -30,6 +30,7 @@
           :lazy="true"
           :paginator="true"
           :rows="20"
+          :rowsPerPageOptions="[5, 10, 20, 50]"
           :totalRecords="totalRecords"
           :loading="loading"
           filterDisplay="row"
@@ -41,31 +42,31 @@
         >
           <Column
             header="#"
-            class="wrap_content text-right"
+            class="text-right wrap_content"
           >
             <template #body="slotProps">
               <strong class="d-inline-flex">
-                <span class="material-icons-outlined">hashtag</span>
+                <span class="material-icons-outlined material-symbols-outlined">tag</span>
                 {{ slotProps.data.autonum}}
               </strong>
             </template>
           </Column>
-          <Column header="Action" class="wrap_content">
+          <Column
+            header="Action"
+            class="text-right wrap_content">
             <template #body="slotProps">
               <span class="p-buttonset">
                 <Button
-                  v-if="permission.btnEditItem !== undefined"
                   class="p-button-info p-button-sm p-button-raised"
                   @click="itemEditForm(slotProps.data.id)"
                 >
-                  <span class="material-icons">edit</span>
+                  <span class="material-icons">edit</span> Edit
                 </Button>
                 <Button
-                  v-if="permission.btnDeleteItem !== undefined"
                   class="p-button-danger p-button-sm p-button-raised"
                   @click="itemDelete($event, slotProps.data.id)"
                 >
-                  <span class="material-icons">delete</span>
+                  <span class="material-icons">delete</span> Delete
                 </Button>
               </span>
             </template>
@@ -76,7 +77,7 @@
             header="Code"
             filterMatchMode="startsWith"
             :sortable="true"
-            class="wrap_content"
+            style="width: 12.5% !important;"
           >
             <template #filter="{ filterModel, filterCallback }">
               <InputText
@@ -86,6 +87,9 @@
                 placeholder="Search by code"
                 @keydown.enter="filterCallback()"
               />
+            </template>
+            <template #body="slotProps">
+              <label class="currency-label text-600">{{ slotProps.data.code }}</label>
             </template>
           </Column>
           <Column
@@ -105,9 +109,24 @@
                 @keydown.enter="filterCallback()"
               />
             </template>
+            <template #body="slotProps">
+              <b>{{ slotProps.data.name }} / {{ slotProps.data.alias }}</b>
+            </template>
+          </Column>
+          <Column
+            ref="unit"
+            field="unit"
+            header="Unit"
+            :sortable="false"
+            style="width: 12.5% !important;"
+          >
+            <template #body="slotProps">
+              <b>{{ slotProps.data.unit.name }}</b>
+            </template>
           </Column>
           <Column
             ref="created_at"
+            class="text-right wrap_content"
             field="created_at"
             header="Created Date"
             :sortable="true"
@@ -116,6 +135,11 @@
               <b>{{ formatDate(slotProps.data.created_at, 'DD MMMM YYYY') }}</b>
             </template>
           </Column>
+          <template #footer>
+            <div class="text-xs">
+              <NumberLabel class="text-cyan-600" lang="ID" code="ID" currency="IDR" :number="lazyParams.page > 0 ? lazyParams.first + 1 : 1" decimal="0" /> - <NumberLabel class="text-cyan-600" lang="ID" code="ID" currency="IDR" :number="lazyParams.first > 0 ? lazyParams.first + lazyParams.rows : lazyParams.rows" decimal="0" /> / <NumberLabel class="text-cyan-600" lang="ID" code="ID" currency="IDR" :number="totalRecords ? totalRecords : 0" decimal="0" /> rows
+            </div>
+          </template>
         </DataTable>
       </template>
       <template #footer></template>
@@ -135,6 +159,8 @@ import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import MasterItemService from '@/modules/master/item/service'
 import DataTableFilterMeta from 'primevue/datatable'
+import {mapState} from "vuex"
+import NumberLabel from '@/components/Number.vue'
 
 export default {
   components: {
@@ -145,6 +171,7 @@ export default {
     Card,
     Toolbar,
     ConfirmPopup,
+    NumberLabel,
   },
   data() {
     return {
@@ -164,13 +191,14 @@ export default {
     }
   },
   computed: {
-    permission() {
-      return this.$store.state.credential.permission
-    },
+    ...mapState('storeCredential', {
+      credential: state => state
+    }),
   },
   mounted() {
     this.lazyParams = {
       first: 0,
+      page: 0,
       rows: this.$refs.dt.rows,
       sortField: 'created_at',
       sortOrder: 1,
@@ -210,8 +238,8 @@ export default {
 
       MasterItemService.getItemList(this.lazyParams).then((response) => {
         if (response) {
-          const data = response.data.payload.data
-          const totalRecords = response.data.payload.totalRecords
+          const data = response.payload.data
+          const totalRecords = response.payload.totalRecords
           this.items = data
           this.totalRecords = totalRecords
         } else {
@@ -230,6 +258,8 @@ export default {
       this.loadLazyData()
     },
     onFilter() {
+      this.lazyParams.page = 0
+      this.lazyParams.first = 0
       this.lazyParams.filters = this.filters
       this.loadLazyData()
     },

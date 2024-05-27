@@ -97,7 +97,7 @@
                                   class="p-button-raised p-button-sm p-button-danger px-3"
                                   @click="deleteDetail(data)"
                                 >
-                                  <span class="material-icons-outlined">close</span> Delete
+                                  <span class="material-icons-outlined material-symbols-outlined">close</span> Delete
                                 </Button>
                               </div>
                             </template>
@@ -306,7 +306,7 @@
                     class="p-button-raised button-sm p-button-danger px-3"
                     @click="back()"
                   >
-                    <span class="material-icons-outlined">arrow_back</span> Back
+                    <span class="material-icons-outlined material-symbols-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div class="flex-grow-1 flex align-items-center justify-content-center m-2 px-5 py-3"></div>
@@ -319,7 +319,7 @@
                     class="p-button-raised button-sm p-button-info px-3"
                     @click="submitPO($event)"
                   >
-                    <span class="material-icons-outlined">check_circle</span> Save Data
+                    <span class="material-icons-outlined material-symbols-outlined">check_circle</span> Save Data
                   </Button>
                 </div>
               </div>

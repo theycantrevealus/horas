@@ -469,7 +469,6 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .topbar .head_wrapper {
     padding: 5px;
-    width: content-box;
     background: rgba(255, 255, 255, 0.24);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(3.5px);
@@ -1038,36 +1037,16 @@ body.dark .p-treenode .p-treenode-content:hover {
     font-size: 10pt !important;
 }
 
-td.wrap_content, th.wrap_content {
-    padding: 5px 5px 5px 1.5rem !important;
-    word-wrap: break-word !important;
-    white-space: nowrap;
-    width: 1% !important;
-}
+/*td.wrap_content, th.wrap_content {*/
+/*    padding: 5px 5px 5px 1.5rem !important;*/
+/*    word-wrap: break-word !important;*/
+/*    white-space: nowrap !important;*/
+/*}*/
 
-
-.p-datatable .p-datatable-tbody > tr > td.wrap_content {
-    padding: 5px 5px 5px 1.5rem !important;
-    word-wrap: break-word !important;
-    white-space: nowrap;
-    width: 1% !important;
-}
-
-.p-datatable .p-datatable-thead > tr > th.text-right {
-    text-align: left !important;
-}
-
-.p-datatable .p-datatable-thead > tr > th.wrap_content .p-column-filter {
-    width: 200px;
-}
-
-.p-datatable .p-datatable-thead > tr > th.wrap_content .p-column-filter .p-hidden-space {
-    display: none !important;
-}
-
-.p-datatable .p-datatable-thead > tr > th.wrap_content .p-column-title {
-    width: 200px;
-}
+/*.p-datatable .p-datatable-tbody > tr > td.wrap_content {*/
+/*    word-wrap: break-word !important;*/
+/*    white-space: nowrap !important;*/
+/*}*/
 
 .p-field {
     margin-bottom: 20px;

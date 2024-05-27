@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <label class="currency-label">{{ format(number) }}{{ prefix }}</label>
-  </div>
+  <label class="currency-label {{class_name}}">{{ format(number) }}{{ prefix }}</label>
 </template>
 <script>
 import { NumberParser } from '@/util/number'
@@ -32,6 +30,16 @@ export default {
       type: String,
       default: '',
       required: false
+    },
+    decimal: {
+      type: Number,
+      default: 2,
+      required: false
+    },
+    class_name: {
+      type: String,
+      default: '',
+      required: false
     }
   },
   emits: ['display'],
@@ -39,7 +47,7 @@ export default {
   methods: {
     format(num) {
       const formatter = new Intl.NumberFormat(`${this.lang.toLowerCase()}-${this.code.toUpperCase()}`, {
-        minimumFractionDigits: 2,
+        minimumFractionDigits: this.decimal,
       })
       const parser = new NumberParser(`${this.lang.toLowerCase()}-${this.code.toUpperCase()}`, num)
       return parser.parse(formatter.format(num))

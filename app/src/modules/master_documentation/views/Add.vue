@@ -15,7 +15,7 @@
           >
             <TabPanel>
               <template #header>
-                <span class="material-icons-outlined">info</span>
+                <span class="material-icons-outlined material-symbols-outlined">info</span>
                 <span>Basic Information</span>
               </template>
               <div class="p-fluid formgrid grid">
@@ -52,7 +52,7 @@
             </TabPanel>
             <TabPanel>
               <template #header>
-                <span class="material-icons-outlined">medication</span>
+                <span class="material-icons-outlined material-symbols-outlined">medication</span>
                 <span>Drug Info</span>
               </template>
             </TabPanel>

@@ -18,7 +18,7 @@
             <div class="col-8 form-mode">
               <div class="inputgroup">
                 <span class="inputgroup-addon">
-                  <span class="material-icons-outlined">mail</span>
+                  <span class="material-icons-outlined material-symbols-outlined">mail</span>
                 </span>
                 <!-- <InputText class="inputtext-sm" @input="updateAccount($event.target.value)" v-model="accountDetail.email"
                   placeholder="Email" /> -->
@@ -30,7 +30,7 @@
               </div>
               <div class="inputgroup">
                 <span class="inputgroup-addon">
-                  <span class="material-icons-outlined">person</span>
+                  <span class="material-icons-outlined material-symbols-outlined">person</span>
                 </span>
                 <InputText
                   v-model="formData.first_name"
@@ -45,7 +45,7 @@
               </div>
               <div class="inputgroup">
                 <span class="inputgroup-addon">
-                  <span class="material-icons-outlined">supervised_user_circle</span>
+                  <span class="material-icons-outlined material-symbols-outlined">supervised_user_circle</span>
                 </span>
                 <Dropdown
                   v-model="formData.authority"
@@ -143,7 +143,7 @@
                     class="button-raised button-sm p-button-danger px-3"
                     @click="back()"
                   >
-                    <span class="material-icons-outlined">arrow_back</span> Back
+                    <span class="material-icons-outlined material-symbols-outlined">arrow_back</span> Back
                   </Button>
                 </div>
                 <div v-if="allowSave === true">
@@ -152,7 +152,7 @@
                     class="button-raised button-sm button-info px-3"
                     @click="updateAccountData($event)"
                   >
-                    <span class="material-icons-outlined">check_circle</span> Save Data
+                    <span class="material-icons-outlined material-symbols-outlined">check_circle</span> Save Data
                   </Button>
                 </div>
               </div>

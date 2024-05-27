@@ -15,7 +15,7 @@
           >
             <TabPanel>
               <template #header>
-                <span class="material-icons-outlined">account_circle</span>
+                <span class="material-icons-outlined material-symbols-outlined">account_circle</span>
                 <span>Basic Information</span>
               </template>
               <div class="p-fluid formgrid grid">
@@ -104,7 +104,7 @@
                 v-if="permission.tabManageRolePerm !== undefined"
                 #header
               >
-                <span class="material-icons-outlined">vpn_key</span>
+                <span class="material-icons-outlined material-symbols-outlined">vpn_key</span>
                 <span>Role and Permission</span>
               </template>
               <DataTable
