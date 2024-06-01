@@ -45,6 +45,13 @@ describe('Master Item Service', () => {
         AuthService,
         JwtService,
         {
+          provide: 'ACCOUNT_SERVICE',
+          useValue: {
+            emit: () => jest.fn(),
+            transaction: () => jest.fn(),
+          },
+        },
+        {
           provide: ConfigService,
           useValue: {
             get: () => jest.fn().mockResolvedValue('Test'),
@@ -141,10 +148,10 @@ describe('Master Item Service', () => {
             )
 
             // Should be an array of data
-            expect(result.payload).toBeInstanceOf(Array)
+            expect(result.payload).toBeInstanceOf(Object)
 
             // Data should be defined
-            expect(result.payload).toEqual(masterItemDocArray)
+            expect(result.payload['data']).toEqual(masterItemDocArray)
           })
       }
     )

@@ -48,7 +48,9 @@ export const mockMasterItemSupplier = (
   id = `supplier-${new Types.ObjectId().toString()}`,
   code = 'SPP-0001',
   name = faker.company.name(),
-  phone = `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+  phone = `+62${'0###########'.replace(/#+/g, (m) =>
+    faker.string.numeric(m.length)
+  )}`,
   email = faker.internet.email(),
   sales_name = faker.person.firstName(),
   address = faker.location.streetAddress(),
@@ -96,7 +98,9 @@ export const mockMasterItemSupplierDoc = (
   name: mock?.name || faker.company.name(),
   phone:
     mock?.phone ||
-    `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+    `+62${'0###########'.replace(/#+/g, (m) =>
+      faker.string.numeric(m.length)
+    )}`,
   email: mock?.email || faker.internet.email(),
   sales_name: mock?.sales_name || faker.person.firstName(),
   address: mock?.address || faker.location.streetAddress(),
@@ -151,7 +155,9 @@ export const masterItemSupplierDocArray = [
   mockMasterItemSupplierDoc({
     code: 'XX-002',
     name: faker.person.firstName(),
-    phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+    phone: `+62${'0###########'.replace(/#+/g, (m) =>
+      faker.string.numeric(m.length)
+    )}`,
     email: faker.internet.email(),
     sales_name: faker.person.firstName(),
     address: faker.location.streetAddress(),
@@ -160,7 +166,9 @@ export const masterItemSupplierDocArray = [
   mockMasterItemSupplierDoc({
     code: 'XX-001',
     name: faker.person.firstName(),
-    phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+    phone: `+62${'0###########'.replace(/#+/g, (m) =>
+      faker.string.numeric(m.length)
+    )}`,
     email: faker.internet.email(),
     sales_name: faker.person.firstName(),
     address: faker.location.streetAddress(),

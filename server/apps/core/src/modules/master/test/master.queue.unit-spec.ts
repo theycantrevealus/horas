@@ -45,6 +45,13 @@ describe('Master Queue Service', () => {
         AuthService,
         JwtService,
         {
+          provide: 'ACCOUNT_SERVICE',
+          useValue: {
+            emit: () => jest.fn(),
+            transaction: () => jest.fn(),
+          },
+        },
+        {
           provide: ConfigService,
           useValue: {
             get: () => jest.fn().mockResolvedValue('Test'),

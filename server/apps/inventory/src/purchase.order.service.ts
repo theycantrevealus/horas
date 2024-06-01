@@ -151,15 +151,20 @@ export class PurchaseOrderService {
       })
       .then(async (result) => {
         response.message = 'Purchase Order created successfully'
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
+        response.statusCode = {
+          defaultCode: HttpStatus.OK,
+          customCode: modCodes.Global.success,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
         response.transaction_id = result._id
         response.payload = result
       })
       .catch((error: Error) => {
         response.message = `Purchase Order failed to create. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
+        response.statusCode = {
+          ...modCodes[this.constructor.name].error.databaseError,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
         response.payload = error
       })
 

@@ -19,6 +19,9 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@mock/*": [
+        "./apps/mock/*"
+      ],
       "@core/*": [
         "./apps/core/src/modules/*"
       ],

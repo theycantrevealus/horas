@@ -444,6 +444,7 @@ export class AccountService {
             }
             response.message = 'Account failed to update'
             response.payload = {}
+            throw new Error(JSON.stringify(response))
           } else {
             response.message = 'Account updated successfully'
             response.payload = result
@@ -498,6 +499,7 @@ export class AccountService {
             }
             response.message = 'Authority failed to update'
             response.payload = {}
+            throw new Error(JSON.stringify(response))
           } else {
             result.__v++
             response.message = 'Authority updated successfully'
@@ -576,6 +578,7 @@ export class AccountService {
           return response
         })
     } catch (error) {
+      console.error(error)
       await transaction.abort()
       response.message = 'Account failed to create'
       response.statusCode = {
@@ -730,7 +733,6 @@ export class AccountService {
           })
       })
       .catch((error: Error) => {
-        console.error(error)
         response.message = `Sign in failed`
         response.statusCode = {
           ...modCodes[this.constructor.name].error.databaseError,
@@ -749,7 +751,7 @@ export class AccountService {
 
       if (dataSet.setter) {
         const setter = dataSet.setter
-        for await (const e of setter) {
+        for (const e in setter) {
           if (!fields[e]) {
             fields[e] = {}
           }

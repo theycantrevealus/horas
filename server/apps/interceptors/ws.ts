@@ -1,9 +1,12 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { CallHandler, ExecutionContext } from '@nestjs/common'
+import { CallHandler, ExecutionContext, HttpStatus } from '@nestjs/common'
 import { PATH_METADATA } from '@nestjs/common/constants'
 import { Reflector } from '@nestjs/core'
+import { JWTTokenDecodeResponse } from '@security/auth.dto'
+import { AuthService } from '@security/auth.service'
 import { isExpressRequest } from '@utility/http'
 import { HorasLogging } from '@utility/logger/interfaces'
+import { CustomErrorCode } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
 import { FastifyRequest } from 'fastify'
 import { Logger } from 'winston'
@@ -12,7 +15,8 @@ export async function wsInterceptor(
   context: ExecutionContext,
   next: CallHandler,
   reflector: Reflector,
-  logger: Logger
+  logger: Logger,
+  authService: AuthService
 ) {
   const TM = new TimeManagement()
   const http = context.switchToHttp()
@@ -29,7 +33,13 @@ export async function wsInterceptor(
   const now = Date.now()
   const { url } = request
   const query = request.query ? JSON.parse(JSON.stringify(request.query)) : ''
-  const account: IAccountCreatedBy = request.credential
+
+  const token = request.handshake.headers.authorization.split('Bearer')[1]
+  const decodeTokenResponse: JWTTokenDecodeResponse =
+    await authService.validate_token({
+      token: token,
+    })
+  const account: IAccountCreatedBy = decodeTokenResponse.account
 
   const dataSet: HorasLogging = {
     ip: request.ip ?? request.handshake.headers.host,
@@ -38,23 +48,26 @@ export async function wsInterceptor(
     method: method ?? request.handshake.query.transport,
     takeTime: Date.now() - now,
     payload: {
-      body: request.body ?? {},
+      body: response,
       params: request.params ?? '',
       query: query,
     },
-    result: JSON.stringify(request.body),
+    result: response.payload,
     account: account,
     time: TM.getTimezone('Asia/Jakarta'),
   }
 
-  // console.log('Request')
-  // console.log(request)
-  // console.log()
-  // console.log('Response')
-  // console.log(JSON.stringify(response, null, 2))
-
-  // console.log(JSON.stringify(dataSet, null, 2))
-  logger.verbose(dataSet)
+  const statusCode: CustomErrorCode = response.payload.statusCode
+  if (statusCode.defaultCode) {
+    if (statusCode.defaultCode === HttpStatus.OK) {
+      logger.verbose(dataSet)
+    } else {
+      console.log(dataSet.payload.body.payload.message)
+      throw new Error(dataSet.payload.body)
+    }
+  } else {
+    logger.warn(dataSet)
+  }
 
   return next.handle()
 }

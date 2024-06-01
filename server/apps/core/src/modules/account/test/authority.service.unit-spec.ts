@@ -15,6 +15,7 @@ import {
 } from '@core/account/schemas/authority.model'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
+import { mockKafkaTransaction } from '@mock/kafka'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
@@ -42,6 +43,10 @@ describe('Authority Service', () => {
         JwtService,
         AuthService,
         ConfigService,
+        {
+          provide: 'ACCOUNT_SERVICE',
+          useValue: mockKafkaTransaction,
+        },
         {
           provide: CACHE_MANAGER,
           useValue: {
@@ -317,6 +322,27 @@ describe('Authority Service', () => {
                 modCodes.Global.success
               )
             })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
+          tab: 1,
+        }),
+        async () => {
+          const targetID = mockAuthority().id
+          jest.spyOn(authorityModel, 'findOneAndUpdate').mockResolvedValue(null)
+
+          await expect(async () => {
+            await accountService.authorityEdit(
+              {
+                code: mockAuthority().code,
+                name: mockAuthority().name,
+                __v: 0,
+              },
+              targetID
+            )
+          }).rejects.toThrow(Error)
         }
       )
 

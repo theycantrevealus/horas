@@ -54,6 +54,7 @@ module.exports = (options, webpack) => {
         : 'development',
     resolve: {
       alias: {
+        '@mock': path.resolve(__dirname, 'apps/mock'),
         '@core': path.resolve(__dirname, 'apps/core/src/modules'),
         '@inventory': path.resolve(__dirname, 'apps/inventory/src'),
         '@log': path.resolve(__dirname, 'apps/log/src'),

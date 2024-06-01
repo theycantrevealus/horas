@@ -10,6 +10,7 @@
     "js", "json", "ts"
   ],
   "moduleNameMapper": {
+    "^@mock(.*)$": "<rootDir>/apps/mock$1",
     "^@core(.*)$": "<rootDir>/apps/core/src/modules$1",
     "^@log(.*)$": "<rootDir>/apps/log/src$1",
     "^@security(.*)$": "<rootDir>/apps/security$1",

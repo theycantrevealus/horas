@@ -119,7 +119,9 @@ export const mockPatientDoc = (
     postal_code: mock?.basic_info?.postal_code || faker.location.zipCode(),
     contact:
       mock?.basic_info?.contact ||
-      `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+      `+62${'0###########'.replace(/#+/g, (m) =>
+        faker.string.numeric(m.length)
+      )}`,
     email: mock?.basic_info?.email || faker.internet.email(),
     address: mock?.basic_info?.address || faker.location.streetAddress(),
     state: mock?.basic_info?.state || faker.location.state(),
@@ -161,7 +163,9 @@ export const patientArray = [
       gender: 'M',
       marriage_status: 'Never Married',
       postal_code: faker.location.zipCode(),
-      contact: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+      contact: `+62${'0###########'.replace(/#+/g, (m) =>
+        faker.string.numeric(m.length)
+      )}`,
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
       state: faker.location.state(),
@@ -189,7 +193,9 @@ export const patientArray = [
       gender: 'M',
       marriage_status: 'Never Married',
       postal_code: faker.location.zipCode(),
-      contact: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+      contact: `+62${'0###########'.replace(/#+/g, (m) =>
+        faker.string.numeric(m.length)
+      )}`,
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
       state: faker.location.state(),
@@ -221,7 +227,9 @@ export const patientDocArray = [
       gender: 'M',
       marriage_status: 'Never Married',
       postal_code: faker.location.zipCode(),
-      contact: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+      contact: `+62${'0###########'.replace(/#+/g, (m) =>
+        faker.string.numeric(m.length)
+      )}`,
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
       state: faker.location.state(),
@@ -249,7 +257,9 @@ export const patientDocArray = [
       gender: 'M',
       marriage_status: 'Never Married',
       postal_code: faker.location.zipCode(),
-      contact: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+      contact: `+62${'0###########'.replace(/#+/g, (m) =>
+        faker.string.numeric(m.length)
+      )}`,
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
       state: faker.location.state(),

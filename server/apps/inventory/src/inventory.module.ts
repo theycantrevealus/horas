@@ -10,7 +10,9 @@ import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { JwtService } from '@nestjs/jwt'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { AuthService } from '@security/auth.service'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { DecoratorProcessorService } from '@utility/decorator'
@@ -91,6 +93,8 @@ import * as redisStore from 'cache-manager-ioredis'
   ],
   controllers: [PurchaseOrderController],
   providers: [
+    JwtService,
+    AuthService,
     PurchaseOrderService,
     DecoratorProcessorService,
     SocketIoClientProvider,

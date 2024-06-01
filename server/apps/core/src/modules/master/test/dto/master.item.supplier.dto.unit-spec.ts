@@ -16,7 +16,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -29,7 +31,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -41,7 +45,9 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -66,7 +72,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
       },
@@ -78,7 +86,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         address: faker.location.streetAddress(),
       },
@@ -90,7 +100,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
       },
@@ -102,7 +114,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -117,7 +131,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -131,7 +147,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -144,7 +162,9 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
@@ -171,7 +191,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),
         __v: 0,
@@ -184,7 +206,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         address: faker.location.streetAddress(),
         __v: 0,
@@ -197,7 +221,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         __v: 0,
@@ -210,7 +236,9 @@ const falseCasePayload = {
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         name: faker.company.name(),
-        phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
         email: faker.internet.email(),
         sales_name: faker.person.firstName(),
         address: faker.location.streetAddress(),

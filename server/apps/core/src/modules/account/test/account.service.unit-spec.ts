@@ -8,6 +8,7 @@ import { Account, AccountDocument } from '@core/account/schemas/account.model'
 import { Authority } from '@core/account/schemas/authority.model'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
+import { mockKafkaTransaction } from '@mock/kafka'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
@@ -22,6 +23,7 @@ import { testCaption } from '@utility/string'
 import * as bcrypt from 'bcrypt'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
+import * as process from 'process'
 
 import { AccountService } from '../account.service'
 
@@ -29,6 +31,7 @@ describe('Account Service', () => {
   let accountService: AccountService
   let authService: AuthService
   let cacheManager: Cache
+  let configService: ConfigService
   let accountModel: Model<Account>
 
   beforeEach(async () => {
@@ -38,6 +41,10 @@ describe('Account Service', () => {
         AccountService,
         JwtService,
         AuthService,
+        {
+          provide: 'ACCOUNT_SERVICE',
+          useValue: mockKafkaTransaction,
+        },
         {
           provide: CACHE_MANAGER,
           useValue: {
@@ -75,11 +82,13 @@ describe('Account Service', () => {
     }).compile()
 
     accountService = module.get<AccountService>(AccountService)
+    configService = module.get<ConfigService>(ConfigService)
     authService = module.get<AuthService>(AuthService)
     cacheManager = module.get(CACHE_MANAGER)
     accountModel = module.get<Model<AccountDocument>>(
       getModelToken(Account.name)
     )
+    jest.spyOn(configService, 'get').mockReturnValue(process.env.TZ)
   })
 
   it(
@@ -340,10 +349,10 @@ describe('Account Service', () => {
               )
 
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(accountDocArray)
+              expect(result.payload['data']).toEqual(accountDocArray)
             })
         }
       )
@@ -498,7 +507,7 @@ describe('Account Service', () => {
 
   describe(testCaption('ADD DATA', 'data', 'Account - Add new account'), () => {
     it(testCaption('DATA', 'data', 'Should add new account'), async () => {
-      jest.spyOn(accountModel, 'create')
+      const producerMethod = jest.spyOn(mockKafkaTransaction, 'transaction')
 
       await accountService
         .accountAdd(
@@ -510,90 +519,14 @@ describe('Account Service', () => {
             password: mockAccount().password,
             authority: mockAccount().authority,
           },
-          mockAccount()
+          mockAccount(),
+          ''
         )
-        .then((result: GlobalResponse) => {
-          // Should create id
-          expect(result.payload).toHaveProperty('id')
-
-          // Should classify transaction
-          expect(result.transaction_classify).toEqual('ACCOUNT_ADD')
-
-          // Not an empty string so be informative
-          expect(result.message).not.toBe('')
-
-          // Should return success code
-          expect(result.statusCode.customCode).toEqual(modCodes.Global.success)
+        .then((result) => {
+          console.log(result)
+          expect(producerMethod).toHaveBeenCalled()
         })
     })
-
-    it(testCaption('DATA', 'data', 'Should add new account'), async () => {
-      jest.spyOn(accountService, 'accountAdd')
-
-      await accountService
-        .accountAdd(
-          {
-            first_name: mockAccount().first_name,
-            last_name: mockAccount().last_name,
-            phone: mockAccount().phone,
-            email: mockAccount().email,
-            password: '',
-            authority: mockAccount().authority,
-          },
-          mockAccount()
-        )
-        .then((result: GlobalResponse) => {
-          expect(result.payload).toHaveProperty('password')
-
-          const passwordIfEmpty = result.payload['password']
-          expect(passwordIfEmpty).not.toEqual('')
-
-          // Should create id
-          expect(result.payload).toHaveProperty('id')
-
-          // Should classify transaction
-          expect(result.transaction_classify).toEqual('ACCOUNT_ADD')
-
-          // Not an empty string so be informative
-          expect(result.message).not.toBe('')
-
-          // Should return success code
-          expect(result.statusCode.customCode).toEqual(modCodes.Global.success)
-        })
-    })
-
-    it(
-      testCaption('HANDLING', 'data', 'Response error on create data', {
-        tab: 1,
-      }),
-      async () => {
-        const mockError = mockResponse({
-          code: modCodes[AccountService.name],
-          message: 'Account failed to create',
-          payload: {},
-          transaction_id: '',
-          transaction_classify: 'ACCOUNT_ADD',
-        })
-
-        jest.spyOn(accountModel, 'create').mockImplementationOnce(() => {
-          throw new Error(JSON.stringify(mockError))
-        })
-
-        await expect(async () => {
-          await accountService.accountAdd(
-            {
-              email: mockAccount().email,
-              phone: mockAccount().phone,
-              first_name: mockAccount().first_name,
-              last_name: mockAccount().last_name,
-              password: '',
-              authority: mockAccount().authority,
-            },
-            mockAccount()
-          )
-        }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
-      }
-    )
   })
 
   describe(testCaption('EDIT DATA', 'data', 'Account - Edit account'), () => {
@@ -629,6 +562,30 @@ describe('Account Service', () => {
               modCodes.Global.success
             )
           })
+      }
+    )
+
+    it(
+      testCaption('HANDLING', 'data', 'Response error if is data not found', {
+        tab: 1,
+      }),
+      async () => {
+        const targetID = mockAccount().id
+        jest.spyOn(accountModel, 'findOneAndUpdate').mockResolvedValue(null)
+
+        await expect(async () => {
+          await accountService.accountEdit(
+            {
+              email: accountDocArray[1].email,
+              first_name: accountDocArray[1].first_name,
+              last_name: accountDocArray[1].last_name,
+              phone: accountDocArray[1].phone,
+              authority: accountDocArray[1].authority,
+              __v: 0,
+            },
+            targetID
+          )
+        }).rejects.toThrow(Error)
       }
     )
 

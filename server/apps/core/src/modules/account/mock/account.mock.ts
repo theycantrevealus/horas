@@ -72,7 +72,9 @@ export const mockAccount = (
   first_name = faker.person.firstName(),
   last_name = faker.person.lastName(),
   password = faker.hacker.phrase(),
-  phone = `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+  phone = `+62${'0###########'.replace(/#+/g, (m) =>
+    faker.string.numeric(m.length)
+  )}`,
   access: IMenu[] = [],
   permission: IMenuPermission[] = [],
   created_by: IAccountCreatedBy = {
@@ -127,7 +129,9 @@ export const mockAccountDoc = (
   password: mock?.password || '',
   phone:
     mock?.phone ||
-    `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+    `+62${'0###########'.replace(/#+/g, (m) =>
+      faker.string.numeric(m.length)
+    )}`,
   access: mock?.access || [],
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -198,7 +202,9 @@ export const accountDocArray = [
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
     password: '123456',
-    phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+    phone: `+62${'0###########'.replace(/#+/g, (m) =>
+      faker.string.numeric(m.length)
+    )}`,
     access: [],
   }),
   mockAccountDoc({
@@ -211,7 +217,9 @@ export const accountDocArray = [
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
     password: '',
-    phone: `+62${faker.helpers.replaceSymbolWithNumber('0###########')}`,
+    phone: `+62${'0###########'.replace(/#+/g, (m) =>
+      faker.string.numeric(m.length)
+    )}`,
     access: [],
   }),
 ]

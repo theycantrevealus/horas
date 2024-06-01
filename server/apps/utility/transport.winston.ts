@@ -131,6 +131,7 @@ function loggerParser(data) {
     parsedResponseHorasLogging?.method ?? '-',
     false
   )
+
   if (parsedResponseHorasLogging?.ip) {
     const account = pad(
       sPad.account,
@@ -150,9 +151,22 @@ function loggerParser(data) {
       sPad.timestamp,
       data.timestamp,
       false
-    )} ${ip} ${pid} ${method} ${httpCode} ${account} ${JSON.stringify(
+    )} ${ip} ${pid} ${method} ${httpCode} ${account} ${
       parsedResponseHorasLogging.result
-    ).substring(0, 175)}... ${delimitter('┅')}`
+        ? JSON.stringify(parsedResponseHorasLogging.result)
+        : JSON.stringify(parsedResponseHorasLogging)
+            .toString()
+            .substring(0, 175)
+    }... ${delimitter('┅')}`
+    // return `${pad(sPad.level, data.level, true)} ${pad(
+    //   sPad.timestamp,
+    //   data.timestamp,
+    //   false
+    // )} ${ip} ${pid} ${method} ${httpCode} ${account} ${
+    //   parsedResponseHorasLogging.result
+    //     ? JSON.stringify(parsedResponseHorasLogging.result)
+    //     : JSON.stringify(parsedResponseHorasLogging)
+    // } ${delimitter('┅')}`
   } else {
     return `${pad(sPad.level, data.level, true)} ${pad(
       sPad.timestamp,

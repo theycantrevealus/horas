@@ -70,11 +70,19 @@ export class EventsGateway
 
   @SubscribeMessage('proceed')
   @UseInterceptors(LoggingInterceptor)
+  // @UseInterceptors(SocketInterceptor)
   async process_result(
     @MessageBody() data: ProceedDataTrafficDTO
     // @ConnectedSocket() client: Socket
   ) {
+    /*
+     * TODO : Add interceptor to handle data response code and notify to client (Transfer it to transport.winston.ts)
+     *  1. Receiver manager - Dont forget to set target receiver manager
+     *  2. Log the socket traffic at winston - Condition for socket traffic only
+     * */
+
     // this.logger.verbose(`Data from ${client.id} : ${JSON.stringify(data)}`)
+    console.log(data)
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.notify_result.data'),
       data
