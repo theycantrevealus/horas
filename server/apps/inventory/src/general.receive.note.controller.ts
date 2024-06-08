@@ -45,7 +45,7 @@ export class GeneralReceiveNoteController {
                   })
               })
               .catch((e: Error) => {
-                this.logger.warn('Failed to connect')
+                this.logger.warn(`Failed to connect: ${e}`)
               })
           })
           .catch((e: Error) => {

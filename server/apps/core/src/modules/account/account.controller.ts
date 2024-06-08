@@ -1,11 +1,7 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import { Account } from '@core/account/schemas/account.model'
-import {
-  AccountToken,
-  Authorization,
-  CredentialAccount,
-} from '@decorators/authorization'
+import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -92,10 +88,10 @@ export class AccountController {
   })
   async add(
     @Body() parameter: AccountAddDTO,
-    @CredentialAccount() account: Account,
-    @AccountToken() token: string
+    @CredentialAccount() account: Account
+    // @AccountToken() token: string
   ): Promise<GlobalResponse> {
-    return await this.accountService.accountAdd(parameter, account, token)
+    return await this.accountService.accountAdd(parameter, account)
   }
 
   @Patch(':id')

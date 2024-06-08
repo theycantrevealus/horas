@@ -1,6 +1,5 @@
 import { AccountJoin } from '@core/account/schemas/account.join'
 import { raw } from '@nestjs/mongoose'
-import { SchemaTypes } from 'mongoose'
 
 export const PurchaseOrderApproval = raw({
   status: {
@@ -13,6 +12,6 @@ export const PurchaseOrderApproval = raw({
     default: () => new Date(),
     required: true,
   },
-  remark: { type: SchemaTypes.String },
+  remark: { type: String },
   created_by: { type: raw(AccountJoin) },
 })

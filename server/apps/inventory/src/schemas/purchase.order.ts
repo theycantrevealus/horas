@@ -9,6 +9,10 @@ import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail
 import { PurchaseOrderApproval } from '@inventory/schemas/purchase.order.approval'
 import { PurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import {
+  DocumentHistoryJoin,
+  IDocumentHistory,
+} from '@utility/schemas/document_history'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
@@ -96,6 +100,9 @@ export class PurchaseOrder {
 
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
+
+  @Prop({ type: DocumentHistoryJoin, _id: false })
+  history: IDocumentHistory[]
 }
 
 export const PurchaseOrderSchema = SchemaFactory.createForClass(PurchaseOrder)

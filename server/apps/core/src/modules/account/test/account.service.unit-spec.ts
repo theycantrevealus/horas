@@ -522,8 +522,7 @@ describe('Account Service', () => {
           mockAccount(),
           ''
         )
-        .then((result) => {
-          console.log(result)
+        .then(() => {
           expect(producerMethod).toHaveBeenCalled()
         })
     })

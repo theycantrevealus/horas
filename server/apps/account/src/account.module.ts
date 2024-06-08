@@ -8,7 +8,9 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { JwtService } from '@nestjs/jwt'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { AuthService } from '@security/auth.service'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { DecoratorProcessorService } from '@utility/decorator'
@@ -79,6 +81,8 @@ import { AccountService } from './account.service'
   ],
   controllers: [AccountController],
   providers: [
+    AuthService,
+    JwtService,
     AccountService,
     DecoratorProcessorService,
     SocketIoClientProvider,

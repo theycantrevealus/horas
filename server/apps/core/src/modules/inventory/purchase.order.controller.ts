@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Account } from '@core/account/schemas/account.model'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
 import {
@@ -23,7 +24,6 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UseGuards,
   UseInterceptors,
   Version,
@@ -152,15 +152,13 @@ export class PurchaseOrderController {
   })
   async ask_approval(
     @Body() parameter: PurchaseOrderApproval,
-    @Param() param,
-    @CredentialAccount() account,
-    @Req() request
+    @Param() param: any,
+    @CredentialAccount() account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.askApproval(
       parameter,
       param.id,
-      account,
-      request.headers.authorization
+      account
     )
   }
 
@@ -179,16 +177,10 @@ export class PurchaseOrderController {
   })
   async approve(
     @Body() parameter: PurchaseOrderApproval,
-    @Param() param,
-    @CredentialAccount() account,
-    @Req() request
+    @Param() param: any,
+    @CredentialAccount() account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.approve(
-      parameter,
-      param.id,
-      account,
-      request.headers.authorization
-    )
+    return await this.purchaseOrderService.approve(parameter, param.id, account)
   }
 
   @Patch('purchase_order/decline/:id')
@@ -206,16 +198,10 @@ export class PurchaseOrderController {
   })
   async decline(
     @Body() parameter: PurchaseOrderApproval,
-    @Param() param,
-    @CredentialAccount() account,
-    @Req() request
+    @Param() param: any,
+    @CredentialAccount() account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.decline(
-      parameter,
-      param.id,
-      account,
-      request.headers.authorization
-    )
+    return await this.purchaseOrderService.decline(parameter, param.id, account)
   }
 
   @Patch('purchase_order/:id')
@@ -233,16 +219,10 @@ export class PurchaseOrderController {
   })
   async edit(
     @Body() parameter: PurchaseOrderEditDTO,
-    @CredentialAccount() account,
-    @Param() param,
-    @Req() request
+    @Param() param: any,
+    @CredentialAccount() account: IAccountCreatedBy
   ) {
-    return await this.purchaseOrderService.edit(
-      parameter,
-      param.id,
-      account,
-      request.headers.authorization
-    )
+    return await this.purchaseOrderService.edit(parameter, param.id, account)
   }
 
   @Delete('purchase_order/:id')
@@ -259,14 +239,10 @@ export class PurchaseOrderController {
     name: 'id',
   })
   async delete(
-    @Param() param,
-    @Req() request,
-    @CredentialAccount() account
+    @Param() param: any,
+    @CredentialAccount() account: IAccountCreatedBy
+    // @Req() request,
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.delete(
-      param.id,
-      account,
-      request.headers.authorization
-    )
+    return await this.purchaseOrderService.delete(param.id, account)
   }
 }

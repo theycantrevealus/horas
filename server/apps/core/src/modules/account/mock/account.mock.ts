@@ -72,7 +72,7 @@ export const mockAccount = (
   first_name = faker.person.firstName(),
   last_name = faker.person.lastName(),
   password = faker.hacker.phrase(),
-  phone = `+62${'0###########'.replace(/#+/g, (m) =>
+  phone = `+62${'852########'.replace(/#+/g, (m) =>
     faker.string.numeric(m.length)
   )}`,
   access: IMenu[] = [],

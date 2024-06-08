@@ -5,9 +5,10 @@ import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
 export class StockDTO {
   item: IMasterItem
   batch: IMasterItemBatch
-  stock_point: IMasterStockPoint
+  stockPointOrigin: IMasterStockPoint
+  stockPointTarget: IMasterStockPoint
   qty: number
   type: string
   transaction: string
-  transaction_id: string
+  transactionId: string
 }

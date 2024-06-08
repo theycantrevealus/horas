@@ -18,7 +18,6 @@ import { AuthService } from '@security/auth.service'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { gen_uuid } from '@utility/generator'
-import { KafkaGlobalKey } from '@utility/kafka/avro/schema/global/key'
 import { KafkaService } from '@utility/kafka/avro/service'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
@@ -520,8 +519,7 @@ export class AccountService {
 
   async accountAdd(
     data: AccountAddDTO,
-    credential: IAccountCreatedBy,
-    token: string
+    credential: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -537,33 +535,15 @@ export class AccountService {
     const saltOrRounds = 10
     const password = data.password
     data.password = await bcrypt.hash(password, saltOrRounds)
-    const transaction = await this.accountProducer.transaction()
+    const generatedID = new Types.ObjectId().toString()
     try {
-      const generatedID = new Types.ObjectId().toString()
-
-      return await transaction
-        .send({
-          topic: 'account',
-          messages: [
-            {
-              headers: {
-                ...credential,
-                token: token,
-              },
-              key: {
-                id: `account-${generatedID}`,
-                code: data.code,
-                service: 'account',
-                method: 'create',
-              } satisfies KafkaGlobalKey,
-              value: {
-                ...data,
-              },
-            },
-          ],
+      return await this.accountModel
+        .create({
+          ...data,
+          id: generatedID,
+          created_by: credential,
         })
         .then(async () => {
-          await transaction.commit()
           response.message = 'Account created successfully'
           response.statusCode = {
             defaultCode: HttpStatus.OK,
@@ -578,8 +558,6 @@ export class AccountService {
           return response
         })
     } catch (error) {
-      console.error(error)
-      await transaction.abort()
       response.message = 'Account failed to create'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
