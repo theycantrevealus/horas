@@ -23,6 +23,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { Config } from '@schemas/config/config'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { ApiQueryGeneral } from '@utility/dto/prime'
@@ -34,7 +35,6 @@ import { Logger } from 'winston'
 
 import { CoreService } from './core.service'
 import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
-import { Config } from './schemas/config'
 
 @Controller()
 @ApiTags('AA - System')

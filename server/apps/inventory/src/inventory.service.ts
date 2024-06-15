@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import { IMasterItem } from '@core/master/interface/master.item'
 import { IMasterItemBatch } from '@core/master/interface/master.item.batch'
 import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
@@ -20,8 +19,11 @@ import {
   InventoryStockLog,
   InventoryStockLogDocument,
 } from '@inventory/schemas/stock.log'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
+import { GlobalResponse } from '@utility/dto/response'
+import { modCodes } from '@utility/modules'
 import { Model } from 'mongoose'
 
 @Injectable()
@@ -39,6 +41,23 @@ export class InventoryService {
     @InjectModel(InventoryStockLog.name)
     private inventoryStockLogModel: Model<InventoryStockLogDocument>
   ) {}
+
+  async stokMovement(data: StockDTO): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: data,
+      transaction_classify: 'PURCHASE_ORDER_ADD',
+      transaction_id: null,
+    } satisfies GlobalResponse
+
+    return response
+  }
+
   async batchCreator(
     item: IMasterItem,
     code: string,
@@ -68,60 +87,60 @@ export class InventoryService {
       })
   }
 
-  async stockMove(data: StockDTO) {
-    await this.inventoryStockModel
-      .findOne({
-        'item.id': data.item.id,
-        'batch.id': data.batch.id,
-        'stock_point.id': data.stock_point.id,
-      })
-      .exec()
-      .then(async (result) => {
-        let proceed,
-          balance = 0
-        if (result) {
-          balance = result.qty
-          proceed = await this.inventoryStockModel
-            .updateOne(
-              {
-                'item.id': data.item.id,
-                'batch.id': data.batch.id,
-                'stock_point.id': data.stock_point.id,
-              },
-              {
-                $inc: {
-                  qty: data.qty,
-                },
-              }
-            )
-            .exec()
-        } else {
-          proceed = new this.inventoryStockModel({
-            item: data.item,
-            batch: data.batch,
-            stock_point: data.stock_point,
-            qty: data.qty,
-          })
-
-          await proceed.save()
-        }
-
-        if (proceed) {
-          const log = new this.inventoryStockLogModel({
-            item: data.item,
-            batch: data.batch,
-            stock_point: data.stock_point,
-            in: data.type === 'in' ? data.qty : 0,
-            out: data.type === 'out' ? data.qty : 0,
-            balance: balance + data.qty,
-            transaction: data.transaction,
-            transaction_id: data.transaction_id,
-          })
-
-          await log.save()
-        }
-      })
-  }
+  // async stockMove(data: StockDTO) {
+  //   await this.inventoryStockModel
+  //     .findOne({
+  //       'item.id': data.item.id,
+  //       'batch.id': data.batch.id,
+  //       'stock_point.id': data.stock_point.id,
+  //     })
+  //     .exec()
+  //     .then(async (result) => {
+  //       let proceed,
+  //         balance = 0
+  //       if (result) {
+  //         balance = result.qty
+  //         proceed = await this.inventoryStockModel
+  //           .updateOne(
+  //             {
+  //               'item.id': data.item.id,
+  //               'batch.id': data.batch.id,
+  //               'stock_point.id': data.stock_point.id,
+  //             },
+  //             {
+  //               $inc: {
+  //                 qty: data.qty,
+  //               },
+  //             }
+  //           )
+  //           .exec()
+  //       } else {
+  //         proceed = new this.inventoryStockModel({
+  //           item: data.item,
+  //           batch: data.batch,
+  //           stock_point: data.stock_point,
+  //           qty: data.qty,
+  //         })
+  //
+  //         await proceed.save()
+  //       }
+  //
+  //       if (proceed) {
+  //         const log = new this.inventoryStockLogModel({
+  //           item: data.item,
+  //           batch: data.batch,
+  //           stock_point: data.stock_point,
+  //           in: data.type === 'in' ? data.qty : 0,
+  //           out: data.type === 'out' ? data.qty : 0,
+  //           balance: balance + data.qty,
+  //           transaction: data.transaction,
+  //           transaction_id: data.transaction_id,
+  //         })
+  //
+  //         await log.save()
+  //       }
+  //     })
+  // }
 
   async storingLabel(
     label: string,

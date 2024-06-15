@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import { LicenseAddDTO } from '@core/license/dto/license'
 import { LicenseService } from '@core/license/license.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
@@ -14,6 +13,7 @@ import {
   Version,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { Account } from '@schemas/account/account.model'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Logger } from 'winston'
 

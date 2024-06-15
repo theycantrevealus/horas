@@ -25,6 +25,7 @@ import {
   logLevel,
   Offsets,
   Producer,
+  ProducerConfig,
   RecordMetadata,
   SeekEntry,
   TopicPartitionOffsetAndMetadata,
@@ -35,6 +36,7 @@ import * as winston from 'winston'
 export class KafkaService implements OnModuleInit, OnModuleDestroy {
   private kafka: Kafka
   private producer: Producer
+  private producerConfig: ProducerConfig
   private consumer: Consumer
   private admin: Admin
   private deserializer: Deserializer
@@ -78,6 +80,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     }
 
     this.autoConnect = options.autoConnect ?? true
+    this.producerConfig = producerConfig
     this.producer = this.kafka.producer(producerConfig)
     this.admin = this.kafka.admin()
     this.initializeDeserializer(options)
@@ -197,13 +200,21 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
   /**
    * Returns a new producer transaction in order to produce messages and commit offsets together
    */
-  async transaction(): Promise<KafkaTransaction> {
-    const producer = this.producer
+  async transaction(id: string): Promise<KafkaTransaction> {
+    // const producer = this.producer
+    const producer = await this.kafka.producer({
+      ...this.producerConfig,
+      transactionalId: id,
+    })
+
+    await producer.connect()
+
     if (!producer) {
       throw 'There is no producer, unable to start transactions.'
     }
 
     const tx = await producer.transaction()
+    const _this = this
     const retval: KafkaTransaction = {
       abort(): Promise<void> {
         return tx.abort()
@@ -215,7 +226,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
         return tx.isActive()
       },
       async send(message: KafkaMessageSend): Promise<RecordMetadata[]> {
-        const serializedPacket = await this.serializer.serialize(message)
+        const serializedPacket = await _this.serializer.serialize(message)
         return await tx.send(serializedPacket)
       },
       sendOffsets(
@@ -271,6 +282,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       : {}
     this.consumer.run({
       ...runConfig,
+      autoCommit: false, // TODO : Test autocommit false
       eachMessage: async ({ topic, partition, message }) => {
         const objectRef = SUBSCRIBER_OBJECT_MAP.get(topic)
         const callback = SUBSCRIBER_MAP.get(topic)
@@ -301,6 +313,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             timestamp,
             partition,
             headers,
+            this.consumer,
           ])
         } catch (e) {
           this.logger.error(`Error processing data: ${e} from topic ${topic}`)

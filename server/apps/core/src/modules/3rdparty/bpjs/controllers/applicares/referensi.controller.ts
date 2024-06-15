@@ -4,7 +4,6 @@ import {
 } from '@core/3rdparty/bpjs/dto/applicares/kamar'
 import { BPJSApplicaresReferensiService } from '@core/3rdparty/bpjs/services/applicares/referensi.service'
 import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
-import { Account } from '@core/account/schemas/account.model'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
@@ -22,6 +21,7 @@ import {
   Version,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { Account } from '@schemas/account/account.model'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { FastifyReply } from 'fastify'
 import { Logger } from 'winston'

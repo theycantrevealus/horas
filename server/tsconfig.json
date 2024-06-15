@@ -22,6 +22,9 @@
       "@mock/*": [
         "./apps/mock/*"
       ],
+      "@schemas/*": [
+        "./apps/schemas/*"
+      ],
       "@core/*": [
         "./apps/core/src/modules/*"
       ],

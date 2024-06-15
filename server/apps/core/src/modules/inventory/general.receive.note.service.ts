@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import { InventoryService } from '@core/inventory/inventory.service'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
@@ -10,6 +9,7 @@ import {
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'

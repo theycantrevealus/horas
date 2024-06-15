@@ -1,8 +1,8 @@
-import { CAuthority, IAuthority } from '@core/account/schemas/authority.model'
 import { CMenu, CMenuPermission } from '@core/menu/dto/menu'
 import { IMenu } from '@core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
+import { CAuthority, IAuthority } from '@schemas/account/authority.model'
 import {
   IsEmail,
   IsNotEmpty,

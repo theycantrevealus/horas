@@ -1,5 +1,4 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { ICurrency } from '@core/i18n/interface/i18n'
 import { CurrencyJoin } from '@core/i18n/schemas/i18n.join'
 import { IMasterItemSupplier } from '@core/master/interface/master.item.supplier'
@@ -9,6 +8,11 @@ import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail
 import { PurchaseOrderApproval } from '@inventory/schemas/purchase.order.approval'
 import { PurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
+import {
+  DocumentHistoryJoin,
+  IDocumentHistory,
+} from '@utility/schemas/document_history'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
@@ -77,6 +81,9 @@ export class PurchaseOrder {
   @Prop(AccountJoin)
   created_by: IAccountCreatedBy
 
+  @Prop({ type: AccountJoin, required: false })
+  updated_by: IAccountCreatedBy
+
   @Prop(CurrencyJoin)
   locale: ICurrency
 
@@ -96,6 +103,9 @@ export class PurchaseOrder {
 
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
+
+  @Prop({ type: [DocumentHistoryJoin], _id: false, required: false })
+  history: IDocumentHistory[]
 }
 
 export const PurchaseOrderSchema = SchemaFactory.createForClass(PurchaseOrder)

@@ -51,10 +51,11 @@ export class PurchaseOrderController implements OnModuleInit {
   async purchase_order(
     @Payload() payload,
     key: KafkaGlobalKey,
-    offset: number,
-    timestamp: string,
-    partition: number,
+    // offset: string,
+    // timestamp: string,
+    // partition: number,
     headers: any
+    // consumer: Consumer
   ) {
     // console.clear()
     // console.log(`Key       : ${JSON.stringify(key, null, 2)}`)
@@ -71,6 +72,13 @@ export class PurchaseOrderController implements OnModuleInit {
           await this.purchaseOrderService
             .add(key.id, payload, account)
             .then(async (response) => {
+              // await consumer.commitOffsets([
+              //   {
+              //     topic: 'purchase_order',
+              //     partition: partition,
+              //     offset: offset,
+              //   },
+              // ])
               await this.socketProxy
                 .reconnect({
                   extraHeaders: {

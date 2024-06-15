@@ -1,25 +1,28 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { Account } from '@core/account/schemas/account.model'
-import { MasterItemService } from '@core/master/services/master.item.service'
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderApproval,
   PurchaseOrderEditDTO,
 } from '@inventory/dto/purchase.order'
+import { IPurchaseOrder } from '@inventory/interface/purchase.order'
+import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
+import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import {
   PurchaseOrder,
   PurchaseOrderDocument,
 } from '@inventory/schemas/purchase.order'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
+import { IConfig } from '@schemas/config/config'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
-import { KafkaGlobalKey } from '@utility/kafka/avro/schema/global/key'
-import { KafkaService } from '@utility/kafka/avro/service'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
+import { pad } from '@utility/string'
 import { TimeManagement } from '@utility/time'
+import { Cache } from 'cache-manager'
 import { Model, Types } from 'mongoose'
 
 @Injectable()
@@ -31,11 +34,10 @@ export class PurchaseOrderService {
     @InjectModel(PurchaseOrder.name)
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
-    @Inject(MasterItemService)
-    private readonly masterItemService: MasterItemService,
+    // @Inject('INVENTORY_SERVICE')
+    // private readonly clientInventory: KafkaService,
 
-    @Inject('INVENTORY_SERVICE')
-    private readonly clientInventory: KafkaService
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {
     // @Inject('INVENTORY_SERVICE') private readonly clientInventory: ClientKafka
     //
@@ -86,10 +88,69 @@ export class PurchaseOrderService {
     return await prime_datatable(parameter, this.purchaseOrderModel)
   }
 
+  // async add(
+  //   data: PurchaseOrderAddDTO,
+  //   credential: IAccountCreatedBy,
+  //   token: string
+  // ): Promise<GlobalResponse> {
+  //   const response = {
+  //     statusCode: {
+  //       defaultCode: HttpStatus.OK,
+  //       customCode: modCodes.Global.success,
+  //       classCode: modCodes[this.constructor.name].defaultCode,
+  //     },
+  //     message: '',
+  //     payload: {},
+  //     transaction_classify: 'PURCHASE_ORDER_ADD',
+  //     transaction_id: null,
+  //   } satisfies GlobalResponse
+  //
+  //   const generatedID = new Types.ObjectId().toString()
+  //   const transaction = await this.clientInventory.transaction(`purchase_order`)
+  //
+  //   try {
+  //     return await transaction
+  //       .send({
+  //         topic: this.configService.get<string>(
+  //           'kafka.inventory.topic.purchase_order'
+  //         ),
+  //         messages: [
+  //           {
+  //             headers: {
+  //               ...credential,
+  //               token: token,
+  //             },
+  //             key: {
+  //               id: `purchase_order-${generatedID}`,
+  //               code: data.code,
+  //               service: 'account',
+  //               method: 'create',
+  //             } satisfies KafkaGlobalKey,
+  //             value: data,
+  //           },
+  //         ],
+  //       })
+  //       .then(async () => {
+  //         await transaction.commit()
+  //         response.message = 'Purchase Order created successfully'
+  //         response.transaction_id = `purchase_order-${generatedID}`
+  //         return response
+  //       })
+  //   } catch (error) {
+  //     await transaction.abort()
+  //     response.message = 'Account failed to create'
+  //     response.statusCode = {
+  //       ...modCodes[this.constructor.name].error.databaseError,
+  //       classCode: modCodes[this.constructor.name].defaultCode,
+  //     }
+  //     response.payload = error
+  //     throw new Error(JSON.stringify(response))
+  //   }
+  // }
+
   async add(
-    data: PurchaseOrderAddDTO,
-    credential: IAccountCreatedBy,
-    token: string
+    payload: PurchaseOrderAddDTO,
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -104,50 +165,110 @@ export class PurchaseOrderService {
     } satisfies GlobalResponse
 
     const generatedID = new Types.ObjectId().toString()
-
-    try {
-      return await this.clientInventory
-        .send({
-          topic: this.configService.get<string>(
-            'kafka.inventory.topic.purchase_order'
-          ),
-          messages: [
-            {
-              headers: {
-                ...credential,
-                token: token,
-              },
-              key: {
-                id: `purchase_order-${generatedID}`,
-                code: data.code,
-                service: 'account',
-                method: 'create',
-              } satisfies KafkaGlobalKey,
-              value: data,
-            },
-          ],
-        })
-        .then(() => {
-          response.message = 'Purchase Order created successfully'
-          response.transaction_id = `purchase_order-${generatedID}`
-          return response
-        })
-    } catch (error) {
-      response.message = 'Account failed to create'
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
+    const data: IPurchaseOrder = {
+      id: `purchase_order-${generatedID}`,
+      ...payload,
+      approval_history: [],
+      total: 0,
+      grand_total: 0,
+      status: 'new',
     }
+
+    const detailData: IPurchaseOrderDetail[] = []
+
+    if (!data.code) {
+      const now = new Date()
+      await this.purchaseOrderModel
+        .countDocuments({
+          created_at: {
+            $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+            $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+          },
+        })
+        .then((counter) => {
+          data.code = `${modCodes[this.constructor.name]}-${new Date()
+            .toJSON()
+            .slice(0, 7)
+            .replace(/-/g, '/')}/${pad('000000', counter + 1, true)}`
+        })
+    }
+
+    data.detail.forEach((row) => {
+      const detail = {
+        ...row,
+        delivered: 0,
+        total: 0,
+      }
+
+      const itemTotal = row.qty * row.price
+      let totalRow = 0
+      if (row.discount_type === 'n') {
+        totalRow = itemTotal
+      } else if (row.discount_type === 'p') {
+        totalRow = itemTotal - (itemTotal * row.discount_value) / 100
+      } else if (row.discount_type === 'v') {
+        totalRow = itemTotal - row.discount_value
+      }
+
+      detail.total = totalRow
+      data.total += totalRow
+      detailData.push(detail)
+    })
+
+    data.detail = detailData
+
+    if (data.discount_type === 'p') {
+      data.grand_total = data.total - (data.total * data.discount_value) / 100
+    } else if (data.discount_type === 'v') {
+      data.grand_total = data.total - data.discount_value
+    }
+
+    data.approval_history = [
+      {
+        status: 'new',
+        remark: data.remark,
+        created_by: account,
+        logged_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+      },
+    ]
+
+    // #2
+    await this.purchaseOrderModel
+      .create({
+        ...data,
+        locale: await this.cacheManager
+          .get('APPLICATION_LOCALE')
+          .then((response: IConfig) => {
+            return response.setter
+          }),
+        created_by: account,
+      })
+      .then(async (result) => {
+        response.message = 'Purchase Order created successfully'
+        response.statusCode = {
+          defaultCode: HttpStatus.OK,
+          customCode: modCodes.Global.success,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
+        response.transaction_id = result._id
+        response.payload = result
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase Order failed to create. ${error.message}`
+        response.statusCode = {
+          ...modCodes[this.constructor.name].error.databaseError,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
+        response.payload = error
+      })
+
+    return response
   }
 
   async askApproval(
     data: PurchaseOrderApproval,
     id: string,
-    account: Account,
-    token: string
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -163,35 +284,32 @@ export class PurchaseOrderService {
 
     data.status = 'need_approval'
 
+    const status: IPurchaseOrderApproval = {
+      status: data.status,
+      remark: data.remark,
+      logged_at: new TimeManagement().getTimezone(
+        this.configService.get<string>('application.timezone')
+      ),
+      created_by: account,
+    }
+
     await this.purchaseOrderModel
-      .findOne({ id: id, status: 'new', __v: data.__v })
-      .exec()
+      .findOneAndUpdate(
+        { id: id, status: 'new', created_by: account, __v: data.__v },
+        {
+          $set: {
+            status: 'need_approval',
+          },
+          $push: {
+            approval_history: status,
+          },
+        }
+      )
       .then(async (result) => {
         if (result) {
-          // const emitter = await this.clientInventory.emit(
-          //   this.configService.get<string>(
-          //     'kafka.inventory.topic.purchase_order'
-          //   ),
-          //   {
-          //     action: 'ask_approval',
-          //     id: id,
-          //     data: data,
-          //     account: account,
-          //     token: token,
-          //   }
-          // )
-          const emitter = true
-          if (emitter) {
-            response.message = 'Purchase order proposed successfully'
-            response.transaction_id = id
-            response.payload = result
-          } else {
-            response.message = `Purchase Order failed to proposed`
-            response.transaction_id = id
-            response.statusCode =
-              modCodes[this.constructor.name].error.databaseError
-            throw new Error(JSON.stringify(response))
-          }
+          response.message = 'Purchase order proposed successfully'
+          response.transaction_id = id
+          response.payload = result
         } else {
           response.message = `Purchase order failed to proposed. Invalid document`
           response.statusCode =
@@ -213,8 +331,7 @@ export class PurchaseOrderService {
   async approve(
     data: PurchaseOrderApproval,
     id: string,
-    account: Account,
-    token: string
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -230,35 +347,32 @@ export class PurchaseOrderService {
 
     data.status = 'approved'
 
+    const status: IPurchaseOrderApproval = {
+      status: data.status,
+      remark: data.remark,
+      logged_at: new TimeManagement().getTimezone(
+        this.configService.get<string>('application.timezone')
+      ),
+      created_by: account,
+    }
+
     await this.purchaseOrderModel
-      .findOne({ id: id, status: 'need_approval', __v: data.__v })
-      .exec()
+      .findOneAndUpdate(
+        { id: id, status: 'need_approval', created_by: account, __v: data.__v },
+        {
+          $set: {
+            status: 'approved',
+          },
+          $push: {
+            approval_history: status,
+          },
+        }
+      )
       .then(async (result) => {
         if (result) {
-          // const emitter = await this.clientInventory.emit(
-          //   this.configService.get<string>(
-          //     'kafka.inventory.topic.purchase_order'
-          //   ),
-          //   {
-          //     action: 'approve',
-          //     id: id,
-          //     data: data,
-          //     account: account,
-          //     token: token,
-          //   }
-          // )
-          const emitter = true
-          if (emitter) {
-            response.message = 'Purchase order approved successfully'
-            response.transaction_id = id
-            response.payload = result
-          } else {
-            response.message = `Purchase Order failed to approved`
-            response.statusCode =
-              modCodes[this.constructor.name].error.databaseError
-            response.transaction_id = id
-            throw new Error(JSON.stringify(response))
-          }
+          response.message = 'Purchase order approved successfully'
+          response.transaction_id = id
+          response.payload = result
         } else {
           response.message = `Purchase order failed to approve. Invalid document`
           response.statusCode =
@@ -280,8 +394,7 @@ export class PurchaseOrderService {
   async decline(
     data: PurchaseOrderApproval,
     id: string,
-    account: Account,
-    token: string
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -297,42 +410,37 @@ export class PurchaseOrderService {
 
     data.status = 'declined'
 
+    const status: IPurchaseOrderApproval = {
+      status: data.status,
+      remark: data.remark,
+      logged_at: new TimeManagement().getTimezone(
+        this.configService.get<string>('application.timezone')
+      ),
+      created_by: account,
+    }
+
     await this.purchaseOrderModel
-      .findOne({
-        id: id,
-        status: 'need_approval',
-        __v: data.__v,
-      })
-      .exec()
+      .findOneAndUpdate(
+        {
+          id: id,
+          status: 'need_approval',
+          created_by: account,
+          __v: data.__v,
+        },
+        {
+          $set: {
+            status: 'declined',
+          },
+          $push: {
+            approval_history: status,
+          },
+        }
+      )
       .then(async (result) => {
         if (result) {
-          // this.clientInventory
-          //   .emit(
-          //     this.configService.get<string>(
-          //       'kafka.inventory.topic.purchase_order'
-          //     ),
-          //     {
-          //       action: 'decline',
-          //       id: id,
-          //       data: data,
-          //       account: account,
-          //       token: token,
-          //     }
-          //   )
-          //   .subscribe({
-          //     next: () => {
-          //       response.message = 'Purchase order declined successfully'
-          //       response.transaction_id = id
-          //       response.payload = result
-          //     },
-          //     error: (onError) => {
-          //       response.message = `Purchase Order failed to decline. ${onError.message}`
-          //       response.statusCode =
-          //         modCodes[this.constructor.name].error.databaseError
-          //       response.transaction_id = id
-          //       throw new Error(JSON.stringify(response))
-          //     },
-          //   })
+          response.message = 'Purchase order approved successfully'
+          response.transaction_id = id
+          response.payload = result
         } else {
           response.message = `Purchase order failed to decline. Invalid document`
           response.statusCode =
@@ -354,8 +462,7 @@ export class PurchaseOrderService {
   async edit(
     data: PurchaseOrderEditDTO,
     id: string,
-    account: Account,
-    token: string
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -370,39 +477,22 @@ export class PurchaseOrderService {
     } satisfies GlobalResponse
 
     await this.purchaseOrderModel
-      .findOne({
-        $and: [
-          { id: id, __v: data.__v },
-          { $or: [{ status: 'new' }, { status: 'declined' }] },
-        ],
-      })
-      .exec()
+      .findOneAndUpdate(
+        {
+          $and: [
+            { id: id, created_by: account, __v: data.__v },
+            { $or: [{ status: 'new' }, { status: 'declined' }] },
+          ],
+        },
+        {
+          $set: data,
+        }
+      )
       .then(async (result) => {
         if (result) {
-          // const emitter = await this.clientInventory.emit(
-          //   this.configService.get<string>(
-          //     'kafka.inventory.topic.purchase_order'
-          //   ),
-          //   {
-          //     action: 'edit',
-          //     id: id,
-          //     data: data,
-          //     token: token,
-          //     account: account,
-          //   }
-          // )
-          const emitter = true
-          if (emitter) {
-            response.message = 'Purchase Order updated successfully'
-            response.transaction_id = id
-            response.payload = result
-          } else {
-            response.message = `Purchase Order failed to update. Invalid document`
-            response.statusCode =
-              modCodes[this.constructor.name].error.databaseError
-            response.transaction_id = id
-            throw new Error(JSON.stringify(response))
-          }
+          response.message = 'Purchase Order updated successfully'
+          response.transaction_id = id
+          response.payload = result
         } else {
           response.message = `Purchase Order failed to update. Invalid document`
           response.transaction_id = id
@@ -423,8 +513,7 @@ export class PurchaseOrderService {
 
   async delete(
     id: string,
-    account: Account,
-    token: string
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -437,40 +526,42 @@ export class PurchaseOrderService {
       transaction_classify: 'PURCHASE_ORDER_DELETE',
       transaction_id: null,
     } satisfies GlobalResponse
-    const data = await this.purchaseOrderModel.findOne({
-      id: id,
-    })
 
-    if (data) {
-      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
-
-      // const emitter = await this.clientInventory.emit(
-      //   this.configService.get<string>('kafka.inventory.topic.purchase_order'),
-      //   {
-      //     action: 'delete',
-      //     id: id,
-      //     data: data,
-      //     account: account,
-      //     token: token,
-      //   }
-      // )
-      const emitter = true
-      if (emitter) {
-        response.message = 'Purchase order deleted successfully'
-        response.transaction_id = id
-        response.payload = {}
-      } else {
-        response.message = 'Purchase order failed to delete'
+    await this.purchaseOrderModel
+      .findOneAndUpdate(
+        {
+          id: id,
+          created_by: account,
+        },
+        {
+          $set: {
+            deleted_at: new TimeManagement().getTimezone(
+              this.configService.get<string>('application.timezone')
+            ),
+          },
+        }
+      )
+      .then((result) => {
+        if (result) {
+          response.message = 'Purchase Order deleted successfully'
+          response.transaction_id = id
+          response.payload = result
+        } else {
+          response.message = `Purchase Order failed to delete. Invalid document`
+          response.transaction_id = id
+          response.statusCode =
+            modCodes[this.constructor.name].error.databaseError
+          throw new Error(JSON.stringify(response))
+        }
+      })
+      .catch((error: Error) => {
+        response.message = `Purchase Order failed to delete. ${error.message}`
         response.statusCode =
           modCodes[this.constructor.name].error.databaseError
-        response.transaction_id = id
+        response.payload = error
         throw new Error(JSON.stringify(response))
-      }
-    } else {
-      response.message = `Purchase order failed to deleted. Invalid document`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
-      throw new Error(JSON.stringify(response))
-    }
+      })
+
     return response
   }
 }

@@ -1,8 +1,5 @@
-import {
-  Authority,
-  AuthoritySchema,
-} from '@core/account/schemas/authority.model'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { Authority, AuthoritySchema } from '@schemas/account/authority.model'
 import { TimeManagement } from '@utility/time'
 
 export const AuthorityModelProvider = {

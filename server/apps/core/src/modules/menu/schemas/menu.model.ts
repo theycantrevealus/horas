@@ -1,9 +1,9 @@
 import { IAccount } from '@core/account/interface/account'
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { IMenuGroup } from '@core/menu/interfaces/menu.group.interface'
 import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { MenuGroupJoin } from '@core/menu/schemas/menu.group.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const MenuJoin = raw({

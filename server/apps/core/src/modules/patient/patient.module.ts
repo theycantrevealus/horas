@@ -1,9 +1,4 @@
 import { AccountService } from '@core/account/account.service'
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
-import {
-  Authority,
-  AuthoritySchema,
-} from '@core/account/schemas/authority.model'
 import { PatientController } from '@core/patient/patient.controller'
 import { PatientService } from '@core/patient/patient.service'
 import { Patient, PatientSchema } from '@core/patient/schema/patient.model'
@@ -11,6 +6,8 @@ import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
+import { Account, AccountSchema } from '@schemas/account/account.model'
+import { Authority, AuthoritySchema } from '@schemas/account/authority.model'
 import { AuthModule } from '@security/auth.module'
 import { KafkaProducer } from '@utility/kafka/avro/producer'
 import { TimeManagement } from '@utility/time'

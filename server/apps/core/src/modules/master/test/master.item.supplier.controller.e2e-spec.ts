@@ -1,5 +1,4 @@
 import { AccountService } from '@core/account/account.service'
-import { Account } from '@core/account/schemas/account.model'
 import { MasterItemSupplierController } from '@core/master/controllers/master.item.supplier.controller'
 import {
   MasterItemSupplierAddDTO,
@@ -27,6 +26,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { Account } from '@schemas/account/account.model'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

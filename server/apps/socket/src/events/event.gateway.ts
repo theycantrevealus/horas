@@ -12,6 +12,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets'
+import { IConfig } from '@schemas/config/config'
 import { JWTTokenDecodeResponse } from '@security/auth.dto'
 import { AuthService } from '@security/auth.service'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
@@ -20,8 +21,6 @@ import { Cache } from 'cache-manager'
 import { Server } from 'socket.io'
 import { Socket } from 'socket.io-client'
 import { Logger } from 'winston'
-
-import { IConfig } from '../../../core/src/schemas/config'
 // origin: [
 //   'http://localhost:port',
 //   new RegExp(`/^http:\/\/192\.168\.1\.([1-9]|[1-9]\d):port$/`),

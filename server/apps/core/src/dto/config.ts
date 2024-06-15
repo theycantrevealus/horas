@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { IConfig } from '@schemas/config/config'
+import { CConfigGroup } from '@schemas/config/config.group'
 import { IsNotEmpty, IsNumber } from 'class-validator'
-
-import { IConfig } from '../schemas/config'
-import { CConfigGroup } from '../schemas/config.group'
 
 export class ConfigAddDTO {
   @ApiProperty({

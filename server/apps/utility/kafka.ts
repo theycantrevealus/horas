@@ -47,7 +47,10 @@ export function KafkaProvider(
             consumer: {
               groupId: configService.get<string>(`${a.configClass}.cons_group`),
             },
-            producer: {},
+            producer: {
+              idempotent: true,
+              maxInFlightRequests: 1,
+            },
             deserializer: new KafkaAvroResponseDeserializer({
               host: configService.get<string>('schema_registry.host'),
             }),

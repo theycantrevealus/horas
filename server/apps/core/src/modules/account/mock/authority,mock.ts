@@ -4,11 +4,8 @@ import {
 } from '@core/account/dto/authority.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  Authority,
-  AuthorityDocument,
-} from '@core/account/schemas/authority.model'
 import { faker } from '@faker-js/faker'
+import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

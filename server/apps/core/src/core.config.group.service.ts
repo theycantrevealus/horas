@@ -1,18 +1,18 @@
-import { Account } from '@core/account/schemas/account.model'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
+import { ConfigGroup, ConfigGroupDocument } from '@schemas/config/config.group'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { Model } from 'mongoose'
 
 import { ConfigGroupAddDTO, ConfigGroupEditDTO } from './dto/config.group'
-import { ConfigGroup, ConfigGroupDocument } from './schemas/config.group'
 
 @Injectable()
 export class CoreConfigGroupService {
   constructor(
-    @InjectModel(ConfigGroup.name)
+    @InjectModel(ConfigGroup.name, 'primary')
     private readonly configGroupModel: Model<ConfigGroupDocument>
   ) {}
 

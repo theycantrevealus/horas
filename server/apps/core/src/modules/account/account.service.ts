@@ -5,20 +5,17 @@ import {
   AuthorityEditDTO,
 } from '@core/account/dto/authority.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import {
-  Authority,
-  AuthorityDocument,
-} from '@core/account/schemas/authority.model'
-import { LogLogin, LogLoginDocument } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account, AccountDocument } from '@schemas/account/account.model'
+import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
+import { IConfig } from '@schemas/config/config'
 import { AuthService } from '@security/auth.service'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { gen_uuid } from '@utility/generator'
-import { KafkaGlobalKey } from '@utility/kafka/avro/schema/global/key'
 import { KafkaService } from '@utility/kafka/avro/service'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
@@ -29,21 +26,16 @@ import { Cache } from 'cache-manager'
 import { Model, Types } from 'mongoose'
 import { Logger } from 'winston'
 
-import { IConfig } from '../../schemas/config'
 import { AccountAddDTO } from './dto/account.add.dto'
-import { Account, AccountDocument } from './schemas/account.model'
 
 @Injectable()
 export class AccountService {
   constructor(
-    @InjectModel(Account.name)
+    @InjectModel(Account.name, 'primary')
     private accountModel: Model<AccountDocument>,
 
-    @InjectModel(Authority.name)
+    @InjectModel(Authority.name, 'primary')
     private accountAuthority: Model<AuthorityDocument>,
-
-    @InjectModel(LogLogin.name)
-    private logLoginModel: Model<LogLoginDocument>,
 
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger,
@@ -520,8 +512,7 @@ export class AccountService {
 
   async accountAdd(
     data: AccountAddDTO,
-    credential: IAccountCreatedBy,
-    token: string
+    credential: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -537,33 +528,15 @@ export class AccountService {
     const saltOrRounds = 10
     const password = data.password
     data.password = await bcrypt.hash(password, saltOrRounds)
-    const transaction = await this.accountProducer.transaction()
+    const generatedID = new Types.ObjectId().toString()
     try {
-      const generatedID = new Types.ObjectId().toString()
-
-      return await transaction
-        .send({
-          topic: 'account',
-          messages: [
-            {
-              headers: {
-                ...credential,
-                token: token,
-              },
-              key: {
-                id: `account-${generatedID}`,
-                code: data.code,
-                service: 'account',
-                method: 'create',
-              } satisfies KafkaGlobalKey,
-              value: {
-                ...data,
-              },
-            },
-          ],
+      return await this.accountModel
+        .create({
+          ...data,
+          id: generatedID,
+          created_by: credential,
         })
         .then(async () => {
-          await transaction.commit()
           response.message = 'Account created successfully'
           response.statusCode = {
             defaultCode: HttpStatus.OK,
@@ -578,8 +551,6 @@ export class AccountService {
           return response
         })
     } catch (error) {
-      console.error(error)
-      await transaction.abort()
       response.message = 'Account failed to create'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,

@@ -40,14 +40,12 @@ const clear = async () => {
 @Injectable()
 export class MongodbConfigService implements MongooseOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
-
-  //You can retrun promise as well
   public createMongooseOptions(): MongooseModuleOptions {
     return {
       uri: `mongodb://${this.configService.get<string>(
-        'mongo.host'
-      )}:${this.configService.get<string>('mongo.port')}`,
-      dbName: this.configService.get<string>('mongo.db_name'),
+        'mongo.primary.host'
+      )}:${this.configService.get<string>('mongo.primary.port')}`,
+      dbName: this.configService.get<string>('mongo.primary.db_name'),
       authSource: 'admin',
       directConnection: true,
       // replicaSet: this.configService.get<string>('MONGO_REPL_SET'),

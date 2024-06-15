@@ -12,6 +12,7 @@ export const PuchaseOrderModelProvider = {
   useFactory: (configService: ConfigService) => {
     const schema = PurchaseOrderSchema
     const time = new TimeManagement()
+
     schema.pre('save', function (next) {
       if (this.isNew) {
         this.id = `purchase_order-${this._id}`

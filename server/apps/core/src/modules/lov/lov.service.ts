@@ -1,9 +1,9 @@
-import { Account } from '@core/account/schemas/account.model'
 import { LOVAddDTO, LOVEditDTO } from '@core/lov/dto/lov'
-import { LOV, LOVDocument } from '@core/lov/schemas/lov'
-import { ILOV } from '@core/lov/schemas/lov.join'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
+import { LOV, LOVDocument } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.join'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -12,7 +12,9 @@ import { Model } from 'mongoose'
 
 @Injectable()
 export class LOVService {
-  constructor(@InjectModel(LOV.name) private lovModel: Model<LOVDocument>) {}
+  constructor(
+    @InjectModel(LOV.name, 'primary') private lovModel: Model<LOVDocument>
+  ) {}
 
   async all(parameter: any) {
     return await prime_datatable(parameter, this.lovModel)

@@ -1,13 +1,10 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
-import {
-  AuthorityJoin,
-  IAuthority,
-} from '@core/account/schemas/authority.model'
 import { IMenu } from '@core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
 import { MenuJoin, MenuPermissionJoin } from '@core/menu/schemas/menu.model'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
+import { AuthorityJoin, IAuthority } from '@schemas/account/authority.model'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
@@ -68,6 +65,9 @@ export class Account {
 
   @Prop(AccountJoin)
   created_by: IAccountCreatedBy
+
+  // @Prop({ type: [DocumentHistoryJoin], _id: false, required: false })
+  // history: IDocumentHistory[]
 
   @Prop({
     type: SchemaTypes.Date,

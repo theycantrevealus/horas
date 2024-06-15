@@ -4,7 +4,6 @@ import { SEPPulang } from '@core/3rdparty/bpjs/dto/sep/pemulangan'
 import { SEPPengajuan } from '@core/3rdparty/bpjs/dto/sep/pengajuan'
 import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimSEPService } from '@core/3rdparty/bpjs/services/vclaim/sep.service'
-import { Account } from '@core/account/schemas/account.model'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
@@ -22,6 +21,7 @@ import {
   Version,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { Account } from '@schemas/account/account.model'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { TimeManagement } from '@utility/time'
 import { FastifyReply } from 'fastify'

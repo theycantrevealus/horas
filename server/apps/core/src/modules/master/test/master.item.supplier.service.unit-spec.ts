@@ -5,8 +5,6 @@ import {
   mockAccountModel,
 } from '@core/account/mock/account.mock'
 import { mockAuthority } from '@core/account/mock/authority,mock'
-import { Account } from '@core/account/schemas/account.model'
-import { Authority } from '@core/account/schemas/authority.model'
 import {
   masterItemSupplierDocArray,
   mockMasterItemSupplier,
@@ -24,6 +22,8 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
+import { Account } from '@schemas/account/account.model'
+import { Authority } from '@schemas/account/authority.model'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

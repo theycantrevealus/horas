@@ -1,6 +1,4 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
-import { ILOV, LOVJoin } from '@core/lov/schemas/lov.join'
 import { IMasterItemBrand } from '@core/master/interface/master.item.brand'
 import { IMasterItemCategory } from '@core/master/interface/master.item.category'
 import { IMasterItemConfiguration } from '@core/master/interface/master.item.configuration'
@@ -12,6 +10,8 @@ import { MasterItemConfiguration } from '@core/master/schemas/master.item.config
 import { MasterItemStoring } from '@core/master/schemas/master.item.storing'
 import { MasterItemUnitJoin } from '@core/master/schemas/master.item.unit.join'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
+import { ILOV, LOVJoin } from '@schemas/lov/lov.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterItemDocument = HydratedDocument<MasterItem>

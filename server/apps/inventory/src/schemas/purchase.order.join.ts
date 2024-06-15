@@ -1,6 +1,6 @@
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { MasterItemSupplierJoin } from '@core/master/schemas/master.item.supplier.join'
 import { raw } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
 import { Types } from 'mongoose'
 
 export const PurchaseOrderJoin = raw({
