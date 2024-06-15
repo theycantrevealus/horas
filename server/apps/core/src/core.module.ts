@@ -2,14 +2,8 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
-import { BpjsModule } from '@core/3rdparty/bpjs/bpjs.module'
 import { AccountModule } from '@core/account/account.module'
-import { i18nModule } from '@core/i18n/i18n.module'
-import { GatewayInventoryModule } from '@core/inventory/inventory.module'
-import { LicenseModule } from '@core/license/license.module'
 import { LOVModule } from '@core/lov/lov.module'
-import { MasterModule } from '@core/master/master.module'
-import { MenuModule } from '@core/menu/menu.module'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -21,6 +15,15 @@ import {
   MongooseModule,
   MongooseModuleOptions,
 } from '@nestjs/mongoose'
+import {
+  Config,
+  ConfigDocument,
+  ConfigSchema,
+  IConfig,
+} from '@schemas/config/config'
+import { ConfigGroup, ConfigGroupSchema } from '@schemas/config/config.group'
+import { MongoMiddlewareConfigGroup } from '@schemas/config/config.group.middleware'
+import { MongoMiddlewareConfig } from '@schemas/config/config.middleware'
 import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
@@ -38,8 +41,6 @@ import { CoreConfigGroupController } from './core.config.group.controller'
 import { CoreConfigGroupService } from './core.config.group.service'
 import { CoreController } from './core.controller'
 import { CoreService } from './core.service'
-import { Config, ConfigDocument, ConfigSchema, IConfig } from './schemas/config'
-import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
 
 @Module({
   imports: [
@@ -77,76 +78,39 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
+      connectionName: 'primary',
       useFactory: async (
         configService: ConfigService
       ): Promise<MongooseModuleOptions> => ({
-        uri: configService.get<string>('mongo.uri'),
-        dbName: configService.get<string>('mongo.db_name'),
-        user: configService.get<string>('mongo.db_user'),
-        pass: configService.get<string>('mongo.db_password'),
+        uri: configService.get<string>('mongo.primary.uri'),
+        dbName: configService.get<string>('mongo.primary.db_name'),
+        user: configService.get<string>('mongo.primary.db_user'),
+        pass: configService.get<string>('mongo.primary.db_password'),
       }),
       inject: [ConfigService],
     }),
-    MongooseModule.forFeatureAsync([
-      {
-        name: Config.name,
-        useFactory: () => {
-          const schema = ConfigSchema
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `config-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: ConfigGroup.name,
-        useFactory: () => {
-          const schema = ConfigGroupSchema
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `config_group-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-    ]),
-    MongooseModule.forFeature([
-      { name: LogLogin.name, schema: LogLoginSchema },
-      { name: LogActivity.name, schema: LogActivitySchema },
-    ]),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      connectionName: 'secondary',
+      useFactory: async (
+        configService: ConfigService
+      ): Promise<MongooseModuleOptions> => ({
+        uri: configService.get<string>('mongo.secondary.uri'),
+        dbName: configService.get<string>('mongo.secondary.db_name'),
+        user: configService.get<string>('mongo.secondary.db_user'),
+        pass: configService.get<string>('mongo.secondary.db_password'),
+      }),
+      inject: [ConfigService],
+    }),
+    MongooseModule.forFeature(
+      [
+        { name: Config.name, schema: ConfigSchema },
+        { name: ConfigGroup.name, schema: ConfigGroupSchema },
+        { name: LogLogin.name, schema: LogLoginSchema },
+        { name: LogActivity.name, schema: LogActivitySchema },
+      ],
+      'primary'
+    ),
     KafkaProvider(
       ['ACCOUNT_SERVICE', 'INVENTORY_SERVICE'],
       [
@@ -178,19 +142,21 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
     ),
     AuthModule,
     AccountModule,
-    LicenseModule,
     LOVModule,
+    // LicenseModule,
     // PatientModule,
-    MenuModule,
-    MasterModule,
-    i18nModule,
-    GatewayInventoryModule,
-    BpjsModule,
+    // MenuModule,
+    // MasterModule,
+    // i18nModule,
+    // GatewayInventoryModule,
+    // BpjsModule,
     // OperationQueueModule,
   ],
   controllers: [CoreController, CoreConfigGroupController],
   providers: [
     ClientDecoratorProcessorService,
+    MongoMiddlewareConfig,
+    MongoMiddlewareConfigGroup,
     CoreService,
     CoreConfigGroupService,
     SocketIoClientProvider,
@@ -200,7 +166,7 @@ import { ConfigGroup, ConfigGroupSchema } from './schemas/config.group'
 export class CoreModule {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    @InjectModel(Config.name)
+    @InjectModel(Config.name, 'primary')
     private readonly configModel: Model<ConfigDocument>,
     @Inject(ConfigService)
     private readonly configService: ConfigService,

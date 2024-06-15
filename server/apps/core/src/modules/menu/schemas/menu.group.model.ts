@@ -1,6 +1,6 @@
-import { AccountJoin } from '@core/account/schemas/account.join'
-import { Account } from '@core/account/schemas/account.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
+import { Account } from '@schemas/account/account.model'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MenuGroupDocument = HydratedDocument<MenuGroup>

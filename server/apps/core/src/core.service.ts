@@ -2,6 +2,8 @@ import { AccountService } from '@core/account/account.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Config, ConfigDocument, IConfig } from '@schemas/config/config'
+import { ConfigGroup, ConfigGroupDocument } from '@schemas/config/config.group'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
@@ -13,14 +15,13 @@ import * as winston from 'winston'
 import { createLogger, Logger } from 'winston'
 
 import { ConfigAddDTO, ConfigEditDTO } from './dto/config'
-import { Config, ConfigDocument, IConfig } from './schemas/config'
-import { ConfigGroup, ConfigGroupDocument } from './schemas/config.group'
 
 @Injectable()
 export class CoreService {
   constructor(
-    @InjectModel(Config.name) private configModel: Model<ConfigDocument>,
-    @InjectModel(ConfigGroup.name)
+    @InjectModel(Config.name, 'primary')
+    private configModel: Model<ConfigDocument>,
+    @InjectModel(ConfigGroup.name, 'primary')
     private configGroupModel: Model<ConfigGroupDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @Inject(AccountService) private readonly accountService: AccountService,

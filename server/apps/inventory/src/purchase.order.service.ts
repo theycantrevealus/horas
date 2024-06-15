@@ -1,5 +1,4 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { Account } from '@core/account/schemas/account.model'
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderApproval,
@@ -15,6 +14,8 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
+import { IConfig } from '@schemas/config/config'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
@@ -23,8 +24,6 @@ import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
-
-import { IConfig } from '../../core/src/schemas/config'
 
 @Injectable()
 export class PurchaseOrderService {

@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import { IMasterItem } from '@core/master/interface/master.item'
 import { IMasterItemBatch } from '@core/master/interface/master.item.batch'
 import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
@@ -22,6 +21,7 @@ import {
 } from '@inventory/schemas/stock.log'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { Model } from 'mongoose'

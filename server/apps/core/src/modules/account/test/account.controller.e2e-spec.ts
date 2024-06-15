@@ -9,11 +9,6 @@ import {
   mockAccountModel,
 } from '@core/account/mock/account.mock'
 import { mockAuthorityModel } from '@core/account/mock/authority,mock'
-import { Account, AccountDocument } from '@core/account/schemas/account.model'
-import {
-  Authority,
-  AuthorityDocument,
-} from '@core/account/schemas/authority.model'
 import { faker } from '@faker-js/faker'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -28,6 +23,8 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { Account, AccountDocument } from '@schemas/account/account.model'
+import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

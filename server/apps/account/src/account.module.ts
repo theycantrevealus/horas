@@ -2,14 +2,14 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
-import { AccountModelProvider } from '@core/account/schemas/account.provider'
-import { AuthorityModelProvider } from '@core/account/schemas/authority.provider'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
+import { MongooseModule } from '@nestjs/mongoose'
+import { AccountModelProvider } from '@schemas/account/account.provider'
+import { AuthorityModelProvider } from '@schemas/account/authority.provider'
 import { AuthService } from '@security/auth.service'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
@@ -39,18 +39,6 @@ import { AccountService } from './account.service'
           transports: WinstonCustomTransports[environmentName],
         }
       },
-      inject: [ConfigService],
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (
-        configService: ConfigService
-      ): Promise<MongooseModuleOptions> => ({
-        uri: configService.get<string>('mongo.uri'),
-        dbName: configService.get<string>('mongo.db_name'),
-        user: configService.get<string>('mongo.db_user'),
-        pass: configService.get<string>('mongo.db_password'),
-      }),
       inject: [ConfigService],
     }),
     MongooseModule.forFeatureAsync([

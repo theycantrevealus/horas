@@ -8,11 +8,6 @@ import {
   mockAuthority,
   mockAuthorityModel,
 } from '@core/account/mock/authority,mock'
-import { Account } from '@core/account/schemas/account.model'
-import {
-  Authority,
-  AuthorityDocument,
-} from '@core/account/schemas/authority.model'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { mockKafkaTransaction } from '@mock/kafka'
@@ -21,6 +16,8 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
+import { Account } from '@schemas/account/account.model'
+import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

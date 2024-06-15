@@ -1,8 +1,8 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { IMasterStockPointConfiguration } from '@core/master/interface/master.stock.point.configuration'
 import { MasterStockPointConfiguration } from '@core/master/schemas/master.stock.point.configuration'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterStockPointDocument = HydratedDocument<MasterStockPoint>

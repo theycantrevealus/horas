@@ -1,6 +1,5 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
-import { Account } from '@core/account/schemas/account.model'
 import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
@@ -10,6 +9,7 @@ import {
   MasterItemCategoryDocument,
 } from '@core/master/schemas/master.item.category'
 import { faker } from '@faker-js/faker'
+import { Account } from '@schemas/account/account.model'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

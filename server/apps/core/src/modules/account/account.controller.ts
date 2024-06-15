@@ -1,6 +1,5 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
-import { Account } from '@core/account/schemas/account.model'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
@@ -25,6 +24,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

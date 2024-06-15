@@ -1,5 +1,4 @@
 import { AccountService } from '@core/account/account.service'
-import { Account } from '@core/account/schemas/account.model'
 import { MenuAddDTO, MenuEditDTO } from '@core/menu/dto/menu'
 import {
   IMenuTree,
@@ -13,6 +12,7 @@ import { Menu, MenuDocument } from '@core/menu/schemas/menu.model'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'

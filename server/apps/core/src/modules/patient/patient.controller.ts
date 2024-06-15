@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import { PatientEditDTO } from '@core/patient/dto/patient.edit'
 import { PatientService } from '@core/patient/patient.service'
@@ -26,6 +25,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { isJSON } from 'class-validator'
 import { FastifyReply } from 'fastify'

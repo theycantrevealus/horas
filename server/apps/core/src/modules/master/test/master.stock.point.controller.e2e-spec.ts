@@ -1,6 +1,5 @@
 import { AccountService } from '@core/account/account.service'
 import { accountArray } from '@core/account/mock/account.mock'
-import { Account } from '@core/account/schemas/account.model'
 import { MasterStockPointController } from '@core/master/controllers/master.stock.point.controller'
 import {
   MasterStockPointAddDTO,
@@ -27,6 +26,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { Account } from '@schemas/account/account.model'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

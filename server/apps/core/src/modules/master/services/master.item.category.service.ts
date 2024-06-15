@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
@@ -10,6 +9,7 @@ import {
 } from '@core/master/schemas/master.item.category'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'

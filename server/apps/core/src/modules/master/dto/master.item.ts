@@ -1,4 +1,3 @@
-import { CLOV, ILOV } from '@core/lov/schemas/lov.join'
 import { CMasterItemBrand } from '@core/master/dto/master.item.brand'
 import { CMasterItemCategory } from '@core/master/dto/master.item.category'
 import { CMasterItemConfiguration } from '@core/master/dto/master.item.configuration'
@@ -10,6 +9,7 @@ import { IMasterItemConfiguration } from '@core/master/interface/master.item.con
 import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
 import { IMasterItemUnit } from '@core/master/interface/master.item.unit'
 import { ApiProperty } from '@nestjs/swagger'
+import { CLOV, ILOV } from '@schemas/lov/lov.join'
 import {
   IsNotEmpty,
   IsNumber,

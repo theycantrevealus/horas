@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
 import { InventoryService } from '@inventory/inventory.service'
@@ -9,6 +8,7 @@ import {
 } from '@inventory/schemas/general.receive.note'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { Model } from 'mongoose'

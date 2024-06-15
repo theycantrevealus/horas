@@ -9,19 +9,18 @@ import {
 } from '@core/3rdparty/bpjs/schemas/applicares/kamar'
 import { BPJSApplicaresAuthService } from '@core/3rdparty/bpjs/services/applicares/auth.service'
 import { BPJSApplicaresRequest } from '@core/3rdparty/bpjs/services/applicares/request.service'
-import { Account } from '@core/account/schemas/account.model'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
+import { IConfig } from '@schemas/config/config'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
-
-import { IConfig } from '../../../../../schemas/config'
 
 @Injectable()
 export class BPJSApplicaresReferensiService {

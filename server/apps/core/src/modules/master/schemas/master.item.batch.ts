@@ -1,8 +1,8 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { IMasterItem } from '@core/master/interface/master.item'
 import { MasterItemJoin } from '@core/master/schemas/master.item.join'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterItemBatchDocument = HydratedDocument<MasterItemBatch>

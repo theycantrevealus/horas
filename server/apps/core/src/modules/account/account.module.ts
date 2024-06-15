@@ -1,12 +1,13 @@
 import { AuthorityController } from '@core/account/authority.controller'
-import { AccountModelProvider } from '@core/account/schemas/account.provider'
-import { AuthorityModelProvider } from '@core/account/schemas/authority.provider'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
+import { MongoMiddlewareAccount } from '@schemas/account/account.middleware'
+import { Account, AccountSchema } from '@schemas/account/account.model'
+import { Authority, AuthoritySchema } from '@schemas/account/authority.model'
 import { AuthModule } from '@security/auth.module'
 import * as redisStore from 'cache-manager-ioredis'
 
@@ -30,18 +31,24 @@ import { AccountService } from './account.service'
       },
       inject: [ConfigService],
     }),
-    MongooseModule.forFeatureAsync([
-      AccountModelProvider,
-      AuthorityModelProvider,
-    ]),
-    MongooseModule.forFeature([
-      { name: LogLogin.name, schema: LogLoginSchema },
-      { name: LogActivity.name, schema: LogActivitySchema },
-    ]),
+    MongooseModule.forFeature(
+      [
+        { name: Account.name, schema: AccountSchema },
+        { name: Authority.name, schema: AuthoritySchema },
+      ],
+      'primary'
+    ),
+    MongooseModule.forFeature(
+      [
+        { name: LogLogin.name, schema: LogLoginSchema },
+        { name: LogActivity.name, schema: LogActivitySchema },
+      ],
+      'secondary'
+    ),
     AuthModule,
   ],
   controllers: [AccountController, AuthorityController],
-  providers: [AccountService],
+  providers: [AccountService, MongoMiddlewareAccount],
   exports: [AccountService],
 })
 export class AccountModule {}

@@ -1,11 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { Account } from '@core/account/schemas/account.model'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
-import {
-  AccountToken,
-  Authorization,
-  CredentialAccount,
-} from '@decorators/authorization'
+import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -35,6 +30,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
@@ -131,10 +127,10 @@ export class PurchaseOrderController {
   })
   async add(
     @Body() parameter: PurchaseOrderAddDTO,
-    @CredentialAccount() account: Account,
-    @AccountToken() token: string
+    @CredentialAccount() account: Account
+    // @AccountToken() token: string
   ): Promise<GlobalResponse> {
-    return await this.purchaseOrderService.add(parameter, account, token)
+    return await this.purchaseOrderService.add(parameter, account)
   }
 
   @Patch('purchase_order/ask_approval/:id')

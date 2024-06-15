@@ -1,6 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
 import { Transform } from 'class-transformer'
 import { IsNotEmpty, IsString } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'

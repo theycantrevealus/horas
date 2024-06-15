@@ -8,6 +8,7 @@ import { GeneralReceiveNoteService } from '@core/inventory/general.receive.note.
 import { InventoryService } from '@core/inventory/inventory.service'
 import { PurchaseOrderController } from '@core/inventory/purchase.order.controller'
 import { PurchaseOrderService } from '@core/inventory/purchase.order.service'
+import { MongoMiddlewarePurchaseOrder } from '@core/inventory/schemas/purchase.order.middleware'
 import { MasterItem, MasterItemSchema } from '@core/master/schemas/master.item'
 import {
   MasterItemBatch,
@@ -77,6 +78,7 @@ import { environmentIdentifier } from '@utility/environtment'
     //     },
     //   ]
     // ),
+    // MongooseModule.forFeatureAsync([PuchaseOrderModelProvider]),
     MongooseModule.forFeature([
       { name: LogLogin.name, schema: LogLoginSchema },
       { name: LogActivity.name, schema: LogActivitySchema },
@@ -93,6 +95,7 @@ import { environmentIdentifier } from '@utility/environtment'
   ],
   controllers: [PurchaseOrderController, GeneralReceiveNoteController],
   providers: [
+    MongoMiddlewarePurchaseOrder,
     LogService,
     InventoryService,
     PurchaseOrderService,

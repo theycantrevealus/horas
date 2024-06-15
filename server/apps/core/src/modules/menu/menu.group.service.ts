@@ -1,4 +1,3 @@
-import { Account } from '@core/account/schemas/account.model'
 import {
   MenuGroupAddDTO,
   MenuGroupEditDTO,
@@ -9,6 +8,7 @@ import {
 } from '@core/menu/schemas/menu.group.model'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'

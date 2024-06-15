@@ -1,8 +1,8 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { IMasterQueue } from '@core/master/interface/master.queue'
 import { MasterQueueJoin } from '@core/master/schemas/master.queue.join'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type VisitDocument = HydratedDocument<Visit>

@@ -1,7 +1,7 @@
 import { IAccount } from '@core/account/interface/account'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { AccountJoin } from '@core/account/schemas/account.join'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type DepartmentDocument = HydratedDocument<Department>

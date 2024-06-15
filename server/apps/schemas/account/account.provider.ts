@@ -1,5 +1,5 @@
-import { Account, AccountSchema } from '@core/account/schemas/account.model'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { Account, AccountSchema } from '@schemas/account/account.model'
 import { TimeManagement } from '@utility/time'
 
 export const AccountModelProvider = {
