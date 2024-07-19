@@ -4,9 +4,20 @@ nav:
   - Home: 'index.md'
   - Core: 'core.md'
   - Outpatient: 'outpatient.md'
+  - Technical:
+      - Models:
+          - Master:
+              - Item: 'models/master/item.md'
+          - Transaction: 'models/transaction.md'
 extra_css:
   - css/extra.css
 theme:
   name: material
   favicon: img/favicon-32x32.png
   logo: img/horas.png
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
