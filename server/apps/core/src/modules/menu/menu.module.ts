@@ -5,16 +5,17 @@ import { MenuController } from '@core/menu/menu.controller'
 import { MenuGroupController } from '@core/menu/menu.group.controller'
 import { MenuGroupService } from '@core/menu/menu.group.service'
 import { MenuService } from '@core/menu/menu.service'
-import { MenuGroup, MenuGroupSchema } from '@core/menu/schemas/menu.group.model'
-import { Menu, MenuSchema } from '@core/menu/schemas/menu.model'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
+import { Menu, MenuSchema } from '@schemas/menu/menu'
+import { MenuGroup, MenuGroupSchema } from '@schemas/menu/menu.group'
+import { MongoMiddlewareMenuGroup } from '@schemas/menu/menu.group.middleware'
+import { MongoMiddlewareMenu } from '@schemas/menu/menu.middleware'
 import { AuthModule } from '@security/auth.module'
 import { environmentIdentifier } from '@utility/environtment'
-import { TimeManagement } from '@utility/time'
 
 @Module({
   imports: [
@@ -25,79 +26,23 @@ import { TimeManagement } from '@utility/time'
     }),
     AuthModule,
     AccountModule,
-    MongooseModule.forFeatureAsync([
-      {
-        name: MenuGroup.name,
-        useFactory: () => {
-          const schema = MenuGroupSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `menu_group-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              // this.increment()
-              this.increment()
-              this.id = `menu_group-${this._id}`
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: Menu.name,
-        useFactory: () => {
-          const schema = MenuSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `menu-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              // this.increment()
-              this.increment()
-              this.id = `menu-${this._id}`
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-    ]),
-    MongooseModule.forFeature([
-      { name: LogLogin.name, schema: LogLoginSchema },
-      { name: LogActivity.name, schema: LogActivitySchema },
-    ]),
+    MongooseModule.forFeature(
+      [
+        { name: Menu.name, schema: MenuSchema },
+        { name: MenuGroup.name, schema: MenuGroupSchema },
+        { name: LogLogin.name, schema: LogLoginSchema },
+        { name: LogActivity.name, schema: LogActivitySchema },
+      ],
+      'primary'
+    ),
   ],
   controllers: [MenuGroupController, MenuController],
-  providers: [MenuGroupService, MenuService],
+  providers: [
+    MongoMiddlewareMenu,
+    MongoMiddlewareMenuGroup,
+    MenuGroupService,
+    MenuService,
+  ],
   exports: [MenuGroupService, MenuService],
 })
 export class MenuModule {}

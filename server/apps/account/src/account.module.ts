@@ -8,8 +8,10 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { MongooseModule } from '@nestjs/mongoose'
-import { AccountModelProvider } from '@schemas/account/account.provider'
-import { AuthorityModelProvider } from '@schemas/account/authority.provider'
+import { MongoMiddlewareAccount } from '@schemas/account/account.middleware'
+import { Account, AccountSchema } from '@schemas/account/account.model'
+import { MongoMiddlewareAuthority } from '@schemas/account/authority.middleware'
+import { Authority, AuthoritySchema } from '@schemas/account/authority.model'
 import { AuthService } from '@security/auth.service'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
@@ -41,14 +43,15 @@ import { AccountService } from './account.service'
       },
       inject: [ConfigService],
     }),
-    MongooseModule.forFeatureAsync([
-      AccountModelProvider,
-      AuthorityModelProvider,
-    ]),
-    MongooseModule.forFeature([
-      { name: LogLogin.name, schema: LogLoginSchema },
-      { name: LogActivity.name, schema: LogActivitySchema },
-    ]),
+    MongooseModule.forFeature(
+      [
+        { name: Account.name, schema: AccountSchema },
+        { name: Authority.name, schema: AuthoritySchema },
+        { name: LogLogin.name, schema: LogLoginSchema },
+        { name: LogActivity.name, schema: LogActivitySchema },
+      ],
+      'primary'
+    ),
     KafkaProvider(
       ['ACCOUNT_SERVICE'],
       [
@@ -69,6 +72,8 @@ import { AccountService } from './account.service'
   ],
   controllers: [AccountController],
   providers: [
+    MongoMiddlewareAccount,
+    MongoMiddlewareAuthority,
     AuthService,
     JwtService,
     AccountService,
