@@ -2,8 +2,7 @@ import { LOVAddDTO, LOVEditDTO } from '@core/lov/dto/lov'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
-import { LOV, LOVDocument } from '@schemas/lov/lov'
-import { ILOV } from '@schemas/lov/lov.join'
+import { ILOV, LOV, LOVDocument } from '@schemas/lov/lov'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -33,6 +32,7 @@ export class LOVService {
     if (!target) {
       await this.add(
         {
+          group: term.group,
           name: term.name,
           parent: term.parent,
           remark: term.remark,
@@ -102,6 +102,7 @@ export class LOVService {
           __v: data.__v,
         },
         {
+          group: data.group,
           name: data.name,
           parent: data.parent,
           remark: data.remark,
