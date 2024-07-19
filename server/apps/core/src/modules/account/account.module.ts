@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { MongoMiddlewareAccount } from '@schemas/account/account.middleware'
 import { Account, AccountSchema } from '@schemas/account/account.model'
+import { MongoMiddlewareAuthority } from '@schemas/account/authority.middleware'
 import { Authority, AuthoritySchema } from '@schemas/account/authority.model'
 import { AuthModule } from '@security/auth.module'
 import * as redisStore from 'cache-manager-ioredis'
@@ -35,20 +36,15 @@ import { AccountService } from './account.service'
       [
         { name: Account.name, schema: AccountSchema },
         { name: Authority.name, schema: AuthoritySchema },
-      ],
-      'primary'
-    ),
-    MongooseModule.forFeature(
-      [
         { name: LogLogin.name, schema: LogLoginSchema },
         { name: LogActivity.name, schema: LogActivitySchema },
       ],
-      'secondary'
+      'primary'
     ),
     AuthModule,
   ],
   controllers: [AccountController, AuthorityController],
-  providers: [AccountService, MongoMiddlewareAccount],
+  providers: [AccountService, MongoMiddlewareAuthority, MongoMiddlewareAccount],
   exports: [AccountService],
 })
 export class AccountModule {}
