@@ -1,9 +1,10 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
-import { Account } from '@schemas/account/account.model'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MenuGroupDocument = HydratedDocument<MenuGroup>
+
 @Schema({ collection: 'core_menu_group' })
 export class MenuGroup {
   @Prop({ type: SchemaTypes.String })
@@ -16,7 +17,7 @@ export class MenuGroup {
   description: string
 
   @Prop(AccountJoin)
-  created_by: Account
+  created_by: IAccountCreatedBy
 
   @Prop({
     type: SchemaTypes.Date,

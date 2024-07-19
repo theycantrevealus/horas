@@ -1,9 +1,9 @@
-import { IAccount } from '@core/account/interface/account'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { IMenuGroup } from '@core/menu/interfaces/menu.group.interface'
 import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
-import { MenuGroupJoin } from '@core/menu/schemas/menu.group.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
+import { MenuGroupJoin } from '@schemas/menu/menu.group'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const MenuJoin = raw({
@@ -74,8 +74,8 @@ export class Menu {
   @Prop({ type: SchemaTypes.String })
   parent: string
 
-  @Prop(AccountJoin)
-  created_by: IAccount
+  @Prop({ type: AccountJoin })
+  created_by: IAccountCreatedBy
 
   @Prop({
     type: SchemaTypes.Date,
