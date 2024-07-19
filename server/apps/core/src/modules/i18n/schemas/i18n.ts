@@ -1,9 +1,9 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { IMenu } from '@core/menu/interfaces/menu.interface'
-import { MenuJoin } from '@core/menu/schemas/menu.model'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
+import { MenuJoin } from '@schemas/menu/menu'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const i18nComponent = raw({
