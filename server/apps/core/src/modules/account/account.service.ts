@@ -647,7 +647,8 @@ export class AccountService {
                     currentTime: currentTime,
                     account: accountSet,
                   })
-                  .then((tokenSet) => {
+                  .then(async (tokenSet) => {
+                    await this.cacheManager.set(result.id, result)
                     token = {
                       set: tokenSet.token,
                       expired_at: tokenSet.expired_at,
