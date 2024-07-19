@@ -1,31 +1,37 @@
+import { PermissionDescriptor } from '@decorators/permission'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import {
   ExecutionContext,
   ForbiddenException,
+  HttpStatus,
+  Inject,
   Injectable,
-  Logger,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
+import { Account } from '@schemas/account/account.model'
 import { JWTTokenDecodeResponse } from '@security/auth.dto'
 import { AuthService } from '@security/auth.service'
+import { GlobalResponse } from '@utility/dto/response'
+import { modCodes } from '@utility/modules'
+import { Cache } from 'cache-manager'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly reflector: Reflector,
     private authService: AuthService
   ) {
     super()
   }
 
-  private logger = new Logger('HTTP')
-
-  handleRequest(err, account, info) {
-    if (err || !account) {
-      throw err || new ForbiddenException()
-    }
-    return account
-  }
+  // handleRequest(err, account) {
+  //   if (err || !account) {
+  //     throw err || new ForbiddenException()
+  //   }
+  //   return account
+  // }
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const secured = this.reflector.get<string[]>(
@@ -33,9 +39,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler()
     )
 
+    const permissionIdentifier = this.reflector.get<PermissionDescriptor[]>(
+      'permission',
+      context.getHandler()
+    )
+
     if (!secured) {
       return true
     }
+
     const request = context.switchToHttp().getRequest()
 
     if (!request.headers.authorization) {
@@ -61,25 +73,41 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       })
 
     request.credential = decodeTokenResponse.account
+    const accountDetail: Account = await this.cacheManager.get(
+      request?.credential?.id
+    )
+    const permissionFind = `${
+      permissionIdentifier[0].group
+    }${permissionIdentifier[0].action
+      .charAt(0)
+      .toUpperCase()}${permissionIdentifier[0].action.slice(1)}`
+    const permissionFound = accountDetail.permission.find(
+      (o) => o.dispatchName === permissionFind
+    )
 
-    if (!decodeTokenResponse.account) {
-      throw new ForbiddenException({
-        message: decodeTokenResponse.message,
-        data: null,
-        errors: null,
-      })
-    }
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: modCodes.Global.failed,
+        classCode: 'CORE',
+      },
+      message: decodeTokenResponse.message,
+      payload: {},
+      transaction_classify: 'CORE',
+      transaction_id: '',
+    } satisfies GlobalResponse
 
     if (
       !decodeTokenResponse ||
       !decodeTokenResponse.token ||
       !decodeTokenResponse.account
     ) {
-      throw new ForbiddenException({
-        message: decodeTokenResponse.message,
-        data: null,
-        errors: null,
-      })
+      throw new Error(JSON.stringify(response))
+    }
+
+    if (!permissionFound) {
+      response.message = `Not permitted to ${permissionIdentifier[0].action} => ${permissionIdentifier[0].group}`
+      throw new Error(JSON.stringify(response))
     }
 
     return true
