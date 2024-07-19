@@ -1,12 +1,12 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
-import { HydratedDocument, SchemaTypes } from 'mongoose'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.raw'
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
-export type MasterItemUnitDocument = HydratedDocument<MasterItemUnit>
+export type MasterItemBrandDocument = HydratedDocument<MasterItemBrand>
 
-@Schema({ collection: 'master_item_unit' })
-export class MasterItemUnit {
+@Schema({ collection: 'master_item_brand' })
+export class MasterItemBrand {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
@@ -40,4 +40,11 @@ export class MasterItemUnit {
   deleted_at: Date | null
 }
 
-export const MasterItemUnitSchema = SchemaFactory.createForClass(MasterItemUnit)
+export const MasterItemBrandSchema =
+  SchemaFactory.createForClass(MasterItemBrand)
+
+export const MasterItemBrandJoin = raw({
+  id: { type: String, example: `item-${new Types.ObjectId().toString()}` },
+  code: { type: String, example: 'BRD00001' },
+  name: { type: String, example: 'PHARMACON' },
+})

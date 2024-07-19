@@ -1,5 +1,5 @@
-import { MasterStockPointJoin } from '@core/master/schemas/master.stock.point.join'
 import { raw } from '@nestjs/mongoose'
+import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 
 export const MasterItemStoring = raw({
   stock_point: { type: MasterStockPointJoin, _id: false },

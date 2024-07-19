@@ -1,20 +1,22 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
-export type MasterItemCategoryDocument = HydratedDocument<MasterItemCategory>
+export const MasterQueueJoin = raw({
+  id: { type: String },
+  code: { type: String },
+})
 
-@Schema({ collection: 'master_item_category' })
-export class MasterItemCategory {
+export type MasterQueueDocument = HydratedDocument<MasterQueue>
+
+@Schema({ collection: 'master_queue' })
+export class MasterQueue {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
-  @Prop({ type: SchemaTypes.String, required: true, unique: true })
+  @Prop({ type: SchemaTypes.String, unique: true })
   code: string
-
-  @Prop({ type: SchemaTypes.String, required: true })
-  name: string
 
   @Prop({ type: SchemaTypes.String })
   remark: string
@@ -40,5 +42,4 @@ export class MasterItemCategory {
   deleted_at: Date | null
 }
 
-export const MasterItemCategorySchema =
-  SchemaFactory.createForClass(MasterItemCategory)
+export const MasterQueueSchema = SchemaFactory.createForClass(MasterQueue)
