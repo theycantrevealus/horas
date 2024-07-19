@@ -3,13 +3,13 @@ import {
   MasterItemCategoryEditDTO,
 } from '@core/master/dto/master.item.category'
 import { IMasterItemCategory } from '@core/master/interface/master.item.category'
-import {
-  MasterItemCategory,
-  MasterItemCategoryDocument,
-} from '@core/master/schemas/master.item.category'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterItemCategory,
+  MasterItemCategoryDocument,
+} from '@schemas/master/master.item.category'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -20,7 +20,7 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MasterItemCategoryService {
   constructor(
-    @InjectModel(MasterItemCategory.name)
+    @InjectModel(MasterItemCategory.name, 'primary')
     private masterItemCategoryModel: Model<MasterItemCategoryDocument>
   ) {}
 

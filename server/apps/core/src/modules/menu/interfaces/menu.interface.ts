@@ -4,3 +4,8 @@ export interface IMenu {
   url: string
   identifier: string
 }
+
+export interface IntegrationMeta {
+  url: string
+  method: string
+}

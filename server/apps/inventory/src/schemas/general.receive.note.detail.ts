@@ -1,5 +1,5 @@
-import { MasterItemJoin } from '@core/master/schemas/master.item.join'
 import { raw } from '@nestjs/mongoose'
+import { MasterItemJoin } from '@schemas/master/master.item'
 
 export const GeneralReceiveNoteDetail = raw({
   item: { type: MasterItemJoin, _id: false },

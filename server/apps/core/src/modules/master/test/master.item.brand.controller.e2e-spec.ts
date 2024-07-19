@@ -10,10 +10,6 @@ import {
   mockMasterItemBrandModel,
 } from '@core/master/mock/master.item.brand.mock'
 import { masterItemDocArray } from '@core/master/mock/master.item.mock'
-import {
-  MasterItemBrand,
-  MasterItemBrandDocument,
-} from '@core/master/schemas/master.item.brand'
 import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -27,6 +23,10 @@ import {
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterItemBrand,
+  MasterItemBrandDocument,
+} from '@schemas/master/master.item.brand'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

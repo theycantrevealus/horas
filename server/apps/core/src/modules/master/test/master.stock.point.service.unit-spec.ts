@@ -4,16 +4,12 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterStockPointDocArray,
   mockMasterStockPoint,
   mockMasterStockPointModel,
 } from '@core/master/mock/master.stock.point.mock'
-import {
-  MasterStockPoint,
-  MasterStockPointDocument,
-} from '@core/master/schemas/master.stock.point'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -24,6 +20,10 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterStockPoint,
+  MasterStockPointDocument,
+} from '@schemas/master/master.stock.point'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

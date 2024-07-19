@@ -4,16 +4,12 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterItemSupplierDocArray,
   mockMasterItemSupplier,
   mockMasterItemSupplierModel,
 } from '@core/master/mock/master.item.supplier.mock'
-import {
-  MasterItemSupplier,
-  MasterItemSupplierDocument,
-} from '@core/master/schemas/master.item.supplier'
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -24,6 +20,10 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterItemSupplier,
+  MasterItemSupplierDocument,
+} from '@schemas/master/master.item.supplier'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

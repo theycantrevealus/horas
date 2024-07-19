@@ -4,16 +4,12 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterItemDocArray,
   mockMasterItem,
   mockMasterItemModel,
 } from '@core/master/mock/master.item.mock'
-import {
-  MasterItem,
-  MasterItemDocument,
-} from '@core/master/schemas/master.item'
 import { MasterItemService } from '@core/master/services/master.item.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -24,6 +20,7 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import { AuthService } from '@security/auth.service'
 import { M_ITEM_SERVICE } from '@utility/constants'
 import { GlobalResponse } from '@utility/dto/response'

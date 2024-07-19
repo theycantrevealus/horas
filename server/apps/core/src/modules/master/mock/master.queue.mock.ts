@@ -4,10 +4,10 @@ import {
   MasterQueueAddDTO,
   MasterQueueEditDTO,
 } from '@core/master/dto/master.queue'
-import { MasterItemBrandDocument } from '@core/master/schemas/master.item.brand'
-import { MasterQueue } from '@core/master/schemas/master.queue.machine'
 import { faker } from '@faker-js/faker'
 import { Account } from '@schemas/account/account.model'
+import { MasterItemBrandDocument } from '@schemas/master/master.item.brand'
+import { MasterQueue } from '@schemas/master/master.queue.machine'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

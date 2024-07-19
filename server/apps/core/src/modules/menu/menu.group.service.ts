@@ -2,13 +2,10 @@ import {
   MenuGroupAddDTO,
   MenuGroupEditDTO,
 } from '@core/menu/dto/menu.group.add'
-import {
-  MenuGroup,
-  MenuGroupDocument,
-} from '@core/menu/schemas/menu.group.model'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
+import { MenuGroup, MenuGroupDocument } from '@schemas/menu/menu.group'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'

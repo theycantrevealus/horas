@@ -8,7 +8,7 @@ import {
   PatientMedicalInfo,
 } from '@core/patient/schema/patient.medical'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type PatientDocument = HydratedDocument<Patient>

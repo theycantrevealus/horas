@@ -10,10 +10,6 @@ import {
   mockMasterStockPoint,
   mockMasterStockPointModel,
 } from '@core/master/mock/master.stock.point.mock'
-import {
-  MasterStockPoint,
-  MasterStockPointDocument,
-} from '@core/master/schemas/master.stock.point'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -27,6 +23,10 @@ import {
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterStockPoint,
+  MasterStockPointDocument,
+} from '@schemas/master/master.stock.point'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

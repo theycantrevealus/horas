@@ -3,12 +3,12 @@ import {
   MasterItemSupplierAddDTO,
   MasterItemSupplierEditDTO,
 } from '@core/master/dto/master.item.supplier'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
 import {
   MasterItemSupplier,
   MasterItemSupplierDocument,
-} from '@core/master/schemas/master.item.supplier'
-import { HttpStatus, Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
+} from '@schemas/master/master.item.supplier'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -19,7 +19,7 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MasterItemSupplierService {
   constructor(
-    @InjectModel(MasterItemSupplier.name)
+    @InjectModel(MasterItemSupplier.name, 'primary')
     private masterItemSupplierModel: Model<MasterItemSupplierDocument>
   ) {}
 

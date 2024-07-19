@@ -9,10 +9,6 @@ import {
   mockMasterItemCategory,
   mockMasterItemCategoryModel,
 } from '@core/master/mock/master.item.category.mock'
-import {
-  MasterItemCategory,
-  MasterItemCategoryDocument,
-} from '@core/master/schemas/master.item.category'
 import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -26,6 +22,10 @@ import {
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterItemCategory,
+  MasterItemCategoryDocument,
+} from '@schemas/master/master.item.category'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

@@ -1,15 +1,11 @@
 import { AccountService } from '@core/account/account.service'
 import { accountDocArray, mockAccount } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterItemBrandDocArray,
   mockMasterItemBrand,
   mockMasterItemBrandModel,
 } from '@core/master/mock/master.item.brand.mock'
-import {
-  MasterItemBrand,
-  MasterItemBrandDocument,
-} from '@core/master/schemas/master.item.brand'
 import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -20,6 +16,10 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterItemBrand,
+  MasterItemBrandDocument,
+} from '@schemas/master/master.item.brand'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

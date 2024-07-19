@@ -4,6 +4,7 @@ import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { AccountModule } from '@core/account/account.module'
 import { LOVModule } from '@core/lov/lov.module'
+import { MasterModule } from '@core/master/master.module'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -82,26 +83,24 @@ import { CoreService } from './core.service'
       useFactory: async (
         configService: ConfigService
       ): Promise<MongooseModuleOptions> => ({
-        uri: configService.get<string>('mongo.primary.uri'),
-        dbName: configService.get<string>('mongo.primary.db_name'),
-        user: configService.get<string>('mongo.primary.db_user'),
-        pass: configService.get<string>('mongo.primary.db_password'),
+        uri: `${configService.get<string>(
+          'mongo.primary.uri'
+        )}?replicaSet=dbrs`,
       }),
       inject: [ConfigService],
     }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      connectionName: 'secondary',
-      useFactory: async (
-        configService: ConfigService
-      ): Promise<MongooseModuleOptions> => ({
-        uri: configService.get<string>('mongo.secondary.uri'),
-        dbName: configService.get<string>('mongo.secondary.db_name'),
-        user: configService.get<string>('mongo.secondary.db_user'),
-        pass: configService.get<string>('mongo.secondary.db_password'),
-      }),
-      inject: [ConfigService],
-    }),
+    // MongooseModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   connectionName: 'secondary',
+    //   useFactory: async (
+    //     configService: ConfigService
+    //   ): Promise<MongooseModuleOptions> => ({
+    //     uri: `${configService.get<string>(
+    //       'mongo.primary.uri'
+    //     )}/?replicaSet=rs0&readPreference=secondary`,
+    //   }),
+    //   inject: [ConfigService],
+    // }),
     MongooseModule.forFeature(
       [
         { name: Config.name, schema: ConfigSchema },
@@ -143,10 +142,10 @@ import { CoreService } from './core.service'
     AuthModule,
     AccountModule,
     LOVModule,
+    MasterModule,
     // LicenseModule,
     // PatientModule,
     // MenuModule,
-    // MasterModule,
     // i18nModule,
     // GatewayInventoryModule,
     // BpjsModule,
@@ -157,6 +156,7 @@ import { CoreService } from './core.service'
     ClientDecoratorProcessorService,
     MongoMiddlewareConfig,
     MongoMiddlewareConfigGroup,
+    // MongoMiddlewareLOV,
     CoreService,
     CoreConfigGroupService,
     SocketIoClientProvider,
@@ -166,10 +166,13 @@ import { CoreService } from './core.service'
 export class CoreModule {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
     @InjectModel(Config.name, 'primary')
     private readonly configModel: Model<ConfigDocument>,
+
     @Inject(ConfigService)
     private readonly configService: ConfigService,
+
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {

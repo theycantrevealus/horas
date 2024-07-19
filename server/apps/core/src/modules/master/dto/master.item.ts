@@ -9,7 +9,7 @@ import { IMasterItemConfiguration } from '@core/master/interface/master.item.con
 import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
 import { IMasterItemUnit } from '@core/master/interface/master.item.unit'
 import { ApiProperty } from '@nestjs/swagger'
-import { CLOV, ILOV } from '@schemas/lov/lov.join'
+import { CLOV, ILOV } from '@schemas/lov/lov'
 import {
   IsNotEmpty,
   IsNumber,

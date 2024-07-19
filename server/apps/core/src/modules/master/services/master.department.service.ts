@@ -1,29 +1,32 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
-  MasterItemBrandAddDTO,
-  MasterItemBrandEditDTO,
-} from '@core/master/dto/master.item.brand'
-import { HttpStatus, Injectable } from '@nestjs/common'
+  MasterDepartmentAddDTO,
+  MasterDepartmentEditDTO,
+} from '@core/master/dto/master.department'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
-import { Account } from '@schemas/account/account.model'
 import {
-  MasterItemBrand,
-  MasterItemBrandDocument,
-} from '@schemas/master/master.item.brand'
+  MasterDepartment,
+  MasterDepartmentDocument,
+} from '@schemas/master/master.department'
+import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
-import { isJSON } from 'class-validator'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 
 @Injectable()
-export class MasterItemBrandService {
+export class MasterDepartmentService {
   constructor(
-    @InjectModel(MasterItemBrand.name, 'primary')
-    private masterItemBrandModel: Model<MasterItemBrandDocument>
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
+    @InjectModel(MasterDepartment.name, 'primary')
+    private masterDepartmentModel: Model<MasterDepartmentDocument>
   ) {}
 
-  async all(parameter: any): Promise<GlobalResponse> {
+  async all(payload: any): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -32,25 +35,26 @@ export class MasterItemBrandService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_LIST',
-      transaction_id: null,
+      transaction_classify: 'MASTER_DEPARTMENT_GET',
+      transaction_id: '',
     } satisfies GlobalResponse
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await prime_datatable(parsedData, this.masterItemBrandModel).then(
+
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+      return await prime_datatable(parameter, this.masterDepartmentModel).then(
         (result) => {
-          response.payload = result.payload.data
-          response.message = 'Data query success'
+          response.payload = result.payload
+          response.message = 'Department fetch successfully'
           return response
         }
       )
-    } else {
+    } catch (error) {
+      response.message = `Department failed to fetch`
       response.statusCode = {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: modCodes.Global.failed,
+        ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
       }
-      response.message = 'filters is not a valid json'
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
   }
@@ -64,20 +68,20 @@ export class MasterItemBrandService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_GET',
-      transaction_id: id,
+      transaction_classify: 'MASTER_DEPARTMENT_GET',
+      transaction_id: '',
     } satisfies GlobalResponse
 
     try {
-      return await this.masterItemBrandModel
+      return await this.masterDepartmentModel
         .findOne({ id: id })
         .then((result) => {
-          response.payload = result
-          response.message = 'Master item brand detail fetch successfully'
+          response.payload = result ?? {}
+          response.message = 'Department detail fetch successfully'
           return response
         })
     } catch (error) {
-      response.message = `Master item brand detail failed to fetch`
+      response.message = `Department detail failed to fetch`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -88,41 +92,44 @@ export class MasterItemBrandService {
   }
 
   async add(
-    data: MasterItemBrandAddDTO,
-    account: Account
+    data: MasterDepartmentAddDTO,
+    credential: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
+        ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_ADD',
-      transaction_id: null,
+      transaction_classify: 'MASTER_DEPARTMENT_ADD',
+      transaction_id: '',
     } satisfies GlobalResponse
 
-    data.code =
-      data.code ?? `${modCodes[this.constructor.name]}-${new Date().getTime()}`
-
+    const generatedID = new Types.ObjectId().toString()
     try {
-      return await this.masterItemBrandModel
+      return await this.masterDepartmentModel
         .create({
           ...data,
-          created_by: account,
+          id: generatedID,
+          created_by: credential,
         })
-        .then((result) => {
-          response.message = 'Master item brand created successfully'
-          response.transaction_id = result._id
+        .then(async () => {
+          response.message = 'Department created successfully'
+          response.statusCode = {
+            defaultCode: HttpStatus.OK,
+            customCode: modCodes.Global.success,
+            classCode: modCodes[this.constructor.name].defaultCode,
+          }
+          response.transaction_id = generatedID
           response.payload = {
-            id: result.id,
+            id: `account-${generatedID}`,
             ...data,
           }
           return response
         })
     } catch (error) {
-      response.message = `Master item brand failed to create`
+      response.message = 'Department failed to create'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -133,7 +140,7 @@ export class MasterItemBrandService {
   }
 
   async edit(
-    data: MasterItemBrandEditDTO,
+    data: MasterDepartmentEditDTO,
     id: string
   ): Promise<GlobalResponse> {
     const response = {
@@ -143,13 +150,15 @@ export class MasterItemBrandService {
         classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
-      payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_EDIT',
-      transaction_id: null,
+      payload: await this.masterDepartmentModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'MASTER_DEPARTMENT_EDIT',
+      transaction_id: id,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterItemBrandModel
+      return await this.masterDepartmentModel
         .findOneAndUpdate(
           {
             id: id,
@@ -159,15 +168,26 @@ export class MasterItemBrandService {
             code: data.code,
             name: data.name,
             remark: data.remark,
-          }
+          },
+          { upsert: false, new: true }
         )
         .then((result) => {
-          response.message = 'Master item brand updated successfully'
-          response.payload = result
+          if (!result) {
+            response.statusCode = {
+              ...modCodes[this.constructor.name].error.isNotFound,
+              classCode: modCodes[this.constructor.name].defaultCode,
+            }
+            response.message = 'Department failed to update'
+            response.payload = {}
+            throw new Error(JSON.stringify(response))
+          } else {
+            response.message = 'Department updated successfully'
+            response.payload = result
+          }
           return response
         })
     } catch (error) {
-      response.message = `Master item brand failed to update`
+      response.message = `Department failed to update. ${error.message}`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -185,27 +205,31 @@ export class MasterItemBrandService {
         classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
-      payload: {},
-      transaction_classify: 'MASTER_ITEM_BRAND_DELETE',
-      transaction_id: null,
+      payload: await this.masterDepartmentModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'MASTER_DEPARTMENT_DELETE',
+      transaction_id: id,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterItemBrandModel
+      return await this.masterDepartmentModel
         .findOneAndUpdate(
           {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
-        .then(async () => {
-          response.message = 'Master item brand deleted successfully'
+        .then(() => {
+          response.message = 'Department deleted successfully'
           return response
         })
     } catch (error) {
-      response.message = 'Master item brand failed to delete'
+      response.message = `Department failed to delete`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,

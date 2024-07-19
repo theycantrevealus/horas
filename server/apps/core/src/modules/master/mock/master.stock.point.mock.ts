@@ -5,12 +5,12 @@ import {
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
 import { IMasterStockPointConfiguration } from '@core/master/interface/master.stock.point.configuration'
+import { faker } from '@faker-js/faker'
+import { Account } from '@schemas/account/account.model'
 import {
   MasterStockPoint,
   MasterStockPointDocument,
-} from '@core/master/schemas/master.stock.point'
-import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
+} from '@schemas/master/master.stock.point'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

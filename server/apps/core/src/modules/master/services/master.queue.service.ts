@@ -2,10 +2,10 @@ import {
   MasterQueueAddDTO,
   MasterQueueEditDTO,
 } from '@core/master/dto/master.queue'
-import { MasterQueue } from '@core/master/schemas/master.queue.machine'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
+import { MasterQueue } from '@schemas/master/master.queue.machine'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -16,7 +16,7 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MasterQueueService {
   constructor(
-    @InjectModel(MasterQueue.name)
+    @InjectModel(MasterQueue.name, 'primary')
     private masterQueueModel: Model<MasterQueue>
   ) {}
 

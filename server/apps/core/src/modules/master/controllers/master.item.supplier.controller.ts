@@ -26,10 +26,11 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Supplier Management')
 export class MasterItemSupplierController {
   private masterItemSupplierService: MasterItemSupplierService
   constructor(masterItemSupplierService: MasterItemSupplierService) {
@@ -61,7 +62,10 @@ export class MasterItemSupplierController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Query() param) {
+  @ApiQuery({
+    name: 'id',
+  })
+  async detail(@Query() param: any) {
     return await this.masterItemSupplierService.detail(param.id)
   }
 
@@ -77,7 +81,7 @@ export class MasterItemSupplierController {
   })
   async add(
     @Body() parameter: MasterItemSupplierAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account: Account
   ) {
     return await this.masterItemSupplierService.add(parameter, account)
   }
@@ -95,7 +99,10 @@ export class MasterItemSupplierController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemSupplierEditDTO, @Param() param) {
+  async edit(
+    @Body() parameter: MasterItemSupplierEditDTO,
+    @Param() param: any
+  ) {
     return await this.masterItemSupplierService.edit(parameter, param.id)
   }
 
@@ -112,7 +119,7 @@ export class MasterItemSupplierController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any) {
     return await this.masterItemSupplierService.delete(param.id)
   }
 }

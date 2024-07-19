@@ -2,13 +2,13 @@ import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
-import {
-  MasterStockPoint,
-  MasterStockPointDocument,
-} from '@core/master/schemas/master.stock.point'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterStockPoint,
+  MasterStockPointDocument,
+} from '@schemas/master/master.stock.point'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -19,7 +19,7 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MasterStockPointService {
   constructor(
-    @InjectModel(MasterStockPoint.name)
+    @InjectModel(MasterStockPoint.name, 'primary')
     private masterStockPointModel: Model<MasterStockPointDocument>
   ) {}
 

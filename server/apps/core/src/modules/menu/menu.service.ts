@@ -4,15 +4,12 @@ import {
   IMenuTree,
   IMenuTreeManager,
 } from '@core/menu/interfaces/menu.tree.interface'
-import {
-  MenuGroup,
-  MenuGroupDocument,
-} from '@core/menu/schemas/menu.group.model'
-import { Menu, MenuDocument } from '@core/menu/schemas/menu.model'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
+import { Menu, MenuDocument } from '@schemas/menu/menu'
+import { MenuGroup, MenuGroupDocument } from '@schemas/menu/menu.group'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'

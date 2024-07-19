@@ -9,10 +9,6 @@ import {
   mockMasterQueue,
   mockMasterQueueModel,
 } from '@core/master/mock/master.queue.mock'
-import {
-  MasterQueue,
-  MasterQueueDocument,
-} from '@core/master/schemas/master.queue.machine'
 import { MasterQueueService } from '@core/master/services/master.queue.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -26,6 +22,10 @@ import {
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterQueue,
+  MasterQueueDocument,
+} from '@schemas/master/master.queue.machine'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

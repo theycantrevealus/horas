@@ -8,12 +8,9 @@ import { IMasterItemConfiguration } from '@core/master/interface/master.item.con
 import { masterItemBrandArray } from '@core/master/mock/master.item.brand.mock'
 import { masterItemCategoryArray } from '@core/master/mock/master.item.category.mock'
 import { masterItemUnitArray } from '@core/master/mock/master.item.unit.mock'
-import {
-  MasterItem,
-  MasterItemDocument,
-} from '@core/master/schemas/master.item'
 import { faker } from '@faker-js/faker'
 import { Account } from '@schemas/account/account.model'
+import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
