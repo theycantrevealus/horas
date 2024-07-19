@@ -3,7 +3,7 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { mockKafkaTransaction } from '@mock/kafka'
@@ -519,8 +519,7 @@ describe('Account Service', () => {
             password: mockAccount().password,
             authority: mockAccount().authority,
           },
-          mockAccount(),
-          ''
+          mockAccount()
         )
         .then(() => {
           expect(producerMethod).toHaveBeenCalled()

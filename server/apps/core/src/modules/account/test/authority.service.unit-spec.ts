@@ -7,7 +7,7 @@ import {
   authorityDocArray,
   mockAuthority,
   mockAuthorityModel,
-} from '@core/account/mock/authority,mock'
+} from '@core/account/mock/authority.mock'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { mockKafkaTransaction } from '@mock/kafka'

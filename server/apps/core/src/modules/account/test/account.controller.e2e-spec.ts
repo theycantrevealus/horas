@@ -8,7 +8,7 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthorityModel } from '@core/account/mock/authority,mock'
+import { mockAuthorityModel } from '@core/account/mock/authority.mock'
 import { faker } from '@faker-js/faker'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
