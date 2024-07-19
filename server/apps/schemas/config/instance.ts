@@ -1,6 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 import { ConfigJoin, IConfig } from './config'

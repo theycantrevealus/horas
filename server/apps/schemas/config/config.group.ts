@@ -1,7 +1,7 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { IsNotEmpty, IsString } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 

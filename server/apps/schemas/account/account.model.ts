@@ -1,13 +1,14 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { IMenu } from '@core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'
-import { MenuJoin, MenuPermissionJoin } from '@core/menu/schemas/menu.model'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { AuthorityJoin, IAuthority } from '@schemas/account/authority.model'
+import { MenuJoin, MenuPermissionJoin } from '@schemas/menu/menu'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
+
 @Schema({ collection: 'core_account' })
 export class Account {
   @Prop({ type: SchemaTypes.String, unique: true })
