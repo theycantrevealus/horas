@@ -428,7 +428,7 @@ export class AccountService {
           },
           { upsert: false, new: true }
         )
-        .then((result) => {
+        .then(async (result) => {
           if (!result) {
             response.statusCode = {
               ...modCodes[this.constructor.name].error.isNotFound,
@@ -438,6 +438,7 @@ export class AccountService {
             response.payload = {}
             throw new Error(JSON.stringify(response))
           } else {
+            await this.cacheManager.set(id, result)
             response.message = 'Account updated successfully'
             response.payload = result
           }
