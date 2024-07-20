@@ -73,12 +73,12 @@ describe('Master Item Brand Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemBrand.name),
+          provide: getModelToken(MasterItemBrand.name, 'primary'),
           useValue: mockMasterItemBrandModel,
         },
         { provide: AuthService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: {} },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
+        { provide: getModelToken(Account.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -98,7 +98,7 @@ describe('Master Item Brand Controller', () => {
       MasterItemBrandController
     )
     masterItemBrandModel = module.get<Model<MasterItemBrandDocument>>(
-      getModelToken(MasterItemBrand.name)
+      getModelToken(MasterItemBrand.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -136,6 +136,7 @@ describe('Master Item Brand Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: '/master/brand',
               query: `lazyEvent=abc`,
@@ -161,6 +162,7 @@ describe('Master Item Brand Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: '/master/brand',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
@@ -187,6 +189,7 @@ describe('Master Item Brand Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: `/master/brand/${mockMasterItemBrand().id}`,
             })
@@ -210,8 +213,12 @@ describe('Master Item Brand Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/brand',
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -235,6 +242,10 @@ describe('Master Item Brand Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/brand',
               body: data,
             })
@@ -258,6 +269,10 @@ describe('Master Item Brand Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/brand',
               body: data,
             })
@@ -281,8 +296,12 @@ describe('Master Item Brand Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/brand/${mockMasterItemBrand().id}`,
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -299,6 +318,10 @@ describe('Master Item Brand Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/brand/${mockMasterItemBrand().id}`,
               body: {},
             })
@@ -323,6 +346,10 @@ describe('Master Item Brand Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/brand/${mockMasterItemBrand().id}`,
               body: data,
             })
@@ -346,6 +373,10 @@ describe('Master Item Brand Controller', () => {
           return app
             .inject({
               method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/brand/${mockMasterItemBrand().id}`,
             })
             .then((result) => {
