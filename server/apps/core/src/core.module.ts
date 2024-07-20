@@ -5,6 +5,7 @@ import { RedisConfig } from '@configuration/redis'
 import { AccountModule } from '@core/account/account.module'
 import { LOVModule } from '@core/lov/lov.module'
 import { MasterModule } from '@core/master/master.module'
+import { MenuModule } from '@core/menu/menu.module'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -145,7 +146,7 @@ import { CoreService } from './core.service'
     MasterModule,
     // LicenseModule,
     // PatientModule,
-    // MenuModule,
+    MenuModule,
     // i18nModule,
     // GatewayInventoryModule,
     // BpjsModule,
