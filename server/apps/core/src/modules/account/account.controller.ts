@@ -1,6 +1,7 @@
 import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -48,6 +49,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all account',
     description: 'Showing account data',
@@ -65,6 +67,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'view' })
   @ApiParam({
     name: 'id',
   })
@@ -82,6 +85,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'add' })
   @ApiOperation({
     summary: 'Add new account',
     description: ``,
@@ -103,6 +107,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'edit' })
   @ApiOperation({
     summary: 'Edit account',
     description: ``,
@@ -121,6 +126,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'delete' })
   @ApiOperation({
     summary: 'Delete account',
     description: ``,
