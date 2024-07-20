@@ -19,10 +19,10 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MenuService {
   constructor(
-    @InjectModel(Menu.name)
+    @InjectModel(Menu.name, 'primary')
     private menuModel: Model<MenuDocument>,
 
-    @InjectModel(MenuGroup.name)
+    @InjectModel(MenuGroup.name, 'primary')
     private menuGroupModel: Model<MenuGroupDocument>,
 
     @Inject(AccountService)

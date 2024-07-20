@@ -15,7 +15,7 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MenuGroupService {
   constructor(
-    @InjectModel(MenuGroup.name)
+    @InjectModel(MenuGroup.name, 'primary')
     private menuGroupModel: Model<MenuGroupDocument>
   ) {}
   async all(parameter: any) {
