@@ -1,5 +1,3 @@
-import { ApplicationConfig } from '@configuration/environtment'
-import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
 import { MenuController } from '@core/menu/menu.controller'
 import { MenuGroupController } from '@core/menu/menu.group.controller'
@@ -8,22 +6,15 @@ import { MenuService } from '@core/menu/menu.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Menu, MenuSchema } from '@schemas/menu/menu'
 import { MenuGroup, MenuGroupSchema } from '@schemas/menu/menu.group'
 import { MongoMiddlewareMenuGroup } from '@schemas/menu/menu.group.middleware'
 import { MongoMiddlewareMenu } from '@schemas/menu/menu.middleware'
 import { AuthModule } from '@security/auth.module'
-import { environmentIdentifier } from '@utility/environtment'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: environmentIdentifier,
-      load: [ApplicationConfig, MongoConfig],
-    }),
     AuthModule,
     AccountModule,
     MongooseModule.forFeature(
