@@ -2,7 +2,6 @@ import { PermissionDescriptor } from '@decorators/permission'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import {
   ExecutionContext,
-  ForbiddenException,
   HttpStatus,
   Inject,
   Injectable,
@@ -34,6 +33,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   // }
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: modCodes.Global.failed,
+        classCode: 'CORE',
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'CORE',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
     const secured = this.reflector.get<string[]>(
       'secured',
       context.getHandler()
@@ -44,6 +55,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler()
     )
 
+    if (!permissionIdentifier || permissionIdentifier.length <= 0) {
+      response.message = 'This endpoint is not configured properly'
+      throw new Error(JSON.stringify(response))
+    }
+
     if (!secured) {
       return true
     }
@@ -51,20 +67,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest()
 
     if (!request.headers.authorization) {
-      throw new ForbiddenException({
-        message: 'Unauthorized',
-        data: null,
-        errors: null,
-      })
+      response.message = 'Unauthorized'
+      throw new Error(JSON.stringify(response))
     }
 
     const header_token = request.headers.authorization
     if (!header_token) {
-      throw new ForbiddenException({
-        message: 'Unauthorized',
-        data: null,
-        errors: null,
-      })
+      response.message = 'Unauthorized'
+      throw new Error(JSON.stringify(response))
     }
     const token = header_token.split('Bearer')[1]
     const decodeTokenResponse: JWTTokenDecodeResponse =
@@ -81,21 +91,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }${permissionIdentifier[0].action
       .charAt(0)
       .toUpperCase()}${permissionIdentifier[0].action.slice(1)}`
-    const permissionFound = accountDetail.permission.find(
+    const permissionFound = accountDetail?.permission.find(
       (o) => o.dispatchName === permissionFind
     )
-
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: modCodes.Global.failed,
-        classCode: 'CORE',
-      },
-      message: decodeTokenResponse.message,
-      payload: {},
-      transaction_classify: 'CORE',
-      transaction_id: '',
-    } satisfies GlobalResponse
 
     if (
       !decodeTokenResponse ||
