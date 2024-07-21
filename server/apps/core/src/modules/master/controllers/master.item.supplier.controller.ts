@@ -4,6 +4,7 @@ import {
 } from '@core/master/dto/master.item.supplier'
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -26,7 +27,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
-import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
@@ -43,6 +43,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all supplier',
     description: 'Showing supplier data',
@@ -58,6 +59,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -75,13 +77,14 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'add' })
   @ApiOperation({
     summary: 'Add new item supplier',
     description: ``,
   })
   async add(
     @Body() parameter: MasterItemSupplierAddDTO,
-    @CredentialAccount() account: Account
+    @CredentialAccount() account
   ) {
     return await this.masterItemSupplierService.add(parameter, account)
   }
@@ -92,6 +95,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'edit' })
   @ApiOperation({
     summary: 'Edit new item supplier',
     description: ``,
@@ -112,6 +116,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'delete' })
   @ApiOperation({
     summary: 'Edit new item supplier',
     description: ``,

@@ -4,6 +4,7 @@ import {
 } from '@core/master/dto/master.department'
 import { MasterDepartmentService } from '@core/master/services/master.department.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -27,7 +28,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
-import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -50,6 +50,7 @@ export class MasterDepartmentController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterDepartment', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all department',
     description: 'Showing department data',
@@ -67,6 +68,7 @@ export class MasterDepartmentController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterDepartment', action: 'view' })
   @ApiParam({
     name: 'id',
   })
@@ -84,13 +86,14 @@ export class MasterDepartmentController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterDepartment', action: 'add' })
   @ApiOperation({
     summary: 'Add new department',
     description: ``,
   })
   async add(
     @Body() parameter: MasterDepartmentAddDTO,
-    @CredentialAccount() account: Account
+    @CredentialAccount() account
   ): Promise<GlobalResponse> {
     return await this.masterDepartmentService.add(parameter, account)
   }
@@ -104,6 +107,7 @@ export class MasterDepartmentController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterDepartment', action: 'edit' })
   @ApiOperation({
     summary: 'Edit department',
     description: ``,
@@ -122,6 +126,7 @@ export class MasterDepartmentController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterDepartment', action: 'delete' })
   @ApiOperation({
     summary: 'Delete department',
     description: ``,
