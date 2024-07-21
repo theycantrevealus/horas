@@ -138,6 +138,15 @@ export class MasterDepartmentEditDTO {
   remark?: string
 
   @ApiProperty({
+    type: CDepartmentConfiguration,
+    description: 'Target stock point',
+  })
+  @Type(() => CDepartmentConfiguration)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  configuration: IDepartmentConfiguration
+
+  @ApiProperty({
     example: 0,
     description: 'Department document version',
   })
