@@ -1,7 +1,8 @@
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import { PatientEditDTO } from '@core/patient/dto/patient.edit'
 import { Patient, PatientDocument } from '@core/patient/schema/patient.model'
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
@@ -13,6 +14,8 @@ import { Model } from 'mongoose'
 @Injectable()
 export class PatientService {
   constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>
   ) {}
   async all(parameter: any): Promise<GlobalResponse> {
@@ -88,7 +91,9 @@ export class PatientService {
           id: id,
         },
         {
-          deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+          deleted_at: new TimeManagement().getTimezone(
+            await this.configService.get<string>('application.timezone')
+          ),
         }
       )
       .exec()

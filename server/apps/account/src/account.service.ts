@@ -1,7 +1,8 @@
 import { AccountAddDTO } from '@core/account/dto/account.add.dto'
 import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account, AccountDocument } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
@@ -12,6 +13,8 @@ import { Model } from 'mongoose'
 @Injectable()
 export class AccountService {
   constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
     @InjectModel(Account.name)
     private accountModel: Model<AccountDocument>
   ) {}
@@ -130,7 +133,9 @@ export class AccountService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(() => {

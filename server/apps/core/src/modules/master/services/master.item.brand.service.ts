@@ -2,7 +2,8 @@ import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
 } from '@core/master/dto/master.item.brand'
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
 import {
@@ -19,6 +20,8 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MasterItemBrandService {
   constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
     @InjectModel(MasterItemBrand.name, 'primary')
     private masterItemBrandModel: Model<MasterItemBrandDocument>
   ) {}
@@ -197,7 +200,9 @@ export class MasterItemBrandService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(async () => {

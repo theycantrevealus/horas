@@ -123,12 +123,13 @@ export class MasterDepartmentService {
           }
           response.transaction_id = generatedID
           response.payload = {
-            id: `account-${generatedID}`,
+            id: `department-${generatedID}`,
             ...data,
           }
           return response
         })
     } catch (error) {
+      console.error(error)
       response.message = 'Department failed to create'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
