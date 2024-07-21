@@ -73,13 +73,13 @@ describe('Master Item Unit Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemUnit.name),
+          provide: getModelToken(MasterItemUnit.name, 'primary'),
           useValue: mockMasterItemUnitModel,
         },
         { provide: AuthService, useValue: {} },
         { provide: AccountService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: {} },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
+        { provide: getModelToken(Account.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -99,7 +99,7 @@ describe('Master Item Unit Controller', () => {
       MasterItemUnitController
     )
     masterItemUnitModel = module.get<Model<MasterItemUnitDocument>>(
-      getModelToken(MasterItemUnit.name)
+      getModelToken(MasterItemUnit.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -211,8 +211,12 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/unit',
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -236,6 +240,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/unit',
               body: data,
             })
@@ -259,6 +267,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/unit',
               body: data,
             })
@@ -282,8 +294,12 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -300,6 +316,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
               body: {},
             })
@@ -324,6 +344,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
               body: data,
             })
@@ -347,6 +371,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
             })
             .then((result) => {

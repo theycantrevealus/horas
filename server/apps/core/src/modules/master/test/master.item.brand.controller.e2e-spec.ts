@@ -40,6 +40,7 @@ import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
 describe('Master Item Brand Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
+  let configService: ConfigService
   let masterItemBrandController: MasterItemBrandController
   let masterItemBrandModel: Model<MasterItemBrand>
   let logger: Logger
@@ -94,6 +95,7 @@ describe('Master Item Brand Controller', () => {
       })
     )
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
+    configService = app.get<ConfigService>(ConfigService)
     masterItemBrandController = app.get<MasterItemBrandController>(
       MasterItemBrandController
     )
@@ -370,6 +372,7 @@ describe('Master Item Brand Controller', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
           return app
             .inject({
               method: 'DELETE',

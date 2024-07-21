@@ -1,15 +1,16 @@
 import { AccountService } from '@core/account/account.service'
-import { accountArray, accountDocArray } from '@core/account/mock/account.mock'
-import { MasterItemCategoryController } from '@core/master/controllers/master.item.category.controller'
+import { mockAccount } from '@core/account/mock/account.mock'
+import { MasterDepartmentController } from '@core/master/controllers/master.department.controller'
 import {
-  MasterItemCategoryAddDTO,
-  MasterItemCategoryEditDTO,
-} from '@core/master/dto/master.item.category'
+  MasterDepartmentAddDTO,
+  MasterDepartmentEditDTO,
+} from '@core/master/dto/master.department'
 import {
-  mockMasterItemCategory,
-  mockMasterItemCategoryModel,
-} from '@core/master/mock/master.item.category.mock'
-import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
+  masterDepartmentDocArray,
+  mockMasterDepartment,
+  mockMasterDepartmentModel,
+} from '@core/master/mock/master.department.mock'
+import { MasterDepartmentService } from '@core/master/services/master.department.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -23,9 +24,9 @@ import {
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import {
-  MasterItemCategory,
-  MasterItemCategoryDocument,
-} from '@schemas/master/master.item.category'
+  MasterDepartment,
+  MasterDepartmentDocument,
+} from '@schemas/master/master.department'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -36,22 +37,23 @@ import { Logger } from 'winston'
 import { CommonErrorFilter } from '../../../../../filters/error'
 import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
 
-describe('Master Item Category Controller', () => {
+describe('Master Department Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
-  let masterItemCategoryController: MasterItemCategoryController
-  let masterItemCategoryModel: Model<MasterItemCategory>
+  let configService: ConfigService
+  let masterDepartmentController: MasterDepartmentController
+  let masterDepartmentModel: Model<MasterDepartment>
   let logger: Logger
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MasterItemCategoryController],
+      controllers: [MasterDepartmentController],
       providers: [
-        MasterItemCategoryService,
+        MasterDepartmentService,
         {
           provide: ConfigService,
           useValue: {
-            get: () => jest.fn().mockResolvedValue('Test'),
+            get: () => jest.fn().mockResolvedValue('Asia/Jakarta'),
             set: () => jest.fn().mockResolvedValue('Test'),
           },
         },
@@ -67,15 +69,15 @@ describe('Master Item Category Controller', () => {
         {
           provide: CACHE_MANAGER,
           useValue: {
-            get: () => accountArray[0],
+            get: () => 'Asia/Jakarta',
             set: () => jest.fn(),
           },
         },
-        { provide: AuthService, useValue: {} },
         {
-          provide: getModelToken(MasterItemCategory.name, 'primary'),
-          useValue: mockMasterItemCategoryModel,
+          provide: getModelToken(MasterDepartment.name, 'primary'),
+          useValue: mockMasterDepartmentModel, // TODO : Create mock here
         },
+        { provide: AuthService, useValue: {} },
         { provide: AccountService, useValue: {} },
         { provide: getModelToken(Account.name, 'primary'), useValue: {} },
         { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
@@ -94,11 +96,12 @@ describe('Master Item Category Controller', () => {
       })
     )
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
-    masterItemCategoryController = app.get<MasterItemCategoryController>(
-      MasterItemCategoryController
+    configService = app.get<ConfigService>(ConfigService)
+    masterDepartmentController = app.get<MasterDepartmentController>(
+      MasterDepartmentController
     )
-    masterItemCategoryModel = module.get<Model<MasterItemCategoryDocument>>(
-      getModelToken(MasterItemCategory.name, 'primary')
+    masterDepartmentModel = module.get<Model<MasterDepartmentDocument>>(
+      getModelToken(MasterDepartment.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -106,24 +109,29 @@ describe('Master Item Category Controller', () => {
     await app.getHttpAdapter().getInstance().ready()
 
     jest.clearAllMocks()
-
-    jest.clearAllMocks()
   })
 
-  describe(
+  it(
     testCaption(
-      'FLOW',
-      'feature',
-      'Master Item Category - Get data lazy loaded'
+      'CONTROLLER STATE',
+      'component',
+      'Controller should be defined'
     ),
+    () => {
+      expect(masterDepartmentController).toBeDefined()
+    }
+  )
+
+  describe(
+    testCaption('FLOW', 'feature', 'Master Department - Get data lazy loaded'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemCategoryModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(accountDocArray),
+          jest.spyOn(masterDepartmentModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterDepartmentDocArray),
           } as any)
 
           return app
@@ -133,7 +141,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: '/master/category',
+              url: '/master/department',
               query: `lazyEvent=abc`,
             })
             .then((result) => {
@@ -148,8 +156,8 @@ describe('Master Item Category Controller', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemCategoryModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(accountDocArray),
+          jest.spyOn(masterDepartmentModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterDepartmentDocArray),
           } as any)
 
           return app
@@ -159,7 +167,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: '/master/category',
+              url: '/master/department',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
@@ -172,7 +180,7 @@ describe('Master Item Category Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Item Category - Get data detail'),
+    testCaption('FLOW', 'feature', 'Master Department - Get data detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return data', {
@@ -186,7 +194,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/category/${mockMasterItemCategory().id}`,
+              url: `/master/department/${mockMasterDepartment().id}`,
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.OK)
@@ -198,7 +206,7 @@ describe('Master Item Category Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Item Category - Add data'),
+    testCaption('FLOW', 'feature', 'Master Department - Add data'),
     () => {
       it(
         testCaption('HANDLING', 'feature', 'Should handle invalid format', {
@@ -212,7 +220,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: '/master/category',
+              url: '/master/department',
               body: {},
             })
             .then((result) => {
@@ -228,9 +236,32 @@ describe('Master Item Category Controller', () => {
         }),
         async () => {
           const data = {
-            code: mockMasterItemCategory().code,
-            name: mockMasterItemCategory().name,
-          } satisfies MasterItemCategoryAddDTO
+            code: mockMasterDepartment().code,
+            name: mockMasterDepartment().name,
+            remark: mockMasterDepartment().remark,
+            configuration: {
+              default_consultation_treatment: {
+                id: '',
+                code: '',
+                name: '',
+              },
+              treatment: [
+                {
+                  id: '',
+                  code: '',
+                  name: '',
+                },
+              ],
+              doctor: [
+                {
+                  id: mockAccount().id,
+                  first_name: mockAccount().first_name,
+                  last_name: mockAccount().last_name,
+                  email: mockAccount().email,
+                },
+              ],
+            },
+          } satisfies MasterDepartmentAddDTO
 
           delete data.name
 
@@ -241,7 +272,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: '/master/category',
+              url: '/master/department',
               body: data,
             })
             .then((result) => {
@@ -257,9 +288,33 @@ describe('Master Item Category Controller', () => {
         }),
         async () => {
           const data = {
-            code: mockMasterItemCategory().code,
-            name: mockMasterItemCategory().name,
-          } satisfies MasterItemCategoryAddDTO
+            code: mockMasterDepartment().code,
+            name: mockMasterDepartment().name,
+            remark: mockMasterDepartment().remark,
+            configuration: {
+              default_consultation_treatment: {
+                id: 'x',
+                code: 'x',
+                name: 'x',
+              },
+              treatment: [
+                {
+                  id: 'x',
+                  code: 'x',
+                  name: 'x',
+                },
+              ],
+              doctor: [
+                {
+                  id: mockAccount().id,
+                  first_name: mockAccount().first_name,
+                  last_name: mockAccount().last_name,
+                  email: mockAccount().email,
+                },
+              ],
+            },
+            __v: 1,
+          } satisfies MasterDepartmentEditDTO
 
           return app
             .inject({
@@ -268,7 +323,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: '/master/category',
+              url: '/master/department',
               body: data,
             })
             .then((result) => {
@@ -281,7 +336,7 @@ describe('Master Item Category Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Item Category - Edit data'),
+    testCaption('FLOW', 'feature', 'Master Department - Edit data'),
     () => {
       it(
         testCaption('HANDLING', 'feature', 'Should handle invalid format', {
@@ -295,7 +350,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/category/${mockMasterItemCategory().id}`,
+              url: `/master/department/${mockMasterDepartment().id}`,
               body: {},
             })
             .then((result) => {
@@ -317,7 +372,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/category/${mockMasterItemCategory().id}`,
+              url: `/master/department/${mockMasterDepartment().id}`,
               body: {},
             })
             .then((result) => {
@@ -333,10 +388,33 @@ describe('Master Item Category Controller', () => {
         }),
         async () => {
           const data = {
-            code: mockMasterItemCategory().code,
-            name: mockMasterItemCategory().name,
+            code: mockMasterDepartment().code,
+            name: mockMasterDepartment().name,
+            remark: mockMasterDepartment().remark,
+            configuration: {
+              default_consultation_treatment: {
+                id: 'x',
+                code: 'x',
+                name: 'x',
+              },
+              treatment: [
+                {
+                  id: 'x',
+                  code: 'x',
+                  name: 'x',
+                },
+              ],
+              doctor: [
+                {
+                  id: mockAccount().id,
+                  first_name: mockAccount().first_name,
+                  last_name: mockAccount().last_name,
+                  email: mockAccount().email,
+                },
+              ],
+            },
             __v: 0,
-          } satisfies MasterItemCategoryEditDTO
+          } satisfies MasterDepartmentEditDTO
 
           return app
             .inject({
@@ -345,7 +423,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/category/${mockMasterItemCategory().id}`,
+              url: `/master/department/${mockMasterDepartment().id}`,
               body: data,
             })
             .then((result) => {
@@ -358,13 +436,14 @@ describe('Master Item Category Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Item Category - Delete data'),
+    testCaption('FLOW', 'feature', 'Master Department - Delete data'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return success delete', {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
           return app
             .inject({
               method: 'DELETE',
@@ -372,7 +451,7 @@ describe('Master Item Category Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/category/${mockMasterItemCategory().id}`,
+              url: `/master/department/${mockMasterDepartment().id}`,
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.OK)

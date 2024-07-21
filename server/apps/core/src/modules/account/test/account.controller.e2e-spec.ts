@@ -85,15 +85,15 @@ describe('Account Controller', () => {
         },
         { provide: AuthService, useValue: {} },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthorityModel,
         },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -112,10 +112,10 @@ describe('Account Controller', () => {
     accountController = app.get<AccountController>(AccountController)
     authorityController = app.get<AuthorityController>(AuthorityController)
     accountModel = module.get<Model<AccountDocument>>(
-      getModelToken(Account.name)
+      getModelToken(Account.name, 'primary')
     )
     authorityModel = module.get<Model<AuthorityDocument>>(
-      getModelToken(Authority.name)
+      getModelToken(Authority.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -151,6 +151,10 @@ describe('Account Controller', () => {
         return app
           .inject({
             method: 'POST',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: `/account/signin`,
             body: data,
           })
@@ -255,7 +259,7 @@ describe('Account Controller', () => {
               'content-type': 'application/json',
             },
             url: '/account',
-            body: 'abc',
+            body: {},
           })
           .then((result) => {
             expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -323,7 +327,6 @@ describe('Account Controller', () => {
             body: data,
           })
           .then((result) => {
-            console.log(result)
             expect(result.statusCode).toEqual(HttpStatus.OK)
             expect(logger.verbose).toHaveBeenCalled()
           })

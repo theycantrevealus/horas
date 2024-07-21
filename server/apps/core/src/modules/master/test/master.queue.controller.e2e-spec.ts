@@ -72,12 +72,12 @@ describe('Master Queue Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterQueue.name),
+          provide: getModelToken(MasterQueue.name, 'primary'),
           useValue: mockMasterQueueModel,
         },
         { provide: AuthService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: {} },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
+        { provide: getModelToken(Account.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -97,7 +97,7 @@ describe('Master Queue Controller', () => {
       MasterQueueController
     )
     masterQueueModel = module.get<Model<MasterQueueDocument>>(
-      getModelToken(MasterQueue.name)
+      getModelToken(MasterQueue.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -207,8 +207,12 @@ describe('Master Queue Controller', () => {
         return app
           .inject({
             method: 'POST',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: '/master/queue',
-            body: 'abc',
+            body: {},
           })
           .then((result) => {
             expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -231,6 +235,10 @@ describe('Master Queue Controller', () => {
         return app
           .inject({
             method: 'POST',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: '/master/queue',
             body: data,
           })
@@ -253,6 +261,10 @@ describe('Master Queue Controller', () => {
         return app
           .inject({
             method: 'POST',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: '/master/queue',
             body: data,
           })
@@ -273,8 +285,12 @@ describe('Master Queue Controller', () => {
         return app
           .inject({
             method: 'PATCH',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: `/master/queue/${mockMasterQueue().id}`,
-            body: 'abc',
+            body: {},
           })
           .then((result) => {
             expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -291,6 +307,10 @@ describe('Master Queue Controller', () => {
         return app
           .inject({
             method: 'PATCH',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: `/master/queue/${mockMasterQueue().id}`,
             body: {},
           })
@@ -314,6 +334,10 @@ describe('Master Queue Controller', () => {
         return app
           .inject({
             method: 'PATCH',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: `/master/queue/${mockMasterQueue().id}`,
             body: data,
           })
@@ -334,6 +358,10 @@ describe('Master Queue Controller', () => {
         return app
           .inject({
             method: 'DELETE',
+            headers: {
+              authorization: 'Bearer ey...',
+              'Content-Type': 'application/json',
+            },
             url: `/master/queue/${mockMasterQueue().id}`,
           })
           .then((result) => {
