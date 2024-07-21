@@ -1,4 +1,4 @@
-import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
@@ -32,7 +32,6 @@ import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Logger } from 'winston'
 
 import { AccountService } from './account.service'
-import { AccountAddDTO } from './dto/account.add.dto'
 
 @Controller('account')
 @ApiTags('Account Management')

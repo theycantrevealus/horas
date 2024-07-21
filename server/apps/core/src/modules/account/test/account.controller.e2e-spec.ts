@@ -1,6 +1,6 @@
 import { AccountController } from '@core/account/account.controller'
 import { AuthorityController } from '@core/account/authority.controller'
-import { AccountAddDTO } from '@core/account/dto/account.add.dto'
+import { AccountAddDTO } from '@core/account/dto/account.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import {
   accountArray,

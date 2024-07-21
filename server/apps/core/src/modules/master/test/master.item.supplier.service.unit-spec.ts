@@ -75,19 +75,19 @@ describe('Master Item Supplier Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemSupplier.name),
+          provide: getModelToken(MasterItemSupplier.name, 'primary'),
           useValue: mockMasterItemSupplierModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
@@ -95,7 +95,7 @@ describe('Master Item Supplier Service', () => {
       MasterItemSupplierService
     )
     masterItemSupplierModel = module.get<Model<MasterItemSupplierDocument>>(
-      getModelToken(MasterItemSupplier.name)
+      getModelToken(MasterItemSupplier.name, 'primary')
     )
 
     jest.clearAllMocks()

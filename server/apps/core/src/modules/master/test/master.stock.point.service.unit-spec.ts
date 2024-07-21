@@ -74,23 +74,23 @@ describe('Master Stock Point Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterStockPoint.name),
+          provide: getModelToken(MasterStockPoint.name, 'primary'),
           useValue: mockMasterStockPointModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
@@ -98,7 +98,7 @@ describe('Master Stock Point Service', () => {
       MasterStockPointService
     )
     masterStockPointModel = module.get<Model<MasterStockPointDocument>>(
-      getModelToken(MasterStockPoint.name)
+      getModelToken(MasterStockPoint.name, 'primary')
     )
 
     jest.clearAllMocks()

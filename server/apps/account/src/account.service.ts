@@ -1,5 +1,4 @@
-import { AccountAddDTO } from '@core/account/dto/account.add.dto'
-import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'

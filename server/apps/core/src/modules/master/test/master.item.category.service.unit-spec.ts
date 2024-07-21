@@ -75,19 +75,19 @@ describe('Master Item Category Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemCategory.name),
+          provide: getModelToken(MasterItemCategory.name, 'primary'),
           useValue: mockMasterItemCategoryModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
@@ -95,7 +95,7 @@ describe('Master Item Category Service', () => {
       MasterItemCategoryService
     )
     masterItemCategoryModel = module.get<Model<MasterItemCategoryDocument>>(
-      getModelToken(MasterItemCategory.name)
+      getModelToken(MasterItemCategory.name, 'primary')
     )
 
     jest.clearAllMocks()

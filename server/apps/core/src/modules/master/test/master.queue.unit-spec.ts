@@ -75,29 +75,29 @@ describe('Master Queue Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterQueue.name),
+          provide: getModelToken(MasterQueue.name, 'primary'),
           useValue: mockMasterQueueModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
     masterQueueService = module.get<MasterQueueService>(MasterQueueService)
     masterQueueModel = module.get<Model<MasterQueueDocument>>(
-      getModelToken(MasterQueue.name)
+      getModelToken(MasterQueue.name, 'primary')
     )
 
     jest.clearAllMocks()

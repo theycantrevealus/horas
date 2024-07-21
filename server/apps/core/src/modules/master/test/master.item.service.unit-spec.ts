@@ -78,25 +78,25 @@ describe('Master Item Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItem.name),
+          provide: getModelToken(MasterItem.name, 'primary'),
           useValue: mockMasterItemModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
     masterItemService = module.get<MasterItemService>(MasterItemService)
     masterItemModel = module.get<Model<MasterItemDocument>>(
-      getModelToken(MasterItem.name)
+      getModelToken(MasterItem.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -234,6 +234,23 @@ describe('Master Item Service', () => {
 
           await expect(async () => {
             await masterItemService.detail(targetData.id)
+          }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on get find data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetData = masterItemDocArray[0]
+
+          jest.spyOn(masterItemModel, 'findOne').mockImplementationOnce(() => {
+            throw new Error()
+          })
+
+          await expect(async () => {
+            await masterItemService.find({ id: targetData.id })
           }).rejects.toThrow(Error)
         }
       )

@@ -61,21 +61,21 @@ describe('Authority Service', () => {
           },
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthorityModel,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
     accountService = module.get<AccountService>(AccountService)
     authorityModel = module.get<Model<AuthorityDocument>>(
-      getModelToken(Authority.name)
+      getModelToken(Authority.name, 'primary')
     )
   })
 

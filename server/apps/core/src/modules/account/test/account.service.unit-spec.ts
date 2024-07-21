@@ -69,15 +69,15 @@ describe('Account Service', () => {
           },
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
@@ -86,7 +86,7 @@ describe('Account Service', () => {
     authService = module.get<AuthService>(AuthService)
     cacheManager = module.get(CACHE_MANAGER)
     accountModel = module.get<Model<AccountDocument>>(
-      getModelToken(Account.name)
+      getModelToken(Account.name, 'primary')
     )
     jest.spyOn(configService, 'get').mockReturnValue(process.env.TZ)
   })
@@ -505,26 +505,67 @@ describe('Account Service', () => {
     }
   )
 
-  describe(testCaption('ADD DATA', 'data', 'Account - Add new account'), () => {
+  describe(testCaption('ADD DATA', 'data', 'Account - Add new data'), () => {
     it(testCaption('DATA', 'data', 'Should add new account'), async () => {
-      const producerMethod = jest.spyOn(mockKafkaTransaction, 'transaction')
+      jest.spyOn(accountModel, 'create')
 
       await accountService
-        .accountAdd(
-          {
-            first_name: mockAccount().first_name,
-            last_name: mockAccount().last_name,
-            phone: mockAccount().phone,
-            email: mockAccount().email,
-            password: mockAccount().password,
-            authority: mockAccount().authority,
-          },
-          mockAccount()
-        )
-        .then(() => {
-          expect(producerMethod).toHaveBeenCalled()
+        .accountAdd(mockAccount(), mockAccount())
+        .then((result: GlobalResponse) => {
+          // Should create id
+          expect(result.payload).toHaveProperty('id')
+
+          // Should classify transaction
+          expect(result.transaction_classify).toEqual('ACCOUNT_ADD')
+
+          // Not an empty string so be informative
+          expect(result.message).not.toBe('')
+
+          // Should return success code
+          expect(result.statusCode.customCode).toEqual(modCodes.Global.success)
         })
     })
+
+    it(
+      testCaption('DATA', 'data', 'Should replace code if not defined'),
+      async () => {
+        jest.spyOn(accountService, 'accountAdd')
+        const dataTest = mockAccount()
+        delete dataTest.code
+        await accountService
+          .accountAdd(dataTest, mockAccount())
+          .then((result: GlobalResponse) => {
+            // Should create id
+            expect(result.payload).toHaveProperty('id')
+
+            // Should classify transaction
+            expect(result.transaction_classify).toEqual('ACCOUNT_ADD')
+
+            // Not an empty string so be informative
+            expect(result.message).not.toBe('')
+
+            // Should return success code
+            expect(result.statusCode.customCode).toEqual(
+              modCodes.Global.success
+            )
+          })
+      }
+    )
+
+    it(
+      testCaption('HANDLING', 'data', 'Response error on add data', {
+        tab: 1,
+      }),
+      async () => {
+        jest.spyOn(accountModel, 'create').mockImplementationOnce(() => {
+          throw new Error()
+        })
+
+        await expect(async () => {
+          await accountService.accountAdd(mockAccount(), mockAccount())
+        }).rejects.toThrow(Error)
+      }
+    )
   })
 
   describe(testCaption('EDIT DATA', 'data', 'Account - Edit account'), () => {

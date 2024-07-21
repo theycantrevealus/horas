@@ -1,4 +1,4 @@
-import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import {
   AuthorityAddDTO,
@@ -25,8 +25,6 @@ import * as bcrypt from 'bcrypt'
 import { Cache } from 'cache-manager'
 import { Model, Types } from 'mongoose'
 import { Logger } from 'winston'
-
-import { AccountAddDTO } from './dto/account.add.dto'
 
 @Injectable()
 export class AccountService {
