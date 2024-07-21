@@ -82,7 +82,7 @@ export async function errorHttpHandler(
     path: request.url ?? '',
     url: request.url ?? '',
     method: method ?? '',
-    takeTime: response.getResponseTime(),
+    takeTime: response.elapsedTime,
     payload: {
       body: request.body ?? {},
       params: request.params ?? '',
