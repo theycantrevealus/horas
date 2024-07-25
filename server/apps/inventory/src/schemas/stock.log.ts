@@ -1,10 +1,10 @@
 import { IMasterItem } from '@core/master/interface/master.item'
 import { IMasterItemBatch } from '@core/master/interface/master.item.batch'
 import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
-import { MasterItemBatchJoin } from '@core/master/schemas/master.item.batch.join'
-import { MasterItemJoin } from '@core/master/schemas/master.item.join'
-import { MasterStockPointJoin } from '@core/master/schemas/master.stock.point.join'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { MasterItemJoin } from '@schemas/master/master.item'
+import { MasterItemBatchJoin } from '@schemas/master/master.item.batch'
+import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type InventoryStockLogDocument = HydratedDocument<InventoryStockLog>

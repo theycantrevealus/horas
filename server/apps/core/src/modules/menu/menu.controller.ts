@@ -1,6 +1,7 @@
 import { MenuAddDTO, MenuEditDTO } from '@core/menu/dto/menu'
 import { MenuService } from '@core/menu/menu.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -39,6 +40,7 @@ export class MenuController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreMenu', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all data',
     description: 'Showing data',
@@ -93,6 +95,7 @@ export class MenuController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreMenu', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -110,6 +113,7 @@ export class MenuController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreMenu', action: 'add' })
   @ApiOperation({
     summary: 'Add new data',
     description: ``,
@@ -127,6 +131,7 @@ export class MenuController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreMenu', action: 'edit' })
   @ApiOperation({
     summary: 'Edit data',
     description: ``,
@@ -144,6 +149,7 @@ export class MenuController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreMenu', action: 'delete' })
   @ApiOperation({
     summary: 'Delete data',
     description: ``,

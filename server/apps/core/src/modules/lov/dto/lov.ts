@@ -1,8 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator'
 import { Types } from 'mongoose'
 
 export class LOVAddDTO {
+  @ApiProperty({
+    example: '',
+    description: 'LOV group code',
+  })
+  @IsNotEmpty()
+  group: string
+
   @ApiProperty({
     example: '',
     description: 'LOV identifier',
@@ -15,7 +22,7 @@ export class LOVAddDTO {
     required: false,
     description: 'Another lov as parent',
   })
-  @IsNotEmpty()
+  @IsString()
   parent: string
 
   @ApiProperty({
@@ -29,6 +36,13 @@ export class LOVAddDTO {
 
 export class LOVEditDTO {
   @ApiProperty({
+    example: '',
+    description: 'LOV group code',
+  })
+  @IsNotEmpty()
+  group: string
+
+  @ApiProperty({
     example: 'Adidas',
     description: 'Item brand name',
   })
@@ -40,6 +54,7 @@ export class LOVEditDTO {
     required: false,
     description: 'Another lov as parent',
   })
+  @IsString()
   parent: string
 
   @ApiProperty({

@@ -2,13 +2,13 @@ import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { ICurrency } from '@core/i18n/interface/i18n'
 import { CurrencyJoin } from '@core/i18n/schemas/i18n.join'
 import { IMasterItemSupplier } from '@core/master/interface/master.item.supplier'
-import { MasterItemSupplierJoin } from '@core/master/schemas/master.item.supplier.join'
 import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { PurchaseOrderApproval } from '@inventory/schemas/purchase.order.approval'
 import { PurchaseOrderDetail } from '@inventory/schemas/purchase.order.detail'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
+import { MasterItemSupplierJoin } from '@schemas/master/master.item.supplier'
 import {
   DocumentHistoryJoin,
   IDocumentHistory,

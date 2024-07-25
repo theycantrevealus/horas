@@ -3,28 +3,31 @@ import {
   MasterItemCategoryEditDTO,
 } from '@core/master/dto/master.item.category'
 import { IMasterItemCategory } from '@core/master/interface/master.item.category'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import {
   MasterItemCategory,
   MasterItemCategoryDocument,
-} from '@core/master/schemas/master.item.category'
-import { HttpStatus, Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
-import { Account } from '@schemas/account/account.model'
+} from '@schemas/master/master.item.category'
+import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
-import { isJSON } from 'class-validator'
 import { Model } from 'mongoose'
 
 @Injectable()
 export class MasterItemCategoryService {
   constructor(
-    @InjectModel(MasterItemCategory.name)
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
+    @InjectModel(MasterItemCategory.name, 'primary')
     private masterItemCategoryModel: Model<MasterItemCategoryDocument>
   ) {}
 
-  async all(parameter: any): Promise<GlobalResponse> {
+  async all(payload: any): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -36,23 +39,24 @@ export class MasterItemCategoryService {
       transaction_classify: 'MASTER_ITEM_CATEGORY_LIST',
       transaction_id: null,
     } satisfies GlobalResponse
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
+
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
       return await prime_datatable(
-        parsedData,
+        parameter,
         this.masterItemCategoryModel
       ).then((result) => {
-        response.payload = result.payload.data
-        response.message = 'Data query success'
+        response.payload = result.payload
+        response.message = 'Master item category fetch successfully'
         return response
       })
-    } else {
+    } catch (error) {
+      response.message = `Master item category failed to fetch`
       response.statusCode = {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: modCodes.Global.failed,
+        ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
       }
-      response.message = 'filters is not a valid json'
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
   }
@@ -240,7 +244,9 @@ export class MasterItemCategoryService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(async () => {

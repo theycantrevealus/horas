@@ -1,6 +1,5 @@
-import { ApplicationConfig } from '@configuration/environtment'
-import { MongoConfig } from '@configuration/mongo'
 import { AccountModule } from '@core/account/account.module'
+import { MasterDepartmentController } from '@core/master/controllers/master.department.controller'
 import { MasterItemBrandController } from '@core/master/controllers/master.item.brand.controller'
 import { MasterItemCategoryController } from '@core/master/controllers/master.item.category.controller'
 import { MasterItemController } from '@core/master/controllers/master.item.controller'
@@ -8,31 +7,7 @@ import { MasterItemSupplierController } from '@core/master/controllers/master.it
 import { MasterItemUnitController } from '@core/master/controllers/master.item.unit.controller'
 import { MasterQueueController } from '@core/master/controllers/master.queue.controller'
 import { MasterStockPointController } from '@core/master/controllers/master.stock.point.controller'
-import { MasterItem, MasterItemSchema } from '@core/master/schemas/master.item'
-import {
-  MasterItemBrand,
-  MasterItemBrandSchema,
-} from '@core/master/schemas/master.item.brand'
-import {
-  MasterItemCategory,
-  MasterItemCategorySchema,
-} from '@core/master/schemas/master.item.category'
-import {
-  MasterItemSupplier,
-  MasterItemSupplierSchema,
-} from '@core/master/schemas/master.item.supplier'
-import {
-  MasterItemUnit,
-  MasterItemUnitSchema,
-} from '@core/master/schemas/master.item.unit'
-import {
-  MasterQueue,
-  MasterQueueSchema,
-} from '@core/master/schemas/master.queue.machine'
-import {
-  MasterStockPoint,
-  MasterStockPointSchema,
-} from '@core/master/schemas/master.stock.point'
+import { MasterDepartmentService } from '@core/master/services/master.department.service'
 import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { MasterItemService } from '@core/master/services/master.item.service'
@@ -43,236 +18,72 @@ import { MasterStockPointService } from '@core/master/services/master.stock.poin
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
+import {
+  MasterDepartment,
+  MasterDepartmentSchema,
+} from '@schemas/master/master.department'
+import { MongoMiddlewareMasterDepartment } from '@schemas/master/master.department.middleware'
+import { MasterItem, MasterItemSchema } from '@schemas/master/master.item'
+import {
+  MasterItemBrand,
+  MasterItemBrandSchema,
+} from '@schemas/master/master.item.brand'
+import { MongoMiddlewareMasterItemBrand } from '@schemas/master/master.item.brand.middleware'
+import {
+  MasterItemCategory,
+  MasterItemCategorySchema,
+} from '@schemas/master/master.item.category'
+import { MongoMiddlewareMasterItemCategory } from '@schemas/master/master.item.category.middleware'
+import { MongoMiddlewareMasterItem } from '@schemas/master/master.item.middleware'
+import {
+  MasterItemSupplier,
+  MasterItemSupplierSchema,
+} from '@schemas/master/master.item.supplier'
+import { MongoMiddlewareMasterItemSupplier } from '@schemas/master/master.item.supplier.middleware'
+import {
+  MasterItemUnit,
+  MasterItemUnitSchema,
+} from '@schemas/master/master.item.unit'
+import { MongoMiddlewareMasterItemUnit } from '@schemas/master/master.item.unit.middleware'
+import {
+  MasterQueue,
+  MasterQueueSchema,
+} from '@schemas/master/master.queue.machine'
+import { MongoMiddlewareMasterQueue } from '@schemas/master/master.queue.middleware'
+import {
+  MasterStockPoint,
+  MasterStockPointSchema,
+} from '@schemas/master/master.stock.point'
+import { MongoMiddlewareMasterStockPoint } from '@schemas/master/master.stock.point.middleware'
+import {
+  MasterTreatment,
+  MasterTreatmentSchema,
+} from '@schemas/master/master.treatment'
+import { MongoMiddlewareMasterTreatment } from '@schemas/master/master.treatment.middleware'
 import { AuthModule } from '@security/auth.module'
-import { environmentIdentifier } from '@utility/environtment'
-import { TimeManagement } from '@utility/time'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: environmentIdentifier,
-      load: [ApplicationConfig, MongoConfig],
-    }),
-    MongooseModule.forFeatureAsync([
-      {
-        name: MasterItem.name,
-        useFactory: () => {
-          const schema = MasterItemSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `item-${this._id}`
-              this.__v = 0
-            }
+    MongooseModule.forFeature(
+      [
+        { name: MasterStockPoint.name, schema: MasterStockPointSchema },
+        { name: MasterItemSupplier.name, schema: MasterItemSupplierSchema },
+        { name: MasterItemBrand.name, schema: MasterItemBrandSchema },
+        { name: MasterItemUnit.name, schema: MasterItemUnitSchema },
+        { name: MasterItemCategory.name, schema: MasterItemCategorySchema },
+        { name: MasterItem.name, schema: MasterItemSchema },
 
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next()
-              //return next(new Error('Invalid document'))
-            }
-          })
+        { name: MasterQueue.name, schema: MasterQueueSchema },
 
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
+        { name: MasterDepartment.name, schema: MasterDepartmentSchema },
+        { name: MasterTreatment.name, schema: MasterTreatmentSchema },
 
-          return schema
-        },
-      },
-      {
-        name: MasterItemSupplier.name,
-        useFactory: () => {
-          const schema = MasterItemSupplierSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `supplier-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: MasterItemCategory.name,
-        useFactory: () => {
-          const schema = MasterItemCategorySchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `item_category-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: MasterItemUnit.name,
-        useFactory: () => {
-          const schema = MasterItemUnitSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `item_unit-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: MasterItemBrand.name,
-        useFactory: () => {
-          const schema = MasterItemBrandSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `brand-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: MasterStockPoint.name,
-        useFactory: () => {
-          const schema = MasterStockPointSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `stock_point-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-      {
-        name: MasterQueue.name,
-        useFactory: () => {
-          const schema = MasterQueueSchema
-          const time = new TimeManagement()
-          schema.pre('save', function (next) {
-            if (this.isNew) {
-              this.id = `queue-${this._id}`
-              this.__v = 0
-            }
-
-            if (this.isModified()) {
-              this.increment()
-              this.updated_at = time.getTimezone('Asia/Jakarta')
-              return next()
-            } else {
-              return next(new Error('Invalid document'))
-            }
-          })
-
-          schema.pre('findOneAndUpdate', function (next) {
-            const update = this.getUpdate()
-            update['updated_at'] = time.getTimezone('Asia/Jakarta')
-            update['$inc'] = { __v: 1 }
-            next()
-          })
-
-          return schema
-        },
-      },
-    ]),
-    MongooseModule.forFeature([
-      { name: LogLogin.name, schema: LogLoginSchema },
-      { name: LogActivity.name, schema: LogActivitySchema },
-    ]),
+        { name: LogLogin.name, schema: LogLoginSchema },
+        { name: LogActivity.name, schema: LogActivitySchema },
+      ],
+      'primary'
+    ),
     AuthModule,
     AccountModule,
   ],
@@ -284,8 +95,22 @@ import { TimeManagement } from '@utility/time'
     MasterItemUnitController,
     MasterItemController,
     MasterQueueController,
+    MasterDepartmentController,
   ],
   providers: [
+    MongoMiddlewareMasterStockPoint,
+    MongoMiddlewareMasterItemSupplier,
+    MongoMiddlewareMasterItemBrand,
+    MongoMiddlewareMasterItemUnit,
+    MongoMiddlewareMasterItemCategory,
+    MongoMiddlewareMasterItem,
+
+    MongoMiddlewareMasterQueue,
+
+    MongoMiddlewareMasterDepartment,
+    MongoMiddlewareMasterTreatment,
+
+    MasterDepartmentService,
     MasterItemSupplierService,
     MasterItemBrandService,
     MasterItemCategoryService,
@@ -295,6 +120,7 @@ import { TimeManagement } from '@utility/time'
     MasterQueueService,
   ],
   exports: [
+    MasterDepartmentService,
     MasterItemSupplierService,
     MasterItemBrandService,
     MasterItemCategoryService,

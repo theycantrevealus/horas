@@ -2,28 +2,31 @@ import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
 } from '@core/master/dto/master.stock.point'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { InjectModel } from '@nestjs/mongoose'
+import { Account } from '@schemas/account/account.model'
 import {
   MasterStockPoint,
   MasterStockPointDocument,
-} from '@core/master/schemas/master.stock.point'
-import { HttpStatus, Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
-import { Account } from '@schemas/account/account.model'
+} from '@schemas/master/master.stock.point'
+import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
-import { isJSON } from 'class-validator'
 import { Model } from 'mongoose'
 
 @Injectable()
 export class MasterStockPointService {
   constructor(
-    @InjectModel(MasterStockPoint.name)
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
+    @InjectModel(MasterStockPoint.name, 'primary')
     private masterStockPointModel: Model<MasterStockPointDocument>
   ) {}
 
-  async all(parameter: any) {
+  async all(payload: any) {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -35,22 +38,23 @@ export class MasterStockPointService {
       transaction_classify: 'MASTER_STOCK_POINT_LIST',
       transaction_id: null,
     } satisfies GlobalResponse
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await prime_datatable(parsedData, this.masterStockPointModel).then(
+
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+      return await prime_datatable(parameter, this.masterStockPointModel).then(
         (result) => {
-          response.payload = result.payload.data
-          response.message = 'Data query success'
+          response.payload = result.payload
+          response.message = 'Master stock point fetch successfully'
           return response
         }
       )
-    } else {
+    } catch (error) {
+      response.message = `Master stock point failed to fetch`
       response.statusCode = {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: modCodes.Global.failed,
+        ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
       }
-      response.message = 'filters is not a valid json'
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
   }
@@ -189,7 +193,9 @@ export class MasterStockPointService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(async () => {

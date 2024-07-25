@@ -1,6 +1,7 @@
 import { i18nAddDTO, i18nEditDTO } from '@core/i18n/dto/i18n'
 import { i18n, i18nDocument } from '@core/i18n/schemas/i18n'
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
 import { PrimeParameter } from '@utility/dto/prime'
@@ -13,6 +14,8 @@ import { Model } from 'mongoose'
 @Injectable()
 export class i18nService {
   constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
     @InjectModel(i18n.name) private readonly i18nModel: Model<i18nDocument>
   ) {}
 
@@ -196,7 +199,9 @@ export class i18nService {
     })
 
     if (data) {
-      data.deleted_at = new TimeManagement().getTimezone('Asia/Jakarta')
+      data.deleted_at = new TimeManagement().getTimezone(
+        await this.configService.get<string>('application.timezone')
+      )
 
       await data
         .save()

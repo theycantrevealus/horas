@@ -1,12 +1,12 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
-import { MasterStockPointJoin } from '@core/master/schemas/master.stock.point.join'
 import { IGeneralReceiveNoteDetail } from '@inventory/interface/general.receive.note.detail'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { GeneralReceiveNoteDetail } from '@inventory/schemas/general.receive.note.detail'
 import { PurchaseOrderJoin } from '@inventory/schemas/purchase.order.join'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
+import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type GeneralReceiveNoteDocument = HydratedDocument<GeneralReceiveNote>

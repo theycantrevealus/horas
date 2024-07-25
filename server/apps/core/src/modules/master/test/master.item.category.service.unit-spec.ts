@@ -4,27 +4,28 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import { IMasterItemCategory } from '@core/master/interface/master.item.category'
 import {
   masterItemCategoryDocArray,
   mockMasterItemCategory,
   mockMasterItemCategoryModel,
 } from '@core/master/mock/master.item.category.mock'
-import {
-  MasterItemCategory,
-  MasterItemCategoryDocument,
-} from '@core/master/schemas/master.item.category'
 import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { HttpStatus } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterItemCategory,
+  MasterItemCategoryDocument,
+} from '@schemas/master/master.item.category'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -35,7 +36,7 @@ import { Model } from 'mongoose'
 describe('Master Item Category Service', () => {
   let masterItemCategoryService: MasterItemCategoryService
   let masterItemCategoryModel: Model<MasterItemCategory>
-
+  let configService: ConfigService
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
@@ -75,27 +76,29 @@ describe('Master Item Category Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemCategory.name),
+          provide: getModelToken(MasterItemCategory.name, 'primary'),
           useValue: mockMasterItemCategoryModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
+
+    configService = module.get<ConfigService>(ConfigService)
 
     masterItemCategoryService = module.get<MasterItemCategoryService>(
       MasterItemCategoryService
     )
     masterItemCategoryModel = module.get<Model<MasterItemCategoryDocument>>(
-      getModelToken(MasterItemCategory.name)
+      getModelToken(MasterItemCategory.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -148,10 +151,10 @@ describe('Master Item Category Service', () => {
               )
 
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(masterItemCategoryDocArray)
+              expect(result.payload['data']).toEqual(masterItemCategoryDocArray)
             })
         }
       )
@@ -467,7 +470,21 @@ describe('Master Item Category Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemCategoryModel, 'findOneAndUpdate')
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
+          jest
+            .spyOn(masterItemCategoryModel, 'findOneAndUpdate')
+            .mockResolvedValue({
+              statusCode: {
+                defaultCode: HttpStatus.OK,
+                customCode: modCodes.Global.success,
+                classCode: '',
+              },
+              message: 'Delete success message',
+              payload: {},
+              transaction_classify: 'MASTER_ITEM_CATEGORY_DELETE',
+              transaction_id: '',
+            } satisfies GlobalResponse)
 
           await masterItemCategoryService
             .delete(masterItemCategoryDocArray[0].id)

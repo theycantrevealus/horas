@@ -4,16 +4,12 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterItemDocArray,
   mockMasterItem,
   mockMasterItemModel,
 } from '@core/master/mock/master.item.mock'
-import {
-  MasterItem,
-  MasterItemDocument,
-} from '@core/master/schemas/master.item'
 import { MasterItemService } from '@core/master/services/master.item.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -24,6 +20,7 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import { AuthService } from '@security/auth.service'
 import { M_ITEM_SERVICE } from '@utility/constants'
 import { GlobalResponse } from '@utility/dto/response'
@@ -35,6 +32,7 @@ import { Model } from 'mongoose'
 describe('Master Item Service', () => {
   let masterItemService: MasterItemService
   let masterItemModel: Model<MasterItem>
+  let configService: ConfigService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -81,25 +79,28 @@ describe('Master Item Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItem.name),
+          provide: getModelToken(MasterItem.name, 'primary'),
           useValue: mockMasterItemModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
+    configService = module.get<ConfigService>(ConfigService)
+
     masterItemService = module.get<MasterItemService>(MasterItemService)
+
     masterItemModel = module.get<Model<MasterItemDocument>>(
-      getModelToken(MasterItem.name)
+      getModelToken(MasterItem.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -148,7 +149,7 @@ describe('Master Item Service', () => {
             )
 
             // Should be an array of data
-            expect(result.payload).toBeInstanceOf(Object)
+            expect(result.payload['data']).toBeInstanceOf(Array)
 
             // Data should be defined
             expect(result.payload['data']).toEqual(masterItemDocArray)
@@ -237,6 +238,23 @@ describe('Master Item Service', () => {
 
           await expect(async () => {
             await masterItemService.detail(targetData.id)
+          }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on get find data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetData = masterItemDocArray[0]
+
+          jest.spyOn(masterItemModel, 'findOne').mockImplementationOnce(() => {
+            throw new Error()
+          })
+
+          await expect(async () => {
+            await masterItemService.find({ id: targetData.id })
           }).rejects.toThrow(Error)
         }
       )
@@ -385,6 +403,8 @@ describe('Master Item Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           jest.spyOn(masterItemModel, 'findOneAndUpdate')
 
           await masterItemService

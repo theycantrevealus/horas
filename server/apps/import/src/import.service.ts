@@ -7,7 +7,7 @@ import { MasterItemService } from '@core/master/services/master.item.service'
 import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
 import { Inject, Injectable } from '@nestjs/common'
 import { Account } from '@schemas/account/account.model'
-import { ILOV } from '@schemas/lov/lov.join'
+import { ILOV } from '@schemas/lov/lov'
 import * as fs from 'fs'
 
 @Injectable()

@@ -25,6 +25,12 @@
       "@schemas/*": [
         "./apps/schemas/*"
       ],
+      "@filters/*": [
+        "./apps/filters/*"
+      ],
+      "@pipes/*": [
+        "./apps/pipes/*"
+      ],
       "@core/*": [
         "./apps/core/src/modules/*"
       ],

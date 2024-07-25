@@ -21,10 +21,14 @@ export class CoreService {
   constructor(
     @InjectModel(Config.name, 'primary')
     private configModel: Model<ConfigDocument>,
+
     @InjectModel(ConfigGroup.name, 'primary')
     private configGroupModel: Model<ConfigGroupDocument>,
+
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
     @Inject(AccountService) private readonly accountService: AccountService,
+
     @Inject(WINSTON_MODULE_PROVIDER)
     private readonly logger: Logger
   ) {}
@@ -148,13 +152,15 @@ export class CoreService {
 
     const promises = files.map(async (file) => {
       return await new Promise(async (resolve, reject) => {
-        const instance = await createLogger({
-          transports: [
-            new winston.transports.File({
-              filename: `logs/${file}`,
-            }),
-          ],
-        })
+        const [instance] = await Promise.all([
+          createLogger({
+            transports: [
+              new winston.transports.File({
+                filename: `logs/${file}`,
+              }),
+            ],
+          }),
+        ])
 
         await instance.query(
           {

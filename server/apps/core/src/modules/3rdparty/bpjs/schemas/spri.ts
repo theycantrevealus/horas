@@ -1,7 +1,7 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { i18nComponent, Ii18nComponent } from '@core/i18n/schemas/i18n'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type BPJSSPRIDocument = HydratedDocument<BPJSSPRI>

@@ -11,6 +11,9 @@
   ],
   "moduleNameMapper": {
     "^@mock(.*)$": "<rootDir>/apps/mock$1",
+    "^@schemas(.*)$": "<rootDir>/apps/schemas$1",
+    "^@filters(.*)$": "<rootDir>/apps/filters$1",
+    "^@pipes(.*)$": "<rootDir>/apps/pipes$1",
     "^@core(.*)$": "<rootDir>/apps/core/src/modules$1",
     "^@log(.*)$": "<rootDir>/apps/log/src$1",
     "^@security(.*)$": "<rootDir>/apps/security$1",
@@ -22,7 +25,7 @@
   },
   "rootDir": ".",
   "preset": "ts-jest",
-  "testRegex": "account.controller.e2e-spec\\.ts$",
+  "testRegex": "controller.e2e-spec\\.ts$",
   "testEnvironment": "node",
   "transform": {
     "^.+\\.ts?$": "ts-jest"
@@ -45,7 +48,9 @@
   ],
   "collectCoverageFrom": [
     "<rootDir>/apps/core/src/modules/account/**/*.{js,jsx,ts,tsx}",
-    "!<rootDir>/node_modules/"
+    "<rootDir>/apps/core/src/modules/master/**/*.{js,jsx,ts,tsx}",
+    "!<rootDir>/node_modules/",
+    "!<rootDir>/**/*.mock.{js,jsx,ts,tsx}"
   ],
   "coverageThreshold": {
     "global": {

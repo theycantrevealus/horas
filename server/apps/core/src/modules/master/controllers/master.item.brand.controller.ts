@@ -4,6 +4,7 @@ import {
 } from '@core/master/dto/master.item.brand'
 import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -43,8 +44,9 @@ export class MasterItemBrandController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemBrand', action: 'view' })
   @ApiOperation({
-    summary: 'Fetch all account',
+    summary: 'Fetch all item brand',
     description: 'Showing brand data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
@@ -58,6 +60,7 @@ export class MasterItemBrandController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemBrand', action: 'view' })
   @ApiParam({
     name: 'id',
   })
@@ -75,6 +78,7 @@ export class MasterItemBrandController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemBrand', action: 'add' })
   @ApiOperation({
     summary: 'Add new item brand',
     description: ``,
@@ -92,6 +96,7 @@ export class MasterItemBrandController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemBrand', action: 'edit' })
   @ApiOperation({
     summary: 'Edit new item brand',
     description: ``,
@@ -109,6 +114,7 @@ export class MasterItemBrandController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemBrand', action: 'delete' })
   @ApiOperation({
     summary: 'Edit new item brand',
     description: ``,

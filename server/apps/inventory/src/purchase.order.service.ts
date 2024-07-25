@@ -133,7 +133,9 @@ export class PurchaseOrderService {
         status: 'new',
         remark: data.remark,
         created_by: account,
-        logged_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+        logged_at: new TimeManagement().getTimezone(
+          await this.configService.get<string>('application.timezone')
+        ),
       },
     ]
 

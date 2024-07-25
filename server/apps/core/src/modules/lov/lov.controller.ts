@@ -100,7 +100,7 @@ export class LOVController {
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Add new item brand',
+    summary: 'Add new lov',
     description: ``,
   })
   async add(
@@ -124,7 +124,7 @@ export class LOVController {
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @ApiOperation({
-    summary: 'Edit new item brand',
+    summary: 'Edit lov',
     description: ``,
   })
   @ApiParam({

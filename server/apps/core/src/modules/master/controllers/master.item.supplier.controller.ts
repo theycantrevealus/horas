@@ -4,6 +4,7 @@ import {
 } from '@core/master/dto/master.item.supplier'
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -29,7 +30,7 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Supplier Management')
 export class MasterItemSupplierController {
   private masterItemSupplierService: MasterItemSupplierService
   constructor(masterItemSupplierService: MasterItemSupplierService) {
@@ -42,6 +43,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all supplier',
     description: 'Showing supplier data',
@@ -57,11 +59,15 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Query() param) {
+  @ApiQuery({
+    name: 'id',
+  })
+  async detail(@Query() param: any) {
     return await this.masterItemSupplierService.detail(param.id)
   }
 
@@ -71,6 +77,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'add' })
   @ApiOperation({
     summary: 'Add new item supplier',
     description: ``,
@@ -88,6 +95,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'edit' })
   @ApiOperation({
     summary: 'Edit new item supplier',
     description: ``,
@@ -95,7 +103,10 @@ export class MasterItemSupplierController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemSupplierEditDTO, @Param() param) {
+  async edit(
+    @Body() parameter: MasterItemSupplierEditDTO,
+    @Param() param: any
+  ) {
     return await this.masterItemSupplierService.edit(parameter, param.id)
   }
 
@@ -105,6 +116,7 @@ export class MasterItemSupplierController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemSupplier', action: 'delete' })
   @ApiOperation({
     summary: 'Edit new item supplier',
     description: ``,
@@ -112,7 +124,7 @@ export class MasterItemSupplierController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any) {
     return await this.masterItemSupplierService.delete(param.id)
   }
 }

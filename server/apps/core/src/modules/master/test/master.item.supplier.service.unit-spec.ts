@@ -4,16 +4,12 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterItemSupplierDocArray,
   mockMasterItemSupplier,
   mockMasterItemSupplierModel,
 } from '@core/master/mock/master.item.supplier.mock'
-import {
-  MasterItemSupplier,
-  MasterItemSupplierDocument,
-} from '@core/master/schemas/master.item.supplier'
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -24,6 +20,10 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterItemSupplier,
+  MasterItemSupplierDocument,
+} from '@schemas/master/master.item.supplier'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -34,6 +34,7 @@ import { Model } from 'mongoose'
 describe('Master Item Supplier Service', () => {
   let masterItemSupplierService: MasterItemSupplierService
   let masterItemSupplierModel: Model<MasterItemSupplier>
+  let configService: ConfigService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -75,27 +76,29 @@ describe('Master Item Supplier Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemSupplier.name),
+          provide: getModelToken(MasterItemSupplier.name, 'primary'),
           useValue: mockMasterItemSupplierModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
+
+    configService = module.get<ConfigService>(ConfigService)
 
     masterItemSupplierService = module.get<MasterItemSupplierService>(
       MasterItemSupplierService
     )
     masterItemSupplierModel = module.get<Model<MasterItemSupplierDocument>>(
-      getModelToken(MasterItemSupplier.name)
+      getModelToken(MasterItemSupplier.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -148,10 +151,10 @@ describe('Master Item Supplier Service', () => {
               )
 
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(masterItemSupplierDocArray)
+              expect(result.payload['data']).toEqual(masterItemSupplierDocArray)
             })
         }
       )
@@ -361,6 +364,8 @@ describe('Master Item Supplier Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           jest.spyOn(masterItemSupplierModel, 'findOneAndUpdate')
 
           await masterItemSupplierService

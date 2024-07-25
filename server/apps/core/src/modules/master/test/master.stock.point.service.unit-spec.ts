@@ -4,16 +4,12 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterStockPointDocArray,
   mockMasterStockPoint,
   mockMasterStockPointModel,
 } from '@core/master/mock/master.stock.point.mock'
-import {
-  MasterStockPoint,
-  MasterStockPointDocument,
-} from '@core/master/schemas/master.stock.point'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -24,6 +20,10 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterStockPoint,
+  MasterStockPointDocument,
+} from '@schemas/master/master.stock.point'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -34,6 +34,7 @@ import { Model } from 'mongoose'
 describe('Master Stock Point Service', () => {
   let masterStockPointService: MasterStockPointService
   let masterStockPointModel: Model<MasterStockPoint>
+  let configService: ConfigService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -74,31 +75,33 @@ describe('Master Stock Point Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterStockPoint.name),
+          provide: getModelToken(MasterStockPoint.name, 'primary'),
           useValue: mockMasterStockPointModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
+
+    configService = module.get<ConfigService>(ConfigService)
 
     masterStockPointService = module.get<MasterStockPointService>(
       MasterStockPointService
     )
     masterStockPointModel = module.get<Model<MasterStockPointDocument>>(
-      getModelToken(MasterStockPoint.name)
+      getModelToken(MasterStockPoint.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -151,10 +154,10 @@ describe('Master Stock Point Service', () => {
               )
 
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(masterStockPointDocArray)
+              expect(result.payload['data']).toEqual(masterStockPointDocArray)
             })
         }
       )
@@ -398,6 +401,8 @@ describe('Master Stock Point Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           jest.spyOn(masterStockPointModel, 'findOneAndUpdate')
 
           await masterStockPointService

@@ -1,25 +1,26 @@
 import { AccountService } from '@core/account/account.service'
 import { accountDocArray, mockAccount } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import {
   masterItemBrandDocArray,
   mockMasterItemBrand,
   mockMasterItemBrandModel,
 } from '@core/master/mock/master.item.brand.mock'
-import {
-  MasterItemBrand,
-  MasterItemBrandDocument,
-} from '@core/master/schemas/master.item.brand'
 import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { HttpStatus } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterItemBrand,
+  MasterItemBrandDocument,
+} from '@schemas/master/master.item.brand'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -28,6 +29,7 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
 describe('Master Item Brand Service', () => {
+  let configService: ConfigService
   let masterItemBrandService: MasterItemBrandService
   let masterItemBrandModel: Model<MasterItemBrand>
 
@@ -70,27 +72,29 @@ describe('Master Item Brand Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemBrand.name),
+          provide: getModelToken(MasterItemBrand.name, 'primary'),
           useValue: mockMasterItemBrandModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: {},
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
+
+    configService = module.get<ConfigService>(ConfigService)
 
     masterItemBrandService = module.get<MasterItemBrandService>(
       MasterItemBrandService
     )
     masterItemBrandModel = module.get<Model<MasterItemBrandDocument>>(
-      getModelToken(MasterItemBrand.name)
+      getModelToken(MasterItemBrand.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -143,10 +147,10 @@ describe('Master Item Brand Service', () => {
               )
 
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(masterItemBrandDocArray)
+              expect(result.payload['data']).toEqual(masterItemBrandDocArray)
             })
         }
       )
@@ -388,7 +392,21 @@ describe('Master Item Brand Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemBrandModel, 'findOneAndUpdate')
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
+          jest
+            .spyOn(masterItemBrandModel, 'findOneAndUpdate')
+            .mockResolvedValue({
+              statusCode: {
+                defaultCode: HttpStatus.OK,
+                customCode: modCodes.Global.success,
+                classCode: '',
+              },
+              message: 'Delete success message',
+              payload: {},
+              transaction_classify: 'MASTER_ITEM_BRAND_DELETE',
+              transaction_id: '',
+            } satisfies GlobalResponse)
 
           await masterItemBrandService
             .delete(masterItemBrandDocArray[0].id)

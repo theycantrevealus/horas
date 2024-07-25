@@ -1,5 +1,6 @@
 import { OperationQueueService } from '@core/operation/queue/services/operation-queue.service'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
+import { CommonErrorFilter } from '@filters/error'
 import { VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
@@ -9,6 +10,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { GatewayPipe } from '@pipes/gateway.pipe'
 import { KAFKA_CLIENTS } from '@utility/constants'
 import { environmentName } from '@utility/environtment'
 import { WinstonCustomTransports } from '@utility/transport.winston'
@@ -17,8 +19,6 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as winston from 'winston'
 
-import { CommonErrorFilter } from '../../filters/error'
-import { GatewayPipe } from '../../pipes/gateway.pipe'
 import { CoreModule } from './core.module'
 
 declare const module: any
@@ -125,10 +125,15 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document, {
     customCss: `
     @import url(https://fonts.googleapis.com/css?family=Handlee);
-    body { padding-top: 218px !important; background-attachment: fixed; background-size: cover; background-color: #f !important; }
-    .topbar { box-shadow: 0 -10px 10px 10px #f6f3f3 inset; width: 100%; margin: -20px auto; position:fixed; top: 0; left: 0; z-index: 100; background-color: #fff !important; }
-    .topbar-wrapper img { width:137px; height:auto; margin: 24px }
-    .swagger-ui .topbar { background-color: #red !important; z-index: 100; }
+    body { padding-top: 218px !important; background: url(\'./${configService.get<string>(
+      'application.images.core_prefix'
+    )}/body.jpg\') no-repeat; background-attachment: fixed; background-size: cover; }
+    .topbar { box-shadow: 0 -30px 30px 30px #f6f3f3 inset !important; width: 100%; margin: 0 auto; position:fixed; top: 0; left: 0; z-index: 100; background-color: #fff !important; }
+    .topbar-wrapper { width:137px; height:40px; margin: 24px; background: url(\'./${configService.get<string>(
+      'application.images.core_prefix'
+    )}/logo.png\')no-repeat !important; background-size: contain !important; background-position: center !important; }
+    .topbar-wrapper a { display: none !important; }
+    .swagger-ui .topbar { background-color: #fff !important; z-index: 100; }
     .scheme-container { position: fixed; top: 80px; width: 100%; padding: 15px 0 !important; z-index: 200; box-shadow: 0 2px 4px 0 rgba(0,0,0,.15) !important; }
     .information-container { position: fixed; right: 250px; top: 0; padding: 0 !important; z-index: 100; }
     .information-container.wrapper { max-width: 800px; }
@@ -194,7 +199,9 @@ async function bootstrap() {
     .swagger-ui textarea { border: solid 1px #ccc !important; }
     `,
     customSiteTitle: configService.get<string>('application.name'),
-    customfavIcon: './icon.png',
+    customfavIcon: `./${configService.get<string>(
+      'application.images.core_prefix'
+    )}/icon.png`,
     swaggerOptions: {
       filter: true,
       tagsSorter: 'alpha',

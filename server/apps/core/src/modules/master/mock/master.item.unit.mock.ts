@@ -4,12 +4,12 @@ import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
 } from '@core/master/dto/master.item.unit'
+import { faker } from '@faker-js/faker'
+import { Account } from '@schemas/account/account.model'
 import {
   MasterItemUnit,
   MasterItemUnitDocument,
-} from '@core/master/schemas/master.item.unit'
-import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
+} from '@schemas/master/master.item.unit'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

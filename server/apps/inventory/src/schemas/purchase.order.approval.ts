@@ -1,5 +1,5 @@
 import { raw } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 
 export const PurchaseOrderApproval = raw({
   status: {

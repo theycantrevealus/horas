@@ -10,11 +10,8 @@ import {
   mockMasterItemUnit,
   mockMasterItemUnitModel,
 } from '@core/master/mock/master.item.unit.mock'
-import {
-  MasterItemUnit,
-  MasterItemUnitDocument,
-} from '@core/master/schemas/master.item.unit'
 import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
+import { CommonErrorFilter } from '@filters/error'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -26,7 +23,12 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterItemUnit,
+  MasterItemUnitDocument,
+} from '@schemas/master/master.item.unit'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -34,12 +36,10 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
-import { CommonErrorFilter } from '../../../../../filters/error'
-import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
-
 describe('Master Item Unit Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
+  let configService: ConfigService
   let masterItemUnitController: MasterItemUnitController
   let masterItemUnitModel: Model<MasterItemUnit>
   let logger: Logger
@@ -73,13 +73,13 @@ describe('Master Item Unit Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemUnit.name),
+          provide: getModelToken(MasterItemUnit.name, 'primary'),
           useValue: mockMasterItemUnitModel,
         },
         { provide: AuthService, useValue: {} },
         { provide: AccountService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: {} },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
+        { provide: getModelToken(Account.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -94,12 +94,13 @@ describe('Master Item Unit Controller', () => {
         ignoreDuplicateSlashes: true,
       })
     )
+    configService = module.get<ConfigService>(ConfigService)
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
     masterItemUnitController = app.get<MasterItemUnitController>(
       MasterItemUnitController
     )
     masterItemUnitModel = module.get<Model<MasterItemUnitDocument>>(
-      getModelToken(MasterItemUnit.name)
+      getModelToken(MasterItemUnit.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -211,8 +212,12 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/unit',
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -236,6 +241,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/unit',
               body: data,
             })
@@ -259,6 +268,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/unit',
               body: data,
             })
@@ -282,8 +295,12 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -300,6 +317,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
               body: {},
             })
@@ -324,6 +345,10 @@ describe('Master Item Unit Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
               body: data,
             })
@@ -344,9 +369,15 @@ describe('Master Item Unit Controller', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           return app
             .inject({
               method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/unit/${mockMasterItemUnit().id}`,
             })
             .then((result) => {

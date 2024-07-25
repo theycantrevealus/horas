@@ -1,6 +1,5 @@
 import { AccountService } from '@core/account/account.service'
-import { AccountAddDTO } from '@core/account/dto/account.add.dto'
-import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { IMenu } from '@core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@core/menu/interfaces/menu.permission.interface'

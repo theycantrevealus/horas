@@ -85,7 +85,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.2",
-    "fastify": "^4.25.2",
+    "fastify": "^4.28.1",
     "fs": "^0.0.1-security",
     "jest": "29.7.0",
     "k6": "^0.0.0",

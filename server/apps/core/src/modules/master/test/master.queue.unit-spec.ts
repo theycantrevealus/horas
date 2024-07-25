@@ -4,17 +4,13 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@core/account/mock/account.mock'
-import { mockAuthority } from '@core/account/mock/authority,mock'
+import { mockAuthority } from '@core/account/mock/authority.mock'
 import { mockMasterItemUnit } from '@core/master/mock/master.item.unit.mock'
 import {
   masterQueueDocArray,
   mockMasterQueue,
   mockMasterQueueModel,
 } from '@core/master/mock/master.queue.mock'
-import {
-  MasterQueue,
-  MasterQueueDocument,
-} from '@core/master/schemas/master.queue.machine'
 import { MasterQueueService } from '@core/master/services/master.queue.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -25,6 +21,10 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import {
+  MasterQueue,
+  MasterQueueDocument,
+} from '@schemas/master/master.queue.machine'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -35,6 +35,7 @@ import { Model } from 'mongoose'
 describe('Master Queue Service', () => {
   let masterQueueService: MasterQueueService
   let masterQueueModel: Model<MasterQueue>
+  let configService: ConfigService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -75,29 +76,31 @@ describe('Master Queue Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterQueue.name),
+          provide: getModelToken(MasterQueue.name, 'primary'),
           useValue: mockMasterQueueModel,
         },
         {
-          provide: getModelToken(Account.name),
+          provide: getModelToken(Account.name, 'primary'),
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
         {
-          provide: getModelToken(Authority.name),
+          provide: getModelToken(Authority.name, 'primary'),
           useValue: mockAuthority,
         },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
-        { provide: getModelToken(LogLogin.name), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
 
+    configService = module.get<ConfigService>(ConfigService)
+
     masterQueueService = module.get<MasterQueueService>(MasterQueueService)
     masterQueueModel = module.get<Model<MasterQueueDocument>>(
-      getModelToken(MasterQueue.name)
+      getModelToken(MasterQueue.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -146,10 +149,10 @@ describe('Master Queue Service', () => {
             )
 
             // Should be an array of data
-            expect(result.payload).toBeInstanceOf(Array)
+            expect(result.payload['data']).toBeInstanceOf(Array)
 
             // Data should be defined
-            expect(result.payload).toEqual(masterQueueDocArray)
+            expect(result.payload['data']).toEqual(masterQueueDocArray)
           })
       }
     )
@@ -370,6 +373,8 @@ describe('Master Queue Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           jest.spyOn(masterQueueModel, 'findOneAndUpdate')
 
           await masterQueueService

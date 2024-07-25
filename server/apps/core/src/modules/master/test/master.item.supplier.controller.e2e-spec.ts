@@ -10,11 +10,8 @@ import {
   mockMasterItemSupplier,
   mockMasterItemSupplierModel,
 } from '@core/master/mock/master.item.supplier.mock'
-import {
-  MasterItemSupplier,
-  MasterItemSupplierDocument,
-} from '@core/master/schemas/master.item.supplier'
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
+import { CommonErrorFilter } from '@filters/error'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -26,7 +23,12 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterItemSupplier,
+  MasterItemSupplierDocument,
+} from '@schemas/master/master.item.supplier'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -34,12 +36,10 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
-import { CommonErrorFilter } from '../../../../../filters/error'
-import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
-
 describe('Master Item Supplier Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
+  let configService: ConfigService
   let masterItemSupplierController: MasterItemSupplierController
   let masterItemSupplierModel: Model<MasterItemSupplier>
   let logger: Logger
@@ -73,13 +73,13 @@ describe('Master Item Supplier Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemSupplier.name),
+          provide: getModelToken(MasterItemSupplier.name, 'primary'),
           useValue: mockMasterItemSupplierModel,
         },
         { provide: AuthService, useValue: {} },
         { provide: AccountService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: {} },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
+        { provide: getModelToken(Account.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -94,12 +94,13 @@ describe('Master Item Supplier Controller', () => {
         ignoreDuplicateSlashes: true,
       })
     )
+    configService = module.get<ConfigService>(ConfigService)
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
     masterItemSupplierController = app.get<MasterItemSupplierController>(
       MasterItemSupplierController
     )
     masterItemSupplierModel = module.get<Model<MasterItemSupplierDocument>>(
-      getModelToken(MasterItemSupplier.name)
+      getModelToken(MasterItemSupplier.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -141,6 +142,7 @@ describe('Master Item Supplier Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: '/master/supplier',
               query: `lazyEvent=abc`,
@@ -166,6 +168,7 @@ describe('Master Item Supplier Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: '/master/supplier',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
@@ -192,6 +195,7 @@ describe('Master Item Supplier Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: `/master/supplier/${mockMasterItemSupplier().id}`,
             })
@@ -215,8 +219,12 @@ describe('Master Item Supplier Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/supplier',
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -244,6 +252,10 @@ describe('Master Item Supplier Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/supplier',
               body: data,
             })
@@ -271,6 +283,10 @@ describe('Master Item Supplier Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/supplier',
               body: data,
             })
@@ -294,8 +310,12 @@ describe('Master Item Supplier Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/supplier/${mockMasterItemSupplier().id}`,
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -312,6 +332,10 @@ describe('Master Item Supplier Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/supplier/${mockMasterItemSupplier().id}`,
               body: {},
             })
@@ -340,6 +364,10 @@ describe('Master Item Supplier Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/supplier/${mockMasterItemSupplier().id}`,
               body: data,
             })
@@ -360,9 +388,15 @@ describe('Master Item Supplier Controller', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           return app
             .inject({
               method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/supplier/${mockMasterItemSupplier().id}`,
             })
             .then((result) => {

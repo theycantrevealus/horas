@@ -1,5 +1,4 @@
-import { AccountAddDTO } from '@core/account/dto/account.add.dto'
-import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import { faker } from '@faker-js/faker'
 import { testCaption } from '@utility/string'

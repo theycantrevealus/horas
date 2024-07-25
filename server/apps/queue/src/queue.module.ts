@@ -2,15 +2,6 @@ import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { SocketConfig } from '@configuration/socket'
 import { AccountModule } from '@core/account/account.module'
-import { MasterItem, MasterItemSchema } from '@core/master/schemas/master.item'
-import {
-  MasterItemBatch,
-  MasterItemBatchSchema,
-} from '@core/master/schemas/master.item.batch'
-import {
-  MasterStockPoint,
-  MasterStockPointSchema,
-} from '@core/master/schemas/master.stock.point'
 import {
   OperationQueue,
   OperationQueueSchema,
@@ -25,6 +16,15 @@ import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
+import { MasterItem, MasterItemSchema } from '@schemas/master/master.item'
+import {
+  MasterItemBatch,
+  MasterItemBatchSchema,
+} from '@schemas/master/master.item.batch'
+import {
+  MasterStockPoint,
+  MasterStockPointSchema,
+} from '@schemas/master/master.stock.point'
 import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'

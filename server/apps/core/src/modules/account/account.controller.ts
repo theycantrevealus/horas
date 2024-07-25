@@ -1,6 +1,7 @@
-import { AccountEditDTO } from '@core/account/dto/account.edit.dto'
+import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -27,18 +28,13 @@ import {
 import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { Logger } from 'winston'
 
 import { AccountService } from './account.service'
-import { AccountAddDTO } from './dto/account.add.dto'
 
 @Controller('account')
 @ApiTags('Account Management')
 export class AccountController {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger,
     @Inject(AccountService) private readonly accountService: AccountService
   ) {}
 
@@ -48,6 +44,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all account',
     description: 'Showing account data',
@@ -65,6 +62,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'view' })
   @ApiParam({
     name: 'id',
   })
@@ -82,6 +80,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'add' })
   @ApiOperation({
     summary: 'Add new account',
     description: ``,
@@ -103,6 +102,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'edit' })
   @ApiOperation({
     summary: 'Edit account',
     description: ``,
@@ -121,6 +121,7 @@ export class AccountController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAccount', action: 'delete' })
   @ApiOperation({
     summary: 'Delete account',
     description: ``,

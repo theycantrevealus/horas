@@ -4,12 +4,12 @@ import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
 } from '@core/master/dto/master.item.brand'
+import { faker } from '@faker-js/faker'
+import { Account } from '@schemas/account/account.model'
 import {
   MasterItemBrand,
   MasterItemBrandDocument,
-} from '@core/master/schemas/master.item.brand'
-import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
+} from '@schemas/master/master.item.brand'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

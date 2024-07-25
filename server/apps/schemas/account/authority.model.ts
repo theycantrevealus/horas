@@ -1,10 +1,11 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export type AuthorityDocument = HydratedDocument<Authority>
+
 @Schema({ collection: 'core_authority' })
 export class Authority {
   @Prop({ type: SchemaTypes.String, unique: true })

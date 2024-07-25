@@ -1,3 +1,4 @@
+import { CommonErrorFilter } from '@filters/error'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Controller,
@@ -16,7 +17,6 @@ import { modCodes } from '@utility/modules'
 import { Socket } from 'socket.io-client'
 import { Logger } from 'winston'
 
-import { CommonErrorFilter } from '../../filters/error'
 import { ConsumerQueueDTO } from './dto/queue.dto'
 import { ConsumerQueueService } from './queue.service'
 

@@ -9,11 +9,8 @@ import {
   mockMasterItemCategory,
   mockMasterItemCategoryModel,
 } from '@core/master/mock/master.item.category.mock'
-import {
-  MasterItemCategory,
-  MasterItemCategoryDocument,
-} from '@core/master/schemas/master.item.category'
 import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
+import { CommonErrorFilter } from '@filters/error'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -25,7 +22,12 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
+import {
+  MasterItemCategory,
+  MasterItemCategoryDocument,
+} from '@schemas/master/master.item.category'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -33,12 +35,10 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
-import { CommonErrorFilter } from '../../../../../filters/error'
-import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
-
 describe('Master Item Category Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
+  let configService: ConfigService
   let masterItemCategoryController: MasterItemCategoryController
   let masterItemCategoryModel: Model<MasterItemCategory>
   let logger: Logger
@@ -73,12 +73,12 @@ describe('Master Item Category Controller', () => {
         },
         { provide: AuthService, useValue: {} },
         {
-          provide: getModelToken(MasterItemCategory.name),
+          provide: getModelToken(MasterItemCategory.name, 'primary'),
           useValue: mockMasterItemCategoryModel,
         },
         { provide: AccountService, useValue: {} },
-        { provide: getModelToken(Account.name), useValue: {} },
-        { provide: getModelToken(LogActivity.name), useValue: {} },
+        { provide: getModelToken(Account.name, 'primary'), useValue: {} },
+        { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -93,12 +93,13 @@ describe('Master Item Category Controller', () => {
         ignoreDuplicateSlashes: true,
       })
     )
+    configService = module.get<ConfigService>(ConfigService)
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
     masterItemCategoryController = app.get<MasterItemCategoryController>(
       MasterItemCategoryController
     )
     masterItemCategoryModel = module.get<Model<MasterItemCategoryDocument>>(
-      getModelToken(MasterItemCategory.name)
+      getModelToken(MasterItemCategory.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -131,6 +132,7 @@ describe('Master Item Category Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: '/master/category',
               query: `lazyEvent=abc`,
@@ -156,6 +158,7 @@ describe('Master Item Category Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: '/master/category',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
@@ -182,6 +185,7 @@ describe('Master Item Category Controller', () => {
               method: 'GET',
               headers: {
                 authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
               },
               url: `/master/category/${mockMasterItemCategory().id}`,
             })
@@ -205,8 +209,12 @@ describe('Master Item Category Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/category',
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -230,6 +238,10 @@ describe('Master Item Category Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/category',
               body: data,
             })
@@ -253,6 +265,10 @@ describe('Master Item Category Controller', () => {
           return app
             .inject({
               method: 'POST',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: '/master/category',
               body: data,
             })
@@ -276,8 +292,12 @@ describe('Master Item Category Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/category/${mockMasterItemCategory().id}`,
-              body: 'abc',
+              body: {},
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -294,6 +314,10 @@ describe('Master Item Category Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/category/${mockMasterItemCategory().id}`,
               body: {},
             })
@@ -318,6 +342,10 @@ describe('Master Item Category Controller', () => {
           return app
             .inject({
               method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/category/${mockMasterItemCategory().id}`,
               body: data,
             })
@@ -338,9 +366,15 @@ describe('Master Item Category Controller', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           return app
             .inject({
               method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'Content-Type': 'application/json',
+              },
               url: `/master/category/${mockMasterItemCategory().id}`,
             })
             .then((result) => {

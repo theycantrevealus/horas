@@ -1,4 +1,4 @@
-import { AccountAddDTO } from '@core/account/dto/account.add.dto'
+import { AccountAddDTO } from '@core/account/dto/account.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { LoggingInterceptor } from '@interceptors/logging'
 import { Controller, Inject, UseInterceptors } from '@nestjs/common'
@@ -37,10 +37,10 @@ export class MasterItemController {
     partition: number,
     headers: IAccountCreatedBy
   ) {
-    await this.masterItemService
-      .create(payload, key.id, headers)
-      .catch((error) => {
-        throw new Error(JSON.stringify(error))
-      })
+    // await this.masterItemService
+    //   .create(payload, key.id, headers)
+    //   .catch((error) => {
+    //     throw new Error(JSON.stringify(error))
+    //   })
   }
 }

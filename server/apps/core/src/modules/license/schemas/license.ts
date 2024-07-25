@@ -1,6 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.join'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type LicenseDocument = HydratedDocument<License>

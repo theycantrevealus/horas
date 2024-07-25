@@ -21,7 +21,7 @@ export function testCaption(
 
   return (
     loggerColor('FgBrightCyan') +
-    `${pad(lPad, `[${title}]`, true)} ${typeLib[type]}` +
+    `${pad(lPad, `[${title}]`, true)} ${typeLib[type]} ` +
     loggerColor('reset') +
     `- ${caption}`
   )
