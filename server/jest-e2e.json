@@ -12,6 +12,8 @@
   "moduleNameMapper": {
     "^@mock(.*)$": "<rootDir>/apps/mock$1",
     "^@schemas(.*)$": "<rootDir>/apps/schemas$1",
+    "^@filters(.*)$": "<rootDir>/apps/filters$1",
+    "^@pipes(.*)$": "<rootDir>/apps/pipes$1",
     "^@core(.*)$": "<rootDir>/apps/core/src/modules$1",
     "^@log(.*)$": "<rootDir>/apps/log/src$1",
     "^@security(.*)$": "<rootDir>/apps/security$1",

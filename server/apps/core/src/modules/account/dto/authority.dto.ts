@@ -25,12 +25,6 @@ export class AuthorityAddDTO {
   })
   @IsOptional()
   remark?: string
-
-  constructor(data: any = {}) {
-    this.code = data.code
-    this.name = data.name
-    this.remark = data.remark
-  }
 }
 
 export class AuthorityEditDTO {
@@ -66,11 +60,4 @@ export class AuthorityEditDTO {
   @IsNotEmpty()
   @IsNumber()
   __v: number
-
-  constructor(data: any = {}) {
-    this.code = data.code
-    this.name = data.name
-    this.remark = data.remark
-    this.__v = data.__v
-  }
 }

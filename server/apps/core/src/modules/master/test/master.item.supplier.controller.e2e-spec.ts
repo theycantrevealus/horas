@@ -11,6 +11,7 @@ import {
   mockMasterItemSupplierModel,
 } from '@core/master/mock/master.item.supplier.mock'
 import { MasterItemSupplierService } from '@core/master/services/master.item.supplier.service'
+import { CommonErrorFilter } from '@filters/error'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -22,6 +23,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
 import {
   MasterItemSupplier,
@@ -34,12 +36,10 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
-import { CommonErrorFilter } from '../../../../../filters/error'
-import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
-
 describe('Master Item Supplier Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
+  let configService: ConfigService
   let masterItemSupplierController: MasterItemSupplierController
   let masterItemSupplierModel: Model<MasterItemSupplier>
   let logger: Logger
@@ -94,6 +94,7 @@ describe('Master Item Supplier Controller', () => {
         ignoreDuplicateSlashes: true,
       })
     )
+    configService = module.get<ConfigService>(ConfigService)
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
     masterItemSupplierController = app.get<MasterItemSupplierController>(
       MasterItemSupplierController
@@ -387,6 +388,8 @@ describe('Master Item Supplier Controller', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           return app
             .inject({
               method: 'DELETE',

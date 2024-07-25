@@ -35,6 +35,7 @@ import { Model } from 'mongoose'
 describe('Master Queue Service', () => {
   let masterQueueService: MasterQueueService
   let masterQueueModel: Model<MasterQueue>
+  let configService: ConfigService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -95,6 +96,8 @@ describe('Master Queue Service', () => {
       ],
     }).compile()
 
+    configService = module.get<ConfigService>(ConfigService)
+
     masterQueueService = module.get<MasterQueueService>(MasterQueueService)
     masterQueueModel = module.get<Model<MasterQueueDocument>>(
       getModelToken(MasterQueue.name, 'primary')
@@ -146,10 +149,10 @@ describe('Master Queue Service', () => {
             )
 
             // Should be an array of data
-            expect(result.payload).toBeInstanceOf(Array)
+            expect(result.payload['data']).toBeInstanceOf(Array)
 
             // Data should be defined
-            expect(result.payload).toEqual(masterQueueDocArray)
+            expect(result.payload['data']).toEqual(masterQueueDocArray)
           })
       }
     )
@@ -370,6 +373,8 @@ describe('Master Queue Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           jest.spyOn(masterQueueModel, 'findOneAndUpdate')
 
           await masterQueueService

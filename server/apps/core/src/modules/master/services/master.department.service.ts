@@ -15,7 +15,7 @@ import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
-import { Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
 @Injectable()
 export class MasterDepartmentService {
@@ -35,7 +35,7 @@ export class MasterDepartmentService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_DEPARTMENT_GET',
+      transaction_classify: 'MASTER_DEPARTMENT_LIST',
       transaction_id: '',
     } satisfies GlobalResponse
 
@@ -93,43 +93,39 @@ export class MasterDepartmentService {
 
   async add(
     data: MasterDepartmentAddDTO,
-    credential: IAccountCreatedBy
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
-        ...modCodes[this.constructor.name].error.databaseError,
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
         classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
       payload: {},
       transaction_classify: 'MASTER_DEPARTMENT_ADD',
-      transaction_id: '',
+      transaction_id: null,
     } satisfies GlobalResponse
 
-    const generatedID = new Types.ObjectId().toString()
+    data.code =
+      data.code ?? `${modCodes[this.constructor.name]}-${new Date().getTime()}`
+
     try {
       return await this.masterDepartmentModel
         .create({
           ...data,
-          id: generatedID,
-          created_by: credential,
+          created_by: account,
         })
-        .then(async () => {
+        .then(async (result) => {
           response.message = 'Department created successfully'
-          response.statusCode = {
-            defaultCode: HttpStatus.OK,
-            customCode: modCodes.Global.success,
-            classCode: modCodes[this.constructor.name].defaultCode,
-          }
-          response.transaction_id = generatedID
+          response.transaction_id = result._id
           response.payload = {
-            id: `department-${generatedID}`,
+            id: result.id,
             ...data,
           }
           return response
         })
     } catch (error) {
-      console.error(error)
       response.message = 'Department failed to create'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,

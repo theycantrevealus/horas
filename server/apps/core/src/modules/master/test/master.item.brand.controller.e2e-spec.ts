@@ -11,6 +11,7 @@ import {
 } from '@core/master/mock/master.item.brand.mock'
 import { masterItemDocArray } from '@core/master/mock/master.item.mock'
 import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
+import { CommonErrorFilter } from '@filters/error'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -22,6 +23,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
 import {
   MasterItemBrand,
@@ -33,9 +35,6 @@ import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
-
-import { CommonErrorFilter } from '../../../../../filters/error'
-import { GatewayPipe } from '../../../../../pipes/gateway.pipe'
 
 describe('Master Item Brand Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }

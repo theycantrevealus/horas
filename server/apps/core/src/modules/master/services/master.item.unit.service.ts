@@ -3,28 +3,31 @@ import {
   MasterItemUnitEditDTO,
 } from '@core/master/dto/master.item.unit'
 import { IMasterItemUnit } from '@core/master/interface/master.item.unit'
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
 import {
   MasterItemUnit,
   MasterItemUnitDocument,
 } from '@schemas/master/master.item.unit'
+import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
-import { isJSON } from 'class-validator'
 import { Model } from 'mongoose'
 
 @Injectable()
 export class MasterItemUnitService {
   constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
     @InjectModel(MasterItemUnit.name, 'primary')
     private masterItemUnitModel: Model<MasterItemUnitDocument>
   ) {}
 
-  async all(parameter: any) {
+  async all(payload: any) {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -36,22 +39,23 @@ export class MasterItemUnitService {
       transaction_classify: 'MASTER_ITEM_UNIT_LIST',
       transaction_id: null,
     } satisfies GlobalResponse
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await prime_datatable(parsedData, this.masterItemUnitModel).then(
+
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+      return await prime_datatable(parameter, this.masterItemUnitModel).then(
         (result) => {
-          response.payload = result.payload.data
-          response.message = 'Data query success'
+          response.payload = result.payload
+          response.message = 'Master item unit fetch successfully'
           return response
         }
       )
-    } else {
+    } catch (error) {
+      response.message = `Master item unit failed to fetch`
       response.statusCode = {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: modCodes.Global.failed,
+        ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
       }
-      response.message = 'filters is not a valid json'
+      response.payload = error
       throw new Error(JSON.stringify(response))
     }
   }
@@ -236,7 +240,9 @@ export class MasterItemUnitService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(async () => {

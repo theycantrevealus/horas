@@ -10,6 +10,7 @@ import { MasterItemBrandService } from '@core/master/services/master.item.brand.
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { HttpStatus } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
@@ -146,10 +147,10 @@ describe('Master Item Brand Service', () => {
               )
 
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(masterItemBrandDocArray)
+              expect(result.payload['data']).toEqual(masterItemBrandDocArray)
             })
         }
       )
@@ -391,8 +392,22 @@ describe('Master Item Brand Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemBrandModel, 'findOneAndUpdate')
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
+          jest
+            .spyOn(masterItemBrandModel, 'findOneAndUpdate')
+            .mockResolvedValue({
+              statusCode: {
+                defaultCode: HttpStatus.OK,
+                customCode: modCodes.Global.success,
+                classCode: '',
+              },
+              message: 'Delete success message',
+              payload: {},
+              transaction_classify: 'MASTER_ITEM_BRAND_DELETE',
+              transaction_id: '',
+            } satisfies GlobalResponse)
+
           await masterItemBrandService
             .delete(masterItemBrandDocArray[0].id)
             .then((result: GlobalResponse) => {

@@ -1,17 +1,11 @@
-import { AccountService } from '@core/account/account.service'
-import {
-  accountDocArray,
-  mockAccount,
-  mockAccountModel,
-} from '@core/account/mock/account.mock'
+import { mockAccount } from '@core/account/mock/account.mock'
 import { mockAuthority } from '@core/account/mock/authority.mock'
-import { IMasterItemCategory } from '@core/master/interface/master.item.category'
 import {
-  masterItemCategoryDocArray,
-  mockMasterItemCategory,
-  mockMasterItemCategoryModel,
-} from '@core/master/mock/master.item.category.mock'
-import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
+  masterDepartmentDocArray,
+  mockMasterDepartment,
+  mockMasterDepartmentModel,
+} from '@core/master/mock/master.department.mock'
+import { MasterDepartmentService } from '@core/master/services/master.department.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -23,9 +17,9 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
 import {
-  MasterItemCategory,
-  MasterItemCategoryDocument,
-} from '@schemas/master/master.item.category'
+  MasterDepartment,
+  MasterDepartmentDocument,
+} from '@schemas/master/master.department'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -33,25 +27,18 @@ import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
-describe('Master Item Category Service', () => {
-  let masterItemCategoryService: MasterItemCategoryService
-  let masterItemCategoryModel: Model<MasterItemCategory>
+describe('Master Department Service', () => {
   let configService: ConfigService
+  let masterDepartmentService: MasterDepartmentService
+  let masterDepartmentModel: Model<MasterDepartment>
+
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
-        MasterItemCategoryService,
-        AccountService,
+        MasterDepartmentService,
         AuthService,
         JwtService,
-        {
-          provide: 'ACCOUNT_SERVICE',
-          useValue: {
-            emit: () => jest.fn(),
-            transaction: () => jest.fn(),
-          },
-        },
         {
           provide: ConfigService,
           useValue: {
@@ -76,12 +63,12 @@ describe('Master Item Category Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterItemCategory.name, 'primary'),
-          useValue: mockMasterItemCategoryModel,
+          provide: getModelToken(MasterDepartment.name, 'primary'),
+          useValue: mockMasterDepartmentModel,
         },
         {
           provide: getModelToken(Account.name, 'primary'),
-          useValue: mockAccountModel,
+          useValue: {},
         },
         {
           provide: getModelToken(Authority.name, 'primary'),
@@ -94,11 +81,11 @@ describe('Master Item Category Service', () => {
 
     configService = module.get<ConfigService>(ConfigService)
 
-    masterItemCategoryService = module.get<MasterItemCategoryService>(
-      MasterItemCategoryService
+    masterDepartmentService = module.get<MasterDepartmentService>(
+      MasterDepartmentService
     )
-    masterItemCategoryModel = module.get<Model<MasterItemCategoryDocument>>(
-      getModelToken(MasterItemCategory.name, 'primary')
+    masterDepartmentModel = module.get<Model<MasterDepartmentDocument>>(
+      getModelToken(MasterDepartment.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -111,22 +98,22 @@ describe('Master Item Category Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(masterItemCategoryService).toBeDefined()
+      expect(masterDepartmentService).toBeDefined()
     }
   )
 
   describe(
-    testCaption('GET DATA', 'data', 'Master Item Category - Fetch list'),
+    testCaption('GET DATA', 'data', 'Master Department - Fetch list'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Response validity', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemCategoryModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(masterItemCategoryDocArray),
+          jest.spyOn(masterDepartmentModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(masterDepartmentDocArray),
           } as any)
-          await masterItemCategoryService
+          await masterDepartmentService
             .all(
               `{
               "first": 0,
@@ -139,7 +126,7 @@ describe('Master Item Category Service', () => {
             .then((result: GlobalResponse) => {
               // Should classify transaction
               expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_CATEGORY_LIST'
+                'MASTER_DEPARTMENT_LIST'
               )
 
               // Not an empty string so be informative
@@ -154,7 +141,7 @@ describe('Master Item Category Service', () => {
               expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload['data']).toEqual(masterItemCategoryDocArray)
+              expect(result.payload['data']).toEqual(masterDepartmentDocArray)
             })
         }
       )
@@ -164,12 +151,12 @@ describe('Master Item Category Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemCategoryModel, 'aggregate').mockImplementation({
+          jest.spyOn(masterDepartmentModel, 'aggregate').mockImplementation({
             exec: jest.fn().mockRejectedValue(new Error()),
           } as any)
 
           await expect(
-            masterItemCategoryService.all({
+            masterDepartmentService.all({
               first: 0,
               rows: 10,
               sortField: 'created_at',
@@ -183,21 +170,21 @@ describe('Master Item Category Service', () => {
   )
 
   describe(
-    testCaption('GET DETAIL', 'data', 'Master Item Category - Fetch detail'),
+    testCaption('GET DETAIL', 'data', 'Master Department - Fetch detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Response validity', {
           tab: 1,
         }),
         async () => {
-          const findMock = masterItemCategoryDocArray[0]
-          masterItemCategoryModel.findOne = jest
+          const findMock = masterDepartmentDocArray[0]
+          masterDepartmentModel.findOne = jest
             .fn()
             .mockImplementationOnce(() => {
               return Promise.resolve(findMock)
             })
 
-          await masterItemCategoryService
+          await masterDepartmentService
             .detail(findMock.id)
             .then((result: GlobalResponse) => {
               // Deep equality check
@@ -205,7 +192,7 @@ describe('Master Item Category Service', () => {
 
               // Should classify transaction
               expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_CATEGORY_GET'
+                'MASTER_DEPARTMENT_GET'
               )
 
               // Not an empty string so be informative
@@ -224,113 +211,39 @@ describe('Master Item Category Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetData = masterItemCategoryDocArray[0]
+          const targetData = masterDepartmentDocArray[0]
 
           jest
-            .spyOn(masterItemCategoryModel, 'findOne')
+            .spyOn(masterDepartmentModel, 'findOne')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await masterItemCategoryService.detail(targetData.id)
+            await masterDepartmentService.detail(targetData.id)
           }).rejects.toThrow(Error)
-        }
-      )
-
-      it(
-        testCaption('HANDLING', 'data', 'Response validity', {
-          tab: 1,
-        }),
-        async () => {
-          const findMock = masterItemCategoryDocArray[0]
-          masterItemCategoryModel.findOne = jest
-            .fn()
-            .mockImplementationOnce(() => {
-              return Promise.resolve(findMock)
-            })
-
-          await masterItemCategoryService
-            .find({ code: findMock.code })
-            .then((result: GlobalResponse) => {
-              // Deep equality check
-              expect(result.payload).toEqual(findMock)
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_CATEGORY_GET'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
-        }
-      )
-
-      it(
-        testCaption('HANDLING', 'data', 'Response error on get detail data', {
-          tab: 1,
-        }),
-        async () => {
-          const targetData = masterItemCategoryDocArray[0]
-
-          jest
-            .spyOn(masterItemCategoryModel, 'findOne')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
-
-          await expect(async () => {
-            await masterItemCategoryService.find({ code: targetData.code })
-          }).rejects.toThrow(Error)
-        }
-      )
-
-      it(
-        testCaption('HANDLING', 'data', 'Response validity', {
-          tab: 1,
-        }),
-        async () => {
-          // const addCall = jest.spyOn(masterItemCategoryService, 'add')
-          const findMock = masterItemCategoryDocArray[0]
-          masterItemCategoryModel.findOne = jest
-            .fn()
-            .mockImplementationOnce(() => {
-              return Promise.resolve(findMock)
-            })
-
-          await masterItemCategoryService
-            .upsert({ name: mockMasterItemCategory().name }, mockAccount())
-            .then((result: IMasterItemCategory) => {
-              expect(result).not.toBe('')
-            })
         }
       )
     }
   )
 
   describe(
-    testCaption('ADD DATA', 'data', 'Master Item Category - Add new data'),
+    testCaption('ADD DATA', 'data', 'Master Department - Add new data'),
     () => {
       it(
-        testCaption('DATA', 'data', 'Should add new master item category'),
+        testCaption('DATA', 'data', 'Should add new master department'),
         async () => {
-          jest.spyOn(masterItemCategoryModel, 'create')
+          jest.spyOn(masterDepartmentModel, 'create')
 
-          await masterItemCategoryService
-            .add(mockMasterItemCategory(), mockAccount())
+          await masterDepartmentService
+            .add(mockMasterDepartment(), mockAccount())
             .then((result: GlobalResponse) => {
               // Should create id
               expect(result.payload).toHaveProperty('id')
 
               // Should classify transaction
               expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_CATEGORY_ADD'
+                'MASTER_DEPARTMENT_ADD'
               )
 
               // Not an empty string so be informative
@@ -347,10 +260,10 @@ describe('Master Item Category Service', () => {
       it(
         testCaption('DATA', 'data', 'Should replace code if not defined'),
         async () => {
-          jest.spyOn(masterItemCategoryService, 'add')
-          const dataTest = mockMasterItemCategory()
+          jest.spyOn(masterDepartmentService, 'add')
+          const dataTest = mockMasterDepartment()
           delete dataTest.code
-          await masterItemCategoryService
+          await masterDepartmentService
             .add(dataTest, mockAccount())
             .then((result: GlobalResponse) => {
               // Should create id
@@ -362,7 +275,7 @@ describe('Master Item Category Service', () => {
 
               // Should classify transaction
               expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_CATEGORY_ADD'
+                'MASTER_DEPARTMENT_ADD'
               )
 
               // Not an empty string so be informative
@@ -382,14 +295,14 @@ describe('Master Item Category Service', () => {
         }),
         async () => {
           jest
-            .spyOn(masterItemCategoryModel, 'create')
+            .spyOn(masterDepartmentModel, 'create')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await masterItemCategoryService.add(
-              mockMasterItemCategory(),
+            await masterDepartmentService.add(
+              mockMasterDepartment(),
               mockAccount()
             )
           }).rejects.toThrow(Error)
@@ -399,22 +312,22 @@ describe('Master Item Category Service', () => {
   )
 
   describe(
-    testCaption('EDIT DATA', 'data', 'Master Item Category - Edit data'),
+    testCaption('EDIT DATA', 'data', 'Master Department - Edit data'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should edit master item category', {
+        testCaption('HANDLING', 'data', 'Should edit master department', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterItemCategoryModel, 'findOneAndUpdate')
+          jest.spyOn(masterDepartmentModel, 'findOneAndUpdate')
 
-          await masterItemCategoryService
+          await masterDepartmentService
             .edit(
               {
-                ...mockMasterItemCategory(),
+                ...mockMasterDepartment(),
                 __v: 0,
               },
-              accountDocArray[0].id
+              masterDepartmentDocArray[0].id
             )
             .then((result: GlobalResponse) => {
               // Should create id
@@ -422,7 +335,7 @@ describe('Master Item Category Service', () => {
 
               // Should classify transaction
               expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_CATEGORY_EDIT'
+                'MASTER_DEPARTMENT_EDIT'
               )
 
               // Not an empty string so be informative
@@ -437,21 +350,42 @@ describe('Master Item Category Service', () => {
       )
 
       it(
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
+          tab: 1,
+        }),
+        async () => {
+          jest
+            .spyOn(masterDepartmentModel, 'findOneAndUpdate')
+            .mockReturnValue(undefined)
+
+          await expect(async () => {
+            await masterDepartmentService.edit(
+              {
+                ...mockMasterDepartment(),
+                __v: 0,
+              },
+              masterDepartmentDocArray[0].id
+            )
+          }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
         testCaption('HANDLING', 'data', 'Response error on edit data', {
           tab: 1,
         }),
         async () => {
-          const targetID = mockMasterItemCategory().id
+          const targetID = mockMasterDepartment().id
           jest
-            .spyOn(masterItemCategoryModel, 'findOneAndUpdate')
+            .spyOn(masterDepartmentModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await masterItemCategoryService.edit(
+            await masterDepartmentService.edit(
               {
-                ...mockMasterItemCategory(),
+                ...mockMasterDepartment(),
                 __v: 0,
               },
               targetID
@@ -463,17 +397,17 @@ describe('Master Item Category Service', () => {
   )
 
   describe(
-    testCaption('DELETE DATA', 'data', 'Master item category - Delete data'),
+    testCaption('DELETE DATA', 'data', 'Master department - Delete data'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should delete master item category', {
+        testCaption('HANDLING', 'data', 'Should delete master department', {
           tab: 1,
         }),
         async () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
 
           jest
-            .spyOn(masterItemCategoryModel, 'findOneAndUpdate')
+            .spyOn(masterDepartmentModel, 'findOneAndUpdate')
             .mockResolvedValue({
               statusCode: {
                 defaultCode: HttpStatus.OK,
@@ -482,16 +416,16 @@ describe('Master Item Category Service', () => {
               },
               message: 'Delete success message',
               payload: {},
-              transaction_classify: 'MASTER_ITEM_CATEGORY_DELETE',
+              transaction_classify: 'MASTER_DEPARTMENT_DELETE',
               transaction_id: '',
             } satisfies GlobalResponse)
 
-          await masterItemCategoryService
-            .delete(masterItemCategoryDocArray[0].id)
+          await masterDepartmentService
+            .delete(masterDepartmentDocArray[0].id)
             .then((result: GlobalResponse) => {
               // Should classify transaction
               expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_CATEGORY_DELETE'
+                'MASTER_DEPARTMENT_DELETE'
               )
 
               // Not an empty string so be informative
@@ -510,16 +444,15 @@ describe('Master Item Category Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockMasterItemCategory().id
-
+          const targetID = mockMasterDepartment().id
           jest
-            .spyOn(masterItemCategoryModel, 'findOneAndUpdate')
+            .spyOn(masterDepartmentModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await masterItemCategoryService.delete(targetID)
+            await masterDepartmentService.delete(targetID)
           }).rejects.toThrow(Error)
         }
       )

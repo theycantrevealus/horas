@@ -34,6 +34,7 @@ import { Model } from 'mongoose'
 describe('Master Item Supplier Service', () => {
   let masterItemSupplierService: MasterItemSupplierService
   let masterItemSupplierModel: Model<MasterItemSupplier>
+  let configService: ConfigService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -90,6 +91,8 @@ describe('Master Item Supplier Service', () => {
         { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
       ],
     }).compile()
+
+    configService = module.get<ConfigService>(ConfigService)
 
     masterItemSupplierService = module.get<MasterItemSupplierService>(
       MasterItemSupplierService
@@ -148,10 +151,10 @@ describe('Master Item Supplier Service', () => {
               )
 
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.payload['data']).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(masterItemSupplierDocArray)
+              expect(result.payload['data']).toEqual(masterItemSupplierDocArray)
             })
         }
       )
@@ -361,6 +364,8 @@ describe('Master Item Supplier Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
           jest.spyOn(masterItemSupplierModel, 'findOneAndUpdate')
 
           await masterItemSupplierService

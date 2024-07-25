@@ -28,8 +28,6 @@ import {
 import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { Logger } from 'winston'
 
 import { AccountService } from './account.service'
 
@@ -37,8 +35,6 @@ import { AccountService } from './account.service'
 @ApiTags('Account Management')
 export class AccountController {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger,
     @Inject(AccountService) private readonly accountService: AccountService
   ) {}
 

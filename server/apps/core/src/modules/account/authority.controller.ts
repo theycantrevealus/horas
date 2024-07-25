@@ -1,8 +1,10 @@
+import { AuthorityService } from '@core/account/authority.service'
 import {
   AuthorityAddDTO,
   AuthorityEditDTO,
 } from '@core/account/dto/authority.dto'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -28,18 +30,13 @@ import {
 } from '@nestjs/swagger'
 import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { Logger } from 'winston'
-
-import { AccountService } from './account.service'
 
 @Controller('authority')
 @ApiTags('Authority Management')
 export class AuthorityController {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger,
-    @Inject(AccountService) private readonly accountService: AccountService
+    @Inject(AuthorityService)
+    private readonly authorityService: AuthorityService
   ) {}
 
   @Get()
@@ -48,13 +45,14 @@ export class AuthorityController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAuthority', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all account authority',
     description: 'Showing account authority data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    return await this.accountService.authorityAll(parameter)
+    return await this.authorityService.all(parameter)
   }
 
   @Get(':id')
@@ -63,6 +61,7 @@ export class AuthorityController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAuthority', action: 'view' })
   @ApiParam({
     name: 'id',
   })
@@ -71,7 +70,7 @@ export class AuthorityController {
     description: '',
   })
   async detail(@Param() param) {
-    return await this.accountService.authorityDetail(param.id)
+    return await this.authorityService.detail(param.id)
   }
 
   @Post()
@@ -80,6 +79,7 @@ export class AuthorityController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAuthority', action: 'add' })
   @ApiOperation({
     summary: 'Add new account',
     description: ``,
@@ -88,7 +88,7 @@ export class AuthorityController {
     @Body() parameter: AuthorityAddDTO,
     @CredentialAccount() account: Account
   ) {
-    return await this.accountService.authorityAdd(parameter, account)
+    return await this.authorityService.add(parameter, account)
   }
 
   @Patch(':id')
@@ -100,13 +100,15 @@ export class AuthorityController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAuthority', action: 'edit' })
   @ApiOperation({
     summary: 'Edit data',
     description: ``,
   })
   async edit(@Body() body: AuthorityEditDTO, @Param() param) {
-    return await this.accountService.authorityEdit(body, param.id)
+    return await this.authorityService.edit(body, param.id)
   }
+
   @Delete(':id')
   @Version('1')
   @ApiParam({
@@ -117,11 +119,12 @@ export class AuthorityController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreAuthority', action: 'delete' })
   @ApiOperation({
     summary: 'Delete authority',
     description: ``,
   })
   async delete(@Param() param) {
-    return await this.accountService.authorityDelete(param.id)
+    return await this.authorityService.delete(param.id)
   }
 }

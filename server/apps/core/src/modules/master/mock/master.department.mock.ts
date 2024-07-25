@@ -10,7 +10,6 @@ import {
   MasterDepartment,
   MasterDepartmentDocument,
 } from '@schemas/master/master.department'
-import { MasterItemBrand } from '@schemas/master/master.item.brand'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
@@ -56,13 +55,23 @@ export const mockMasterDepartment = (
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
+  configuration = {
+    default_consultation_treatment: {
+      id: '',
+      code: '',
+      name: '',
+    },
+    treatment: [],
+    doctor: [],
+  },
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
-): MasterItemBrand => ({
+): MasterDepartment => ({
   id,
   code,
   name,
+  configuration,
   remark,
   created_by,
   created_at,
@@ -88,6 +97,15 @@ export const mockMasterDepartmentDoc = (
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   name: mock?.name || faker.company.name(),
   remark: mock?.remark || '',
+  configuration: {
+    default_consultation_treatment: {
+      id: '',
+      code: '',
+      name: '',
+    },
+    treatment: [],
+    doctor: [],
+  },
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),

@@ -1,5 +1,6 @@
 import { OperationQueueService } from '@core/operation/queue/services/operation-queue.service'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
+import { CommonErrorFilter } from '@filters/error'
 import { VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
@@ -9,6 +10,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { GatewayPipe } from '@pipes/gateway.pipe'
 import { KAFKA_CLIENTS } from '@utility/constants'
 import { environmentName } from '@utility/environtment'
 import { WinstonCustomTransports } from '@utility/transport.winston'
@@ -17,8 +19,6 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as winston from 'winston'
 
-import { CommonErrorFilter } from '../../filters/error'
-import { GatewayPipe } from '../../pipes/gateway.pipe'
 import { CoreModule } from './core.module'
 
 declare const module: any

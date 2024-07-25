@@ -2,7 +2,8 @@ import {
   MasterItemAddDTO,
   MasterItemEditDTO,
 } from '@core/master/dto/master.item'
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
 import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
@@ -16,6 +17,8 @@ import { Model } from 'mongoose'
 @Injectable()
 export class MasterItemService {
   constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+
     @InjectModel(MasterItem.name, 'primary')
     private masterItemModel: Model<MasterItemDocument>
   ) {}
@@ -263,7 +266,9 @@ export class MasterItemService {
             id: id,
           },
           {
-            deleted_at: new TimeManagement().getTimezone('Asia/Jakarta'),
+            deleted_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
           }
         )
         .then(async () => {

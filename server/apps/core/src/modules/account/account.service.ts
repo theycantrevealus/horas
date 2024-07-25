@@ -1,9 +1,5 @@
 import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
-import {
-  AuthorityAddDTO,
-  AuthorityEditDTO,
-} from '@core/account/dto/authority.dto'
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
@@ -82,40 +78,6 @@ export class AccountService {
     }
   }
 
-  async authorityAll(payload: any): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'AUTHORITY_GET',
-      transaction_id: '',
-    } satisfies GlobalResponse
-
-    try {
-      const parameter: PrimeParameter = JSON.parse(payload)
-
-      return await prime_datatable(parameter, this.accountAuthority).then(
-        (result) => {
-          response.payload = result.payload.data
-          response.message = 'Authority fetch successfully'
-          return response
-        }
-      )
-    } catch (error) {
-      response.message = `Authority failed to fetch`
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
-    }
-  }
-
   async accountDetail(id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -131,7 +93,7 @@ export class AccountService {
 
     try {
       return await this.accountModel.findOne({ id: id }).then((result) => {
-        response.payload = result ?? {}
+        response.payload = result
         response.message = 'Account detail fetch successfully'
         return response
       })
@@ -245,36 +207,6 @@ export class AccountService {
     }
   }
 
-  async authorityDetail(id: string): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'AUTHORITY_GET',
-      transaction_id: id,
-    } satisfies GlobalResponse
-
-    try {
-      return await this.accountAuthority.findOne({ id: id }).then((result) => {
-        response.payload = result
-        response.message = 'Authority detail fetch successfully'
-        return response
-      })
-    } catch (error) {
-      response.message = `Authority detail failed to fetch`
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
-    }
-  }
-
   async accountDelete(id: string): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -308,48 +240,6 @@ export class AccountService {
         })
     } catch (error) {
       response.message = `Account failed to delete`
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
-    }
-  }
-
-  async authorityDelete(id: string): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: await this.accountAuthority.findOne({
-        id: id,
-      }),
-      transaction_classify: 'AUTHORITY_DELETE',
-      transaction_id: id,
-    } satisfies GlobalResponse
-
-    try {
-      return await this.accountAuthority
-        .findOneAndUpdate(
-          {
-            id: id,
-          },
-          {
-            deleted_at: new TimeManagement().getTimezone(
-              await this.configService.get<string>('application.timezone')
-            ),
-          }
-        )
-        .then(async () => {
-          response.message = 'Authority deleted successfully'
-          return response
-        })
-    } catch (error) {
-      response.message = 'Authority failed to delete'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -453,62 +343,6 @@ export class AccountService {
     }
   }
 
-  async authorityEdit(
-    parameter: AuthorityEditDTO,
-    id: string
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'AUTHORITY_EDIT',
-      transaction_id: id,
-    } satisfies GlobalResponse
-
-    try {
-      return await this.accountAuthority
-        .findOneAndUpdate(
-          {
-            id: id,
-            __v: parameter.__v,
-          },
-          {
-            code: parameter.code,
-            name: parameter.name,
-            remark: parameter.remark,
-          }
-        )
-        .then((result) => {
-          if (!result) {
-            response.statusCode = {
-              ...modCodes[this.constructor.name].error.isNotFound,
-              classCode: modCodes[this.constructor.name].defaultCode,
-            }
-            response.message = 'Authority failed to update'
-            response.payload = {}
-            throw new Error(JSON.stringify(response))
-          } else {
-            result.__v++
-            response.message = 'Authority updated successfully'
-            response.payload = result
-          }
-          return response
-        })
-    } catch (error) {
-      response.message = `Authority failed to update`
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
-    }
-  }
-
   async accountAdd(
     data: AccountAddDTO,
     credential: IAccountCreatedBy
@@ -551,48 +385,6 @@ export class AccountService {
         })
     } catch (error) {
       response.message = 'Account failed to create'
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
-    }
-  }
-
-  async authorityAdd(
-    data: AuthorityAddDTO,
-    credential: IAccountCreatedBy
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'AUTHORITY_ADD',
-      transaction_id: '',
-    } satisfies GlobalResponse
-
-    try {
-      return await this.accountAuthority
-        .create({
-          ...data,
-          created_by: credential,
-        })
-        .then((result) => {
-          response.message = 'Authority created successfully'
-          response.transaction_id = result.id
-          response.payload = {
-            id: result.id,
-            ...data,
-          }
-          return response
-        })
-    } catch (error) {
-      response.message = `Authority failed to create`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
