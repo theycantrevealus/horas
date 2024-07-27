@@ -116,47 +116,54 @@ export class MasterItemService {
   }
 
   async bulk(bulkData = []) {
-    if (bulkData.length > 0) {
-      const prepareBulk = await Promise.all(
-        bulkData.map(async (data) => {
-          let prepareData = await this.find({
-            $and: [{ code: data.code }],
-          }).then((r) => r)['payload']
-          if (!prepareData) {
-            prepareData = new this.masterItemModel({
-              code: data.code,
-              name: data.name,
-              alias: data.alias,
-              unit: data.unit,
-              category: data.category,
-              configuration: data.configuration,
-              brand: data.brand,
-              storing: data.storing,
-              remark: data.remark,
-              properties: data.properties,
-            })
-          } else {
-            prepareData.name = data.name
-            prepareData.alias = data.alias
-            prepareData.unit = data.unit
-            prepareData.category = data.category
-            // prepareData.configuration = data.configuration
-            prepareData.brand = data.brand
-            // prepareData.storing = data.storing
-            prepareData.remark = data.remark
-            prepareData.properties = data.properties
-          }
-          return prepareData
-        })
-      )
-      await this.masterItemModel
-        .bulkSave(prepareBulk, { ordered: false })
-        .then(() => {
-          //
-        })
-        .catch((e: Error) => {
-          throw e
-        })
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'MASTER_ITEM_IMPORT',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    try {
+      if (bulkData.length > 0) {
+        const prepareBulk = await Promise.all(
+          bulkData.map(async (data) => {
+            let prepareData = await this.find({
+              $and: [{ code: data.code }],
+            }).then((r) => r)['payload']
+            prepareData = !prepareData ? { code: '' } : prepareData
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { code, ...dataRes } = prepareData
+            return !prepareData ? data : dataRes
+          })
+        )
+        return await this.masterItemModel
+          .bulkSave(prepareBulk, { ordered: false })
+          .then(() => {
+            response.message = 'Data imported successfully'
+            return response
+          })
+      } else {
+        response.message = `Data to import is empty`
+        response.statusCode = {
+          ...modCodes[this.constructor.name].error.databaseError,
+          classCode: modCodes[this.constructor.name].defaultCode,
+        }
+        response.payload = bulkData
+        throw new Error(JSON.stringify(response))
+      }
+    } catch (error) {
+      response.message = error.message
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error.stack
+      throw new Error(JSON.stringify(response))
     }
   }
 
@@ -284,45 +291,5 @@ export class MasterItemService {
       response.payload = error
       throw new Error(JSON.stringify(response))
     }
-  }
-
-  async import(file: string, account: Account): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MASTER_ITEM_IMPORT',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    // const emitter = await this.mItemClient.send({
-    //   topic: 'master_item',
-    //   messages: [
-    //     {
-    //       headers: {},
-    //       key: {},
-    //       value: {
-    //         file: file,
-    //         account: account,
-    //       },
-    //     },
-    //   ],
-    // })
-    const emitter = true
-    if (emitter) {
-      response.message = 'Master item imported successfully'
-    } else {
-      response.message = `Master item failed to import`
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      throw new Error(JSON.stringify(response))
-    }
-    return response
   }
 }

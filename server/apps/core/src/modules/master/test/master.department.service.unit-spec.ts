@@ -356,7 +356,7 @@ describe('Master Department Service', () => {
         async () => {
           jest
             .spyOn(masterDepartmentModel, 'findOneAndUpdate')
-            .mockReturnValue(undefined)
+            .mockReturnValue(null)
 
           await expect(async () => {
             await masterDepartmentService.edit(

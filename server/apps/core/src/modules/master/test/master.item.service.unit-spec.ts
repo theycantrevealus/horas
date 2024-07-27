@@ -5,15 +5,19 @@ import {
   mockAccountModel,
 } from '@core/account/mock/account.mock'
 import { mockAuthority } from '@core/account/mock/authority.mock'
+import { MasterItemAddDTO } from '@core/master/dto/master.item'
+import { mockMasterItemBrand } from '@core/master/mock/master.item.brand.mock'
 import {
   masterItemDocArray,
   mockMasterItem,
   mockMasterItemModel,
 } from '@core/master/mock/master.item.mock'
+import { mockMasterItemUnit } from '@core/master/mock/master.item.unit.mock'
 import { MasterItemService } from '@core/master/services/master.item.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { HttpStatus } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
@@ -439,6 +443,146 @@ describe('Master Item Service', () => {
 
           await expect(async () => {
             await masterItemService.delete(targetID)
+          }).rejects.toThrow(Error)
+        }
+      )
+    }
+  )
+
+  describe(
+    testCaption('IMPORT DATA', 'data', 'Master item - Import data'),
+    () => {
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Response error on import data if provided data is empty',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          await expect(async () => {
+            await masterItemService.bulk([])
+          }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should import master item', {
+          tab: 1,
+        }),
+        async () => {
+          const data: MasterItemAddDTO[] = [
+            {
+              code: mockMasterItem().code,
+              name: mockMasterItem().name,
+              alias: mockMasterItem().alias,
+              configuration: {
+                allow_sell: true,
+              },
+              storing: [],
+              category: [],
+              unit: {
+                id: mockMasterItemUnit().id,
+                code: mockMasterItemUnit().code,
+                name: mockMasterItemUnit().name,
+              },
+              brand: {
+                id: mockMasterItemBrand().id,
+                code: mockMasterItemBrand().code,
+                name: mockMasterItemBrand().name,
+              },
+              properties: [],
+              remark: mockMasterItem().remark,
+            },
+          ]
+
+          jest.spyOn(masterItemService, 'find').mockResolvedValue({
+            statusCode: {
+              defaultCode: HttpStatus.OK,
+              customCode: modCodes.Global.success,
+              classCode: '',
+            },
+            message: '',
+            payload: null,
+            transaction_classify: 'MASTER_ITEM_IMPORT',
+            transaction_id: '',
+          } satisfies GlobalResponse)
+
+          const findResult = await masterItemService.find({ code: '' })
+          expect(findResult['payload']).toEqual(null)
+
+          jest.spyOn(masterItemModel, 'bulkSave')
+
+          await masterItemService.bulk(data).then((result: GlobalResponse) => {
+            // Should classify transaction
+            expect(result.transaction_classify).toEqual('MASTER_ITEM_IMPORT')
+
+            // Not an empty string so be informative
+            expect(result.message).not.toBe('')
+
+            // Should return success code
+            expect(result.statusCode.customCode).toEqual(
+              modCodes.Global.success
+            )
+          })
+        }
+      )
+
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Should return error if import is failed',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          const data: MasterItemAddDTO[] = [
+            {
+              code: mockMasterItem().code,
+              name: mockMasterItem().name,
+              alias: mockMasterItem().alias,
+              configuration: {
+                allow_sell: true,
+              },
+              storing: [],
+              category: [],
+              unit: {
+                id: mockMasterItemUnit().id,
+                code: mockMasterItemUnit().code,
+                name: mockMasterItemUnit().name,
+              },
+              brand: {
+                id: mockMasterItemBrand().id,
+                code: mockMasterItemBrand().code,
+                name: mockMasterItemBrand().name,
+              },
+              properties: [],
+              remark: mockMasterItem().remark,
+            },
+          ]
+
+          jest.spyOn(masterItemService, 'find').mockResolvedValue({
+            statusCode: {
+              defaultCode: HttpStatus.OK,
+              customCode: modCodes.Global.success,
+              classCode: '',
+            },
+            message: '',
+            payload: null,
+            transaction_classify: 'MASTER_ITEM_IMPORT',
+            transaction_id: '',
+          } satisfies GlobalResponse)
+
+          jest.spyOn(masterItemModel, 'bulkSave').mockImplementationOnce(() => {
+            throw new Error()
+          })
+
+          await expect(async () => {
+            await masterItemService.bulk(data)
           }).rejects.toThrow(Error)
         }
       )

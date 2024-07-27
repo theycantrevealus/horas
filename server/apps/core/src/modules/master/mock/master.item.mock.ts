@@ -110,6 +110,7 @@ export const mockMasterItemModel = {
   update: jest.fn().mockResolvedValue(mockMasterItem()),
   create: jest.fn().mockResolvedValue(mockMasterItem()),
   save: jest.fn().mockImplementation(),
+  bulkSave: jest.fn().mockResolvedValue({}),
   exec: jest.fn().mockImplementation(),
 }
 

@@ -169,18 +169,20 @@ export class MasterDepartmentService {
           { upsert: false, new: true }
         )
         .then((result) => {
-          if (!result) {
-            response.statusCode = {
-              ...modCodes[this.constructor.name].error.isNotFound,
-              classCode: modCodes[this.constructor.name].defaultCode,
-            }
-            response.message = 'Department failed to update'
-            response.payload = {}
-            throw new Error(JSON.stringify(response))
-          } else {
-            response.message = 'Department updated successfully'
-            response.payload = result
-          }
+          response.statusCode.customCode = !result
+            ? modCodes[this.constructor.name].error.isNotFound.customCode
+            : response.statusCode.customCode
+
+          response.statusCode.defaultCode = !result
+            ? modCodes[this.constructor.name].error.isNotFound.defaultCode
+            : response.statusCode.defaultCode
+
+          response.message = !result
+            ? 'Department failed to update'
+            : 'Department updated successfully'
+
+          response.payload = result
+
           return response
         })
     } catch (error) {
