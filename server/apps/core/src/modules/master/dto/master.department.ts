@@ -1,5 +1,6 @@
 import { CAccount } from '@core/account/dto/account.dto'
 import { IDoctor } from '@core/account/interface/account'
+import { CMasterTreatment } from '@core/master/dto/master.treatment'
 import { ApiProperty } from '@nestjs/swagger'
 import { IDepartmentConfiguration } from '@schemas/master/master.department'
 import { IMasterTreatment } from '@schemas/master/master.treatment'
@@ -14,8 +15,6 @@ import {
   ValidateNested,
 } from 'class-validator'
 import { Types } from 'mongoose'
-
-import { CMasterTreatment } from '../../../../../dto/master/master.treatment.dto'
 
 export class CMasterDepartment {
   @ApiProperty({
