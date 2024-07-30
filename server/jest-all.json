@@ -41,7 +41,6 @@
   "coveragePathIgnorePatterns": [
     "<rootDir>/node_modules/",
     ".(e2e|unit)-spec.(t|j)s",
-    ".controller.(t|j)s",
     ".provider.(t|j)s",
     ".batch.(t|j)s",
     ".join.(t|j)s",
