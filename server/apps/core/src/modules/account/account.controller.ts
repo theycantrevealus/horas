@@ -1,5 +1,6 @@
 import { AccountAddDTO, AccountEditDTO } from '@core/account/dto/account.dto'
 import { AccountSignInDTO } from '@core/account/dto/account.signin.dto'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -25,7 +26,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
-import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 
@@ -87,7 +87,7 @@ export class AccountController {
   })
   async add(
     @Body() parameter: AccountAddDTO,
-    @CredentialAccount() account: Account
+    @CredentialAccount() account: IAccountCreatedBy
     // @AccountToken() token: string
   ): Promise<GlobalResponse> {
     return await this.accountService.accountAdd(parameter, account)
@@ -188,7 +188,7 @@ export class AccountController {
   // })
   // async authorityAdd(
   //   @Body() parameter: AuthorityAddDTO,
-  //   @CredentialAccount() account: Account
+  //   @CredentialAccount() account: IAccountCreatedBy
   // ) {
   //   return await this.accountService
   //     .authorityAdd(parameter, account)

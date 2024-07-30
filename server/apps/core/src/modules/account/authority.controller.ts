@@ -3,6 +3,7 @@ import {
   AuthorityAddDTO,
   AuthorityEditDTO,
 } from '@core/account/dto/authority.dto'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -28,7 +29,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
-import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('authority')
@@ -86,7 +86,7 @@ export class AuthorityController {
   })
   async add(
     @Body() parameter: AuthorityAddDTO,
-    @CredentialAccount() account: Account
+    @CredentialAccount() account: IAccountCreatedBy
   ) {
     return await this.authorityService.add(parameter, account)
   }

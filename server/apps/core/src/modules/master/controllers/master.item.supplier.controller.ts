@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemSupplierAddDTO,
   MasterItemSupplierEditDTO,
@@ -12,6 +13,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -30,12 +32,12 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
-@ApiTags('Master Supplier Management')
+@ApiTags('Master Data Supplier Management')
 export class MasterItemSupplierController {
-  private masterItemSupplierService: MasterItemSupplierService
-  constructor(masterItemSupplierService: MasterItemSupplierService) {
-    this.masterItemSupplierService = masterItemSupplierService
-  }
+  constructor(
+    @Inject(MasterItemSupplierService)
+    private readonly masterItemSupplierService: MasterItemSupplierService
+  ) {}
 
   @Get('supplier')
   @Version('1')
@@ -84,7 +86,7 @@ export class MasterItemSupplierController {
   })
   async add(
     @Body() parameter: MasterItemSupplierAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account: IAccountCreatedBy
   ) {
     return await this.masterItemSupplierService.add(parameter, account)
   }

@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
@@ -31,7 +32,7 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Data Item Brand Management')
 export class MasterItemBrandController {
   constructor(
     @Inject(MasterItemBrandService)
@@ -68,7 +69,7 @@ export class MasterItemBrandController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
+  async detail(@Param() param: any) {
     return await this.masterItemBrandService.detail(param.id)
   }
 
@@ -85,7 +86,7 @@ export class MasterItemBrandController {
   })
   async add(
     @Body() parameter: MasterItemBrandAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account: IAccountCreatedBy
   ) {
     return await this.masterItemBrandService.add(parameter, account)
   }
@@ -104,7 +105,7 @@ export class MasterItemBrandController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param) {
+  async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param: any) {
     return await this.masterItemBrandService.edit(parameter, param.id)
   }
 
@@ -122,7 +123,7 @@ export class MasterItemBrandController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any) {
     return await this.masterItemBrandService.delete(param.id)
   }
 }

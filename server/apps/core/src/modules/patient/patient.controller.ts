@@ -25,7 +25,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
-import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { isJSON } from 'class-validator'
 import { FastifyReply } from 'fastify'
@@ -161,7 +160,7 @@ export class PatientController {
   async add(
     @Res() response: FastifyReply,
     @Body() parameter: PatientAddDTO,
-    @CredentialAccount() account: Account
+    @CredentialAccount() account: IAccountCreatedBy
   ) {
     await this.patientService
       .add(parameter, account)

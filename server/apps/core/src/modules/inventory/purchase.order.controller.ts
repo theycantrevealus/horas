@@ -30,7 +30,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
-import { Account } from '@schemas/account/account.model'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
@@ -127,7 +126,7 @@ export class PurchaseOrderController {
   })
   async add(
     @Body() parameter: PurchaseOrderAddDTO,
-    @CredentialAccount() account: Account
+    @CredentialAccount() account: IAccountCreatedBy
     // @AccountToken() token: string
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.add(parameter, account)

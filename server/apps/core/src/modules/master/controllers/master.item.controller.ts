@@ -1,4 +1,5 @@
 // import { FileInterceptor } from '@nestjs/platform-express'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemAddDTO,
   MasterItemEditDTO,
@@ -31,7 +32,7 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Data Item Management')
 export class MasterItemController {
   constructor(
     @Inject(MasterItemService)
@@ -63,7 +64,7 @@ export class MasterItemController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
+  async detail(@Param() param: any) {
     return await this.masterItemService.detail(param.id)
   }
 
@@ -77,7 +78,10 @@ export class MasterItemController {
     summary: 'Add new item',
     description: ``,
   })
-  async add(@Body() parameter: MasterItemAddDTO, @CredentialAccount() account) {
+  async add(
+    @Body() parameter: MasterItemAddDTO,
+    @CredentialAccount() account: IAccountCreatedBy
+  ) {
     return await this.masterItemService.add(parameter, account)
   }
 
@@ -94,7 +98,7 @@ export class MasterItemController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemEditDTO, @Param() param) {
+  async edit(@Body() parameter: MasterItemEditDTO, @Param() param: any) {
     return await this.masterItemService.edit(parameter, param.id)
   }
 
@@ -111,7 +115,7 @@ export class MasterItemController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any) {
     return await this.masterItemService.delete(param.id)
   }
 

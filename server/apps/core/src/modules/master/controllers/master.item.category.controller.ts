@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
@@ -16,7 +17,6 @@ import {
   Patch,
   Post,
   Query,
-  Res,
   UseGuards,
   UseInterceptors,
   Version,
@@ -29,10 +29,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { FastifyReply } from 'fastify'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Data Item Category Management')
 export class MasterItemCategoryController {
   constructor(
     @Inject(MasterItemCategoryService)
@@ -64,7 +63,7 @@ export class MasterItemCategoryController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
+  async detail(@Param() param: any) {
     return await this.masterItemCategoryService.detail(param.id)
   }
 
@@ -79,9 +78,8 @@ export class MasterItemCategoryController {
     description: ``,
   })
   async add(
-    @Res() response: FastifyReply,
     @Body() parameter: MasterItemCategoryAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account: IAccountCreatedBy
   ) {
     return await this.masterItemCategoryService.add(parameter, account)
   }
@@ -99,7 +97,10 @@ export class MasterItemCategoryController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemCategoryEditDTO, @Param() param) {
+  async edit(
+    @Body() parameter: MasterItemCategoryEditDTO,
+    @Param() param: any
+  ) {
     return await this.masterItemCategoryService.edit(parameter, param.id)
   }
 
@@ -116,7 +117,7 @@ export class MasterItemCategoryController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any) {
     return await this.masterItemCategoryService.delete(param.id)
   }
 }

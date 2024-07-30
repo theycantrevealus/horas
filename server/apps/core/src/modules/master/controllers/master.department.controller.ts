@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterDepartmentAddDTO,
   MasterDepartmentEditDTO,
@@ -30,16 +31,11 @@ import {
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
-import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { Logger } from 'winston'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Data Department Management')
 export class MasterDepartmentController {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER)
-    private readonly logger: Logger,
-
     @Inject(MasterDepartmentService)
     private readonly masterDepartmentService: MasterDepartmentService
   ) {}
@@ -76,7 +72,7 @@ export class MasterDepartmentController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
+  async detail(@Param() param: any) {
     return await this.masterDepartmentService.detail(param.id)
   }
 
@@ -93,7 +89,7 @@ export class MasterDepartmentController {
   })
   async add(
     @Body() parameter: MasterDepartmentAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     return await this.masterDepartmentService.add(parameter, account)
   }
@@ -112,7 +108,7 @@ export class MasterDepartmentController {
     summary: 'Edit department',
     description: ``,
   })
-  async edit(@Body() body: MasterDepartmentEditDTO, @Param() param) {
+  async edit(@Body() body: MasterDepartmentEditDTO, @Param() param: any) {
     return await this.masterDepartmentService.edit(body, param.id)
   }
 
@@ -131,7 +127,7 @@ export class MasterDepartmentController {
     summary: 'Delete department',
     description: ``,
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any) {
     return await this.masterDepartmentService.delete(param.id)
   }
 }
