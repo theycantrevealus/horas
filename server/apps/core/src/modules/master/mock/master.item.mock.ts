@@ -1,47 +1,41 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  MasterItemAddDTO,
-  MasterItemEditDTO,
-} from '@core/master/dto/master.item'
 import { IMasterItemConfiguration } from '@core/master/interface/master.item.configuration'
 import { masterItemBrandArray } from '@core/master/mock/master.item.brand.mock'
 import { masterItemCategoryArray } from '@core/master/mock/master.item.category.mock'
 import { masterItemUnitArray } from '@core/master/mock/master.item.unit.mock'
 import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
 import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterItemService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: MasterItemAddDTO, account: Account) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `item-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest.fn().mockImplementation((dto: MasterItemEditDTO, id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockMasterItemService = {
+//   all: jest.fn().mockResolvedValue((dto: any) => dto),
+//   add: jest.fn().mockImplementation((dto: MasterItemAddDTO) => {
+//     return Promise.resolve({
+//       payload: {
+//         ...dto,
+//         id: `item-${new Types.ObjectId().toString()}`,
+//       },
+//     })
+//   }),
+//   edit: jest.fn().mockImplementation((dto: MasterItemEditDTO, id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//         ...dto,
+//       },
+//     })
+//   }),
+//   detail: jest.fn().mockResolvedValue((dto: any) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockMasterItem = (
   id = `item-${new Types.ObjectId().toString()}`,

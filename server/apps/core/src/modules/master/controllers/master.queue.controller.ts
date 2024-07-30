@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterQueueAddDTO,
   MasterQueueEditDTO,
@@ -28,9 +29,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
+import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Data Queue Management')
 export class MasterQueueController {
   constructor(
     @Inject(MasterQueueService)
@@ -48,7 +50,7 @@ export class MasterQueueController {
     description: '',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
+  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
     return await this.masterQueueService.all(parameter)
   }
 
@@ -65,7 +67,7 @@ export class MasterQueueController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
+  async detail(@Param() param: any): Promise<GlobalResponse> {
     return await this.masterQueueService.detail(param.id)
   }
 
@@ -81,8 +83,8 @@ export class MasterQueueController {
   })
   async add(
     @Body() parameter: MasterQueueAddDTO,
-    @CredentialAccount() account
-  ) {
+    @CredentialAccount() account: IAccountCreatedBy
+  ): Promise<GlobalResponse> {
     return await this.masterQueueService.add(parameter, account)
   }
 
@@ -99,7 +101,10 @@ export class MasterQueueController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterQueueEditDTO, @Param() param) {
+  async edit(
+    @Body() parameter: MasterQueueEditDTO,
+    @Param() param: any
+  ): Promise<GlobalResponse> {
     return await this.masterQueueService.edit(parameter, param.id)
   }
 
@@ -116,7 +121,7 @@ export class MasterQueueController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any): Promise<GlobalResponse> {
     return await this.masterQueueService.delete(param.id)
   }
 }

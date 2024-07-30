@@ -1,4 +1,5 @@
 import { AuthorityController } from '@core/account/authority.controller'
+import { AuthorityService } from '@core/account/authority.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { CacheModule } from '@nestjs/cache-manager'
@@ -44,7 +45,12 @@ import { AccountService } from './account.service'
     AuthModule,
   ],
   controllers: [AccountController, AuthorityController],
-  providers: [AccountService, MongoMiddlewareAuthority, MongoMiddlewareAccount],
-  exports: [AccountService],
+  providers: [
+    AccountService,
+    AuthorityService,
+    MongoMiddlewareAuthority,
+    MongoMiddlewareAccount,
+  ],
+  exports: [AccountService, AuthorityService],
 })
 export class AccountModule {}

@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
@@ -28,9 +29,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
+import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Data Stock Point Management')
 export class MasterStockPointController {
   constructor(
     @Inject(MasterStockPointService)
@@ -48,7 +50,7 @@ export class MasterStockPointController {
     description: 'Showing stock_point data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
+  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
     return await this.masterStockPointService.all(parameter)
   }
 
@@ -65,7 +67,7 @@ export class MasterStockPointController {
   @ApiParam({
     name: 'id',
   })
-  async detail(@Param() param) {
+  async detail(@Param() param: any): Promise<GlobalResponse> {
     return await this.masterStockPointService.detail(param.id)
   }
 
@@ -81,8 +83,8 @@ export class MasterStockPointController {
   })
   async add(
     @Body() parameter: MasterStockPointAddDTO,
-    @CredentialAccount() account
-  ) {
+    @CredentialAccount() account: IAccountCreatedBy
+  ): Promise<GlobalResponse> {
     return await this.masterStockPointService.add(parameter, account)
   }
 
@@ -99,7 +101,10 @@ export class MasterStockPointController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterStockPointEditDTO, @Param() param) {
+  async edit(
+    @Body() parameter: MasterStockPointEditDTO,
+    @Param() param: any
+  ): Promise<GlobalResponse> {
     return await this.masterStockPointService.edit(parameter, param.id)
   }
 
@@ -116,7 +121,7 @@ export class MasterStockPointController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any): Promise<GlobalResponse> {
     return await this.masterStockPointService.delete(param.id)
   }
 }

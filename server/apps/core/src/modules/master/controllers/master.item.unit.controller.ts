@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
@@ -30,7 +31,7 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
-@ApiTags('Master Data Management')
+@ApiTags('Master Data Item Unit Management')
 export class MasterItemUnitController {
   constructor(
     @Inject(MasterItemUnitService)
@@ -62,7 +63,7 @@ export class MasterItemUnitController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param) {
+  async detail(@Param() param: any) {
     return await this.masterItemUnitService.detail(param.id)
   }
 
@@ -78,7 +79,7 @@ export class MasterItemUnitController {
   })
   async add(
     @Body() parameter: MasterItemUnitAddDTO,
-    @CredentialAccount() account
+    @CredentialAccount() account: IAccountCreatedBy
   ) {
     return await this.masterItemUnitService.add(parameter, account)
   }
@@ -96,7 +97,7 @@ export class MasterItemUnitController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemUnitEditDTO, @Param() param) {
+  async edit(@Body() parameter: MasterItemUnitEditDTO, @Param() param: any) {
     return await this.masterItemUnitService.edit(parameter, param.id)
   }
 
@@ -113,7 +114,7 @@ export class MasterItemUnitController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param) {
+  async delete(@Param() param: any) {
     return await this.masterItemUnitService.delete(param.id)
   }
 }

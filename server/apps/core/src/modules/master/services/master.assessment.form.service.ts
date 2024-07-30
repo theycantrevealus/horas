@@ -1,12 +1,15 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
-  MasterQueueAddDTO,
-  MasterQueueEditDTO,
-} from '@core/master/dto/master.queue'
+  MasterAssessmentFormAddDTO,
+  MasterAssessmentFormEditDTO,
+} from '@core/master/dto/master.assessment.form'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
-import { MasterQueue } from '@schemas/master/master.queue.machine'
+import {
+  MasterAssessmentForm,
+  MasterAssessmentFormDocument,
+} from '@schemas/master/master.assessment.form'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -15,15 +18,15 @@ import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
-export class MasterQueueService {
+export class MasterAssessmentFormService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
 
-    @InjectModel(MasterQueue.name, 'primary')
-    private masterQueueModel: Model<MasterQueue>
+    @InjectModel(MasterAssessmentForm.name, 'primary')
+    private masterAssessmentFormModel: Model<MasterAssessmentFormDocument>
   ) {}
 
-  async all(payload: any) {
+  async all(payload: any): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -32,21 +35,22 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_LIST',
-      transaction_id: null,
+      transaction_classify: 'MASTER_ASSESSMENT_FORM_LIST',
+      transaction_id: '',
     } satisfies GlobalResponse
 
     try {
       const parameter: PrimeParameter = JSON.parse(payload)
-      return await prime_datatable(parameter, this.masterQueueModel).then(
-        (result) => {
-          response.payload = result.payload
-          response.message = 'Master queue fetch successfully'
-          return response
-        }
-      )
+      return await prime_datatable(
+        parameter,
+        this.masterAssessmentFormModel
+      ).then((result) => {
+        response.payload = result.payload
+        response.message = 'Assessment form fetch successfully'
+        return response
+      })
     } catch (error) {
-      response.message = `Master queue failed to fetch`
+      response.message = `Assessment form failed to fetch`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -65,18 +69,20 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_GET',
-      transaction_id: id,
+      transaction_classify: 'MASTER_ASSESSMENT_FORM_GET',
+      transaction_id: '',
     } satisfies GlobalResponse
 
     try {
-      return await this.masterQueueModel.findOne({ id: id }).then((result) => {
-        response.payload = result
-        response.message = 'Master queue detail fetch successfully'
-        return response
-      })
+      return await this.masterAssessmentFormModel
+        .findOne({ id: id })
+        .then((result) => {
+          response.payload = result ?? {}
+          response.message = 'Assessment form detail fetch successfully'
+          return response
+        })
     } catch (error) {
-      response.message = `Master queue detail failed to fetch`
+      response.message = `Assessment form detail failed to fetch`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -87,7 +93,7 @@ export class MasterQueueService {
   }
 
   async add(
-    data: MasterQueueAddDTO,
+    data: MasterAssessmentFormAddDTO,
     account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
@@ -98,24 +104,26 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_ADD',
+      transaction_classify: 'MASTER_ASSESSMENT_FORM_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
-
     try {
-      return await this.masterQueueModel
+      return await this.masterAssessmentFormModel
         .create({
           ...data,
           created_by: account,
         })
-        .then((result) => {
-          response.message = 'Master queue created successfully'
+        .then(async (result) => {
+          response.message = 'Assessment form created successfully'
           response.transaction_id = result._id
-          response.payload = result
+          response.payload = {
+            id: result.id,
+            ...data,
+          }
           return response
         })
     } catch (error) {
-      response.message = `Master queue failed to create`
+      response.message = 'Assessment form failed to create'
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -125,7 +133,10 @@ export class MasterQueueService {
     }
   }
 
-  async edit(data: MasterQueueEditDTO, id: string): Promise<GlobalResponse> {
+  async edit(
+    data: MasterAssessmentFormEditDTO,
+    id: string
+  ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -133,30 +144,46 @@ export class MasterQueueService {
         classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
-      payload: {},
-      transaction_classify: 'MASTER_QUEUE_EDIT',
-      transaction_id: null,
+      payload: await this.masterAssessmentFormModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'MASTER_ASSESSMENT_FORM_EDIT',
+      transaction_id: id,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterQueueModel
+      return await this.masterAssessmentFormModel
         .findOneAndUpdate(
           {
             id: id,
             __v: data.__v,
           },
           {
-            code: data.code,
+            document_version: data.document_version,
+            elements: data.elements,
             remark: data.remark,
-          }
+          },
+          { upsert: false, new: true }
         )
         .then((result) => {
-          response.message = 'Master queue updated successfully'
+          response.statusCode.customCode = !result
+            ? modCodes[this.constructor.name].error.isNotFound.customCode
+            : response.statusCode.customCode
+
+          response.statusCode.defaultCode = !result
+            ? modCodes[this.constructor.name].error.isNotFound.defaultCode
+            : response.statusCode.defaultCode
+
+          response.message = !result
+            ? 'Assessment form failed to update'
+            : 'Assessment form updated successfully'
+
           response.payload = result
+
           return response
         })
     } catch (error) {
-      response.message = `Master queue failed to update`
+      response.message = `Assessment form failed to update. ${error.message}`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,
@@ -174,13 +201,15 @@ export class MasterQueueService {
         classCode: modCodes[this.constructor.name].defaultCode,
       },
       message: '',
-      payload: {},
-      transaction_classify: 'MASTER_QUEUE_DELETE',
-      transaction_id: null,
+      payload: await this.masterAssessmentFormModel.findOne({
+        id: id,
+      }),
+      transaction_classify: 'MASTER_ASSESSMENT_FORM_DELETE',
+      transaction_id: id,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterQueueModel
+      return await this.masterAssessmentFormModel
         .findOneAndUpdate(
           {
             id: id,
@@ -191,12 +220,12 @@ export class MasterQueueService {
             ),
           }
         )
-        .then(async () => {
-          response.message = 'Master queue deleted successfully'
+        .then(() => {
+          response.message = 'Assessment form deleted successfully'
           return response
         })
     } catch (error) {
-      response.message = 'Master queue failed to delete'
+      response.message = `Assessment form failed to delete`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,

@@ -1,25 +1,28 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { faker } from '@faker-js/faker'
+import { ILOV } from '@schemas/lov/lov'
+import { IMasterPartner } from '@schemas/master/master.partner'
 import {
-  MasterDepartment,
-  MasterDepartmentDocument,
-} from '@schemas/master/master.department'
+  IMasterTreatmentPriceRate,
+  MasterTreatment,
+  MasterTreatmentDocument,
+} from '@schemas/master/master.treatment'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-// export const mockMasterDepartmentService = {
+// export const mockMasterTreatmentService = {
 //   all: jest.fn().mockResolvedValue((dto: any) => dto),
-//   add: jest.fn().mockImplementation((dto: MasterDepartmentAddDTO) => {
+//   add: jest.fn().mockImplementation((dto: MasterTreatmentAddDTO) => {
 //     return Promise.resolve({
 //       payload: {
 //         ...dto,
-//         id: `department-${new Types.ObjectId().toString()}`,
+//         id: `treatment-${new Types.ObjectId().toString()}`,
 //       },
 //     })
 //   }),
 //   edit: jest
 //     .fn()
-//     .mockImplementation((dto: MasterDepartmentEditDTO, id: string) => {
+//     .mockImplementation((dto: MasterTreatmentEditDTO, id: string) => {
 //       return Promise.resolve({
 //         payload: {
 //           id: id,
@@ -37,9 +40,9 @@ import { Types } from 'mongoose'
 //   }),
 // }
 
-export const mockMasterDepartment = (
-  id = `department-${new Types.ObjectId().toString()}`,
-  code = 'MSRD-0001',
+export const mockMasterTreatment = (
+  id = `treatment-${new Types.ObjectId().toString()}`,
+  code = 'MSRTRT-0001',
   name = faker.company.name(),
   remark = 'Example remark',
   created_by: IAccountCreatedBy = {
@@ -48,57 +51,47 @@ export const mockMasterDepartment = (
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
-  configuration = {
-    default_consultation_treatment: {
-      id: '',
-      code: '',
-      name: '',
-    },
-    treatment: [],
-    doctor: [],
-  },
+  group: ILOV[] = [],
+  rate: IMasterTreatmentPriceRate[] = [],
+  partner: IMasterPartner[] = [],
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
-): MasterDepartment => ({
+): MasterTreatment => ({
   id,
   code,
   name,
-  configuration,
   remark,
   created_by,
+  group,
+  rate,
+  partner,
   created_at,
   updated_at,
   deleted_at,
 })
 
-export const mockMasterDepartmentModel = {
-  new: jest.fn().mockResolvedValue(mockMasterDepartment()),
+export const mockMasterTreatmentModel = {
+  new: jest.fn().mockResolvedValue(mockMasterTreatment()),
   find: jest.fn().mockImplementation(),
   aggregate: jest.fn().mockImplementation(),
-  findOne: jest.fn().mockResolvedValue(mockMasterDepartment()),
-  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterDepartment()),
-  update: jest.fn().mockResolvedValue(mockMasterDepartment()),
-  create: jest.fn().mockResolvedValue(mockMasterDepartment()),
+  findOne: jest.fn().mockResolvedValue(mockMasterTreatment()),
+  findOneAndUpdate: jest.fn().mockResolvedValue(mockMasterTreatment()),
+  update: jest.fn().mockResolvedValue(mockMasterTreatment()),
+  create: jest.fn().mockResolvedValue(mockMasterTreatment()),
   save: jest.fn().mockImplementation(),
   exec: jest.fn().mockImplementation(),
 }
 
-export const mockMasterDepartmentDoc = (
-  mock?: Partial<MasterDepartment>
-): Partial<MasterDepartmentDocument> => ({
+export const mockMasterTreatmentDoc = (
+  mock?: Partial<MasterTreatment>
+): Partial<MasterTreatmentDocument> => ({
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   name: mock?.name || faker.company.name(),
   remark: mock?.remark || '',
-  configuration: {
-    default_consultation_treatment: {
-      id: '',
-      code: '',
-      name: '',
-    },
-    treatment: [],
-    doctor: [],
-  },
+  group: [],
+  rate: [],
+  partner: [],
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
@@ -112,37 +105,43 @@ export const mockMasterDepartmentDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-// export const masterDepartmentArray = [
-//   mockMasterDepartment(),
-//   mockMasterDepartment(
-//     `department-${new Types.ObjectId().toString()}`,
-//     'MSRD-0001',
+// export const masterTreatmentArray = [
+//   mockMasterTreatment(),
+//   mockMasterTreatment(
+//     `treatment-${new Types.ObjectId().toString()}`,
+//     'MSRTRT-0001',
 //     '',
 //     '',
 //     mockAccount(),
+//     [],
+//     [],
+//     [],
 //     new TimeManagement().getTimezone('Asia/Jakarta'),
 //     new TimeManagement().getTimezone('Asia/Jakarta'),
 //     null
 //   ),
-//   mockMasterDepartment(
-//     `department-${new Types.ObjectId().toString()}`,
-//     'MSRD-0002',
+//   mockMasterTreatment(
+//     `treatment-${new Types.ObjectId().toString()}`,
+//     'MSRTRT-0002',
 //     '',
 //     '',
 //     mockAccount(),
+//     [],
+//     [],
+//     [],
 //     new TimeManagement().getTimezone('Asia/Jakarta'),
 //     new TimeManagement().getTimezone('Asia/Jakarta')
 //   ),
 // ]
 
-export const masterDepartmentDocArray = [
-  mockMasterDepartmentDoc(),
-  mockMasterDepartmentDoc({
+export const masterTreatmentDocArray = [
+  mockMasterTreatmentDoc(),
+  mockMasterTreatmentDoc({
     code: 'XX-002',
     name: faker.person.firstName(),
     remark: '',
   }),
-  mockMasterDepartmentDoc({
+  mockMasterTreatmentDoc({
     code: 'XX-001',
     name: faker.person.firstName(),
     remark: '',

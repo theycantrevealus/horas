@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
@@ -5,7 +6,6 @@ import {
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
-import { Account } from '@schemas/account/account.model'
 import {
   MasterItemBrand,
   MasterItemBrandDocument,
@@ -92,7 +92,7 @@ export class MasterItemBrandService {
 
   async add(
     data: MasterItemBrandAddDTO,
-    account: Account
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

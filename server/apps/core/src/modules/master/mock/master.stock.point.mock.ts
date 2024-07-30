@@ -1,12 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  MasterStockPointAddDTO,
-  MasterStockPointEditDTO,
-} from '@core/master/dto/master.stock.point'
 import { IMasterStockPointConfiguration } from '@core/master/interface/master.stock.point.configuration'
 import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
 import {
   MasterStockPoint,
   MasterStockPointDocument,
@@ -14,36 +8,35 @@ import {
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterStockPointService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: MasterStockPointAddDTO, account: Account) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `stock_point-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest
-    .fn()
-    .mockImplementation((dto: MasterStockPointEditDTO, id: string) => {
-      return Promise.resolve({
-        payload: {
-          id: id,
-        },
-      })
-    }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockMasterStockPointService = {
+//   all: jest.fn().mockResolvedValue((dto: any) => dto),
+//   add: jest.fn().mockImplementation((dto: MasterStockPointAddDTO) => {
+//     return Promise.resolve({
+//       payload: {
+//         ...dto,
+//         id: `stock_point-${new Types.ObjectId().toString()}`,
+//       },
+//     })
+//   }),
+//   edit: jest
+//     .fn()
+//     .mockImplementation((dto: MasterStockPointEditDTO, id: string) => {
+//       return Promise.resolve({
+//         payload: {
+//           id: id,
+//           ...dto,
+//         },
+//       })
+//     }),
+//   detail: jest.fn().mockResolvedValue((dto: any) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockMasterStockPoint = (
   id = `stock_point-${new Types.ObjectId().toString()}`,
@@ -108,40 +101,40 @@ export const mockMasterStockPointDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-export const masterStockPointArray = [
-  mockMasterStockPoint(),
-  mockMasterStockPoint(
-    `stock_point-${new Types.ObjectId().toString()}`,
-    'BRD-0001',
-    '',
-    {
-      allow_grn: true,
-      allow_incoming: true,
-      allow_outgoing: true,
-      allow_destruction: true,
-    },
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    null
-  ),
-  mockMasterStockPoint(
-    `stock_point-${new Types.ObjectId().toString()}`,
-    'BRD-0002',
-    '',
-    {
-      allow_grn: true,
-      allow_incoming: true,
-      allow_outgoing: true,
-      allow_destruction: true,
-    },
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta')
-  ),
-]
+// export const masterStockPointArray = [
+//   mockMasterStockPoint(),
+//   mockMasterStockPoint(
+//     `stock_point-${new Types.ObjectId().toString()}`,
+//     'BRD-0001',
+//     '',
+//     {
+//       allow_grn: true,
+//       allow_incoming: true,
+//       allow_outgoing: true,
+//       allow_destruction: true,
+//     },
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     null
+//   ),
+//   mockMasterStockPoint(
+//     `stock_point-${new Types.ObjectId().toString()}`,
+//     'BRD-0002',
+//     '',
+//     {
+//       allow_grn: true,
+//       allow_incoming: true,
+//       allow_outgoing: true,
+//       allow_destruction: true,
+//     },
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta')
+//   ),
+// ]
 
 export const masterStockPointDocArray = [
   mockMasterStockPointDoc(),

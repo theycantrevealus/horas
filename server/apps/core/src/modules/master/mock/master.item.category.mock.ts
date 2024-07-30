@@ -1,11 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  MasterItemCategoryAddDTO,
-  MasterItemCategoryEditDTO,
-} from '@core/master/dto/master.item.category'
 import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
 import {
   MasterItemCategory,
   MasterItemCategoryDocument,
@@ -13,36 +8,35 @@ import {
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterItemCategoryService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: MasterItemCategoryAddDTO, account: Account) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `category-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest
-    .fn()
-    .mockImplementation((dto: MasterItemCategoryEditDTO, id: string) => {
-      return Promise.resolve({
-        payload: {
-          id: id,
-        },
-      })
-    }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockMasterItemCategoryService = {
+//   all: jest.fn().mockResolvedValue((dto: any) => dto),
+//   add: jest.fn().mockImplementation((dto: MasterItemCategoryAddDTO) => {
+//     return Promise.resolve({
+//       payload: {
+//         ...dto,
+//         id: `category-${new Types.ObjectId().toString()}`,
+//       },
+//     })
+//   }),
+//   edit: jest
+//     .fn()
+//     .mockImplementation((dto: MasterItemCategoryEditDTO, id: string) => {
+//       return Promise.resolve({
+//         payload: {
+//           id: id,
+//           ...dto,
+//         },
+//       })
+//     }),
+//   detail: jest.fn().mockResolvedValue((dto: any) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockMasterItemCategory = (
   id = `category-${new Types.ObjectId().toString()}`,

@@ -4,6 +4,7 @@ import { SEPPulang } from '@core/3rdparty/bpjs/dto/sep/pemulangan'
 import { SEPPengajuan } from '@core/3rdparty/bpjs/dto/sep/pengajuan'
 import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimSEPService } from '@core/3rdparty/bpjs/services/vclaim/sep.service'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
@@ -21,7 +22,6 @@ import {
   Version,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
-import { Account } from '@schemas/account/account.model'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { TimeManagement } from '@utility/time'
 import { FastifyReply } from 'fastify'
@@ -77,7 +77,7 @@ export class BPJSVClaimSEPController {
   })
   async create(
     @Body() parameter: SEPAdd,
-    @CredentialAccount() account: Account,
+    @CredentialAccount() account: IAccountCreatedBy,
     @Res() response: FastifyReply
   ) {
     await this.bpjsVClaimSEPService
@@ -185,7 +185,7 @@ export class BPJSVClaimSEPController {
   })
   async updatePulang(
     @Body() body: SEPPulang,
-    @CredentialAccount() account: Account,
+    @CredentialAccount() account: IAccountCreatedBy,
     @Res() response: FastifyReply
   ) {
     await this.bpjsVClaimSEPService

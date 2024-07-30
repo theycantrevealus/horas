@@ -5,6 +5,7 @@ import { SEPPengajuan } from '@core/3rdparty/bpjs/dto/sep/pengajuan'
 import { SEP, SEPDocument } from '@core/3rdparty/bpjs/schemas/sep'
 import { BPJSVClaimAuthService } from '@core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimRequest } from '@core/3rdparty/bpjs/services/vclaim/request.service'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
@@ -57,7 +58,10 @@ export class BPJSVClaimSEPService {
     return response
   }
 
-  async create(parameter: SEPAdd, account: Account): Promise<GlobalResponse> {
+  async create(
+    parameter: SEPAdd,
+    account: IAccountCreatedBy
+  ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -218,7 +222,7 @@ export class BPJSVClaimSEPService {
 
   async updatePulang(
     parameter: SEPPulang,
-    account: Account
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

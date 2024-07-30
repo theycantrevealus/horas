@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemAddDTO,
   MasterItemEditDTO,
@@ -5,7 +6,6 @@ import {
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
-import { Account } from '@schemas/account/account.model'
 import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -167,7 +167,10 @@ export class MasterItemService {
     }
   }
 
-  async add(data: MasterItemAddDTO, account: Account): Promise<GlobalResponse> {
+  async add(
+    data: MasterItemAddDTO,
+    account: IAccountCreatedBy
+  ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,

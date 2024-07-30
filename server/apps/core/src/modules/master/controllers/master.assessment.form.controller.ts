@@ -1,9 +1,9 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
-  MasterTreatmentAddDTO,
-  MasterTreatmentEditDTO,
-} from '@core/master/dto/master.treatment'
-import { MasterTreatmentService } from '@core/master/services/master.treatment.service'
+  MasterAssessmentFormAddDTO,
+  MasterAssessmentFormEditDTO,
+} from '@core/master/dto/master.assessment.form'
+import { MasterAssessmentFormService } from '@core/master/services/master.assessment.form.service'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -33,38 +33,38 @@ import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
-@ApiTags('Master Data Treatment Management')
-export class MasterTreatmentController {
+@ApiTags('Master Assessment Form')
+export class MasterAssessmentFormController {
   constructor(
-    @Inject(MasterTreatmentService)
-    private readonly masterTreatmentService: MasterTreatmentService
+    @Inject(MasterAssessmentFormService)
+    private readonly masterAssessmentFormService: MasterAssessmentFormService
   ) {}
 
-  @Get('treatment')
+  @Get('assessment_form')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterTreatment', action: 'view' })
+  @PermissionManager({ group: 'MasterAssessmentForm', action: 'view' })
   @ApiOperation({
-    summary: 'Fetch all treatment',
-    description: 'Showing treatment data',
+    summary: 'Fetch all assessment form',
+    description: 'Showing assessment form data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async accountAll(
     @Query('lazyEvent') parameter: string
   ): Promise<GlobalResponse> {
-    return await this.masterTreatmentService.all(parameter)
+    return await this.masterAssessmentFormService.all(parameter)
   }
 
-  @Get('treatment/:id')
+  @Get('assessment_form/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterTreatment', action: 'view' })
+  @PermissionManager({ group: 'MasterAssessmentForm', action: 'view' })
   @ApiParam({
     name: 'id',
   })
@@ -73,28 +73,28 @@ export class MasterTreatmentController {
     description: '',
   })
   async detail(@Param() param: any) {
-    return await this.masterTreatmentService.detail(param.id)
+    return await this.masterAssessmentFormService.detail(param.id)
   }
 
-  @Post('treatment')
+  @Post('assessment_form')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterTreatment', action: 'add' })
+  @PermissionManager({ group: 'MasterAssessmentForm', action: 'add' })
   @ApiOperation({
-    summary: 'Add new treatment',
+    summary: 'Add new assessment form',
     description: ``,
   })
   async add(
-    @Body() parameter: MasterTreatmentAddDTO,
+    @Body() parameter: MasterAssessmentFormAddDTO,
     @CredentialAccount() account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
-    return await this.masterTreatmentService.add(parameter, account)
+    return await this.masterAssessmentFormService.add(parameter, account)
   }
 
-  @Patch('treatment/:id')
+  @Patch('assessment_form/:id')
   @Version('1')
   @ApiParam({
     name: 'id',
@@ -103,16 +103,16 @@ export class MasterTreatmentController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterTreatment', action: 'edit' })
+  @PermissionManager({ group: 'MasterAssessmentForm', action: 'edit' })
   @ApiOperation({
-    summary: 'Edit treatment',
+    summary: 'Edit assessment form',
     description: ``,
   })
-  async edit(@Body() body: MasterTreatmentEditDTO, @Param() param: any) {
-    return await this.masterTreatmentService.edit(body, param.id)
+  async edit(@Body() body: MasterAssessmentFormEditDTO, @Param() param: any) {
+    return await this.masterAssessmentFormService.edit(body, param.id)
   }
 
-  @Delete('treatment/:id')
+  @Delete('assessment_form/:id')
   @Version('1')
   @ApiParam({
     name: 'id',
@@ -122,12 +122,12 @@ export class MasterTreatmentController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterTreatment', action: 'delete' })
+  @PermissionManager({ group: 'MasterAssessmentForm', action: 'delete' })
   @ApiOperation({
-    summary: 'Delete treatment',
+    summary: 'Delete assessment form',
     description: ``,
   })
   async delete(@Param() param: any) {
-    return await this.masterTreatmentService.delete(param.id)
+    return await this.masterAssessmentFormService.delete(param.id)
   }
 }

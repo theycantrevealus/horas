@@ -1,11 +1,5 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  MasterItemSupplierAddDTO,
-  MasterItemSupplierEditDTO,
-} from '@core/master/dto/master.item.supplier'
 import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
 import {
   MasterItemSupplier,
   MasterItemSupplierDocument,
@@ -13,36 +7,35 @@ import {
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterItemSupplierService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: MasterItemSupplierAddDTO, account: Account) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `supplier-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest
-    .fn()
-    .mockImplementation((dto: MasterItemSupplierEditDTO, id: string) => {
-      return Promise.resolve({
-        payload: {
-          id: id,
-        },
-      })
-    }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockMasterItemSupplierService = {
+//   all: jest.fn().mockResolvedValue((dto: any) => dto),
+//   add: jest.fn().mockImplementation((dto: MasterItemSupplierAddDTO) => {
+//     return Promise.resolve({
+//       payload: {
+//         ...dto,
+//         id: `supplier-${new Types.ObjectId().toString()}`,
+//       },
+//     })
+//   }),
+//   edit: jest
+//     .fn()
+//     .mockImplementation((dto: MasterItemSupplierEditDTO, id: string) => {
+//       return Promise.resolve({
+//         payload: {
+//           id: id,
+//           ...dto,
+//         },
+//       })
+//     }),
+//   detail: jest.fn().mockResolvedValue((dto: any) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockMasterItemSupplier = (
   id = `supplier-${new Types.ObjectId().toString()}`,
@@ -118,37 +111,37 @@ export const mockMasterItemSupplierDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-export const masterItemSupplierArray = [
-  mockMasterItemSupplier(),
-  mockMasterItemSupplier(
-    `supplier-${new Types.ObjectId().toString()}`,
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    null
-  ),
-  mockMasterItemSupplier(
-    `supplier-${new Types.ObjectId().toString()}`,
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    null
-  ),
-]
+// export const masterItemSupplierArray = [
+//   mockMasterItemSupplier(),
+//   mockMasterItemSupplier(
+//     `supplier-${new Types.ObjectId().toString()}`,
+//     '',
+//     '',
+//     '',
+//     '',
+//     '',
+//     '',
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     null
+//   ),
+//   mockMasterItemSupplier(
+//     `supplier-${new Types.ObjectId().toString()}`,
+//     '',
+//     '',
+//     '',
+//     '',
+//     '',
+//     '',
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     null
+//   ),
+// ]
 
 export const masterItemSupplierDocArray = [
   mockMasterItemSupplierDoc(),
