@@ -9,12 +9,12 @@ import {
 } from '@core/3rdparty/bpjs/schemas/applicares/kamar'
 import { BPJSApplicaresAuthService } from '@core/3rdparty/bpjs/services/applicares/auth.service'
 import { BPJSApplicaresRequest } from '@core/3rdparty/bpjs/services/applicares/request.service'
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
-import { Account } from '@schemas/account/account.model'
 import { IConfig } from '@schemas/config/config'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -58,7 +58,7 @@ export class BPJSApplicaresReferensiService {
     return response
   }
 
-  async kamarTersedia(account: Account): Promise<GlobalResponse> {
+  async kamarTersedia(account: IAccountCreatedBy): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -132,7 +132,7 @@ export class BPJSApplicaresReferensiService {
 
   async kamarCreate(
     parameter: ApplicaresKamarAdd,
-    account: Account
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

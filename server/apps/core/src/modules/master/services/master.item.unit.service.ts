@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
@@ -143,7 +144,7 @@ export class MasterItemUnitService {
 
   async add(
     data: MasterItemUnitAddDTO,
-    account: Account
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

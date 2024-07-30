@@ -1,3 +1,4 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
@@ -144,7 +145,7 @@ export class MasterItemCategoryService {
 
   async add(
     data: MasterItemCategoryAddDTO,
-    account: Account
+    account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
