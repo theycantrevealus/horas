@@ -1,10 +1,10 @@
+import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { PatientAddDTO } from '@core/patient/dto/patient.add'
 import { PatientEditDTO } from '@core/patient/dto/patient.edit'
 import { Patient, PatientDocument } from '@core/patient/schema/patient.model'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
-import { Account } from '@schemas/account/account.model'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -111,7 +111,10 @@ export class PatientService {
       })
   }
 
-  async add(data: PatientAddDTO, credential: Account): Promise<GlobalResponse> {
+  async add(
+    data: PatientAddDTO,
+    credential: IAccountCreatedBy
+  ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,

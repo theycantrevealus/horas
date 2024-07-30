@@ -28,6 +28,7 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { isJSON } from 'class-validator'
 import { FastifyReply } from 'fastify'
+import { IAccountCreatedBy } from "@core/account/interface/account.create_by";
 
 @Controller('patient')
 @ApiTags('Patient Management')
