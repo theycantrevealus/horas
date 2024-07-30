@@ -1,11 +1,5 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  MasterDepartmentAddDTO,
-  MasterDepartmentEditDTO,
-} from '@core/master/dto/master.department'
 import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
 import {
   MasterDepartment,
   MasterDepartmentDocument,
@@ -13,36 +7,35 @@ import {
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterDepartmentService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: MasterDepartmentAddDTO, account: Account) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `department-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest
-    .fn()
-    .mockImplementation((dto: MasterDepartmentEditDTO, id: string) => {
-      return Promise.resolve({
-        payload: {
-          id: id,
-        },
-      })
-    }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockMasterDepartmentService = {
+//   all: jest.fn().mockResolvedValue((dto: any) => dto),
+//   add: jest.fn().mockImplementation((dto: MasterDepartmentAddDTO) => {
+//     return Promise.resolve({
+//       payload: {
+//         ...dto,
+//         id: `department-${new Types.ObjectId().toString()}`,
+//       },
+//     })
+//   }),
+//   edit: jest
+//     .fn()
+//     .mockImplementation((dto: MasterDepartmentEditDTO, id: string) => {
+//       return Promise.resolve({
+//         payload: {
+//           id: id,
+//           ...dto,
+//         },
+//       })
+//     }),
+//   detail: jest.fn().mockResolvedValue((dto: any) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockMasterDepartment = (
   id = `department-${new Types.ObjectId().toString()}`,
@@ -119,28 +112,28 @@ export const mockMasterDepartmentDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-export const masterItemBrandArray = [
-  mockMasterDepartment(),
-  mockMasterDepartment(
-    `department-${new Types.ObjectId().toString()}`,
-    'MSRD-0001',
-    '',
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    null
-  ),
-  mockMasterDepartment(
-    `department-${new Types.ObjectId().toString()}`,
-    'MSRD-0002',
-    '',
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta')
-  ),
-]
+// export const masterDepartmentArray = [
+//   mockMasterDepartment(),
+//   mockMasterDepartment(
+//     `department-${new Types.ObjectId().toString()}`,
+//     'MSRD-0001',
+//     '',
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     null
+//   ),
+//   mockMasterDepartment(
+//     `department-${new Types.ObjectId().toString()}`,
+//     'MSRD-0002',
+//     '',
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta')
+//   ),
+// ]
 
 export const masterDepartmentDocArray = [
   mockMasterDepartmentDoc(),

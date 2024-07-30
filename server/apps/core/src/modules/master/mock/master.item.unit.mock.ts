@@ -1,11 +1,6 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
 import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  MasterItemUnitAddDTO,
-  MasterItemUnitEditDTO,
-} from '@core/master/dto/master.item.unit'
 import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
 import {
   MasterItemUnit,
   MasterItemUnitDocument,
@@ -13,36 +8,35 @@ import {
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterItemUnitService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: MasterItemUnitAddDTO, account: Account) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `item_unit-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest
-    .fn()
-    .mockImplementation((dto: MasterItemUnitEditDTO, id: string) => {
-      return Promise.resolve({
-        payload: {
-          id: id,
-        },
-      })
-    }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockMasterItemUnitService = {
+//   all: jest.fn().mockResolvedValue((dto: any) => dto),
+//   add: jest.fn().mockImplementation((dto: MasterItemUnitAddDTO) => {
+//     return Promise.resolve({
+//       payload: {
+//         ...dto,
+//         id: `item_unit-${new Types.ObjectId().toString()}`,
+//       },
+//     })
+//   }),
+//   edit: jest
+//     .fn()
+//     .mockImplementation((dto: MasterItemUnitEditDTO, id: string) => {
+//       return Promise.resolve({
+//         payload: {
+//           id: id,
+//           ...dto,
+//         },
+//       })
+//     }),
+//   detail: jest.fn().mockResolvedValue((dto: any) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockMasterItemUnit = (
   id = `item_unit-${new Types.ObjectId().toString()}`,

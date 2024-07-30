@@ -1,44 +1,37 @@
 import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { mockAccount } from '@core/account/mock/account.mock'
-import {
-  MasterQueueAddDTO,
-  MasterQueueEditDTO,
-} from '@core/master/dto/master.queue'
 import { faker } from '@faker-js/faker'
-import { Account } from '@schemas/account/account.model'
 import { MasterItemBrandDocument } from '@schemas/master/master.item.brand'
 import { MasterQueue } from '@schemas/master/master.queue.machine'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockMasterQueueService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: MasterQueueAddDTO, account: Account) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `queue-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest.fn().mockImplementation((dto: MasterQueueEditDTO, id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockMasterQueueService = {
+//   all: jest.fn().mockResolvedValue((dto: any) => dto),
+//   add: jest.fn().mockImplementation((dto: MasterQueueAddDTO) => {
+//     return Promise.resolve({
+//       payload: {
+//         ...dto,
+//         id: `queue-${new Types.ObjectId().toString()}`,
+//       },
+//     })
+//   }),
+//   edit: jest.fn().mockImplementation((dto: MasterQueueEditDTO, id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//         ...dto,
+//       },
+//     })
+//   }),
+//   detail: jest.fn().mockResolvedValue((dto: dto) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockMasterQueue = (
   id = `queue-${new Types.ObjectId().toString()}`,
@@ -93,26 +86,26 @@ export const mockMasterQueueDoc = (
   deleted_at: mock?.deleted_at || null,
 })
 
-export const masterQueueArray = [
-  mockMasterQueue(),
-  mockMasterQueue(
-    `brand-${new Types.ObjectId().toString()}`,
-    'BRD-0001',
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    null
-  ),
-  mockMasterQueue(
-    `brand-${new Types.ObjectId().toString()}`,
-    'BRD-0002',
-    '',
-    mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta')
-  ),
-]
+// export const masterQueueArray = [
+//   mockMasterQueue(),
+//   mockMasterQueue(
+//     `brand-${new Types.ObjectId().toString()}`,
+//     'BRD-0001',
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     null
+//   ),
+//   mockMasterQueue(
+//     `brand-${new Types.ObjectId().toString()}`,
+//     'BRD-0002',
+//     '',
+//     mockAccount(),
+//     new TimeManagement().getTimezone('Asia/Jakarta'),
+//     new TimeManagement().getTimezone('Asia/Jakarta')
+//   ),
+// ]
 
 export const masterQueueDocArray = [
   mockMasterQueueDoc(),
