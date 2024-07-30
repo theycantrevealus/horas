@@ -1,4 +1,5 @@
 import { AccountModule } from '@core/account/account.module'
+import { MasterAssessmentFormController } from '@core/master/controllers/master.assessment.form.controller'
 import { MasterDepartmentController } from '@core/master/controllers/master.department.controller'
 import { MasterItemBrandController } from '@core/master/controllers/master.item.brand.controller'
 import { MasterItemCategoryController } from '@core/master/controllers/master.item.category.controller'
@@ -7,6 +8,8 @@ import { MasterItemSupplierController } from '@core/master/controllers/master.it
 import { MasterItemUnitController } from '@core/master/controllers/master.item.unit.controller'
 import { MasterQueueController } from '@core/master/controllers/master.queue.controller'
 import { MasterStockPointController } from '@core/master/controllers/master.stock.point.controller'
+import { MasterTreatmentController } from '@core/master/controllers/master.treatment.controller'
+import { MasterAssessmentFormService } from '@core/master/services/master.assessment.form.service'
 import { MasterDepartmentService } from '@core/master/services/master.department.service'
 import { MasterItemBrandService } from '@core/master/services/master.item.brand.service'
 import { MasterItemCategoryService } from '@core/master/services/master.item.category.service'
@@ -15,10 +18,16 @@ import { MasterItemSupplierService } from '@core/master/services/master.item.sup
 import { MasterItemUnitService } from '@core/master/services/master.item.unit.service'
 import { MasterQueueService } from '@core/master/services/master.queue.service'
 import { MasterStockPointService } from '@core/master/services/master.stock.point.service'
+import { MasterTreatmentService } from '@core/master/services/master.treatment.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
+import {
+  MasterAssessmentForm,
+  MasterAssessmentFormSchema,
+} from '@schemas/master/master.assessment.form'
+import { MongoMiddlewareMasterAssessmentForm } from '@schemas/master/master.assessment.form.middleware'
 import {
   MasterDepartment,
   MasterDepartmentSchema,
@@ -78,6 +87,7 @@ import { AuthModule } from '@security/auth.module'
 
         { name: MasterDepartment.name, schema: MasterDepartmentSchema },
         { name: MasterTreatment.name, schema: MasterTreatmentSchema },
+        { name: MasterAssessmentForm.name, schema: MasterAssessmentFormSchema },
 
         { name: LogLogin.name, schema: LogLoginSchema },
         { name: LogActivity.name, schema: LogActivitySchema },
@@ -96,6 +106,8 @@ import { AuthModule } from '@security/auth.module'
     MasterItemController,
     MasterQueueController,
     MasterDepartmentController,
+    MasterTreatmentController,
+    MasterAssessmentFormController,
   ],
   providers: [
     MongoMiddlewareMasterStockPoint,
@@ -109,6 +121,7 @@ import { AuthModule } from '@security/auth.module'
 
     MongoMiddlewareMasterDepartment,
     MongoMiddlewareMasterTreatment,
+    MongoMiddlewareMasterAssessmentForm,
 
     MasterDepartmentService,
     MasterItemSupplierService,
@@ -118,6 +131,8 @@ import { AuthModule } from '@security/auth.module'
     MasterItemUnitService,
     MasterItemService,
     MasterQueueService,
+    MasterTreatmentService,
+    MasterAssessmentFormService,
   ],
   exports: [
     MasterDepartmentService,
@@ -128,6 +143,8 @@ import { AuthModule } from '@security/auth.module'
     MasterItemUnitService,
     MasterItemService,
     MasterQueueService,
+    MasterTreatmentService,
+    MasterAssessmentFormService,
   ],
 })
 export class MasterModule {}
