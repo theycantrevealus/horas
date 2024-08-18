@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { CallHandler, ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { KafkaContext } from '@nestjs/microservices'
