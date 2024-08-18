@@ -28,13 +28,13 @@
         "tsConfigPath": "apps/xx_auth/tsconfig.app.json"
       }
     },
-    "core": {
+    "gateway_core": {
       "type": "application",
-      "root": "apps/core",
+      "root": "apps/gateway_core",
       "entryFile": "main",
-      "sourceRoot": "apps/core/src",
+      "sourceRoot": "apps/gateway_core/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/core/tsconfig.app.json"
+        "tsConfigPath": "apps/gateway_core/tsconfig.app.json"
       }
     },
     "report": {
@@ -125,6 +125,33 @@
       "sourceRoot": "apps/master.item/src",
       "compilerOptions": {
         "tsConfigPath": "apps/master.item/tsconfig.app.json"
+      }
+    },
+    "gateway_inventory": {
+      "type": "application",
+      "root": "apps/gateway_inventory",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway_inventory/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway_inventory/tsconfig.app.json"
+      }
+    },
+    "gateway_example": {
+      "type": "application",
+      "root": "apps/gateway_example",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway_example/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway_example/tsconfig.app.json"
+      }
+    },
+    "stock": {
+      "type": "application",
+      "root": "apps/stock",
+      "entryFile": "main",
+      "sourceRoot": "apps/stock/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/stock/tsconfig.app.json"
       }
     }
   }

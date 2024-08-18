@@ -31,8 +31,14 @@
       "@pipes/*": [
         "./apps/pipes/*"
       ],
-      "@core/*": [
-        "./apps/core/src/modules/*"
+      "@gateway_core/*": [
+        "./apps/gateway_core/src/modules/*"
+      ],
+      "@gateway_inventory/*": [
+        "./apps/gateway_inventory/src/modules/*"
+      ],
+      "@stock/*": [
+        "./apps/stock/src/*"
       ],
       "@inventory/*": [
         "./apps/inventory/src/*"

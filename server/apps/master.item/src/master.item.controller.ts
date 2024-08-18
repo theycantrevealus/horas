@@ -1,5 +1,5 @@
-import { AccountAddDTO } from '@core/account/dto/account.dto'
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { AccountAddDTO } from '@gateway_core/account/dto/account.dto'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { LoggingInterceptor } from '@interceptors/logging'
 import { Controller, Inject, UseInterceptors } from '@nestjs/common'
 import { Payload } from '@nestjs/microservices'

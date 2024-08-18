@@ -1,4 +1,14 @@
 export const ApplicationConfig = () => ({
+  gateway_core: {
+    host: process.env.GATEWAY_HOST_CORE,
+    port: process.env.GATEWAY_PORT_CORE,
+    host_port: process.env.GATEWAY_HOST_PORT_CORE,
+  },
+  gateway_inventory: {
+    host: process.env.GATEWAY_HOST_INVENTORY,
+    port: process.env.GATEWAY_PORT_INVENTORY,
+    host_port: process.env.GATEWAY_HOST_PORT_INVENTORY,
+  },
   application: {
     node_env: process.env.NODE_ENV,
     timezone: process.env.TZ,
