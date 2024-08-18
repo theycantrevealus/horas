@@ -1,4 +1,4 @@
-import { IMasterItem } from '@core/master/interface/master.item'
+import { IMasterItem } from '@gateway_core/master/interface/master.item'
 import { ApiProperty } from '@nestjs/swagger'
 import { MasterItemJoin } from '@schemas/master/master.item'
 

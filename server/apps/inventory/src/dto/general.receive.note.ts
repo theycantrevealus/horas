@@ -1,13 +1,16 @@
-import { CMasterStockPoint } from '@core/master/dto/master.stock.point'
-import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
+import { ICurrency } from '@gateway_core/i18n/interface/i18n'
+import { CCurrency } from '@gateway_core/i18n/schemas/i18n'
+import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
+import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
+import { CPurchaseOrder } from '@gateway_inventory/purchase_order/dto/purchase.order'
 import { CGeneralReceiveNoteDetail } from '@inventory/dto/general.receive.note.detail'
-import { CPurchaseOrder } from '@inventory/dto/purchase.order'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
   IsNumber,
+  IsString,
   MaxLength,
   MinLength,
   ValidateNested,
@@ -26,10 +29,20 @@ export class GeneralReceiveNoteAddDTO {
   code: string
 
   @ApiProperty({
-    example: '',
-    description: 'Any extra object',
+    type: CCurrency,
+    description: 'Currency',
   })
   @IsNotEmpty()
+  @Type(() => CCurrency)
+  @ValidateNested({ each: true })
+  locale: ICurrency
+
+  @ApiProperty({
+    example: '',
+    description: 'Any extra object',
+    required: false,
+  })
+  @IsString()
   extras: any
 
   @ApiProperty({

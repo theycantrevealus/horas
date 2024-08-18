@@ -53,6 +53,30 @@ export const KafkaConfig = () => {
           password: process.env.KAFKA_ACCOUNT_SASL_PASSWORD,
         },
       },
+      stock: {
+        port: {
+          transport: process.env.KAFKA_STOCK_PORT_TRANSPORT,
+          service: process.env.KAFKA_STOCK_PORT_SERVICE,
+        },
+        service: process.env.KAFKA_STOCK_SERVICE,
+        topic: {
+          stock: process.env.KAFKA_STOCK_TOPIC_STOCK,
+        },
+        client: process.env.KAFKA_STOCK_CLIENT_ID,
+        broker: process.env.KAFKA_STOCK_BROKER,
+        cons_group: process.env.KAFKA_STOCK_CONSUMER_GROUP,
+        ssl: {
+          protocol: process.env.KAFKA_STOCK_SSL_SCP,
+          ca: process.env.KAFKA_STOCK_SSL_CA,
+          key: process.env.KAFKA_STOCK_SSL_KEY,
+          passphrase: process.env.KAFKA_STOCK_SSL_PASSPHRASE,
+        },
+        sasl: {
+          mechanism: process.env.KAFKA_STOCK_SASL_MECHANISM,
+          username: process.env.KAFKA_STOCK_SASL_USERNAME,
+          password: process.env.KAFKA_STOCK_SASL_PASSWORD,
+        },
+      },
       inventory: {
         port: {
           transport: process.env.KAFKA_INVENTORY_PORT_TRANSPORT,

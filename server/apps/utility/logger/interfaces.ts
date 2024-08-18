@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { Type } from '@nestjs/common'
 import { ModuleMetadata } from '@nestjs/common/interfaces'
 import { Logger, LoggerOptions } from 'winston'

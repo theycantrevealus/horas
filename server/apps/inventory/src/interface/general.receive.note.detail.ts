@@ -1,4 +1,4 @@
-import { IMasterItem } from '@core/master/interface/master.item'
+import { IMasterItem } from '@gateway_core/master/interface/master.item'
 
 export interface IGeneralReceiveNoteDetail {
   item: IMasterItem

@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { ArgumentsHost, HttpStatus } from '@nestjs/common'
 import { GlobalResponse } from '@utility/dto/response'
 import { isExpressRequest } from '@utility/http'
