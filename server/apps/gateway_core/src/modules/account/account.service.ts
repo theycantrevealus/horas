@@ -299,21 +299,16 @@ export class AccountService {
     } satisfies GlobalResponse
 
     try {
+      const { __v, ...documentUpdate } = parameter
+
       return await this.accountModel
         .findOneAndUpdate(
           {
             id: id,
-            __v: parameter.__v,
+            __v: __v,
           },
           {
-            code: parameter.code,
-            authority: parameter.authority,
-            email: parameter.email,
-            first_name: parameter.first_name,
-            last_name: parameter.last_name,
-            phone: parameter.phone,
-            access: parameter.access,
-            permission: parameter.permission,
+            $set: documentUpdate,
           },
           { upsert: false, new: true }
         )
@@ -419,6 +414,7 @@ export class AccountService {
                 email: result.email,
                 first_name: result.first_name,
                 last_name: result.last_name,
+                stock_point: result.stock_point,
               }
               const idenPass = gen_uuid()
               const TM = new TimeManagement()
