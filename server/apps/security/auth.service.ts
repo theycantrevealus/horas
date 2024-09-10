@@ -23,7 +23,10 @@ export class AuthService implements JwtOptionsFactory {
         const expiresIn = 30 * 24 * 60 * 60
         // const expiresIn = 30
 
-        const token = this.jwtService.sign(data, { expiresIn: expiresIn })
+        const token = this.jwtService.sign(data, {
+          expiresIn: expiresIn,
+          secret: null,
+        })
 
         result = {
           account: data.account,
@@ -70,7 +73,7 @@ export class AuthService implements JwtOptionsFactory {
       try {
         const cleanToken = data.token.trim()
 
-        await this.jwtService.verify(cleanToken)
+        await this.jwtService.verify(cleanToken, { secret: null })
 
         const decoded = await this.jwtService.decode(cleanToken, {
           complete: true,
