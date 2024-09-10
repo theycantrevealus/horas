@@ -109,11 +109,7 @@
       }
     },
     {
-      "name": "in",
-      "type": "double"
-    },
-    {
-      "name": "out",
+      "name": "qty",
       "type": "double"
     },
     {

@@ -32,26 +32,20 @@ export class StockLogDTO {
     required: true,
     description: 'Stock target to add',
   })
-  to: IMasterStockPoint;
+  to: IMasterStockPoint
 
   @ApiProperty({
     type: Number,
     example: 0,
   })
-  in: number
+  qty: number
 
   @ApiProperty({
     type: Number,
     example: 0,
+    description: 'Balance before process',
   })
-  out: number
-
-  @ApiProperty({
-    type: Number,
-    example: 0,
-    description: 'Stock point origin balance before process',
-  })
-  balance_from: number
+  balance: number
 
   @ApiProperty({
     type: Number,

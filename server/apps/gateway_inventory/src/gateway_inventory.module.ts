@@ -5,6 +5,7 @@ import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { GeneralReceiveNoteModule } from '@gateway_inventory/general_receive_note/general.receive.note.module'
 import { PurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
+import { StockModule } from '@gateway_inventory/stock/stock.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { CacheModule } from '@nestjs/cache-manager'
@@ -17,9 +18,6 @@ import { KafkaProvider } from '@utility/kafka'
 import { WinstonModule } from '@utility/logger/module'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 import * as redisStore from 'cache-manager-ioredis'
-
-import { GatewayInventoryController } from './gateway_inventory.controller'
-import { GatewayInventoryService } from './gateway_inventory.service'
 
 @Module({
   imports: [
@@ -94,9 +92,10 @@ import { GatewayInventoryService } from './gateway_inventory.service'
     AuthModule,
     GeneralReceiveNoteModule,
     PurchaseOrderModule,
+    StockModule,
   ],
-  controllers: [GatewayInventoryController],
-  providers: [ClientDecoratorProcessorService, GatewayInventoryService],
-  exports: [GatewayInventoryService],
+  controllers: [],
+  providers: [ClientDecoratorProcessorService],
+  exports: [],
 })
 export class GatewayInventoryModule {}

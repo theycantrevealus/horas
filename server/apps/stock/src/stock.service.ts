@@ -1,6 +1,6 @@
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { HttpStatus, Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
+import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import {
   InventoryStock,
   InventoryStockDocument,
@@ -12,11 +12,13 @@ import {
 import { StockLogDTO } from '@stock/dto/stock.log'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
-import { Model } from 'mongoose'
+import { Connection, Model } from 'mongoose'
 
 @Injectable()
 export class StockService {
   constructor(
+    @InjectConnection('primary') private mongoConnection: Connection,
+
     @InjectModel(InventoryStock.name, 'primary')
     private inventoryStockModel: Model<InventoryStockDocument>,
 
@@ -40,87 +42,147 @@ export class StockService {
       transaction_id: null,
     } satisfies GlobalResponse
     const stockPointUpdate = []
-    if (payload.from.id !== '-' && payload.from.id !== '') {
-      stockPointUpdate.push({
-        updateOne: {
-          filter: {
-            'stock_point.id': payload.from.id,
-          },
-          upsert: true,
-          update: {
-            $set: {
-              stock_point: payload.from,
+    const stockPointLog = []
+    const session = await this.mongoConnection.startSession()
+    await session
+      .withTransaction(async () => {
+        let fromData = 0
+        let toData = 0
+        let fromFlag = false
+        if (payload.from.id !== '-' && payload.from.id !== '') {
+          await this.inventoryStockModel
+            .findOne({ stock_point: payload.from })
+            .session(session)
+            .then((stockFromData) => {
+              fromData = stockFromData?.qty ?? 0
+              if (stockFromData && stockFromData.qty >= payload.qty) {
+                stockPointUpdate.push({
+                  updateOne: {
+                    filter: {
+                      'stock_point.id': payload.from.id,
+                    },
+                    upsert: true,
+                    update: {
+                      $set: {
+                        stock_point: payload.from,
+                        item: payload.item,
+                        batch: payload.batch,
+                      },
+                      $inc: {
+                        qty: payload.qty * -1,
+                      },
+                    },
+                  },
+                })
+              } else {
+                response.message = `Origin stock is not sufficient`
+                response.statusCode = {
+                  ...modCodes[this.constructor.name].error.databaseError,
+                  classCode: modCodes[this.constructor.name].defaultCode,
+                }
+                // response.payload = stockFromData
+                throw new Error(JSON.stringify(response))
+              }
+            })
+          fromFlag = true
+        }
+
+        if (payload.to.id !== '-' && payload.to.id !== '') {
+          await this.inventoryStockModel
+            .findOne({ stock_point: payload.to })
+            .session(session)
+            .then((stockToData) => {
+              toData = stockToData?.qty ?? 0
+              stockPointUpdate.push({
+                updateOne: {
+                  filter: {
+                    'stock_point.id': payload.to.id,
+                  },
+                  upsert: true,
+                  update: {
+                    $set: {
+                      stock_point: payload.to,
+                      item: payload.item,
+                      batch: payload.batch,
+                    },
+                    $inc: {
+                      qty: payload.qty,
+                    },
+                  },
+                },
+              })
+            })
+        }
+
+        if (fromFlag) {
+          stockPointLog.push({
+            insertOne: {
+              document: {
+                item: payload.item,
+                batch: payload.batch,
+                stock_point: payload.from,
+                in: 0,
+                out: payload.qty,
+                balance: fromData,
+                transaction_id: payload.transaction_id,
+                created_by: account,
+              },
+            },
+          })
+        }
+
+        stockPointLog.push({
+          insertOne: {
+            document: {
               item: payload.item,
               batch: payload.batch,
-              storing_label: '',
-            },
-            $dec: {
-              qty: payload.out,
-            },
-          },
-        },
-      })
-    }
-
-    if (payload.to.id !== '-' && payload.to.id !== '') {
-      stockPointUpdate.push({
-        updateOne: {
-          filter: {
-            'stock_point.id': payload.to.id,
-          },
-          upsert: true,
-          update: {
-            $set: {
               stock_point: payload.to,
-              item: payload.item,
-              batch: payload.batch,
-              storing_label: '',
-            },
-            $inc: {
-              qty: payload.in,
+              in: payload.qty,
+              out: 0,
+              balance: toData,
+              transaction_id: payload.transaction_id,
+              created_by: account,
             },
           },
-        },
-      })
-    }
+        })
 
-    return await this.inventoryStockModel
-      .bulkWrite(stockPointUpdate)
-      .then(async () => {
-        return await this.inventoryStockModelLog
-          .create({
-            item: payload.item,
-            batch: payload.batch,
-            from: payload.from,
-            to: payload.to,
-            in: payload.in,
-            out: payload.out,
-            balance_from: payload.balance_from,
-            balance_to: payload.balance_to,
-            transaction_id: payload.transaction_id,
-            created_by: account,
+        await this.inventoryStockModel
+          .bulkWrite(stockPointUpdate)
+          .then(async () => {
+            return await this.inventoryStockModelLog
+              .bulkWrite(stockPointLog)
+              .then((result) => {
+                response.message = 'Stock updated'
+                response.transaction_id = payload.transaction_id
+                response.payload = {
+                  id: payload.transaction_id,
+                  ...result,
+                }
+                return response
+              })
           })
-          .then((result) => {
-            response.message = 'Stock updated'
-            response.transaction_id = result._id
-            response.payload = {
-              id: result.id,
-              ...payload,
+          .catch((error) => {
+            response.message = `Stock failed to process`
+            response.statusCode = {
+              ...modCodes[this.constructor.name].error.databaseError,
+              classCode: modCodes[this.constructor.name].defaultCode,
             }
-            return response
+            response.payload = error
+            throw new Error(JSON.stringify(response))
           })
       })
-      .catch((error) => {
-        console.error(error)
+      .catch((transactionError) => {
         response.message = `Stock failed to process`
         response.statusCode = {
           ...modCodes[this.constructor.name].error.databaseError,
           classCode: modCodes[this.constructor.name].defaultCode,
         }
-        response.payload = error
+        response.payload = transactionError
         throw new Error(JSON.stringify(response))
       })
-  }
 
-  async recalculate_stock() {}
+    await session.endSession()
+
+    return response
+  }
 }
