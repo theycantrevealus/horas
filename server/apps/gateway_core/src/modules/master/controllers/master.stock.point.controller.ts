@@ -1,4 +1,5 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterStockPointAddDTO,
@@ -45,6 +46,7 @@ export class MasterStockPointController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterStockPoint', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all account',
     description: 'Showing stock_point data',
@@ -60,6 +62,7 @@ export class MasterStockPointController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterStockPoint', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -77,6 +80,7 @@ export class MasterStockPointController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterStockPoint', action: 'add' })
   @ApiOperation({
     summary: 'Add stock point',
     description: ``,
@@ -94,6 +98,7 @@ export class MasterStockPointController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterStockPoint', action: 'edit' })
   @ApiOperation({
     summary: 'Edit stock point',
     description: ``,
@@ -114,6 +119,7 @@ export class MasterStockPointController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterStockPoint', action: 'delete' })
   @ApiOperation({
     summary: 'Delete stock point',
     description: ``,
