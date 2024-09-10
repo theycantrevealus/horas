@@ -77,6 +77,7 @@ export const mockAccount = (
   phone = `+62${'852########'.replace(/#+/g, (m) =>
     faker.string.numeric(m.length)
   )}`,
+  stock_point = [],
   access: IMenu[] = [],
   permission: IMenuPermission[] = [],
   created_by: IAccountCreatedBy = {
@@ -97,6 +98,7 @@ export const mockAccount = (
   last_name,
   password,
   phone,
+  stock_point,
   access,
   permission,
   created_by,
@@ -134,6 +136,7 @@ export const mockAccountDoc = (
     `+62${'0###########'.replace(/#+/g, (m) =>
       faker.string.numeric(m.length)
     )}`,
+  stock_point: [],
   access: mock?.access || [],
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -165,6 +168,7 @@ export const accountArray = [
     '6285261516666',
     [],
     [],
+    [],
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -183,6 +187,7 @@ export const accountArray = [
     faker.person.lastName(),
     '12345678',
     '6285261517777',
+    [],
     [],
     [],
     mockAccount(),
@@ -207,6 +212,7 @@ export const accountDocArray = [
     phone: `+62${'0###########'.replace(/#+/g, (m) =>
       faker.string.numeric(m.length)
     )}`,
+    stock_point: [],
     access: [],
   }),
   mockAccountDoc({
@@ -222,6 +228,7 @@ export const accountDocArray = [
     phone: `+62${'0###########'.replace(/#+/g, (m) =>
       faker.string.numeric(m.length)
     )}`,
+    stock_point: [],
     access: [],
   }),
 ]
