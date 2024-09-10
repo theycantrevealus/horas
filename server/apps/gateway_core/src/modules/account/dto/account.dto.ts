@@ -1,8 +1,11 @@
+import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
+import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { CMenu, CMenuPermission } from '@gateway_core/menu/dto/menu'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import { CAuthority, IAuthority } from '@schemas/account/authority.model'
+import { Type } from 'class-transformer'
 import {
   IsArray,
   IsEmail,
@@ -32,7 +35,7 @@ export class AccountAddDTO {
   })
   @IsNotEmpty()
   @IsEmail()
-  email: string
+  email?: string
 
   @ApiProperty({
     example: 'xxxxx',
@@ -49,7 +52,7 @@ export class AccountAddDTO {
   })
   @MinLength(8)
   @IsNotEmpty()
-  password: string
+  password?: string
 
   @ApiProperty({
     example: 'John',
@@ -58,7 +61,7 @@ export class AccountAddDTO {
   @MinLength(3)
   @IsNotEmpty()
   @IsString()
-  first_name: string
+  first_name?: string
 
   @ApiProperty({
     example: 'Doe',
@@ -77,7 +80,16 @@ export class AccountAddDTO {
   })
   @IsNotEmpty()
   @IsPhoneNumber()
-  phone: string
+  phone?: string
+
+  @ApiProperty({
+    type: CMasterStockPoint,
+    description: 'Assigned stock point',
+  })
+  @Type(() => CMasterStockPoint)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  stock_point?: IMasterStockPoint[]
 
   @ApiProperty({
     type: CMenu,
@@ -113,7 +125,7 @@ export class AccountEditDTO {
   })
   @IsNotEmpty()
   @IsEmail()
-  email: string
+  email?: string
 
   @ApiProperty({
     example: 'xxxxx',
@@ -130,7 +142,7 @@ export class AccountEditDTO {
   @MinLength(3)
   @IsNotEmpty()
   @IsString()
-  first_name: string
+  first_name?: string
 
   @ApiProperty({
     example: 'Doe',
@@ -149,7 +161,16 @@ export class AccountEditDTO {
   })
   @IsNotEmpty()
   @IsPhoneNumber()
-  phone: string
+  phone?: string
+
+  @ApiProperty({
+    type: CMasterStockPoint,
+    description: 'Assigned stock point',
+  })
+  @Type(() => CMasterStockPoint)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  stock_point?: IMasterStockPoint[]
 
   @ApiProperty({
     required: false,
@@ -175,7 +196,7 @@ export class AccountEditDTO {
   })
   @IsNotEmpty()
   @IsNumber()
-  __v: number
+  __v?: number
 }
 
 export class CAccount {
