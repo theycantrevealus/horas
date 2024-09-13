@@ -88,20 +88,6 @@ export class StockController {
     )
   }
 
-  // @Post('stock/import')
-  // public async upload2Files(@Request() request) {
-  //   const files = request.files()
-  //
-  //   for await (const file of files) {
-  //     const writeStream = fs.createWriteStream(
-  //       `./document-upload-storage/${file.filename}`
-  //     )
-  //
-  //     file.file.pipe(writeStream)
-  //   }
-  //   return { message: 'files uploaded' }
-  // }
-
   @Post('stock/import')
   @Version('1')
   @UseGuards(JwtAuthGuard)
@@ -137,8 +123,8 @@ export class StockController {
 
   /*
    * TODO : Feature request
-   *  1. Stock import from csv
-   *      Should auto import to master item if not exist
+   *  1. ✅ Stock import from csv
+   *      Should auto import to master item if not exist. Create Transaction master for stock initiate
    *  2. Stock Opname
    *      Should can do transaction while opname
    *  3. Stock Destruct

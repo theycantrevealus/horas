@@ -130,16 +130,20 @@ export class StockService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'STOCK_TRANSFER',
+      transaction_classify: 'STOCK_IMPORT',
       transaction_id: '',
     } satisfies GlobalResponse
     return await this.stockImportQueue
-      .add('import', {
-        filename: filename,
-        payload: payload,
-        account: account,
-        token: token,
-      })
+      .add(
+        'import',
+        {
+          filename: filename,
+          payload: payload,
+          account: account,
+          token: token,
+        },
+        { removeOnComplete: true }
+      )
       .then((result) => {
         response.payload = result
         return response

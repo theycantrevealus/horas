@@ -1,4 +1,5 @@
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -28,6 +29,9 @@ export class GeneralReceiveNoteService {
     @Inject(PurchaseOrderService)
     private readonly purchaseOrderService: PurchaseOrderService,
 
+    @Inject(MasterStockPointService)
+    private readonly masterStockPointService: MasterStockPointService,
+
     // @Inject('STOCK_SERVICE') private readonly clientStock: ClientKafka
     @Inject('STOCK_SERVICE') private readonly clientStock: KafkaService
   ) {}
@@ -45,7 +49,6 @@ export class GeneralReceiveNoteService {
     account: IAccountCreatedBy,
     token: string
   ): Promise<GlobalResponse> {
-    console.log(JSON.stringify(data, null, 2))
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -58,76 +61,91 @@ export class GeneralReceiveNoteService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    await this.purchaseOrderService
-      .detail(data.purchase_order.id)
-      .then(async (purchaseOrder) => {
-        if (purchaseOrder && purchaseOrder.status === 'approved') {
-          const generatedID = new Types.ObjectId().toString()
-          const transaction = await this.clientStock.transaction('grn')
-          try {
-            const items = []
-            data.detail.forEach((item) => {
-              items.push({
-                headers: {
-                  ...account,
-                  token: token,
-                },
-                key: {
-                  id: `general_receive_note-${generatedID.toString()}`,
-                  code: generatedID.toString(),
-                  service: 'stock',
-                  method: 'stock_movement',
-                },
-                value: {
-                  item: item.item,
-                  batch: item.batch,
-                  from: {
-                    id: '-',
-                    code: '-',
-                    name: '-',
+    const stockPointConfig = await this.masterStockPointService
+      .find({
+        id: data.stock_point.id,
+      })
+      .then((response) => response.payload)
+
+    if (stockPointConfig['configuration'].allow_grn) {
+      await this.purchaseOrderService
+        .detail(data.purchase_order.id)
+        .then(async (purchaseOrder) => {
+          if (purchaseOrder && purchaseOrder.status === 'approved') {
+            const generatedID = new Types.ObjectId().toString()
+            const transaction = await this.clientStock.transaction('grn')
+            try {
+              const items = []
+              data.detail.forEach((item) => {
+                items.push({
+                  headers: {
+                    ...account,
+                    token: token,
                   },
-                  to: data.stock_point,
-                  qty: item.qty,
-                  balance: item.qty,
-                  transaction_id: `general_receive_note-${generatedID.toString()}`,
-                  logged_at: new Date().toString(),
-                },
+                  key: {
+                    id: `general_receive_note-${generatedID.toString()}`,
+                    code: generatedID.toString(),
+                    service: 'stock',
+                    method: 'stock_movement',
+                  },
+                  value: {
+                    item: item.item,
+                    batch: item.batch,
+                    from: {
+                      id: '-',
+                      code: '-',
+                      name: '-',
+                    },
+                    to: data.stock_point,
+                    qty: item.qty,
+                    balance: item.qty,
+                    transaction_id: `general_receive_note-${generatedID.toString()}`,
+                    logged_at: new Date().toString(),
+                  },
+                })
               })
-            })
 
-            await transaction.send({
-              acks: -1, // TODO : Configurable
-              timeout: 5000, // TODO : Configurable,
-              compression: CompressionTypes.None,
-              topic: this.configService.get<string>('kafka.stock.topic.stock'),
-              messages: items,
-            })
+              await transaction.send({
+                acks: -1, // TODO : Configurable
+                timeout: 5000, // TODO : Configurable,
+                compression: CompressionTypes.None,
+                topic: this.configService.get<string>(
+                  'kafka.stock.topic.stock'
+                ),
+                messages: items,
+              })
 
-            await transaction.commit().then(() => {
-              response.message = 'General receive note created successfully'
-              response.transaction_id = `general_receive_note-${generatedID}`
-            })
-          } catch (kafkaError) {
-            await transaction.abort()
-            response.message = `General receive note failed to create. ${kafkaError}`
+              await transaction.commit().then(() => {
+                response.message = 'General receive note created successfully'
+                response.transaction_id = `general_receive_note-${generatedID}`
+              })
+            } catch (kafkaError) {
+              await transaction.abort()
+              response.message = `General receive note failed to create. ${kafkaError}`
+              response.statusCode =
+                modCodes[this.constructor.name].error.databaseError
+              throw new Error(JSON.stringify(response))
+            }
+          } else {
+            response.message = `General receive note failed to create. Purchase order is not valid`
             response.statusCode =
               modCodes[this.constructor.name].error.databaseError
             throw new Error(JSON.stringify(response))
           }
-        } else {
-          response.message = `General receive note failed to create. Purchase order is not valid`
+        })
+        .catch((error: Error) => {
+          response.message = `General receive note failed to create. Purchase order error : ${error.message}`
           response.statusCode =
             modCodes[this.constructor.name].error.databaseError
+          response.payload = error
           throw new Error(JSON.stringify(response))
-        }
-      })
-      .catch((error: Error) => {
-        response.message = `General receive note failed to create. Purchase order error : ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
-      })
+        })
+    } else {
+      response.message = `General receive note failed to create. Target stock point not allowed to receive grn`
+      response.statusCode = modCodes[this.constructor.name].error.databaseError
+      response.payload = {}
+      throw new Error(JSON.stringify(response))
+    }
 
     return response
   }
