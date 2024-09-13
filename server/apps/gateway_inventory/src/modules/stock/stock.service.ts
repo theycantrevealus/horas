@@ -7,6 +7,7 @@ import {
   StockInitiateDTO,
   StockTransferDTO,
 } from '@gateway_inventory/stock/dto/stock'
+import { InjectQueue } from '@nestjs/bullmq'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
@@ -18,6 +19,7 @@ import { GlobalResponse } from '@utility/dto/response'
 import { KafkaService } from '@utility/kafka/avro/service'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
+import { Queue } from 'bullmq'
 import { CompressionTypes } from 'kafkajs'
 import { Model, Types } from 'mongoose'
 
@@ -36,7 +38,9 @@ export class StockService {
     private readonly masterStockPointService: MasterStockPointService,
 
     @InjectModel(InventoryStock.name, 'primary')
-    private inventoryStockModel: Model<InventoryStockDocument>
+    private inventoryStockModel: Model<InventoryStockDocument>,
+
+    @InjectQueue('stock') private readonly stockImportQueue: Queue
   ) {}
 
   async stockTransfer(
@@ -110,6 +114,40 @@ export class StockService {
 
   async stockBalance(parameter: any) {
     return await prime_datatable(parameter, this.inventoryStockModel)
+  }
+
+  async stockImport(
+    filename: string,
+    payload,
+    account: IAccountCreatedBy,
+    token
+  ): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'STOCK_TRANSFER',
+      transaction_id: '',
+    } satisfies GlobalResponse
+    return await this.stockImportQueue
+      .add('import', {
+        filename: filename,
+        payload: payload,
+        account: account,
+        token: token,
+      })
+      .then((result) => {
+        response.payload = result
+        return response
+      })
+      .catch((error) => {
+        response.message = error.message
+        throw new Error(JSON.stringify(response))
+      })
   }
 
   async stockInitiate(

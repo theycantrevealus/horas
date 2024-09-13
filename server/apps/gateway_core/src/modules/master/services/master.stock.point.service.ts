@@ -91,6 +91,36 @@ export class MasterStockPointService {
     }
   }
 
+  async find(term: any): Promise<GlobalResponse> {
+    const response = {
+      statusCode: {
+        defaultCode: HttpStatus.OK,
+        customCode: modCodes.Global.success,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      },
+      message: '',
+      payload: {},
+      transaction_classify: 'MASTER_STOCK_POINT_GET',
+      transaction_id: '',
+    } satisfies GlobalResponse
+
+    try {
+      return await this.masterStockPointModel.findOne(term).then((result) => {
+        response.payload = result
+        response.message = 'Master stock point detail fetch successfully'
+        return response
+      })
+    } catch (error) {
+      response.message = `Master stock point detail failed to fetch`
+      response.statusCode = {
+        ...modCodes[this.constructor.name].error.databaseError,
+        classCode: modCodes[this.constructor.name].defaultCode,
+      }
+      response.payload = error
+      throw new Error(JSON.stringify(response))
+    }
+  }
+
   async add(
     data: MasterStockPointAddDTO,
     account: IAccountCreatedBy

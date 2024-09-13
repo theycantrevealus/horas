@@ -1,5 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
+import { Files } from '@decorators/upload'
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import {
   StockAssignDTO,
@@ -9,6 +10,7 @@ import {
 import { StockService } from '@gateway_inventory/stock/stock.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
+import { MultipartInterceptor } from '@interceptors/multipart'
 import {
   Body,
   Controller,
@@ -22,6 +24,7 @@ import {
   Version,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { StorageMultipartFile } from '@utility/dto/file'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { isJSON } from 'class-validator'
 
@@ -79,6 +82,53 @@ export class StockController {
     @Req() request: any
   ) {
     return await this.stockService.stockInitiate(
+      parameter,
+      account,
+      request.headers.authorization
+    )
+  }
+
+  // @Post('stock/import')
+  // public async upload2Files(@Request() request) {
+  //   const files = request.files()
+  //
+  //   for await (const file of files) {
+  //     const writeStream = fs.createWriteStream(
+  //       `./document-upload-storage/${file.filename}`
+  //     )
+  //
+  //     file.file.pipe(writeStream)
+  //   }
+  //   return { message: 'files uploaded' }
+  // }
+
+  @Post('stock/import')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  // @UseGuards(UploadGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'Stock', action: 'import' })
+  @ApiOperation({
+    summary: 'Import initialize stock',
+    description: 'Import initialize stock',
+  })
+  @UseInterceptors(
+    MultipartInterceptor({
+      modifier: {
+        dest: './uploads/stock/import',
+        prefix: 'STOCK_',
+      },
+    })
+  )
+  async upload_master_data(
+    @Body() parameter: any,
+    @CredentialAccount() account: IAccountCreatedBy,
+    @Req() request: any,
+    @Files() file: StorageMultipartFile
+  ) {
+    return await this.stockService.stockImport(
+      file['file'][0].filename,
       parameter,
       account,
       request.headers.authorization

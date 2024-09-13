@@ -1,4 +1,9 @@
+import { createBullBoard } from '@bull-board/api'
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
+import { FastifyAdapter as BullFastifyAdapter } from '@bull-board/fastify'
+// import * as BullFastifyAdapter from '@bull-board/fastify'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
+import * as multipart from '@fastify/multipart'
 import { CommonErrorFilter } from '@filters/error'
 import { OperationQueueService } from '@gateway_core/operation/queue/services/operation-queue.service'
 import { VersioningType } from '@nestjs/common'
@@ -12,14 +17,47 @@ import {
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { GatewayPipe } from '@pipes/gateway.pipe'
 import { KAFKA_CLIENTS } from '@utility/constants'
-import { environmentName } from '@utility/environtment'
+import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WinstonCustomTransports } from '@utility/transport.winston'
+import { Queue as QueueMQ, Worker } from 'bullmq'
 import * as CopyPlugin from 'copy-webpack-plugin'
+import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as winston from 'winston'
 
 import { GatewayInventoryModule } from './gateway_inventory.module'
+
+dotenv.config({
+  path: environmentIdentifier,
+})
+
+async function setupBullMQProcessor(queueName, redisOptions) {
+  new Worker(
+    queueName,
+    async (job) => {
+      for (let i = 0; i <= 100; i++) {
+        await job.updateProgress(i)
+        await job.log(`Processing job at interval ${i}`)
+
+        if (Math.random() * 200 < 1) throw new Error(`Random error ${i}`)
+      }
+
+      return { jobId: `This is the return value of job (${job.id})` }
+    },
+    { connection: redisOptions }
+  )
+}
+
+const readQueuesFromEnv = () => {
+  const qStr = process.env.REDIS_TOPIC
+  try {
+    const qs = qStr.split(',')
+    return qs.map((q) => q.trim())
+  } catch (e) {
+    return []
+  }
+}
 
 declare const module: any
 async function bootstrap() {
@@ -75,6 +113,33 @@ async function bootstrap() {
     },
   })
 
+  const redisConfig = {
+    connection: {
+      port: configService.get<number>('redis.port'),
+      host: configService.get<string>('redis.host'),
+      password: configService.get<string>('redis.password'),
+    },
+  }
+
+  const createQueueMQ = (name) => new QueueMQ(name, redisConfig)
+
+  const queues = readQueuesFromEnv().map((q) => createQueueMQ(q))
+  for (const q of queues) {
+    await setupBullMQProcessor(q.name, redisConfig)
+  }
+
+  const bullFastifyAdapter = new BullFastifyAdapter()
+
+  createBullBoard({
+    queues: queues.map((q) => new BullMQAdapter(q)),
+    serverAdapter: bullFastifyAdapter,
+  })
+
+  bullFastifyAdapter.setBasePath('/ui')
+  fastifyAdapter.register(bullFastifyAdapter.registerPlugin(), {
+    prefix: '/ui',
+  })
+
   fastifyAdapter.register(require('@fastify/static'), {
     root: path.join(
       __dirname,
@@ -82,6 +147,8 @@ async function bootstrap() {
     ),
     prefix: `/${configService.get<string>('application.images.core_prefix')}`,
   })
+
+  await fastifyAdapter.register(multipart)
 
   app.useGlobalFilters(new CommonErrorFilter(logger))
   app.useGlobalPipes(new GatewayPipe())
