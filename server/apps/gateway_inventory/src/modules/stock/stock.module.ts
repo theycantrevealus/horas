@@ -14,6 +14,10 @@ import { Account, AccountSchema } from '@schemas/account/account.model'
 import { Authority, AuthoritySchema } from '@schemas/account/authority.model'
 import { InventoryStock, InventoryStockSchema } from '@schemas/inventory/stock'
 import {
+  InventoryStockInit,
+  InventoryStockInitSchema,
+} from '@schemas/inventory/stock.init'
+import {
   InventoryStockLog,
   InventoryStockLogSchema,
 } from '@schemas/inventory/stock.log'
@@ -45,6 +49,7 @@ import { AuthModule } from '@security/auth.module'
 
         { name: InventoryStock.name, schema: InventoryStockSchema },
         { name: InventoryStockLog.name, schema: InventoryStockLogSchema },
+        { name: InventoryStockInit.name, schema: InventoryStockInitSchema },
 
         { name: LogLogin.name, schema: LogLoginSchema },
         { name: LogActivity.name, schema: LogActivitySchema },

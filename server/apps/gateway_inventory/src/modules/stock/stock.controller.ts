@@ -107,7 +107,7 @@ export class StockController {
       },
     })
   )
-  async upload_master_data(
+  async upload_initial_stock(
     @Body() parameter: any,
     @CredentialAccount() account: IAccountCreatedBy,
     @Req() request: any,

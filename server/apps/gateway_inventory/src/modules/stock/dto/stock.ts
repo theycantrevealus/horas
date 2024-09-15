@@ -134,6 +134,15 @@ export class StockTransferDTO {
 
 export class StockInitiateDTO {
   @ApiProperty({
+    type: String,
+    description: 'Custom transaction ID. If not set, it will follow system',
+    required: false,
+    example: '',
+  })
+  @IsString()
+  transaction_id?: string
+
+  @ApiProperty({
     type: CMasterStockPoint,
     isArray: false,
     description: 'Stock origin of the items',

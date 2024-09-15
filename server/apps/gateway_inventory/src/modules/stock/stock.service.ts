@@ -15,6 +15,10 @@ import {
   InventoryStock,
   InventoryStockDocument,
 } from '@schemas/inventory/stock'
+import {
+  InventoryStockInit,
+  InventoryStockInitDocument,
+} from '@schemas/inventory/stock.init'
 import { GlobalResponse } from '@utility/dto/response'
 import { KafkaService } from '@utility/kafka/avro/service'
 import { modCodes } from '@utility/modules'
@@ -39,6 +43,9 @@ export class StockService {
 
     @InjectModel(InventoryStock.name, 'primary')
     private inventoryStockModel: Model<InventoryStockDocument>,
+
+    @InjectModel(InventoryStockInit.name, 'primary')
+    private initStockModel: Model<InventoryStockInitDocument>,
 
     @InjectQueue('stock') private readonly stockImportQueue: Queue
   ) {}
@@ -174,48 +181,69 @@ export class StockService {
     const generatedID = new Types.ObjectId().toString()
     const transaction = await this.clientStock.transaction('stck_init')
     try {
-      const items = []
-      payload.item.forEach((item) => {
-        items.push({
-          headers: {
-            ...account,
-            token: token,
-          },
-          key: {
-            id: `stock_init-${generatedID.toString()}`,
-            code: generatedID.toString(),
-            service: 'stock',
-            method: 'stock_movement',
-          },
-          value: {
-            item: item.item,
-            batch: item.batch,
-            from: {
-              id: '-',
-              code: '-',
-              name: '-',
-            },
-            to: payload.stock_point,
-            qty: item.qty,
-            balance: item.qty,
-            transaction_id: `stock_init-${generatedID.toString()}`,
-            logged_at: new Date().toString(),
-          },
+      return await this.initStockModel
+        .create({
+          transaction_id:
+            payload.transaction_id && payload.transaction_id !== ''
+              ? payload.transaction_id
+              : `stock_init-${generatedID.toString()}`,
+          stock_point: payload.stock_point,
+          item: payload.item,
+          source: 'manual',
+          timezone: this.configService.get<string>('application.timezone'),
         })
-      })
+        .then(async (result) => {
+          response.payload = result
 
-      await transaction.send({
-        acks: -1,
-        timeout: 5000,
-        compression: CompressionTypes.None,
-        topic: this.configService.get<string>('kafka.stock.topic.stock'),
-        messages: items,
-      })
+          const items = []
+          payload.item.forEach((item) => {
+            items.push({
+              headers: {
+                ...account,
+                token: token,
+              },
+              key: {
+                id: `stock_init-${generatedID.toString()}`,
+                code: generatedID.toString(),
+                service: 'stock',
+                method: 'stock_movement',
+              },
+              value: {
+                item: item.item,
+                batch: item.batch,
+                from: {
+                  id: '-',
+                  code: '-',
+                  name: '-',
+                },
+                to: payload.stock_point,
+                qty: item.qty,
+                balance: item.qty,
+                transaction_id: `stock_init-${generatedID.toString()}`,
+                logged_at: new Date().toString(),
+              },
+            })
+          })
 
-      await transaction.commit().then(() => {
-        response.message = 'Stock init requested successfully'
-        response.transaction_id = `stock_transfer-${generatedID}`
-      })
+          await transaction.send({
+            acks: -1,
+            timeout: 5000,
+            compression: CompressionTypes.None,
+            topic: this.configService.get<string>('kafka.stock.topic.stock'),
+            messages: items,
+          })
+
+          await transaction.commit().then(() => {
+            response.message = 'Stock init requested successfully'
+            response.transaction_id = `stock_init-${generatedID}`
+          })
+
+          return response
+        })
+        .catch((error) => {
+          response.message = error.message
+          throw new Error(JSON.stringify(response))
+        })
     } catch (kafkaError) {
       await transaction.abort()
       response.message = `Stock init failed to create. ${kafkaError}`

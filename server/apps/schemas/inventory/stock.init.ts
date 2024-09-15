@@ -1,23 +1,25 @@
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { IMasterItem } from '@gateway_core/master/interface/master.item'
+import { IMasterItemBatch } from '@gateway_core/master/interface/master.item.batch'
 import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { MasterItemJoin } from '@schemas/master/master.item'
+import { MasterItemBatchJoin } from '@schemas/master/master.item.batch'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const InventoryStockInitDetail = raw({
   item: { type: MasterItemJoin, _id: false },
   qty: { type: Number, example: 10 },
-  batch: { type: String, example: 'XXXX' },
+  batch: { type: MasterItemBatchJoin, _id: false },
   remark: { type: String, example: 'Another remark for an item' },
 })
 
 export interface IInventoryStockInitDetail {
   item: IMasterItem
   qty: number
-  batch: string
+  batch: IMasterItemBatch
   remark: string
 }
 
