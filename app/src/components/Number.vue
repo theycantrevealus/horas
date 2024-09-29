@@ -1,5 +1,5 @@
 <template>
-  <label class="currency-label {{class_name}}">{{ format(number) }}{{ prefix }}</label>
+  <label class="currency-label {{className}}">{{ format(number) }}{{ prefix }}</label>
 </template>
 <script>
 import { NumberParser } from '@/util/number'
@@ -36,7 +36,7 @@ export default {
       default: 2,
       required: false
     },
-    class_name: {
+    className: {
       type: String,
       default: '',
       required: false
