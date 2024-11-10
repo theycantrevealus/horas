@@ -83,6 +83,20 @@ const falseCasePayload = {
       },
     },
     {
+      expectedToContain: 'stock_point should not be empty',
+      targetClass: AccountAddDTO,
+      testType: -1,
+      data: {
+        email: faker.internet.email(),
+        password: faker.internet.password({ length: 24 }),
+        first_name: faker.person.firstName(),
+        last_name: faker.person.lastName(),
+        phone: `+62${'0###########'.replace(/#+/g, (m) =>
+          faker.string.numeric(m.length)
+        )}`,
+      },
+    },
+    {
       expectedToContain: 'Correct data',
       targetClass: AccountAddDTO,
       testType: 1,

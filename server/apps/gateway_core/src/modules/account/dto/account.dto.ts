@@ -166,6 +166,7 @@ export class AccountEditDTO {
   @ApiProperty({
     type: CMasterStockPoint,
     description: 'Assigned stock point',
+    isArray: true,
   })
   @Type(() => CMasterStockPoint)
   @ValidateNested({ each: true })

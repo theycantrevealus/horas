@@ -3,23 +3,23 @@ import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
+import { AccountModule } from '@gateway_core/account/account.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
 import {
-  MasterStockPoint,
-  MasterStockPointSchema,
-} from '@schemas/master/master.stock.point'
+  MasterQueue,
+  MasterQueueSchema,
+} from '@schemas/master/master.queue.machine'
+import { AuthModule } from '@security/auth.module'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WinstonModule } from '@utility/logger/module'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 
 import { GatewayQueueController } from './gateway_queue.controller'
 import { GatewayQueueService } from './gateway_queue.service'
-import { AuthModule } from '@security/auth.module'
-import { AccountModule } from '@gateway_core/account/account.module'
 
 @Module({
   imports: [
@@ -54,7 +54,7 @@ import { AccountModule } from '@gateway_core/account/account.module'
     }),
     MongooseModule.forFeature(
       [
-        { name: MasterStockPoint.name, schema: MasterStockPointSchema },
+        { name: MasterQueue.name, schema: MasterQueueSchema },
 
         { name: LogLogin.name, schema: LogLoginSchema },
         { name: LogActivity.name, schema: LogActivitySchema },

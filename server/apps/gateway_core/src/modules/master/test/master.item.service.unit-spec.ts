@@ -273,8 +273,21 @@ describe('Master Item Service', () => {
         async () => {
           jest.spyOn(masterItemModel, 'create')
 
+          let sampleData = new MasterItemAddDTO()
+          sampleData = {
+            code: mockMasterItem().code,
+            name: mockMasterItem().name,
+            category: mockMasterItem().category,
+            configuration: mockMasterItem().configuration,
+            unit: mockMasterItem().unit,
+            storing: mockMasterItem().storing,
+            brand: mockMasterItem().brand,
+            structure: mockMasterItem().structure,
+            properties: mockMasterItem().properties,
+          }
+
           await masterItemService
-            .add(mockMasterItem(), mockAccount())
+            .add(sampleData, mockAccount())
             .then((result: GlobalResponse) => {
               // Should create id
               expect(result.payload).toHaveProperty('id')
@@ -297,10 +310,22 @@ describe('Master Item Service', () => {
         testCaption('DATA', 'data', 'Should replace code if not defined'),
         async () => {
           jest.spyOn(masterItemService, 'add')
-          const dataTest = mockMasterItem()
-          delete dataTest.code
+          let sampleData = new MasterItemAddDTO()
+          sampleData = {
+            code: mockMasterItem().code,
+            name: mockMasterItem().name,
+            category: mockMasterItem().category,
+            configuration: mockMasterItem().configuration,
+            unit: mockMasterItem().unit,
+            storing: mockMasterItem().storing,
+            brand: mockMasterItem().brand,
+            structure: mockMasterItem().structure,
+            properties: mockMasterItem().properties,
+          }
+
+          delete sampleData.code
           await masterItemService
-            .add(dataTest, mockAccount())
+            .add(sampleData, mockAccount())
             .then((result: GlobalResponse) => {
               // Should create id
               expect(result.payload).toHaveProperty('id')
@@ -332,8 +357,21 @@ describe('Master Item Service', () => {
             throw new Error()
           })
 
+          let sampleData = new MasterItemAddDTO()
+          sampleData = {
+            code: mockMasterItem().code,
+            name: mockMasterItem().name,
+            category: mockMasterItem().category,
+            configuration: mockMasterItem().configuration,
+            unit: mockMasterItem().unit,
+            storing: mockMasterItem().storing,
+            brand: mockMasterItem().brand,
+            structure: mockMasterItem().structure,
+            properties: mockMasterItem().properties,
+          }
+
           await expect(async () => {
-            await masterItemService.add(mockMasterItem(), mockAccount())
+            await masterItemService.add(sampleData, mockAccount())
           }).rejects.toThrow(Error)
         }
       )
@@ -493,6 +531,7 @@ describe('Master Item Service', () => {
                 code: mockMasterItemBrand().code,
                 name: mockMasterItemBrand().name,
               },
+              structure: mockMasterItem().structure,
               properties: [],
               remark: mockMasterItem().remark,
             },
@@ -560,6 +599,7 @@ describe('Master Item Service', () => {
                 code: mockMasterItemBrand().code,
                 name: mockMasterItemBrand().name,
               },
+              structure: mockMasterItem().structure,
               properties: [],
               remark: mockMasterItem().remark,
             },
