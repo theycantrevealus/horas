@@ -11,8 +11,17 @@ import { MasterItemBrandJoin } from '@schemas/master/master.item.brand'
 import { MasterItemCategoryJoin } from '@schemas/master/master.item.category'
 import { MasterItemConfiguration } from '@schemas/master/master.item.configuration'
 import { MasterItemStoring } from '@schemas/master/master.item.storing'
+import {
+  MasterItemStructureCoordinatorSchema,
+  registerMasterItemStructureSchemaDiscriminator,
+} from '@schemas/master/master.item.structure.coordinator'
 import { MasterItemUnitJoin } from '@schemas/master/master.item.unit'
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+import {
+  HydratedDocument,
+  Schema as MongooseSchema,
+  SchemaTypes,
+  Types,
+} from 'mongoose'
 
 export const MasterItemJoin = raw({
   id: { type: String, example: `item-${new Types.ObjectId().toString()}` },
@@ -61,6 +70,9 @@ export class MasterItem {
   })
   brand: IMasterItemBrand
 
+  @Prop({ type: MasterItemStructureCoordinatorSchema, required: false })
+  structure?: unknown
+
   @Prop({
     unique: false,
     required: false,
@@ -102,3 +114,12 @@ export class MasterItem {
 }
 
 export const MasterItemSchema = SchemaFactory.createForClass(MasterItem)
+
+registerMasterItemStructureSchemaDiscriminator(
+  MasterItemSchema.path('structure') as MongooseSchema.Types.Subdocument
+)
+
+// export const MasterItemSchema = initDiscriminators(MasterItem, 'type', [
+//   { name: 'B1', schema: SchemaFactory.createForClass(MasterDrugIngredient) },
+//   { name: 'B2', schema: SchemaFactory.createForClass(MasterOtherProperty) },
+// ])

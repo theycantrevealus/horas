@@ -115,6 +115,12 @@ export class MasterItemAddDTO {
   brand: IMasterItemBrand
 
   @ApiProperty({
+    required: false,
+    example: {},
+  })
+  structure: any
+
+  @ApiProperty({
     type: CLOV,
     isArray: true,
     description: 'Stock point configuration',

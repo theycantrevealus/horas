@@ -48,6 +48,10 @@ export const mockMasterStockPoint = (
     allow_outgoing: true,
     allow_destruction: true,
   },
+  meta = {
+    branch: '',
+    commit: '',
+  },
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -64,6 +68,7 @@ export const mockMasterStockPoint = (
   name,
   configuration,
   remark,
+  meta,
   created_by,
   created_at,
   updated_at,

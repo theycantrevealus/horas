@@ -29,19 +29,25 @@ export const RedisStock = {
   ): Promise<BullModuleOptions> => {
     if (configService.get<string>('redis.password') !== '') {
       return {
-        redis: {
-          host: configService.get<string>('redis.host'),
-          port: +configService.get<number>('redis.port'),
-          password: configService.get<string>('redis.password'),
-        },
+        url: `${configService.get<string>('redis.password')}@${configService.get<string>('redis.host')}:${configService.get<string>('redis.port')}`,
       }
+      // return {
+      //   redis: {
+      //     host: configService.get<string>('redis.host'),
+      //     port: +configService.get<number>('redis.port'),
+      //     password: configService.get<string>('redis.password'),
+      //   },
+      // }
     } else {
       return {
-        redis: {
-          host: configService.get<string>('redis.host'),
-          port: +configService.get<number>('redis.port'),
-        },
+        url: `redis://${configService.get<string>('redis.host')}:${configService.get<string>('redis.port')}`,
       }
+      // return {
+      //   redis: {
+      //     host: configService.get<string>('redis.host'),
+      //     port: +configService.get<number>('redis.port'),
+      //   },
+      // }
     }
   },
 }

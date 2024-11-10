@@ -7,6 +7,7 @@ export const MongoConfig = () => {
         db_name: process.env.MONGO_DB_NAME,
         db_user: process.env.MONGO_DB_USER,
         db_password: process.env.MONGO_DB_PASSWORD,
+        replica_set: process.env.MONGO_REPLICASET,
         uri:
           process.env.MONGO_DB_USER !== '' &&
           process.env.MONGO_DB_PASSWORD !== ''

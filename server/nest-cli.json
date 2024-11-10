@@ -153,6 +153,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/stock/tsconfig.app.json"
       }
+    },
+    "gateway_queue": {
+      "type": "application",
+      "root": "apps/gateway_queue",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway_queue/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway_queue/tsconfig.app.json"
+      }
     }
   }
 }

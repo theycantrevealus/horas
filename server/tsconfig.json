@@ -34,6 +34,9 @@
       "@gateway_core/*": [
         "./apps/gateway_core/src/modules/*"
       ],
+      "@gateway_queue/*": [
+        "./apps/gateway_queue/src/modules/*"
+      ],
       "@gateway_inventory/*": [
         "./apps/gateway_inventory/src/modules/*"
       ],

@@ -2,10 +2,7 @@ import { faker } from '@faker-js/faker'
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { PatientAddDTO } from '@gateway_core/patient/dto/patient.add'
 import { PatientEditDTO } from '@gateway_core/patient/dto/patient.edit'
-import {
-  Patient,
-  PatientDocument,
-} from '@gateway_core/patient/schema/patient.model'
+import { Patient, PatientDocument } from '@schemas/patient/patient'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

@@ -1,15 +1,27 @@
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { AccountJoin } from '@schemas/account/account.raw'
 import {
   IPatientBasicInfo,
   PatientBasicInfo,
-} from '@gateway_core/patient/schema/patient.basic'
+} from '@schemas/patient/patient.basic'
 import {
   IPatientMedicalInfo,
   PatientMedicalInfo,
-} from '@gateway_core/patient/schema/patient.medical'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { AccountJoin } from '@schemas/account/account.raw'
-import { HydratedDocument, SchemaTypes } from 'mongoose'
+} from '@schemas/patient/patient.medical'
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+
+export const PatientJoin = raw({
+  id: { type: String, example: `item-${new Types.ObjectId().toString()}` },
+  medical_record: { type: String, example: 'John' },
+  title: { type: String, example: 'Mr.' },
+  first_name: { type: String, example: 'John' },
+  last_name: { type: String, example: 'Doe' },
+  nick_name: { type: String, example: 'JD' },
+  birth_date: { type: Date },
+  age: { type: Number },
+  gender: { type: String },
+})
 
 export type PatientDocument = HydratedDocument<Patient>
 
@@ -23,8 +35,6 @@ export class Patient {
 
   @Prop(raw(PatientMedicalInfo))
   medical_info: IPatientMedicalInfo
-
-  // Basic Information Section
 
   @Prop(raw(PatientBasicInfo))
   basic_info: IPatientBasicInfo

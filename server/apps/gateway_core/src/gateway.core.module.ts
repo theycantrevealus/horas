@@ -7,6 +7,7 @@ import { AccountModule } from '@gateway_core/account/account.module'
 import { LOVModule } from '@gateway_core/lov/lov.module'
 import { MasterModule } from '@gateway_core/master/master.module'
 import { MenuModule } from '@gateway_core/menu/menu.module'
+import { PatientModule } from '@gateway_core/patient/patient.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager'
@@ -85,7 +86,7 @@ import { GatewayCoreService } from './gateway.core.service'
       ): Promise<MongooseModuleOptions> => ({
         uri: `${configService.get<string>(
           'mongo.primary.uri'
-        )}?replicaSet=dbrs`,
+        )}?${configService.get<string>('mongo.primary.replica_set') !== '' ? `replicaSet=${configService.get<string>('mongo.primary.replica_set')}` : ''}`,
       }),
       inject: [ConfigService],
     }),
@@ -144,7 +145,7 @@ import { GatewayCoreService } from './gateway.core.service'
     LOVModule,
     MasterModule,
     // LicenseModule,
-    // PatientModule,
+    PatientModule,
     MenuModule,
     // i18nModule,
     // GatewayInventoryModule,

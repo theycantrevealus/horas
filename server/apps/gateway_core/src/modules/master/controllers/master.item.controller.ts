@@ -1,5 +1,6 @@
 // import { FileInterceptor } from '@nestjs/platform-express'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemAddDTO,
@@ -45,6 +46,7 @@ export class MasterItemController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItem', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all',
     description: 'Showing data',
@@ -60,6 +62,7 @@ export class MasterItemController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItem', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -74,6 +77,7 @@ export class MasterItemController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItem', action: 'add' })
   @ApiOperation({
     summary: 'Add new item',
     description: ``,
@@ -91,6 +95,7 @@ export class MasterItemController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItem', action: 'edit' })
   @ApiOperation({
     summary: 'Edit item',
     description: ``,
@@ -108,6 +113,7 @@ export class MasterItemController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItem', action: 'delete' })
   @ApiOperation({
     summary: 'Edit new item',
     description: ``,

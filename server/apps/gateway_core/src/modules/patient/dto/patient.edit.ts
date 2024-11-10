@@ -1,12 +1,12 @@
+import { ApiProperty } from '@nestjs/swagger'
 import {
   IPatientBasicInfo,
   PatientBasicInfo,
-} from '@gateway_core/patient/schema/patient.basic'
+} from '@schemas/patient/patient.basic'
 import {
   IPatientMedicalInfo,
   PatientMedicalInfo,
-} from '@gateway_core/patient/schema/patient.medical'
-import { ApiProperty } from '@nestjs/swagger'
+} from '@schemas/patient/patient.medical'
 
 export class PatientEditDTO {
   @ApiProperty({
