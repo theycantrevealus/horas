@@ -1,8 +1,9 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { IMasterStockPointConfiguration } from '@core/master/interface/master.stock.point.configuration'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IMasterStockPointConfiguration } from '@gateway_core/master/interface/master.stock.point.configuration'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { MasterStockPointConfiguration } from '@schemas/master/master.stock.point.configuration'
+import { IMetaData, MetaData } from '@schemas/meta'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const MasterStockPointJoin = raw({
@@ -29,6 +30,13 @@ export class MasterStockPoint {
 
   @Prop({ type: SchemaTypes.String })
   remark: string
+
+  @Prop({
+    unique: false,
+    type: MetaData,
+    _id: false,
+  })
+  meta: IMetaData
 
   @Prop(AccountJoin)
   created_by: IAccountCreatedBy

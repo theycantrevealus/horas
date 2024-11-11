@@ -229,6 +229,57 @@ export const modCodes = {
       },
     },
   },
+  MasterTreatmentService: {
+    defaultCode: 'MSRTRT',
+    error: {
+      databaseError: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: 'E0001',
+      },
+      isNotFound: {
+        defaultCode: HttpStatus.NOT_FOUND,
+        customCode: 'E0002',
+      },
+      isNoAccess: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: 'E0003',
+      },
+    },
+  },
+  MasterAssessmentFormService: {
+    defaultCode: 'MSRASF',
+    error: {
+      databaseError: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: 'E0001',
+      },
+      isNotFound: {
+        defaultCode: HttpStatus.NOT_FOUND,
+        customCode: 'E0002',
+      },
+      isNoAccess: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: 'E0003',
+      },
+    },
+  },
+  StockService: {
+    defaultCode: 'STO',
+    error: {
+      databaseError: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: 'E0001',
+      },
+      isNotFound: {
+        defaultCode: HttpStatus.NOT_FOUND,
+        customCode: 'E0002',
+      },
+      isNoAccess: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: 'E0003',
+      },
+    },
+  },
   PurchaseOrderService: {
     defaultCode: 'PO',
     error: {
@@ -282,6 +333,23 @@ export const modCodes = {
   },
   i18nService: {
     defaultCode: 'I18N',
+    error: {
+      databaseError: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: 'E0001',
+      },
+      isNotFound: {
+        defaultCode: HttpStatus.NOT_FOUND,
+        customCode: 'E0002',
+      },
+      isNoAccess: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: 'E0003',
+      },
+    },
+  },
+  GatewayQueueService: {
+    defaultCode: 'QUE',
     error: {
       databaseError: {
         defaultCode: HttpStatus.BAD_REQUEST,

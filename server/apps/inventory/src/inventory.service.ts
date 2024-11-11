@@ -1,19 +1,19 @@
-import { IMasterItem } from '@core/master/interface/master.item'
-import { IMasterItemBatch } from '@core/master/interface/master.item.batch'
-import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
-import { IMasterStockPoint } from '@core/master/interface/master.stock.point'
+import { IMasterItem } from '@gateway_core/master/interface/master.item'
+import { IMasterItemBatch } from '@gateway_core/master/interface/master.item.batch'
+import { IMasterItemStoring } from '@gateway_core/master/interface/master.item.storing'
+import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { StockDTO } from '@inventory/dto/stock'
-import {
-  InventoryStock,
-  InventoryStockDocument,
-} from '@inventory/schemas/stock'
-import {
-  InventoryStockLog,
-  InventoryStockLogDocument,
-} from '@inventory/schemas/stock.log'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
+import {
+  InventoryStock,
+  InventoryStockDocument,
+} from '@schemas/inventory/stock'
+import {
+  InventoryStockLog,
+  InventoryStockLogDocument,
+} from '@schemas/inventory/stock.log'
 import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import {
   MasterItemBatch,

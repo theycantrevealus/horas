@@ -1,5 +1,5 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { IMasterItem } from '@core/master/interface/master.item'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IMasterItem } from '@gateway_core/master/interface/master.item'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { AccountJoin } from '@schemas/account/account.raw'

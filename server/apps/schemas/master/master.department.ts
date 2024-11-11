@@ -1,5 +1,5 @@
-import { IDoctor } from '@core/account/interface/account'
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { IDoctor } from '@gateway_core/account/interface/account'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import {

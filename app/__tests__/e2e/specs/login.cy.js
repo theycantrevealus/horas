@@ -4,9 +4,7 @@ const getStore = () => app().its('store')
 describe('Login Page', () => {
   beforeEach(visit)
   it('Apps load', () => {
-    app()
-      .its('app')
-      .then((app) => {})
+    app().its('app')
   })
 
   it('Cypress is loaded', () => {
@@ -29,9 +27,8 @@ describe('Login Page', () => {
     cy.get('button#submitButton')
       .click()
       .then(() => {
-        const credential = getStore().its('state.credential.token')
+        // const credential = getStore().its('state.credential.token')
+        cy.url().should('include', 'dashboard')
       })
-
-    // cy.url().should('include', 'dashboard')
   })
 })

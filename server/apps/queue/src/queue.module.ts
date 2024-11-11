@@ -1,21 +1,21 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { MongoConfig } from '@configuration/mongo'
 import { SocketConfig } from '@configuration/socket'
-import { AccountModule } from '@core/account/account.module'
+import { AccountModule } from '@gateway_core/account/account.module'
 import {
   OperationQueue,
   OperationQueueSchema,
-} from '@core/operation/queue/schemas/queue'
-import {
-  InventoryStockLog,
-  InventoryStockLogSchema,
-} from '@inventory/schemas/stock.log'
+} from '@gateway_core/operation/queue/schemas/queue'
 import { LogService } from '@log/log.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Inject, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
+import {
+  InventoryStockLog,
+  InventoryStockLogSchema,
+} from '@schemas/inventory/stock.log'
 import { MasterItem, MasterItemSchema } from '@schemas/master/master.item'
 import {
   MasterItemBatch,

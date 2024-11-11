@@ -37,6 +37,7 @@ export class LoggingInterceptor<T> implements NestInterceptor<T, Response<T>> {
     if (context.getType() === 'http') {
       return await httpInterceptor(context, next, this.reflector, this.logger)
     } else if (context.getType() === 'rpc') {
+      console.log('RPC Logger')
       return await rpcInterceptor(context, next, this.reflector, this.logger)
     } else if (context.getType() === 'ws') {
       return await wsInterceptor(

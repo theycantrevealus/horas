@@ -1,4 +1,4 @@
-import { mockAccount } from '@core/account/mock/account.mock'
+import { mockAccount } from '@gateway_core/account/mock/account.mock'
 
 export const mockLogLoginModel = {
   new: jest.fn().mockResolvedValue(mockAccount()),

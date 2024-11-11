@@ -58,8 +58,16 @@ module.exports = (options, webpack) => {
         '@schemas': path.resolve(__dirname, 'apps/schemas'),
         '@filters': path.resolve(__dirname, 'apps/filters'),
         '@pipes': path.resolve(__dirname, 'apps/pipes'),
-        '@core': path.resolve(__dirname, 'apps/core/src/modules'),
+        '@gateway_core': path.resolve(
+          __dirname,
+          'apps/gateway_core/src/modules'
+        ),
+        '@gateway_inventory': path.resolve(
+          __dirname,
+          'apps/gateway_inventory/src/modules'
+        ),
         '@inventory': path.resolve(__dirname, 'apps/inventory/src'),
+        '@stock': path.resolve(__dirname, 'apps/stock/src'),
         '@log': path.resolve(__dirname, 'apps/log/src'),
         '@security': path.resolve(__dirname, 'apps/security'),
         '@configuration': path.resolve(__dirname, 'apps/configuration'),

@@ -1,9 +1,9 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { IMasterItemBrand } from '@core/master/interface/master.item.brand'
-import { IMasterItemCategory } from '@core/master/interface/master.item.category'
-import { IMasterItemConfiguration } from '@core/master/interface/master.item.configuration'
-import { IMasterItemStoring } from '@core/master/interface/master.item.storing'
-import { IMasterItemUnit } from '@core/master/interface/master.item.unit'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IMasterItemBrand } from '@gateway_core/master/interface/master.item.brand'
+import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
+import { IMasterItemConfiguration } from '@gateway_core/master/interface/master.item.configuration'
+import { IMasterItemStoring } from '@gateway_core/master/interface/master.item.storing'
+import { IMasterItemUnit } from '@gateway_core/master/interface/master.item.unit'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { ILOV, LOVJoin } from '@schemas/lov/lov'
@@ -11,8 +11,17 @@ import { MasterItemBrandJoin } from '@schemas/master/master.item.brand'
 import { MasterItemCategoryJoin } from '@schemas/master/master.item.category'
 import { MasterItemConfiguration } from '@schemas/master/master.item.configuration'
 import { MasterItemStoring } from '@schemas/master/master.item.storing'
+import {
+  MasterItemStructureCoordinatorSchema,
+  registerMasterItemStructureSchemaDiscriminator,
+} from '@schemas/master/master.item.structure.coordinator'
 import { MasterItemUnitJoin } from '@schemas/master/master.item.unit'
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+import {
+  HydratedDocument,
+  Schema as MongooseSchema,
+  SchemaTypes,
+  Types,
+} from 'mongoose'
 
 export const MasterItemJoin = raw({
   id: { type: String, example: `item-${new Types.ObjectId().toString()}` },
@@ -61,6 +70,9 @@ export class MasterItem {
   })
   brand: IMasterItemBrand
 
+  @Prop({ type: MasterItemStructureCoordinatorSchema, required: false })
+  structure?: unknown
+
   @Prop({
     unique: false,
     required: false,
@@ -102,3 +114,12 @@ export class MasterItem {
 }
 
 export const MasterItemSchema = SchemaFactory.createForClass(MasterItem)
+
+registerMasterItemStructureSchemaDiscriminator(
+  MasterItemSchema.path('structure') as MongooseSchema.Types.Subdocument
+)
+
+// export const MasterItemSchema = initDiscriminators(MasterItem, 'type', [
+//   { name: 'B1', schema: SchemaFactory.createForClass(MasterDrugIngredient) },
+//   { name: 'B2', schema: SchemaFactory.createForClass(MasterOtherProperty) },
+// ])

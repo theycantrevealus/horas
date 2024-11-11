@@ -1,9 +1,9 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { QueueAddDTO } from '@core/operation/queue/dto/queue'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { QueueAddDTO } from '@gateway_core/operation/queue/dto/queue'
 import {
   OperationQueue,
   OperationQueueDocument,
-} from '@core/operation/queue/schemas/queue'
+} from '@gateway_core/operation/queue/schemas/queue'
 import { LogService } from '@log/log.service'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'

@@ -1,4 +1,4 @@
-import { IMasterQueue } from '@core/master/interface/master.queue'
+import { IMasterQueue } from '@gateway_core/master/interface/master.queue'
 import { ConsumerGeneralDataDTO } from '@utility/dto/consumer'
 
 class ConsumerQueueDataDTO {

@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { CallHandler, ExecutionContext, HttpStatus } from '@nestjs/common'
 import { PATH_METADATA } from '@nestjs/common/constants'
 import { Reflector } from '@nestjs/core'

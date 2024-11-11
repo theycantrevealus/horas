@@ -2,40 +2,42 @@
   <div>
     <vue3-html2pdf
       ref="html2Pdf"
-      :show-layout="false"
       :enable-download="enableDownload"
-      :preview-modal="previewModal"
-      :paginate-elements-by-height="paginateElementsByHeight"
       :filename="fileName"
-      :pdf-quality="quality"
       :manual-pagination="manualPagination"
-      :pdf-format="paperSize"
-      :pdf-orientation="orientation"
+      :paginate-elements-by-height="paginateElementsByHeight"
       :pdf-content-width="contentWidth"
+      :pdf-format="paperSize"
       :pdf-margin="margin"
+      :pdf-orientation="orientation"
+      :pdf-quality="quality"
+      :preview-modal="previewModal"
+      :show-layout="false"
 
-      @progress="onProgress($event)"
-      @startPagination="startPagination()"
-      @hasPaginated="hasPaginated()"
-      @hasGenerated="hasGenerated($event)"
       @beforeDownload="beforeDownload($event)"
       @hasDownloaded="hasDownloaded($event)"
+      @hasGenerated="hasGenerated($event)"
+      @hasPaginated="hasPaginated()"
+      @progress="onProgress($event)"
+      @startPagination="startPagination()"
     >
       <template #pdf-content>
         <div class="print-container">
-          <div class="print-left-1" :style="{'background-image': `url(${server_image}dotted.png)`}"></div>
-          <div class="print-left-2" :style="{'background-image': `url(${server_image}dotted.png)`}"></div>
-          <div class="print-right-1" :style="{'background-image': `url(${server_image}dotted.png)`}"></div>
-          <div class="print-right-2" :style="{'background-image': `url(${server_image}dotted.png)`}"></div>
+          <div :style="{'background-image': `url(${server_image}dotted.png)`}" class="print-left-1"></div>
+          <div :style="{'background-image': `url(${server_image}dotted.png)`}" class="print-left-2"></div>
+          <div :style="{'background-image': `url(${server_image}dotted.png)`}" class="print-right-1"></div>
+          <div :style="{'background-image': `url(${server_image}dotted.png)`}" class="print-right-2"></div>
           <div class="print-logo">
             <img
-              :style="{ width: `${application['APPLICATION_LOGO'].setter.size.print.width}` }"
               :src="`${application['APPLICATION_LOGO'].setter.image}`"
-              class="print-logo"
+              :style="{ width: `${application['APPLICATION_LOGO'].setter.size.print.width}` }"
               alt="horas"
+              class="print-logo"
             />
           </div>
+          <!-- eslint-disable vue/no-v-html -->
           <div class="print" v-html="targetPrint"></div>
+          <!--eslint-enable-->
           <div class="print-sign">
             <div class="grid">
               <div v-for="(item, i) of signer" :key="i" class="col">

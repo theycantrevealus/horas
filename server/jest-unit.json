@@ -14,11 +14,14 @@
     "^@schemas(.*)$": "<rootDir>/apps/schemas$1",
     "^@filters(.*)$": "<rootDir>/apps/filters$1",
     "^@pipes(.*)$": "<rootDir>/apps/pipes$1",
-    "^@core(.*)$": "<rootDir>/apps/core/src/modules$1",
+    "^@gateway_core(.*)$": "<rootDir>/apps/gateway_core/src/modules$1",
+    "^@gateway_inventory(.*)$": "<rootDir>/apps/gateway_inventory/src/modules$1",
     "^@log(.*)$": "<rootDir>/apps/log/src$1",
+    "^@stock(.*)$": "<rootDir>/apps/stock$1",
     "^@security(.*)$": "<rootDir>/apps/security$1",
     "^@configuration(.*)$": "<rootDir>/apps/configuration$1",
     "^@utility(.*)$": "<rootDir>/apps/utility$1",
+    "^@socket(.*)$": "<rootDir>/apps/socket$1",
     "^@interceptors(.*)$": "<rootDir>/apps/interceptors$1",
     "^@guards(.*)$": "<rootDir>/apps/guards$1",
     "^@decorators(.*)$": "<rootDir>/apps/decorators$1"
@@ -38,6 +41,8 @@
     "<rootDir>/node_modules/",
     ".(e2e|unit)-spec.(t|j)s",
     ".controller.(t|j)s",
+    "assessment.form.service.(t|j)s",
+    ".dto.(t|j)s",
     ".provider.(t|j)s",
     ".batch.(t|j)s",
     ".join.(t|j)s",
@@ -46,8 +51,8 @@
     ".stub.(t|j)s"
   ],
   "collectCoverageFrom": [
-    "<rootDir>/apps/core/src/modules/account/**/*.{js,jsx,ts,tsx}",
-    "<rootDir>/apps/core/src/modules/master/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_core/src/modules/account/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_core/src/modules/master/**/*.{js,jsx,ts,tsx}",
     "!<rootDir>/node_modules/",
     "!<rootDir>/**/*.mock.{js,jsx,ts,tsx}"
   ],

@@ -1,21 +1,16 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import {
-  PurchaseOrderAddDTO,
-  PurchaseOrderApproval,
-  PurchaseOrderEditDTO,
-} from '@inventory/dto/purchase.order'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
-import {
-  PurchaseOrder,
-  PurchaseOrderDocument,
-} from '@inventory/schemas/purchase.order'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
 import { IConfig } from '@schemas/config/config'
+import {
+  PurchaseOrder,
+  PurchaseOrderDocument,
+} from '@schemas/inventory/purchase.order'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
@@ -24,6 +19,12 @@ import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
+
+import {
+  PurchaseOrderAddDTO,
+  PurchaseOrderApproval,
+  PurchaseOrderEditDTO,
+} from '../../gateway_inventory/src/modules/purchase_order/dto/purchase.order'
 
 @Injectable()
 export class PurchaseOrderService {

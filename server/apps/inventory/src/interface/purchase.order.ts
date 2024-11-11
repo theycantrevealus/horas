@@ -1,5 +1,5 @@
-import { ICurrency } from '@core/i18n/interface/i18n'
-import { IMasterItemSupplier } from '@core/master/interface/master.item.supplier'
+import { ICurrency } from '@gateway_core/i18n/interface/i18n'
+import { IMasterItemSupplier } from '@gateway_core/master/interface/master.item.supplier'
 import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 

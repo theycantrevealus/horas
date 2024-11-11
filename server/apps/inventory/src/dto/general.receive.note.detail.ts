@@ -1,6 +1,5 @@
-import { CMasterItem } from '@core/master/dto/master.item'
-import { CMasterItemSupplier } from '@core/master/dto/master.item.supplier'
-import { IMasterItem } from '@core/master/interface/master.item'
+import { CMasterItem } from '@gateway_core/master/dto/master.item'
+import { IMasterItem } from '@gateway_core/master/interface/master.item'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { IsNotEmpty, ValidateNested } from 'class-validator'
@@ -10,7 +9,7 @@ export class CGeneralReceiveNoteDetail {
     type: CMasterItem,
     required: true,
   })
-  @Type(() => CMasterItemSupplier)
+  @Type(() => CMasterItem)
   @ValidateNested({
     each: true,
   })

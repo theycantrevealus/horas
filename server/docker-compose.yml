@@ -6,7 +6,7 @@ services:
     build:
       context: .
       target: development
-      dockerfile: apps/core/Dockerfile
+      dockerfile: apps/gateway_core/Dockerfile
     command: npm run server:dev:core
     networks:
       - nestjs-network

@@ -316,7 +316,9 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             this.consumer,
           ])
         } catch (e) {
-          this.logger.error(`Error processing data: ${e} from topic ${topic}`)
+          this.logger.error(
+            `Error processing data: ${e.message} from topic ${topic}.\n${e.stack}`
+          )
           throw new Error(`Error for message ${topic}: ${e}`)
         }
       },

@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { ArgumentsHost, HttpStatus } from '@nestjs/common'
 import { GlobalResponse } from '@utility/dto/response'
 import { isExpressRequest } from '@utility/http'
@@ -56,10 +56,10 @@ export async function errorHttpHandler(
 
     statusCode = parseError.statusCode.defaultCode
   } else {
-    console.error(exception)
     responseSet = {
       statusCode: {
-        defaultCode: exception['response'].statusCode,
+        defaultCode:
+          exception['response']?.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR,
         customCode: modCodes.Global.failed,
         classCode: 'CORE',
       },
@@ -73,7 +73,8 @@ export async function errorHttpHandler(
     }
 
     // statusCode = HttpStatus.BAD_REQUEST
-    statusCode = exception['response'].statusCode
+    statusCode =
+      exception['response']?.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR
   }
 
   const account: IAccountCreatedBy = request.credential

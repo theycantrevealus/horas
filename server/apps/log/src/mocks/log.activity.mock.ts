@@ -1,5 +1,5 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { accountArray } from '@core/account/mock/account.mock'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { accountArray } from '@gateway_core/account/mock/account.mock'
 import { LogActivity } from '@log/schemas/log.activity'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'

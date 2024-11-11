@@ -6,14 +6,17 @@ import { KAFKA_TOPICS } from '@utility/constants'
 import { DecoratorProcessorService } from '@utility/decorator'
 import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 
-import { CoreModule } from '../../core/src/core.module'
+import { GatewayCoreModule } from '../../gateway_core/src/gateway.core.module'
 import { ConsumerQueueController } from './queue.controller'
 import { ConsumerQueueModule } from './queue.module'
 
 async function bootstrap() {
-  const appContext = await NestFactory.createApplicationContext(CoreModule, {
-    logger: ['error', 'verbose', 'debug', 'warn'],
-  })
+  const appContext = await NestFactory.createApplicationContext(
+    GatewayCoreModule,
+    {
+      logger: ['error', 'verbose', 'debug', 'warn'],
+    }
+  )
   const configService = appContext.get(ConfigService)
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     ConsumerQueueModule,

@@ -1,15 +1,43 @@
-import { IAccountCreatedBy } from '@core/account/interface/account.create_by'
-import { IMasterItem } from '@core/master/interface/master.item'
+import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { CMasterItem } from '@gateway_core/master/dto/master.item'
+import { IMasterItem } from '@gateway_core/master/interface/master.item'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { ApiProperty } from '@nestjs/swagger'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { MasterItemJoin } from '@schemas/master/master.item'
-import { HydratedDocument, SchemaTypes } from 'mongoose'
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export const MasterItemBatchJoin = raw({
   id: { type: String },
   code: { type: String },
   expired: { type: Date },
 })
+
+export class CMasterItemBatch {
+  @ApiProperty({
+    type: String,
+    example: `item-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+
+  @ApiProperty({
+    type: CMasterItem,
+    example: 'XX-XX',
+  })
+  item: IMasterItem
+
+  @ApiProperty({
+    type: Date,
+    example: 'Drugs',
+  })
+  expired: Date
+}
 
 export type MasterItemBatchDocument = HydratedDocument<MasterItemBatch>
 

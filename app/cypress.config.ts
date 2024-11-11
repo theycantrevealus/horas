@@ -1,5 +1,6 @@
-import { defineConfig } from 'cypress'
+import {defineConfig} from 'cypress'
 import webpackConfig from './webpack.config'
+
 export default defineConfig({
   projectId: '2tp2jb',
   chromeWebSecurity: false,
@@ -8,6 +9,7 @@ export default defineConfig({
   videosFolder: '__tests__/e2e/videos',
 
   e2e: {
+    baseUrl: process.env.BASE_URL,
     setupNodeEvents(on, config) {
       return require('./__tests__/e2e/plugins/index.js')(on, config)
     },
