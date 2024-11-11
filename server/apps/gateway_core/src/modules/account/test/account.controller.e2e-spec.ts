@@ -317,6 +317,7 @@ describe('Account Controller', () => {
           password: faker.internet.password({ length: 24 }),
           phone: mockAccount().phone,
           authority: mockAccount().authority,
+          stock_point: [],
         } satisfies AccountAddDTO
 
         return app
@@ -395,6 +396,7 @@ describe('Account Controller', () => {
             last_name: mockAccount().last_name,
             phone: mockAccount().phone,
             authority: mockAccount().authority,
+            stock_point: [],
             __v: 0,
           } satisfies AccountEditDTO
 

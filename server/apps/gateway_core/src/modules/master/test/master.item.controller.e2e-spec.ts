@@ -244,6 +244,7 @@ describe('Master Item Controller', () => {
           unit: mockMasterItem().unit,
           brand: mockMasterItem().brand,
           properties: mockMasterItem().properties,
+          structure: [],
         } satisfies MasterItemAddDTO
 
         delete data.name
@@ -280,6 +281,7 @@ describe('Master Item Controller', () => {
           unit: mockMasterItem().unit,
           brand: mockMasterItem().brand,
           properties: mockMasterItem().properties,
+          structure: [],
         } satisfies MasterItemAddDTO
 
         return app

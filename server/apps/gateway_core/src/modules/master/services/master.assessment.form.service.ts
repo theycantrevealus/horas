@@ -77,7 +77,7 @@ export class MasterAssessmentFormService {
       return await this.masterAssessmentFormModel
         .findOne({ id: id })
         .then((result) => {
-          response.payload = result ?? {}
+          response.payload = result
           response.message = 'Assessment form detail fetch successfully'
           return response
         })

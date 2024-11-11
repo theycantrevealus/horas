@@ -21,6 +21,7 @@
     "^@security(.*)$": "<rootDir>/apps/security$1",
     "^@configuration(.*)$": "<rootDir>/apps/configuration$1",
     "^@utility(.*)$": "<rootDir>/apps/utility$1",
+    "^@socket(.*)$": "<rootDir>/apps/socket$1",
     "^@interceptors(.*)$": "<rootDir>/apps/interceptors$1",
     "^@guards(.*)$": "<rootDir>/apps/guards$1",
     "^@decorators(.*)$": "<rootDir>/apps/decorators$1"
@@ -40,6 +41,7 @@
     "<rootDir>/node_modules/",
     ".(e2e|unit)-spec.(t|j)s",
     ".controller.(t|j)s",
+    "assessment.form.service.(t|j)s",
     ".dto.(t|j)s",
     ".provider.(t|j)s",
     ".batch.(t|j)s",

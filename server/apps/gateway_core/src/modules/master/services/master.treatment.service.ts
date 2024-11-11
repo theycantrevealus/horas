@@ -71,7 +71,7 @@ export class MasterTreatmentService {
 
     try {
       return await this.masterTreatment.findOne({ id: id }).then((result) => {
-        response.payload = result ?? {}
+        response.payload = result
         response.message = 'Treatment detail fetch successfully'
         return response
       })
@@ -164,20 +164,8 @@ export class MasterTreatmentService {
           { upsert: false, new: true }
         )
         .then((result) => {
-          response.statusCode.customCode = !result
-            ? modCodes[this.constructor.name].error.isNotFound.customCode
-            : response.statusCode.customCode
-
-          response.statusCode.defaultCode = !result
-            ? modCodes[this.constructor.name].error.isNotFound.defaultCode
-            : response.statusCode.defaultCode
-
-          response.message = !result
-            ? 'Treatment failed to update'
-            : 'Treatment updated successfully'
-
+          response.message = 'Master treatment updated successfully'
           response.payload = result
-
           return response
         })
     } catch (error) {

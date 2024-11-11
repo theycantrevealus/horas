@@ -76,7 +76,7 @@ export class MasterDepartmentService {
       return await this.masterDepartmentModel
         .findOne({ id: id })
         .then((result) => {
-          response.payload = result ?? {}
+          response.payload = result
           response.message = 'Department detail fetch successfully'
           return response
         })
@@ -169,24 +169,12 @@ export class MasterDepartmentService {
           { upsert: false, new: true }
         )
         .then((result) => {
-          response.statusCode.customCode = !result
-            ? modCodes[this.constructor.name].error.isNotFound.customCode
-            : response.statusCode.customCode
-
-          response.statusCode.defaultCode = !result
-            ? modCodes[this.constructor.name].error.isNotFound.defaultCode
-            : response.statusCode.defaultCode
-
-          response.message = !result
-            ? 'Department failed to update'
-            : 'Department updated successfully'
-
+          response.message = 'Master department updated successfully'
           response.payload = result
-
           return response
         })
     } catch (error) {
-      response.message = `Department failed to update. ${error.message}`
+      response.message = `Master department failed to update. ${error.message}`
       response.statusCode = {
         ...modCodes[this.constructor.name].error.databaseError,
         classCode: modCodes[this.constructor.name].defaultCode,

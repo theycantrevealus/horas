@@ -246,6 +246,66 @@ describe('Master Stock Point Service', () => {
   )
 
   describe(
+    testCaption('FIND', 'data', 'Master Stock Point - Find master stock point'),
+    () => {
+      it(
+        testCaption('HANDLING', 'data', 'Response validity', {
+          tab: 1,
+        }),
+        async () => {
+          const findMock = masterStockPointDocArray[0]
+          masterStockPointModel.findOne = jest
+            .fn()
+            .mockImplementationOnce(() => {
+              return Promise.resolve(findMock)
+            })
+
+          await masterStockPointService
+            .find({
+              id: findMock.id,
+            })
+            .then((result: GlobalResponse) => {
+              // Deep equality check
+              expect(result.payload).toEqual(findMock)
+
+              // Should classify transaction
+              expect(result.transaction_classify).toEqual(
+                'MASTER_STOCK_POINT_GET'
+              )
+
+              // Not an empty string so be informative
+              expect(result.message).not.toBe('')
+
+              // Should return success code
+              expect(result.statusCode.customCode).toEqual(
+                modCodes.Global.success
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error on find data', {
+          tab: 1,
+        }),
+        async () => {
+          const targetData = masterStockPointDocArray[0]
+
+          jest
+            .spyOn(masterStockPointModel, 'findOne')
+            .mockImplementationOnce(() => {
+              throw new Error()
+            })
+
+          await expect(async () => {
+            await masterStockPointService.find({ id: targetData.id })
+          }).rejects.toThrow(Error)
+        }
+      )
+    }
+  )
+
+  describe(
     testCaption('ADD DATA', 'data', 'Master Stock Point - Add new data'),
     () => {
       it(
