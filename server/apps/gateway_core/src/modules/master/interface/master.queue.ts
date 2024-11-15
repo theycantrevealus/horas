@@ -1,4 +1,4 @@
-export interface IMasterQueue {
+export interface IMasterQueueMachine {
   id: string
   code: string
 }

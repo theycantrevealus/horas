@@ -1,6 +1,9 @@
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { MasterQueue } from '@schemas/master/master.queue.machine'
+import {
+  MasterQueueMachine,
+  MasterQueueMachineDocument,
+} from '@schemas/master/master.queue.machine'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { Model } from 'mongoose'
@@ -8,8 +11,8 @@ import { Model } from 'mongoose'
 @Injectable()
 export class GatewayQueueService {
   constructor(
-    @InjectModel(MasterQueue.name, 'primary')
-    private masterQueueModel: Model<MasterQueue>
+    @InjectModel(MasterQueueMachine.name, 'primary')
+    private masterQueueMachineModel: Model<MasterQueueMachineDocument>
   ) {}
   async queueMachineAvail(): Promise<GlobalResponse> {
     const response = {

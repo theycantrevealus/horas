@@ -1,10 +1,10 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import {
-  MasterQueueAddDTO,
-  MasterQueueEditDTO,
-} from '@gateway_core/master/dto/master.queue'
-import { MasterQueueService } from '@gateway_core/master/services/master.queue.service'
+  MasterQueueMachineAddDTO,
+  MasterQueueMachineEditDTO,
+} from '@gateway_core/master/dto/master.queue.machine'
+import { MasterQueueMachineService } from '@gateway_core/master/services/master.queue.machine.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -33,10 +33,10 @@ import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
 @ApiTags('Master Data Queue Management')
-export class MasterQueueController {
+export class MasterQueueMachineController {
   constructor(
-    @Inject(MasterQueueService)
-    private readonly masterQueueService: MasterQueueService
+    @Inject(MasterQueueMachineService)
+    private readonly masterQueueService: MasterQueueMachineService
   ) {}
 
   @Get('queue')
@@ -82,7 +82,7 @@ export class MasterQueueController {
     description: ``,
   })
   async add(
-    @Body() parameter: MasterQueueAddDTO,
+    @Body() parameter: MasterQueueMachineAddDTO,
     @CredentialAccount() account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     return await this.masterQueueService.add(parameter, account)
@@ -102,7 +102,7 @@ export class MasterQueueController {
     name: 'id',
   })
   async edit(
-    @Body() parameter: MasterQueueEditDTO,
+    @Body() parameter: MasterQueueMachineEditDTO,
     @Param() param: any
   ): Promise<GlobalResponse> {
     return await this.masterQueueService.edit(parameter, param.id)

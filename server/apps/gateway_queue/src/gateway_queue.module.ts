@@ -10,8 +10,8 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
 import {
-  MasterQueue,
-  MasterQueueSchema,
+  MasterQueueMachine,
+  MasterQueueMachineSchema,
 } from '@schemas/master/master.queue.machine'
 import { AuthModule } from '@security/auth.module'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
@@ -54,7 +54,7 @@ import { GatewayQueueService } from './gateway_queue.service'
     }),
     MongooseModule.forFeature(
       [
-        { name: MasterQueue.name, schema: MasterQueueSchema },
+        { name: MasterQueueMachine.name, schema: MasterQueueMachineSchema },
 
         { name: LogLogin.name, schema: LogLoginSchema },
         { name: LogActivity.name, schema: LogActivitySchema },

@@ -1,22 +1,31 @@
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
+import { ILOV, LOVJoin } from '@schemas/lov/lov'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
-export const MasterQueueJoin = raw({
+export const MasterQueueMachineJoin = raw({
   id: { type: String },
   code: { type: String },
 })
 
-export type MasterQueueDocument = HydratedDocument<MasterQueue>
+export type MasterQueueMachineDocument = HydratedDocument<MasterQueueMachine>
 
 @Schema({ collection: 'master_queue' })
-export class MasterQueue {
+export class MasterQueueMachine {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
   @Prop({ type: SchemaTypes.String, unique: true })
   code: string
+
+  @Prop({
+    unique: false,
+    required: false,
+    type: [LOVJoin],
+    _id: false,
+  })
+  type: ILOV[]
 
   @Prop({ type: SchemaTypes.String })
   remark: string
@@ -42,4 +51,5 @@ export class MasterQueue {
   deleted_at: Date | null
 }
 
-export const MasterQueueSchema = SchemaFactory.createForClass(MasterQueue)
+export const MasterQueueMachineSchema =
+  SchemaFactory.createForClass(MasterQueueMachine)

@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
 import {
-  MasterQueueAddDTO,
-  MasterQueueEditDTO,
-} from '@gateway_core/master/dto/master.queue'
+  MasterQueueMachineAddDTO,
+  MasterQueueMachineEditDTO,
+} from '@gateway_core/master/dto/master.queue.machine'
 import { testCaption } from '@utility/string'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
@@ -11,13 +11,13 @@ const falseCasePayload = {
   add: [
     {
       expectedToContain: 'code should not be empty',
-      targetClass: MasterQueueAddDTO,
+      targetClass: MasterQueueMachineAddDTO,
       testType: -1,
       data: {},
     },
     {
       expectedToContain: 'code must be longer than or equal to 3 characters',
-      targetClass: MasterQueueAddDTO,
+      targetClass: MasterQueueMachineAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 2, casing: 'upper' }),
@@ -25,7 +25,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'code must be shorter than or equal to 3 characters',
-      targetClass: MasterQueueAddDTO,
+      targetClass: MasterQueueMachineAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 4, casing: 'upper' }),
@@ -33,7 +33,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: MasterQueueAddDTO,
+      targetClass: MasterQueueMachineAddDTO,
       testType: 1,
       data: {
         code: faker.string.alpha({ length: 3, casing: 'upper' }),
@@ -43,7 +43,7 @@ const falseCasePayload = {
   edit: [
     {
       expectedToContain: 'code should not be empty',
-      targetClass: MasterQueueEditDTO,
+      targetClass: MasterQueueMachineEditDTO,
       testType: -1,
       data: {
         __v: 0,
@@ -51,7 +51,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'code must be longer than or equal to 3 characters',
-      targetClass: MasterQueueEditDTO,
+      targetClass: MasterQueueMachineEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 2, casing: 'upper' }),
@@ -60,7 +60,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'code must be shorter than or equal to 3 characters',
-      targetClass: MasterQueueEditDTO,
+      targetClass: MasterQueueMachineEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 4, casing: 'upper' }),
@@ -69,7 +69,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v should not be empty',
-      targetClass: MasterQueueEditDTO,
+      targetClass: MasterQueueMachineEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 3, casing: 'upper' }),
@@ -77,7 +77,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: MasterQueueEditDTO,
+      targetClass: MasterQueueMachineEditDTO,
       testType: 1,
       data: {
         code: faker.string.alpha({ length: 3, casing: 'upper' }),

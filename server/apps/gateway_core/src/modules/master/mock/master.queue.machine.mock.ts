@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import { MasterItemBrandDocument } from '@schemas/master/master.item.brand'
-import { MasterQueue } from '@schemas/master/master.queue.machine'
+import { MasterQueueMachine } from '@schemas/master/master.queue.machine'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
@@ -36,6 +36,7 @@ import { Types } from 'mongoose'
 export const mockMasterQueue = (
   id = `queue-${new Types.ObjectId().toString()}`,
   code = 'QUE',
+  type = [],
   remark = '',
   created_by: IAccountCreatedBy = {
     id: `queue-${new Types.ObjectId().toString()}`,
@@ -46,9 +47,10 @@ export const mockMasterQueue = (
   created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
   deleted_at = null
-): MasterQueue => ({
+): MasterQueueMachine => ({
   id,
   code,
+  type,
   remark,
   created_by,
   created_at,
@@ -69,7 +71,7 @@ export const mockMasterQueueModel = {
 }
 
 export const mockMasterQueueDoc = (
-  mock?: Partial<MasterQueue>
+  mock?: Partial<MasterQueueMachine>
 ): Partial<MasterItemBrandDocument> => ({
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   remark: mock?.remark || '',

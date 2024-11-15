@@ -1,18 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
-  MasterQueue,
-  MasterQueueSchema,
+  MasterQueueMachine,
+  MasterQueueMachineSchema,
 } from '@schemas/master/master.queue.machine'
 import { MongoMiddleware, MongoSubscriber } from '@schemas/subscriber'
 import { TimeManagement } from '@utility/time'
 
 @Injectable()
 @MongoSubscriber({
-  name: MasterQueue.name,
-  schema: MasterQueueSchema,
+  name: MasterQueueMachine.name,
+  schema: MasterQueueMachineSchema,
 })
-export class MongoMiddlewareMasterQueue {
+export class MongoMiddlewareMasterQueueMachine {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
@@ -31,7 +31,7 @@ export class MongoMiddlewareMasterQueue {
   async beforeSave(message: any) {
     const time = new TimeManagement()
     if (message.isNew) {
-      message.id = `queue-${message._id}`
+      message.id = `queue_machine-${message._id}`
       message.__v = 0
     }
 

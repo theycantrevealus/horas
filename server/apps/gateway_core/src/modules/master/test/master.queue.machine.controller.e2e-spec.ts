@@ -1,16 +1,16 @@
 import { CommonErrorFilter } from '@filters/error'
 import { accountArray } from '@gateway_core/account/mock/account.mock'
-import { MasterQueueController } from '@gateway_core/master/controllers/master.queue.controller'
+import { MasterQueueMachineController } from '@gateway_core/master/controllers/master.queue.machine.controller'
 import {
-  MasterQueueAddDTO,
-  MasterQueueEditDTO,
-} from '@gateway_core/master/dto/master.queue'
+  MasterQueueMachineAddDTO,
+  MasterQueueMachineEditDTO,
+} from '@gateway_core/master/dto/master.queue.machine'
 import {
   masterQueueDocArray,
   mockMasterQueue,
   mockMasterQueueModel,
-} from '@gateway_core/master/mock/master.queue.mock'
-import { MasterQueueService } from '@gateway_core/master/services/master.queue.service'
+} from '@gateway_core/master/mock/master.queue.machine.mock'
+import { MasterQueueMachineService } from '@gateway_core/master/services/master.queue.machine.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -25,8 +25,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
 import {
-  MasterQueue,
-  MasterQueueDocument,
+  MasterQueueMachine,
+  MasterQueueMachineDocument,
 } from '@schemas/master/master.queue.machine'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
@@ -39,15 +39,15 @@ describe('Master Queue Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
   let configService: ConfigService
-  let masterQueueController: MasterQueueController
-  let masterQueueModel: Model<MasterQueue>
+  let masterQueueController: MasterQueueMachineController
+  let masterQueueModel: Model<MasterQueueMachine>
   let logger: Logger
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MasterQueueController],
+      controllers: [MasterQueueMachineController],
       providers: [
-        MasterQueueService,
+        MasterQueueMachineService,
         {
           provide: ConfigService,
           useValue: {
@@ -72,7 +72,7 @@ describe('Master Queue Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterQueue.name, 'primary'),
+          provide: getModelToken(MasterQueueMachine.name, 'primary'),
           useValue: mockMasterQueueModel,
         },
         { provide: AuthService, useValue: {} },
@@ -94,11 +94,11 @@ describe('Master Queue Controller', () => {
     )
     configService = module.get<ConfigService>(ConfigService)
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
-    masterQueueController = app.get<MasterQueueController>(
-      MasterQueueController
+    masterQueueController = app.get<MasterQueueMachineController>(
+      MasterQueueMachineController
     )
-    masterQueueModel = module.get<Model<MasterQueueDocument>>(
-      getModelToken(MasterQueue.name, 'primary')
+    masterQueueModel = module.get<Model<MasterQueueMachineDocument>>(
+      getModelToken(MasterQueueMachine.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -229,7 +229,7 @@ describe('Master Queue Controller', () => {
       async () => {
         const data = {
           code: mockMasterQueue().code,
-        } satisfies MasterQueueAddDTO
+        } satisfies MasterQueueMachineAddDTO
 
         delete data.code
 
@@ -257,7 +257,7 @@ describe('Master Queue Controller', () => {
       async () => {
         const data = {
           code: mockMasterQueue().code,
-        } satisfies MasterQueueAddDTO
+        } satisfies MasterQueueMachineAddDTO
 
         return app
           .inject({
@@ -330,7 +330,7 @@ describe('Master Queue Controller', () => {
         const data = {
           code: mockMasterQueue().code,
           __v: 0,
-        } satisfies MasterQueueEditDTO
+        } satisfies MasterQueueMachineEditDTO
 
         return app
           .inject({

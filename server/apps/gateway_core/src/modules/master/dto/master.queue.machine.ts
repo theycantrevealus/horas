@@ -8,7 +8,7 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
-export class CMasterQueue {
+export class CMasterQueueMachine {
   @ApiProperty({
     type: String,
     example: `queue-${new Types.ObjectId().toString()}`,
@@ -22,7 +22,7 @@ export class CMasterQueue {
   code: string
 }
 
-export class MasterQueueAddDTO {
+export class MasterQueueMachineAddDTO {
   @ApiProperty({
     example: 'xxx',
     minLength: 3,
@@ -44,7 +44,7 @@ export class MasterQueueAddDTO {
   remark?: string
 }
 
-export class MasterQueueEditDTO {
+export class MasterQueueMachineEditDTO {
   @ApiProperty({
     example: 'xxx',
     minLength: 3,

@@ -1,11 +1,11 @@
-import { CMasterQueue } from '@gateway_core/master/dto/master.queue'
+import { CMasterQueueMachine } from '@gateway_core/master/dto/master.queue.machine'
 import { IMasterQueue } from '@gateway_core/master/interface/master.queue'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty } from 'class-validator'
 
 export class QueueAddDTO {
   @ApiProperty({
-    type: CMasterQueue,
+    type: CMasterQueueMachine,
   })
   @IsNotEmpty()
   machine: IMasterQueue

@@ -93,6 +93,23 @@ export const modCodes = {
       },
     },
   },
+  MasterQueueMachineService: {
+    defaultCode: 'MSRQM',
+    error: {
+      databaseError: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: 'E0001',
+      },
+      isNotFound: {
+        defaultCode: HttpStatus.NOT_FOUND,
+        customCode: 'E0002',
+      },
+      isNoAccess: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: 'E0003',
+      },
+    },
+  },
   MasterDepartmentService: {
     defaultCode: 'MSRD',
     error: {

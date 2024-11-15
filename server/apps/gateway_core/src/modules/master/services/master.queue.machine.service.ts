@@ -1,12 +1,15 @@
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import {
-  MasterQueueAddDTO,
-  MasterQueueEditDTO,
-} from '@gateway_core/master/dto/master.queue'
+  MasterQueueMachineAddDTO,
+  MasterQueueMachineEditDTO,
+} from '@gateway_core/master/dto/master.queue.machine'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
-import { MasterQueue } from '@schemas/master/master.queue.machine'
+import {
+  MasterQueueMachine,
+  MasterQueueMachineDocument,
+} from '@schemas/master/master.queue.machine'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -15,12 +18,12 @@ import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
-export class MasterQueueService {
+export class MasterQueueMachineService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
 
-    @InjectModel(MasterQueue.name, 'primary')
-    private masterQueueModel: Model<MasterQueue>
+    @InjectModel(MasterQueueMachine.name, 'primary')
+    private masterQueueMachineModel: Model<MasterQueueMachineDocument>
   ) {}
 
   async all(payload: any) {
@@ -32,19 +35,20 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_LIST',
+      transaction_classify: 'MASTER_QUEUE_MACHINE_LIST',
       transaction_id: null,
     } satisfies GlobalResponse
 
     try {
       const parameter: PrimeParameter = JSON.parse(payload)
-      return await prime_datatable(parameter, this.masterQueueModel).then(
-        (result) => {
-          response.payload = result.payload
-          response.message = 'Master queue fetch successfully'
-          return response
-        }
-      )
+      return await prime_datatable(
+        parameter,
+        this.masterQueueMachineModel
+      ).then((result) => {
+        response.payload = result.payload
+        response.message = 'Master queue fetch successfully'
+        return response
+      })
     } catch (error) {
       response.message = `Master queue failed to fetch`
       response.statusCode = {
@@ -65,16 +69,18 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_GET',
+      transaction_classify: 'MASTER_QUEUE_MACHINE_GET',
       transaction_id: id,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterQueueModel.findOne({ id: id }).then((result) => {
-        response.payload = result
-        response.message = 'Master queue detail fetch successfully'
-        return response
-      })
+      return await this.masterQueueMachineModel
+        .findOne({ id: id })
+        .then((result) => {
+          response.payload = result
+          response.message = 'Master queue detail fetch successfully'
+          return response
+        })
     } catch (error) {
       response.message = `Master queue detail failed to fetch`
       response.statusCode = {
@@ -87,7 +93,7 @@ export class MasterQueueService {
   }
 
   async add(
-    data: MasterQueueAddDTO,
+    data: MasterQueueMachineAddDTO,
     account: IAccountCreatedBy
   ): Promise<GlobalResponse> {
     const response = {
@@ -98,12 +104,12 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_ADD',
+      transaction_classify: 'MASTER_QUEUE_MACHINE_ADD',
       transaction_id: null,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterQueueModel
+      return await this.masterQueueMachineModel
         .create({
           ...data,
           created_by: account,
@@ -125,7 +131,10 @@ export class MasterQueueService {
     }
   }
 
-  async edit(data: MasterQueueEditDTO, id: string): Promise<GlobalResponse> {
+  async edit(
+    data: MasterQueueMachineEditDTO,
+    id: string
+  ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -134,12 +143,12 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_EDIT',
+      transaction_classify: 'MASTER_QUEUE_MACHINE_EDIT',
       transaction_id: null,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterQueueModel
+      return await this.masterQueueMachineModel
         .findOneAndUpdate(
           {
             id: id,
@@ -175,12 +184,12 @@ export class MasterQueueService {
       },
       message: '',
       payload: {},
-      transaction_classify: 'MASTER_QUEUE_DELETE',
+      transaction_classify: 'MASTER_QUEUE_MACHINE_DELETE',
       transaction_id: null,
     } satisfies GlobalResponse
 
     try {
-      return await this.masterQueueModel
+      return await this.masterQueueMachineModel
         .findOneAndUpdate(
           {
             id: id,

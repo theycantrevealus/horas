@@ -10,8 +10,8 @@ import {
   masterQueueDocArray,
   mockMasterQueue,
   mockMasterQueueModel,
-} from '@gateway_core/master/mock/master.queue.mock'
-import { MasterQueueService } from '@gateway_core/master/services/master.queue.service'
+} from '@gateway_core/master/mock/master.queue.machine.mock'
+import { MasterQueueMachineService } from '@gateway_core/master/services/master.queue.machine.service'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -22,8 +22,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
 import {
-  MasterQueue,
-  MasterQueueDocument,
+  MasterQueueMachine,
+  MasterQueueMachineDocument,
 } from '@schemas/master/master.queue.machine'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
@@ -33,15 +33,15 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
 describe('Master Queue Service', () => {
-  let masterQueueService: MasterQueueService
-  let masterQueueModel: Model<MasterQueue>
+  let masterQueueService: MasterQueueMachineService
+  let masterQueueModel: Model<MasterQueueMachine>
   let configService: ConfigService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
-        MasterQueueService,
+        MasterQueueMachineService,
         AccountService,
         AuthService,
         JwtService,
@@ -76,7 +76,7 @@ describe('Master Queue Service', () => {
           },
         },
         {
-          provide: getModelToken(MasterQueue.name, 'primary'),
+          provide: getModelToken(MasterQueueMachine.name, 'primary'),
           useValue: mockMasterQueueModel,
         },
         {
@@ -98,9 +98,11 @@ describe('Master Queue Service', () => {
 
     configService = module.get<ConfigService>(ConfigService)
 
-    masterQueueService = module.get<MasterQueueService>(MasterQueueService)
-    masterQueueModel = module.get<Model<MasterQueueDocument>>(
-      getModelToken(MasterQueue.name, 'primary')
+    masterQueueService = module.get<MasterQueueMachineService>(
+      MasterQueueMachineService
+    )
+    masterQueueModel = module.get<Model<MasterQueueMachineDocument>>(
+      getModelToken(MasterQueueMachine.name, 'primary')
     )
 
     jest.clearAllMocks()
@@ -138,7 +140,9 @@ describe('Master Queue Service', () => {
           )
           .then((result: GlobalResponse) => {
             // Should classify transaction
-            expect(result.transaction_classify).toEqual('MASTER_QUEUE_LIST')
+            expect(result.transaction_classify).toEqual(
+              'MASTER_QUEUE_MACHINE_LIST'
+            )
 
             // Not an empty string so be informative
             expect(result.message).not.toBe('')
@@ -199,7 +203,9 @@ describe('Master Queue Service', () => {
               expect(result.payload).toEqual(findMock)
 
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_QUEUE_GET')
+              expect(result.transaction_classify).toEqual(
+                'MASTER_QUEUE_MACHINE_GET'
+              )
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
@@ -246,7 +252,9 @@ describe('Master Queue Service', () => {
               expect(result.payload).toHaveProperty('id')
 
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_QUEUE_ADD')
+              expect(result.transaction_classify).toEqual(
+                'MASTER_QUEUE_MACHINE_ADD'
+              )
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
@@ -276,7 +284,9 @@ describe('Master Queue Service', () => {
               expect(result.payload['code']).not.toBe('')
 
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_QUEUE_ADD')
+              expect(result.transaction_classify).toEqual(
+                'MASTER_QUEUE_MACHINE_ADD'
+              )
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
@@ -327,7 +337,9 @@ describe('Master Queue Service', () => {
             expect(result.payload).toHaveProperty('id')
 
             // Should classify transaction
-            expect(result.transaction_classify).toEqual('MASTER_QUEUE_EDIT')
+            expect(result.transaction_classify).toEqual(
+              'MASTER_QUEUE_MACHINE_EDIT'
+            )
 
             // Not an empty string so be informative
             expect(result.message).not.toBe('')
@@ -381,7 +393,9 @@ describe('Master Queue Service', () => {
             .delete(masterQueueDocArray[0].id)
             .then((result: GlobalResponse) => {
               // Should classify transaction
-              expect(result.transaction_classify).toEqual('MASTER_QUEUE_DELETE')
+              expect(result.transaction_classify).toEqual(
+                'MASTER_QUEUE_MACHINE_DELETE'
+              )
 
               // Not an empty string so be informative
               expect(result.message).not.toBe('')
