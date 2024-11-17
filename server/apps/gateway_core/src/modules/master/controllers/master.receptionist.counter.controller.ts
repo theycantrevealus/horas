@@ -2,10 +2,10 @@ import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
 import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
 import {
-  MasterItemBrandAddDTO,
-  MasterItemBrandEditDTO,
-} from '@gateway_core/master/dto/master.item.brand'
-import { MasterItemBrandService } from '@gateway_core/master/services/master.item.brand.service'
+  MasterReceptionistCounterAddDTO,
+  MasterReceptionistCounterEditDTO,
+} from '@gateway_core/master/dto/master.receptionist.counter'
+import { MasterReceptionistCounterService } from '@gateway_core/master/services/master.receptionist.counter.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -32,36 +32,36 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 
 @Controller('master')
-@ApiTags('Master Data Item Brand Management')
-export class MasterItemBrandController {
+@ApiTags('Master Data Receptionist Counter Management')
+export class MasterReceptionistCounterController {
   constructor(
-    @Inject(MasterItemBrandService)
-    private readonly masterItemBrandService: MasterItemBrandService
+    @Inject(MasterReceptionistCounterService)
+    private readonly masterReceptionistCounterService: MasterReceptionistCounterService
   ) {}
 
-  @Get('brand')
+  @Get('receptionist_counter')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterItemBrand', action: 'view' })
+  @PermissionManager({ group: 'MasterReceptionistCounter', action: 'view' })
   @ApiOperation({
-    summary: 'Fetch all item brand',
-    description: 'Showing brand data',
+    summary: 'Fetch all',
+    description: 'Showing data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    return await this.masterItemBrandService.all(parameter)
+    return await this.masterReceptionistCounterService.all(parameter)
   }
 
-  @Get('brand/:id')
+  @Get('receptionist_counter/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterItemBrand', action: 'view' })
+  @PermissionManager({ group: 'MasterReceptionistCounter', action: 'view' })
   @ApiParam({
     name: 'id',
   })
@@ -70,52 +70,55 @@ export class MasterItemBrandController {
     description: '',
   })
   async detail(@Param() param: any) {
-    return await this.masterItemBrandService.detail(param.id)
+    return await this.masterReceptionistCounterService.detail(param.id)
   }
 
-  @Post('brand')
+  @Post('receptionist_counter')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterItemBrand', action: 'add' })
+  @PermissionManager({ group: 'MasterReceptionistCounter', action: 'add' })
   @ApiOperation({
-    summary: 'Add new item brand',
+    summary: 'Add new data',
     description: ``,
   })
   async add(
-    @Body() parameter: MasterItemBrandAddDTO,
+    @Body() parameter: MasterReceptionistCounterAddDTO,
     @CredentialAccount() account: IAccountCreatedBy
   ) {
-    return await this.masterItemBrandService.add(parameter, account)
+    return await this.masterReceptionistCounterService.add(parameter, account)
   }
 
-  @Patch('brand/:id')
+  @Patch('receptionist_counter/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterItemBrand', action: 'edit' })
+  @PermissionManager({ group: 'MasterReceptionistCounter', action: 'edit' })
   @ApiOperation({
-    summary: 'Edit new item brand',
+    summary: 'Edit item',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param: any) {
-    return await this.masterItemBrandService.edit(parameter, param.id)
+  async edit(
+    @Body() parameter: MasterReceptionistCounterEditDTO,
+    @Param() param: any
+  ) {
+    return await this.masterReceptionistCounterService.edit(parameter, param.id)
   }
 
-  @Delete('brand/:id')
+  @Delete('receptionist_counter/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MasterItemBrand', action: 'delete' })
+  @PermissionManager({ group: 'MasterReceptionistCounter', action: 'delete' })
   @ApiOperation({
     summary: 'Delete item',
     description: ``,
@@ -124,6 +127,6 @@ export class MasterItemBrandController {
     name: 'id',
   })
   async delete(@Param() param: any) {
-    return await this.masterItemBrandService.delete(param.id)
+    return await this.masterReceptionistCounterService.delete(param.id)
   }
 }
