@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
@@ -41,7 +41,7 @@ export class MasterItemSupplier {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

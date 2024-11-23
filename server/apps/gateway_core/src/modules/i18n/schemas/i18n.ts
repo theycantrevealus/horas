@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
@@ -180,7 +180,7 @@ export class i18n {
   components: Ii18nComponent[]
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

@@ -1,5 +1,4 @@
-import { IDoctor } from '@gateway_core/account/interface/account'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import {
@@ -19,7 +18,7 @@ export const DepartmentConfigurationJoin = raw({
 export interface IDepartmentConfiguration {
   default_consultation_treatment: IMasterTreatment
   treatment: IMasterDepartment[]
-  doctor: IDoctor[]
+  doctor: IAccount[]
 }
 
 @Schema({ collection: 'master_department' })
@@ -40,7 +39,7 @@ export class MasterDepartment {
   configuration: IDepartmentConfiguration
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

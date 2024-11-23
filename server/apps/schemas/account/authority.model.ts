@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { AccountJoin } from '@schemas/account/account.raw'
@@ -28,7 +28,7 @@ export class Authority {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

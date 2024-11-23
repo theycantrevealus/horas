@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockAccount } from '@gateway_core/account/mock/account.mock'
 import { IMasterItemConfiguration } from '@gateway_core/master/interface/master.item.configuration'
 import { masterItemBrandArray } from '@gateway_core/master/mock/master.item.brand.mock'
@@ -68,7 +68,7 @@ export const mockMasterItem = (
     },
   ],
   remark = '',
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

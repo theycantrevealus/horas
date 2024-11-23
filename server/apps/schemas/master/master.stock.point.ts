@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMasterStockPointConfiguration } from '@gateway_core/master/interface/master.stock.point.configuration'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
@@ -39,7 +39,7 @@ export class MasterStockPoint {
   meta: IMetaData
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

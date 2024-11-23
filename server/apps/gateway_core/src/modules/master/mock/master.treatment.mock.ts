@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ILOV } from '@schemas/lov/lov'
 import { IMasterPartner } from '@schemas/master/master.partner'
 import {
@@ -45,7 +45,7 @@ export const mockMasterTreatment = (
   code = 'MSRTRT-0001',
   name = faker.company.name(),
   remark = 'Example remark',
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ICurrency } from '@gateway_core/i18n/interface/i18n'
 import { CurrencyJoin } from '@gateway_core/i18n/schemas/i18n.join'
 import { IMasterItemSupplier } from '@gateway_core/master/interface/master.item.supplier'
@@ -79,10 +79,10 @@ export class PurchaseOrder {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({ type: AccountJoin, required: false })
-  updated_by: IAccountCreatedBy
+  updated_by: IAccount
 
   @Prop(CurrencyJoin)
   locale: ICurrency

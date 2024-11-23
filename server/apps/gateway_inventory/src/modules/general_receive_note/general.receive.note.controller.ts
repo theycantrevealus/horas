@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
@@ -97,7 +97,7 @@ export class GeneralReceiveNoteController {
   })
   async add(
     @Body() parameter: GeneralReceiveNoteAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Req() request: any
   ): Promise<GlobalResponse> {
     return await this.generalReceiveNoteService.add(

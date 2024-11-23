@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemSupplier,
   MasterItemSupplierDocument,
@@ -48,7 +48,7 @@ export const mockMasterItemSupplier = (
   sales_name = faker.person.firstName(),
   address = faker.location.streetAddress(),
   remark = '',
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

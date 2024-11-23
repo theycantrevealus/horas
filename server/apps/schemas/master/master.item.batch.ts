@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CMasterItem } from '@gateway_core/master/dto/master.item'
 import { IMasterItem } from '@gateway_core/master/interface/master.item'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
@@ -63,7 +63,7 @@ export class MasterItemBatch {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

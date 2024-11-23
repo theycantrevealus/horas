@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   Visit,
   VisitDocument,
@@ -14,7 +14,7 @@ export class VisitService {
   constructor(
     @InjectModel(Visit.name) private readonly visitModel: Model<VisitDocument>
   ) {}
-  async add(data, credential: IAccountCreatedBy): Promise<GlobalResponse> {
+  async add(data, credential: IAccount): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,

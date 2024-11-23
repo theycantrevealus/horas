@@ -5,7 +5,7 @@ import { SEPPulang } from '@gateway_core/3rdparty/bpjs/dto/sep/pemulangan'
 import { SEPPengajuan } from '@gateway_core/3rdparty/bpjs/dto/sep/pengajuan'
 import { BPJSVClaimAuthService } from '@gateway_core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimSEPService } from '@gateway_core/3rdparty/bpjs/services/vclaim/sep.service'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
   Body,
@@ -77,7 +77,7 @@ export class BPJSVClaimSEPController {
   })
   async create(
     @Body() parameter: SEPAdd,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Res() response: FastifyReply
   ) {
     await this.bpjsVClaimSEPService
@@ -185,7 +185,7 @@ export class BPJSVClaimSEPController {
   })
   async updatePulang(
     @Body() body: SEPPulang,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Res() response: FastifyReply
   ) {
     await this.bpjsVClaimSEPService

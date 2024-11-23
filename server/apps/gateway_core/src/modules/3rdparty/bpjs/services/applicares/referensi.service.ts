@@ -9,7 +9,7 @@ import {
 } from '@gateway_core/3rdparty/bpjs/schemas/applicares/kamar'
 import { BPJSApplicaresAuthService } from '@gateway_core/3rdparty/bpjs/services/applicares/auth.service'
 import { BPJSApplicaresRequest } from '@gateway_core/3rdparty/bpjs/services/applicares/request.service'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
@@ -58,7 +58,7 @@ export class BPJSApplicaresReferensiService {
     return response
   }
 
-  async kamarTersedia(account: IAccountCreatedBy): Promise<GlobalResponse> {
+  async kamarTersedia(account: IAccount): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -132,7 +132,7 @@ export class BPJSApplicaresReferensiService {
 
   async kamarCreate(
     parameter: ApplicaresKamarAdd,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

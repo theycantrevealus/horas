@@ -1,5 +1,5 @@
 import { PermissionDescriptor } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import {
   ExecutionContext,
@@ -85,7 +85,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         })
 
       delete decodeTokenResponse?.account?.created_at
-      request.credential = decodeTokenResponse.account as IAccountCreatedBy
+      request.credential = decodeTokenResponse.account as IAccount
       const accountDetail: Account = await this.cacheManager.get(
         request?.credential?.id
       )
@@ -115,6 +115,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true
     } catch (jwtGuardError) {
       response.message = `JWT guard error : ${jwtGuardError}`
+      console.error(jwtGuardError)
       throw new Error(JSON.stringify(response))
     }
   }

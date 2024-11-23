@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { ILOV, LOVJoin } from '@schemas/lov/lov'
@@ -23,11 +23,19 @@ export class MasterReceptionistCounter {
   })
   type: ILOV[]
 
+  @Prop({
+    type: AccountJoin,
+    _id: false,
+    required: false,
+    default: null,
+  })
+  assigned_receptionist: IAccount
+
   @Prop({ type: SchemaTypes.String })
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,
@@ -50,6 +58,11 @@ export class MasterReceptionistCounter {
 export const MasterReceptionistCounterSchema = SchemaFactory.createForClass(
   MasterReceptionistCounter
 )
+
+export interface IMasterReceptionistCounter {
+  id: string
+  code: string
+}
 
 export const MasterReceptionistCounterJoin = raw({
   id: { type: String, example: `item-${new Types.ObjectId().toString()}` },

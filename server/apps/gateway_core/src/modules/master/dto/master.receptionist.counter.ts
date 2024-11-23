@@ -8,6 +8,21 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator'
+import { Types } from 'mongoose'
+
+export class CMasterReceptionistCounter {
+  @ApiProperty({
+    type: String,
+    example: `receptionist_counter-${new Types.ObjectId().toString()}`,
+  })
+  id: string
+
+  @ApiProperty({
+    type: String,
+    example: 'XX-XX',
+  })
+  code: string
+}
 
 export class MasterReceptionistCounterAddDTO {
   @ApiProperty({

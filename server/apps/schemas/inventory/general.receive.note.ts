@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { IGeneralReceiveNoteDetail } from '@inventory/interface/general.receive.note.detail'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
@@ -38,7 +38,7 @@ export class GeneralReceiveNote {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.String,

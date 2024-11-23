@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterReceptionistCounterAddDTO,
   MasterReceptionistCounterEditDTO,
@@ -86,7 +86,7 @@ export class MasterReceptionistCounterController {
   })
   async add(
     @Body() parameter: MasterReceptionistCounterAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.masterReceptionistCounterService.add(parameter, account)
   }

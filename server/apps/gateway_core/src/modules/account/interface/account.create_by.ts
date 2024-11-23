@@ -1,6 +1,6 @@
 import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 
-export interface IAccountCreatedBy {
+export interface IAccount {
   id: string
   email: string
   first_name: string

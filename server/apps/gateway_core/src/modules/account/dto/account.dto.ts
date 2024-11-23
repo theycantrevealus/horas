@@ -208,14 +208,38 @@ export class CAccount {
   id: string
 
   @ApiProperty({
-    type: String,
-    example: 'XX-XX',
+    example: 'johndoe@example.com',
+    description: '',
   })
-  code: string
+  @IsNotEmpty()
+  @IsEmail()
+  email?: string
 
   @ApiProperty({
-    type: String,
-    example: 'Drugs',
+    example: 'John',
+    description: '',
   })
-  name: string
+  @MinLength(3)
+  @IsNotEmpty()
+  @IsString()
+  first_name?: string
+
+  @ApiProperty({
+    example: 'Doe',
+    required: false,
+    description: '',
+  })
+  @IsString()
+  @IsOptional()
+  last_name?: string
+
+  @ApiProperty({
+    type: CMasterStockPoint,
+    description: 'Assigned stock point',
+    isArray: true,
+  })
+  @Type(() => CMasterStockPoint)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  stock_point?: IMasterStockPoint[]
 }

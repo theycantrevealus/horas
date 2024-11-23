@@ -1,7 +1,7 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
 import { Files } from '@decorators/upload'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   StockAssignDTO,
   StockInitiateDTO,
@@ -78,7 +78,7 @@ export class StockController {
   })
   async stockInitiate(
     @Body() parameter: StockInitiateDTO,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Req() request: any
   ) {
     return await this.stockService.stockInitiate(
@@ -109,7 +109,7 @@ export class StockController {
   )
   async upload_initial_stock(
     @Body() parameter: any,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Req() request: any,
     @Files() file: StorageMultipartFile
   ) {
@@ -146,7 +146,7 @@ export class StockController {
   })
   async stockTransfer(
     @Body() parameter: StockTransferDTO,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Req() request: any
   ) {
     return await this.stockService.stockTransfer(
@@ -169,7 +169,7 @@ export class StockController {
   })
   async assignStockPoint(
     @Body() parameter: StockAssignDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.stockService.assignStockPoint(parameter, account)
   }

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMasterStockPointConfiguration } from '@gateway_core/master/interface/master.stock.point.configuration'
 import {
   MasterStockPoint,
@@ -53,7 +53,7 @@ export const mockMasterStockPoint = (
     commit: '',
   },
   remark = '',
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

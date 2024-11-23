@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
@@ -46,7 +46,7 @@ export class GeneralReceiveNoteService {
 
   async add(
     data: GeneralReceiveNoteAddDTO,
-    account: IAccountCreatedBy,
+    account: IAccount,
     token: string
   ): Promise<GlobalResponse> {
     const response = {

@@ -3,7 +3,7 @@ import {
   AccountEditDTO,
 } from '@gateway_core/account/dto/account.dto'
 import { AccountSignInDTO } from '@gateway_core/account/dto/account.signin.dto'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -341,7 +341,7 @@ export class AccountService {
 
   async accountAdd(
     data: AccountAddDTO,
-    credential: IAccountCreatedBy
+    credential: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -409,7 +409,7 @@ export class AccountService {
           .compare(parameter.password, result.password)
           .then(async (passCheck) => {
             if (passCheck) {
-              const accountSet: IAccountCreatedBy = {
+              const accountSet: IAccount = {
                 id: result.id,
                 email: result.email,
                 first_name: result.first_name,

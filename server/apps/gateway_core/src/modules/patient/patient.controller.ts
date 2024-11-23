@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { PatientAddDTO } from '@gateway_core/patient/dto/patient.add'
 import { PatientEditDTO } from '@gateway_core/patient/dto/patient.edit'
 import { PatientService } from '@gateway_core/patient/patient.service'
@@ -111,7 +111,7 @@ export class PatientController {
   })
   async add(
     @Body() parameter: PatientAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.patientService.add(parameter, account)
   }

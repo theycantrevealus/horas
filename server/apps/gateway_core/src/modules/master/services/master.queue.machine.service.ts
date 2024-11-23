@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterQueueMachineAddDTO,
   MasterQueueMachineEditDTO,
@@ -94,7 +94,7 @@ export class MasterQueueMachineService {
 
   async add(
     data: MasterQueueMachineAddDTO,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

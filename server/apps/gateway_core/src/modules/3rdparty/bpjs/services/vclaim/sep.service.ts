@@ -5,7 +5,7 @@ import { SEPPengajuan } from '@gateway_core/3rdparty/bpjs/dto/sep/pengajuan'
 import { SEP, SEPDocument } from '@gateway_core/3rdparty/bpjs/schemas/sep'
 import { BPJSVClaimAuthService } from '@gateway_core/3rdparty/bpjs/services/vclaim/auth.service'
 import { BPJSVClaimRequest } from '@gateway_core/3rdparty/bpjs/services/vclaim/request.service'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { HttpService } from '@nestjs/axios'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
@@ -58,10 +58,7 @@ export class BPJSVClaimSEPService {
     return response
   }
 
-  async create(
-    parameter: SEPAdd,
-    account: IAccountCreatedBy
-  ): Promise<GlobalResponse> {
+  async create(parameter: SEPAdd, account: IAccount): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,
@@ -222,7 +219,7 @@ export class BPJSVClaimSEPService {
 
   async updatePulang(
     parameter: SEPPulang,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

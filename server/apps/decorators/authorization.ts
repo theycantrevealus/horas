@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   createParamDecorator,
   ExecutionContext,
@@ -9,9 +9,9 @@ export const Authorization = (secured: boolean) =>
   SetMetadata('secured', secured)
 
 export const CredentialAccount = createParamDecorator(
-  (data: string, ctx: ExecutionContext): IAccountCreatedBy => {
+  (data: string, ctx: ExecutionContext): IAccount => {
     const request = ctx.switchToHttp().getRequest()
-    const account = <IAccountCreatedBy>request.credential
+    const account = <IAccount>request.credential
     return account
   }
 )

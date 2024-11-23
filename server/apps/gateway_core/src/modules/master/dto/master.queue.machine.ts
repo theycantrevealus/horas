@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { CLOV, ILOV } from '@schemas/lov/lov'
 import {
+  IsArray,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -11,7 +13,7 @@ import { Types } from 'mongoose'
 export class CMasterQueueMachine {
   @ApiProperty({
     type: String,
-    example: `queue-${new Types.ObjectId().toString()}`,
+    example: `queue_machine-${new Types.ObjectId().toString()}`,
   })
   id: string
 
@@ -35,6 +37,16 @@ export class MasterQueueMachineAddDTO {
   code: string
 
   @ApiProperty({
+    type: CLOV,
+    isArray: true,
+    description: 'Data type',
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  type: ILOV[]
+
+  @ApiProperty({
     example: 'Extra remark',
     description: '',
     required: false,
@@ -55,6 +67,16 @@ export class MasterQueueMachineEditDTO {
   @MaxLength(3)
   @IsNotEmpty()
   code: string
+
+  @ApiProperty({
+    type: CLOV,
+    isArray: true,
+    description: 'Data type',
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  type: ILOV[]
 
   @ApiProperty({
     example: 'Extra remark',

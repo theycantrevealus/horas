@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockAccount } from '@gateway_core/account/mock/account.mock'
 import {
   MasterReceptionistCounter,
@@ -12,8 +12,9 @@ export const mockMasterReceptionistCounter = (
   id = `receptionist_counter-${new Types.ObjectId().toString()}`,
   code = 'MSTRRC-0001',
   type = [],
+  assigned_receptionist = null,
   remark = '',
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),
@@ -26,6 +27,7 @@ export const mockMasterReceptionistCounter = (
   id,
   code,
   type,
+  assigned_receptionist,
   remark,
   created_by,
   created_at,
@@ -72,6 +74,7 @@ export const masterReceptionistCounterArray = [
     `receptionist_counter-${new Types.ObjectId().toString()}`,
     'MSTRRC-0001',
     [],
+    null,
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -82,6 +85,7 @@ export const masterReceptionistCounterArray = [
     `receptionist_counter-${new Types.ObjectId().toString()}`,
     'MSTRRC-0002',
     [],
+    null,
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),

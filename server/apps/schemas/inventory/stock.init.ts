@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMasterItem } from '@gateway_core/master/interface/master.item'
 import { IMasterItemBatch } from '@gateway_core/master/interface/master.item.batch'
 import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
@@ -48,7 +48,7 @@ export class InventoryStockInit {
   item: IInventoryStockInitDetail
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.String,

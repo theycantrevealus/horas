@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Type } from '@nestjs/common'
 import { ModuleMetadata } from '@nestjs/common/interfaces'
 import { Logger, LoggerOptions } from 'winston'
@@ -35,6 +35,6 @@ export interface HorasLogging {
   payload: any
   result: any
   takeTime: number
-  account: IAccountCreatedBy
+  account: IAccount
   time: Date
 }

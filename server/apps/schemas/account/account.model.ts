@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
@@ -76,7 +76,7 @@ export class Account {
   permission: IMenuPermission[]
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   // @Prop({ type: [DocumentHistoryJoin], _id: false, required: false })
   // history: IDocumentHistory[]

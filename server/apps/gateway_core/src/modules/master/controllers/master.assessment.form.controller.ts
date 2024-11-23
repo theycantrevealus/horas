@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterAssessmentFormAddDTO,
   MasterAssessmentFormEditDTO,
@@ -89,7 +89,7 @@ export class MasterAssessmentFormController {
   })
   async add(
     @Body() parameter: MasterAssessmentFormAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ): Promise<GlobalResponse> {
     return await this.masterAssessmentFormService.add(parameter, account)
   }

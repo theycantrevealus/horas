@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { LicenseAddDTO } from '@gateway_core/license/dto/license'
 import { License, LicenseDocument } from '@gateway_core/license/schemas/license'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
@@ -23,7 +23,7 @@ export class LicenseService {
 
   async add(
     parameter: LicenseAddDTO,
-    credential: IAccountCreatedBy
+    credential: IAccount
   ): Promise<GlobalResponse> {
     const generateDir = path.resolve(`${process.cwd()}/certificates`)
     const response = {

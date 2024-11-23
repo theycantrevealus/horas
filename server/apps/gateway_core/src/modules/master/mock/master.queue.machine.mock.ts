@@ -1,44 +1,16 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { MasterItemBrandDocument } from '@schemas/master/master.item.brand'
 import { MasterQueueMachine } from '@schemas/master/master.queue.machine'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
-
-// export const mockMasterQueueService = {
-//   all: jest.fn().mockResolvedValue((dto: any) => dto),
-//   add: jest.fn().mockImplementation((dto: MasterQueueAddDTO) => {
-//     return Promise.resolve({
-//       payload: {
-//         ...dto,
-//         id: `queue-${new Types.ObjectId().toString()}`,
-//       },
-//     })
-//   }),
-//   edit: jest.fn().mockImplementation((dto: MasterQueueEditDTO, id: string) => {
-//     return Promise.resolve({
-//       payload: {
-//         id: id,
-//         ...dto,
-//       },
-//     })
-//   }),
-//   detail: jest.fn().mockResolvedValue((dto: dto) => dto),
-//   delete: jest.fn().mockImplementation((id: string) => {
-//     return Promise.resolve({
-//       payload: {
-//         id: id,
-//       },
-//     })
-//   }),
-// }
 
 export const mockMasterQueue = (
   id = `queue-${new Types.ObjectId().toString()}`,
   code = 'QUE',
   type = [],
   remark = '',
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `queue-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

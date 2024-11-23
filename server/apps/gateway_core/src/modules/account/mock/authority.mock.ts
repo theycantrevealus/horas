@@ -3,7 +3,7 @@ import {
   AuthorityAddDTO,
   AuthorityEditDTO,
 } from '@gateway_core/account/dto/authority.dto'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockAccount } from '@gateway_core/account/mock/account.mock'
 import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
 import { TimeManagement } from '@utility/time'
@@ -43,7 +43,7 @@ export const mockAuthority = (
   code = 'AUT',
   name = 'Authority Example',
   remark = 'Remark',
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

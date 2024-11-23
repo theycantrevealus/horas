@@ -1,7 +1,7 @@
 // import { FileInterceptor } from '@nestjs/platform-express'
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemAddDTO,
   MasterItemEditDTO,
@@ -84,7 +84,7 @@ export class MasterItemController {
   })
   async add(
     @Body() parameter: MasterItemAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.masterItemService.add(parameter, account)
   }

@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMasterItemBrand } from '@gateway_core/master/interface/master.item.brand'
 import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
 import { IMasterItemConfiguration } from '@gateway_core/master/interface/master.item.configuration'
@@ -93,7 +93,7 @@ export class MasterItem {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

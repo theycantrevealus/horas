@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterStockPointAddDTO,
   MasterStockPointEditDTO,
@@ -87,7 +87,7 @@ export class MasterStockPointController {
   })
   async add(
     @Body() parameter: MasterStockPointAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ): Promise<GlobalResponse> {
     return await this.masterStockPointService.add(parameter, account)
   }
