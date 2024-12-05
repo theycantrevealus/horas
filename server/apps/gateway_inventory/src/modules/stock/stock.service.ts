@@ -1,6 +1,5 @@
 import { AccountService } from '@gateway_core/account/account.service'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import {
   StockAssignDTO,
@@ -19,6 +18,7 @@ import {
   InventoryStockInit,
   InventoryStockInitDocument,
 } from '@schemas/inventory/stock.init'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { GlobalResponse } from '@utility/dto/response'
 import { KafkaService } from '@utility/kafka/avro/service'
 import { modCodes } from '@utility/modules'

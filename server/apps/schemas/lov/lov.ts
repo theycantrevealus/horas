@@ -1,8 +1,6 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { ApiProperty } from '@nestjs/swagger'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { IsNotEmpty, IsString } from 'class-validator'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type LOVDocument = HydratedDocument<LOV>
@@ -53,41 +51,3 @@ export class LOV {
 }
 
 export const LOVSchema = SchemaFactory.createForClass(LOV)
-
-export const LOVJoin = raw({
-  id: { type: String },
-  name: { type: String },
-  value: { type: String },
-})
-
-export interface ILOV {
-  id: string
-  name: string
-  value: string
-}
-
-export class CLOV {
-  @ApiProperty({
-    type: String,
-    description: '',
-  })
-  @IsNotEmpty()
-  @IsString()
-  id: string
-
-  @ApiProperty({
-    type: String,
-    description: '',
-  })
-  @IsNotEmpty()
-  @IsString()
-  name: string
-
-  @ApiProperty({
-    type: String,
-    description: '',
-  })
-  @IsNotEmpty()
-  @IsString()
-  value: string
-}

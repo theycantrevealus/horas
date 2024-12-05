@@ -1,25 +1,11 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import {
-  IMasterTreatment,
-  MasterTreatmentJoin,
-} from '@schemas/master/master.treatment'
+import { IDepartmentConfiguration } from '@schemas/master/master.department.interface'
+import { DepartmentConfigurationJoin } from '@schemas/master/master.department.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterDepartmentDocument = HydratedDocument<MasterDepartment>
-
-export const DepartmentConfigurationJoin = raw({
-  default_consultation_treatment: { type: MasterTreatmentJoin, _id: false },
-  treatment: { type: [MasterTreatmentJoin], _id: false },
-  doctor: { type: [AccountJoin], _id: false },
-})
-
-export interface IDepartmentConfiguration {
-  default_consultation_treatment: IMasterTreatment
-  treatment: IMasterDepartment[]
-  doctor: IAccount[]
-}
 
 @Schema({ collection: 'master_department' })
 export class MasterDepartment {
@@ -57,18 +43,6 @@ export class MasterDepartment {
 
   @Prop({ type: SchemaTypes.Mixed, default: null })
   deleted_at: Date | null
-}
-
-export const MasterDepartmentJoin = raw({
-  id: { type: String },
-  code: { type: String },
-  name: { type: String },
-})
-
-export interface IMasterDepartment {
-  id: string
-  code: string
-  name: string
 }
 
 export const MasterDepartmentSchema =

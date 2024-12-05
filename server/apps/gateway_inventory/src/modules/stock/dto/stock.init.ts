@@ -1,7 +1,7 @@
 import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { GeneralItemDetailDTO } from '@gateway_inventory/stock/dto/stock'
 import { ApiProperty } from '@nestjs/swagger'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { Type } from 'class-transformer'
 import { IsArray, IsNotEmpty, ValidateNested } from 'class-validator'
 

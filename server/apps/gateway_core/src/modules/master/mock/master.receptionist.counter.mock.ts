@@ -11,8 +11,9 @@ import { Types } from 'mongoose'
 export const mockMasterReceptionistCounter = (
   id = `receptionist_counter-${new Types.ObjectId().toString()}`,
   code = 'MSTRRC-0001',
-  type = [],
+  queue_type = [],
   assigned_receptionist = null,
+  current_queue = null,
   remark = '',
   created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -26,8 +27,9 @@ export const mockMasterReceptionistCounter = (
 ): MasterReceptionistCounter => ({
   id,
   code,
-  type,
+  queue_type,
   assigned_receptionist,
+  current_queue,
   remark,
   created_by,
   created_at,
@@ -53,7 +55,7 @@ export const mockMasterReceptionistCounterDoc = (
   mock?: Partial<MasterReceptionistCounter>
 ): Partial<MasterReceptionistCounterDocument> => ({
   code: mock?.code || `MSTRRC-${new Types.ObjectId().toString()}`,
-  type: [],
+  queue_type: [],
   remark: mock?.remark || '',
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
@@ -75,6 +77,7 @@ export const masterReceptionistCounterArray = [
     'MSTRRC-0001',
     [],
     null,
+    null,
     '',
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -85,6 +88,7 @@ export const masterReceptionistCounterArray = [
     `receptionist_counter-${new Types.ObjectId().toString()}`,
     'MSTRRC-0002',
     [],
+    null,
     null,
     '',
     mockAccount(),
@@ -97,12 +101,12 @@ export const masterReceptionistCounterDocArray = [
   mockMasterReceptionistCounterDoc(),
   mockMasterReceptionistCounterDoc({
     code: 'XX-002',
-    type: [],
+    queue_type: [],
     remark: '',
   }),
   mockMasterReceptionistCounterDoc({
     code: 'XX-001',
-    type: [],
+    queue_type: [],
     remark: '',
   }),
 ]

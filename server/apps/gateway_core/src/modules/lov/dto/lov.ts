@@ -72,3 +72,29 @@ export class LOVEditDTO {
   @IsNumber()
   __v: number
 }
+
+export class CLOV {
+  @ApiProperty({
+    type: String,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsString()
+  id: string
+
+  @ApiProperty({
+    type: String,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsString()
+  name: string
+
+  @ApiProperty({
+    type: String,
+    description: '',
+  })
+  @IsNotEmpty()
+  @IsString()
+  value: string
+}

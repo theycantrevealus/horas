@@ -1,13 +1,7 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
-
-export const MasterItemUnitJoin = raw({
-  id: { type: String },
-  code: { type: String },
-  name: { type: String },
-})
 
 export type MasterItemUnitDocument = HydratedDocument<MasterItemUnit>
 

@@ -1,5 +1,5 @@
-import { IMasterStockPointConfiguration } from '@gateway_core/master/interface/master.stock.point.configuration'
 import { ApiProperty } from '@nestjs/swagger'
+import { IMasterStockPointConfiguration } from '@schemas/master/master.stock.point.configuration.interface'
 import {
   IsBoolean,
   IsNotEmpty,

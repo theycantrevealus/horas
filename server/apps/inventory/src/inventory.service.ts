@@ -1,7 +1,3 @@
-import { IMasterItem } from '@gateway_core/master/interface/master.item'
-import { IMasterItemBatch } from '@gateway_core/master/interface/master.item.batch'
-import { IMasterItemStoring } from '@gateway_core/master/interface/master.item.storing'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { StockDTO } from '@inventory/dto/stock'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
@@ -19,6 +15,10 @@ import {
   MasterItemBatch,
   MasterItemBatchDocument,
 } from '@schemas/master/master.item.batch'
+import { IMasterItemBatch } from '@schemas/master/master.item.batch.interface'
+import { IMasterItem } from '@schemas/master/master.item.interface'
+import { IMasterItemStoring } from '@schemas/master/master.item.storing.interface'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { Model } from 'mongoose'

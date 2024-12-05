@@ -1,10 +1,10 @@
 import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { CMenu, CMenuPermission } from '@gateway_core/menu/dto/menu'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import { CAuthority, IAuthority } from '@schemas/account/authority.model'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { Type } from 'class-transformer'
 import {
   IsArray,

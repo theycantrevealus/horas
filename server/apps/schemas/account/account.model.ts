@@ -1,11 +1,11 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { AuthorityJoin, IAuthority } from '@schemas/account/authority.model'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { MenuJoin, MenuPermissionJoin } from '@schemas/menu/menu'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 

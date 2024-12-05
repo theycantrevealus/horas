@@ -1,34 +1,27 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { IMasterItemBrand } from '@gateway_core/master/interface/master.item.brand'
-import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
-import { IMasterItemConfiguration } from '@gateway_core/master/interface/master.item.configuration'
-import { IMasterItemStoring } from '@gateway_core/master/interface/master.item.storing'
-import { IMasterItemUnit } from '@gateway_core/master/interface/master.item.unit'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { ILOV, LOVJoin } from '@schemas/lov/lov'
-import { MasterItemBrandJoin } from '@schemas/master/master.item.brand'
-import { MasterItemCategoryJoin } from '@schemas/master/master.item.category'
+import { ILOV } from '@schemas/lov/lov.interface'
+import { LOVJoin } from '@schemas/lov/lov.join'
+import { IMasterItemBrand } from '@schemas/master/master.item.brand.interface'
+import { MasterItemBrandJoin } from '@schemas/master/master.item.brand.join'
+import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
+import { MasterItemCategoryJoin } from '@schemas/master/master.item.category.join'
 import { MasterItemConfiguration } from '@schemas/master/master.item.configuration'
+import { IMasterItemConfiguration } from '@schemas/master/master.item.configuration.interface'
 import { MasterItemStoring } from '@schemas/master/master.item.storing'
+import { IMasterItemStoring } from '@schemas/master/master.item.storing.interface'
 import {
   MasterItemStructureCoordinatorSchema,
   registerMasterItemStructureSchemaDiscriminator,
 } from '@schemas/master/master.item.structure.coordinator'
-import { MasterItemUnitJoin } from '@schemas/master/master.item.unit'
+import { IMasterItemUnit } from '@schemas/master/master.item.unit.interface'
+import { MasterItemUnitJoin } from '@schemas/master/master.item.unit.join'
 import {
   HydratedDocument,
   Schema as MongooseSchema,
   SchemaTypes,
-  Types,
 } from 'mongoose'
-
-export const MasterItemJoin = raw({
-  id: { type: String, example: `item-${new Types.ObjectId().toString()}` },
-  code: { type: String, example: 'ABC00123' },
-  name: { type: String, example: 'Any Item' },
-  brand: { type: MasterItemBrandJoin, _id: false },
-})
 
 export type MasterItemDocument = HydratedDocument<MasterItem>
 

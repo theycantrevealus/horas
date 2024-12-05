@@ -1,7 +1,8 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { ILOV, LOVJoin } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
+import { LOVJoin } from '@schemas/lov/lov.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const MasterQueueMachineJoin = raw({

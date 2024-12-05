@@ -3,7 +3,6 @@ import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
 } from '@gateway_core/master/dto/master.item.unit'
-import { IMasterItemUnit } from '@gateway_core/master/interface/master.item.unit'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
@@ -12,6 +11,7 @@ import {
   MasterItemUnit,
   MasterItemUnitDocument,
 } from '@schemas/master/master.item.unit'
+import { IMasterItemUnit } from '@schemas/master/master.item.unit.interface'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'

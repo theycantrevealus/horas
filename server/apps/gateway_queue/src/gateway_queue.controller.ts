@@ -8,13 +8,20 @@ import {
   Controller,
   Get,
   Inject,
+  Param,
   Post,
   Req,
   UseGuards,
   UseInterceptors,
   Version,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger'
 import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { ApiQueryGeneral } from '@utility/dto/prime'
@@ -22,7 +29,11 @@ import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import { Socket } from 'socket.io-client'
 
-import { QueueMachineAddQueueDTO } from './dto/queue.machine.dto'
+import {
+  CallQueueDTO,
+  QueueMachineAddQueueDTO,
+  ReceptionistCounterAssignDTO,
+} from './dto/queue.machine.dto'
 import { GatewayQueueService } from './gateway_queue.service'
 
 @Controller('queue')
@@ -53,7 +64,40 @@ export class GatewayQueueController {
     return await this.gatewayQueueService.queueMachineAvail(account)
   }
 
-  @Post()
+  @Post('assign')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'Queue', action: 'assign' })
+  @ApiOperation({
+    summary: 'Assign receptionist to counter',
+    description: ``,
+  })
+  async assignReceptionist(
+    @Body() data: ReceptionistCounterAssignDTO,
+    @CredentialAccount() account: IAccount
+  ): Promise<GlobalResponse> {
+    return await this.gatewayQueueService.assignReceptionist('', data, account)
+  }
+
+  @Post('call')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'Queue', action: 'call' })
+  @ApiOperation({
+    summary: 'Call queue',
+    description: ``,
+  })
+  async callQueue(@Body() data: CallQueueDTO): Promise<GlobalResponse> {
+    return await this.gatewayQueueService.callQueue(data)
+  }
+
+  @Post('add')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LoggingInterceptor)
@@ -65,7 +109,7 @@ export class GatewayQueueController {
     description: ``,
   })
   async add(
-    @Req() request,
+    @Req() request: any,
     @CredentialAccount() account: IAccount,
     @Body() parameter: QueueMachineAddQueueDTO
   ): Promise<GlobalResponse> {
@@ -99,5 +143,47 @@ export class GatewayQueueController {
 
         return response
       })
+  }
+
+  @Get('next')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'Queue', action: 'next' })
+  @ApiOperation({
+    summary: 'Get next queue',
+    description: ``,
+  })
+  @ApiParam({
+    name: 'queue_machine',
+  })
+  async nextQueue(@Param() param: any): Promise<GlobalResponse> {
+    return await this.gatewayQueueService.otherQueue(
+      param.queue_machine,
+      'next'
+    )
+  }
+
+  @Get('previous')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggingInterceptor)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'Queue', action: 'previous' })
+  @ApiOperation({
+    summary: 'Get previous queue',
+    description: ``,
+  })
+  @ApiParam({
+    name: 'queue_machine',
+  })
+  async previouseQueue(@Param() param: any): Promise<GlobalResponse> {
+    return await this.gatewayQueueService.otherQueue(
+      param.queue_machine,
+      'previous'
+    )
   }
 }

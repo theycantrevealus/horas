@@ -1,15 +1,16 @@
+import { CLOV } from '@gateway_core/lov/dto/lov'
 import { CMasterItemBrand } from '@gateway_core/master/dto/master.item.brand'
 import { CMasterItemCategory } from '@gateway_core/master/dto/master.item.category'
 import { CMasterItemConfiguration } from '@gateway_core/master/dto/master.item.configuration'
 import { CMasterItemStoring } from '@gateway_core/master/dto/master.item.storing'
 import { CMasterItemUnit } from '@gateway_core/master/dto/master.item.unit'
-import { IMasterItemBrand } from '@gateway_core/master/interface/master.item.brand'
-import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
-import { IMasterItemConfiguration } from '@gateway_core/master/interface/master.item.configuration'
-import { IMasterItemStoring } from '@gateway_core/master/interface/master.item.storing'
-import { IMasterItemUnit } from '@gateway_core/master/interface/master.item.unit'
 import { ApiProperty } from '@nestjs/swagger'
-import { CLOV, ILOV } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
+import { IMasterItemBrand } from '@schemas/master/master.item.brand.interface'
+import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
+import { IMasterItemConfiguration } from '@schemas/master/master.item.configuration.interface'
+import { IMasterItemStoring } from '@schemas/master/master.item.storing.interface'
+import { IMasterItemUnit } from '@schemas/master/master.item.unit.interface'
 import {
   IsNotEmpty,
   IsNumber,

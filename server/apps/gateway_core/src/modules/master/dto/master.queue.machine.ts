@@ -1,5 +1,6 @@
+import { CLOV } from '@gateway_core/lov/dto/lov'
 import { ApiProperty } from '@nestjs/swagger'
-import { CLOV, ILOV } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
 import {
   IsArray,
   IsNotEmpty,

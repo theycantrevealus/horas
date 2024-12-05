@@ -1,17 +1,11 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CMasterItem } from '@gateway_core/master/dto/master.item'
-import { IMasterItem } from '@gateway_core/master/interface/master.item'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { MasterItemJoin } from '@schemas/master/master.item'
+import { IMasterItem } from '@schemas/master/master.item.interface'
+import { MasterItemJoin } from '@schemas/master/master.item.join'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
-
-export const MasterItemBatchJoin = raw({
-  id: { type: String },
-  code: { type: String },
-  expired: { type: Date },
-})
 
 export class CMasterItemBatch {
   @ApiProperty({

@@ -2,10 +2,8 @@ import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IPatient } from '@gateway_core/patient/interface/patient.interface'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import {
-  IMasterDepartment,
-  MasterDepartmentJoin,
-} from '@schemas/master/master.department'
+import { IMasterDepartment } from '@schemas/master/master.department.interface'
+import { MasterDepartmentJoin } from '@schemas/master/master.department.join'
 import { IMetaData, MetaData } from '@schemas/meta'
 import { PatientJoin } from '@schemas/patient/patient'
 import { HydratedDocument, SchemaTypes } from 'mongoose'

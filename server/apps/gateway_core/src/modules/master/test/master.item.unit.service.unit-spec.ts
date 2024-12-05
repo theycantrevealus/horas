@@ -5,7 +5,6 @@ import {
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
 import { mockAuthority } from '@gateway_core/account/mock/authority.mock'
-import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
 import { mockMasterItemCategory } from '@gateway_core/master/mock/master.item.category.mock'
 import {
   masterItemUnitDocArray,
@@ -22,6 +21,7 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority } from '@schemas/account/authority.model'
+import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
 import {
   MasterItemUnit,
   MasterItemUnitDocument,

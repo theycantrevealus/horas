@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { IMasterStockPointConfiguration } from '@gateway_core/master/interface/master.stock.point.configuration'
 import {
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@schemas/master/master.stock.point'
+import { IMasterStockPointConfiguration } from '@schemas/master/master.stock.point.configuration.interface'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

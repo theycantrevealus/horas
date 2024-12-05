@@ -1,13 +1,13 @@
 import { LOVService } from '@gateway_core/lov/lov.service'
 import { MasterItemAddDTO } from '@gateway_core/master/dto/master.item'
-import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
-import { IMasterItemUnit } from '@gateway_core/master/interface/master.item.unit'
 import { MasterItemCategoryService } from '@gateway_core/master/services/master.item.category.service'
 import { MasterItemService } from '@gateway_core/master/services/master.item.service'
 import { MasterItemUnitService } from '@gateway_core/master/services/master.item.unit.service'
 import { Inject, Injectable } from '@nestjs/common'
 import { Account } from '@schemas/account/account.model'
-import { ILOV } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
+import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
+import { IMasterItemUnit } from '@schemas/master/master.item.unit.interface'
 import * as fs from 'fs'
 
 @Injectable()
@@ -77,25 +77,25 @@ export class ImportService {
               account
             )
 
-            bulkData.push({
-              code: code,
-              name: name,
-              alias: alias,
-              unit: targetUnit,
-              category: [targetCategory],
-              configuration: {
-                allow_sell: true,
-              },
-              brand: null,
-              storing: [],
-              remark: '',
-              properties: [
-                {
-                  ...targetLOV,
-                  value: route,
-                },
-              ],
-            })
+            // bulkData.push({
+            //   code: code,
+            //   name: name,
+            //   alias: alias,
+            //   unit: targetUnit,
+            //   category: [targetCategory],
+            //   configuration: {
+            //     allow_sell: true,
+            //   },
+            //   brand: null,
+            //   storing: [],
+            //   remark: '',
+            //   properties: [
+            //     {
+            //       ...targetLOV,
+            //       value: route,
+            //     },
+            //   ],
+            // })
 
             countProceed++
           }

@@ -1,4 +1,4 @@
-import { IMasterItemBrand } from '@gateway_core/master/interface/master.item.brand'
+import { IMasterItemBrand } from '@schemas/master/master.item.brand.interface'
 
 export interface IMasterItem {
   id: string

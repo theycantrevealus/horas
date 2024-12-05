@@ -1,7 +1,10 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { ILOV, LOVJoin } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
+import { LOVJoin } from '@schemas/lov/lov.join'
+import { IQueue } from '@schemas/management/queue.interface'
+import { QueueJoin } from '@schemas/management/queue.join'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export type MasterReceptionistCounterDocument =
@@ -21,7 +24,7 @@ export class MasterReceptionistCounter {
     type: [LOVJoin],
     _id: false,
   })
-  type: ILOV[]
+  queue_type: ILOV[]
 
   @Prop({
     type: AccountJoin,
@@ -30,6 +33,15 @@ export class MasterReceptionistCounter {
     default: null,
   })
   assigned_receptionist: IAccount
+
+  @Prop({
+    unique: false,
+    required: false,
+    type: QueueJoin,
+    _id: false,
+    // default: null,
+  })
+  current_queue: IQueue
 
   @Prop({ type: SchemaTypes.String })
   remark: string

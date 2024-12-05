@@ -1,4 +1,4 @@
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 
 export interface IAccount {
   id: string

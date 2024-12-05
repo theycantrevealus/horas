@@ -1,4 +1,3 @@
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { MasterItemService } from '@gateway_core/master/services/master.item.service'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import { StockService } from '@gateway_inventory/stock/stock.service'
@@ -16,7 +15,8 @@ import {
   MasterItemBatch,
   MasterItemBatchDocument,
 } from '@schemas/master/master.item.batch'
-import { Job } from 'bull'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
+import { Job } from 'bullmq'
 import * as fs from 'fs'
 import { Model } from 'mongoose'
 import * as readline from 'readline'
@@ -55,7 +55,7 @@ export class StockProcessor {
 
   @OnQueueCompleted()
   onCompleted(job: Job, result: any) {
-    job.progress(100)
+    // job.progress(100)
     job.log(`Job finished with result: ${result}`)
   }
 

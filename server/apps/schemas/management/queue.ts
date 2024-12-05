@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { ILOV, LOVJoin } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
+import { LOVJoin } from '@schemas/lov/lov.join'
 import {
   IMasterQueueMachine,
   MasterQueueMachineJoin,
@@ -25,7 +26,7 @@ export class Queue {
     type: LOVJoin,
     _id: false,
   })
-  type: ILOV
+  queue_type: ILOV
 
   @Prop({ type: SchemaTypes.Number, required: true, unique: false })
   queue_number: number
@@ -45,9 +46,10 @@ export class Queue {
   queue_machine: IMasterQueueMachine
 
   @Prop({
+    required: false,
     type: MasterReceptionistCounterJoin,
     _id: false,
-    required: false,
+    // default: null,
   })
   receptionist_counter: IMasterReceptionistCounter
 

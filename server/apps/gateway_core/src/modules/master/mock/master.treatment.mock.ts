@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { ILOV } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
 import { IMasterPartner } from '@schemas/master/master.partner'
 import {
-  IMasterTreatmentPriceRate,
   MasterTreatment,
   MasterTreatmentDocument,
 } from '@schemas/master/master.treatment'
+import { IMasterTreatmentPriceRate } from '@schemas/master/master.treatment.interface'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
