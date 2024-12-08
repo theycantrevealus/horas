@@ -104,6 +104,20 @@
       "id": "nU1PYR1"
     }
   ],
+  "item_brand": [
+    {
+      "id": "item_brand-6428638f90f59e64ae266bea",
+      "code": "BRD00001",
+      "name": "SANMOL",
+      "created_at": "2023-04-09T18:57:39.000Z"
+    },
+    {
+      "code": "BRD00231",
+      "name": "DUMIN RECTAL",
+      "remark": "<p>DUMIN</p>",
+      "id": "wVxmkja"
+    }
+  ],
   "i18n": [
     {
       "created_by": {
