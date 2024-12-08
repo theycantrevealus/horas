@@ -1,6 +1,7 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { i18nAddDTO, i18nEditDTO } from '@gateway_core/i18n/dto/i18n'
-import { i18nService } from '@gateway_core/i18n/i18n.service'
+import { I18nService } from '@gateway_core/i18n/i18n.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -29,10 +30,10 @@ import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('i18n')
 @ApiTags('i18n Management')
-export class i18nController {
+export class I18nController {
   constructor(
-    @Inject(i18nService)
-    private readonly i18nService: i18nService
+    @Inject(I18nService)
+    private readonly i18nService: I18nService
   ) {}
 
   @Get()
@@ -40,6 +41,7 @@ export class i18nController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'i18n', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all data',
     description: 'Showing data',
@@ -54,6 +56,7 @@ export class i18nController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'i18n', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all data without filter',
     description: 'Showing data',
@@ -68,6 +71,7 @@ export class i18nController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'i18n', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -82,6 +86,7 @@ export class i18nController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'i18n', action: 'add' })
   @ApiOperation({
     summary: 'Add new data',
     description: ``,
@@ -99,6 +104,7 @@ export class i18nController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'i18n', action: 'edit' })
   @ApiOperation({
     summary: 'Edit data',
     description: ``,
@@ -116,6 +122,7 @@ export class i18nController {
   @Authorization(true)
   @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'i18n', action: 'delete' })
   @ApiOperation({
     summary: 'Delete data',
     description: ``,

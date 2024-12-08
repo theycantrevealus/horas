@@ -1,25 +1,385 @@
 {
-  "tasks": [
+  "tasks": [],
+  "item": [
     {
-      "id": "1",
-      "title": "Sample task",
-      "description": "Task description",
-      "status": "in-progress",
-      "userId": 2
+      "_id": "6432a7da9b8f79e8e41131a3",
+      "id": "item-6432a7da9b8f79e8e41131a3",
+      "code": "51532-4616",
+      "name": "CUT CLEANER",
+      "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
+      "configuration": {
+        "allow_grn": false,
+        "allow_incoming": false,
+        "allow_outgoing": false,
+        "allow_destruction": false
+      },
+      "category": [
+        {
+          "id": "item_category-6428638f90f59e64ae266bea",
+          "code": "CAT00001",
+          "name": "Drugs"
+        }
+      ],
+      "unit": {
+        "id": "item_unit-64327bd1b2e0e3c2ab090494",
+        "code": "MSRI-UNT-1681030097526",
+        "name": "SWAB"
+      },
+      "brand": null,
+      "properties": [
+        {
+          "id": "lov-643280763e921da3ad410128",
+          "name": "Route",
+          "value": "TOPICAL"
+        }
+      ],
+      "storing": [],
+      "remark": "",
+      "created_at": "2023-04-09T18:56:10.000Z",
+      "updated_at": "2023-04-09T18:56:10.000Z",
+      "deleted_at": null,
+      "__v": 0,
+      "timezone": "Asia/Jakarta",
+      "autonum": 1
     },
     {
-      "id": "2",
-      "title": "Sample other task 2",
-      "description": "Other description",
-      "status": "done",
-      "userId": 1
+      "_id": "6432a8339b8f79e8e414b00c",
+      "id": "item-6432a8339b8f79e8e414b00c",
+      "code": "81238-4616",
+      "name": "CUT CLEANER",
+      "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
+      "configuration": {
+        "allow_grn": false,
+        "allow_incoming": false,
+        "allow_outgoing": false,
+        "allow_destruction": false
+      },
+      "category": [
+        {
+          "id": "item_category-6428638f90f59e64ae266bea",
+          "code": "CAT00001",
+          "name": "Drugs"
+        }
+      ],
+      "unit": {
+        "id": "item_unit-64327bd0b2e0e3c2ab08f64e",
+        "code": "MSRI-UNT-1681030096338",
+        "name": "CLOTH"
+      },
+      "brand": null,
+      "properties": [
+        {
+          "id": "lov-643280763e921da3ad410128",
+          "name": "Route",
+          "value": "TOPICAL"
+        }
+      ],
+      "storing": [],
+      "remark": "",
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null,
+      "__v": 0,
+      "timezone": "Asia/Jakarta",
+      "autonum": 2
+    }
+  ],
+  "item_category": [
+    {
+      "id": "item_category-6428638f90f59e64ae266bea",
+      "code": "CAT00001",
+      "name": "Drugs",
+      "created_at": "2023-04-09T18:57:39.000Z"
     },
     {
-      "id": 5,
-      "title": "Test Post",
-      "description": "Test post description",
-      "userId": "2",
-      "status": "start"
+      "code": "TEST0011",
+      "name": "New Category Test Edit Data",
+      "remark": "<p>Testing Caption EDit</p>",
+      "id": "W9XjU0k"
+    },
+    {
+      "code": "TEst003",
+      "name": "Another data Test?",
+      "remark": "<p>Hello there</p>",
+      "id": "nU1PYR1"
+    }
+  ],
+  "i18n": [
+    {
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "_id": "643ab3443e59e302f7a39234",
+      "language_code": "EN",
+      "iso_2_digits": "US",
+      "iso_3_digits": "USA",
+      "name": "United States",
+      "datetime_weekday": "long",
+      "datetime_era": "long",
+      "datetime_year": "numeric",
+      "datetime_month": "long",
+      "datetime_day": "numeric",
+      "datetime_hour": "numeric",
+      "datetime_minute": "numeric",
+      "datetime_second": "numeric",
+      "datetime_timezone_name": "long",
+      "remark": "Extra remark",
+      "components": [
+        {
+          "component": "menu.datatable.button.sort_down",
+          "translation": "Down"
+        },
+        {
+          "component": "menu.datatable.column.label.caption",
+          "translation": "Label",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.label.placeholder",
+          "translation": "Search by label",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "label.header1",
+          "translation": "Hello There 2"
+        },
+        {
+          "component": "label.header2",
+          "translation": "Hello Second Label"
+        },
+        {
+          "component": "label.header3",
+          "translation": "Hello Third Label"
+        },
+        {
+          "component": "i18n.datatable.column.action",
+          "translation": "Action"
+        },
+        {
+          "component": "global.datatable.paginate.showing",
+          "translation": "Showing"
+        },
+        {
+          "component": "global.datatable.paginate.to",
+          "translation": "to"
+        },
+        {
+          "component": "global.datatable.paginate.of",
+          "translation": "of"
+        },
+        {
+          "component": "i18n.datatable.button.edit",
+          "translation": "Edit"
+        },
+        {
+          "component": "i18n.input.name.placeholder",
+          "translation": "Language Name"
+        },
+        {
+          "component": "i18n.input.name.caption",
+          "translation": "i18n Name"
+        },
+        {
+          "component": "i18n.input.iso_3_digits.placeholder",
+          "translation": "ISO 3 digits"
+        },
+        {
+          "component": "i18n.input.iso_2_digits.placeholder",
+          "translation": "ISO 2 digits"
+        },
+        {
+          "component": "i18n.input.datetime_weekday.placeholder",
+          "translation": "Weekday format"
+        },
+        {
+          "component": "global.menu.dashboard",
+          "translation": "Dashboard"
+        },
+        {
+          "component": "i18n.datatable.column.iso_2_digits.caption",
+          "translation": "ISO 2 digits"
+        },
+        {
+          "component": "i18n.datatable.column.iso_2_digits.search",
+          "translation": "Search by ISO 2digits"
+        },
+        {
+          "component": "i18n.datatable.column.iso_3_digits.caption",
+          "translation": "ISO 3 digits"
+        },
+        {
+          "component": "i18n.datatable.column.iso_3_digits.search",
+          "translation": "Search by ISO 3 digits"
+        },
+        {
+          "component": "i18n.datatable.column.name.caption",
+          "translation": "Language Name"
+        },
+        {
+          "component": "i18n.datatable.column.name.search",
+          "translation": "Search by name"
+        },
+        {
+          "component": "i18n.datatable.button.add",
+          "translation": "Add Language"
+        },
+        {
+          "component": "i18n.button.add_language",
+          "translation": "Add Language"
+        },
+        {
+          "component": "i18n.label.index",
+          "translation": "Locale Management"
+        },
+        {
+          "component": "i18n.button.add_grouper",
+          "translation": "Add new grouper"
+        },
+        {
+          "component": "i18n.button.duplicate_component",
+          "translation": "Generate Master Template"
+        },
+        {
+          "component": "i18n.datatable.button.delete",
+          "translation": "Delete"
+        },
+        {
+          "component": "menu.label.index",
+          "translation": "Menu Management"
+        },
+        {
+          "component": "global.datatable.column.action",
+          "translation": "Action"
+        },
+        {
+          "component": "menu.datatable.button.add_child",
+          "translation": "Add"
+        },
+        {
+          "component": "menu.datatable.button.edit_child",
+          "translation": "Edit"
+        },
+        {
+          "component": "menu.datatable.button.delete_child",
+          "translation": "Delete"
+        },
+        {
+          "component": "menu.datatable.button.sort_up",
+          "translation": "Up"
+        },
+        {
+          "component": "master_item.label.index",
+          "translation": "Master Item Management"
+        },
+        {
+          "component": "master_item.modal.label.upload",
+          "translation": "Upload Data"
+        },
+        {
+          "component": "master_item.button.import",
+          "translation": "Import Data"
+        },
+        {
+          "component": "master_item.button.add",
+          "translation": "Add Item"
+        },
+        {
+          "component": "menu.datatable.column.visibility.caption",
+          "translation": "Show On Menu",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.visibility.placeholder",
+          "translation": "Search Visibility",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.link.caption",
+          "translation": "Link",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.link.placeholder",
+          "translation": "Search Link",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        }
+      ],
+      "deleted_at": null,
+      "created_at": "2023-04-15T21:23:00.000Z",
+      "updated_at": "2024-05-26T00:01:16.000Z",
+      "id": "i18n-643ab3443e59e302f7a39234",
+      "__v": 4,
+      "currency": "USD",
+      "timezone": "Asia/Jakarta"
+    },
+    {
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "_id": "643ea62511f00b62d022f08d",
+      "language_code": "ID",
+      "iso_2_digits": "ID",
+      "iso_3_digits": "IDN",
+      "name": "Indonesia",
+      "currency": "IDR",
+      "datetime_weekday": "long",
+      "datetime_era": "long",
+      "datetime_year": "numeric",
+      "datetime_month": "long",
+      "datetime_day": "numeric",
+      "datetime_hour": "numeric",
+      "datetime_minute": "numeric",
+      "datetime_second": "numeric",
+      "datetime_timezone_name": "long",
+      "remark": "Extra remark",
+      "components": [
+        {
+          "component": "menu.datatable.button.sort_down",
+          "translation": "Down"
+        }
+      ],
+      "deleted_at": null,
+      "created_at": "2023-04-18T21:16:05.000Z",
+      "updated_at": "2023-04-18T21:16:05.000Z",
+      "id": "i18n-643ea62511f00b62d022f08d",
+      "__v": 0,
+      "timezone": "Asia/Jakarta"
     }
   ],
   "queue": [],

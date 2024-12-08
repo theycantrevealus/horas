@@ -365,7 +365,7 @@ export const modCodes = {
       },
     },
   },
-  i18nService: {
+  I18nService: {
     defaultCode: 'I18N',
     error: {
       databaseError: {

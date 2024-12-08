@@ -1,6 +1,6 @@
-import AccountService from "@/service/account";
-import {CoreResponse, CoreResponseLib} from "@/model/Response";
-import CoreService from "@/service/core/sidemenu";
+import AccountService from '@/service/account'
+import { CoreResponse, CoreResponseLib } from '@/model/Response'
+import CoreService from '@/service/core/sidemenu'
 
 export const CredentialStore = {
   namespaced: true,
@@ -104,16 +104,18 @@ export const CredentialStore = {
         }
         buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
 
-        if(!routeMap[grantedPerm[a].menu.identifier]) {
-          routeMap[grantedPerm[a].menu.identifier] = {}
-        }
+        if(grantedPerm[a]?.menu) {
+          if(!routeMap[grantedPerm[a].menu.identifier]) {
+            routeMap[grantedPerm[a].menu.identifier] = {}
+          }
 
-        if(!routeMap[grantedPerm[a].menu.identifier].permission) {
-          routeMap[grantedPerm[a].menu.identifier].permission = []
-        }
+          if(!routeMap[grantedPerm[a].menu.identifier].permission) {
+            routeMap[grantedPerm[a].menu.identifier].permission = []
+          }
 
-        if(routeMap[grantedPerm[a].menu.identifier].permission.indexOf(grantedPerm[a].dispatchName) < 0) {
-          routeMap[grantedPerm[a].menu.identifier].permission.push(grantedPerm[a].dispatchName)
+          if(routeMap[grantedPerm[a].menu.identifier].permission.indexOf(grantedPerm[a].dispatchName) < 0) {
+            routeMap[grantedPerm[a].menu.identifier].permission.push(grantedPerm[a].dispatchName)
+          }
         }
 
         if(!routeMap[grantedPerm[a].dispatchName]) {

@@ -1,0 +1,324 @@
+[
+  {
+    "id": "menu_group-64396339334f96672465a893",
+    "name": "Application",
+    "url": "",
+    "icon": "",
+    "group_color": "",
+    "show_order": 1,
+    "show_on_menu": true,
+    "level": 1,
+    "items": [
+      {
+        "id": "menu-6439639d334f96672465a89f",
+        "name": "Dashboard",
+        "url": "/",
+        "icon": "home",
+        "group_color": "",
+        "show_order": 1,
+        "show_on_menu": true,
+        "level": 2,
+        "items": []
+      },
+      {
+        "id": "menu-66521b838b572eb737229d57",
+        "name": "Ancillary Service",
+        "url": "",
+        "icon": "medical_services",
+        "group_color": "",
+        "show_order": 1,
+        "show_on_menu": true,
+        "level": 2,
+        "items": [
+          {
+            "id": "menu-66521ba18b572eb737229d72",
+            "name": "Laboratory",
+            "url": "/ancillary_service/laboratory",
+            "icon": "labs",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-66521bf18b572eb737229dab",
+            "name": "Pharmacy",
+            "url": "/ancillary_service/pharmacy",
+            "icon": "outpatient_med",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-66521bcf8b572eb737229d8e",
+            "name": "Radiology",
+            "url": "/ancillary_service/radiology",
+            "icon": "skeleton",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          }
+        ]
+      },
+      {
+        "id": "menu-6651f086586688c661878d3b",
+        "name": "Nurse Station",
+        "url": "",
+        "icon": "diversity_1",
+        "group_color": "",
+        "show_order": 1,
+        "show_on_menu": true,
+        "level": 2,
+        "items": [
+          {
+            "id": "menu-6651fd22dd429dde0552a1dd",
+            "name": "In Patient",
+            "url": "/nurse_station/inpatient",
+            "icon": "bed",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-6651fd94dd429dde0552a252",
+            "name": "Out Patient",
+            "url": "/nurse_station/outpatient",
+            "icon": "group",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          }
+        ]
+      },
+      {
+        "id": "menu-6652d371313f1eaaba85b930",
+        "name": "Clinical Service",
+        "url": "",
+        "icon": "medical_information",
+        "group_color": "",
+        "show_order": 1,
+        "show_on_menu": true,
+        "level": 2,
+        "items": [
+          {
+            "id": "menu-6652d5aa313f1eaaba85ba2f",
+            "name": "Surgical Service",
+            "url": "/clinical_service/surgical_service",
+            "icon": "surgical",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-6652d4d7313f1eaaba85ba0f",
+            "name": "Polyclinic Service",
+            "url": "/clinical_service/polyclinic_service",
+            "icon": "stethoscope",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          }
+        ]
+      },
+      {
+        "id": "menu-643af5ba469b9a55b5d2c9be",
+        "name": "Inventory",
+        "url": "",
+        "icon": "store",
+        "show_order": 1,
+        "show_on_menu": true,
+        "items": [
+          {
+            "id": "menu-643af9e9469b9a55b5d2cb2a",
+            "name": "Purchase Order",
+            "url": "/inventory/purchase_order",
+            "icon": "shopping_cart",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-643afe32469b9a55b5d2cba7",
+            "name": "General Receive Note",
+            "url": "/inventory/general_receive_note",
+            "icon": "local_shipping",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-643afed0469b9a55b5d2cbd5",
+            "name": "Material Requisition",
+            "url": "/inventory/material_requisition",
+            "icon": "home_repair_service",
+            "show_order": 3,
+            "show_on_menu": true,
+            "items": []
+          }
+        ]
+      },
+      {
+        "id": "menu-6439894d964e52ecda66f2f8",
+        "name": "Master Data",
+        "url": "",
+        "icon": "list_alt",
+        "group_color": "",
+        "show_order": 1,
+        "show_on_menu": true,
+        "level": 2,
+        "items": [
+          {
+            "id": "menu-64398975964e52ecda66f2fd",
+            "name": "Item Management",
+            "url": "",
+            "icon": "shelves",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": [
+              {
+                "id": "menu-643c070b8a44bc1bccecabd7",
+                "name": "Item",
+                "url": "/master/item",
+                "icon": "package_2",
+                "group_color": "",
+                "show_order": 1,
+                "show_on_menu": true,
+                "level": 2,
+                "items": []
+              },
+              {
+                "id": "menu-643c07558a44bc1bccecac36",
+                "name": "Item Brand",
+                "url": "/master/item/brand",
+                "icon": "dataset",
+                "group_color": "",
+                "show_order": 1,
+                "show_on_menu": true,
+                "level": 2,
+                "items": []
+              },
+              {
+                "id": "menu-643c073d8a44bc1bccecac15",
+                "name": "Item Category",
+                "url": "/master/item/category",
+                "icon": "pallet",
+                "group_color": "",
+                "show_order": 1,
+                "show_on_menu": true,
+                "level": 2,
+                "items": []
+              }
+            ]
+          },
+          {
+            "id": "menu-643c3663d3c66942a626b6ab",
+            "name": "Polyclinic Management",
+            "url": "/master/polyclinic",
+            "icon": "medical_information",
+            "show_order": 2,
+            "show_on_menu": true,
+            "items": []
+          }
+        ]
+      },
+      {
+        "id": "menu-6649fe6807b35431b06fbd8a",
+        "name": "Front Desk",
+        "url": "/front_desk",
+        "icon": "list_alt",
+        "group_color": "",
+        "show_order": 4,
+        "show_on_menu": true,
+        "level": 2,
+        "items": [
+          {
+            "id": "menu-66521a358b572eb737229cc5",
+            "name": "Registration",
+            "url": "/front_desk/registration",
+            "icon": "assignment",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "menu_group-64396343334f96672465a898",
+    "name": "Configuration",
+    "url": "",
+    "icon": "",
+    "group_color": "",
+    "show_order": 1,
+    "show_on_menu": true,
+    "level": 1,
+    "items": [
+      {
+        "id": "menu-644c037c078b31bb71244080",
+        "name": "Application",
+        "url": "/application",
+        "icon": "manufacturing",
+        "group_color": "",
+        "show_order": 1,
+        "show_on_menu": true,
+        "level": 2,
+        "items": []
+      },
+      {
+        "id": "menu-643c38916d198727bfbf301d",
+        "name": "i18n",
+        "url": "/setting/i18n",
+        "icon": "language",
+        "group_color": "",
+        "show_order": 2,
+        "show_on_menu": true,
+        "level": 2,
+        "items": []
+      },
+      {
+        "id": "menu-643a68c5e6f975d6f3a5b131",
+        "name": "Menu",
+        "url": "/core/menu",
+        "icon": "api",
+        "group_color": "",
+        "show_order": 3,
+        "show_on_menu": true,
+        "level": 1,
+        "items": []
+      },
+      {
+        "id": "menu-643aff26469b9a55b5d2cbf0",
+        "name": "Account",
+        "url": "/account",
+        "icon": "person",
+        "group_color": "",
+        "show_order": 4,
+        "show_on_menu": true,
+        "level": 2,
+        "items": []
+      }
+    ]
+  }
+]

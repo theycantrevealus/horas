@@ -93,7 +93,6 @@ export default ({ requiresAuth = true } = {}) => {
         let detail = ''
         for(const a in error.response.data.payload) {
           const errorParser = error.response.data.payload[a]
-          console.log(errorParser)
           for( const b in errorParser) {
             detail += `- ${errorParser[b]}\n`
           }

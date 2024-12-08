@@ -27,6 +27,7 @@ import Authority from '@/modules/setting/authority'
 import Corei18n from '@/modules/setting/i18n'
 import ApplicationConfiguration from '@/modules/setting/configuration'
 import MasterItem from '@/modules/master/item'
+import MasterItemCategory from '@/modules/master/item_category'
 import PurchaseOrder from '@/modules/inventory/purchase_order'
 import GeneralReceiveNote from '@/modules/inventory/general_receive_note'
 import Service from '@/modules/service'
@@ -48,6 +49,7 @@ registerModules({
   getStarted: GetStarted,
   accountModule: Account,
   masterItem: MasterItem,
+  masterItemCategory: MasterItemCategory,
   authorityModule: Authority,
   corei18N: Corei18n,
   applicationConfiguration: ApplicationConfiguration,

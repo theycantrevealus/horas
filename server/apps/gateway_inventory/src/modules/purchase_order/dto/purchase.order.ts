@@ -1,8 +1,8 @@
 import { ICurrency } from '@gateway_core/i18n/interface/i18n'
-import { CCurrency } from '@gateway_core/i18n/schemas/i18n'
 import { CMasterItemSupplier } from '@gateway_core/master/dto/master.item.supplier'
 import { CPurchaseOrderDetail } from '@inventory/dto/purchase.order.detail'
 import { ApiProperty } from '@nestjs/swagger'
+import { CCurrency } from '@schemas/i18n/i18n'
 import { IMasterItemSupplier } from '@schemas/master/master.item.supplier.interface'
 import { Type } from 'class-transformer'
 import {

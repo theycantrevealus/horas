@@ -7,35 +7,83 @@
     "permission": [
       {
         "domIdentity": "tableAccount",
-        "dispatchName": "CoreAccountView"
+        "dispatchName": "CoreAccountView",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
       },
       {
         "domIdentity": "btnAccountAdd",
-        "dispatchName": "CoreAccountAdd"
+        "dispatchName": "CoreAccountAdd",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
       },
       {
         "domIdentity": "btnAccountEdit",
-        "dispatchName": "CoreAccountEdit"
+        "dispatchName": "CoreAccountEdit",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
       },
       {
         "domIdentity": "btnAccountDelete",
-        "dispatchName": "CoreAccountDelete"
+        "dispatchName": "CoreAccountDelete",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
       },
       {
         "domIdentity": "tableMenu",
-        "dispatchName": "CoreMenuView"
+        "dispatchName": "CoreMenuView",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
       },
       {
         "domIdentity": "btnMenuAdd",
-        "dispatchName": "CoreMenuAdd"
+        "dispatchName": "CoreMenuAdd",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
       },
       {
         "domIdentity": "btnMenuEdit",
-        "dispatchName": "CoreMenuEdit"
+        "dispatchName": "CoreMenuEdit",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
       },
       {
         "domIdentity": "btnMenuDelete",
-        "dispatchName": "CoreMenuDelete"
+        "dispatchName": "CoreMenuDelete",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
       },
       {
         "domIdentity": "tablePatient",

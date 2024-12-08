@@ -691,7 +691,6 @@ export default {
         this.dropdown.item = []
       } else {
         await MasterItemService.findItem(search).then((response) => {
-          console.log(response)
           this.dropdown.item = response.payload.data
         })
       }

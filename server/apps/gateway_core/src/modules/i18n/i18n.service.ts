@@ -1,9 +1,9 @@
 import { i18nAddDTO, i18nEditDTO } from '@gateway_core/i18n/dto/i18n'
-import { i18n, i18nDocument } from '@gateway_core/i18n/schemas/i18n'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from '@schemas/account/account.model'
+import { i18n, i18nDocument } from '@schemas/i18n/i18n'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -12,11 +12,12 @@ import { TimeManagement } from '@utility/time'
 import { Model } from 'mongoose'
 
 @Injectable()
-export class i18nService {
+export class I18nService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
 
-    @InjectModel(i18n.name) private readonly i18nModel: Model<i18nDocument>
+    @InjectModel(i18n.name, 'primary')
+    private readonly i18nModel: Model<i18nDocument>
   ) {}
 
   async all(payload: any) {

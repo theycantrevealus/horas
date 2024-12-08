@@ -11,13 +11,17 @@ server.post('/v1/account/signin', (req, res) => {
     statusCode: {
       defaultCode: 200,
       customCode: 'S0000',
-      classCode: 'XXX'
+      classCode: 'ACC'
     },
     message: 'Sign in success',
     payload: require('./signin.json'),
     transaction_classify: '',
     transaction_id: null
   })
+})
+
+server.get('/v1/menu/tree', (req, res) => {
+  res.jsonp(require('./menu.tree.json'))
 })
 
 server.use((req, res, next) => {
@@ -29,6 +33,12 @@ server.use((req, res, next) => {
 
   next()
 })
+
+server.use(jsonServer.rewriter({
+  '/v1/*': '/$1',
+  '/master/*': '/$1',
+  '/i18n/all': '/i18n'
+}))
 
 server.use(router)
 
@@ -45,7 +55,7 @@ router.render = (req, res) => {
       },
       message: 'Data fetched',
       payload: {
-        totalRecords: 2,
+        totalRecords: res.locals.data.length,
         data: res.locals.data
       },
       transaction_classify: '',
