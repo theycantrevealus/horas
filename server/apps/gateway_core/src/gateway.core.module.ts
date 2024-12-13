@@ -4,6 +4,7 @@ import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { AccountModule } from '@gateway_core/account/account.module'
+import { I18nModule } from '@gateway_core/i18n/i18n.module'
 import { LOVModule } from '@gateway_core/lov/lov.module'
 import { MasterModule } from '@gateway_core/master/master.module'
 import { MenuModule } from '@gateway_core/menu/menu.module'
@@ -147,7 +148,7 @@ import { GatewayCoreService } from './gateway.core.service'
     // LicenseModule,
     PatientModule,
     MenuModule,
-    // i18nModule,
+    I18nModule,
     // GatewayInventoryModule,
     // BpjsModule,
     // OperationQueueModule,

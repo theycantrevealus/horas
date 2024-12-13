@@ -1,6 +1,6 @@
-import { IMasterItem } from '@gateway_core/master/interface/master.item'
 import { ApiProperty } from '@nestjs/swagger'
-import { MasterItemJoin } from '@schemas/master/master.item'
+import { IMasterItem } from '@schemas/master/master.item.interface'
+import { MasterItemJoin } from '@schemas/master/master.item.join'
 
 export class CPurchaseOrderDetail {
   @ApiProperty({

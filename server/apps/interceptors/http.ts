@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CallHandler, ExecutionContext, HttpStatus } from '@nestjs/common'
 import { PATH_METADATA } from '@nestjs/common/constants'
 import { Reflector } from '@nestjs/core'
@@ -32,7 +32,7 @@ export async function httpInterceptor(
   const now = Date.now()
   const { url } = request
   const query = request.query ? JSON.parse(JSON.stringify(request.query)) : ''
-  const account: IAccountCreatedBy = request.credential
+  const account: IAccount = request.credential
 
   return next.handle().pipe(
     tap(async (result: GlobalResponse) => {

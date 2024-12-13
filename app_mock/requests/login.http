@@ -1,0 +1,8 @@
+### Send POST request with json body
+POST http://localhost:10200/v1/account/signin
+Content-Type: application/json
+
+{
+  "email": "takashitanaka@horas.com",
+  "password": "12345678"
+}

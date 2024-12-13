@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemSupplierAddDTO,
   MasterItemSupplierEditDTO,
@@ -94,7 +94,7 @@ export class MasterItemSupplierService {
 
   async add(
     data: MasterItemSupplierAddDTO,
-    creator: IAccountCreatedBy
+    creator: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

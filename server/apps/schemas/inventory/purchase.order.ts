@@ -1,14 +1,14 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ICurrency } from '@gateway_core/i18n/interface/i18n'
-import { CurrencyJoin } from '@gateway_core/i18n/schemas/i18n.join'
-import { IMasterItemSupplier } from '@gateway_core/master/interface/master.item.supplier'
 import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
+import { CurrencyJoin } from '@schemas/i18n/i18n.join'
 import { PurchaseOrderApproval } from '@schemas/inventory/purchase.order.approval'
 import { PurchaseOrderDetail } from '@schemas/inventory/purchase.order.detail'
-import { MasterItemSupplierJoin } from '@schemas/master/master.item.supplier'
+import { IMasterItemSupplier } from '@schemas/master/master.item.supplier.interface'
+import { MasterItemSupplierJoin } from '@schemas/master/master.item.supplier.join'
 import {
   DocumentHistoryJoin,
   IDocumentHistory,
@@ -79,10 +79,10 @@ export class PurchaseOrder {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({ type: AccountJoin, required: false })
-  updated_by: IAccountCreatedBy
+  updated_by: IAccount
 
   @Prop(CurrencyJoin)
   locale: ICurrency

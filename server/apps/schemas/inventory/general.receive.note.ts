@@ -1,5 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IGeneralReceiveNoteDetail } from '@inventory/interface/general.receive.note.detail'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
@@ -7,6 +6,7 @@ import { AccountJoin } from '@schemas/account/account.raw'
 import { GeneralReceiveNoteDetail } from '@schemas/inventory/general.receive.note.detail'
 import { PurchaseOrderJoin } from '@schemas/inventory/purchase.order.join'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type GeneralReceiveNoteDocument = HydratedDocument<GeneralReceiveNote>
@@ -38,7 +38,7 @@ export class GeneralReceiveNote {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.String,

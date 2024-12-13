@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { accountArray } from '@gateway_core/account/mock/account.mock'
 import { LogActivity } from '@log/schemas/log.activity'
 import { TimeManagement } from '@utility/time'
@@ -10,7 +10,7 @@ export const mockLogActivity = (
   log_meta = 'Doe',
   old_meta: any = {},
   new_meta: any = {},
-  account: IAccountCreatedBy = {
+  account: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: 'Hendry',
     last_name: 'Tanaka',

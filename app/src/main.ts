@@ -26,7 +26,11 @@ import Account from '@/modules/setting/account'
 import Authority from '@/modules/setting/authority'
 import Corei18n from '@/modules/setting/i18n'
 import ApplicationConfiguration from '@/modules/setting/configuration'
+import LOV from '@/modules/lov'
+import MasterQueueMachine from '@/modules/master/queue_machine'
 import MasterItem from '@/modules/master/item'
+import MasterItemCategory from '@/modules/master/item_category'
+import MasterItemBrand from '@/modules/master/item_brand'
 import PurchaseOrder from '@/modules/inventory/purchase_order'
 import GeneralReceiveNote from '@/modules/inventory/general_receive_note'
 import Service from '@/modules/service'
@@ -47,7 +51,11 @@ import process from 'process'
 registerModules({
   getStarted: GetStarted,
   accountModule: Account,
+  lov: LOV,
+  masterQueueMachine: MasterQueueMachine,
   masterItem: MasterItem,
+  masterItemCategory: MasterItemCategory,
+  masterItemBrand: MasterItemBrand,
   authorityModule: Authority,
   corei18N: Corei18n,
   applicationConfiguration: ApplicationConfiguration,

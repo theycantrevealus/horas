@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemBrandAddDTO,
   MasterItemBrandEditDTO,
@@ -30,6 +30,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
+import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
 @ApiTags('Master Data Item Brand Management')
@@ -51,7 +52,7 @@ export class MasterItemBrandController {
     description: 'Showing brand data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string) {
+  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
     return await this.masterItemBrandService.all(parameter)
   }
 
@@ -69,7 +70,7 @@ export class MasterItemBrandController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param: any) {
+  async detail(@Param() param: any): Promise<GlobalResponse> {
     return await this.masterItemBrandService.detail(param.id)
   }
 
@@ -86,8 +87,8 @@ export class MasterItemBrandController {
   })
   async add(
     @Body() parameter: MasterItemBrandAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
-  ) {
+    @CredentialAccount() account: IAccount
+  ): Promise<GlobalResponse> {
     return await this.masterItemBrandService.add(parameter, account)
   }
 
@@ -105,7 +106,10 @@ export class MasterItemBrandController {
   @ApiParam({
     name: 'id',
   })
-  async edit(@Body() parameter: MasterItemBrandEditDTO, @Param() param: any) {
+  async edit(
+    @Body() parameter: MasterItemBrandEditDTO,
+    @Param() param: any
+  ): Promise<GlobalResponse> {
     return await this.masterItemBrandService.edit(parameter, param.id)
   }
 
@@ -117,13 +121,13 @@ export class MasterItemBrandController {
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterItemBrand', action: 'delete' })
   @ApiOperation({
-    summary: 'Edit new item brand',
+    summary: 'Delete item',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param: any) {
+  async delete(@Param() param: any): Promise<GlobalResponse> {
     return await this.masterItemBrandService.delete(param.id)
   }
 }

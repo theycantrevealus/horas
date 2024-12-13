@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemSupplierAddDTO,
   MasterItemSupplierEditDTO,
@@ -86,7 +86,7 @@ export class MasterItemSupplierController {
   })
   async add(
     @Body() parameter: MasterItemSupplierAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.masterItemSupplierService.add(parameter, account)
   }

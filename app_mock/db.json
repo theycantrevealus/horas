@@ -1,0 +1,892 @@
+{
+  "lov": [
+    {
+      "id": "lov-xxx",
+      "name": "General",
+      "group": "QUEUE_TYPE",
+      "parent": "",
+      "value": "General",
+      "remark": "<p>General queue</p>",
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "lov-abc",
+      "name": "Special",
+      "group": "QUEUE_TYPE",
+      "parent": "",
+      "value": "Special",
+      "remark": "",
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    },
+    {
+      "name": "Urgent",
+      "group": "QUEUE_TYPE",
+      "parent": {
+        "id": "",
+        "name": ""
+      },
+      "value": "Urgent",
+      "remark": "",
+      "id": "DU5LPwr"
+    }
+  ],
+  "item": [
+    {
+      "_id": "6432a7da9b8f79e8e41131a3",
+      "id": "item-6432a7da9b8f79e8e41131a3",
+      "code": "51532-4616",
+      "name": "CUT CLEANER",
+      "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
+      "configuration": {
+        "allow_grn": false,
+        "allow_incoming": false,
+        "allow_outgoing": false,
+        "allow_destruction": false
+      },
+      "category": [
+        {
+          "id": "item_category-6428638f90f59e64ae266bea",
+          "code": "CAT00001",
+          "name": "Drugs"
+        }
+      ],
+      "unit": {
+        "id": "item_unit-64327bd1b2e0e3c2ab090494",
+        "code": "MSRI-UNT-1681030097526",
+        "name": "SWAB"
+      },
+      "brand": null,
+      "properties": [
+        {
+          "id": "lov-643280763e921da3ad410128",
+          "name": "Route",
+          "value": "TOPICAL"
+        }
+      ],
+      "storing": [],
+      "remark": "",
+      "created_at": "2023-04-09T18:56:10.000Z",
+      "updated_at": "2023-04-09T18:56:10.000Z",
+      "deleted_at": null,
+      "__v": 0,
+      "timezone": "Asia/Jakarta",
+      "autonum": 1
+    },
+    {
+      "_id": "6432a8339b8f79e8e414b00c",
+      "id": "item-6432a8339b8f79e8e414b00c",
+      "code": "81238-4616",
+      "name": "CUT CLEANER",
+      "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
+      "configuration": {
+        "allow_grn": false,
+        "allow_incoming": false,
+        "allow_outgoing": false,
+        "allow_destruction": false
+      },
+      "category": [
+        {
+          "id": "item_category-6428638f90f59e64ae266bea",
+          "code": "CAT00001",
+          "name": "Drugs"
+        }
+      ],
+      "unit": {
+        "id": "item_unit-64327bd0b2e0e3c2ab08f64e",
+        "code": "MSRI-UNT-1681030096338",
+        "name": "CLOTH"
+      },
+      "brand": null,
+      "properties": [
+        {
+          "id": "lov-643280763e921da3ad410128",
+          "name": "Route",
+          "value": "TOPICAL"
+        }
+      ],
+      "storing": [],
+      "remark": "",
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null,
+      "__v": 0,
+      "timezone": "Asia/Jakarta",
+      "autonum": 2
+    }
+  ],
+  "item_category": [
+    {
+      "id": "item_category-6428638f90f59e64ae266bea",
+      "code": "CAT00001",
+      "name": "Drugs",
+      "created_at": "2023-04-09T18:57:39.000Z"
+    },
+    {
+      "code": "TEST0011",
+      "name": "New Category Test Edit Data",
+      "remark": "<p>Testing Caption EDit</p>",
+      "id": "W9XjU0k"
+    },
+    {
+      "code": "TEst003",
+      "name": "Another data Test?",
+      "remark": "<p>Hello there</p>",
+      "id": "nU1PYR1"
+    }
+  ],
+  "item_brand": [
+    {
+      "id": "item_brand-6428638f90f59e64ae266bea",
+      "code": "BRD00001",
+      "name": "SANMOL",
+      "created_at": "2023-04-09T18:57:39.000Z"
+    },
+    {
+      "code": "BRD00231",
+      "name": "DUMIN RECTAL",
+      "remark": "<p>DUMIN</p>",
+      "id": "wVxmkja"
+    }
+  ],
+  "queue_machine": [
+    {
+      "id": "queue_machine-xxxx",
+      "code": "CODE",
+      "type": [
+        {
+          "id": "lov-xxxx",
+          "name": "Queue Machine Type"
+        }
+      ],
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    }
+  ],
+  "receptionist": [
+    {
+      "id": "receptionist-xxxx",
+      "code": "CODE",
+      "type": [
+        {
+          "id": "lov-xxxx",
+          "name": "Receptionist Type"
+        }
+      ],
+      "current_employee": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "current_queue": {},
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    }
+  ],
+  "queue": [
+    {
+      "id": "queue-xxxx",
+      "queue_code": "CODE",
+      "queue": 10,
+      "type": {
+        "id": "lov-xxxx",
+        "name": "Receptionist Type"
+      },
+      "queue_machine": {
+        "id": "queue_machine-xxxx",
+        "code": "CODE"
+      },
+      "receptionist": {
+        "id": "receptionist-xxxx",
+        "code": "CODE"
+      },
+      "status": "New",
+      "processed_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    }
+  ],
+  "i18n": [
+    {
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "_id": "643ab3443e59e302f7a39234",
+      "language_code": "EN",
+      "iso_2_digits": "US",
+      "iso_3_digits": "USA",
+      "name": "United States",
+      "datetime_weekday": "long",
+      "datetime_era": "long",
+      "datetime_year": "numeric",
+      "datetime_month": "long",
+      "datetime_day": "numeric",
+      "datetime_hour": "numeric",
+      "datetime_minute": "numeric",
+      "datetime_second": "numeric",
+      "datetime_timezone_name": "long",
+      "remark": "Extra remark",
+      "components": [
+        {
+          "component": "menu.datatable.button.sort_down",
+          "translation": "Down"
+        },
+        {
+          "component": "menu.datatable.column.label.caption",
+          "translation": "Label",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.label.placeholder",
+          "translation": "Search by label",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "label.header1",
+          "translation": "Hello There 2"
+        },
+        {
+          "component": "label.header2",
+          "translation": "Hello Second Label"
+        },
+        {
+          "component": "label.header3",
+          "translation": "Hello Third Label"
+        },
+        {
+          "component": "i18n.datatable.column.action",
+          "translation": "Action"
+        },
+        {
+          "component": "global.datatable.paginate.showing",
+          "translation": "Showing"
+        },
+        {
+          "component": "global.datatable.paginate.to",
+          "translation": "to"
+        },
+        {
+          "component": "global.datatable.paginate.of",
+          "translation": "of"
+        },
+        {
+          "component": "i18n.datatable.button.edit",
+          "translation": "Edit"
+        },
+        {
+          "component": "i18n.input.name.placeholder",
+          "translation": "Language Name"
+        },
+        {
+          "component": "i18n.input.name.caption",
+          "translation": "i18n Name"
+        },
+        {
+          "component": "i18n.input.iso_3_digits.placeholder",
+          "translation": "ISO 3 digits"
+        },
+        {
+          "component": "i18n.input.iso_2_digits.placeholder",
+          "translation": "ISO 2 digits"
+        },
+        {
+          "component": "i18n.input.datetime_weekday.placeholder",
+          "translation": "Weekday format"
+        },
+        {
+          "component": "global.menu.dashboard",
+          "translation": "Dashboard"
+        },
+        {
+          "component": "i18n.datatable.column.iso_2_digits.caption",
+          "translation": "ISO 2 digits"
+        },
+        {
+          "component": "i18n.datatable.column.iso_2_digits.search",
+          "translation": "Search by ISO 2digits"
+        },
+        {
+          "component": "i18n.datatable.column.iso_3_digits.caption",
+          "translation": "ISO 3 digits"
+        },
+        {
+          "component": "i18n.datatable.column.iso_3_digits.search",
+          "translation": "Search by ISO 3 digits"
+        },
+        {
+          "component": "i18n.datatable.column.name.caption",
+          "translation": "Language Name"
+        },
+        {
+          "component": "i18n.datatable.column.name.search",
+          "translation": "Search by name"
+        },
+        {
+          "component": "i18n.datatable.button.add",
+          "translation": "Add Language"
+        },
+        {
+          "component": "i18n.button.add_language",
+          "translation": "Add Language"
+        },
+        {
+          "component": "i18n.label.index",
+          "translation": "Locale Management"
+        },
+        {
+          "component": "i18n.button.add_grouper",
+          "translation": "Add new grouper"
+        },
+        {
+          "component": "i18n.button.duplicate_component",
+          "translation": "Generate Master Template"
+        },
+        {
+          "component": "i18n.datatable.button.delete",
+          "translation": "Delete"
+        },
+        {
+          "component": "menu.label.index",
+          "translation": "Menu Management"
+        },
+        {
+          "component": "global.datatable.column.action",
+          "translation": "Action"
+        },
+        {
+          "component": "menu.datatable.button.add_child",
+          "translation": "Add"
+        },
+        {
+          "component": "menu.datatable.button.edit_child",
+          "translation": "Edit"
+        },
+        {
+          "component": "menu.datatable.button.delete_child",
+          "translation": "Delete"
+        },
+        {
+          "component": "menu.datatable.button.sort_up",
+          "translation": "Up"
+        },
+        {
+          "component": "master_item.label.index",
+          "translation": "Master Item Management"
+        },
+        {
+          "component": "master_item.modal.label.upload",
+          "translation": "Upload Data"
+        },
+        {
+          "component": "master_item.button.import",
+          "translation": "Import Data"
+        },
+        {
+          "component": "master_item.button.add",
+          "translation": "Add Item"
+        },
+        {
+          "component": "menu.datatable.column.visibility.caption",
+          "translation": "Show On Menu",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.visibility.placeholder",
+          "translation": "Search Visibility",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.link.caption",
+          "translation": "Link",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        },
+        {
+          "component": "menu.datatable.column.link.placeholder",
+          "translation": "Search Link",
+          "menu": {
+            "id": "menu-643a68c5e6f975d6f3a5b131",
+            "name": "Menu",
+            "url": "/core/menu",
+            "identifier": "Menu"
+          }
+        }
+      ],
+      "deleted_at": null,
+      "created_at": "2023-04-15T21:23:00.000Z",
+      "updated_at": "2024-05-26T00:01:16.000Z",
+      "id": "i18n-643ab3443e59e302f7a39234",
+      "__v": 4,
+      "currency": "USD",
+      "timezone": "Asia/Jakarta"
+    },
+    {
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "_id": "643ea62511f00b62d022f08d",
+      "language_code": "ID",
+      "iso_2_digits": "ID",
+      "iso_3_digits": "IDN",
+      "name": "Indonesia",
+      "currency": "IDR",
+      "datetime_weekday": "long",
+      "datetime_era": "long",
+      "datetime_year": "numeric",
+      "datetime_month": "long",
+      "datetime_day": "numeric",
+      "datetime_hour": "numeric",
+      "datetime_minute": "numeric",
+      "datetime_second": "numeric",
+      "datetime_timezone_name": "long",
+      "remark": "Extra remark",
+      "components": [
+        {
+          "component": "menu.datatable.button.sort_down",
+          "translation": "Down"
+        }
+      ],
+      "deleted_at": null,
+      "created_at": "2023-04-18T21:16:05.000Z",
+      "updated_at": "2023-04-18T21:16:05.000Z",
+      "id": "i18n-643ea62511f00b62d022f08d",
+      "__v": 0,
+      "timezone": "Asia/Jakarta"
+    }
+  ],
+  "users": [
+    {
+      "id": "account-63d51ede32795cb7a2a0eedd",
+      "code": "god001",
+      "first_name": "Hendry",
+      "last_name": "Tanaka",
+      "permission": [
+        {
+          "domIdentity": "tableAccount",
+          "dispatchName": "CoreAccountView"
+        },
+        {
+          "domIdentity": "btnAccountAdd",
+          "dispatchName": "CoreAccountAdd"
+        },
+        {
+          "domIdentity": "btnAccountEdit",
+          "dispatchName": "CoreAccountEdit"
+        },
+        {
+          "domIdentity": "btnAccountDelete",
+          "dispatchName": "CoreAccountDelete"
+        },
+        {
+          "domIdentity": "tableMenu",
+          "dispatchName": "CoreMenuView"
+        },
+        {
+          "domIdentity": "btnMenuAdd",
+          "dispatchName": "CoreMenuAdd"
+        },
+        {
+          "domIdentity": "btnMenuEdit",
+          "dispatchName": "CoreMenuEdit"
+        },
+        {
+          "domIdentity": "btnMenuDelete",
+          "dispatchName": "CoreMenuDelete"
+        },
+        {
+          "domIdentity": "tablePatient",
+          "dispatchName": "PatientView"
+        },
+        {
+          "domIdentity": "tableQueue",
+          "dispatchName": "QueueMachine"
+        },
+        {
+          "domIdentity": "tableQueue",
+          "dispatchName": "QueueView"
+        },
+        {
+          "domIdentity": "btnAddQueue",
+          "dispatchName": "QueueAdd"
+        },
+        {
+          "domIdentity": "btnAddItemBrand",
+          "dispatchName": "MasterItemBrandAdd"
+        },
+        {
+          "domIdentity": "tableMasterItem",
+          "dispatchName": "MasterItemView"
+        },
+        {
+          "domIdentity": "btnAddItem",
+          "dispatchName": "MasterItemAdd"
+        },
+        {
+          "domIdentity": "btnEditItem",
+          "dispatchName": "MasterItemEdit"
+        },
+        {
+          "domIdentity": "btnDeleteItem",
+          "dispatchName": "MasterItemDelete"
+        },
+        {
+          "domIdentity": "btnImportMasterItem",
+          "dispatchName": "MasterItemImport"
+        },
+        {
+          "domIdentity": "tableStockPoint",
+          "dispatchName": "MasterStockPointView"
+        },
+        {
+          "domIdentity": "btnAddStockPoint",
+          "dispatchName": "MasterStockPointAdd"
+        },
+        {
+          "domIdentity": "btnEditStockPoint",
+          "dispatchName": "MasterStockPointEdit"
+        },
+        {
+          "domIdentity": "btnDeleteStockPoint",
+          "dispatchName": "MasterStockPointDelete"
+        },
+        {
+          "domIdentity": "btnAddPolyclinic",
+          "dispatchName": "MASTER_POLYCLINIC_ADD"
+        },
+        {
+          "domIdentity": "btnEditPolyclinic",
+          "dispatchName": "MASTER_POLYCLINIC_EDIT"
+        },
+        {
+          "domIdentity": "btnAddItem",
+          "dispatchName": "ITEM_ADD"
+        },
+        {
+          "domIdentity": "btnEditItem",
+          "dispatchName": "ITEM_EDIT"
+        },
+        {
+          "domIdentity": "btnAddItemCategory",
+          "dispatchName": "MASTER_ITEM_CATEGORY_ADD"
+        },
+        {
+          "domIdentity": "btnEditItemCategory",
+          "dispatchName": "MASTER_ITEM_CATEOGRY_EDIT"
+        },
+        {
+          "domIdentity": "btni18nEdit",
+          "dispatchName": "i18nEdit"
+        },
+        {
+          "domIdentity": "btni18nAdd",
+          "dispatchName": "i18nAdd"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderAdd",
+          "dispatchName": "PurchaseOrderAdd"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderEdit",
+          "dispatchName": "PurchaseOrderEdit"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderDelete",
+          "dispatchName": "PurchaseOrderDelete"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderAskApproval",
+          "dispatchName": "PurchaseOrderAsk_approval"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderAskApprove",
+          "dispatchName": "PurchaseOrderApprove"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderAskDecline",
+          "dispatchName": "PurchaseOrderDecline"
+        },
+        {
+          "domIdentity": "btnGeneralReceiveNoteEdit",
+          "dispatchName": "GeneralReceiveNoteEdit"
+        },
+        {
+          "domIdentity": "btnStockAssign",
+          "dispatchName": "StockAssign_stock"
+        },
+        {
+          "domIdentity": "tableStockBalance",
+          "dispatchName": "StockBalance"
+        },
+        {
+          "domIdentity": "btnStockInitialize",
+          "dispatchName": "StockInitialize"
+        },
+        {
+          "domIdentity": "btnStockTransfer",
+          "dispatchName": "StockTransfer"
+        },
+        {
+          "domIdentity": "btnStockImport",
+          "dispatchName": "StockImport"
+        },
+        {
+          "domIdentity": "btnApplicationConfigurationAdd",
+          "dispatchName": "ApplicationConfigurationAdd"
+        },
+        {
+          "domIdentity": "btnApplicationConfigurationEdit",
+          "dispatchName": "ApplicationConfigurationEdit"
+        },
+        {
+          "domIdentity": "btnApplicationConfigurationDelete",
+          "dispatchName": "ApplicationConfigurationDelete"
+        },
+        {
+          "domIdentity": "btnGeneralReceiveNoteAdd",
+          "dispatchName": "GeneralReceiveNoteAdd"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderApprove",
+          "dispatchName": "PurchaseOrderApprove"
+        },
+        {
+          "domIdentity": "btnPurchaseOrderDecline",
+          "dispatchName": "PurchaseOrderDecline"
+        }
+      ],
+      "access": [
+        {
+          "id": "menu-6439639d334f96672465a89f",
+          "name": "Dashboard",
+          "url": "/",
+          "identifier": "Dashboard"
+        },
+        {
+          "id": "menu-643af5ba469b9a55b5d2c9be",
+          "name": "Inventory",
+          "url": "",
+          "identifier": "Inventory"
+        },
+        {
+          "id": "menu-643afed0469b9a55b5d2cbd5",
+          "name": "Material Requisition",
+          "url": "/inventory/material_requisition",
+          "identifier": "MaterialRequisition"
+        },
+        {
+          "id": "menu-643afe32469b9a55b5d2cba7",
+          "name": "General Receive Note",
+          "url": "/inventory/general_receive_note",
+          "identifier": "GeneralReceiveNote"
+        },
+        {
+          "id": "menu-643af9e9469b9a55b5d2cb2a",
+          "name": "Purchase Order",
+          "url": "/inventory/purchase_order",
+          "identifier": "PurchaseOrder"
+        },
+        {
+          "id": "menu-6439894d964e52ecda66f2f8",
+          "name": "Master Data",
+          "url": "",
+          "identifier": "Master"
+        },
+        {
+          "id": "menu-643c3663d3c66942a626b6ab",
+          "name": "Polyclinic Management",
+          "url": "/master/polyclinic",
+          "identifier": "PolyclinicManagement"
+        },
+        {
+          "id": "menu-64398975964e52ecda66f2fd",
+          "name": "Item Management",
+          "url": "",
+          "identifier": ""
+        },
+        {
+          "id": "menu-643c070b8a44bc1bccecabd7",
+          "name": "Item",
+          "url": "/master/item",
+          "identifier": "MasterItem"
+        },
+        {
+          "id": "menu-643c073d8a44bc1bccecac15",
+          "name": "Item Category",
+          "url": "/master/item/category",
+          "identifier": "MasterItemCategory"
+        },
+        {
+          "id": "menu-643c07558a44bc1bccecac36",
+          "name": "Item Brand",
+          "url": "/master/item/brand",
+          "identifier": "MasterItemBrand"
+        },
+        {
+          "id": "menu-643c38916d198727bfbf301d",
+          "name": "i18n",
+          "url": "/setting/i18n",
+          "identifier": "i18n"
+        },
+        {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        },
+        {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        },
+        {
+          "id": "menu-644c037c078b31bb71244080",
+          "name": "Application",
+          "url": "/application",
+          "identifier": "ApplicationConfiguration"
+        },
+        {
+          "id": "menu-6649fe6807b35431b06fbd8a",
+          "name": "Front Desk",
+          "url": "/front_desk",
+          "identifier": "FrontDesk"
+        },
+        {
+          "id": "menu-66521a358b572eb737229cc5",
+          "name": "Registration",
+          "url": "/front_desk/registration",
+          "identifier": "Registration"
+        },
+        {
+          "id": "menu-66521b838b572eb737229d57",
+          "name": "Ancillary Service",
+          "url": "",
+          "identifier": "AncillaryService"
+        },
+        {
+          "id": "menu-66521bcf8b572eb737229d8e",
+          "name": "Radiology",
+          "url": "/ancillary_service/radiology",
+          "identifier": "Radiology"
+        },
+        {
+          "id": "menu-66521ba18b572eb737229d72",
+          "name": "Laboratory",
+          "url": "/ancillary_service/laboratory",
+          "identifier": "Laboratory"
+        },
+        {
+          "id": "menu-66521bf18b572eb737229dab",
+          "name": "Pharmacy",
+          "url": "/ancillary_service/pharmacy",
+          "identifier": "Pharmacy"
+        },
+        {
+          "id": "menu-6651f086586688c661878d3b",
+          "name": "Nurse Station",
+          "url": "",
+          "identifier": "NurseStation"
+        },
+        {
+          "id": "menu-6651fd22dd429dde0552a1dd",
+          "name": "In Patient",
+          "url": "/nurse_station/inpatient",
+          "identifier": "NurseStationInpatient"
+        },
+        {
+          "id": "menu-6651fd94dd429dde0552a252",
+          "name": "Out Patient",
+          "url": "/nurse_station/outpatient",
+          "identifier": "NurseStationOutPatient"
+        },
+        {
+          "id": "menu-6652d371313f1eaaba85b930",
+          "name": "Clinical Service",
+          "url": "",
+          "identifier": "ClinicalService"
+        },
+        {
+          "id": "menu-6652d4d7313f1eaaba85ba0f",
+          "name": "Polyclinic Service",
+          "url": "/clinical_service/polyclinic_service",
+          "identifier": "PolyclinicService"
+        },
+        {
+          "id": "menu-6652d5aa313f1eaaba85ba2f",
+          "name": "Surgical Service",
+          "url": "/clinical_service/surgical_service",
+          "identifier": "SurgicalService"
+        }
+      ]
+    }
+  ],
+  "account": {
+    "signin": {}
+  }
+}

@@ -1,8 +1,10 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { IMasterQueue } from '@gateway_core/master/interface/master.queue'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { MasterQueueJoin } from '@schemas/master/master.queue.machine'
+import {
+  IMasterQueueMachine,
+  MasterQueueMachineJoin,
+} from '@schemas/master/master.queue.machine'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type OperationQueueDocument = HydratedDocument<OperationQueue>
@@ -11,14 +13,14 @@ export class OperationQueue {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
 
-  @Prop(MasterQueueJoin)
-  machine: IMasterQueue
+  @Prop(MasterQueueMachineJoin)
+  machine: IMasterQueueMachine
 
   @Prop({ type: SchemaTypes.Number })
   queue_number: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

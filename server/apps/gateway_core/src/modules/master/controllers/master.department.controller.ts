@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterDepartmentAddDTO,
   MasterDepartmentEditDTO,
@@ -89,7 +89,7 @@ export class MasterDepartmentController {
   })
   async add(
     @Body() parameter: MasterDepartmentAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ): Promise<GlobalResponse> {
     return await this.masterDepartmentService.add(parameter, account)
   }

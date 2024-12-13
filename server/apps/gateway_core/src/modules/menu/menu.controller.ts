@@ -69,6 +69,7 @@ export class MenuController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreMenu', action: 'view' })
   @ApiOperation({
     summary: 'Tree data',
     description: '',
@@ -82,6 +83,7 @@ export class MenuController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'CoreMenu', action: 'view' })
   @ApiOperation({
     summary: 'Tree manager data',
     description: '',

@@ -4,7 +4,7 @@ import {
   AccountAddDTO,
   AccountEditDTO,
 } from '@gateway_core/account/dto/account.dto'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { HttpStatus } from '@nestjs/common'
@@ -31,7 +31,7 @@ export const mockAccountService = {
   }),
   accountAdd: jest
     .fn()
-    .mockImplementation((dto: AccountAddDTO, account: IAccountCreatedBy) => {
+    .mockImplementation((dto: AccountAddDTO, account: IAccount) => {
       return Promise.resolve({
         payload: {
           ...dto,
@@ -80,7 +80,7 @@ export const mockAccount = (
   stock_point = [],
   access: IMenu[] = [],
   permission: IMenuPermission[] = [],
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

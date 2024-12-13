@@ -6,7 +6,8 @@ import { MasterItemCategoryController } from '@gateway_core/master/controllers/m
 import { MasterItemController } from '@gateway_core/master/controllers/master.item.controller'
 import { MasterItemSupplierController } from '@gateway_core/master/controllers/master.item.supplier.controller'
 import { MasterItemUnitController } from '@gateway_core/master/controllers/master.item.unit.controller'
-import { MasterQueueController } from '@gateway_core/master/controllers/master.queue.controller'
+import { MasterQueueMachineController } from '@gateway_core/master/controllers/master.queue.machine.controller'
+import { MasterReceptionistCounterController } from '@gateway_core/master/controllers/master.receptionist.counter.controller'
 import { MasterStockPointController } from '@gateway_core/master/controllers/master.stock.point.controller'
 import { MasterTreatmentController } from '@gateway_core/master/controllers/master.treatment.controller'
 import { MasterAssessmentFormService } from '@gateway_core/master/services/master.assessment.form.service'
@@ -16,7 +17,8 @@ import { MasterItemCategoryService } from '@gateway_core/master/services/master.
 import { MasterItemService } from '@gateway_core/master/services/master.item.service'
 import { MasterItemSupplierService } from '@gateway_core/master/services/master.item.supplier.service'
 import { MasterItemUnitService } from '@gateway_core/master/services/master.item.unit.service'
-import { MasterQueueService } from '@gateway_core/master/services/master.queue.service'
+import { MasterQueueMachineService } from '@gateway_core/master/services/master.queue.machine.service'
+import { MasterReceptionistCounterService } from '@gateway_core/master/services/master.receptionist.counter.service'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import { MasterTreatmentService } from '@gateway_core/master/services/master.treatment.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
@@ -56,10 +58,15 @@ import {
 } from '@schemas/master/master.item.unit'
 import { MongoMiddlewareMasterItemUnit } from '@schemas/master/master.item.unit.middleware'
 import {
-  MasterQueue,
-  MasterQueueSchema,
+  MasterQueueMachine,
+  MasterQueueMachineSchema,
 } from '@schemas/master/master.queue.machine'
-import { MongoMiddlewareMasterQueue } from '@schemas/master/master.queue.middleware'
+import { MongoMiddlewareMasterQueueMachine } from '@schemas/master/master.queue.machine.middleware'
+import {
+  MasterReceptionistCounter,
+  MasterReceptionistCounterSchema,
+} from '@schemas/master/master.receptionist.counter'
+import { MongoMiddlewareMasterReceptionistCounter } from '@schemas/master/master.receptionist.counter.middleware'
 import {
   MasterStockPoint,
   MasterStockPointSchema,
@@ -83,7 +90,11 @@ import { AuthModule } from '@security/auth.module'
         { name: MasterItemCategory.name, schema: MasterItemCategorySchema },
         { name: MasterItem.name, schema: MasterItemSchema },
 
-        { name: MasterQueue.name, schema: MasterQueueSchema },
+        { name: MasterQueueMachine.name, schema: MasterQueueMachineSchema },
+        {
+          name: MasterReceptionistCounter.name,
+          schema: MasterReceptionistCounterSchema,
+        },
 
         { name: MasterDepartment.name, schema: MasterDepartmentSchema },
         { name: MasterTreatment.name, schema: MasterTreatmentSchema },
@@ -104,7 +115,8 @@ import { AuthModule } from '@security/auth.module'
     MasterStockPointController,
     MasterItemUnitController,
     MasterItemController,
-    MasterQueueController,
+    MasterQueueMachineController,
+    MasterReceptionistCounterController,
     MasterDepartmentController,
     MasterTreatmentController,
     MasterAssessmentFormController,
@@ -117,7 +129,8 @@ import { AuthModule } from '@security/auth.module'
     MongoMiddlewareMasterItemCategory,
     MongoMiddlewareMasterItem,
 
-    MongoMiddlewareMasterQueue,
+    MongoMiddlewareMasterQueueMachine,
+    MongoMiddlewareMasterReceptionistCounter,
 
     MongoMiddlewareMasterDepartment,
     MongoMiddlewareMasterTreatment,
@@ -130,7 +143,8 @@ import { AuthModule } from '@security/auth.module'
     MasterStockPointService,
     MasterItemUnitService,
     MasterItemService,
-    MasterQueueService,
+    MasterQueueMachineService,
+    MasterReceptionistCounterService,
     MasterTreatmentService,
     MasterAssessmentFormService,
   ],
@@ -142,7 +156,8 @@ import { AuthModule } from '@security/auth.module'
     MasterStockPointService,
     MasterItemUnitService,
     MasterItemService,
-    MasterQueueService,
+    MasterQueueMachineService,
+    MasterReceptionistCounterService,
     MasterTreatmentService,
     MasterAssessmentFormService,
   ],

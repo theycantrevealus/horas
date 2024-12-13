@@ -1,12 +1,12 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { IMasterItem } from '@gateway_core/master/interface/master.item'
-import { IMasterItemBatch } from '@gateway_core/master/interface/master.item.batch'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { MasterItemJoin } from '@schemas/master/master.item'
-import { MasterItemBatchJoin } from '@schemas/master/master.item.batch'
+import { IMasterItemBatch } from '@schemas/master/master.item.batch.interface'
+import { MasterItemBatchJoin } from '@schemas/master/master.item.batch.join'
+import { IMasterItem } from '@schemas/master/master.item.interface'
+import { MasterItemJoin } from '@schemas/master/master.item.join'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export const InventoryStockInitDetail = raw({
@@ -48,7 +48,7 @@ export class InventoryStockInit {
   item: IInventoryStockInitDetail
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.String,

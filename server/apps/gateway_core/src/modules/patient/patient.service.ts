@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { PatientAddDTO } from '@gateway_core/patient/dto/patient.add'
 import { PatientEditDTO } from '@gateway_core/patient/dto/patient.edit'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
@@ -125,7 +125,7 @@ export class PatientService {
 
   async add(
     data: PatientAddDTO,
-    credential: IAccountCreatedBy
+    credential: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

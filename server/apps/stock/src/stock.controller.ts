@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Controller,
@@ -55,7 +55,7 @@ export class StockController implements OnModuleInit {
     // consumer: Consumer
   ) {
     try {
-      const account: IAccountCreatedBy = headers
+      const account: IAccount = headers
       if (key.method === 'stock_movement') {
         await this.stockService
           .stock_movement(payload, account)

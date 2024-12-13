@@ -11,7 +11,6 @@ class CoreService {
         }
       })
       .then((response) => {
-        console.log(response)
         const data: CoreResponse = response.data
         return Promise.resolve(data)
       })

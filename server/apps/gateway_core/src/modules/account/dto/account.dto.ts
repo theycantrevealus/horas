@@ -1,10 +1,10 @@
 import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { CMenu, CMenuPermission } from '@gateway_core/menu/dto/menu'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
 import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import { CAuthority, IAuthority } from '@schemas/account/authority.model'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { Type } from 'class-transformer'
 import {
   IsArray,
@@ -208,14 +208,38 @@ export class CAccount {
   id: string
 
   @ApiProperty({
-    type: String,
-    example: 'XX-XX',
+    example: 'johndoe@example.com',
+    description: '',
   })
-  code: string
+  @IsNotEmpty()
+  @IsEmail()
+  email?: string
 
   @ApiProperty({
-    type: String,
-    example: 'Drugs',
+    example: 'John',
+    description: '',
   })
-  name: string
+  @MinLength(3)
+  @IsNotEmpty()
+  @IsString()
+  first_name?: string
+
+  @ApiProperty({
+    example: 'Doe',
+    required: false,
+    description: '',
+  })
+  @IsString()
+  @IsOptional()
+  last_name?: string
+
+  @ApiProperty({
+    type: CMasterStockPoint,
+    description: 'Assigned stock point',
+    isArray: true,
+  })
+  @Type(() => CMasterStockPoint)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  stock_point?: IMasterStockPoint[]
 }

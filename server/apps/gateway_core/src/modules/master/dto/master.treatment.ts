@@ -1,11 +1,12 @@
+import { CLOV } from '@gateway_core/lov/dto/lov'
 import { ApiProperty } from '@nestjs/swagger'
-import { CLOV, ILOV } from '@schemas/lov/lov'
+import { ILOV } from '@schemas/lov/lov.interface'
 import {
   CMasterInsurance,
   IMasterInsurance,
 } from '@schemas/master/master.insurance'
 import { CMasterPartner, IMasterPartner } from '@schemas/master/master.partner'
-import { IMasterTreatmentPriceRate } from '@schemas/master/master.treatment'
+import { IMasterTreatmentPriceRate } from '@schemas/master/master.treatment.interface'
 import {
   IsNotEmpty,
   IsNumber,

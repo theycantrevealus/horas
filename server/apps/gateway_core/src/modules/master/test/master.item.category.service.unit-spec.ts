@@ -5,7 +5,6 @@ import {
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
 import { mockAuthority } from '@gateway_core/account/mock/authority.mock'
-import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
 import {
   masterItemCategoryDocArray,
   mockMasterItemCategory,
@@ -26,6 +25,7 @@ import {
   MasterItemCategory,
   MasterItemCategoryDocument,
 } from '@schemas/master/master.item.category'
+import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -8,7 +8,7 @@ export type LogActivityDocument = HydratedDocument<LogActivity>
 @Schema({ collection: 'core_log_activity' })
 export class LogActivity {
   @Prop(AccountJoin)
-  account: IAccountCreatedBy
+  account: IAccount
 
   @Prop({
     type: SchemaTypes.String,

@@ -1,0 +1,464 @@
+{
+  "account": {
+    "id": "account-63d51ede32795cb7a2a0eedd",
+    "code": "god001",
+    "first_name": "Hendry",
+    "last_name": "Tanaka",
+    "permission": [
+      {
+        "domIdentity": "tableAccount",
+        "dispatchName": "CoreAccountView",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
+      },
+      {
+        "domIdentity": "btnAccountAdd",
+        "dispatchName": "CoreAccountAdd",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
+      },
+      {
+        "domIdentity": "btnAccountEdit",
+        "dispatchName": "CoreAccountEdit",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
+      },
+      {
+        "domIdentity": "btnAccountDelete",
+        "dispatchName": "CoreAccountDelete",
+        "menu": {
+          "id": "menu-643aff26469b9a55b5d2cbf0",
+          "name": "Account",
+          "url": "/account",
+          "identifier": "Account"
+        }
+      },
+      {
+        "domIdentity": "tableMenu",
+        "dispatchName": "CoreMenuView",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
+      },
+      {
+        "domIdentity": "btnMenuAdd",
+        "dispatchName": "CoreMenuAdd",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
+      },
+      {
+        "domIdentity": "btnMenuEdit",
+        "dispatchName": "CoreMenuEdit",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
+      },
+      {
+        "domIdentity": "btnMenuDelete",
+        "dispatchName": "CoreMenuDelete",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
+      },
+      {
+        "domIdentity": "tablePatient",
+        "dispatchName": "PatientView"
+      },
+      {
+        "domIdentity": "tableQueue",
+        "dispatchName": "QueueMachine"
+      },
+      {
+        "domIdentity": "tableQueue",
+        "dispatchName": "QueueView"
+      },
+      {
+        "domIdentity": "btnAddQueue",
+        "dispatchName": "QueueAdd"
+      },
+      {
+        "domIdentity": "btnAddLOV",
+        "dispatchName": "LOVAdd"
+      },
+      {
+        "domIdentity": "btnEditLOV",
+        "dispatchName": "LOVEdit"
+      },
+      {
+        "domIdentity": "btnDeleteLOV",
+        "dispatchName": "LOVDelete"
+      },
+      {
+        "domIdentity": "btnAddItemBrand",
+        "dispatchName": "MasterItemBrandAdd"
+      },
+      {
+        "domIdentity": "btnEditItemBrand",
+        "dispatchName": "MasterItemBrandEdit"
+      },
+      {
+        "domIdentity": "tableMasterItem",
+        "dispatchName": "MasterItemView"
+      },
+      {
+        "domIdentity": "btnAddItem",
+        "dispatchName": "MasterItemAdd"
+      },
+      {
+        "domIdentity": "btnEditItem",
+        "dispatchName": "MasterItemEdit"
+      },
+      {
+        "domIdentity": "btnDeleteItem",
+        "dispatchName": "MasterItemDelete"
+      },
+      {
+        "domIdentity": "btnImportMasterItem",
+        "dispatchName": "MasterItemImport"
+      },
+      {
+        "domIdentity": "tableStockPoint",
+        "dispatchName": "MasterStockPointView"
+      },
+      {
+        "domIdentity": "btnAddStockPoint",
+        "dispatchName": "MasterStockPointAdd"
+      },
+      {
+        "domIdentity": "btnEditStockPoint",
+        "dispatchName": "MasterStockPointEdit"
+      },
+      {
+        "domIdentity": "btnDeleteStockPoint",
+        "dispatchName": "MasterStockPointDelete"
+      },
+      {
+        "domIdentity": "btnAddPolyclinic",
+        "dispatchName": "MASTER_POLYCLINIC_ADD"
+      },
+      {
+        "domIdentity": "btnEditPolyclinic",
+        "dispatchName": "MASTER_POLYCLINIC_EDIT"
+      },
+      {
+        "domIdentity": "btnAddItem",
+        "dispatchName": "ITEM_ADD"
+      },
+      {
+        "domIdentity": "btnEditItem",
+        "dispatchName": "ITEM_EDIT"
+      },
+      {
+        "domIdentity": "btnAddQueueMachine",
+        "dispatchName": "MasterQueueMachineAdd"
+      },
+      {
+        "domIdentity": "btnEditQueueMachine",
+        "dispatchName": "MasterQueueMachineEdit"
+      },
+      {
+        "domIdentity": "btnDeleteQueueMachine",
+        "dispatchName": "MasterQueueMachineDelete"
+      },
+      {
+        "domIdentity": "btnAddItemCategory",
+        "dispatchName": "MASTER_ITEM_CATEGORY_ADD"
+      },
+      {
+        "domIdentity": "btnEditItemCategory",
+        "dispatchName": "MASTER_ITEM_CATEOGRY_EDIT"
+      },
+      {
+        "domIdentity": "btni18nEdit",
+        "dispatchName": "i18nEdit"
+      },
+      {
+        "domIdentity": "btni18nAdd",
+        "dispatchName": "i18nAdd"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderAdd",
+        "dispatchName": "PurchaseOrderAdd"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderEdit",
+        "dispatchName": "PurchaseOrderEdit"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderDelete",
+        "dispatchName": "PurchaseOrderDelete"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderAskApproval",
+        "dispatchName": "PurchaseOrderAsk_approval"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderAskApprove",
+        "dispatchName": "PurchaseOrderApprove"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderAskDecline",
+        "dispatchName": "PurchaseOrderDecline"
+      },
+      {
+        "domIdentity": "btnGeneralReceiveNoteEdit",
+        "dispatchName": "GeneralReceiveNoteEdit"
+      },
+      {
+        "domIdentity": "btnStockAssign",
+        "dispatchName": "StockAssign_stock"
+      },
+      {
+        "domIdentity": "tableStockBalance",
+        "dispatchName": "StockBalance"
+      },
+      {
+        "domIdentity": "btnStockInitialize",
+        "dispatchName": "StockInitialize"
+      },
+      {
+        "domIdentity": "btnStockTransfer",
+        "dispatchName": "StockTransfer"
+      },
+      {
+        "domIdentity": "btnStockImport",
+        "dispatchName": "StockImport"
+      },
+      {
+        "domIdentity": "btnApplicationConfigurationAdd",
+        "dispatchName": "ApplicationConfigurationAdd"
+      },
+      {
+        "domIdentity": "btnApplicationConfigurationEdit",
+        "dispatchName": "ApplicationConfigurationEdit"
+      },
+      {
+        "domIdentity": "btnApplicationConfigurationDelete",
+        "dispatchName": "ApplicationConfigurationDelete"
+      },
+      {
+        "domIdentity": "btnGeneralReceiveNoteAdd",
+        "dispatchName": "GeneralReceiveNoteAdd"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderApprove",
+        "dispatchName": "PurchaseOrderApprove"
+      },
+      {
+        "domIdentity": "btnPurchaseOrderDecline",
+        "dispatchName": "PurchaseOrderDecline"
+      }
+    ],
+    "access": [
+      {
+        "id": "menu-6439639d334f96672465a89f",
+        "name": "Dashboard",
+        "url": "/",
+        "identifier": "Dashboard"
+      },
+      {
+        "id": "menu-643af5ba469b9a55b5d2c9be",
+        "name": "Inventory",
+        "url": "",
+        "identifier": "Inventory"
+      },
+      {
+        "id": "menu-643afed0469b9a55b5d2cbd5",
+        "name": "Material Requisition",
+        "url": "/inventory/material_requisition",
+        "identifier": "MaterialRequisition"
+      },
+      {
+        "id": "menu-643afe32469b9a55b5d2cba7",
+        "name": "General Receive Note",
+        "url": "/inventory/general_receive_note",
+        "identifier": "GeneralReceiveNote"
+      },
+      {
+        "id": "menu-643af9e9469b9a55b5d2cb2a",
+        "name": "Purchase Order",
+        "url": "/inventory/purchase_order",
+        "identifier": "PurchaseOrder"
+      },
+      {
+        "id": "menu-6439894d964e52ecda66f2f8",
+        "name": "Master Data",
+        "url": "",
+        "identifier": "Master"
+      },
+      {
+        "id": "menu-643c3663d3c66942a626b6ab",
+        "name": "Polyclinic Management",
+        "url": "/master/polyclinic",
+        "identifier": "PolyclinicManagement"
+      },
+      {
+        "id": "menu-64398975964e52ecda66f2fd",
+        "name": "Item Management",
+        "url": "",
+        "identifier": ""
+      },
+      {
+        "id": "menu-643c070b8a44bc1bccecabd7",
+        "name": "Item",
+        "url": "/master/item",
+        "identifier": "MasterItem"
+      },
+      {
+        "id": "menu-643c073d8a44bc1bccecac15",
+        "name": "Item Category",
+        "url": "/master/item/category",
+        "identifier": "MasterItemCategory"
+      },
+      {
+        "id": "menu-643c07558a44bc1bccecac36",
+        "name": "Item Brand",
+        "url": "/master/item/brand",
+        "identifier": "MasterItemBrand"
+      },
+      {
+        "id": "menu-643c38916d198727bfbf301d",
+        "name": "i18n",
+        "url": "/setting/i18n",
+        "identifier": "i18n"
+      },
+      {
+        "id": "menu-643a68c5e6f975d6f3a5b131",
+        "name": "Menu",
+        "url": "/core/menu",
+        "identifier": "Menu"
+      },
+      {
+        "id": "menu-643aff26469b9a55b5d2cbf0",
+        "name": "Account",
+        "url": "/account",
+        "identifier": "Account"
+      },
+      {
+        "id": "menu-644c037c078b31bb71244080",
+        "name": "Application",
+        "url": "/application",
+        "identifier": "ApplicationConfiguration"
+      },
+      {
+        "id": "menu-6649fe6807b35431b06fbd8a",
+        "name": "Front Desk",
+        "url": "/front_desk",
+        "identifier": "FrontDesk"
+      },
+      {
+        "id": "menu-66521a358b572eb737229cc5",
+        "name": "Registration",
+        "url": "/front_desk/registration",
+        "identifier": "Registration"
+      },
+      {
+        "id": "menu-66521b838b572eb737229d57",
+        "name": "Ancillary Service",
+        "url": "",
+        "identifier": "AncillaryService"
+      },
+      {
+        "id": "menu-66521bcf8b572eb737229d8e",
+        "name": "Radiology",
+        "url": "/ancillary_service/radiology",
+        "identifier": "Radiology"
+      },
+      {
+        "id": "menu-66521ba18b572eb737229d72",
+        "name": "Laboratory",
+        "url": "/ancillary_service/laboratory",
+        "identifier": "Laboratory"
+      },
+      {
+        "id": "menu-66521bf18b572eb737229dab",
+        "name": "Pharmacy",
+        "url": "/ancillary_service/pharmacy",
+        "identifier": "Pharmacy"
+      },
+      {
+        "id": "menu-6651f086586688c661878d3b",
+        "name": "Nurse Station",
+        "url": "",
+        "identifier": "NurseStation"
+      },
+      {
+        "id": "menu-6651fd22dd429dde0552a1dd",
+        "name": "In Patient",
+        "url": "/nurse_station/inpatient",
+        "identifier": "NurseStationInpatient"
+      },
+      {
+        "id": "menu-6651fd94dd429dde0552a252",
+        "name": "Out Patient",
+        "url": "/nurse_station/outpatient",
+        "identifier": "NurseStationOutPatient"
+      },
+      {
+        "id": "menu-6652d371313f1eaaba85b930",
+        "name": "Clinical Service",
+        "url": "",
+        "identifier": "ClinicalService"
+      },
+      {
+        "id": "menu-6652d4d7313f1eaaba85ba0f",
+        "name": "Polyclinic Service",
+        "url": "/clinical_service/polyclinic_service",
+        "identifier": "PolyclinicService"
+      },
+      {
+        "id": "menu-6652d5aa313f1eaaba85ba2f",
+        "name": "Surgical Service",
+        "url": "/clinical_service/surgical_service",
+        "identifier": "SurgicalService"
+      },
+      {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov",
+        "identifier": "LOV"
+      },
+      {
+        "id": "menu-67558002ba7667cd569ed451",
+        "name": "Queue Management",
+        "url": "/master/queue_machine",
+        "identifier": "MasterQueueMachine"
+      }
+    ]
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIxYjVkODU2LWQ4M2YtNGY4Ny05YTBmLWU5MGFlMGNjZWU3ZiIsImN1cnJlbnRUaW1lIjoiMjAyNC0xMi0wM1QxNDoxNTowMy4wMDBaIiwiYWNjb3VudCI6eyJpZCI6ImFjY291bnQtNjNkNTFlZGUzMjc5NWNiN2EyYTBlZWRkIiwiZW1haWwiOiJ0YWthc2hpdGFuYWthQGhvcmFzLmNvbSIsImZpcnN0X25hbWUiOiJIZW5kcnkiLCJsYXN0X25hbWUiOiJUYW5ha2EiLCJzdG9ja19wb2ludCI6W119LCJpYXQiOjE3MzMyMzUzMDMsImV4cCI6MTczNTgyNzMwM30.vVvExNDqh5W3AT15eEpiq9cg5RSMciF8-w9tgy-lj1o",
+  "config": {
+    "0": null,
+    "1": null,
+    "2": null,
+    "3": null,
+    "4": null,
+    "5": null,
+    "6": null
+  }
+}

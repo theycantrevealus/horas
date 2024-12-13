@@ -5,7 +5,7 @@ import {
   AuthorityAddDTO,
   AuthorityEditDTO,
 } from '@gateway_core/account/dto/authority.dto'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -86,7 +86,7 @@ export class AuthorityController {
   })
   async add(
     @Body() parameter: AuthorityAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.authorityService.add(parameter, account)
   }

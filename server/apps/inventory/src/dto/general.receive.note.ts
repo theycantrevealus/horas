@@ -1,11 +1,11 @@
 import { ICurrency } from '@gateway_core/i18n/interface/i18n'
-import { CCurrency } from '@gateway_core/i18n/schemas/i18n'
 import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
 import { CPurchaseOrder } from '@gateway_inventory/purchase_order/dto/purchase.order'
 import { CGeneralReceiveNoteDetail } from '@inventory/dto/general.receive.note.detail'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { ApiProperty } from '@nestjs/swagger'
+import { CCurrency } from '@schemas/i18n/i18n'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { Type } from 'class-transformer'
 import {
   IsNotEmpty,

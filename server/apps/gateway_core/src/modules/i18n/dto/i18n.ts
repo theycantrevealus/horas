@@ -1,5 +1,5 @@
-import { Ci18nComponent } from '@gateway_core/i18n/schemas/i18n'
 import { ApiProperty } from '@nestjs/swagger'
+import { Ci18nComponent } from '@schemas/i18n/i18n'
 import {
   IsNotEmpty,
   IsNumber,

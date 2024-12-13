@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ArgumentsHost, HttpStatus } from '@nestjs/common'
 import { GlobalResponse } from '@utility/dto/response'
 import { isExpressRequest } from '@utility/http'
@@ -77,7 +77,7 @@ export async function errorHttpHandler(
       exception['response']?.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR
   }
 
-  const account: IAccountCreatedBy = request.credential
+  const account: IAccount = request.credential
   const dataSet: HorasLogging = {
     ip: request.ip ?? '',
     path: request.url ?? '',

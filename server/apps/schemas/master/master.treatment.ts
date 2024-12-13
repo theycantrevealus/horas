@@ -1,42 +1,17 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { ILOV, LOVJoin } from '@schemas/lov/lov'
-import {
-  IMasterInsurance,
-  MasterInsuranceJoin,
-} from '@schemas/master/master.insurance'
+import { ILOV } from '@schemas/lov/lov.interface'
+import { LOVJoin } from '@schemas/lov/lov.join'
 import {
   IMasterPartner,
   MasterPartnerJoin,
 } from '@schemas/master/master.partner'
+import { IMasterTreatmentPriceRate } from '@schemas/master/master.treatment.interface'
+import { MasterTreatmentPriceRateJoin } from '@schemas/master/master.treatment.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterTreatmentDocument = HydratedDocument<MasterTreatment>
-
-export const MasterTreatmentPriceRateJoin = raw({
-  insurance: { type: MasterInsuranceJoin },
-  rate: { type: LOVJoin },
-  price: { type: Number },
-})
-
-export interface IMasterTreatmentPriceRate {
-  insurance: IMasterInsurance
-  rate: ILOV
-  price: number
-}
-
-export const MasterTreatmentJoin = raw({
-  id: { type: String },
-  code: { type: String },
-  name: { type: String },
-})
-
-export interface IMasterTreatment {
-  id: string
-  code: string
-  name: string
-}
 
 @Schema({ collection: 'master_treatment' })
 export class MasterTreatment {
@@ -77,7 +52,7 @@ export class MasterTreatment {
   partner: IMasterPartner[]
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

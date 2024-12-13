@@ -1,6 +1,6 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -115,7 +115,7 @@ export class PurchaseOrderController {
   })
   async add(
     @Body() parameter: PurchaseOrderAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.add(parameter, account)
   }
@@ -137,7 +137,7 @@ export class PurchaseOrderController {
   async ask_approval(
     @Body() parameter: PurchaseOrderApproval,
     @Param() param: any,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.askApproval(
       parameter,
@@ -163,7 +163,7 @@ export class PurchaseOrderController {
   async approve(
     @Body() parameter: PurchaseOrderApproval,
     @Param() param: any,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.approve(parameter, param.id, account)
   }
@@ -185,7 +185,7 @@ export class PurchaseOrderController {
   async decline(
     @Body() parameter: PurchaseOrderApproval,
     @Param() param: any,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.decline(parameter, param.id, account)
   }
@@ -207,7 +207,7 @@ export class PurchaseOrderController {
   async edit(
     @Body() parameter: PurchaseOrderEditDTO,
     @Param() param: any,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.purchaseOrderService.edit(parameter, param.id, account)
   }
@@ -228,7 +228,7 @@ export class PurchaseOrderController {
   })
   async delete(
     @Param() param: any,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
     // @Req() request,
   ): Promise<GlobalResponse> {
     return await this.purchaseOrderService.delete(param.id, account)

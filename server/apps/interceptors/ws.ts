@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CallHandler, ExecutionContext, HttpStatus } from '@nestjs/common'
 import { PATH_METADATA } from '@nestjs/common/constants'
 import { Reflector } from '@nestjs/core'
@@ -39,7 +39,7 @@ export async function wsInterceptor(
     await authService.validate_token({
       token: token,
     })
-  const account: IAccountCreatedBy = decodeTokenResponse.account
+  const account: IAccount = decodeTokenResponse.account
 
   const dataSet: HorasLogging = {
     ip: request.ip ?? request.handshake.headers.host,

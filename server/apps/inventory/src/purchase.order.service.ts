@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -50,7 +50,7 @@ export class PurchaseOrderService {
   async add(
     generatedID: string,
     payload: PurchaseOrderAddDTO,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     /*
      * #1. Prepare for the data

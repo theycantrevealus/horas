@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ArgumentsHost, HttpStatus } from '@nestjs/common'
 import { KafkaContext } from '@nestjs/microservices'
 import { GlobalResponse } from '@utility/dto/response'
@@ -74,7 +74,7 @@ export async function errorRpcHandler(
     statusCode = HttpStatus.BAD_REQUEST
   }
 
-  const account: IAccountCreatedBy = request.credential
+  const account: IAccount = request.credential
   const dataSet: HorasLogging = {
     ip: `${path}_${partition}_${offset}`,
     path: path ?? '',

@@ -1,7 +1,7 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { i18nComponent, Ii18nComponent } from '@gateway_core/i18n/schemas/i18n'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
+import { i18nComponent, Ii18nComponent } from '@schemas/i18n/i18n'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type BPJSSPRIDocument = HydratedDocument<BPJSSPRI>
@@ -120,7 +120,7 @@ export class BPJSSPRI {
   components: Ii18nComponent[]
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

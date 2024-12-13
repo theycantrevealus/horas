@@ -247,6 +247,9 @@ export default {
           this.totalRecords = 0
         }
         this.loading = false
+      }).catch(() => {
+        this.items = []
+        this.loading = false
       })
     },
     onPage(event) {

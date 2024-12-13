@@ -1,9 +1,9 @@
 import { CAccount } from '@gateway_core/account/dto/account.dto'
-import { IDoctor } from '@gateway_core/account/interface/account'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CMasterTreatment } from '@gateway_core/master/dto/master.treatment'
 import { ApiProperty } from '@nestjs/swagger'
-import { IDepartmentConfiguration } from '@schemas/master/master.department'
-import { IMasterTreatment } from '@schemas/master/master.treatment'
+import { IDepartmentConfiguration } from '@schemas/master/master.department.interface'
+import { IMasterTreatment } from '@schemas/master/master.treatment.interface'
 import { Type } from 'class-transformer'
 import {
   IsArray,
@@ -67,7 +67,7 @@ export class CDepartmentConfiguration {
   @Type(() => CAccount)
   @ValidateNested({ each: true })
   @IsArray()
-  doctor: IDoctor[]
+  doctor: IAccount[]
 }
 
 export class MasterDepartmentAddDTO {

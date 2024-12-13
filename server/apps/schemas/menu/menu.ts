@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMenuGroup } from '@gateway_core/menu/interfaces/menu.group.interface'
 import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
@@ -75,7 +75,7 @@ export class Menu {
   parent: string
 
   @Prop({ type: AccountJoin })
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

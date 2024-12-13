@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { PatientAddDTO } from '@gateway_core/patient/dto/patient.add'
 import { PatientEditDTO } from '@gateway_core/patient/dto/patient.edit'
 import { Patient, PatientDocument } from '@schemas/patient/patient'
@@ -65,7 +65,7 @@ export const mockPatient = (
     mother_name: 'Marry',
     father_name: 'Andy',
   },
-  created_by: IAccountCreatedBy = {
+  created_by: IAccount = {
     id: `account-${new Types.ObjectId()}`,
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),

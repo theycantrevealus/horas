@@ -1,4 +1,4 @@
-import { IMasterItem } from '@gateway_core/master/interface/master.item'
+import { IMasterItem } from '@schemas/master/master.item.interface'
 
 export interface IPurchaseOrderDetail {
   item: IMasterItem

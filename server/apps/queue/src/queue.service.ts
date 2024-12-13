@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { QueueAddDTO } from '@gateway_core/operation/queue/dto/queue'
 import {
   OperationQueue,
@@ -23,7 +23,7 @@ export class ConsumerQueueService {
   async add(
     generatedID: string,
     data: QueueAddDTO,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

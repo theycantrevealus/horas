@@ -2,7 +2,7 @@ import {
   AuthorityAddDTO,
   AuthorityEditDTO,
 } from '@gateway_core/account/dto/authority.dto'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
@@ -184,7 +184,7 @@ export class AuthorityService {
 
   async add(
     data: AuthorityAddDTO,
-    credential: IAccountCreatedBy
+    credential: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

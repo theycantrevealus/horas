@@ -196,7 +196,7 @@ export default {
     } else {
       document.querySelector('body').classList.remove('dark')
     }
-    // this.loadLanguage()
+    this.loadLanguage()
   },
   methods: {
     ...mapActions({

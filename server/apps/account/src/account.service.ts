@@ -2,7 +2,7 @@ import {
   AccountAddDTO,
   AccountEditDTO,
 } from '@gateway_core/account/dto/account.dto'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
@@ -24,7 +24,7 @@ export class AccountService {
   async accountAdd(
     data: AccountAddDTO,
     generatedID: string,
-    credential: IAccountCreatedBy
+    credential: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

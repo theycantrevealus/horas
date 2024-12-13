@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Controller,
@@ -66,7 +66,7 @@ export class PurchaseOrderController implements OnModuleInit {
     // console.log(`Header    : ${JSON.stringify(headers, null, 2)}`)
 
     try {
-      const account: IAccountCreatedBy = headers
+      const account: IAccount = headers
       if (key.method) {
         if (key.method === 'create') {
           await this.purchaseOrderService

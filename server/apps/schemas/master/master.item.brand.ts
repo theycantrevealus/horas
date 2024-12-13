@@ -1,7 +1,7 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type MasterItemBrandDocument = HydratedDocument<MasterItemBrand>
 
@@ -20,7 +20,7 @@ export class MasterItemBrand {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,
@@ -42,9 +42,3 @@ export class MasterItemBrand {
 
 export const MasterItemBrandSchema =
   SchemaFactory.createForClass(MasterItemBrand)
-
-export const MasterItemBrandJoin = raw({
-  id: { type: String, example: `item-${new Types.ObjectId().toString()}` },
-  code: { type: String, example: 'BRD00001' },
-  name: { type: String, example: 'PHARMACON' },
-})

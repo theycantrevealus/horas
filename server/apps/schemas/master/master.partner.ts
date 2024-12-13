@@ -1,9 +1,9 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { IMasterItem } from '@gateway_core/master/interface/master.item'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { MasterItemJoin } from '@schemas/master/master.item'
+import { IMasterItem } from '@schemas/master/master.item.interface'
+import { MasterItemJoin } from '@schemas/master/master.item.join'
 import { IsNotEmpty, IsString } from 'class-validator'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
@@ -63,7 +63,7 @@ export class MasterPartner {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,

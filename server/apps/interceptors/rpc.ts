@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CallHandler, ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { KafkaContext } from '@nestjs/microservices'
@@ -26,7 +26,7 @@ export async function rpcInterceptor(
   const offset = kafkaContext.offset
 
   const now = Date.now()
-  const account: IAccountCreatedBy = response.account
+  const account: IAccount = response.account
 
   const dataSet: HorasLogging = {
     ip: `${path}_${partition}_${offset}`,

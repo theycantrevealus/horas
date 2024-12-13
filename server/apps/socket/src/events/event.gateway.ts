@@ -81,7 +81,7 @@ export class EventsGateway
      * */
 
     // this.logger.verbose(`Data from ${client.id} : ${JSON.stringify(data)}`)
-    console.log(data)
+    console.log(JSON.stringify(data, null, 2))
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.notify_result.data'),
       data
@@ -143,9 +143,8 @@ export class EventsGateway
   }
 
   async handleDisconnect(client: any, ...args: any[]) {
-    const connectedClients: IConfig = await this.cacheManager.get(
-      'CONNECTED_SOCKET'
-    )
+    const connectedClients: IConfig =
+      await this.cacheManager.get('CONNECTED_SOCKET')
 
     const clientMeta = connectedClients.setter
     delete clientMeta[client.id]
@@ -156,9 +155,8 @@ export class EventsGateway
   }
 
   async handleConnection(client: any, ...args: any[]) {
-    const connectedClients: IConfig = await this.cacheManager.get(
-      'CONNECTED_SOCKET'
-    )
+    const connectedClients: IConfig =
+      await this.cacheManager.get('CONNECTED_SOCKET')
 
     const token: string = client.handshake.headers.authorization
       .split('Bearer')[1]

@@ -5,7 +5,7 @@ import {
   AccountEditDTO,
 } from '@gateway_core/account/dto/account.dto'
 import { AccountSignInDTO } from '@gateway_core/account/dto/account.signin.dto'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -90,7 +90,7 @@ export class AccountController {
   })
   async add(
     @Body() parameter: AccountAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
     // @AccountToken() token: string
   ): Promise<GlobalResponse> {
     return await this.accountService.accountAdd(parameter, account)
@@ -191,7 +191,7 @@ export class AccountController {
   // })
   // async authorityAdd(
   //   @Body() parameter: AuthorityAddDTO,
-  //   @CredentialAccount() account: IAccountCreatedBy
+  //   @CredentialAccount() account: IAccount
   // ) {
   //   return await this.accountService
   //     .authorityAdd(parameter, account)

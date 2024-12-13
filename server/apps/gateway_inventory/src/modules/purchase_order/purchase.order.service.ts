@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
@@ -85,7 +85,7 @@ export class PurchaseOrderService {
 
   async add(
     payload: PurchaseOrderAddDTO,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -202,7 +202,7 @@ export class PurchaseOrderService {
   async askApproval(
     data: PurchaseOrderApproval,
     id: string,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -265,7 +265,7 @@ export class PurchaseOrderService {
   async approve(
     data: PurchaseOrderApproval,
     id: string,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -337,7 +337,7 @@ export class PurchaseOrderService {
   async decline(
     data: PurchaseOrderApproval,
     id: string,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -404,7 +404,7 @@ export class PurchaseOrderService {
   async edit(
     data: PurchaseOrderEditDTO,
     id: string,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {
@@ -453,10 +453,7 @@ export class PurchaseOrderService {
     return response
   }
 
-  async delete(
-    id: string,
-    account: IAccountCreatedBy
-  ): Promise<GlobalResponse> {
+  async delete(id: string, account: IAccount): Promise<GlobalResponse> {
     const response = {
       statusCode: {
         defaultCode: HttpStatus.OK,

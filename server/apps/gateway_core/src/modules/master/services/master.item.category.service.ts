@@ -1,9 +1,8 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemCategoryAddDTO,
   MasterItemCategoryEditDTO,
 } from '@gateway_core/master/dto/master.item.category'
-import { IMasterItemCategory } from '@gateway_core/master/interface/master.item.category'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
@@ -12,6 +11,7 @@ import {
   MasterItemCategory,
   MasterItemCategoryDocument,
 } from '@schemas/master/master.item.category'
+import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
@@ -145,7 +145,7 @@ export class MasterItemCategoryService {
 
   async add(
     data: MasterItemCategoryAddDTO,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

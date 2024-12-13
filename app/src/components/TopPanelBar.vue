@@ -32,11 +32,12 @@
           </div>
 
           <Dropdown
+            v-if="selectedLanguage"
             v-model="selectedLanguage"
-            class="country-selector dark"
-            :options="countries"
-            optionLabel="name"
             :filter="true"
+            :options="countries"
+            class="country-selector dark"
+            optionLabel="name"
             placeholder="Select a Country"
             @change="changeLanguage()"
           >
@@ -46,8 +47,8 @@
                 class="country-item country-item-value"
               >
                 <img
+                  :class="'flag flag-' + slotProps.value.code.toLowerCase() ?? ''"
                   :src="require('@/assets/flag_placeholder.png')"
-                  :class="'flag flag-' + slotProps.value.code.toLowerCase()"
                   width="18"
                 />
                 <div>{{slotProps.value.name}}</div>
@@ -59,8 +60,8 @@
             <template #option="slotProps">
               <div class="country-item">
                 <img
-                  :src="require('@/assets/flag_placeholder.png')"
                   :class="'flag flag-' + slotProps.option.code.toLowerCase()"
+                  :src="require('@/assets/flag_placeholder.png')"
                 />
                 <div>{{slotProps.option.name}}</div>
               </div>
@@ -313,8 +314,10 @@ export default {
   },
   created() {},
   async mounted() {
-    this.selectedLanguage = this.language
+
     await this.initLanguage()
+
+    this.selectedLanguage = this.language
   },
   methods: {
     ...mapActions({

@@ -5,7 +5,7 @@ import {
 } from '@gateway_core/3rdparty/bpjs/dto/applicares/kamar'
 import { BPJSApplicaresReferensiService } from '@gateway_core/3rdparty/bpjs/services/applicares/referensi.service'
 import { BPJSVClaimAuthService } from '@gateway_core/3rdparty/bpjs/services/vclaim/auth.service'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
 import {
   Body,
@@ -80,7 +80,7 @@ export class BPJSApplicaresReferensiController {
   })
   async kamarTersedia(
     @Param() parameter,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Res() response: FastifyReply
   ) {
     await this.bpjsApplicaresReference
@@ -105,7 +105,7 @@ export class BPJSApplicaresReferensiController {
   })
   async kamarCreate(
     @Body() parameter: ApplicaresKamarAdd,
-    @CredentialAccount() account: IAccountCreatedBy,
+    @CredentialAccount() account: IAccount,
     @Res() response: FastifyReply
   ) {
     await this.bpjsApplicaresReference

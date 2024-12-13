@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 
 // export class IPurchaseOrderApproval {
 //   @Prop({
@@ -19,12 +19,12 @@ import { IAccountCreatedBy } from '@gateway_core/account/interface/account.creat
 //   remark: string
 //
 //   @Prop(AccountJoin)
-//   created_by: IAccountCreatedBy
+//   created_by: IAccount
 // }
 
 export interface IPurchaseOrderApproval {
   status: string
   logged_at: Date
   remark: string
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 }

@@ -1,6 +1,5 @@
 import { AccountService } from '@gateway_core/account/account.service'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { IMasterStockPoint } from '@gateway_core/master/interface/master.stock.point'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import {
   StockAssignDTO,
@@ -19,6 +18,7 @@ import {
   InventoryStockInit,
   InventoryStockInitDocument,
 } from '@schemas/inventory/stock.init'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { GlobalResponse } from '@utility/dto/response'
 import { KafkaService } from '@utility/kafka/avro/service'
 import { modCodes } from '@utility/modules'
@@ -52,7 +52,7 @@ export class StockService {
 
   async stockTransfer(
     payload: StockTransferDTO,
-    account: IAccountCreatedBy,
+    account: IAccount,
     token: string
   ): Promise<GlobalResponse> {
     const response = {
@@ -126,7 +126,7 @@ export class StockService {
   async stockImport(
     filename: string,
     payload,
-    account: IAccountCreatedBy,
+    account: IAccount,
     token
   ): Promise<GlobalResponse> {
     const response = {
@@ -163,7 +163,7 @@ export class StockService {
 
   async stockInitiate(
     payload: StockInitiateDTO,
-    account: IAccountCreatedBy,
+    account: IAccount,
     token: string
   ): Promise<GlobalResponse> {
     const response = {
@@ -256,7 +256,7 @@ export class StockService {
 
   async assignStockPoint(
     payload: StockAssignDTO,
-    account: IAccountCreatedBy
+    account: IAccount
   ): Promise<GlobalResponse> {
     const response = {
       statusCode: {

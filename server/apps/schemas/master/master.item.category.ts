@@ -1,5 +1,5 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
@@ -20,7 +20,7 @@ export class MasterItemCategory {
   remark: string
 
   @Prop(AccountJoin)
-  created_by: IAccountCreatedBy
+  created_by: IAccount
 
   @Prop({
     type: SchemaTypes.Date,
@@ -42,9 +42,3 @@ export class MasterItemCategory {
 
 export const MasterItemCategorySchema =
   SchemaFactory.createForClass(MasterItemCategory)
-
-export const MasterItemCategoryJoin = raw({
-  id: { type: String },
-  code: { type: String },
-  name: { type: String },
-})

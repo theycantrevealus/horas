@@ -1,5 +1,5 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemUnitAddDTO,
   MasterItemUnitEditDTO,
@@ -79,7 +79,7 @@ export class MasterItemUnitController {
   })
   async add(
     @Body() parameter: MasterItemUnitAddDTO,
-    @CredentialAccount() account: IAccountCreatedBy
+    @CredentialAccount() account: IAccount
   ) {
     return await this.masterItemUnitService.add(parameter, account)
   }

@@ -1,4 +1,4 @@
-import { IAccountCreatedBy } from '@gateway_core/account/interface/account.create_by'
+import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { raw } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { SchemaTypes } from 'mongoose'
@@ -13,7 +13,7 @@ export const DocumentHistoryJoin = raw({
 })
 
 export interface IDocumentHistory {
-  account: IAccountCreatedBy
+  account: IAccount
   loggedAt: Date
   oldValue: any
   newValue: any
