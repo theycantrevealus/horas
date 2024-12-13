@@ -102,6 +102,18 @@
         "dispatchName": "QueueAdd"
       },
       {
+        "domIdentity": "btnAddLOV",
+        "dispatchName": "LOVAdd"
+      },
+      {
+        "domIdentity": "btnEditLOV",
+        "dispatchName": "LOVEdit"
+      },
+      {
+        "domIdentity": "btnDeleteLOV",
+        "dispatchName": "LOVDelete"
+      },
+      {
         "domIdentity": "btnAddItemBrand",
         "dispatchName": "MasterItemBrandAdd"
       },
@@ -160,6 +172,18 @@
       {
         "domIdentity": "btnEditItem",
         "dispatchName": "ITEM_EDIT"
+      },
+      {
+        "domIdentity": "btnAddQueueMachine",
+        "dispatchName": "MasterQueueMachineAdd"
+      },
+      {
+        "domIdentity": "btnEditQueueMachine",
+        "dispatchName": "MasterQueueMachineEdit"
+      },
+      {
+        "domIdentity": "btnDeleteQueueMachine",
+        "dispatchName": "MasterQueueMachineDelete"
       },
       {
         "domIdentity": "btnAddItemCategory",
@@ -412,6 +436,18 @@
         "name": "Surgical Service",
         "url": "/clinical_service/surgical_service",
         "identifier": "SurgicalService"
+      },
+      {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov",
+        "identifier": "LOV"
+      },
+      {
+        "id": "menu-67558002ba7667cd569ed451",
+        "name": "Queue Management",
+        "url": "/master/queue_machine",
+        "identifier": "MasterQueueMachine"
       }
     ]
   },

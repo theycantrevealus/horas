@@ -230,11 +230,29 @@
             ]
           },
           {
+            "id": "menu-67558002ba7667cd569ed451",
+            "name": "Queue Management",
+            "url": "/master/queue_machine",
+            "icon": "medical_information",
+            "show_order": 2,
+            "show_on_menu": true,
+            "items": []
+          },
+          {
             "id": "menu-643c3663d3c66942a626b6ab",
             "name": "Polyclinic Management",
             "url": "/master/polyclinic",
             "icon": "medical_information",
-            "show_order": 2,
+            "show_order": 3,
+            "show_on_menu": true,
+            "items": []
+          },
+          {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov",
+            "icon": "medical_information",
+            "show_order": 999,
             "show_on_menu": true,
             "items": []
           }

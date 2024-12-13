@@ -13,14 +13,14 @@ module.exports = {
   target: 'node',
   devServer: {
     port: 3001,
-    https: {
-      ca: path.resolve(__dirname, 'certificates/CA.pem'),
-      pfx: path.resolve(__dirname, 'certificates/localhost.pfx'),
-      key: path.resolve(__dirname, 'certificates/localhost.decrypted.key'),
-      cert: path.resolve(__dirname, 'certificates/localhost.crt'),
-      passphrase: process.env.CA_PASS,
-      requestCert: true
-    },
+    // https: {
+    //   ca: path.resolve(__dirname, 'certificates/CA.pem'),
+    //   pfx: path.resolve(__dirname, 'certificates/localhost.pfx'),
+    //   key: path.resolve(__dirname, 'certificates/localhost.decrypted.key'),
+    //   cert: path.resolve(__dirname, 'certificates/localhost.crt'),
+    //   passphrase: process.env.CA_PASS,
+    //   requestCert: true
+    // },
     devMiddleware: {
       index: true,
       mimeTypes: {

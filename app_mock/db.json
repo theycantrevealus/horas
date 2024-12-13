@@ -1,5 +1,51 @@
 {
-  "tasks": [],
+  "lov": [
+    {
+      "id": "lov-xxx",
+      "name": "General",
+      "group": "QUEUE_TYPE",
+      "parent": "",
+      "value": "General",
+      "remark": "<p>General queue</p>",
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "lov-abc",
+      "name": "Special",
+      "group": "QUEUE_TYPE",
+      "parent": "",
+      "value": "Special",
+      "remark": "",
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    },
+    {
+      "name": "Urgent",
+      "group": "QUEUE_TYPE",
+      "parent": {
+        "id": "",
+        "name": ""
+      },
+      "value": "Urgent",
+      "remark": "",
+      "id": "DU5LPwr"
+    }
+  ],
   "item": [
     {
       "_id": "6432a7da9b8f79e8e41131a3",
@@ -116,6 +162,84 @@
       "name": "DUMIN RECTAL",
       "remark": "<p>DUMIN</p>",
       "id": "wVxmkja"
+    }
+  ],
+  "queue_machine": [
+    {
+      "id": "queue_machine-xxxx",
+      "code": "CODE",
+      "type": [
+        {
+          "id": "lov-xxxx",
+          "name": "Queue Machine Type"
+        }
+      ],
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    }
+  ],
+  "receptionist": [
+    {
+      "id": "receptionist-xxxx",
+      "code": "CODE",
+      "type": [
+        {
+          "id": "lov-xxxx",
+          "name": "Receptionist Type"
+        }
+      ],
+      "current_employee": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "current_queue": {},
+      "created_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
+    }
+  ],
+  "queue": [
+    {
+      "id": "queue-xxxx",
+      "queue_code": "CODE",
+      "queue": 10,
+      "type": {
+        "id": "lov-xxxx",
+        "name": "Receptionist Type"
+      },
+      "queue_machine": {
+        "id": "queue_machine-xxxx",
+        "code": "CODE"
+      },
+      "receptionist": {
+        "id": "receptionist-xxxx",
+        "code": "CODE"
+      },
+      "status": "New",
+      "processed_by": {
+        "id": "account-63d51ede32795cb7a2a0eedd",
+        "email": "johndoe@example.com",
+        "first_name": "UPDATEDDJohn",
+        "last_name": "DoeUPDATEDD"
+      },
+      "created_at": "2023-04-09T18:57:39.000Z",
+      "updated_at": "2023-04-09T18:57:39.000Z",
+      "deleted_at": null
     }
   ],
   "i18n": [
@@ -396,7 +520,6 @@
       "timezone": "Asia/Jakarta"
     }
   ],
-  "queue": [],
   "users": [
     {
       "id": "account-63d51ede32795cb7a2a0eedd",

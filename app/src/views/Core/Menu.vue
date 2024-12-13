@@ -443,22 +443,22 @@ export default defineComponent({
       this.ui.modal.manageFeature.state = !this.ui.modal.manageFeature.state
     },
     onNodeDelete(event, target: Number) {
-      this.$confirm.require({
-        target: event.currentTarget,
-        message: 'Are you sure to delete this menu?',
-        icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'button-danger',
-        acceptLabel: 'Yes. Delete it!',
-        rejectLabel: 'Cancel',
-        accept: () => {
-          return CoreService.menuDelete(target).then(() => {
-            this.reloadMenu()
-          })
-        },
-        reject: () => {
-          // callback to execute when user rejects the action
-        },
-      })
+      // this.$confirm.require({
+      //   target: event.currentTarget,
+      //   message: 'Are you sure to delete this menu?',
+      //   icon: 'pi pi-exclamation-triangle',
+      //   acceptClass: 'button-danger',
+      //   acceptLabel: 'Yes. Delete it!',
+      //   rejectLabel: 'Cancel',
+      //   accept: () => {
+      //     return CoreService.menuDelete(target).then(() => {
+      //       this.reloadMenu()
+      //     })
+      //   },
+      //   reject: () => {
+      //     // callback to execute when user rejects the action
+      //   },
+      // })
     },
     onNodeEdit(target: any, mode: string) {
       const data = target.data

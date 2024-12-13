@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --host localhost",
-    "webpack:server": "webpack-dev-server --mode development --https",
+    "webpack:server": "webpack-dev-server --mode development --http",
     "build": "vue-cli-service build",
     "test:unit": "jest",
     "test:clearCache": "npx jest --clearCache",
@@ -44,6 +44,7 @@
     "prettier": "^3.2.5",
     "primeicons": "^7.0.0",
     "register-service-worker": "^1.7.2",
+    "tailwindcss-primeui": "^0.3.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "url": "^0.11.3",
