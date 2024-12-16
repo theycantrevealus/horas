@@ -69,3 +69,4 @@ pnpm-debug.log*
 **/*.csv
 **/*.ttf
 **/*.woff2
+**/*.zip
