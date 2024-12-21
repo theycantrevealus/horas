@@ -23,9 +23,9 @@ export const storeLogin = defineStore('signIn', () => {
           parentStore.auth.first_name = data.payload.account.first_name
           parentStore.auth.last_name = data.payload.account.last_name
           parentStore.auth.permission = data.payload.account.permission
-
-
-
+          parentStore.updatePermissionv2(data.payload.account.access)
+          // parentStore.updateAccess(data.payload.account)
+          // parentStore.updatePermission(data.payload.account)
         }
       })
       .catch((e: Error) => {

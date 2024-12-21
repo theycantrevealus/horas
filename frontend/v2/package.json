@@ -17,6 +17,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@material-design-icons/font": "^0.14.13",
     "@primevue/themes": "^4.2.5",
     "@types/nprogress": "^0.2.3",
     "@vuelidate/core": "^2.0.3",
@@ -24,6 +25,9 @@
     "axios": "^1.7.9",
     "ckeditor5": "^44.1.0",
     "https": "^1.0.0",
+    "material-icons.css": "link:material-icons/iconfont/material-icons.css",
+    "material-symbols": "^0.27.2",
+    "outlined.css": "link:@material-design-icons/font/outlined.css",
     "pinia": "^2.3.0",
     "pinia-plugin-persistedstate": "^4.2.0",
     "primeflex": "^3.3.1",
@@ -31,6 +35,7 @@
     "primevue": "^4.2.5",
     "secure-ls": "^2.0.0",
     "vue": "^3.5.13",
+    "vue-i18n": "^10.0.5",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {

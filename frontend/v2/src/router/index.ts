@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { storeCore } from '@/store/index.ts'
+import Builder from '@/components/Builder.vue'
 // import * as NProgress from 'nprogress'
 
 const router = createRouter({
@@ -7,11 +8,23 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'dashboard',
+      name: 'Builder',
+      component: Builder,
       meta: {
         requiresAuth: true,
       },
-      component: () => import('@/modules/core/Dashboard.vue'),
+      redirect: '/dashboard',
+      children: [
+        {
+          path: 'dashboard',
+          name: 'Dashboard',
+          meta: {
+            pageTitle: 'Dashboard',
+            requiresAuth: true,
+          },
+          component: () => import('@/modules/core/Dashboard.vue'),
+        }
+      ]
     },
     {
       path: '/login',
@@ -77,7 +90,8 @@ router.beforeEach((to, from, next) => {
           next({
             path: '/403',
             query: {
-              from: from.fullPath
+              from: from.fullPath,
+              to: to?.name?.toString()
             }
           })
           return

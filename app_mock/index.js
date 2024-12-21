@@ -14,7 +14,7 @@ server.post('/v1/account/signin', (req, res) => {
       classCode: 'ACC'
     },
     message: 'Sign in success',
-    payload: require('./signin.json'),
+    payload: require('./signinv2.json'),
     transaction_classify: '',
     transaction_id: null
   })

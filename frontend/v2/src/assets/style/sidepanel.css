@@ -1,0 +1,222 @@
+/*
+========================================================================================================================================================================
+    SIDE PANEL NORMAL
+========================================================================================================================================================================
+*/
+
+.sidepanel {
+    z-index: 1000;
+    position: absolute;
+    width: 3%;
+    left: 0;
+    height: 100%;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 2px 0 2px -2px #888;
+    transition-duration: .5s;
+}
+
+.sidepanel li {
+    list-style-type: none;
+}
+
+.sidepanel-menu {
+    position: absolute;
+    width: 100%;
+    top: 5%;
+    left: -20px;
+    height: 95%;
+    overflow-y: scroll !important;
+}
+
+.sidepanel .wrapper {
+    overflow-x: hidden;
+    padding: 0;
+}
+
+.layout-menu-container {
+    width: 100%;
+    position: absolute;
+    overflow-x: hidden;
+    min-height: 100px;
+    margin: 7px auto;
+}
+
+.sidepanel .panel-logo {
+    position: relative;
+    margin: 12.5px 13% 0px;
+}
+
+.sidepanel .panel-logo2 {
+    position: relative;
+    width: 15%;
+    margin: 12.5px 13% 0px;
+}
+
+.sidepanel-container {
+    padding: 0;
+}
+
+.layout-menu {
+    padding: 0 !important;
+}
+
+/*
+========================================================================================================================================================================
+    SIDE PANEL OPEN
+========================================================================================================================================================================
+*/
+.sidepanel.open {
+    width: 17%;
+}
+
+.sidepanel .layout-menu li {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.sidepanel .layout-menu li a {
+    display: block;
+    font-weight: bolder;
+    padding: 10px !important;
+    margin: 0 !important;
+    left: 0 !important;
+    min-height: 20px !important;
+    height: 40px;
+    border-radius: 0;
+    text-align: center !important;
+    color: #575757 !important;
+    transition-duration: .5s;
+    overflow-x: hidden;
+}
+
+.sidepanel .layout-menu li a:hover {
+    left: 0 !important;
+    background: rgba(28, 185, 115, .1) !important;
+    box-shadow: inset 3px 0 0 0 #1cb973;
+}
+
+.sidepanel.open .layout-menu li a {
+    text-align: left !important;
+    /*width: 100%;*/
+}
+
+.sidepanel.open .layout-menu li {
+    position: relative;
+}
+
+.sidepanel .layout-menu li a span.caption {
+    display: inline-block;
+    position: absolute;
+    left: 50px;
+    opacity: 0;
+    transition-duration: .5s;
+}
+
+.sidepanel.open .layout-menu li a span.caption {
+    display: inline-block;
+    position: absolute;
+    left: 70px;
+    opacity: 1;
+}
+
+.material-icons-outlined {
+    font-size: 1rem;
+}
+
+.sidepanel .layout-menu li a .material-icons,
+.sidepanel .material-icons-outlined {
+    position: absolute;
+    margin: 0 auto;
+    left: 40px;
+    color: #878787 !important;
+    transition-duration: .5s;
+}
+
+.sidepanel.open .layout-menu li a .material-icons,
+.sidepanel.open .material-icons-outlined {
+    margin: 0;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text {
+    font-weight: bolder !important;
+    padding: 22px 22px 0 22px;
+    color: #1cb973 !important;
+    min-height: 50px;
+    letter-spacing: 2px;
+    font-size: .6rem !important;
+    text-align: right;
+    transition-duration: .5s;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text b {
+    opacity: 0;
+    margin-left: 15px;
+    transition-duration: .5s;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text.open b {
+    opacity: 1;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text.open {
+    text-align: left;
+    opacity: 1;
+}
+
+.sidepanel .layout-menu li .layout-menuitem-root-text span {
+    color: #1cb973 !important;
+    opacity: 1;
+}
+
+.sidepanel.open .layout-menu li .layout-menuitem-root-text span {
+    opacity: 0;
+}
+
+.sidepanel.open .layout-menu li a:hover>span.caption {
+    color: #1cb973 !important
+}
+
+.sidepanel .layout-menu li a:hover .material-icons,
+.sidepanel .layout-menu li a:hover .material-icons-outlined {
+    color: #1cb973 !important
+}
+
+.sidepanel hr {
+    border: solid 1px #42b883 !important;
+}
+
+.sidepanel h5 {
+    padding: 0 20px !important;
+    color: #191054 !important;
+}
+
+.sidepanel .p-component {
+    background: #003F49;
+    font-size: 10pt !important;
+}
+
+body.dark .main-container .sidepanel {
+    background: #36434c !important;
+}
+
+body.dark .main-container .sidepanel .layout-menu li a {
+    color: #0dff70 !important
+}
+
+body.dark .main-container .sidepanel .layout-menu li a .material-icons,
+body.dark .main-container .sidepanel .material-icons-outlined {
+    color: #25ffc3 !important
+}
+
+body.dark .main-container .sidepanel .layout-menu li .layout-menuitem-root-text {
+    color: #fff !important
+}
+
+.menuitem-toggle-icon {
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    margin: 4px;
+    font-size: 8pt !important;
+}

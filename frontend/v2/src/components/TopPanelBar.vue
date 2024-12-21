@@ -46,11 +46,11 @@
                 v-if="slotProps.value"
                 class="country-item country-item-value"
               >
-                <img
+                <!--img
                   :class="'flag flag-' + slotProps.value.code.toLowerCase() ?? ''"
                   :src="require('@/assets/flag_placeholder.png')"
                   width="18"
-                />
+                /-->
                 <div>{{slotProps.value.name}}</div>
               </div>
               <span v-else>
@@ -72,7 +72,7 @@
     </Menubar>
   </div>
 </template>
-<script>
+<script lang="ts">
 import Menubar from 'primevue/menubar'
 import Dropdown from 'primevue/dropdown'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -269,55 +269,11 @@ export default {
   },
   computed: {
     ...mapStores(storeCore),
-    ...mapState('storeCredential', ['first_name', 'last_name', 'profile_photo']),
-    ...mapState('storei18n', ['language']),
-    ...mapGetters({
-      getThemeMode: 'storeApplication/Getter___getThemeMode',
-      geti18n: 'storei18n/Getter___menuData',
-      getSelectedLanguage: 'storei18n/Getter___getLanguage',
-      getSocketSession: 'storeSocket/Getter___status',
-    }),
-  },
-  watch: {
-    getSocketSession: {
-      handler(getData) {
-        this.socket.status = getData
-      }
-    },
-    getThemeMode: {
-      handler(getData) {
-        if (getData) {
-          document.querySelector('body').classList.add('dark')
-        } else {
-          document.querySelector('body').classList.remove('dark')
-        }
-
-        this.darkMode = getData
-      },
-    },
-    getSelectedLanguage: {
-      handler(getData) {
-        this.selectedLanguage = getData
-        this.$i18n.locale = getData.lang
-      }
-    },
-    geti18n: {
-      handler(getData) {
-        this.countries = []
-        getData.map((e) => {
-          this.countries.push({
-            name: e.name,
-            code: e.iso_2_digits.toLowerCase(),
-            lang: e.language_code.toLowerCase(),
-            currency: e.currency.toLowerCase(),
-          })
-        })
-      },
-    },
   },
   created() {
     this.coreStore.$subscribe((mutation, state) => {
       const darkMode = state.setting.dark
+      const language = state.setting.language
       if (darkMode) {
         document.querySelector('body').classList.add('dark')
       } else {
@@ -325,22 +281,22 @@ export default {
       }
 
       this.darkMode = darkMode
+      this.selectedLanguage = language
+      this.$i18n.locale = language.lang
     })
   },
   async mounted() {
 
-    await this.initLanguage()
+    await this.coreStore.getLanguage()
 
     this.selectedLanguage = this.language
   },
   methods: {
-    ...mapActions({
-      storeLanguage: 'storei18n/Action___changeLanguage',
-      initLanguage: 'storei18n/Action___getLanguage',
-      toggleDarkMode: 'storeApplication/Action___toggleDarkMode',
-    }),
+    toggleDarkMode() {
+      this.coreStore.toggleDarkMode()
+    },
     changeLanguage() {
-      this.storeLanguage(this.selectedLanguage).then(() => {
+      this.coreStore.changeLanguage(this.selectedLanguage).then(() => {
         this.$i18n.locale = this.selectedLanguage.lang
       })
     },
