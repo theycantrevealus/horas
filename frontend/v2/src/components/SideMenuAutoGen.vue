@@ -20,7 +20,7 @@
           </SideMenuAutoGen>
         </template>
         <template v-else>
-          <router-link
+          <RouterLink
             v-if="item.to && getCredential.pages[`page_${item.id}`] !== undefined"
             v-tooltip.right="item.name"
             :to="item.to"
@@ -42,10 +42,10 @@
               v-if="item.badge"
               class="menuitem-badge"
             >{{ item.badge }}</span>
-          </router-link>
+          </RouterLink>
+<!--          :href="item.url || '#'"-->
           <a
             v-if="!item.to"
-            :href="item.url || '#'"
             :style="item.style"
             :class="[item.class, { 'disabled': item.disabled }]"
             :target="item.target"
@@ -83,7 +83,7 @@
   </ul>
 </template>
 <script lang="ts">
-import { mapStores } from 'pinia'
+import { mapState, mapStores } from 'pinia'
 import { storeCore } from '@/store'
 
 export default {
@@ -102,19 +102,20 @@ export default {
   data() {
     return {
       getCredential: {},
-      getMenuModeStatus: true,
       activeIndex: null,
     }
   },
   computed: {
     ...mapStores(storeCore),
+    ...mapState(storeCore, {
+      getMenuModeStatus: 'getSidePanel'
+    })
   },
   mounted() {
     //
   },
   created() {
     this.coreStore.$subscribe((mutation, state) => {
-      this.getMenuModeStatus = state.setting.sidePanel
       this.getCredential = {
         pages: state.setting.pages
       }
@@ -130,6 +131,8 @@ export default {
       if (!item.to && !item.url) {
         event.preventDefault()
       } else {
+        // This will load router without reload page
+        this.$router.push(item.url)
         // this.toogleMenuStatus()
       }
 

@@ -26,7 +26,7 @@
 </template>
 <script lang="ts">
 import SideMenuAutoGen from './SideMenuAutoGen.vue'
-import { mapStores } from 'pinia'
+import { mapState, mapStores } from 'pinia'
 import { storeCore } from '@/store'
 
 export default {
@@ -43,20 +43,21 @@ export default {
   emits: ['menuitem-click'],
   data() {
     return {
-      menuMeta: [],
-      getMenuModeStatus: true,
+      menuMeta: [] as any [],
     }
   },
   computed: {
     ...mapStores(storeCore),
+    ...mapState(storeCore, {
+      getMenuModeStatus: 'getSidePanel'
+    })
   },
   mounted() {
     this.rebuildMenu()
   },
   created() {
     this.coreStore.$subscribe((mutation, state) => {
-      this.menuMeta = state.setting.menu
-      this.getMenuModeStatus = state.setting.sidePanel
+      this.menuMeta = state.setting.menu ?? []
     })
   },
   methods: {

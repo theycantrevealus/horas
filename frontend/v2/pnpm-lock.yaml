@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ckeditor/ckeditor5-vue':
+        specifier: ^7.3.0
+        version: 7.3.0(ckeditor5@44.1.0)(vue@3.5.13(typescript@5.6.3))
       '@material-design-icons/font':
         specifier: ^0.14.13
         version: 0.14.13
@@ -38,6 +41,9 @@ importers:
       material-symbols:
         specifier: ^0.27.2
         version: 0.27.2
+      moment:
+        specifier: ^2.30.1
+        version: 2.30.1
       outlined.css:
         specifier: link:@material-design-icons/font/outlined.css
         version: link:@material-design-icons/font/outlined.css
@@ -366,6 +372,12 @@ packages:
   '@ckeditor/ckeditor5-indent@44.1.0':
     resolution: {integrity: sha512-iFrtDVkXhbHHTJIs+yw0x9X/uEH0kyjQ5pQZM5fAzX6g9TFd71iiJ2l8xBSefXRcqEEPVaMWZgikBeRHmQDyOA==}
 
+  '@ckeditor/ckeditor5-integrations-common@2.2.2':
+    resolution: {integrity: sha512-SKGBBrwFFmSEZawR8P9tHGRq/l2OoqoJxy9f7j0HbDGEwIpSOsCSgH0xudD6lcEbWG4QWrCS28p5n8lgPA5elQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      ckeditor5: '>=42.0.0 || ^0.0.0-nightly'
+
   '@ckeditor/ckeditor5-language@44.1.0':
     resolution: {integrity: sha512-CudeLs2RvADdchJ6FFznsNrMYHDcOrj8CGuSgyTW9PcsnhAzUOYWuaunJ3xXd8MXwu6pGwEReVYuouc2JQQg6A==}
 
@@ -437,6 +449,13 @@ packages:
 
   '@ckeditor/ckeditor5-utils@44.1.0':
     resolution: {integrity: sha512-PILjaPvEMuQ0qlnPAFeNTTQcLuXgGionSxaxF8HGnZolaqWnsJ11xGYxqUslNOGtdZNp/88/FC9TjCY/ksiibg==}
+
+  '@ckeditor/ckeditor5-vue@7.3.0':
+    resolution: {integrity: sha512-OM8VW2bf5cXWKKaSr2eS1BhjzPmvkC2Jp/rWFdjU8wi4hhcKVJ5QqMepDguDcC+PHThaLec45WIrQTeLCb2AaA==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      ckeditor5: '>=42.0.0 || ^0.0.0-nightly'
+      vue: ^3.4.0
 
   '@ckeditor/ckeditor5-watchdog@44.1.0':
     resolution: {integrity: sha512-fTwYEW1TbbxC7PVmZtfWfwHT5aMREfBTDvH3KQWKpowTcoAiMBlQQKA/lvkRJ1bFMp4AZFjqs1IWZyap/sanAg==}
@@ -2130,6 +2149,9 @@ packages:
   mlly@1.7.3:
     resolution: {integrity: sha512-xUsx5n/mN0uQf4V548PKQ+YShA4/IW0KI1dZhrNrPCLG+xizETbHTkOa1f8/xut9JRPp8kQuMnz0oqwkTiLo/A==}
 
+  moment@2.30.1:
+    resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
+
   mrmime@2.0.0:
     resolution: {integrity: sha512-eu38+hdgojoyq63s+yTpN4XMBdt5l8HhMhc4VKLO9KM5caLIBvUm4thi7fFaxyTmCKeNnXZ5pAlBwCUnhA09uw==}
     engines: {node: '>=10'}
@@ -3369,6 +3391,10 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 44.1.0
       ckeditor5: 44.1.0
 
+  '@ckeditor/ckeditor5-integrations-common@2.2.2(ckeditor5@44.1.0)':
+    dependencies:
+      ckeditor5: 44.1.0
+
   '@ckeditor/ckeditor5-language@44.1.0':
     dependencies:
       '@ckeditor/ckeditor5-core': 44.1.0
@@ -3557,6 +3583,13 @@ snapshots:
     dependencies:
       '@ckeditor/ckeditor5-ui': 44.1.0
       lodash-es: 4.17.21
+
+  '@ckeditor/ckeditor5-vue@7.3.0(ckeditor5@44.1.0)(vue@3.5.13(typescript@5.6.3))':
+    dependencies:
+      '@ckeditor/ckeditor5-integrations-common': 2.2.2(ckeditor5@44.1.0)
+      ckeditor5: 44.1.0
+      lodash-es: 4.17.21
+      vue: 3.5.13(typescript@5.6.3)
 
   '@ckeditor/ckeditor5-watchdog@44.1.0':
     dependencies:
@@ -5352,6 +5385,8 @@ snapshots:
       pathe: 1.1.2
       pkg-types: 1.2.1
       ufo: 1.5.4
+
+  moment@2.30.1: {}
 
   mrmime@2.0.0: {}
 

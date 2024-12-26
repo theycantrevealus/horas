@@ -12,15 +12,15 @@
         <img
           v-if="getMenuModeStatus"
           class="panel-logo"
-          :style="{ width: logo[layoutColorMode].image.size.sidepanel.width }"
-          :src="logo[layoutColorMode].image.image ?? ''"
+          :style="{ width: parseFloat(logo[`${layoutColorMode}`].image.size.sidepanel.width) }"
+          :src="logo[layoutColorMode].image.target ?? ''"
           alt="horas"
         />
         <img
           v-if="!getMenuModeStatus"
           class="panel-logo2"
           :style="{ width: logo[layoutColorMode].icon.size.sidepanel.width }"
-          :src="logo[layoutColorMode].icon.image"
+          :src="logo[layoutColorMode].icon.target ?? ''"
           alt="horas"
         />
       </div>
@@ -37,23 +37,25 @@
           <BreadCrumb :items="breadcrumb" :pageName="pageName" />
         </div>
         <div id="content-loader" class="content-loader">
-          <router-view v-slot="{ Component }">
+          <RouterView v-slot="{ Component }">
             <transition name="scale" mode="out-in">
               <component :is="Component" />
             </transition>
-          </router-view>
+          </RouterView>
         </div>
       </div>
       <!-- <perfect-scrollbar ref="scrollLoader">
       </perfect-scrollbar> -->
     </div>
   </div>
+  <ConfirmDialog></ConfirmDialog>
 </template>
 <script lang="ts">
 import TopPanelBar from '@/components/TopPanelBar.vue'
 import SidePanelBar from '@/components/SidePanelBar.vue'
 import BreadCrumb from '@/components/BreadCrumb.vue'
-import { mapStores } from 'pinia'
+import ConfirmDialog from 'primevue/confirmdialog';
+import { mapActions, mapState, mapStores } from 'pinia'
 import { storeCore } from '@/store'
 
 export default {
@@ -62,22 +64,23 @@ export default {
     TopPanelBar,
     SidePanelBar,
     BreadCrumb,
+    ConfirmDialog
   },
   data() {
     return {
-      getMenuModeStatus: true,
       layoutMode: 'static',
-      layoutColorMode: 'light',
+      layoutColorMode: 'light' as 'light' | 'dark',
       staticMenuInactive: false,
       overlayMenuActive: false,
       mobileMenuActive: false,
       menu: [],
-      breadcrumb: [],
+      breadcrumb: [] as any[],
       pageName: '',
       darkMode: false,
       logo: {
         light: {
           image: {
+            target: '',
             size: {
               sidepanel: {
                 width: '',
@@ -86,6 +89,7 @@ export default {
             }
           },
           icon: {
+            target: '',
             size: {
               sidepanel: {
                 width: '',
@@ -96,6 +100,7 @@ export default {
         },
         dark: {
           image: {
+            target: '',
             size: {
               sidepanel: {
                 width: '',
@@ -104,6 +109,7 @@ export default {
             }
           },
           icon: {
+            target: '',
             size: {
               sidepanel: {
                 width: '',
@@ -117,10 +123,13 @@ export default {
   },
   computed: {
     ...mapStores(storeCore),
+    ...mapState(storeCore, {
+      getMenuModeStatus: 'getSidePanel',
+    })
   },
   created() {
     this.coreStore.$subscribe((mutation, state) => {
-      this.getMenuModeStatus = state.setting.sidePanel
+      // this.getMenuModeStatus = state.setting.sidePanel ?? false
       const darkMode = state.setting.dark
       const languageLib = state.setting.languageLib
       if (languageLib) {
@@ -151,21 +160,26 @@ export default {
     //   this.logo.light.image = this.application['APPLICATION_LOGO'].setter ?? this.logo.light.image
     //   this.logo.light.icon = this.application['APPLICATION_ICON'].setter ?? this.logo.light.icon
     // }
-
     if (this.darkMode) {
       document.querySelector('body').classList.add('dark')
     } else {
       document.querySelector('body').classList.remove('dark')
     }
 
+    // TODO : How to set it on storeCore ???
+    // this.$router.beforeRouteLeave(async () => {
+
+    // })
+
     this.loadLanguage()
 
     this.updatePageInfo()
   },
   methods: {
+    ...mapActions(storeCore, [ 'UIToggleEditingData' ]),
     updatePageInfo() {
-      this.breadcrumb = this.$route.meta.breadcrumb
-      this.pageName = this.$route.name
+      this.breadcrumb = this.$route.meta.breadcrumb as any[] ?? []
+      this.pageName = this.$route.name as string ?? ''
     },
     toogleMenuModeOn() {
       this.coreStore.toggleSideMenuOn()
@@ -176,20 +190,20 @@ export default {
     loadLanguage() {
       this.coreStore.setBrowserLanguage(true)
     },
-    onMenuItemClick(event) {
+    onMenuItemClick(event: any) {
       if (event.item && !event.item.items) {
         this.overlayMenuActive = false
         this.mobileMenuActive = false
       }
     },
-    addClass(element, className) {
+    addClass(element: any, className: any) {
       if (element.classList) {
         element.classList.add(className)
       } else {
         element.className += ' ' + className
       }
     },
-    removeClass(element, className) {
+    removeClass(element: any, className: any) {
       if (element.classList) {
         element.classList.remove(className)
       } else {

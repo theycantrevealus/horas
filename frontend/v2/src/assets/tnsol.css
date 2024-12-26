@@ -1,26 +1,26 @@
 @font-face {
     font-family: Poppins;
-    src: url("./font/poppins/Poppins-Regular.ttf");
+    src: url("./fonts/poppins/Poppins-Regular.ttf");
 }
 
 @font-face {
     font-family: GreyCliff;
-    src: url("./font/greycliff/GreycliffCF-Bold.ttf");
+    src: url("./fonts/greycliff/GreycliffCF-Bold.ttf");
 }
 
 @font-face {
     font-family: Karla;
-    src: url("./font/karla/static/Karla-Regular.ttf");
+    src: url("./fonts/karla/static/Karla-Regular.ttf");
 }
 
 @font-face {
     font-family: 'Visby Round';
-    src: url("./font/visby/VisbyRoundCF-Medium.otf");
+    src: url("./fonts/visby/VisbyRoundCF-Medium.otf");
 }
 
 @font-face {
     font-family: 'Visby Round Bold';
-    src: url("./font/visby/VisbyRoundCF-Bold.otf");
+    src: url("./fonts/visby/VisbyRoundCF-Bold.otf");
 }
 
 body {

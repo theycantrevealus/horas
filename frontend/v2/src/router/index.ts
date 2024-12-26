@@ -68,6 +68,9 @@ router.beforeEach((to, from, next) => {
 
   const store = storeCore()
 
+  // Close side panel in every page change
+  store.setting.sidePanel = false
+
   // Check if route exists
   if (!to.matched.length) {
     next('/404')
@@ -83,7 +86,6 @@ router.beforeEach((to, from, next) => {
         if(store.hasAccess(to.name?.toString() ?? '')) {
 
           next()
-          return
 
         } else {
 
@@ -94,13 +96,13 @@ router.beforeEach((to, from, next) => {
               to: to?.name?.toString()
             }
           })
-          return
 
         }
 
       } else {
+
         next('/login')
-        return
+
       }
 
     } else {

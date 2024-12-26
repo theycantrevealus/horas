@@ -28,7 +28,7 @@ interface Authentication {
   code: string
   first_name: string
   last_name: string
-  permission: Permission[]
+  permission: Permission[] // TODO : Consider to take out
   pagesAllow: any
   domAllow: AccountAccessItem[]
 }
@@ -40,19 +40,24 @@ interface Setting {
   language: any
   languageLib: any
   languageMeta?: any
-  routeMap?: any
-  routes?: any[]
-  pages?: any[]
-  menu?: any[]
+  routeMap?: any // TODO : Analyze usage
+  routes?: any[] // TODO : Analyze usage
+  pages?: any[] // TODO : Analyze usage
+  menu?: any[] // TODO : Analyze usage
 }
 
 interface ToastMessageOptionsExtra extends ToastMessageOptions{
   position?: string
 }
 
+interface UIStatus {
+  isEditData: boolean
+}
+
 interface StateCore {
   auth: Authentication
   setting: Setting
+  ui_status: UIStatus
   toast: ToastMessageOptionsExtra
 }
 
@@ -69,6 +74,9 @@ export const storeCore = defineStore('core',{
       permission: [],
       pagesAllow: {},
       domAllow: []
+    },
+    ui_status: {
+      isEditData: false
     },
     setting: {
       theme: '',
@@ -111,6 +119,17 @@ export const storeCore = defineStore('core',{
   getters: {
     getToken(state): string {
       return state.auth.token
+    },
+    getSidePanel(state): boolean {
+      return state.setting.sidePanel
+    },
+
+
+
+
+    // UI STATUS MANAGEMENT
+    UIEdittingStatus(state): boolean {
+      return state.ui_status.isEditData
     }
   },
   actions: {
@@ -257,6 +276,10 @@ export const storeCore = defineStore('core',{
 
         this.setting.language = this.setting.languageMeta[selectedLanguage]
       }
+    },
+    // UI STATUS MANAGEMENT
+    async UIToggleEditingData(status: boolean) {
+      this.ui_status.isEditData = status
     }
   }
 })

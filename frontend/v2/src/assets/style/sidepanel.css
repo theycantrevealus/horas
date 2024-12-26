@@ -88,6 +88,8 @@
     color: #575757 !important;
     transition-duration: .5s;
     overflow-x: hidden;
+    cursor: pointer ;
+    cursor: hand;
 }
 
 .sidepanel .layout-menu li a:hover {

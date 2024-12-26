@@ -17,6 +17,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-vue": "^7.3.0",
     "@material-design-icons/font": "^0.14.13",
     "@primevue/themes": "^4.2.5",
     "@types/nprogress": "^0.2.3",
@@ -27,6 +28,7 @@
     "https": "^1.0.0",
     "material-icons.css": "link:material-icons/iconfont/material-icons.css",
     "material-symbols": "^0.27.2",
+    "moment": "^2.30.1",
     "outlined.css": "link:@material-design-icons/font/outlined.css",
     "pinia": "^2.3.0",
     "pinia-plugin-persistedstate": "^4.2.0",

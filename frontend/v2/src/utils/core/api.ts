@@ -145,3 +145,4 @@ export default ({ requiresAuth = true } = {}) => {
 
   return instance
 }
+
