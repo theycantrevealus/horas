@@ -71,3 +71,6 @@ pnpm-debug.log*
 **/*.ttf
 **/*.woff2
 **/*.zip
+
+# Report File
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
