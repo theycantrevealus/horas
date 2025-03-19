@@ -14,15 +14,23 @@ export default [
     ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**'],
   },
 
+  {
+    rules: {
+      'space-in-brackets': ['error', 'always'],
+      'space-in-parens': ['error', 'always'],
+    },
+  },
+
   ...pluginVue.configs['flat/essential'],
   ...vueTsEslintConfig(),
-  
+
   {
     ...pluginCypress.configs.recommended,
     files: [
-      ''**/__tests__/*.{cy,spec}.{js,ts,jsx,tsx}',',
+      // ''**/__tests__/*.{cy,spec}.{js,ts,jsx,tsx}',',
+      '**/__tests__/*.{cy,spec}.{js,ts,jsx,tsx}',
       'cypress/e2e/**/*.{cy,spec}.{js,ts,jsx,tsx}',
-      'cypress/support/**/*.{js,ts,jsx,tsx}'
+      'cypress/support/**/*.{js,ts,jsx,tsx}',
     ],
   },
   skipFormatting,

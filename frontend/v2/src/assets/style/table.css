@@ -8,8 +8,8 @@ table thead tr th {
     padding: 10pt 1.5rem !important;
 }
 
-.p-datatable .p-datatable-tbody>tr>td {
-    border: none !important
+.p-datatable .p-datatable-tbody > tr > td {
+    border: none !important;
 }
 
 .p-treetable-thead tr th {
@@ -21,12 +21,13 @@ table thead tr th {
     color: #fff !important;
 }
 
-.p-treetable-thead tr th, .p-treetable-thead tr th.p-filter-column {
+.p-treetable-thead tr th,
+.p-treetable-thead tr th.p-filter-column {
     padding: 7px 1.5rem !important;
     font-size: 10pt !important;
 }
 
-.p-treetable-thead tr th.p-filter-column>div.p-column-filter {
+.p-treetable-thead tr th.p-filter-column > div.p-column-filter {
     padding: 0 !important;
 }
 
@@ -42,17 +43,18 @@ table thead tr th {
     font-size: 6pt !important;
 }
 
-.p-treetable-thead tr th .p-sortable-column-icon, .p-datatable .p-sortable-column .p-sortable-column-icon {
+.p-treetable-thead tr th .p-sortable-column-icon,
+.p-datatable .p-sortable-column .p-sortable-column-icon {
     font-size: 6pt !important;
     color: #fff !important;
 }
 
 .p-datatable .p-sortable-column .p-sortable-column-icon {
-    width: .5rem;
+    width: 0.5rem;
 }
 
 .p-datatable-table thead tr th.p-filter-column .p-column-filter .p-link svg {
-    width: .5rem;
+    width: 0.5rem;
     color: #fff !important;
 }
 
@@ -62,7 +64,6 @@ table thead tr th {
 }
 
 .p-datatable {
-
 }
 
 .p-datatable .p-datatable-thead > tr > th {
@@ -100,7 +101,6 @@ table thead tr th {
 
 .p-datatable-table thead tr th .p-column-filter-menu-button-active {
     background: #8ca0fa !important;
-
 }
 
 .p-datatable-table thead tr th .p-column-filter-menu-button-active .pi {
@@ -124,18 +124,18 @@ th.p-filter-column input.p-inputtext {
 tbody tr td {
     font-size: 8pt !important;
     padding: 10px !important;
-    -webkit-transition-duration: .3s;
-    -moz-transition-duration: .3s;
-    -o-transition-duration: .3s;
-    transition-duration: .3s;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    transition-duration: 0.3s;
 }
 
 tbody tr:hover td {
     background: #dde3ff !important;
 }
 
-.p-treetable .p-treetable-tbody>tr>td {
-    border: none !important
+.p-treetable .p-treetable-tbody > tr > td {
+    border: none !important;
 }
 
 tbody.p-treetable-tbody tr td .p-treetable-toggler {
@@ -173,7 +173,6 @@ tbody.p-treetable-tbody tr td .p-buttonset .p-button.p-button-icon-only {
 
 tbody.p-treetable-tbody tr td .p-buttonset button span {
     font-size: 8pt !important;
-
 }
 
 .p-paginator .p-paginator-first,
@@ -188,7 +187,7 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
 }
 
 .p-datatable-header {
-    border: none !important
+    border: none !important;
 }
 
 .p-paginator .p-paginator-icon,
@@ -196,22 +195,18 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     font-size: 8pt !important;
 }
 
-
-
-
-
-
 /*=================================== DATATABLE =====================================*/
 .p-datatable-table {
     font-family: Karla, SansSerif, Arial, serif !important;
 }
 
-.p-datatable-table thead tr th, .p-datatable-table thead tr th.p-filter-column {
+.p-datatable-table thead tr th,
+.p-datatable-table thead tr th.p-filter-column {
     padding: 7px 1.5rem !important;
     font-size: 10pt !important;
 }
 
-.p-datatable-table thead tr th.p-filter-column>div.p-column-filter {
+.p-datatable-table thead tr th.p-filter-column > div.p-column-filter {
     padding: 0 !important;
 }
 

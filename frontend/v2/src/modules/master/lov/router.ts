@@ -1,11 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-const moduleRoute:RouteRecordRaw[] = [
+const moduleRoute: RouteRecordRaw[] = [
   {
     path: '/lov',
     name: 'LOVBuilder',
-    component: () =>
-      import('@/modules/master/lov/Module.vue'),
+    component: () => import('@/modules/master/lov/Module.vue'),
     meta: {
       pageTitle: 'LOV Management Builder',
       requiresAuth: true,
@@ -30,8 +29,7 @@ const moduleRoute:RouteRecordRaw[] = [
             },
           ],
         },
-        component: () =>
-          import('@/modules/master/lov/views/Index.vue'),
+        component: () => import('@/modules/master/lov/views/Index.vue'),
       },
     ],
   },

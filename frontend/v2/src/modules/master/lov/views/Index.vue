@@ -190,8 +190,8 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import NumberLabel from '@/components/Number.vue'
-import { defineAsyncComponent } from "vue"
-import DynamicDialog from "primevue/dynamicdialog";
+import { defineAsyncComponent } from 'vue'
+import DynamicDialog from 'primevue/dynamicdialog'
 import { storeCore } from '@/store/index'
 import { mapActions, mapState } from 'pinia'
 import { storeLOV } from '@/modules/master/lov/store'
@@ -229,9 +229,7 @@ export default {
       ],
     }
   },
-  computed: {
-
-  },
+  computed: {},
   mounted() {
     this.lazyParams = {
       first: 0,
@@ -252,20 +250,20 @@ export default {
         props: {
           header: 'Add LOV',
           style: {
-            width: '90vw'
+            width: '90vw',
           },
           breakpoints: {
             '960px': '75vw',
-            '640px': '90vw'
+            '640px': '90vw',
           },
           modal: true,
         },
         data: {
-          mode: 'add'
+          mode: 'add',
         },
         onClose: () => {
           this.loadLazyData()
-        }
+        },
       })
     },
     editLOV(id) {
@@ -273,21 +271,21 @@ export default {
         props: {
           header: 'Edit LOV',
           style: {
-            width: '90vw'
+            width: '90vw',
           },
           breakpoints: {
             '960px': '75vw',
-            '640px': '90vw'
+            '640px': '90vw',
           },
           modal: true,
         },
         data: {
           mode: 'edit',
-          id: id
+          id: id,
         },
         onClose: () => {
           this.loadLazyData()
-        }
+        },
       })
     },
     deleteLOV(event, id) {
@@ -314,21 +312,23 @@ export default {
     async loadLazyData() {
       this.loading = true
 
-      await this.getList(this.lazyParams).then((response) => {
-        if (response) {
-          const data = response.payload.data
-          const totalRecords = response.payload.totalRecords
-          this.items = data
-          this.totalRecords = totalRecords
-        } else {
+      await this.getList(this.lazyParams)
+        .then((response) => {
+          if (response) {
+            const data = response.payload.data
+            const totalRecords = response.payload.totalRecords
+            this.items = data
+            this.totalRecords = totalRecords
+          } else {
+            this.items = []
+            this.totalRecords = 0
+          }
+          this.loading = false
+        })
+        .catch(() => {
           this.items = []
-          this.totalRecords = 0
-        }
-        this.loading = false
-      }).catch(() => {
-        this.items = []
-        this.loading = false
-      })
+          this.loading = false
+        })
     },
     onPage(event) {
       this.lazyParams = event

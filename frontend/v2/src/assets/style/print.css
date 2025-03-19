@@ -1,12 +1,13 @@
 /* Styles go here */
 
-.page-header, .page-header-space {
+.page-header,
+.page-header-space {
     height: 100px;
 }
 
-.page-footer, .page-footer-space {
+.page-footer,
+.page-footer-space {
     height: 50px;
-
 }
 
 .page-footer {
@@ -30,14 +31,22 @@
 }
 
 @page {
-    margin: 20mm
+    margin: 20mm;
 }
 
 @media print {
-    thead {display: table-header-group;}
-    tfoot {display: table-footer-group;}
+    thead {
+        display: table-header-group;
+    }
+    tfoot {
+        display: table-footer-group;
+    }
 
-    button {display: none;}
+    button {
+        display: none;
+    }
 
-    body {margin: 0;}
+    body {
+        margin: 0;
+    }
 }

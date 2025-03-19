@@ -43,14 +43,14 @@ export default {
   emits: ['menuitem-click'],
   data() {
     return {
-      menuMeta: [] as any [],
+      menuMeta: [] as any[],
     }
   },
   computed: {
     ...mapStores(storeCore),
     ...mapState(storeCore, {
-      getMenuModeStatus: 'getSidePanel'
-    })
+      getMenuModeStatus: 'getSidePanel',
+    }),
   },
   mounted() {
     this.rebuildMenu()
@@ -72,7 +72,7 @@ export default {
     },
     rebuildMenu() {
       this.coreStore.generateMenu()
-    }
+    },
   },
 }
 </script>

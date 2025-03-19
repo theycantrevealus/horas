@@ -1,15 +1,16 @@
-import { createPinia, defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import type { ToastMessageOptions } from 'primevue/toast'
 import SecureLS from 'secure-ls'
 import api from '@/utils/core/api'
-import getBrowserLocale from "@/utils/core/i18n.ts";
+import getBrowserLocale from '@/utils/core/i18n.ts'
+import type { Language } from '@/interfaces/language'
 
 interface AccountAccessItem {
   domIdentity: string
   dispatchName: string
 }
 
-interface AccountAccess {
+export interface AccountAccess {
   id: string
   name: string
   url: string
@@ -36,8 +37,9 @@ interface Authentication {
 interface Setting {
   theme: string
   dark: boolean
+  logo: any
   sidePanel: boolean
-  language: any
+  language: Language
   languageLib: any
   languageMeta?: any
   routeMap?: any // TODO : Analyze usage
@@ -46,7 +48,7 @@ interface Setting {
   menu?: any[] // TODO : Analyze usage
 }
 
-interface ToastMessageOptionsExtra extends ToastMessageOptions{
+export interface ToastMessageOptionsExtra extends ToastMessageOptions {
   position?: string
 }
 
@@ -54,7 +56,7 @@ interface UIStatus {
   isEditData: boolean
 }
 
-interface StateCore {
+export interface StateCore {
   auth: Authentication
   setting: Setting
   ui_status: UIStatus
@@ -63,8 +65,8 @@ interface StateCore {
 
 const ls = new SecureLS({ isCompression: false })
 
-export const storeCore = defineStore('core',{
-  state: ():StateCore => ({
+export const storeCore = defineStore('core', {
+  state: (): StateCore => ({
     auth: {
       token: '',
       id: '',
@@ -73,16 +75,62 @@ export const storeCore = defineStore('core',{
       last_name: '',
       permission: [],
       pagesAllow: {},
-      domAllow: []
+      domAllow: [],
     },
     ui_status: {
-      isEditData: false
+      isEditData: false,
     },
     setting: {
       theme: '',
       dark: false,
+      logo: {
+        light: {
+          image: {
+            target: '',
+            size: {
+              sidepanel: {
+                width: '',
+                height: '',
+              },
+            },
+          },
+          icon: {
+            target: '',
+            size: {
+              sidepanel: {
+                width: '',
+                height: '',
+              },
+            },
+          },
+        },
+        dark: {
+          image: {
+            target: '',
+            size: {
+              sidepanel: {
+                width: '',
+                height: '',
+              },
+            },
+          },
+          icon: {
+            target: '',
+            size: {
+              sidepanel: {
+                width: '',
+                height: '',
+              },
+            },
+          },
+        },
+      },
       sidePanel: false,
-      language: {},
+      language: {
+        code: '',
+        name: '',
+        lang: '',
+      },
       languageLib: {},
       languageMeta: {
         en: {
@@ -101,20 +149,20 @@ export const storeCore = defineStore('core',{
       routeMap: {},
       routes: [],
       pages: [],
-      menu: []
+      menu: [],
     },
     toast: {
       severity: 'warn',
       summary: 'Menu Manager',
       detail: 'Hello',
       life: 3000,
-    }
+    },
   }),
   persist: {
     storage: {
       getItem: (key) => ls.get(key),
       setItem: (key, value) => ls.set(key, value),
-    }
+    },
   },
   getters: {
     getToken(state): string {
@@ -124,54 +172,65 @@ export const storeCore = defineStore('core',{
       return state.setting.sidePanel
     },
 
-
-
-
     // UI STATUS MANAGEMENT
     UIEdittingStatus(state): boolean {
       return state.ui_status.isEditData
-    }
+    },
   },
   actions: {
     async signOut() {
       this.$reset()
     },
-    async setToast(payload:ToastMessageOptionsExtra) {
+    async setToast(payload: ToastMessageOptionsExtra) {
       this.toast = {
         severity: 'warn',
         summary: 'Menu Manager',
         detail: 'Hello',
         life: 3000,
+        ...payload,
       }
     },
-    hasAccess(name: string):boolean {
+    hasAccess(name: string): boolean {
       return this.auth.pagesAllow.hasOwnProperty(name)
     },
     allowDispatch(domIdentity: string) {
       return this.auth.domAllow.find((o: AccountAccessItem, i: number) => {
-        return (o.domIdentity === domIdentity)
+        return o.domIdentity === domIdentity
       })
     },
-    updatePermissionv2(access: AccountAccess[]) {
-      const pagesAccess:any = {}
-      const domAccess:any = []
+    updateAppConfig(data: any) {
+      this.setting.logo.light.image = data.application_logo?.setter
+      this.setting.logo.light.image.target = `${import.meta.env.VITE_API_URL}/${data.application_logo?.setter.target}`
 
-      for (let pagesKey in access) {
-        if(! pagesAccess[access[pagesKey].name]) {
+      this.setting.logo.light.icon = data.application_icon?.setter
+      this.setting.logo.light.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon?.setter.target}`
+
+      this.setting.logo.dark.image = data.application_logo?.setter
+      this.setting.logo.dark.image.target = `${import.meta.env.VITE_API_URL}/${data.application_logo?.setter.target}`
+
+      this.setting.logo.dark.icon = data.application_icon?.setter
+      this.setting.logo.dark.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon.setter?.target}`
+    },
+    updatePermissionv2(access: AccountAccess[]) {
+      const pagesAccess: any = {}
+      const domAccess: any = []
+
+      for (const pagesKey in access) {
+        if (!pagesAccess[access[pagesKey].name]) {
           pagesAccess[access[pagesKey].name] = {}
         }
 
         pagesAccess[access[pagesKey].name] = access[pagesKey]
 
-        if(access[pagesKey].access && access[pagesKey].access.length > 0) {
+        if (access[pagesKey].access && access[pagesKey].access.length > 0) {
           const accessList = access[pagesKey].access
 
-          for(let accessKey in accessList) {
+          for (const accessKey in accessList) {
             const check = domAccess.find((o: AccountAccessItem, i: number) => {
-              return (o.domIdentity === accessList[accessKey].domIdentity)
-            });
+              return o.domIdentity === accessList[accessKey].domIdentity
+            })
 
-            if(!check) {
+            if (!check) {
               domAccess.push(accessList[accessKey])
             }
           }
@@ -182,31 +241,35 @@ export const storeCore = defineStore('core',{
       this.auth.domAllow = domAccess
       // this.auth.token = ''
     },
-    updatePermission(payload:any) {
-      const routeMap:any = {}
+    updatePermission(payload: any) {
+      const routeMap: any = {}
       const grantedPerm = payload.permission
-      const buildPermission:any = {}
-      for (let a in grantedPerm) {
+      const buildPermission: any = {}
+      for (const a in grantedPerm) {
         if (buildPermission[grantedPerm[a].domIdentity]) {
           buildPermission[grantedPerm[a].domIdentity] = {}
         }
         buildPermission[grantedPerm[a].domIdentity] = grantedPerm[a]
 
-        if(grantedPerm[a]?.menu) {
-          if(!routeMap[grantedPerm[a].menu.identifier]) {
+        if (grantedPerm[a]?.menu) {
+          if (!routeMap[grantedPerm[a].menu.identifier]) {
             routeMap[grantedPerm[a].menu.identifier] = {}
           }
 
-          if(!routeMap[grantedPerm[a].menu.identifier].permission) {
+          if (!routeMap[grantedPerm[a].menu.identifier].permission) {
             routeMap[grantedPerm[a].menu.identifier].permission = []
           }
 
-          if(routeMap[grantedPerm[a].menu.identifier].permission.indexOf(grantedPerm[a].dispatchName) < 0) {
+          if (
+            routeMap[grantedPerm[a].menu.identifier].permission.indexOf(
+              grantedPerm[a].dispatchName,
+            ) < 0
+          ) {
             routeMap[grantedPerm[a].menu.identifier].permission.push(grantedPerm[a].dispatchName)
           }
         }
 
-        if(!routeMap[grantedPerm[a].dispatchName]) {
+        if (!routeMap[grantedPerm[a].dispatchName]) {
           routeMap[grantedPerm[a].dispatchName] = {}
         }
       }
@@ -215,19 +278,19 @@ export const storeCore = defineStore('core',{
     },
     updateAccess(payload: any) {
       const routes: string[] = ['Login']
-      const routeMap:any = {}
+      const routeMap: any = {}
       const grantedPage = payload.access
-      const buildPage:any = {}
+      const buildPage: any = {}
 
-      for (let a in grantedPage) {
-        if(grantedPage[a]) {
+      for (const a in grantedPage) {
+        if (grantedPage[a]) {
           if (buildPage[`page_${grantedPage[a].id}`]) {
             buildPage[`page_${grantedPage[a].id}`] = {}
           }
           buildPage[`page_${grantedPage[a].id}`] = grantedPage[a]
-          if(routes.indexOf(grantedPage[a].identifier) < 0) routes.push(grantedPage[a].identifier)
-          if(grantedPage[a].identifier !== '') {
-            if(!routeMap[grantedPage[a].identifier]) {
+          if (routes.indexOf(grantedPage[a].identifier) < 0) routes.push(grantedPage[a].identifier)
+          if (grantedPage[a].identifier !== '') {
+            if (!routeMap[grantedPage[a].identifier]) {
               routeMap[grantedPage[a].identifier] = {}
             }
             routeMap[grantedPage[a].identifier] = grantedPage[a]
@@ -249,7 +312,7 @@ export const storeCore = defineStore('core',{
           return Promise.reject(e)
         })
     },
-    changeLanguage(payload: any) {
+    async changeLanguage(payload: Language) {
       this.setting.language = payload
     },
     toggleDarkMode() {
@@ -269,7 +332,11 @@ export const storeCore = defineStore('core',{
         })
     },
     setBrowserLanguage(data: any) {
-      if(this.setting.language && Object.keys(this.setting.language).length === 0 && Object.getPrototypeOf(this.setting.language) === Object.prototype) {
+      if (
+        this.setting.language &&
+        Object.keys(this.setting.language).length === 0 &&
+        Object.getPrototypeOf(this.setting.language) === Object.prototype
+      ) {
         const selectedLanguage: string = getBrowserLocale({
           countryCodeOnly: data,
         })
@@ -280,6 +347,6 @@ export const storeCore = defineStore('core',{
     // UI STATUS MANAGEMENT
     async UIToggleEditingData(status: boolean) {
       this.ui_status.isEditData = status
-    }
-  }
+    },
+  },
 })

@@ -1,7 +1,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-ExtraBold.eot');
-    src: local('Visby Round CF ExtraBold'), local('VisbyRoundCF-ExtraBold'),
+    src:
+        local('Visby Round CF ExtraBold'),
+        local('VisbyRoundCF-ExtraBold'),
         url('VisbyRoundCF-ExtraBold.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-ExtraBold.woff2') format('woff2'),
         url('VisbyRoundCF-ExtraBold.woff') format('woff'),
@@ -13,7 +15,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-Heavy.eot');
-    src: local('Visby Round CF Heavy'), local('VisbyRoundCF-Heavy'),
+    src:
+        local('Visby Round CF Heavy'),
+        local('VisbyRoundCF-Heavy'),
         url('VisbyRoundCF-Heavy.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-Heavy.woff2') format('woff2'),
         url('VisbyRoundCF-Heavy.woff') format('woff'),
@@ -25,7 +29,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-ExtraBoldOblique.eot');
-    src: local('Visby Round CF ExtraBold Oblique'), local('VisbyRoundCF-ExtraBoldOblique'),
+    src:
+        local('Visby Round CF ExtraBold Oblique'),
+        local('VisbyRoundCF-ExtraBoldOblique'),
         url('VisbyRoundCF-ExtraBoldOblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-ExtraBoldOblique.woff2') format('woff2'),
         url('VisbyRoundCF-ExtraBoldOblique.woff') format('woff'),
@@ -37,7 +43,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-Medium.eot');
-    src: local('Visby Round CF Medium'), local('VisbyRoundCF-Medium'),
+    src:
+        local('Visby Round CF Medium'),
+        local('VisbyRoundCF-Medium'),
         url('VisbyRoundCF-Medium.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-Medium.woff2') format('woff2'),
         url('VisbyRoundCF-Medium.woff') format('woff'),
@@ -49,7 +57,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-ExtraLight.eot');
-    src: local('Visby Round CF ExtraLight'), local('VisbyRoundCF-ExtraLight'),
+    src:
+        local('Visby Round CF ExtraLight'),
+        local('VisbyRoundCF-ExtraLight'),
         url('VisbyRoundCF-ExtraLight.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-ExtraLight.woff2') format('woff2'),
         url('VisbyRoundCF-ExtraLight.woff') format('woff'),
@@ -61,7 +71,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-DemiBold.eot');
-    src: local('Visby Round CF DemiBold'), local('VisbyRoundCF-DemiBold'),
+    src:
+        local('Visby Round CF DemiBold'),
+        local('VisbyRoundCF-DemiBold'),
         url('VisbyRoundCF-DemiBold.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-DemiBold.woff2') format('woff2'),
         url('VisbyRoundCF-DemiBold.woff') format('woff'),
@@ -73,7 +85,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-HeavyOblique.eot');
-    src: local('Visby Round CF Heavy Oblique'), local('VisbyRoundCF-HeavyOblique'),
+    src:
+        local('Visby Round CF Heavy Oblique'),
+        local('VisbyRoundCF-HeavyOblique'),
         url('VisbyRoundCF-HeavyOblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-HeavyOblique.woff2') format('woff2'),
         url('VisbyRoundCF-HeavyOblique.woff') format('woff'),
@@ -85,7 +99,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-LightOblique.eot');
-    src: local('Visby Round CF Light Oblique'), local('VisbyRoundCF-LightOblique'),
+    src:
+        local('Visby Round CF Light Oblique'),
+        local('VisbyRoundCF-LightOblique'),
         url('VisbyRoundCF-LightOblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-LightOblique.woff2') format('woff2'),
         url('VisbyRoundCF-LightOblique.woff') format('woff'),
@@ -97,7 +113,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-BoldOblique.eot');
-    src: local('Visby Round CF Bold Oblique'), local('VisbyRoundCF-BoldOblique'),
+    src:
+        local('Visby Round CF Bold Oblique'),
+        local('VisbyRoundCF-BoldOblique'),
         url('VisbyRoundCF-BoldOblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-BoldOblique.woff2') format('woff2'),
         url('VisbyRoundCF-BoldOblique.woff') format('woff'),
@@ -109,7 +127,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-MediumOblique.eot');
-    src: local('Visby Round CF Medium Oblique'), local('VisbyRoundCF-MediumOblique'),
+    src:
+        local('Visby Round CF Medium Oblique'),
+        local('VisbyRoundCF-MediumOblique'),
         url('VisbyRoundCF-MediumOblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-MediumOblique.woff2') format('woff2'),
         url('VisbyRoundCF-MediumOblique.woff') format('woff'),
@@ -121,7 +141,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-Bold.eot');
-    src: local('Visby Round CF Bold'), local('VisbyRoundCF-Bold'),
+    src:
+        local('Visby Round CF Bold'),
+        local('VisbyRoundCF-Bold'),
         url('VisbyRoundCF-Bold.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-Bold.woff2') format('woff2'),
         url('VisbyRoundCF-Bold.woff') format('woff'),
@@ -133,7 +155,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-DemiBoldOblique.eot');
-    src: local('Visby Round CF DemiBold Oblique'), local('VisbyRoundCF-DemiBoldOblique'),
+    src:
+        local('Visby Round CF DemiBold Oblique'),
+        local('VisbyRoundCF-DemiBoldOblique'),
         url('VisbyRoundCF-DemiBoldOblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-DemiBoldOblique.woff2') format('woff2'),
         url('VisbyRoundCF-DemiBoldOblique.woff') format('woff'),
@@ -145,7 +169,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-Regular.eot');
-    src: local('Visby Round CF Regular'), local('VisbyRoundCF-Regular'),
+    src:
+        local('Visby Round CF Regular'),
+        local('VisbyRoundCF-Regular'),
         url('VisbyRoundCF-Regular.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-Regular.woff2') format('woff2'),
         url('VisbyRoundCF-Regular.woff') format('woff'),
@@ -157,7 +183,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-Oblique.eot');
-    src: local('Visby Round CF Oblique'), local('VisbyRoundCF-Oblique'),
+    src:
+        local('Visby Round CF Oblique'),
+        local('VisbyRoundCF-Oblique'),
         url('VisbyRoundCF-Oblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-Oblique.woff2') format('woff2'),
         url('VisbyRoundCF-Oblique.woff') format('woff'),
@@ -169,7 +197,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-Light.eot');
-    src: local('Visby Round CF Light'), local('VisbyRoundCF-Light'),
+    src:
+        local('Visby Round CF Light'),
+        local('VisbyRoundCF-Light'),
         url('VisbyRoundCF-Light.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-Light.woff2') format('woff2'),
         url('VisbyRoundCF-Light.woff') format('woff'),
@@ -181,7 +211,9 @@
 @font-face {
     font-family: 'Visby Round CF';
     src: url('VisbyRoundCF-ExtraLightOblique.eot');
-    src: local('Visby Round CF ExtraLight Oblique'), local('VisbyRoundCF-ExtraLightOblique'),
+    src:
+        local('Visby Round CF ExtraLight Oblique'),
+        local('VisbyRoundCF-ExtraLightOblique'),
         url('VisbyRoundCF-ExtraLightOblique.eot?#iefix') format('embedded-opentype'),
         url('VisbyRoundCF-ExtraLightOblique.woff2') format('woff2'),
         url('VisbyRoundCF-ExtraLightOblique.woff') format('woff'),
@@ -189,4 +221,3 @@
     font-weight: 200;
     font-style: normal;
 }
-

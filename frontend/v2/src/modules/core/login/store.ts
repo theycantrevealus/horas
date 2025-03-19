@@ -14,9 +14,10 @@ export const storeLogin = defineStore('signIn', () => {
       .then(async (response) => {
         const data = response.data
 
-        console.log(data)
-
-        if (`${data.statusCode['classCode']}_I_${data.statusCode['customCode']}` === CoreResponseLib.Login.success) {
+        if (
+          `${data.statusCode['classCode']}_I_${data.statusCode['customCode']}` ===
+          CoreResponseLib.Login.success
+        ) {
           parentStore.auth.token = data.payload.token
           parentStore.auth.id = data.payload.account.id
           parentStore.auth.code = data.payload.account.code
@@ -24,17 +25,18 @@ export const storeLogin = defineStore('signIn', () => {
           parentStore.auth.last_name = data.payload.account.last_name
           parentStore.auth.permission = data.payload.account.permission
           parentStore.updatePermissionv2(data.payload.account.access)
+          parentStore.updateAppConfig(data.payload.config)
           // parentStore.updateAccess(data.payload.account)
           // parentStore.updatePermission(data.payload.account)
         }
       })
       .catch((e: Error) => {
-        alert(`Error ${e}`);
+        console.error(`Error ${e}`)
       })
   }
 
   parentStore.$subscribe((mutation, state) => {
-    if(state.auth.token !== '') {
+    if (state.auth.token !== '') {
       router.push('/')
     }
   })

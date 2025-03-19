@@ -10,13 +10,14 @@
       placeholder="Select LOV"
       optionLabel="name"
       @change="onSelect"
-      @filter="onFilter">
+      @filter="onFilter"
+    >
       <template #value="slotProps">
         <div v-if="slotProps.value" class="flex align-items-center">
           <div>{{ slotProps.value.name }}</div>
         </div>
         <span v-else>
-            {{ slotProps.placeholder }}
+          {{ slotProps.placeholder }}
         </span>
       </template>
       <template #option="slotProps">
@@ -36,24 +37,24 @@ import Select from 'primevue/select'
 export default {
   name: 'DropdownLOV',
   components: {
-    Select
+    Select,
   },
   props: {
     selectedID: {
       required: false,
       type: String,
-      default: ''
+      default: '',
     },
     selectedName: {
       required: false,
       type: String,
-      default: ''
+      default: '',
     },
     disabled: {
       required: false,
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   emits: ['onSelect'],
   data() {
@@ -61,17 +62,17 @@ export default {
       searchTerm: '',
       selected: {
         id: '',
-        name: 'Select LOV'
+        name: 'Select LOV',
       },
       searchResult: [],
       loading: true,
     }
   },
   created() {
-    if(this.selectedName !== '') {
+    if (this.selectedName !== '') {
       this.selected = {
         id: this.selectedID ?? '',
-        name: this.selectedName ?? ''
+        name: this.selectedName ?? '',
       }
     }
   },
@@ -89,9 +90,9 @@ export default {
     onSelect(event) {
       this.$emit('onSelect', {
         id: this.selected.id,
-        name: this.selected.name
+        name: this.selected.name,
       })
-    }
-  }
+    },
+  },
 }
 </script>

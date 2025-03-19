@@ -1,9 +1,6 @@
 <template>
   <div>
-    <form
-      autocomplete="off"
-      @submit.prevent="submitLOV"
-    >
+    <form autocomplete="off" @submit.prevent="submitLOV">
       <Card>
         <template #content>
           <div class="grid p-fluid">
@@ -26,7 +23,9 @@
                     v-for="(error, index) of validator.group.$errors"
                     :key="index"
                     class="error-msg"
-                  >{{ error.$message }}</div>
+                  >
+                    {{ error.$message }}
+                  </div>
                 </Message>
               </div>
             </div>
@@ -49,7 +48,9 @@
                     v-for="(error, index) of validator.name.$errors"
                     :key="index"
                     class="error-msg"
-                  >{{ error.$message }}</div>
+                  >
+                    {{ error.$message }}
+                  </div>
                 </Message>
               </div>
             </div>
@@ -61,7 +62,8 @@
                   :selectedID="parent.id"
                   :selectedName="parent.name"
                   :disabled="!submitPermission"
-                  @onSelect="selectedLOV" />
+                  @onSelect="selectedLOV"
+                />
               </div>
             </div>
             <div class="col-9">
@@ -83,7 +85,9 @@
                     v-for="(error, index) of validator.value.$errors"
                     :key="index"
                     class="error-msg"
-                  >{{ error.$message }}</div>
+                  >
+                    {{ error.$message }}
+                  </div>
                 </Message>
               </div>
             </div>
@@ -134,13 +138,13 @@
 </template>
 <script>
 import { ClassicEditor, Alignment, Essentials, Bold, Italic, Link, Paragraph } from 'ckeditor5'
-import Card from "primevue/card"
-import Button from "primevue/button"
-import Toolbar from "primevue/toolbar"
-import InputText from "primevue/inputtext"
-import Message from "primevue/message"
-import useVuelidate from "@vuelidate/core"
-import {minLength, required} from "@vuelidate/validators"
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import Toolbar from 'primevue/toolbar'
+import InputText from 'primevue/inputtext'
+import Message from 'primevue/message'
+import useVuelidate from '@vuelidate/core'
+import { minLength, required } from '@vuelidate/validators'
 import DropdownLOV from '@/modules/master/lov/components/DropDown.vue'
 import { mapActions } from 'pinia'
 import { storeCore } from '@/store/index.ts'
@@ -152,7 +156,7 @@ export default {
     Button,
     InputText,
     Message,
-    DropdownLOV
+    DropdownLOV,
   },
   inject: ['dialogRef'],
   setup() {
@@ -165,14 +169,7 @@ export default {
       editor: ClassicEditor,
       editorData: '',
       editorConfig: {
-        plugins: [
-          Essentials,
-          Bold,
-          Italic,
-          Link,
-          Paragraph,
-          Alignment,
-        ],
+        plugins: [Essentials, Bold, Italic, Link, Paragraph, Alignment],
 
         toolbar: {
           items: ['bold', 'italic', 'link', 'undo', 'redo', 'alignment'],
@@ -183,7 +180,7 @@ export default {
       value: '',
       parent: {
         id: '',
-        name: ''
+        name: '',
       },
       remark: '',
     }
@@ -201,11 +198,9 @@ export default {
     value: {},
     remark: {},
   },
-  unmounted() {
-
-  },
+  unmounted() {},
   async created() {
-    if(this.dialogRef.data.mode === 'edit') {
+    if (this.dialogRef.data.mode === 'edit') {
       this.submitPermission = this.allowDispatch('btnEditLOV')
       // await LOVService.getLOVDetail(this.dialogRef.data.id).then((response) => {
       //   const data = response.data.payload.data
@@ -235,10 +230,10 @@ export default {
       this.dialogRef.close({
         ...this.dialogRef.data,
         ...e,
-      });
+      })
     },
     async submitData() {
-      if(this.dialogRef.data.mode === 'edit') {
+      if (this.dialogRef.data.mode === 'edit') {
         // await LOVService.editLOV(this.dialogRef.data.id, {
         //   name: this.name,
         //   group: this.group,
@@ -259,7 +254,7 @@ export default {
         //   this.closeDialog()
         // })
       }
-    }
+    },
   },
 }
 </script>

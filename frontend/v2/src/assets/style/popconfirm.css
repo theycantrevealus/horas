@@ -1,11 +1,10 @@
 .p-confirm-popup {
     background: #fcfcfc;
-    box-shadow: 0 0 10px 5px rgba(0, 0, 0, .1) !important;
+    box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1) !important;
 }
 
 .p-confirm-popup .p-confirm-popup-content {
     padding: 10px !important;
-
 }
 
 .p-confirm-popup .p-confirm-popup-message {

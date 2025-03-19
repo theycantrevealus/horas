@@ -9,11 +9,11 @@ export const storeLOV = defineStore('lov', {
       return await api({ requiresAuth: true })
         .get(`${import.meta.env.VITE_API_URL}/v1/lov`, {
           params: {
-            lazyEvent: JSON.stringify(parameter)
+            lazyEvent: JSON.stringify(parameter),
           },
         })
         .then((response: AxiosResponse) => {
-          const data:CoreResponse = response.data
+          const data: CoreResponse = response.data
           return data
         })
         .catch((e) => {
@@ -24,12 +24,12 @@ export const storeLOV = defineStore('lov', {
       return await api({ requiresAuth: true })
         .get(`${import.meta.env.VITE_API_URL}/v1/lov?q=${term}`)
         .then((response: AxiosResponse) => {
-          const data:CoreResponse = response.data
+          const data: CoreResponse = response.data
           return data
         })
         .catch((e) => {
           throw e
         })
-    }
-  }
+    },
+  },
 })

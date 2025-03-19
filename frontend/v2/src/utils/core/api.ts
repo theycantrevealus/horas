@@ -45,7 +45,7 @@ export default ({ requiresAuth = true } = {}) => {
   instance.interceptors.request.use(
     (config) => {
       config.headers = config.headers ?? {}
-      if(requiresAuth) {
+      if (requiresAuth) {
         const token = store.getToken
         config.headers.set('Authorization', token ? `Bearer ${token}` : '', true)
       }
@@ -53,19 +53,19 @@ export default ({ requiresAuth = true } = {}) => {
     },
     (error) => {
       return Promise.reject(error)
-    }
+    },
   )
 
   instance.interceptors.response.use(
     (response) => {
-      if(response.config.method === 'get') {
+      if (response.config.method === 'get') {
         return Promise.resolve(response)
       } else {
         // DOC : THIS IS POST SUCCESS SEGMENT
-        if(response.data.length === undefined) {
+        if (response.data.length === undefined) {
           const responseParsed: GlobalResponse = response.data
           const statusCodeIdentifier = responseParsed.statusCode
-          if(statusCodeIdentifier) {
+          if (statusCodeIdentifier) {
             store.setToast({
               severity: 'success',
               summary: `[${statusCodeIdentifier.defaultCode}/${statusCodeIdentifier.classCode}_${statusCodeIdentifier.customCode}]`,
@@ -92,19 +92,26 @@ export default ({ requiresAuth = true } = {}) => {
         const statusCode = error.response.data.statusCode ?? {
           defaultCode: '',
           classCode: '',
-          customCode: ''
+          customCode: '',
         }
         const message = error.response.data.message
         let detail = ''
-        for(const a in error.response.data.payload) {
+        for (const a in error.response.data.payload) {
           const errorParser = error.response.data.payload[a]
-          for( const b in errorParser) {
+          for (const b in errorParser) {
             detail += `- ${errorParser[b]}\n`
           }
         }
 
-        type SeverityOption = 'success' | 'info' | 'warn' | 'error' | 'secondary' | 'contrast' | undefined;
-        let severity:SeverityOption
+        type SeverityOption =
+          | 'success'
+          | 'info'
+          | 'warn'
+          | 'error'
+          | 'secondary'
+          | 'contrast'
+          | undefined
+        let severity: SeverityOption
 
         switch (error.response.status) {
           case 400:
@@ -129,20 +136,21 @@ export default ({ requiresAuth = true } = {}) => {
             severity = 'error'
             break
         }
-        return await store.setToast({
-          severity: severity,
-          summary: `[${statusCode.defaultCode}/${statusCode.classCode}_${statusCode.customCode}]\n${message}`,
-          detail: detail,
-          life: 5000,
-        }).then(() => {
-          return Promise.reject(error.response.data)
-        })
+        return await store
+          .setToast({
+            severity: severity,
+            summary: `[${statusCode.defaultCode}/${statusCode.classCode}_${statusCode.customCode}]\n${message}`,
+            detail: detail,
+            life: 5000,
+          })
+          .then(() => {
+            return Promise.reject(error.response.data)
+          })
       } else {
         return Promise.reject(error.message)
       }
-    }
+    },
   )
 
   return instance
 }
-

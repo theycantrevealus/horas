@@ -1,8 +1,11 @@
-.p-dialog .p-dialog-content p, .p-dialog .p-dialog-content label, .p-dialog .p-dialog-content span {
+.p-dialog .p-dialog-content p,
+.p-dialog .p-dialog-content label,
+.p-dialog .p-dialog-content span {
     font-size: 10pt !important;
 }
 
-.p-dialog .p-dialog-content .p-inputtext, .p-dialog .p-dialog-content .p-inputgroup .p-inputtext {
+.p-dialog .p-dialog-content .p-inputtext,
+.p-dialog .p-dialog-content .p-inputgroup .p-inputtext {
     padding: 10px !important;
     font-size: 10pt !important;
 }

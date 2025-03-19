@@ -10,7 +10,7 @@ export default {
   data() {
     return {
       target: '',
-      previous: '/dashboard'
+      previous: '/dashboard',
     }
   },
   mounted() {

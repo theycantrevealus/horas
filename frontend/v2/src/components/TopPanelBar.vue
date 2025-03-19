@@ -31,7 +31,7 @@
             </div>
           </div>
 
-          <Dropdown
+          <Select
             v-if="selectedLanguage"
             v-model="selectedLanguage"
             :filter="true"
@@ -42,51 +42,40 @@
             @change="changeLanguage()"
           >
             <template #value="slotProps">
-              <div
-                v-if="slotProps.value"
-                class="country-item country-item-value"
-              >
+              <div v-if="slotProps.value" class="country-item country-item-value">
+                <div>{{ slotProps.value.name }}</div>
+              </div>
+              <span v-else>
+                {{ slotProps.placeholder }}
+              </span>
+            </template>
+            <template #option="slotProps">
+              <div class="country-item">
                 <!--img
                   :class="'flag flag-' + slotProps.value.code.toLowerCase() ?? ''"
                   :src="require('@/assets/flag_placeholder.png')"
                   width="18"
                 /-->
-                <div>{{slotProps.value.name}}</div>
-              </div>
-              <span v-else>
-              {{slotProps.placeholder}}
-            </span>
-            </template>
-            <template #option="slotProps">
-              <div class="country-item">
-                <img
-                  :class="'flag flag-' + slotProps.option.code.toLowerCase()"
-                  :src="require('@/assets/flag_placeholder.png')"
-                />
-                <div>{{slotProps.option.name}}</div>
+                <div>{{ slotProps.option.name }}</div>
               </div>
             </template>
-          </Dropdown>
+          </Select>
         </div>
       </template>
     </Menubar>
   </div>
 </template>
 <script lang="ts">
-import Menubar from 'primevue/menubar'
-import Dropdown from 'primevue/dropdown'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { defineComponent } from 'vue'
 import { mapStores } from 'pinia'
-import { storeCore } from '@/store/index.js'
-export default {
-  name: 'TopPanelMenu',
-  components: {
-    Menubar,
-    Dropdown,
-  },
+import { storeCore } from '@/store'
+import type { Language } from '@/interfaces/language'
 
+export default defineComponent({
+  name: 'TopPanelMenu',
   data() {
     return {
+      getThemeMode: false,
       socket: {
         status: {
           connect: false,
@@ -103,10 +92,14 @@ export default {
           ping: false,
           pong: false,
         },
-        message: ''
+        message: '',
       },
       darkMode: false,
-      selectedLanguage: null,
+      selectedLanguage: {
+        code: '',
+        lang: '',
+        name: '',
+      } as Language,
       countries: [
         { name: 'United States', code: 'us', lang: 'en' },
         { name: 'Indonesia', code: 'id', lang: 'id' },
@@ -273,11 +266,12 @@ export default {
   created() {
     this.coreStore.$subscribe((mutation, state) => {
       const darkMode = state.setting.dark
-      const language = state.setting.language
+      const language: Language = state.setting.language
+
       if (darkMode) {
-        document.querySelector('body').classList.add('dark')
+        document.body.classList.add('dark')
       } else {
-        document.querySelector('body').classList.remove('dark')
+        document.body.classList.remove('dark')
       }
 
       this.darkMode = darkMode
@@ -286,20 +280,21 @@ export default {
     })
   },
   async mounted() {
-
     await this.coreStore.getLanguage()
-
-    this.selectedLanguage = this.language
   },
   methods: {
     toggleDarkMode() {
+      this.getThemeMode = !this.getThemeMode
       this.coreStore.toggleDarkMode()
     },
-    changeLanguage() {
-      this.coreStore.changeLanguage(this.selectedLanguage).then(() => {
+    async changeLanguage() {
+      await this.coreStore.changeLanguage(this.selectedLanguage).then(() => {
         this.$i18n.locale = this.selectedLanguage.lang
       })
     },
+    getFlagImage() {
+      // TODO : Add flag provider from backend
+    },
   },
-}
+})
 </script>

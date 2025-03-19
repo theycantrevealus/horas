@@ -1,17 +1,25 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.cypress-ct.json"
+    "files": [],
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        },
+        {
+            "path": "./tsconfig.app.json"
+        },
+        {
+            "path": "./tsconfig.cypress-ct.json"
+        }
+    ],
+    "compilerOptions": {
+        "types": ["node"],
+        "typeRoots": ["../node_modules/@types"],
+        "declaration": false,
+        "module": "NodeNext",
+        "isolatedModules": true,
+        "verbatimModuleSyntax": true,
+        "strict": true,
+        "jsx": "preserve",
+        "jsxImportSource": "vue"
     }
-  ],
-  "compilerOptions": {
-    "module": "NodeNext"
-  }
 }

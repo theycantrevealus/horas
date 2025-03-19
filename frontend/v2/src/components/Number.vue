@@ -8,50 +8,53 @@ export default {
   props: {
     number: {
       type: Number,
-      default: 0.00,
+      default: 0.0,
       required: true,
     },
     currency: {
       type: String,
       default: 'IDR',
-      required: true
+      required: true,
     },
     lang: {
       type: String,
       default: 'id',
-      required: true
+      required: true,
     },
     code: {
       type: String,
       default: 'ID',
-      required: true
+      required: true,
     },
     prefix: {
       type: String,
       default: '',
-      required: false
+      required: false,
     },
     decimal: {
       type: Number,
       default: 2,
-      required: false
+      required: false,
     },
     className: {
       type: String,
       default: '',
-      required: false
-    }
+      required: false,
+    },
   },
   emits: ['display'],
-  mounted() { },
+  mounted() {},
   methods: {
     format(num) {
-      const formatter = new Intl.NumberFormat(`${this.lang.toLowerCase()}-${this.code.toUpperCase()}`, {
-        minimumFractionDigits: this.decimal,
-      })
+      const formatter = new Intl.NumberFormat(
+        `${this.lang.toLowerCase()}-${this.code.toUpperCase()}`,
+        {
+          minimumFractionDigits: this.decimal,
+        },
+      )
       const parser = new NumberParser(`${this.lang.toLowerCase()}-${this.code.toUpperCase()}`, num)
       return parser.parse(formatter.format(num))
-    }
-  }
+    },
+  },
 }
 </script>

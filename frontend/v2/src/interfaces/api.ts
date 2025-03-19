@@ -14,5 +14,5 @@ export const CoreResponseLib = {
   Login: {
     success: 'ACC_I_S0000',
     failed: '',
-  }
+  },
 }

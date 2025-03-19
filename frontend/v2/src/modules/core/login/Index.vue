@@ -65,19 +65,11 @@ import useVuelidate from '@vuelidate/core'
 import { validateEmail } from '@/utils/core/string'
 import { required, minLength } from '@vuelidate/validators'
 import { storeLogin } from '@/modules/core/login/store.ts'
-
-import Card from 'primevue/card'
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Message from 'primevue/message'
-import Button from 'primevue/button'
 import { storeCore } from '@/store'
-import { mapStores, storeToRefs } from 'pinia'
+import { mapStores } from 'pinia'
+import { defineComponent } from 'vue'
 
-export default {
-  components: {
-    Card, InputText, Password, Message, Button
-  },
+export default defineComponent({
   setup() {
     return { v$: useVuelidate() }
   },
@@ -92,7 +84,7 @@ export default {
     }
   },
   computed: {
-    ...mapStores(storeLogin, storeCore)
+    ...mapStores(storeLogin, storeCore),
   },
   validations: {
     email: {
@@ -115,9 +107,9 @@ export default {
     async login() {
       this.signInStore.signIn({
         email: this.email,
-        password: this.password
+        password: this.password,
       })
-    }
-  }
-}
+    },
+  },
+})
 </script>

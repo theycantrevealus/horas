@@ -19,6 +19,7 @@
   "dependencies": {
     "@ckeditor/ckeditor5-vue": "^7.3.0",
     "@material-design-icons/font": "^0.14.13",
+    "@primevue/auto-import-resolver": "^4.3.2",
     "@primevue/themes": "^4.2.5",
     "@types/nprogress": "^0.2.3",
     "@vuelidate/core": "^2.0.3",
@@ -36,6 +37,7 @@
     "primeicons": "^7.0.0",
     "primevue": "^4.2.5",
     "secure-ls": "^2.0.0",
+    "unplugin-vue-components": "^28.4.1",
     "vue": "^3.5.13",
     "vue-i18n": "^10.0.5",
     "vue-router": "^4.5.0"

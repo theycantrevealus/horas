@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div :class="(darkMode ? 'dark' : '') + ' main-container'">
     <div :class="(getMenuModeStatus ? 'open' : '') + ' topbar'">
@@ -51,21 +52,11 @@
   <ConfirmDialog></ConfirmDialog>
 </template>
 <script lang="ts">
-import TopPanelBar from '@/components/TopPanelBar.vue'
-import SidePanelBar from '@/components/SidePanelBar.vue'
-import BreadCrumb from '@/components/BreadCrumb.vue'
-import ConfirmDialog from 'primevue/confirmdialog';
-import { mapActions, mapState, mapStores } from 'pinia'
 import { storeCore } from '@/store'
+import { mapActions, mapState, mapStores } from 'pinia'
+import { defineComponent } from 'vue'
 
-export default {
-  name: 'Builder',
-  components: {
-    TopPanelBar,
-    SidePanelBar,
-    BreadCrumb,
-    ConfirmDialog
-  },
+export default defineComponent({
   data() {
     return {
       layoutMode: 'static',
@@ -84,18 +75,18 @@ export default {
             size: {
               sidepanel: {
                 width: '',
-                height: ''
-              }
-            }
+                height: '',
+              },
+            },
           },
           icon: {
             target: '',
             size: {
               sidepanel: {
                 width: '',
-                height: ''
-              }
-            }
+                height: '',
+              },
+            },
           },
         },
         dark: {
@@ -104,53 +95,47 @@ export default {
             size: {
               sidepanel: {
                 width: '',
-                height: ''
-              }
-            }
+                height: '',
+              },
+            },
           },
           icon: {
             target: '',
             size: {
               sidepanel: {
                 width: '',
-                height: ''
-              }
-            }
-          }
-        }
-      }
+                height: '',
+              },
+            },
+          },
+        },
+      },
     }
   },
   computed: {
     ...mapStores(storeCore),
     ...mapState(storeCore, {
       getMenuModeStatus: 'getSidePanel',
-    })
+    }),
   },
   created() {
-    this.coreStore.$subscribe((mutation, state) => {
-      // this.getMenuModeStatus = state.setting.sidePanel ?? false
+    this.coreStore.$subscribe((_mutation, state) => {
       const darkMode = state.setting.dark
       const languageLib = state.setting.languageLib
+
       if (languageLib) {
-        for(const a in languageLib) {
-            this.$i18n.setLocaleMessage(
-            a,
-            languageLib[a]
-          )
+        for (const a in languageLib) {
+          // this.$i18n.setLocaleMessage(a, languageLib[a])
         }
       }
-
       if (darkMode) {
         this.layoutColorMode = 'dark'
-        document.querySelector('body').classList.add('dark')
+        document.body.classList.add('dark')
       } else {
         this.layoutColorMode = 'light'
-        document.querySelector('body').classList.remove('dark')
+        document.body.classList.remove('dark')
       }
-
       this.darkMode = darkMode
-
     })
   },
   mounted() {
@@ -161,9 +146,9 @@ export default {
     //   this.logo.light.icon = this.application['APPLICATION_ICON'].setter ?? this.logo.light.icon
     // }
     if (this.darkMode) {
-      document.querySelector('body').classList.add('dark')
+      document.body.classList.add('dark')
     } else {
-      document.querySelector('body').classList.remove('dark')
+      document.body.classList.remove('dark')
     }
 
     // TODO : How to set it on storeCore ???
@@ -176,10 +161,10 @@ export default {
     this.updatePageInfo()
   },
   methods: {
-    ...mapActions(storeCore, [ 'UIToggleEditingData' ]),
+    ...mapActions(storeCore, ['UIToggleEditingData']),
     updatePageInfo() {
-      this.breadcrumb = this.$route.meta.breadcrumb as any[] ?? []
-      this.pageName = this.$route.name as string ?? ''
+      this.breadcrumb = (this.$route.meta.breadcrumb as any[]) ?? []
+      this.pageName = (this.$route.name as string) ?? ''
     },
     toogleMenuModeOn() {
       this.coreStore.toggleSideMenuOn()
@@ -190,32 +175,29 @@ export default {
     loadLanguage() {
       this.coreStore.setBrowserLanguage(true)
     },
-    onMenuItemClick(event: any) {
-      if (event.item && !event.item.items) {
-        this.overlayMenuActive = false
-        this.mobileMenuActive = false
-      }
-    },
-    addClass(element: any, className: any) {
-      if (element.classList) {
-        element.classList.add(className)
-      } else {
-        element.className += ' ' + className
-      }
-    },
-    removeClass(element: any, className: any) {
-      if (element.classList) {
-        element.classList.remove(className)
-      } else {
-        element.className = element.className.replace(
-          new RegExp(
-            '(^|\\b)' + className.split(' ').join('|') + '(\\b|$)',
-            'gi'
-          ),
-          ' '
-        )
-      }
-    },
-  }
-}
+    // onMenuItemClick(event) {
+    //   if (event.item && !event.item.items) {
+    //     this.overlayMenuActive = false
+    //     this.mobileMenuActive = false
+    //   }
+    // },
+    // addClass(element: any, className: any) {
+    //   if (element.classList) {
+    //     element.classList.add(className)
+    //   } else {
+    //     element.className += ' ' + className
+    //   }
+    // },
+    // removeClass(element: any, className: any) {
+    //   if (element.classList) {
+    //     element.classList.remove(className)
+    //   } else {
+    //     element.className = element.className.replace(
+    //       new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'),
+    //       ' ',
+    //     )
+    //   }
+    // },
+  },
+})
 </script>

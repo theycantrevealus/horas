@@ -5,7 +5,9 @@ import Toast from 'primevue/toast'
 <template>
   <router-view v-slot="{ Component }">
     <transition name="scale" mode="out-in">
-      <component :is="Component" />
+      <div>
+        <component :is="Component" />
+      </div>
     </transition>
   </router-view>
   <Toast :position="'top-right'" />

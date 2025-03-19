@@ -28,19 +28,16 @@
   </div>
 </template>
 <script lang="ts">
-import Breadcrumb from 'primevue/breadcrumb'
-import Chip from 'primevue/chip'
 import { mapStores } from 'pinia'
 import { storeCore } from '@/store/index.js'
-export default {
+import { defineComponent } from 'vue'
+import type { MenuItem } from 'primevue/menuitem'
+
+export default defineComponent({
   name: 'BreadCrumb',
-  components: {
-    Breadcrumb,
-    Chip,
-  },
   props: {
     items: {
-      type: Array,
+      type: Array as () => MenuItem[],
       default: [],
     },
     pageName: {
@@ -65,5 +62,5 @@ export default {
       this.last_name = state.auth.last_name
     })
   },
-}
+})
 </script>
