@@ -209,7 +209,7 @@
       },
       {
         "id": "menu-67558e316838f1c99d0e3401",
-        "name": "LOV Management",
+        "name": "LOV",
         "url": "/lov",
         "identifier": "LOV"
       },
@@ -223,12 +223,35 @@
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIxYjVkODU2LWQ4M2YtNGY4Ny05YTBmLWU5MGFlMGNjZWU3ZiIsImN1cnJlbnRUaW1lIjoiMjAyNC0xMi0wM1QxNDoxNTowMy4wMDBaIiwiYWNjb3VudCI6eyJpZCI6ImFjY291bnQtNjNkNTFlZGUzMjc5NWNiN2EyYTBlZWRkIiwiZW1haWwiOiJ0YWthc2hpdGFuYWthQGhvcmFzLmNvbSIsImZpcnN0X25hbWUiOiJIZW5kcnkiLCJsYXN0X25hbWUiOiJUYW5ha2EiLCJzdG9ja19wb2ludCI6W119LCJpYXQiOjE3MzMyMzUzMDMsImV4cCI6MTczNTgyNzMwM30.vVvExNDqh5W3AT15eEpiq9cg5RSMciF8-w9tgy-lj1o",
   "config": {
-    "0": null,
-    "1": null,
-    "2": null,
-    "3": null,
-    "4": null,
-    "5": null,
-    "6": null
+    "application_logo": {
+      "setter": {
+        "target": "icon.png",
+        "size": {
+          "sidepanel": {
+            "width": "85%",
+            "height": ""
+          },
+          "print": {
+            "width": "200px",
+            "height": ""
+          }
+        }
+      }
+    },
+    "application_icon": {
+      "setter": {
+        "target": "logo.png",
+        "size": {
+          "sidepanel": {
+            "width": "15%",
+            "height": ""
+          },
+          "print": {
+            "width": "50px",
+            "height": ""
+          }
+        }
+      }
+    }
   }
 }
