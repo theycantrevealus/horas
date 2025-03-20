@@ -85,9 +85,7 @@ import { GatewayCoreService } from './gateway.core.service'
       useFactory: async (
         configService: ConfigService
       ): Promise<MongooseModuleOptions> => ({
-        uri: `${configService.get<string>(
-          'mongo.primary.uri'
-        )}?${configService.get<string>('mongo.primary.replica_set') !== '' ? `replicaSet=${configService.get<string>('mongo.primary.replica_set')}` : ''}`,
+        uri: `${configService.get<string>('mongo.primary.uri')}`,
       }),
       inject: [ConfigService],
     }),
