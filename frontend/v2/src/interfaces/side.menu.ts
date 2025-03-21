@@ -1,6 +1,8 @@
 export interface SideMenuItem {
   id: string
   name: string
+  // url: string
+  // command: string
   label: string
   class: string
   style: string

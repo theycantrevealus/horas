@@ -33,7 +33,7 @@ import '@/assets/tnsol.css'
 // Module List
 import LOV from '@/modules/master/lov'
 import type { RouteRecordRaw } from 'vue-router'
-import { setupI18n } from '@/utils/core/i18n.ts'
+import { i18n } from '@/utils/core/i18n.ts'
 
 const app = createApp(App)
 
@@ -54,17 +54,6 @@ Object.keys(Modules).forEach((moduleKey) => {
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
-// const i18n = createI18n({
-//   locale: window.navigator.language.toString(),
-//   fallbackLocale: 'en',
-//   silentTranslationWarn: true
-// })
-
-const i18n = setupI18n({
-  locale: window.navigator.language.toString(),
-  fallbackLocale: 'en',
-  silentTranslationWarn: true,
-})
 
 app
   .use(pinia)

@@ -38,7 +38,7 @@ export default defineComponent({
   props: {
     items: {
       type: Array as () => MenuItem[],
-      default: [],
+      default: () => [],
     },
     pageName: {
       type: String,

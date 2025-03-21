@@ -1,7 +1,7 @@
 <template>
   <label class="currency-label {{className}}">{{ format(number) }}{{ prefix }}</label>
 </template>
-<script>
+<script lang="ts">
 import { NumberParser } from '@/utils/core/number.ts'
 export default {
   name: 'NumberLabel',

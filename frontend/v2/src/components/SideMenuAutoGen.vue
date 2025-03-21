@@ -25,7 +25,7 @@
         </template>
         <template v-else>
           <RouterLink
-            v-if="item.to && getCredential.pages[`page_${item.id}`] !== undefined"
+            v-if="item.to && credential.pages[`page_${item.id}`] !== undefined"
             v-tooltip.right="item.name"
             :to="item.to"
             :class="[item.class, { disabled: item.disabled }]"
@@ -83,13 +83,14 @@
 import { mapState, mapStores } from 'pinia'
 import { storeCore } from '@/store'
 import type { SideMenuItem } from '@/interfaces/side.menu'
+import type { UICredential } from '@/interfaces/ui/credential'
 
 export default {
   name: 'SideMenuAutoGen',
   props: {
     items: {
       type: Array as () => SideMenuItem[],
-      default: [],
+      default: () => [],
     },
     root: {
       type: Boolean,
@@ -99,10 +100,8 @@ export default {
   emits: ['menuitem-click'],
   data() {
     return {
-      getCredential: {
-        // pages: [],
-      },
-      activeIndex: null,
+      credential: {} as UICredential,
+      activeIndex: 0,
     }
   },
   computed: {
@@ -116,13 +115,14 @@ export default {
   },
   created() {
     this.coreStore.$subscribe((mutation, state) => {
-      this.getCredential = {
+      this.credential = {
         pages: state.setting.pages,
       }
     })
   },
   methods: {
-    onMenuItemClick(event: any, item: any, index: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onMenuItemClick(event: MouseEvent, item: any, index: number) {
       if (item.disabled) {
         event.preventDefault()
         return
@@ -141,13 +141,14 @@ export default {
         item.command({ originalEvent: event, item: item })
       }
 
-      this.activeIndex = index === this.activeIndex ? null : index
+      this.activeIndex = index === this.activeIndex ? 0 : index
 
       this.$emit('menuitem-click', {
         originalEvent: event,
         item: item,
       })
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     visible(item: any) {
       return typeof item.visible === 'function' ? item.visible() : item.visible !== false
     },

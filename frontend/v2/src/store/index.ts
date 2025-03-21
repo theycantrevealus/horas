@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 import type { ToastMessageOptions } from 'primevue/toast'
 import SecureLS from 'secure-ls'
 import api from '@/utils/core/api'
-import getBrowserLocale from '@/utils/core/i18n.ts'
 import type { Language } from '@/interfaces/language'
+import { getBrowserLocale, i18n } from '@/utils/core/i18n'
 
 interface AccountAccessItem {
   domIdentity: string
@@ -30,6 +30,7 @@ interface Authentication {
   first_name: string
   last_name: string
   permission: Permission[] // TODO : Consider to take out
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pagesAllow: any
   domAllow: AccountAccessItem[]
 }
@@ -37,14 +38,21 @@ interface Authentication {
 interface Setting {
   theme: string
   dark: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logo: any
   sidePanel: boolean
   language: Language
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   languageLib: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   languageMeta?: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   routeMap?: any // TODO : Analyze usage
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   routes?: any[] // TODO : Analyze usage
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pages?: any[] // TODO : Analyze usage
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   menu?: any[] // TODO : Analyze usage
 }
 
@@ -178,6 +186,17 @@ export const storeCore = defineStore('core', {
     },
   },
   actions: {
+    async fetch_i18n() {
+      return await api({ requiresAuth: true })
+        .get(`${import.meta.env.VITE_API_URL}/v1/i18n`)
+        .then((response) => {
+          const data = response.data.payload.data
+          return Promise.resolve(data)
+        })
+        .catch((e) => {
+          return Promise.reject(e)
+        })
+    },
     async signOut() {
       this.$reset()
     },
@@ -191,13 +210,15 @@ export const storeCore = defineStore('core', {
       }
     },
     hasAccess(name: string): boolean {
-      return this.auth.pagesAllow.hasOwnProperty(name)
+      return name in this.auth.pagesAllow
+      // return this.auth.pagesAllow.hasOwnProperty(name)
     },
     allowDispatch(domIdentity: string) {
-      return this.auth.domAllow.find((o: AccountAccessItem, i: number) => {
+      return this.auth.domAllow.find((o: AccountAccessItem) => {
         return o.domIdentity === domIdentity
       })
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateAppConfig(data: any) {
       this.setting.logo.light.image = data.application_logo?.setter
       this.setting.logo.light.image.target = `${import.meta.env.VITE_API_URL}/${data.application_logo?.setter.target}`
@@ -212,7 +233,9 @@ export const storeCore = defineStore('core', {
       this.setting.logo.dark.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon.setter?.target}`
     },
     updatePermissionv2(access: AccountAccess[]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pagesAccess: any = {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const domAccess: any = []
 
       for (const pagesKey in access) {
@@ -226,7 +249,7 @@ export const storeCore = defineStore('core', {
           const accessList = access[pagesKey].access
 
           for (const accessKey in accessList) {
-            const check = domAccess.find((o: AccountAccessItem, i: number) => {
+            const check = domAccess.find((o: AccountAccessItem) => {
               return o.domIdentity === accessList[accessKey].domIdentity
             })
 
@@ -241,9 +264,12 @@ export const storeCore = defineStore('core', {
       this.auth.domAllow = domAccess
       // this.auth.token = ''
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updatePermission(payload: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const routeMap: any = {}
       const grantedPerm = payload.permission
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buildPermission: any = {}
       for (const a in grantedPerm) {
         if (buildPermission[grantedPerm[a].domIdentity]) {
@@ -276,10 +302,13 @@ export const storeCore = defineStore('core', {
       this.auth.permission = buildPermission
       this.setting.routeMap = routeMap
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateAccess(payload: any) {
       const routes: string[] = ['Login']
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const routeMap: any = {}
       const grantedPage = payload.access
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buildPage: any = {}
 
       for (const a in grantedPage) {
@@ -331,7 +360,60 @@ export const storeCore = defineStore('core', {
           this.setting.menu = response.data
         })
     },
-    setBrowserLanguage(data: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setBrowserLanguage(data: any) {
+      // Fetch language from server
+      const language_data = await this.fetch_i18n()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const i18nConfig: any = {
+        messages: {},
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const allLanguage: any = {}
+      if (language_data.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        language_data.forEach((item: any) => {
+          const code = `${item.language_code.toLowerCase()}-${item.iso_2_digits.toUpperCase()}`
+
+          if (!i18nConfig[code]) {
+            i18nConfig[code] = {
+              ...item.datetime,
+              ...item.number,
+            }
+          }
+
+          if (!allLanguage[item.language_code.toLowerCase()]) {
+            allLanguage[item.language_code.toLowerCase()] = {}
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          item.components.forEach((element: any) => {
+            const keys = element.component.split('.')
+
+            // let temp = i18nConfig[code].messages
+            let temp = allLanguage[item.language_code.toLowerCase()]
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            keys.forEach((key: any, index: any) => {
+              if (!temp[key]) {
+                temp[key] = {}
+              }
+
+              if (index === keys.length - 1) {
+                temp[key] = element.translation
+              }
+
+              temp = temp[key]
+            })
+          })
+        })
+
+        i18nConfig.messages = allLanguage
+        Object.keys(allLanguage).forEach((locale: string) => {
+          i18n.global.setLocaleMessage(locale, allLanguage[locale])
+        })
+      }
+
       if (
         this.setting.language &&
         Object.keys(this.setting.language).length === 0 &&

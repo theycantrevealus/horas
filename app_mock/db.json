@@ -255,15 +255,46 @@
       "iso_2_digits": "US",
       "iso_3_digits": "USA",
       "name": "United States",
-      "datetime_weekday": "long",
-      "datetime_era": "long",
-      "datetime_year": "numeric",
-      "datetime_month": "long",
-      "datetime_day": "numeric",
-      "datetime_hour": "numeric",
-      "datetime_minute": "numeric",
-      "datetime_second": "numeric",
-      "datetime_timezone_name": "long",
+      "datetime": {
+        "short": {
+          "weekday": "short",
+          "era": "short",
+          "year": "numeric",
+          "month": "short",
+          "day": "numeric",
+          "hour": "numeric",
+          "minute": "numeric",
+          "second": "numeric",
+          "timezone_name": "short"
+        },
+        "long": {
+          "weekday": "long",
+          "era": "long",
+          "year": "numeric",
+          "month": "long",
+          "day": "numeric",
+          "hour": "numeric",
+          "minute": "numeric",
+          "second": "numeric",
+          "timezone_name": "long"
+        }
+      },
+      "number": {
+        "currency": {
+          "style": "currency",
+          "currency": "USD",
+          "notation": "standard"
+        },
+        "decimal": {
+          "style": "decimal",
+          "minimumFractionDigits": 2,
+          "maximumFractionDigits": 2
+        },
+        "percent": {
+          "style": "percent",
+          "useGrouping": false
+        }
+      },
       "remark": "Extra remark",
       "components": [
         {
@@ -344,7 +375,7 @@
         },
         {
           "component": "global.menu.dashboard",
-          "translation": "Dashboard"
+          "translation": "Dashboard Page"
         },
         {
           "component": "i18n.datatable.column.iso_2_digits.caption",
@@ -480,7 +511,6 @@
       "updated_at": "2024-05-26T00:01:16.000Z",
       "id": "i18n-643ab3443e59e302f7a39234",
       "__v": 4,
-      "currency": "USD",
       "timezone": "Asia/Jakarta"
     },
     {
@@ -510,6 +540,10 @@
         {
           "component": "menu.datatable.button.sort_down",
           "translation": "Down"
+        },
+        {
+          "component": "global.menu.dashboard",
+          "translation": "Halaman Dashboard"
         }
       ],
       "deleted_at": null,

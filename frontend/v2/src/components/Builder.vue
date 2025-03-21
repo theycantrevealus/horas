@@ -65,6 +65,7 @@ export default defineComponent({
       overlayMenuActive: false,
       mobileMenuActive: false,
       menu: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       breadcrumb: [] as any[],
       pageName: '',
       darkMode: false,
@@ -121,13 +122,7 @@ export default defineComponent({
   created() {
     this.coreStore.$subscribe((_mutation, state) => {
       const darkMode = state.setting.dark
-      const languageLib = state.setting.languageLib
 
-      if (languageLib) {
-        for (const a in languageLib) {
-          // this.$i18n.setLocaleMessage(a, languageLib[a])
-        }
-      }
       if (darkMode) {
         this.layoutColorMode = 'dark'
         document.body.classList.add('dark')
@@ -163,6 +158,7 @@ export default defineComponent({
   methods: {
     ...mapActions(storeCore, ['UIToggleEditingData']),
     updatePageInfo() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.breadcrumb = (this.$route.meta.breadcrumb as any[]) ?? []
       this.pageName = (this.$route.name as string) ?? ''
     },

@@ -1,7 +1,8 @@
 import { isRef, nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 
-export default function getBrowserLocale(options = {}): any {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getBrowserLocale(options = {}): any {
   const defaultOptions = { countryCodeOnly: false }
 
   const opt = { ...defaultOptions, ...options }
@@ -61,15 +62,22 @@ export function setI18nLanguage(i18n: I18n, locale: Locale): void {
   document.querySelector('html')!.setAttribute('lang', locale)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getResourceMessages = (r: any) => r.default || r
-
-export async function loadLocaleMessages(i18n: I18n, locale: Locale) {
+export async function loadLocaleMessages(i18n: I18n, locale: Locale, messages = {}) {
+  // const getResourceMessages = (r: any) => r.default || r
   // load locale messages
   // const messages = await import(`./locales/${locale}.json`).then(getResourceMessages)
 
   // set locale and locale message
-  // i18n.global.setLocaleMessage(locale, messages)
+  i18n.global.setLocaleMessage(locale, messages)
 
   return nextTick()
 }
+
+export const i18n = setupI18n({
+  locale: window.navigator.language.toString().substring(0, 2),
+  silentTranslationWarn: true,
+  fallbackLocale: 'en',
+  legacy: true,
+  warnHtmlInMessage: 'off',
+  globalInjection: true,
+})

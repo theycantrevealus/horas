@@ -37,12 +37,13 @@ export default {
   props: {
     model: {
       type: Array,
-      default: [],
+      default: () => [],
     },
   },
   emits: ['menuitem-click'],
   data() {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       menuMeta: [] as any[],
     }
   },
@@ -67,6 +68,7 @@ export default {
         this.$router.push('/login')
       })
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onMenuItemClick(event: any) {
       this.$emit('menuitem-click', event)
     },
