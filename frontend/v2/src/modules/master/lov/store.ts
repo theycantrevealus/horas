@@ -45,7 +45,7 @@ export const storeLOV = defineStore('lov', {
         })
     },
     async edit(id: string, parameter: LovParameter) {
-      return await api({ requiresAuth: true })
+      return await api({ requiresAuth: true, responseToast: true })
         .put(`${import.meta.env.VITE_API_URL}/v1/lov/${id}`, parameter)
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data
@@ -56,7 +56,7 @@ export const storeLOV = defineStore('lov', {
         })
     },
     async add(parameter: LovParameter) {
-      return await api({ requiresAuth: true })
+      return await api({ requiresAuth: true, responseToast: true })
         .post(`${import.meta.env.VITE_API_URL}/v1/lov`, parameter)
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data

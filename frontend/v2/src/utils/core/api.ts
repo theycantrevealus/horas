@@ -9,12 +9,13 @@ export interface GlobalResponse {
     classCode: string
   }
   message: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any
   transaction_classify: string
   transaction_id: string | null
 }
 
-export default ({ requiresAuth = true } = {}) => {
+export default ({ requiresAuth = true, responseToast = false } = {}) => {
   const store = storeCore()
 
   const options = {
@@ -58,33 +59,38 @@ export default ({ requiresAuth = true } = {}) => {
 
   instance.interceptors.response.use(
     (response) => {
-      if (response.config.method === 'get') {
-        return Promise.resolve(response)
-      } else {
-        // DOC : THIS IS POST SUCCESS SEGMENT
-        if (response.data.length === undefined) {
-          const responseParsed: GlobalResponse = response.data
-          const statusCodeIdentifier = responseParsed.statusCode
-          if (statusCodeIdentifier) {
-            store.setToast({
-              severity: 'success',
-              summary: `[${statusCodeIdentifier.defaultCode}/${statusCodeIdentifier.classCode}_${statusCodeIdentifier.customCode}]`,
-              detail: responseParsed.message,
-              life: 5000,
-            })
-            return Promise.resolve(response)
-          } else {
-            store.setToast({
-              severity: 'error',
-              summary: responseParsed.statusCode.toString() ?? '',
-              detail: 'Unknown response status code',
-              life: 5000,
-            })
-            return Promise.reject(response)
-          }
-        } else {
+      // feture : only show toast if configured true
+      if (responseToast) {
+        if (response.config.method === 'get') {
           return Promise.resolve(response)
+        } else {
+          if (response.data.length === undefined) {
+            const responseParsed: GlobalResponse = response.data
+            const statusCodeIdentifier = responseParsed.statusCode
+            if (statusCodeIdentifier) {
+              // TODO : handle response status code on severity
+              store.setToast({
+                severity: 'success',
+                summary: `[${statusCodeIdentifier.defaultCode}/${statusCodeIdentifier.classCode}_${statusCodeIdentifier.customCode}]`,
+                detail: responseParsed.message,
+                life: 5000,
+              })
+              return Promise.resolve(response)
+            } else {
+              store.setToast({
+                severity: 'error',
+                summary: responseParsed.statusCode.toString() ?? '',
+                detail: 'Unknown response status code',
+                life: 5000,
+              })
+              return Promise.reject(response)
+            }
+          } else {
+            return Promise.resolve(response)
+          }
         }
+      } else {
+        return Promise.resolve(response)
       }
     },
     async (error) => {

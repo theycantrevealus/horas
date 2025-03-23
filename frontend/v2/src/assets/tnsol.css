@@ -502,6 +502,8 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .topbar .p-menubar {
+    font-family: 'Visby Round' !important;
+    font-size: 10pt !important;
     background: transparent;
     border: none !important;
     border-radius: 0 !important;

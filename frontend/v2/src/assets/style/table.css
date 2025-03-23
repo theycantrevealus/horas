@@ -49,6 +49,17 @@ table thead tr th {
     color: #fff !important;
 }
 
+.p-datatable-sort-icon {
+    font-size: 6pt !important;
+    color: #fff !important;
+}
+
+.p-datatable .p-icon .p-button-icon,
+.p-datatable .p-button-text.p-button-secondary {
+    font-size: 6pt !important;
+    color: #fff !important;
+}
+
 .p-datatable .p-sortable-column .p-sortable-column-icon {
     width: 0.5rem;
 }
