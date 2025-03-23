@@ -1,38 +1,20 @@
 {
   "lov": [
     {
-      "id": "lov-xxx",
       "name": "General",
       "group": "QUEUE_TYPE",
       "parent": "",
       "value": "General",
       "remark": "<p>General queue</p>",
-      "created_by": {
-        "id": "account-63d51ede32795cb7a2a0eedd",
-        "email": "johndoe@example.com",
-        "first_name": "UPDATEDDJohn",
-        "last_name": "DoeUPDATEDD"
-      },
-      "created_at": "2023-04-09T18:57:39.000Z",
-      "updated_at": "2023-04-09T18:57:39.000Z",
-      "deleted_at": null
+      "id": "lov-xxx"
     },
     {
-      "id": "lov-abc",
       "name": "Special",
       "group": "QUEUE_TYPE",
       "parent": "",
       "value": "Special",
       "remark": "",
-      "created_by": {
-        "id": "account-63d51ede32795cb7a2a0eedd",
-        "email": "johndoe@example.com",
-        "first_name": "UPDATEDDJohn",
-        "last_name": "DoeUPDATEDD"
-      },
-      "created_at": "2023-04-09T18:57:39.000Z",
-      "updated_at": "2023-04-09T18:57:39.000Z",
-      "deleted_at": null
+      "id": "lov-abc"
     },
     {
       "name": "Urgent",

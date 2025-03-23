@@ -69,6 +69,7 @@ router.render = (req, res) => {
         classCode: 'XXX'
       },
       payload: {},
+      message: 'Data processed successfully',
       transaction_classify: '',
       transaction_id: null
     })

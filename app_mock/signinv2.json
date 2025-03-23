@@ -211,7 +211,21 @@
         "id": "menu-67558e316838f1c99d0e3401",
         "name": "LOV",
         "url": "/lov",
-        "identifier": "LOV"
+        "identifier": "LOV",
+        "access":[
+          {
+            "domIdentity": "btnEditLOV",
+            "dispatchName": "MasterLOVEdit"
+          },
+          {
+            "domIdentity": "btnAddLOV",
+            "dispatchName": "MasterLOVAdd"
+          }
+          {
+            "domIdentity": "btnDeleteLOV",
+            "dispatchName": "MasterLOVDelete"
+          }
+        ]
       },
       {
         "id": "menu-67558002ba7667cd569ed451",
