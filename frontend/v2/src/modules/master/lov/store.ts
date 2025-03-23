@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import api from '@/utils/core/api.ts'
 import type { AxiosResponse } from 'axios'
 import type { CoreResponse } from '@/interfaces/api.ts'
+import type { LovParameter } from './interfaces'
 
 export const storeLOV = defineStore('lov', {
   actions: {
@@ -35,6 +36,28 @@ export const storeLOV = defineStore('lov', {
     async detail(id: string) {
       return await api({ requiresAuth: true })
         .get(`${import.meta.env.VITE_API_URL}/v1/lov/${id}`)
+        .then((response: AxiosResponse) => {
+          const data: CoreResponse = response.data
+          return data
+        })
+        .catch((e) => {
+          throw e
+        })
+    },
+    async edit(id: string, parameter: LovParameter) {
+      return await api({ requiresAuth: true })
+        .put(`${import.meta.env.VITE_API_URL}/v1/lov/${id}`, parameter)
+        .then((response: AxiosResponse) => {
+          const data: CoreResponse = response.data
+          return data
+        })
+        .catch((e) => {
+          throw e
+        })
+    },
+    async add(parameter: LovParameter) {
+      return await api({ requiresAuth: true })
+        .post(`${import.meta.env.VITE_API_URL}/v1/lov`, parameter)
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data
           return data

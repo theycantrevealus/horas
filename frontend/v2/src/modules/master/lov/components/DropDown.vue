@@ -6,7 +6,6 @@
       :options="searchResult"
       :filter="true"
       :loading="loading"
-      filter-match-mode="allow-all"
       placeholder="Select LOV"
       optionLabel="name"
       @change="onSelect"
@@ -29,16 +28,12 @@
   </div>
 </template>
 <script>
-// import Dropdown from 'primevue/dropdown'
-import Select from 'primevue/select'
-// import { FilterService } from "primevue/api"
+import { mapStores } from 'pinia'
+import { storeLOV } from '../store'
+import { defineComponent } from 'vue'
 
-// FilterService.register('allow-all', () => true)
-export default {
+export default defineComponent({
   name: 'DropdownLOV',
-  components: {
-    Select,
-  },
   props: {
     selectedID: {
       required: false,
@@ -76,23 +71,31 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapStores(storeLOV),
+  },
   mounted() {
     this.loading = false
   },
   methods: {
     async onFilter(event) {
       this.loading = true
+      await this.lovStore.find(event.value).then((response) => {
+        console.log(response)
+        this.searchResult = response.payload.data
+        this.loading = false
+      })
       // await LOVService.findLOV(event.value).then((response) => {
       //   this.searchResult = response.data.payload.data
       //   this.loading = false
       // })
     },
-    onSelect(event) {
+    onSelect() {
       this.$emit('onSelect', {
         id: this.selected.id,
         name: this.selected.name,
       })
     },
   },
-}
+})
 </script>

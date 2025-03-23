@@ -245,7 +245,8 @@ export default {
         data: {
           mode: 'add',
         },
-        onClose: () => {
+        onClose: (processResponse) => {
+          // TODO : Check for processResponse.data.response to perform notification
           this.loadLazyData()
         },
       })
@@ -267,7 +268,8 @@ export default {
           mode: 'edit',
           id: id,
         },
-        onClose: () => {
+        onClose: (processResponse) => {
+          console.log(processResponse.data.response)
           this.loadLazyData()
         },
       })

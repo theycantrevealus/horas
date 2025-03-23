@@ -131,15 +131,20 @@
     </form>
   </div>
 </template>
-<script>
+<script lang="ts">
 import useVuelidate from '@vuelidate/core'
 import { minLength, required } from '@vuelidate/validators'
 import DropdownLOV from '@/modules/master/lov/components/DropDown.vue'
 import { mapActions, mapStores } from 'pinia'
 import { storeCore } from '@/store/index.ts'
 import { storeLOV } from '@/modules/master/lov/store'
+import { defineComponent } from 'vue'
+import type { LovParameter } from '../interfaces'
+// import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
+// const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
+// TODO : This is example data type of dialogRef
 
-export default {
+export default defineComponent({
   components: {
     DropdownLOV,
   },
@@ -176,13 +181,12 @@ export default {
   },
   unmounted() {},
   async created() {
-    if (this.dialogRef.data.mode === 'edit') {
+    if (this.dialogRef?.data.mode === 'edit') {
       this.submitPermission = this.allowDispatch('btnEditLOV')
       await this.lovStore
         .detail(this.dialogRef.data.id)
         .then((response) => {
-          console.log(response)
-          const data = response.data.payload.data
+          const data = response.payload.data
           this.group = data?.group
           this.name = data?.name
           this.value = data?.value
@@ -205,36 +209,33 @@ export default {
     selectedLOV(event) {
       this.parent = event
     },
-    closeDialog(e) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    closeDialog(e: any) {
       this.UIToggleEditingData(false)
       this.dialogRef.close({
         ...this.dialogRef.data,
-        ...e,
+        response: e,
       })
     },
     async submitData() {
+      const parameter: LovParameter = {
+        name: this.name,
+        group: this.group,
+        parent: this.parent,
+        value: this.value,
+        remark: this.remark,
+      }
+
       if (this.dialogRef.data.mode === 'edit') {
-        // await LOVService.editLOV(this.dialogRef.data.id, {
-        //   name: this.name,
-        //   group: this.group,
-        //   parent: this.parent,
-        //   value: this.value,
-        //   remark: this.remark
-        // }).then(() => {
-        //   this.closeDialog()
-        // })
+        await this.lovStore.edit(this.dialogRef.data.id, parameter).then((response) => {
+          this.closeDialog(response)
+        })
       } else {
-        // await LOVService.addLOV({
-        //   name: this.name,
-        //   group: this.group,
-        //   parent: this.parent,
-        //   value: this.value,
-        //   remark: this.remark
-        // }).then(() => {
-        //   this.closeDialog()
-        // })
+        await this.lovStore.add(parameter).then((response) => {
+          this.closeDialog(response)
+        })
       }
     },
   },
-}
+})
 </script>
