@@ -4,6 +4,7 @@ import SecureLS from 'secure-ls'
 import api from '@/utils/core/api'
 import type { Language } from '@/interfaces/language'
 import { getBrowserLocale, i18n } from '@/utils/core/i18n'
+import { all } from 'axios'
 
 interface AccountAccessItem {
   domIdentity: string
@@ -213,10 +214,16 @@ export const storeCore = defineStore('core', {
       return name in this.auth.pagesAllow
       // return this.auth.pagesAllow.hasOwnProperty(name)
     },
-    allowDispatch(domIdentity: string) {
-      return this.auth.domAllow.find((o: AccountAccessItem) => {
-        return o.domIdentity === domIdentity
-      })
+    allowDispatch(domIdentity: string): boolean {
+      let allowed = false
+      if (
+        this.auth.domAllow.find((o: AccountAccessItem) => {
+          return o.domIdentity === domIdentity
+        })
+      ) {
+        allowed = true
+      }
+      return allowed
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateAppConfig(data: any) {
