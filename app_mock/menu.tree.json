@@ -185,6 +185,15 @@
         "level": 2,
         "items": [
           {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov",
+            "icon": "medical_information",
+            "show_order": 999,
+            "show_on_menu": true,
+            "items": []
+          },
+          {
             "id": "menu-64398975964e52ecda66f2fd",
             "name": "Item Management",
             "url": "",
@@ -244,15 +253,6 @@
             "url": "/master/polyclinic",
             "icon": "medical_information",
             "show_order": 3,
-            "show_on_menu": true,
-            "items": []
-          },
-          {
-            "id": "menu-67558e316838f1c99d0e3401",
-            "name": "LOV Management",
-            "url": "/lov",
-            "icon": "medical_information",
-            "show_order": 999,
             "show_on_menu": true,
             "items": []
           }

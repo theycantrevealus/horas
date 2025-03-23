@@ -26,6 +26,28 @@
       "value": "Urgent",
       "remark": "",
       "id": "DU5LPwr"
+    },
+    {
+      "name": "EXAMPLE",
+      "group": "EXAMPLE",
+      "parent": {
+        "id": "",
+        "name": ""
+      },
+      "value": "Example Parent",
+      "remark": "",
+      "id": "gTeVxqy"
+    },
+    {
+      "name": "EXAMPLE_CHILD",
+      "group": "EXAMPLE",
+      "parent": {
+        "id": "gTeVxqy",
+        "name": "EXAMPLE"
+      },
+      "value": "Example Child",
+      "remark": "",
+      "id": "pgdU1rD"
     }
   ],
   "item": [

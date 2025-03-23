@@ -840,6 +840,10 @@ body.dark .p-treenode .p-treenode-content:hover {
     width: 100%;
 }
 
+.p-toast {
+    font-family: 'Visby Round';
+}
+
 .p-toast-message {
     z-index: 1500;
 }

@@ -66,5 +66,16 @@ export const storeLOV = defineStore('lov', {
           throw e
         })
     },
+    async delete(id: string) {
+      return await api({ requiresAuth: true, responseToast: true })
+        .delete(`${import.meta.env.VITE_API_URL}/v1/lov/${id}`)
+        .then((response: AxiosResponse) => {
+          const data: CoreResponse = response.data
+          return data
+        })
+        .catch((e) => {
+          throw e
+        })
+    },
   },
 })

@@ -4,7 +4,6 @@ import SecureLS from 'secure-ls'
 import api from '@/utils/core/api'
 import type { Language } from '@/interfaces/language'
 import { getBrowserLocale, i18n } from '@/utils/core/i18n'
-import { all } from 'axios'
 
 interface AccountAccessItem {
   domIdentity: string
@@ -163,7 +162,7 @@ export const storeCore = defineStore('core', {
     toast: {
       severity: 'warn',
       summary: 'Menu Manager',
-      detail: 'Hello',
+      detail: '',
       life: 3000,
     },
   }),

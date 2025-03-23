@@ -37,11 +37,11 @@
           @sort="onSort($event)"
           @filter="onFilter($event)"
         >
-          <Column header="#" class="text-right wrap_content">
+          <Column header="#" class="text-left wrap_content">
             <template #body="slotProps">
               <strong class="d-inline-flex">
                 <span class="material-icons-outlined material-symbols-outlined">tag</span>
-                {{ slotProps.data['autonum'] }}
+                {{ slotProps.data['autonum'] ?? slotProps.data['id'] }}
               </strong>
             </template>
           </Column>
@@ -176,7 +176,7 @@
       </template>
       <template #footer></template>
     </Card>
-    <ConfirmPopup></ConfirmPopup>
+    <ConfirmPopup group="delete_confirm_lov" />
     <DynamicDialog />
   </div>
 </template>
@@ -275,16 +275,16 @@ export default {
     deleteLOV(event, id) {
       this.$confirm.require({
         target: event.currentTarget,
+        group: 'delete_confirm_lov',
         message: 'Are you sure to delete this data?',
         icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'button-danger',
+        acceptClass: 'p-button-secondary',
         acceptLabel: 'Yes. Delete it!',
         rejectLabel: 'Cancel',
         accept: async () => {
-          console.log(id)
-          // LOVService.deleteLOV(id).then(() => {
-          //   this.loadLazyData()
-          // })
+          await this.lovStore.delete(id).then(() => {
+            this.loadLazyData()
+          })
         },
         reject: () => {
           // Reject

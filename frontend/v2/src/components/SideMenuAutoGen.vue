@@ -122,7 +122,7 @@ export default {
   },
   methods: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onMenuItemClick(event: MouseEvent, item: any, index: number) {
+    onMenuItemClick(event, item: any, index: number) {
       if (item.disabled) {
         event.preventDefault()
         return
