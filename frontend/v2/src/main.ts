@@ -3,7 +3,6 @@ import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 
 import { createApp } from 'vue'
-// import { createI18n } from 'vue-i18n'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
@@ -17,7 +16,6 @@ import ConfirmationService from 'primevue/confirmationservice'
 import DialogService from 'primevue/dialogservice'
 import Tooltip from 'primevue/tooltip'
 // import 'material-icons/iconfont/material-icons.css'
-// import { Ckeditor } from '@ckeditor/ckeditor5-vue'
 import '@material-design-icons/font'
 import '@material-design-icons/font/outlined.css'
 import 'material-symbols'
@@ -32,6 +30,7 @@ import '@/assets/tnsol.css'
 
 // Module List
 import LOV from '@/modules/master/lov'
+import MasterItem from '@/modules/master/item'
 import type { RouteRecordRaw } from 'vue-router'
 import { i18n } from '@/utils/core/i18n.ts'
 
@@ -42,7 +41,17 @@ const router = setUpRouter()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Modules: any = {
   lov: LOV,
+  masterItem: MasterItem,
 }
+
+// TODO : This is duplcated feature, need to be removed
+// ClassicEditor.create(document.querySelector('#app') as HTMLElement)
+//   .then((editor) => {
+//     console.log('Editor was initialized', editor)
+//   })
+//   .catch((error) => {
+//     console.error(error.stack)
+//   })
 
 Object.keys(Modules).forEach((moduleKey) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

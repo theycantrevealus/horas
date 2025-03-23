@@ -17,7 +17,6 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-vue": "^7.3.0",
     "@material-design-icons/font": "^0.14.13",
     "@primevue/auto-import-resolver": "^4.3.2",
     "@primevue/themes": "^4.2.5",
@@ -25,7 +24,6 @@
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "axios": "^1.7.9",
-    "ckeditor5": "^44.1.0",
     "https": "^1.0.0",
     "material-icons.css": "link:material-icons/iconfont/material-icons.css",
     "material-symbols": "^0.27.2",
@@ -59,6 +57,7 @@
     "globals": "^16.0.0",
     "npm-run-all2": "^7.0.1",
     "prettier": "^3.3.3",
+    "quill": "^2.0.3",
     "start-server-and-test": "^2.0.8",
     "typescript": "~5.6.3",
     "typescript-eslint": "^8.27.0",

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div>
     <Card class="card-fluid">
@@ -182,33 +183,15 @@
 
 <script>
 import DateManagement from '@/utils/core/date.ts'
-import Card from 'primevue/card'
-import ConfirmPopup from 'primevue/confirmpopup'
-import Toolbar from 'primevue/toolbar'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import NumberLabel from '@/components/Number.vue'
 import { defineAsyncComponent } from 'vue'
-import DynamicDialog from 'primevue/dynamicdialog'
 import { storeCore } from '@/store/index'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapStores } from 'pinia'
 import { storeLOV } from '@/modules/master/lov/store'
+import NumberLabel from '@/components/Number.vue'
 
 const LOVForm = defineAsyncComponent(() => import('@/modules/master/lov/components/Form.vue'))
 export default {
-  components: {
-    DataTable,
-    DynamicDialog,
-    Column,
-    InputText,
-    Button,
-    Card,
-    Toolbar,
-    ConfirmPopup,
-    NumberLabel,
-  },
+  components: { NumberLabel },
   data() {
     return {
       credential: {},
@@ -229,7 +212,9 @@ export default {
       ],
     }
   },
-  computed: {},
+  computed: {
+    ...mapStores(storeLOV),
+  },
   mounted() {
     this.lazyParams = {
       first: 0,
@@ -244,7 +229,6 @@ export default {
   },
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
-    ...mapActions(storeLOV, ['getList']),
     addLOV() {
       this.$dialog.open(LOVForm, {
         props: {
@@ -297,6 +281,7 @@ export default {
         acceptLabel: 'Yes. Delete it!',
         rejectLabel: 'Cancel',
         accept: async () => {
+          console.log(id)
           // LOVService.deleteLOV(id).then(() => {
           //   this.loadLazyData()
           // })
@@ -312,7 +297,8 @@ export default {
     async loadLazyData() {
       this.loading = true
 
-      await this.getList(this.lazyParams)
+      await this.lovStore
+        .list(this.lazyParams)
         .then((response) => {
           if (response) {
             const data = response.payload.data

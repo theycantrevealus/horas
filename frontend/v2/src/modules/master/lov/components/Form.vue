@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div>
     <form autocomplete="off" @submit.prevent="submitLOV">
@@ -36,7 +37,7 @@
                   id="itemFormName"
                   v-model.trim="validator.name.$model"
                   :disabled="!submitPermission"
-                  placeholder="Brand Name"
+                  placeholder="LOV Name"
                   type="text"
                 />
                 <Message
@@ -94,13 +95,7 @@
             <div class="col-12">
               <div class="field">
                 <label for="itemFormRemark">Remark</label>
-                <ckeditor
-                  id="itemFormRemark"
-                  v-model="validator.remark.$model"
-                  :disabled="!submitPermission"
-                  :editor="editor"
-                  :config="editorConfig"
-                ></ckeditor>
+                <Editor v-model="validator.remark.$model" editorStyle="height: 320px" />
               </div>
             </div>
           </div>
@@ -137,25 +132,15 @@
   </div>
 </template>
 <script>
-import { ClassicEditor, Alignment, Essentials, Bold, Italic, Link, Paragraph } from 'ckeditor5'
-import Card from 'primevue/card'
-import Button from 'primevue/button'
-import Toolbar from 'primevue/toolbar'
-import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
 import useVuelidate from '@vuelidate/core'
 import { minLength, required } from '@vuelidate/validators'
 import DropdownLOV from '@/modules/master/lov/components/DropDown.vue'
-import { mapActions } from 'pinia'
+import { mapActions, mapStores } from 'pinia'
 import { storeCore } from '@/store/index.ts'
+import { storeLOV } from '@/modules/master/lov/store'
 
 export default {
   components: {
-    Card,
-    Toolbar,
-    Button,
-    InputText,
-    Message,
     DropdownLOV,
   },
   inject: ['dialogRef'],
@@ -166,15 +151,6 @@ export default {
     return {
       rendered: false,
       submitPermission: false,
-      editor: ClassicEditor,
-      editorData: '',
-      editorConfig: {
-        plugins: [Essentials, Bold, Italic, Link, Paragraph, Alignment],
-
-        toolbar: {
-          items: ['bold', 'italic', 'link', 'undo', 'redo', 'alignment'],
-        },
-      },
       group: '',
       name: '',
       value: '',
@@ -186,7 +162,7 @@ export default {
     }
   },
   computed: {
-    //
+    ...mapStores(storeLOV),
   },
   validations: {
     name: {
@@ -202,16 +178,20 @@ export default {
   async created() {
     if (this.dialogRef.data.mode === 'edit') {
       this.submitPermission = this.allowDispatch('btnEditLOV')
-      // await LOVService.getLOVDetail(this.dialogRef.data.id).then((response) => {
-      //   const data = response.data.payload.data
-      //   this.group = data?.group
-      //   this.name = data?.name
-      //   this.value = data?.value
-      //   this.parent = data?.parent
-      //   this.remark = data?.remark
-      // }).catch(() => {
-      //   //
-      // })
+      await this.lovStore
+        .detail(this.dialogRef.data.id)
+        .then((response) => {
+          console.log(response)
+          const data = response.data.payload.data
+          this.group = data?.group
+          this.name = data?.name
+          this.value = data?.value
+          this.parent = data?.parent
+          this.remark = data?.remark
+        })
+        .catch(() => {
+          //
+        })
     } else {
       this.submitPermission = this.allowDispatch('btnAddLOV')
     }

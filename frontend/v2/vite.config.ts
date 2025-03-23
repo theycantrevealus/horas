@@ -8,6 +8,8 @@ import { PrimeVueResolver } from '@primevue/auto-import-resolver'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
+// import { createRequire } from 'node:module'
+// const require = createRequire(import.meta.url)
 
 // https://vite.dev/config/
 export default defineConfig({
