@@ -73,7 +73,13 @@ function setUpRouter() {
 
     // Check if route exists
     if (!to.matched.length) {
-      next('/404')
+      next({
+        path: '/404',
+        query: {
+          from: from.fullPath,
+          to: to?.name?.toString(),
+        },
+      })
     } else {
       // Check if route need authentication
       if (to.matched.some((record) => record.meta.requiresAuth)) {
