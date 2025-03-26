@@ -210,7 +210,6 @@ export const storeCore = defineStore('core', {
       }
     },
     hasAccess(name: string): boolean {
-      console.log(`Expect ${name} permission from ${JSON.stringify(this.auth.pagesAllow[name])}`)
       return name in this.auth.pagesAllow
       // return this.auth.pagesAllow.hasOwnProperty(name)
     },

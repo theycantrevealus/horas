@@ -180,17 +180,18 @@
     <DynamicDialog />
   </div>
 </template>
-
-<script>
+<script lang="ts">
 import DateManagement from '@/utils/core/date.ts'
 import { defineAsyncComponent } from 'vue'
+import { defineComponent } from 'vue'
 import { storeCore } from '@/store/index'
 import { mapActions, mapStores } from 'pinia'
 import { storeLOV } from '@/modules/master/lov/store'
 import NumberLabel from '@/components/Number.vue'
 
 const LOVForm = defineAsyncComponent(() => import('@/modules/master/lov/components/Form.vue'))
-export default {
+
+export default defineComponent({
   components: { NumberLabel },
   data() {
     return {
@@ -331,5 +332,5 @@ export default {
       this.loadLazyData()
     },
   },
-}
+})
 </script>
