@@ -36,9 +36,27 @@
         ]
       },
       {
+        "id": "menu-67e3b92b547e5daba942c3e8",
+        "name": "Procurement",
+        "url": "",
+        "identifier": "Procurement"
+      },
+      {
+        "id": "menu-67e3bb28a966a3cac5c7c66a",
+        "name": "Purchase Requisition",
+        "url": "/procurement/purchase_requisition",
+        "identifier": "GeneralReceiveNote",
+        "access": [
+          {
+            "domIdentity": "btnGeneralReceiveNoteAdd",
+            "dispatchName": "GeneralReceiveNoteAdd"
+          }
+        ]
+      },
+      {
         "id": "menu-643af9e9469b9a55b5d2cb2a",
         "name": "Purchase Order",
-        "url": "/inventory/purchase_order",
+        "url": "/procurement/purchase_order",
         "identifier": "PurchaseOrder",
         "access": [
           {
@@ -140,8 +158,22 @@
       {
         "id": "menu-643aff26469b9a55b5d2cbf0",
         "name": "Account",
-        "url": "/account",
-        "identifier": "Account"
+        "url": "/core/account",
+        "identifier": "Account",
+        "access":[
+          {
+            "domIdentity": "btnEditAccount",
+            "dispatchName": "AccountEdit"
+          },
+          {
+            "domIdentity": "btnAddAccount",
+            "dispatchName": "AccountAdd"
+          },
+          {
+            "domIdentity": "btnDeleteAccount",
+            "dispatchName": "AccountDelete"
+          }
+        ]
       },
       {
         "id": "menu-644c037c078b31bb71244080",

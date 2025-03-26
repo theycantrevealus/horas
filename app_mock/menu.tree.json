@@ -134,6 +134,40 @@
         ]
       },
       {
+        "id": "menu-67e3b92b547e5daba942c3e8",
+        "name": "Procurement",
+        "url": "",
+        "icon": "shopping_cart",
+        "group_color": "",
+        "show_order": 1,
+        "show_on_menu": true,
+        "level": 2,
+        "items": [
+          {
+            "id": "menu-643af9e9469b9a55b5d2cb2a",
+            "name": "Purchase Order",
+            "url": "/procurement/purchase_order",
+            "icon": "shopping_cart",
+            "group_color": "",
+            "show_order": 1,
+            "show_on_menu": true,
+            "level": 1,
+            "items": []
+          },
+          {
+            "id": "menu-67e3bb28a966a3cac5c7c66a",
+            "name": "Purchase Requisition",
+            "url": "/procurement/purchase_requisition",
+            "icon": "shopping_cart",
+            "group_color": "",
+            "show_order": 2,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          }
+        ]
+      },
+      {
         "id": "menu-643af5ba469b9a55b5d2c9be",
         "name": "Inventory",
         "url": "",
@@ -142,14 +176,12 @@
         "show_on_menu": true,
         "items": [
           {
-            "id": "menu-643af9e9469b9a55b5d2cb2a",
-            "name": "Purchase Order",
-            "url": "/inventory/purchase_order",
-            "icon": "shopping_cart",
-            "group_color": "",
+            "id": "menu-643afed0469b9a55b5d2cbd5",
+            "name": "Material Requisition",
+            "url": "/inventory/material_requisition",
+            "icon": "home_repair_service",
             "show_order": 1,
             "show_on_menu": true,
-            "level": 2,
             "items": []
           },
           {
@@ -158,18 +190,53 @@
             "url": "/inventory/general_receive_note",
             "icon": "local_shipping",
             "group_color": "",
-            "show_order": 1,
+            "show_order": 2,
             "show_on_menu": true,
             "level": 2,
             "items": []
           },
           {
-            "id": "menu-643afed0469b9a55b5d2cbd5",
-            "name": "Material Requisition",
-            "url": "/inventory/material_requisition",
-            "icon": "home_repair_service",
+            "id": "menu-67e3bb6b2adb341318d9e37e",
+            "name": "General Issue Note",
+            "url": "/inventory/general_issue_note",
+            "icon": "local_shipping",
+            "group_color": "",
             "show_order": 3,
             "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-67e3bb8f46599aa50313400f",
+            "name": "Mutation",
+            "url": "/inventory/mutation",
+            "icon": "local_shipping",
+            "group_color": "",
+            "show_order": 4,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-67e3bbcb096b83048ad236fe",
+            "name": "Opname",
+            "url": "/inventory/opname",
+            "icon": "local_shipping",
+            "group_color": "",
+            "show_order": 5,
+            "show_on_menu": true,
+            "level": 2,
+            "items": []
+          },
+          {
+            "id": "menu-67e3bba3e3c27d33fee56211",
+            "name": "Disposal",
+            "url": "/inventory/disposal",
+            "icon": "local_shipping",
+            "group_color": "",
+            "show_order": 6,
+            "show_on_menu": true,
+            "level": 2,
             "items": []
           }
         ]
@@ -329,7 +396,7 @@
       {
         "id": "menu-643aff26469b9a55b5d2cbf0",
         "name": "Account",
-        "url": "/account",
+        "url": "/core/account",
         "icon": "person",
         "group_color": "",
         "show_order": 4,

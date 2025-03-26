@@ -1248,7 +1248,7 @@
       "timezone": "Asia/Jakarta"
     }
   ],
-  "users": [
+  "account": [
     {
       "id": "account-63d51ede32795cb7a2a0eedd",
       "code": "god001",
@@ -1613,8 +1613,5 @@
         }
       ]
     }
-  ],
-  "account": {
-    "signin": {}
-  }
+  ]
 }
