@@ -29,6 +29,7 @@ import '@/assets/style/sidepanel.css'
 import '@/assets/tnsol.css'
 
 // Module List
+import Account from '@/modules/core/account'
 import Menu from '@/modules/core/menu'
 import LOV from '@/modules/master/lov'
 import MasterItem from '@/modules/master/item'
@@ -41,9 +42,13 @@ const router = setUpRouter()
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Modules: any = {
+  // Core Module
+  account: Account,
+  menu: Menu,
+
+  // Master Module
   lov: LOV,
   masterItem: MasterItem,
-  menu: Menu,
 }
 
 Object.keys(Modules).forEach((moduleKey) => {
