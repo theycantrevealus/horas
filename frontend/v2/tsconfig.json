@@ -19,7 +19,12 @@
         "isolatedModules": true,
         "verbatimModuleSyntax": true,
         "strict": true,
+        "noImplicitAny": false,
+        "allowJs": true,
         "jsx": "preserve",
-        "jsxImportSource": "vue"
+        "jsxImportSource": "vue",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     }
 }
