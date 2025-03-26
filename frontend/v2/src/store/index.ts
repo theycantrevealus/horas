@@ -210,6 +210,7 @@ export const storeCore = defineStore('core', {
       }
     },
     hasAccess(name: string): boolean {
+      console.log(`Expect ${name} permission from ${JSON.stringify(this.auth.pagesAllow[name])}`)
       return name in this.auth.pagesAllow
       // return this.auth.pagesAllow.hasOwnProperty(name)
     },
@@ -245,11 +246,12 @@ export const storeCore = defineStore('core', {
       const domAccess: any = []
 
       for (const pagesKey in access) {
-        if (!pagesAccess[access[pagesKey].name]) {
-          pagesAccess[access[pagesKey].name] = {}
+        if (!pagesAccess[access[pagesKey].identifier]) {
+          pagesAccess[access[pagesKey].identifier] = {}
+          console.log(`Registering ${access[pagesKey].identifier} permission`)
         }
 
-        pagesAccess[access[pagesKey].name] = access[pagesKey]
+        pagesAccess[access[pagesKey].identifier] = access[pagesKey]
 
         if (access[pagesKey].access && access[pagesKey].access.length > 0) {
           const accessList = access[pagesKey].access
