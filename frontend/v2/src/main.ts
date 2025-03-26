@@ -29,6 +29,7 @@ import '@/assets/style/sidepanel.css'
 import '@/assets/tnsol.css'
 
 // Module List
+import Menu from '@/modules/core/menu'
 import LOV from '@/modules/master/lov'
 import MasterItem from '@/modules/master/item'
 import type { RouteRecordRaw } from 'vue-router'
@@ -42,16 +43,8 @@ const router = setUpRouter()
 const Modules: any = {
   lov: LOV,
   masterItem: MasterItem,
+  menu: Menu,
 }
-
-// TODO : This is duplcated feature, need to be removed
-// ClassicEditor.create(document.querySelector('#app') as HTMLElement)
-//   .then((editor) => {
-//     console.log('Editor was initialized', editor)
-//   })
-//   .catch((error) => {
-//     console.error(error.stack)
-//   })
 
 Object.keys(Modules).forEach((moduleKey) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
