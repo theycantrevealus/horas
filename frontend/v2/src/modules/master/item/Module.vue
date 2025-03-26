@@ -2,7 +2,11 @@
   <router-view />
 </template>
 <script>
-export default {
-  name: 'MasterItem',
-}
+import { defineComponent } from 'vue'
+export default defineComponent({
+  name: 'ItemModule',
+  setup() {
+    return {}
+  },
+})
 </script>
