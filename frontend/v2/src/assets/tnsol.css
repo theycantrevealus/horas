@@ -1,17 +1,17 @@
-@font-face {
+/* @font-face {
     font-family: Poppins;
     src: url('./fonts/poppins/Poppins-Regular.ttf');
-}
+} */
 
 @font-face {
     font-family: GreyCliff;
     src: url('./fonts/greycliff/GreycliffCF-Bold.ttf');
 }
 
-@font-face {
+/* @font-face {
     font-family: Karla;
     src: url('./fonts/karla/static/Karla-Regular.ttf');
-}
+} */
 
 @font-face {
     font-family: 'Visby Round';
