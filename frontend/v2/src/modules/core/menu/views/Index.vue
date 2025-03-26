@@ -299,9 +299,6 @@ export default defineComponent({
   },
   computed: {
     ...mapStores(storeMenu),
-    // ...mapGetters({
-    //   data: 'storeMenu/Getter___menuData',
-    // }),
   },
   mounted() {
     this.reloadMenu()
@@ -333,13 +330,8 @@ export default defineComponent({
     },
     async reloadMenu() {
       await this.menuStore.tree().then((data) => {
-        console.log(data)
         this.nodes = data
       })
-      // this.getMenu().then((data: any) => {
-      //   this.nodes = data.data
-      //   // this.expandAll(data.data)
-      // })
     },
     expandAll(children) {
       for (const a in children) {
@@ -357,24 +349,24 @@ export default defineComponent({
     toggleFeature() {
       this.ui.modal.manageFeature.state = !this.ui.modal.manageFeature.state
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     onNodeDelete(event, target: number) {
-      // this.$confirm.require({
-      //   target: event.currentTarget,
-      //   message: 'Are you sure to delete this menu?',
-      //   icon: 'pi pi-exclamation-triangle',
-      //   acceptClass: 'button-danger',
-      //   acceptLabel: 'Yes. Delete it!',
-      //   rejectLabel: 'Cancel',
-      //   accept: () => {
-      //     return CoreService.menuDelete(target).then(() => {
-      //       this.reloadMenu()
-      //     })
-      //   },
-      //   reject: () => {
-      //     // callback to execute when user rejects the action
-      //   },
-      // })
+      this.$confirm.require({
+        target: event.currentTarget,
+        message: 'Are you sure to delete this menu?',
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'button-danger',
+        acceptLabel: 'Yes. Delete it!',
+        rejectLabel: 'Cancel',
+        accept: async () => {
+          return await this.menuStore.delete(target).then(() => {
+            this.reloadMenu()
+          })
+        },
+        reject: () => {
+          // callback to execute when user rejects the action
+        },
+      })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onNodeEdit(target: any, mode: string) {
@@ -422,36 +414,36 @@ export default defineComponent({
       this.toggleFeature()
     },
     async editMenu() {
-      // const label = this.form.txt_label
-      // const routeTo = this.form.txt_route
-      // const routeToUrl = this.form.txt_route_url
-      // const icon = this.form.txt_icon
-      // const showMenu = this.form.showMenu
-      // this.form.permission = this.setterPermission
-      // return await CoreService.menuEdit(this.form.targetID, {
-      //   name: label,
-      //   menu_group: this.form.targetGroup,
-      //   identifier: routeTo,
-      //   url: routeToUrl,
-      //   remark: '',
-      //   parent: this.form.targetParent,
-      //   icon: icon,
-      //   show_order: 1,
-      //   level: 2,
-      //   group_color: '',
-      //   permission: this.setterPermission,
-      //   show_on_menu: showMenu,
-      //   __v: this.form.__v,
-      // })
-      //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      //   .then((response) => {
-      //     this.reloadMenu()
-      //     this.clearForm()
-      //     this.ui.modal.manageMenu.state = false
-      //   })
-      //   .catch((e) => {
-      //     console.error(e)
-      //   })
+      const label = this.form.txt_label
+      const routeTo = this.form.txt_route
+      const routeToUrl = this.form.txt_route_url
+      const icon = this.form.txt_icon
+      const showMenu = this.form.showMenu
+      this.form.permission = this.setterPermission
+      return await this.menuStore
+        .edit(this.form.targetID, {
+          name: label,
+          menu_group: this.form.targetGroup,
+          identifier: routeTo,
+          url: routeToUrl,
+          remark: '',
+          parent: this.form.targetParent,
+          icon: icon,
+          show_order: 1,
+          level: 2,
+          group_color: '',
+          permission: this.setterPermission,
+          show_on_menu: showMenu,
+          __v: this.form.__v,
+        })
+        .then(() => {
+          this.reloadMenu()
+          this.clearForm()
+          this.ui.modal.manageMenu.state = false
+        })
+        .catch((e) => {
+          console.error(e)
+        })
     },
     processForm() {
       if (this.formMode === 'add') {
@@ -486,33 +478,34 @@ export default defineComponent({
       })
     },
     async addMenu() {
-      // const label = this.form.txt_label
-      // const routeTo = this.form.txt_route
-      // const routeToUrl = this.form.txt_route_url
-      // const icon = this.form.txt_icon
-      // const showMenu = this.form.showMenu
-      // const checkParent = this.form.targetParent.split('-')
-      // return CoreService.menuAdd({
-      //   name: label,
-      //   // menu_group: (checkParent[0] === 'menu_group') ? this.form.targetParent : this.form.targetGroup,
-      //   menu_group: this.form.targetGroup,
-      //   identifier: routeTo,
-      //   url: routeToUrl,
-      //   remark: '',
-      //   parent: checkParent[0] === 'menu_group' ? '' : this.form.targetParent,
-      //   permission: this.setterPermission,
-      //   icon: icon,
-      //   show_order: 1,
-      //   show_on_menu: showMenu,
-      // })
-      //   .then(() => {
-      //     this.reloadMenu()
-      //     this.clearForm()
-      //     this.ui.modal.manageMenu.state = false
-      //   })
-      //   .catch(() => {
-      //     //
-      //   })
+      const label = this.form.txt_label
+      const routeTo = this.form.txt_route
+      const routeToUrl = this.form.txt_route_url
+      const icon = this.form.txt_icon
+      const showMenu = this.form.showMenu
+      const checkParent = this.form.targetParent.split('-')
+      return await this.menuStore
+        .add({
+          name: label,
+          // menu_group: (checkParent[0] === 'menu_group') ? this.form.targetParent : this.form.targetGroup,
+          menu_group: this.form.targetGroup,
+          identifier: routeTo,
+          url: routeToUrl,
+          remark: '',
+          parent: checkParent[0] === 'menu_group' ? '' : this.form.targetParent,
+          permission: this.setterPermission,
+          icon: icon,
+          show_order: 1,
+          show_on_menu: showMenu,
+        })
+        .then(() => {
+          this.reloadMenu()
+          this.clearForm()
+          this.ui.modal.manageMenu.state = false
+        })
+        .catch(() => {
+          //
+        })
     },
   },
 })

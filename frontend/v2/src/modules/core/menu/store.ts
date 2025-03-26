@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import api from '@/utils/core/api.ts'
 import type { AxiosResponse } from 'axios'
 import type { CoreResponse } from '@/interfaces/api.ts'
+import type { MenuParameterAdd, MenuParameterEdit } from './interfaces'
 
 export const storeMenu = defineStore('menu', {
   actions: {
@@ -59,38 +60,38 @@ export const storeMenu = defineStore('menu', {
     //       throw e
     //     })
     // },
-    // async edit(id: string, parameter: LovParameter) {
-    //   return await api({ requiresAuth: true, responseToast: true })
-    //     .put(`${import.meta.env.VITE_API_URL}/v1/lov/${id}`, parameter)
-    //     .then((response: AxiosResponse) => {
-    //       const data: CoreResponse = response.data
-    //       return data
-    //     })
-    //     .catch((e) => {
-    //       throw e
-    //     })
-    // },
-    // async add(parameter: LovParameter) {
-    //   return await api({ requiresAuth: true, responseToast: true })
-    //     .post(`${import.meta.env.VITE_API_URL}/v1/lov`, parameter)
-    //     .then((response: AxiosResponse) => {
-    //       const data: CoreResponse = response.data
-    //       return data
-    //     })
-    //     .catch((e) => {
-    //       throw e
-    //     })
-    // },
-    // async delete(id: string) {
-    //   return await api({ requiresAuth: true, responseToast: true })
-    //     .delete(`${import.meta.env.VITE_API_URL}/v1/lov/${id}`)
-    //     .then((response: AxiosResponse) => {
-    //       const data: CoreResponse = response.data
-    //       return data
-    //     })
-    //     .catch((e) => {
-    //       throw e
-    //     })
-    // },
+    async edit(id: string, parameter: MenuParameterEdit) {
+      return await api({ requiresAuth: true, responseToast: true })
+        .put(`${import.meta.env.VITE_API_URL}/v1/menu/${id}`, parameter)
+        .then((response: AxiosResponse) => {
+          const data: CoreResponse = response.data
+          return data
+        })
+        .catch((e) => {
+          throw e
+        })
+    },
+    async add(parameter: MenuParameterAdd) {
+      return await api({ requiresAuth: true, responseToast: true })
+        .post(`${import.meta.env.VITE_API_URL}/v1/menu`, parameter)
+        .then((response: AxiosResponse) => {
+          const data: CoreResponse = response.data
+          return data
+        })
+        .catch((e) => {
+          throw e
+        })
+    },
+    async delete(id: string) {
+      return await api({ requiresAuth: true, responseToast: true })
+        .delete(`${import.meta.env.VITE_API_URL}/v1/menu/${id}`)
+        .then((response: AxiosResponse) => {
+          const data: CoreResponse = response.data
+          return data
+        })
+        .catch((e) => {
+          throw e
+        })
+    },
   },
 })
