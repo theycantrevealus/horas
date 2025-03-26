@@ -1,4 +1,4 @@
-<template xmlns="http://www.w3.org/1999/html">
+<template>
   <div>
     403 Permission Denied <b class="text-red-500">[{{ target }}]</b><br />
     <router-link :to="previous">Return</router-link>
