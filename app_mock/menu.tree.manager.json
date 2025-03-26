@@ -1,0 +1,809 @@
+[
+    {
+        "id": "menu_group-64396339334f96672465a893",
+        "key": "0",
+        "label": "Application",
+        "to": "",
+        "show_on_menu": true,
+        "data": {
+            "id": "menu_group-64396339334f96672465a893",
+            "label": "Application",
+            "parent": "",
+            "menu_group": "",
+            "identifier": "",
+            "to": "",
+            "icon": "",
+            "show_on_menu": true,
+            "__v": 0
+        },
+        "icon": "",
+        "children": [
+            {
+                "id": "menu-6649fe6807b35431b06fbd8a",
+                "key": "0-6",
+                "label": "Front Desk",
+                "to": "/front_desk",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-6649fe6807b35431b06fbd8a",
+                    "label": "Front Desk",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396339334f96672465a893",
+                        "name": "Application"
+                    },
+                    "identifier": "FrontDesk",
+                    "permission": [],
+                    "to": "/front_desk",
+                    "icon": "list_alt",
+                    "show_on_menu": true,
+                    "__v": 0
+                },
+                "icon": "",
+                "children": [
+                    {
+                        "id": "menu-66521a358b572eb737229cc5",
+                        "key": "0-6-0",
+                        "label": "Registration",
+                        "to": "/front_desk/registration",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-66521a358b572eb737229cc5",
+                            "label": "Registration",
+                            "parent": "menu-6649fe6807b35431b06fbd8a",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "Registration",
+                            "permission": [],
+                            "to": "/front_desk/registration",
+                            "icon": "assignment",
+                            "show_on_menu": true,
+                            "__v": 1
+                        },
+                        "icon": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "menu-6439639d334f96672465a89f",
+                "key": "0-2",
+                "label": "Dashboard",
+                "to": "/",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-6439639d334f96672465a89f",
+                    "label": "Dashboard",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396339334f96672465a893",
+                        "name": "Application"
+                    },
+                    "identifier": "Dashboard",
+                    "permission": [],
+                    "to": "/",
+                    "icon": "home",
+                    "show_on_menu": true,
+                    "__v": 3
+                },
+                "icon": "",
+                "children": []
+            },
+            {
+                "id": "menu-66521b838b572eb737229d57",
+                "key": "0-1",
+                "label": "Ancillary Service",
+                "to": "",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-66521b838b572eb737229d57",
+                    "label": "Ancillary Service",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396339334f96672465a893",
+                        "name": "Application"
+                    },
+                    "identifier": "AncillaryService",
+                    "permission": [],
+                    "to": "",
+                    "icon": "medical_services",
+                    "show_on_menu": true,
+                    "__v": 4
+                },
+                "icon": "",
+                "children": [
+                    {
+                        "id": "menu-66521bf18b572eb737229dab",
+                        "key": "0-1-0",
+                        "label": "Pharmacy",
+                        "to": "/ancillary_service/pharmacy",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-66521bf18b572eb737229dab",
+                            "label": "Pharmacy",
+                            "parent": "menu-66521b838b572eb737229d57",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "Pharmacy",
+                            "permission": [],
+                            "to": "/ancillary_service/pharmacy",
+                            "icon": "outpatient_med",
+                            "show_on_menu": true,
+                            "__v": 3
+                        },
+                        "icon": "",
+                        "children": []
+                    },
+                    {
+                        "id": "menu-66521ba18b572eb737229d72",
+                        "key": "0-1-2",
+                        "label": "Laboratory",
+                        "to": "/ancillary_service/laboratory",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-66521ba18b572eb737229d72",
+                            "label": "Laboratory",
+                            "parent": "menu-66521b838b572eb737229d57",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "Laboratory",
+                            "permission": [],
+                            "to": "/ancillary_service/laboratory",
+                            "icon": "labs",
+                            "show_on_menu": true,
+                            "__v": 4
+                        },
+                        "icon": "",
+                        "children": []
+                    },
+                    {
+                        "id": "menu-66521bcf8b572eb737229d8e",
+                        "key": "0-1-1",
+                        "label": "Radiology",
+                        "to": "/ancillary_service/radiology",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-66521bcf8b572eb737229d8e",
+                            "label": "Radiology",
+                            "parent": "menu-66521b838b572eb737229d57",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "Radiology",
+                            "permission": [],
+                            "to": "/ancillary_service/radiology",
+                            "icon": "skeleton",
+                            "show_on_menu": true,
+                            "__v": 3
+                        },
+                        "icon": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "menu-6439894d964e52ecda66f2f8",
+                "key": "0-5",
+                "label": "Master Data",
+                "to": "",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-6439894d964e52ecda66f2f8",
+                    "label": "Master Data",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396339334f96672465a893",
+                        "name": "Application"
+                    },
+                    "identifier": "Master",
+                    "permission": [],
+                    "to": "",
+                    "icon": "list_alt",
+                    "show_on_menu": true,
+                    "__v": 2
+                },
+                "icon": "",
+                "children": [
+                    {
+                        "id": "menu-64398975964e52ecda66f2fd",
+                        "key": "0-5-0",
+                        "label": "Item Management",
+                        "to": "",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-64398975964e52ecda66f2fd",
+                            "label": "Item Management",
+                            "parent": "menu-6439894d964e52ecda66f2f8",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "",
+                            "permission": [],
+                            "to": "",
+                            "icon": "shelves",
+                            "show_on_menu": true,
+                            "__v": 16
+                        },
+                        "icon": "",
+                        "children": [
+                            {
+                                "id": "menu-643c073d8a44bc1bccecac15",
+                                "key": "0-5-0-2",
+                                "label": "Item Category",
+                                "to": "/master/item/category",
+                                "show_on_menu": true,
+                                "data": {
+                                    "id": "menu-643c073d8a44bc1bccecac15",
+                                    "label": "Item Category",
+                                    "parent": "menu-64398975964e52ecda66f2fd",
+                                    "menu_group": {
+                                        "id": "menu_group-64396339334f96672465a893",
+                                        "name": "Application"
+                                    },
+                                    "identifier": "MasterItemCategory",
+                                    "permission": [
+                                        {
+                                            "domIdentity": "btnAddItemCategory",
+                                            "dispatchName": "MASTER_ITEM_CATEGORY_ADD"
+                                        },
+                                        {
+                                            "domIdentity": "btnEditItemCategory",
+                                            "dispatchName": "MASTER_ITEM_CATEOGRY_EDIT"
+                                        }
+                                    ],
+                                    "to": "/master/item/category",
+                                    "icon": "pallet",
+                                    "show_on_menu": true,
+                                    "__v": 2
+                                },
+                                "icon": "",
+                                "children": []
+                            },
+                            {
+                                "id": "menu-643c070b8a44bc1bccecabd7",
+                                "key": "0-5-0-1",
+                                "label": "Item",
+                                "to": "/master/item",
+                                "show_on_menu": true,
+                                "data": {
+                                    "id": "menu-643c070b8a44bc1bccecabd7",
+                                    "label": "Item",
+                                    "parent": "menu-64398975964e52ecda66f2fd",
+                                    "menu_group": {
+                                        "id": "menu_group-64396339334f96672465a893",
+                                        "name": "Application"
+                                    },
+                                    "identifier": "MasterItem",
+                                    "permission": [
+                                        {
+                                            "domIdentity": "btnAddItem",
+                                            "dispatchName": "ITEM_ADD"
+                                        },
+                                        {
+                                            "domIdentity": "btnEditItem",
+                                            "dispatchName": "ITEM_EDIT"
+                                        }
+                                    ],
+                                    "to": "/master/item",
+                                    "icon": "package_2",
+                                    "show_on_menu": true,
+                                    "__v": 1
+                                },
+                                "icon": "",
+                                "children": []
+                            },
+                            {
+                                "id": "menu-643c07558a44bc1bccecac36",
+                                "key": "0-5-0-0",
+                                "label": "Item Brand",
+                                "to": "/master/item/brand",
+                                "show_on_menu": true,
+                                "data": {
+                                    "id": "menu-643c07558a44bc1bccecac36",
+                                    "label": "Item Brand",
+                                    "parent": "menu-64398975964e52ecda66f2fd",
+                                    "menu_group": {
+                                        "id": "menu_group-64396339334f96672465a893",
+                                        "name": "Application"
+                                    },
+                                    "identifier": "MasterItemBrand",
+                                    "permission": [
+                                        {
+                                            "domIdentity": "btnAddItemBrand",
+                                            "dispatchName": "MasterItemAdd"
+                                        },
+                                        {
+                                            "domIdentity": "btnEditItemBrand",
+                                            "dispatchName": "MasterItemEdit"
+                                        }
+                                    ],
+                                    "to": "/master/item/brand",
+                                    "icon": "dataset",
+                                    "show_on_menu": true,
+                                    "__v": 44
+                                },
+                                "icon": "",
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "id": "menu-643c3663d3c66942a626b6ab",
+                        "key": "0-5-1",
+                        "label": "Polyclinic Management",
+                        "to": "/master/polyclinic",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-643c3663d3c66942a626b6ab",
+                            "label": "Polyclinic Management",
+                            "parent": "menu-6439894d964e52ecda66f2f8",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "PolyclinicManagement",
+                            "permission": [
+                                {
+                                    "domIdentity": "btnAddPolyclinic",
+                                    "dispatchName": "MASTER_POLYCLINIC_ADD"
+                                },
+                                {
+                                    "domIdentity": "btnEditPolyclinic",
+                                    "dispatchName": "MASTER_POLYCLINIC_EDIT"
+                                }
+                            ],
+                            "to": "/master/polyclinic",
+                            "icon": "medical_information",
+                            "show_on_menu": true,
+                            "__v": 0
+                        },
+                        "icon": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "menu-6651f086586688c661878d3b",
+                "key": "0-4",
+                "label": "Nurse Station",
+                "to": "",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-6651f086586688c661878d3b",
+                    "label": "Nurse Station",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396339334f96672465a893",
+                        "name": "Application"
+                    },
+                    "identifier": "NurseStation",
+                    "permission": [],
+                    "to": "",
+                    "icon": "diversity_1",
+                    "show_on_menu": true,
+                    "__v": 17
+                },
+                "icon": "",
+                "children": [
+                    {
+                        "id": "menu-6651fd94dd429dde0552a252",
+                        "key": "0-4-0",
+                        "label": "Out Patient",
+                        "to": "/nurse_station/outpatient",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-6651fd94dd429dde0552a252",
+                            "label": "Out Patient",
+                            "parent": "menu-6651f086586688c661878d3b",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "NurseStationOutPatient",
+                            "permission": [],
+                            "to": "/nurse_station/outpatient",
+                            "icon": "group",
+                            "show_on_menu": true,
+                            "__v": 1
+                        },
+                        "icon": "",
+                        "children": []
+                    },
+                    {
+                        "id": "menu-6651fd22dd429dde0552a1dd",
+                        "key": "0-4-1",
+                        "label": "In Patient",
+                        "to": "/nurse_station/inpatient",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-6651fd22dd429dde0552a1dd",
+                            "label": "In Patient",
+                            "parent": "menu-6651f086586688c661878d3b",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "NurseStationInpatient",
+                            "permission": [],
+                            "to": "/nurse_station/inpatient",
+                            "icon": "bed",
+                            "show_on_menu": true,
+                            "__v": 4
+                        },
+                        "icon": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "menu-643af5ba469b9a55b5d2c9be",
+                "key": "0-0",
+                "label": "Inventory",
+                "to": "",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-643af5ba469b9a55b5d2c9be",
+                    "label": "Inventory",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396339334f96672465a893",
+                        "name": "Application"
+                    },
+                    "identifier": "Inventory",
+                    "permission": [],
+                    "to": "",
+                    "icon": "store",
+                    "show_on_menu": true,
+                    "__v": 0
+                },
+                "icon": "",
+                "children": [
+                    {
+                        "id": "menu-643af9e9469b9a55b5d2cb2a",
+                        "key": "0-0-0",
+                        "label": "Purchase Order",
+                        "to": "/inventory/purchase_order",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-643af9e9469b9a55b5d2cb2a",
+                            "label": "Purchase Order",
+                            "parent": "menu-643af5ba469b9a55b5d2c9be",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "PurchaseOrder",
+                            "permission": [
+                                {
+                                    "domIdentity": "btnPurchaseOrderAdd",
+                                    "dispatchName": "PurchaseOrderAdd"
+                                },
+                                {
+                                    "domIdentity": "btnPurchaseOrderEdit",
+                                    "dispatchName": "PurchaseOrderEdit"
+                                },
+                                {
+                                    "domIdentity": "btnPurchaseOrderDelete",
+                                    "dispatchName": "PurchaseOrderDelete"
+                                },
+                                {
+                                    "domIdentity": "btnPurchaseOrderApprove",
+                                    "dispatchName": "PurchaseOrderApprove"
+                                },
+                                {
+                                    "domIdentity": "btnPurchaseOrderDecline",
+                                    "dispatchName": "PurchaseOrderDecline"
+                                }
+                            ],
+                            "to": "/inventory/purchase_order",
+                            "icon": "shopping_cart",
+                            "show_on_menu": true,
+                            "__v": 3
+                        },
+                        "icon": "",
+                        "children": []
+                    },
+                    {
+                        "id": "menu-643afe32469b9a55b5d2cba7",
+                        "key": "0-0-1",
+                        "label": "General Receive Note",
+                        "to": "/inventory/general_receive_note",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-643afe32469b9a55b5d2cba7",
+                            "label": "General Receive Note",
+                            "parent": "menu-643af5ba469b9a55b5d2c9be",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "GeneralReceiveNote",
+                            "permission": [
+                                {
+                                    "domIdentity": "btnGeneralReceiveNoteAdd",
+                                    "dispatchName": "GeneralReceiveNoteAdd"
+                                }
+                            ],
+                            "to": "/inventory/general_receive_note",
+                            "icon": "local_shipping",
+                            "show_on_menu": true,
+                            "__v": 1
+                        },
+                        "icon": "",
+                        "children": []
+                    },
+                    {
+                        "id": "menu-643afed0469b9a55b5d2cbd5",
+                        "key": "0-0-2",
+                        "label": "Material Requisition",
+                        "to": "/inventory/material_requisition",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-643afed0469b9a55b5d2cbd5",
+                            "label": "Material Requisition",
+                            "parent": "menu-643af5ba469b9a55b5d2c9be",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "MaterialRequisition",
+                            "permission": [],
+                            "to": "/inventory/material_requisition",
+                            "icon": "home_repair_service",
+                            "show_on_menu": true,
+                            "__v": 0
+                        },
+                        "icon": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "menu-6652d371313f1eaaba85b930",
+                "key": "0-3",
+                "label": "Clinical Service",
+                "to": "",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-6652d371313f1eaaba85b930",
+                    "label": "Clinical Service",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396339334f96672465a893",
+                        "name": "Application"
+                    },
+                    "identifier": "ClinicalService",
+                    "permission": [],
+                    "to": "",
+                    "icon": "medical_information",
+                    "show_on_menu": true,
+                    "__v": 4
+                },
+                "icon": "",
+                "children": [
+                    {
+                        "id": "menu-6652d5aa313f1eaaba85ba2f",
+                        "key": "0-3-0",
+                        "label": "Surgical Service",
+                        "to": "/clinical_service/surgical_service",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-6652d5aa313f1eaaba85ba2f",
+                            "label": "Surgical Service",
+                            "parent": "menu-6652d371313f1eaaba85b930",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "SurgicalService",
+                            "permission": [],
+                            "to": "/clinical_service/surgical_service",
+                            "icon": "surgical",
+                            "show_on_menu": true,
+                            "__v": 1
+                        },
+                        "icon": "",
+                        "children": []
+                    },
+                    {
+                        "id": "menu-6652d4d7313f1eaaba85ba0f",
+                        "key": "0-3-1",
+                        "label": "Polyclinic Service",
+                        "to": "/clinical_service/polyclinic_service",
+                        "show_on_menu": true,
+                        "data": {
+                            "id": "menu-6652d4d7313f1eaaba85ba0f",
+                            "label": "Polyclinic Service",
+                            "parent": "menu-6652d371313f1eaaba85b930",
+                            "menu_group": {
+                                "id": "menu_group-64396339334f96672465a893",
+                                "name": "Application"
+                            },
+                            "identifier": "PolyclinicService",
+                            "permission": [],
+                            "to": "/clinical_service/polyclinic_service",
+                            "icon": "stethoscope",
+                            "show_on_menu": true,
+                            "__v": 2
+                        },
+                        "icon": "",
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "menu_group-64396343334f96672465a898",
+        "key": "1",
+        "label": "Configuration",
+        "to": "",
+        "show_on_menu": true,
+        "data": {
+            "id": "menu_group-64396343334f96672465a898",
+            "label": "Configuration",
+            "parent": "",
+            "menu_group": "",
+            "identifier": "",
+            "to": "",
+            "icon": "",
+            "show_on_menu": true,
+            "__v": 0
+        },
+        "icon": "",
+        "children": [
+            {
+                "id": "menu-644c037c078b31bb71244080",
+                "key": "1-0",
+                "label": "Application",
+                "to": "/application",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-644c037c078b31bb71244080",
+                    "label": "Application",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396343334f96672465a898",
+                        "name": "Configuration"
+                    },
+                    "identifier": "ApplicationConfiguration",
+                    "permission": [
+                        {
+                            "domIdentity": "btnApplicationConfigurationAdd",
+                            "dispatchName": "ApplicationConfigurationAdd"
+                        },
+                        {
+                            "domIdentity": "btnApplicationConfigurationEdit",
+                            "dispatchName": "ApplicationConfigurationEdit"
+                        },
+                        {
+                            "domIdentity": "btnApplicationConfigurationDelete",
+                            "dispatchName": "ApplicationConfigurationDelete"
+                        }
+                    ],
+                    "to": "/application",
+                    "icon": "manufacturing",
+                    "show_on_menu": true,
+                    "__v": 2
+                },
+                "icon": "",
+                "children": []
+            },
+            {
+                "id": "menu-643aff26469b9a55b5d2cbf0",
+                "key": "1-3",
+                "label": "Account",
+                "to": "/account",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-643aff26469b9a55b5d2cbf0",
+                    "label": "Account",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396343334f96672465a898",
+                        "name": "Configuration"
+                    },
+                    "identifier": "Account",
+                    "permission": [
+                        {
+                            "domIdentity": "btnAccountEdit",
+                            "dispatchName": "AccountEdit"
+                        },
+                        {
+                            "domIdentity": "btnAccountDelete",
+                            "dispatchName": "AccountDelete"
+                        }
+                    ],
+                    "to": "/account",
+                    "icon": "person",
+                    "show_on_menu": true,
+                    "__v": 3
+                },
+                "icon": "",
+                "children": []
+            },
+            {
+                "id": "menu-643a68c5e6f975d6f3a5b131",
+                "key": "1-2",
+                "label": "Menu",
+                "to": "/core/menu",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-643a68c5e6f975d6f3a5b131",
+                    "label": "Menu",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396343334f96672465a898",
+                        "name": "Configuration"
+                    },
+                    "identifier": "Menu",
+                    "permission": [
+                        {
+                            "domIdentity": "tableMenu",
+                            "dispatchName": "CoreMenuView"
+                        },
+                        {
+                            "domIdentity": "btnMenuAdd",
+                            "dispatchName": "CoreMenuAdd"
+                        },
+                        {
+                            "domIdentity": "btnMenuEdit",
+                            "dispatchName": "CoreMenuEdit"
+                        },
+                        {
+                            "domIdentity": "btnMenuDelete",
+                            "dispatchName": "CoreMenuDelete"
+                        }
+                    ],
+                    "to": "/core/menu",
+                    "icon": "api",
+                    "show_on_menu": true,
+                    "__v": 1
+                },
+                "icon": "",
+                "children": []
+            },
+            {
+                "id": "menu-643c38916d198727bfbf301d",
+                "key": "1-1",
+                "label": "i18n",
+                "to": "/setting/i18n",
+                "show_on_menu": true,
+                "data": {
+                    "id": "menu-643c38916d198727bfbf301d",
+                    "label": "i18n",
+                    "parent": "",
+                    "menu_group": {
+                        "id": "menu_group-64396343334f96672465a898",
+                        "name": "Configuration"
+                    },
+                    "identifier": "i18n",
+                    "permission": [
+                        {
+                            "domIdentity": "btni18nEdit",
+                            "dispatchName": "i18nEdit"
+                        },
+                        {
+                            "domIdentity": "btni18nAdd",
+                            "dispatchName": "i18nAdd"
+                        }
+                    ],
+                    "to": "/setting/i18n",
+                    "icon": "language",
+                    "show_on_menu": true,
+                    "__v": 4
+                },
+                "icon": "",
+                "children": []
+            }
+        ]
+    }
+]

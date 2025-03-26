@@ -1,4 +1,694 @@
 {
+  "menu": [
+      {
+          "_id": "6439639d334f96672465a89f",
+          "name": "Dashboard",
+          "identifier": "Dashboard",
+          "url": "/",
+          "icon": "home",
+          "show_on_menu": true,
+          "show_order": 1,
+          "level": 2,
+          "group_color": "",
+          "remark": "",
+          "channel": "web",
+          "parent": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-14T21:30:53.000Z",
+          "updated_at": "2023-04-18T00:17:26.000Z",
+          "id": "menu-6439639d334f96672465a89f",
+          "__v": 3,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "autonum": 1
+      },
+      {
+          "_id": "64398975964e52ecda66f2fd",
+          "name": "Item Management",
+          "identifier": "",
+          "url": "",
+          "icon": "shelves",
+          "show_on_menu": true,
+          "show_order": 1,
+          "level": 2,
+          "group_color": "",
+          "remark": "",
+          "channel": "web",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-6439894d964e52ecda66f2f8",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-15T00:12:21.000Z",
+          "updated_at": "2024-05-26T14:50:18.000Z",
+          "id": "menu-64398975964e52ecda66f2fd",
+          "__v": 16,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "autonum": 2
+      },
+      {
+          "_id": "643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "identifier": "Menu",
+          "url": "/core/menu",
+          "icon": "api",
+          "show_on_menu": true,
+          "show_order": 3,
+          "level": 1,
+          "group_color": "",
+          "remark": "",
+          "channel": "web",
+          "menu_group": {
+              "id": "menu_group-64396343334f96672465a898",
+              "name": "Configuration"
+          },
+          "parent": "",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-15T16:05:09.000Z",
+          "updated_at": "2024-07-20T20:28:54.000Z",
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "__v": 1,
+          "timezone": "Asia/Jakarta",
+          "permission": [
+              {
+                  "domIdentity": "tableMenu",
+                  "dispatchName": "CoreMenuView"
+              },
+              {
+                  "domIdentity": "btnMenuAdd",
+                  "dispatchName": "CoreMenuAdd"
+              },
+              {
+                  "domIdentity": "btnMenuEdit",
+                  "dispatchName": "CoreMenuEdit"
+              },
+              {
+                  "domIdentity": "btnMenuDelete",
+                  "dispatchName": "CoreMenuDelete"
+              }
+          ],
+          "autonum": 3
+      },
+      {
+          "_id": "643af5ba469b9a55b5d2c9be",
+          "name": "Inventory",
+          "identifier": "Inventory",
+          "url": "",
+          "icon": "store",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "remark": "",
+          "parent": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-16T02:06:34.000Z",
+          "updated_at": "2023-04-16T02:06:34.000Z",
+          "id": "menu-643af5ba469b9a55b5d2c9be",
+          "__v": 0,
+          "timezone": "Asia/Jakarta",
+          "autonum": 4
+      },
+      {
+          "_id": "643af9e9469b9a55b5d2cb2a",
+          "name": "Purchase Order",
+          "identifier": "PurchaseOrder",
+          "url": "/inventory/purchase_order",
+          "icon": "shopping_cart",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [
+              {
+                  "domIdentity": "btnPurchaseOrderAdd",
+                  "dispatchName": "PurchaseOrderAdd"
+              },
+              {
+                  "domIdentity": "btnPurchaseOrderEdit",
+                  "dispatchName": "PurchaseOrderEdit"
+              },
+              {
+                  "domIdentity": "btnPurchaseOrderDelete",
+                  "dispatchName": "PurchaseOrderDelete"
+              },
+              {
+                  "domIdentity": "btnPurchaseOrderApprove",
+                  "dispatchName": "PurchaseOrderApprove"
+              },
+              {
+                  "domIdentity": "btnPurchaseOrderDecline",
+                  "dispatchName": "PurchaseOrderDecline"
+              }
+          ],
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-643af5ba469b9a55b5d2c9be",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-16T02:24:25.000Z",
+          "updated_at": "2023-04-23T02:17:09.000Z",
+          "id": "menu-643af9e9469b9a55b5d2cb2a",
+          "__v": 3,
+          "group_color": "",
+          "level": 2,
+          "timezone": "Asia/Jakarta",
+          "autonum": 5
+      },
+      {
+          "_id": "643c07558a44bc1bccecac36",
+          "name": "Item Brand",
+          "identifier": "MasterItemBrand",
+          "url": "/master/item/brand",
+          "icon": "dataset",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [
+              {
+                  "domIdentity": "btnAddItemBrand",
+                  "dispatchName": "MasterItemAdd"
+              },
+              {
+                  "domIdentity": "btnEditItemBrand",
+                  "dispatchName": "MasterItemEdit"
+              }
+          ],
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-64398975964e52ecda66f2fd",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-16T21:33:57.000Z",
+          "updated_at": "2023-04-18T01:42:01.000Z",
+          "id": "menu-643c07558a44bc1bccecac36",
+          "__v": 44,
+          "group_color": "",
+          "level": 2,
+          "timezone": "Asia/Jakarta",
+          "autonum": 6
+      },
+      {
+          "_id": "643c3663d3c66942a626b6ab",
+          "name": "Polyclinic Management",
+          "identifier": "PolyclinicManagement",
+          "url": "/master/polyclinic",
+          "icon": "medical_information",
+          "show_on_menu": true,
+          "show_order": 2,
+          "permission": [
+              {
+                  "domIdentity": "btnAddPolyclinic",
+                  "dispatchName": "MASTER_POLYCLINIC_ADD"
+              },
+              {
+                  "domIdentity": "btnEditPolyclinic",
+                  "dispatchName": "MASTER_POLYCLINIC_EDIT"
+              }
+          ],
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-6439894d964e52ecda66f2f8",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-17T00:54:43.000Z",
+          "updated_at": "2023-04-17T00:54:44.000Z",
+          "id": "menu-643c3663d3c66942a626b6ab",
+          "__v": 0,
+          "timezone": "Asia/Jakarta",
+          "autonum": 7
+      },
+      {
+          "_id": "643c38916d198727bfbf301d",
+          "name": "i18n",
+          "identifier": "i18n",
+          "url": "/setting/i18n",
+          "icon": "language",
+          "show_on_menu": true,
+          "show_order": 2,
+          "permission": [
+              {
+                  "domIdentity": "btni18nEdit",
+                  "dispatchName": "i18nEdit"
+              },
+              {
+                  "domIdentity": "btni18nAdd",
+                  "dispatchName": "i18nAdd"
+              }
+          ],
+          "remark": "",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "johndoe@example.com",
+              "first_name": "UPDATEDDJohn",
+              "last_name": "DoeUPDATEDD"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-17T01:04:01.000Z",
+          "updated_at": "2023-04-18T19:34:30.000Z",
+          "id": "menu-643c38916d198727bfbf301d",
+          "__v": 4,
+          "menu_group": {
+              "id": "menu_group-64396343334f96672465a898",
+              "name": "Configuration"
+          },
+          "level": 2,
+          "group_color": "",
+          "channel": "web",
+          "parent": "",
+          "timezone": "Asia/Jakarta",
+          "autonum": 8
+      },
+      {
+          "_id": "644c037c078b31bb71244080",
+          "name": "Application",
+          "identifier": "ApplicationConfiguration",
+          "url": "/application",
+          "icon": "manufacturing",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [
+              {
+                  "domIdentity": "btnApplicationConfigurationAdd",
+                  "dispatchName": "ApplicationConfigurationAdd"
+              },
+              {
+                  "domIdentity": "btnApplicationConfigurationEdit",
+                  "dispatchName": "ApplicationConfigurationEdit"
+              },
+              {
+                  "domIdentity": "btnApplicationConfigurationDelete",
+                  "dispatchName": "ApplicationConfigurationDelete"
+              }
+          ],
+          "remark": "",
+          "parent": "",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "email": "takashitanaka@horas.com",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2023-04-29T00:33:48.000Z",
+          "updated_at": "2024-05-26T14:51:27.000Z",
+          "menu_group": {
+              "id": "menu_group-64396343334f96672465a898",
+              "name": "Configuration"
+          },
+          "level": 2,
+          "group_color": "",
+          "channel": "web",
+          "id": "menu-644c037c078b31bb71244080",
+          "__v": 2,
+          "timezone": "Asia/Jakarta",
+          "autonum": 9
+      },
+      {
+          "_id": "6649fe6807b35431b06fbd8a",
+          "name": "Front Desk",
+          "identifier": "FrontDesk",
+          "url": "/front_desk",
+          "icon": "list_alt",
+          "show_on_menu": true,
+          "show_order": 4,
+          "permission": [],
+          "level": 2,
+          "group_color": "",
+          "timezone": "Asia/Jakarta",
+          "channel": "web",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-19T13:28:08.874Z",
+          "updated_at": "2024-05-19T20:28:08.000Z",
+          "id": "menu-6649fe6807b35431b06fbd8a",
+          "__v": 0,
+          "autonum": 10
+      },
+      {
+          "_id": "6651fd22dd429dde0552a1dd",
+          "name": "In Patient",
+          "identifier": "NurseStationInpatient",
+          "url": "/nurse_station/inpatient",
+          "icon": "bed",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-6651f086586688c661878d3b",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-25T15:00:50.845Z",
+          "updated_at": "2024-05-26T14:22:28.000Z",
+          "id": "menu-6651fd22dd429dde0552a1dd",
+          "__v": 4,
+          "group_color": "",
+          "level": 2,
+          "autonum": 11
+      },
+      {
+          "_id": "6651fd94dd429dde0552a252",
+          "name": "Out Patient",
+          "identifier": "NurseStationOutPatient",
+          "url": "/nurse_station/outpatient",
+          "icon": "group",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-6651f086586688c661878d3b",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-25T15:02:44.374Z",
+          "updated_at": "2024-05-26T14:23:30.000Z",
+          "id": "menu-6651fd94dd429dde0552a252",
+          "__v": 1,
+          "group_color": "",
+          "level": 2,
+          "autonum": 12
+      },
+      {
+          "_id": "66521a358b572eb737229cc5",
+          "name": "Registration",
+          "identifier": "Registration",
+          "url": "/front_desk/registration",
+          "icon": "assignment",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-6649fe6807b35431b06fbd8a",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-25T17:04:53.676Z",
+          "updated_at": "2024-05-26T14:18:30.000Z",
+          "id": "menu-66521a358b572eb737229cc5",
+          "__v": 1,
+          "group_color": "",
+          "level": 2,
+          "autonum": 13
+      },
+      {
+          "_id": "66521b838b572eb737229d57",
+          "name": "Ancillary Service",
+          "identifier": "AncillaryService",
+          "url": "",
+          "icon": "medical_services",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-25T17:10:27.815Z",
+          "updated_at": "2024-05-26T14:24:25.000Z",
+          "id": "menu-66521b838b572eb737229d57",
+          "__v": 4,
+          "group_color": "",
+          "level": 2,
+          "autonum": 14
+      },
+      {
+          "_id": "66521ba18b572eb737229d72",
+          "name": "Laboratory",
+          "identifier": "Laboratory",
+          "url": "/ancillary_service/laboratory",
+          "icon": "labs",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-66521b838b572eb737229d57",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-25T17:10:57.448Z",
+          "updated_at": "2024-05-26T14:39:23.000Z",
+          "id": "menu-66521ba18b572eb737229d72",
+          "__v": 4,
+          "group_color": "",
+          "level": 2,
+          "autonum": 15
+      },
+      {
+          "_id": "66521bcf8b572eb737229d8e",
+          "name": "Radiology",
+          "identifier": "Radiology",
+          "url": "/ancillary_service/radiology",
+          "icon": "skeleton",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-66521b838b572eb737229d57",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-25T17:11:43.627Z",
+          "updated_at": "2024-05-26T14:46:10.000Z",
+          "id": "menu-66521bcf8b572eb737229d8e",
+          "__v": 3,
+          "group_color": "",
+          "level": 2,
+          "autonum": 16
+      },
+      {
+          "_id": "66521bf18b572eb737229dab",
+          "name": "Pharmacy",
+          "identifier": "Pharmacy",
+          "url": "/ancillary_service/pharmacy",
+          "icon": "outpatient_med",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-66521b838b572eb737229d57",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-25T17:12:17.231Z",
+          "updated_at": "2024-05-26T14:45:03.000Z",
+          "id": "menu-66521bf18b572eb737229dab",
+          "__v": 3,
+          "group_color": "",
+          "level": 2,
+          "autonum": 17
+      },
+      {
+          "_id": "6652d371313f1eaaba85b930",
+          "name": "Clinical Service",
+          "identifier": "ClinicalService",
+          "url": "",
+          "icon": "medical_information",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-26T06:15:13.894Z",
+          "updated_at": "2024-05-26T13:30:31.000Z",
+          "id": "menu-6652d371313f1eaaba85b930",
+          "__v": 4,
+          "group_color": "",
+          "level": 2,
+          "autonum": 18
+      },
+      {
+          "_id": "6652d4d7313f1eaaba85ba0f",
+          "name": "Polyclinic Service",
+          "identifier": "PolyclinicService",
+          "url": "/clinical_service/polyclinic_service",
+          "icon": "stethoscope",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-6652d371313f1eaaba85b930",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-26T06:21:11.708Z",
+          "updated_at": "2024-05-26T14:47:26.000Z",
+          "id": "menu-6652d4d7313f1eaaba85ba0f",
+          "__v": 2,
+          "group_color": "",
+          "level": 2,
+          "autonum": 19
+      },
+      {
+          "_id": "6652d5aa313f1eaaba85ba2f",
+          "name": "Surgical Service",
+          "identifier": "SurgicalService",
+          "url": "/clinical_service/surgical_service",
+          "icon": "surgical",
+          "show_on_menu": true,
+          "show_order": 1,
+          "permission": [],
+          "timezone": "Asia/Jakarta",
+          "remark": "",
+          "menu_group": {
+              "id": "menu_group-64396339334f96672465a893",
+              "name": "Application"
+          },
+          "parent": "menu-6652d371313f1eaaba85b930",
+          "created_by": {
+              "id": "account-63d51ede32795cb7a2a0eedd",
+              "first_name": "Hendry",
+              "last_name": "Tanaka"
+          },
+          "deleted_at": null,
+          "created_at": "2024-05-26T06:24:42.813Z",
+          "updated_at": "2024-05-26T14:46:51.000Z",
+          "id": "menu-6652d5aa313f1eaaba85ba2f",
+          "__v": 1,
+          "group_color": "",
+          "level": 2,
+          "autonum": 20
+      }
+  ],
   "lov": [
     {
       "name": "General",

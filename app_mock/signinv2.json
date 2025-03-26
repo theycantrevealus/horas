@@ -95,9 +95,23 @@
       },
       {
         "id": "menu-643c070b8a44bc1bccecabd7",
-        "name": "Item",
+        "name": "Master Item",
         "url": "/master/item",
-        "identifier": "MasterItem"
+        "identifier": "MasterItem",
+        "access":[
+          {
+            "domIdentity": "btnEditMasterItem",
+            "dispatchName": "MasterItemEdit"
+          },
+          {
+            "domIdentity": "btnAddMasterItem",
+            "dispatchName": "MasterItemAdd"
+          },
+          {
+            "domIdentity": "btnDeleteMasterItem",
+            "dispatchName": "MasterItemDelete"
+          }
+        ]
       },
       {
         "id": "menu-643c073d8a44bc1bccecac15",

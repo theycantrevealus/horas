@@ -24,6 +24,10 @@ server.get('/v1/menu/tree', (req, res) => {
   res.jsonp(require('./menu.tree.json'))
 })
 
+server.get('/v1/menu/tree/manager', (req, res) => {
+  res.jsonp(require('./menu.tree.manager.json'))
+})
+
 server.use((req, res, next) => {
   const method = req.method
   const url = req.url
