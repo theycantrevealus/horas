@@ -740,90 +740,6 @@
       "id": "pgdU1rD"
     }
   ],
-  "item": [
-    {
-      "_id": "6432a7da9b8f79e8e41131a3",
-      "id": "item-6432a7da9b8f79e8e41131a3",
-      "code": "51532-4616",
-      "name": "CUT CLEANER",
-      "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
-      "configuration": {
-        "allow_grn": false,
-        "allow_incoming": false,
-        "allow_outgoing": false,
-        "allow_destruction": false
-      },
-      "category": [
-        {
-          "id": "item_category-6428638f90f59e64ae266bea",
-          "code": "CAT00001",
-          "name": "Drugs"
-        }
-      ],
-      "unit": {
-        "id": "item_unit-64327bd1b2e0e3c2ab090494",
-        "code": "MSRI-UNT-1681030097526",
-        "name": "SWAB"
-      },
-      "brand": null,
-      "properties": [
-        {
-          "id": "lov-643280763e921da3ad410128",
-          "name": "Route",
-          "value": "TOPICAL"
-        }
-      ],
-      "storing": [],
-      "remark": "",
-      "created_at": "2023-04-09T18:56:10.000Z",
-      "updated_at": "2023-04-09T18:56:10.000Z",
-      "deleted_at": null,
-      "__v": 0,
-      "timezone": "Asia/Jakarta",
-      "autonum": 1
-    },
-    {
-      "_id": "6432a8339b8f79e8e414b00c",
-      "id": "item-6432a8339b8f79e8e414b00c",
-      "code": "81238-4616",
-      "name": "CUT CLEANER",
-      "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
-      "configuration": {
-        "allow_grn": false,
-        "allow_incoming": false,
-        "allow_outgoing": false,
-        "allow_destruction": false
-      },
-      "category": [
-        {
-          "id": "item_category-6428638f90f59e64ae266bea",
-          "code": "CAT00001",
-          "name": "Drugs"
-        }
-      ],
-      "unit": {
-        "id": "item_unit-64327bd0b2e0e3c2ab08f64e",
-        "code": "MSRI-UNT-1681030096338",
-        "name": "CLOTH"
-      },
-      "brand": null,
-      "properties": [
-        {
-          "id": "lov-643280763e921da3ad410128",
-          "name": "Route",
-          "value": "TOPICAL"
-        }
-      ],
-      "storing": [],
-      "remark": "",
-      "created_at": "2023-04-09T18:57:39.000Z",
-      "updated_at": "2023-04-09T18:57:39.000Z",
-      "deleted_at": null,
-      "__v": 0,
-      "timezone": "Asia/Jakarta",
-      "autonum": 2
-    }
-  ],
   "item_category": [
     {
       "id": "item_category-6428638f90f59e64ae266bea",
@@ -844,20 +760,104 @@
       "id": "nU1PYR1"
     }
   ],
-  "item_brand": [
-    {
-      "id": "item_brand-6428638f90f59e64ae266bea",
-      "code": "BRD00001",
-      "name": "SANMOL",
-      "created_at": "2023-04-09T18:57:39.000Z"
-    },
-    {
-      "code": "BRD00231",
-      "name": "DUMIN RECTAL",
-      "remark": "<p>DUMIN</p>",
-      "id": "wVxmkja"
-    }
-  ],
+  "item": [
+      {
+        "_id": "6432a7da9b8f79e8e41131a3",
+        "id": "item-6432a7da9b8f79e8e41131a3",
+        "code": "51532-4616",
+        "name": "CUT CLEANER 2",
+        "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
+        "configuration": {
+          "allow_grn": false,
+          "allow_incoming": false,
+          "allow_outgoing": false,
+          "allow_destruction": false
+        },
+        "category": [
+          {
+            "id": "item_category-6428638f90f59e64ae266bea",
+            "code": "CAT00001",
+            "name": "Drugs"
+          }
+        ],
+        "unit": {
+          "id": "item_unit-64327bd1b2e0e3c2ab090494",
+          "code": "MSRI-UNT-1681030097526",
+          "name": "SWAB"
+        },
+        "brand": null,
+        "properties": [
+          {
+            "id": "lov-643280763e921da3ad410128",
+            "name": "Route",
+            "value": "TOPICAL"
+          }
+        ],
+        "storing": [],
+        "remark": "",
+        "created_at": "2023-04-09T18:56:10.000Z",
+        "updated_at": "2023-04-09T18:56:10.000Z",
+        "deleted_at": null,
+        "__v": 0,
+        "timezone": "Asia/Jakarta",
+        "autonum": 1
+      },
+      {
+        "_id": "6432a8339b8f79e8e414b00c",
+        "id": "item-6432a8339b8f79e8e414b00c",
+        "code": "81238-4616",
+        "name": "CUT CLEANER",
+        "alias": "BENZALKONIUM CHLORIDE; BENZOCAINE",
+        "configuration": {
+          "allow_grn": false,
+          "allow_incoming": false,
+          "allow_outgoing": false,
+          "allow_destruction": false
+        },
+        "category": [
+          {
+            "id": "item_category-6428638f90f59e64ae266bea",
+            "code": "CAT00001",
+            "name": "Drugs"
+          }
+        ],
+        "unit": {
+          "id": "item_unit-64327bd0b2e0e3c2ab08f64e",
+          "code": "MSRI-UNT-1681030096338",
+          "name": "CLOTH"
+        },
+        "brand": null,
+        "properties": [
+          {
+            "id": "lov-643280763e921da3ad410128",
+            "name": "Route",
+            "value": "TOPICAL"
+          }
+        ],
+        "storing": [],
+        "remark": "",
+        "created_at": "2023-04-09T18:57:39.000Z",
+        "updated_at": "2023-04-09T18:57:39.000Z",
+        "deleted_at": null,
+        "__v": 0,
+        "timezone": "Asia/Jakarta",
+        "autonum": 2
+      }
+    ],
+    "item_brand": [
+        {
+          "id": "item_brand-6428638f90f59e64ae266bea",
+          "code": "BRD00001",
+          "name": "SANMOL",
+          "created_at": "2023-04-09T18:57:39.000Z"
+        },
+        {
+          "code": "BRD00231",
+          "name": "DUMIN RECTAL",
+          "remark": "<p>DUMIN</p>",
+          "id": "wVxmkja"
+        }
+      ],
   "queue_machine": [
     {
       "id": "queue_machine-xxxx",
@@ -991,6 +991,78 @@
       },
       "remark": "Extra remark",
       "components": [
+        {
+          "component": "lov.datatable.column.action.caption",
+          "translation": "Action",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
+        {
+          "component": "lov.datatable.column.name.caption",
+          "translation": "Name",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
+        {
+          "component": "lov.datatable.column.name.search",
+          "translation": "Search by name",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
+        {
+          "component": "lov.datatable.column.group.caption",
+          "translation": "Group",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
+        {
+          "component": "lov.datatable.column.group.search",
+          "translation": "Search by group",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
+        {
+          "component": "lov.datatable.column.value.caption",
+          "translation": "Value",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
+        {
+          "component": "lov.datatable.column.value.search",
+          "translation": "Search by value",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
+        {
+          "component": "lov.datatable.column.created_at.caption",
+          "translation": "Created At",
+          "menu": {
+            "id": "menu-67558e316838f1c99d0e3401",
+            "name": "LOV Management",
+            "url": "/lov"
+          }
+        },
         {
           "component": "menu.datatable.button.sort_down",
           "translation": "Down"
