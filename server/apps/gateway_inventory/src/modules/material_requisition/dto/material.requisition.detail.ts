@@ -1,10 +1,10 @@
+import { CMasterItem } from '@gateway_core/master/dto/master.item'
 import { ApiProperty } from '@nestjs/swagger'
 import { IMasterItem } from '@schemas/master/master.item.interface'
-import { MasterItemJoin } from '@schemas/master/master.item.join'
 
 export class CMaterialRequisitionDetail {
   @ApiProperty({
-    type: MasterItemJoin,
+    type: CMasterItem,
     required: true,
   })
   item: IMasterItem
