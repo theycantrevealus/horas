@@ -290,15 +290,6 @@ export class PurchaseOrderService {
       created_by: account,
     }
 
-    console.log(
-      `Finding \n${JSON.stringify({
-        id: id,
-        status: 'need_approval',
-        created_by: account,
-        __v: data.__v,
-      })}`
-    )
-
     await this.purchaseOrderModel
       .findOneAndUpdate(
         { id: id, status: 'need_approval', __v: data.__v },
