@@ -13,7 +13,7 @@
     background: #fff;
     overflow: hidden;
     box-shadow: 2px 0 2px -2px #888;
-    transition-duration: 0.5s;
+    transition-duration: 0.2s;
 }
 
 .sidepanel li {
@@ -86,16 +86,16 @@
     border-radius: 0;
     text-align: center !important;
     color: #575757 !important;
-    transition-duration: 0.5s;
     overflow-x: hidden;
     cursor: pointer;
     cursor: hand;
+    border-radius: 10px !important;
 }
 
 .sidepanel .layout-menu li a:hover {
     left: 0 !important;
     background: rgba(28, 185, 115, 0.1) !important;
-    box-shadow: inset 3px 0 0 0 #1cb973;
+    /* box-shadow: inset 3px 0 0 0 #1cb973; */
 }
 
 .sidepanel.open .layout-menu li a {
@@ -132,7 +132,6 @@
     margin: 0 auto;
     left: 40px;
     color: #878787 !important;
-    transition-duration: 0.5s;
 }
 
 .sidepanel.open .layout-menu li a .material-icons,
@@ -148,13 +147,11 @@
     letter-spacing: 2px;
     font-size: 0.6rem !important;
     text-align: right;
-    transition-duration: 0.5s;
 }
 
 .sidepanel .layout-menu li .layout-menuitem-root-text b {
     opacity: 0;
     margin-left: 15px;
-    transition-duration: 0.5s;
 }
 
 .sidepanel .layout-menu li .layout-menuitem-root-text.open b {

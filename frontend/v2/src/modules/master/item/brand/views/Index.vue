@@ -7,11 +7,11 @@
           <Toolbar>
             <template #start>
               <Button
-                :disabled="!allowDispatch('btnAddLOV')"
-                :label="$t('lov.btn.add_lov')"
+                :disabled="!allowDispatch('btnAddMasterItemBrand')"
+                :label="$t('master_item_brand.button.add_item_brand')"
                 icon="pi pi-plus"
                 class="mr-2 button-rounded"
-                @click="addLOV"
+                @click="add"
               />
             </template>
 
@@ -35,7 +35,7 @@
           responsiveLayout="scroll"
           @page="onPage($event)"
           @sort="onSort($event)"
-          @filter="onFilter($event)"
+          @filter="onFilter()"
         >
           <Column header="#" class="text-left wrap_content">
             <template #body="slotProps">
@@ -46,22 +46,22 @@
             </template>
           </Column>
           <Column
-            :header="$t('lov.datatable.column.action.caption')"
+            :header="$t('master_item_brand.datatable.column.action.caption')"
             class="text-right wrap_content"
           >
             <template #body="slotProps">
               <span class="p-buttonset">
                 <Button
                   class="p-button-info p-button-sm p-button-raised"
-                  :disabled="!allowDispatch('btnEditLOV')"
-                  @click="editLOV(slotProps.data.id)"
+                  :disabled="!allowDispatch('btnEditMasterItemBrand')"
+                  @click="editMasterItemBrand(slotProps.data.id)"
                 >
                   <span class="material-icons">edit</span> Edit
                 </Button>
                 <Button
                   class="p-button-danger p-button-sm p-button-raised"
-                  :disabled="!allowDispatch('btnDeleteLOV')"
-                  @click="deleteLOV($event, slotProps.data.id)"
+                  :disabled="!allowDispatch('btnDeleteMasterItemBrand')"
+                  @click="deleteMasterItemBrand($event, slotProps.data.id)"
                 >
                   <span class="material-icons">delete</span> Delete
                 </Button>
@@ -69,9 +69,30 @@
             </template>
           </Column>
           <Column
+            ref="code"
+            field="code"
+            :header="$t('master_item_brand.datatable.column.code.caption')"
+            filterMatchMode="startsWith"
+            :sortable="true"
+            style="width: 12.5% !important"
+          >
+            <template #filter="{ filterModel, filterCallback }">
+              <InputText
+                v-model="filterModel.value"
+                type="text"
+                class="column-filter"
+                :placeholder="$t('master_item_brand.datatable.column.code.search')"
+                @keydown.enter="filterCallback()"
+              />
+            </template>
+            <template #body="slotProps">
+              <label class="currency-label text-600">{{ slotProps.data.code }}</label>
+            </template>
+          </Column>
+          <Column
             ref="name"
             field="name"
-            :header="$t('lov.datatable.column.name.caption')"
+            :header="$t('master_item_brand.datatable.column.name.caption')"
             filterField="name"
             filterMatchMode="contains"
             :sortable="true"
@@ -81,7 +102,7 @@
                 v-model="filterModel.value"
                 type="text"
                 class="column-filter"
-                :placeholder="$t('lov.datatable.column.name.search')"
+                :placeholder="$t('master_item_brand.datatable.column.name.search')"
                 @keydown.enter="filterCallback()"
               />
             </template>
@@ -90,52 +111,10 @@
             </template>
           </Column>
           <Column
-            ref="group"
-            field="group"
-            :header="$t('lov.datatable.column.group.caption')"
-            filterMatchMode="startsWith"
-            :sortable="true"
-            style="width: 12.5% !important"
-          >
-            <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                v-model="filterModel.value"
-                type="text"
-                class="column-filter"
-                :placeholder="$t('lov.datatable.column.group.search')"
-                @keydown.enter="filterCallback()"
-              />
-            </template>
-            <template #body="slotProps">
-              <label class="currency-label text-600">{{ slotProps.data.group }}</label>
-            </template>
-          </Column>
-          <Column
-            ref="value"
-            field="value"
-            :header="$t('lov.datatable.column.value.caption')"
-            filterMatchMode="startsWith"
-            :sortable="true"
-            style="width: 12.5% !important"
-          >
-            <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                v-model="filterModel.value"
-                type="text"
-                class="column-filter"
-                :placeholder="$t('lov.datatable.column.value.search')"
-                @keydown.enter="filterCallback()"
-              />
-            </template>
-            <template #body="slotProps">
-              <label class="currency-label text-600">{{ slotProps.data.value }}</label>
-            </template>
-          </Column>
-          <Column
             ref="created_at"
             class="text-right wrap_content"
             field="created_at"
-            :header="$t('lov.datatable.column.created_at.caption')"
+            :header="$t('master_item_brand.datatable.column.created_at.caption')"
             :sortable="true"
           >
             <template #body="slotProps">
@@ -179,7 +158,7 @@
       </template>
       <template #footer></template>
     </Card>
-    <ConfirmPopup group="delete_confirm_lov" />
+    <ConfirmPopup group="delete_confirm_master_item_brand" />
     <DynamicDialog />
   </div>
 </template>
@@ -189,23 +168,24 @@ import { defineAsyncComponent } from 'vue'
 import { defineComponent } from 'vue'
 import { storeCore } from '@/store/index'
 import { mapActions, mapStores } from 'pinia'
-import { storeLOV } from '@/modules/master/lov/store'
+import { storeMasterItemBrand } from '@/modules/master/item/brand/store'
 import NumberLabel from '@/components/Number.vue'
 
-const LOVForm = defineAsyncComponent(() => import('@/modules/master/lov/components/Form.vue'))
+const FormMasterItemBrand = defineAsyncComponent(
+  () => import('@/modules/master/item/brand/components/Form.vue'),
+)
 
 export default defineComponent({
   components: { NumberLabel },
   data() {
     return {
-      credential: {},
       loading: false,
       totalRecords: 0,
       items: [],
       filters: {
+        code: { value: '', matchMode: 'contains' },
         name: { value: '', matchMode: 'contains' },
-        group: { value: '', matchMode: 'contains' },
-        value: { value: '', matchMode: 'contains' },
+        remark: { value: '', matchMode: 'contains' },
       },
       lazyParams: {
         filters: {},
@@ -216,21 +196,21 @@ export default defineComponent({
         sortOrder: 1,
       },
       columns: [
+        { field: 'code', header: 'Code' },
         { field: 'name', header: 'Name' },
-        { field: 'group', header: 'Group' },
-        { field: 'value', header: 'Value' },
+        { field: 'remark', header: 'Remark' },
         { field: 'created_at', header: 'Created Date' },
       ],
     }
   },
   computed: {
-    ...mapStores(storeLOV),
+    ...mapStores(storeMasterItemBrand),
   },
   mounted() {
     this.lazyParams = {
       first: 0,
       page: 0,
-      rows: this.$refs.dt.rows,
+      rows: (this.$refs.dt as { rows: number }).rows,
       sortField: 'created_at',
       sortOrder: 1,
       filters: this.filters,
@@ -240,10 +220,10 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
-    addLOV() {
-      this.$dialog.open(LOVForm, {
+    add() {
+      this.$dialog.open(FormMasterItemBrand, {
         props: {
-          header: 'Add LOV',
+          header: 'Add Master Item Brand',
           style: {
             width: '90vw',
           },
@@ -261,10 +241,10 @@ export default defineComponent({
         },
       })
     },
-    editLOV(id: string) {
-      this.$dialog.open(LOVForm, {
+    editMasterItemBrand(id: string) {
+      this.$dialog.open(FormMasterItemBrand, {
         props: {
-          header: 'Edit LOV',
+          header: 'Edit Master Item Brand',
           style: {
             width: '90vw',
           },
@@ -284,17 +264,17 @@ export default defineComponent({
       })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    deleteLOV(event: any, id: string) {
+    deleteMasterItemBrand(event: any, id: string) {
       this.$confirm.require({
         target: event.currentTarget,
-        group: 'delete_confirm_lov',
+        group: 'delete_confirm_master_item_brand',
         message: 'Are you sure to delete this data?',
         icon: 'pi pi-exclamation-triangle',
         acceptClass: 'p-button-secondary',
         acceptLabel: 'Yes. Delete it!',
         rejectLabel: 'Cancel',
         accept: async () => {
-          await this.lovStore.delete(id).then(() => {
+          await this.masterItemBrandStore.delete(id).then(() => {
             this.loadLazyData()
           })
         },
@@ -303,14 +283,13 @@ export default defineComponent({
         },
       })
     },
-    // TODO : Centralize this function
     formatDate(date: string, format: string) {
       return DateManagement.formatDate(date, format)
     },
     async loadLazyData() {
       this.loading = true
 
-      await this.lovStore
+      await this.masterItemBrandStore
         .list(this.lazyParams)
         .then((response) => {
           if (response) {
@@ -329,15 +308,17 @@ export default defineComponent({
           this.loading = false
         })
     },
-    onPage(event) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onPage(event: any) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onSort(event) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onSort(event: any) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onFilter(event) {
+    onFilter() {
       this.lazyParams.page = 0
       this.lazyParams.first = 0
       this.lazyParams.filters = this.filters

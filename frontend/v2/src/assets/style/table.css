@@ -13,12 +13,13 @@ table thead tr th {
 }
 
 .p-treetable-thead tr th {
-    background: #1cb973 !important;
-    color: #fff !important;
+    /* background: #1cb973 !important; */
+    background: #fff !important;
+    color: #ccc !important;
 }
 
 .p-treetable-thead tr th .pi {
-    color: #fff !important;
+    color: #ccc !important;
 }
 
 .p-treetable-thead tr th,
@@ -46,17 +47,23 @@ table thead tr th {
 .p-treetable-thead tr th .p-sortable-column-icon,
 .p-datatable .p-sortable-column .p-sortable-column-icon {
     font-size: 6pt !important;
-    color: #fff !important;
+    color: #ccc !important;
 }
 
 .p-datatable-sort-icon {
     font-size: 6pt !important;
-    color: #fff !important;
+    color: #a0a0a0 !important;
 }
 
 .p-datatable .p-button-text.p-button-secondary {
-    font-size: 6pt !important;
-    color: #fff !important;
+    color: #a0a0a0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
+.p-datatable .p-button-text.p-button-secondary svg {
+    width: 20px;
+    margin-left: 5px;
 }
 
 .p-datatable .p-button-text.p-button-secondary:hover {
@@ -77,20 +84,33 @@ table thead tr th {
     border: none !important;
 }
 
-.p-datatable {
-}
-
 .p-datatable .p-datatable-thead > tr > th {
     border: none !important;
 }
 
-.p-datatable .p-datatable-thead > tr:nth-child(odd) > th {
-    border-bottom: solid 1.5px #00874b !important;
+/* .p-datatable .p-datatable-thead > tr:nth-child(odd) > th {
+    border-bottom: solid 1.5px #fff !important;
+} */
+
+.p-datatable .p-datatable-thead > tr:first-child > th {
+    border-top: solid 1.5px #e6e6e8 !important;
 }
 
-.p-datatable-table thead tr th {
+.p-datatable .p-datatable-thead > tr > th {
+    border-bottom: solid 1.5px #e6e6e8 !important;
+}
+
+/* .p-datatable-table thead tr th {
     background: #1cb973 !important;
     color: #fff !important;
+} */
+
+.p-datatable .p-paginator .p-select.p-component {
+    font-size: 0.75rem !important;
+}
+
+.p-select-overlay.p-component .p-select-option-label {
+    font-size: 0.75rem !important;
 }
 
 .p-datatable .p-datatable-thead > tr > th.wrap_content {
@@ -110,7 +130,7 @@ table thead tr th {
 }
 
 .p-datatable-table thead tr th .pi {
-    color: #fff !important;
+    color: #ccc !important;
 }
 
 .p-datatable-table thead tr th .p-column-filter-menu-button-active {
@@ -118,7 +138,7 @@ table thead tr th {
 }
 
 .p-datatable-table thead tr th .p-column-filter-menu-button-active .pi {
-    color: #fff !important;
+    color: #ccc !important;
 }
 
 .p-datatable .p-datatable-footer {
@@ -126,8 +146,12 @@ table thead tr th {
     margin-top: 10px !important;
 }
 
-tbody tr:nth-child(even) td {
-    background: #eff2fe !important;
+tbody tr:nth-child(odd) td {
+    background: #f1f1f1 !important;
+}
+
+.p-datatable-filter-constraint {
+    font-size: 0.75rem !important;
 }
 
 th.p-filter-column input.p-inputtext {
@@ -145,7 +169,7 @@ tbody tr td {
 }
 
 tbody tr:hover td {
-    background: #dde3ff !important;
+    background: #a4f6d1 !important;
 }
 
 .p-treetable .p-treetable-tbody > tr > td {

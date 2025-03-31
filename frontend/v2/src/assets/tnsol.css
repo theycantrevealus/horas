@@ -552,7 +552,6 @@ body.dark .p-treenode .p-treenode-content:hover {
     top: 0;
     padding-top: 47.5px;
     margin-bottom: 10px;
-    background: #fff;
     height: 100px;
     width: 100%;
     min-height: 100px;
@@ -560,8 +559,10 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .breadcrumb-container {
     background: #fff;
+    border-radius: 10px;
     font-family: 'Visby Round Bold' !important;
     box-shadow: 0px 2px 2px -2px #888;
+    margin: 30px;
 }
 
 .breadcrumb-container .p-chip {
@@ -789,8 +790,9 @@ body.dark .p-treenode .p-treenode-content:hover {
     padding: 0 !important;
 }
 
-.p-card-header {
-    background: #fff !important;
+.p-toolbar {
+    padding: 20px !important;
+    border-radius: 10px !important;
 }
 
 .p-card.card-fluid {

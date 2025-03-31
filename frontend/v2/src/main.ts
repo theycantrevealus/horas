@@ -32,7 +32,10 @@ import '@/assets/tnsol.css'
 import Account from '@/modules/core/account'
 import Menu from '@/modules/core/menu'
 import LOV from '@/modules/master/lov'
+
+import MasterItemBrand from '@/modules/master/item/brand'
 import MasterItem from '@/modules/master/item'
+
 import type { RouteRecordRaw } from 'vue-router'
 import { i18n } from '@/utils/core/i18n.ts'
 
@@ -48,6 +51,7 @@ const Modules: any = {
 
   // Master Module
   lov: LOV,
+  masterItemBrand: MasterItemBrand,
   masterItem: MasterItem,
 }
 

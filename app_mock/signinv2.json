@@ -140,8 +140,22 @@
       {
         "id": "menu-643c07558a44bc1bccecac36",
         "name": "Item Brand",
-        "url": "/master/item/brand",
-        "identifier": "MasterItemBrand"
+        "url": "/master/item_brand",
+        "identifier": "MasterItemBrand",
+        "access": [
+          {
+            "domIdentity": "btnAddMasterItemBrand",
+            "dispatchName": "MasterItemBrandAdd"
+          },
+          {
+            "domIdentity": "btnEditMasterItemBrand",
+            "dispatchName": "MasterItemBrandEdit"
+          },
+          {
+            "domIdentity": "btnDeleteMasterItemBrand",
+            "dispatchName": "MasterItemBrandDelete"
+          }
+        ]
       },
       {
         "id": "menu-643c38916d198727bfbf301d",
