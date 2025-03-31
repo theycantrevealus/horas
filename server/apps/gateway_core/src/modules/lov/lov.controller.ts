@@ -1,4 +1,5 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { LOVAddDTO, LOVEditDTO } from '@gateway_core/lov/dto/lov'
 import { LOVService } from '@gateway_core/lov/lov.service'
 import { JwtAuthGuard } from '@guards/jwt'
@@ -38,6 +39,7 @@ export class LOVController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'LOV', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all',
     description: 'Showing brand data',
@@ -56,6 +58,7 @@ export class LOVController {
           sortField: parsedData.sortField,
           sortOrder: parsedData.sortOrder,
           filters: parsedData.filters,
+          custom_filter: parsedData.custom_filter,
         })
         .then((result) => {
           response.code(HttpStatus.OK).send(result)
@@ -76,6 +79,7 @@ export class LOVController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'LOV', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -99,6 +103,7 @@ export class LOVController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'LOV', action: 'add' })
   @ApiOperation({
     summary: 'Add new lov',
     description: ``,
@@ -123,6 +128,7 @@ export class LOVController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'LOV', action: 'edit' })
   @ApiOperation({
     summary: 'Edit lov',
     description: ``,
@@ -150,6 +156,7 @@ export class LOVController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'LOV', action: 'delete' })
   @ApiOperation({
     summary: 'Delete lov',
     description: ``,
