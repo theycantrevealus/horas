@@ -1,0 +1,12 @@
+[
+    {
+        "component": "menu.datatable.column.label.caption",
+        "translation": "Label",
+        "menu": {
+          "id": "menu-643a68c5e6f975d6f3a5b131",
+          "name": "Menu",
+          "url": "/core/menu",
+          "identifier": "Menu"
+        }
+      }
+]

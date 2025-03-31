@@ -15,7 +15,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
-        type: [],
+        queue_type: [],
       },
     },
     {
@@ -24,7 +24,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
-        type: [],
+        queue_type: [],
       },
     },
     {
@@ -33,7 +33,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        type: 'testing',
+        queue_type: 'testing',
       },
     },
     {
@@ -42,7 +42,7 @@ const falseCasePayload = {
       testType: 1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        type: [],
+        queue_type: [],
       },
     },
   ],
@@ -53,7 +53,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
-        type: [],
+        queue_type: [],
         __v: 0,
       },
     },
@@ -63,7 +63,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
-        type: [],
+        queue_type: [],
         __v: 0,
       },
     },
@@ -73,7 +73,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
-        type: 'testing',
+        queue_type: 'testing',
       },
     },
     {
@@ -82,7 +82,7 @@ const falseCasePayload = {
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        type: [],
+        queue_type: [],
       },
     },
     {
@@ -91,7 +91,7 @@ const falseCasePayload = {
       testType: 1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        type: [],
+        queue_type: [],
         __v: 0,
       },
     },

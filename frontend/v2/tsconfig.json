@@ -1,0 +1,30 @@
+{
+    "files": [],
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        },
+        {
+            "path": "./tsconfig.app.json"
+        },
+        {
+            "path": "./tsconfig.cypress-ct.json"
+        }
+    ],
+    "compilerOptions": {
+        "types": ["node"],
+        "typeRoots": ["../node_modules/@types"],
+        "declaration": false,
+        "module": "NodeNext",
+        "isolatedModules": true,
+        "verbatimModuleSyntax": true,
+        "strict": true,
+        "noImplicitAny": false,
+        "allowJs": true,
+        "jsx": "preserve",
+        "jsxImportSource": "vue",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    }
+}

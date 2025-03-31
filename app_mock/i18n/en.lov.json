@@ -1,0 +1,74 @@
+[
+    {
+      "component": "lov.datatable.column.action.caption",
+      "translation": "Action",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    },
+    {
+      "component": "lov.datatable.column.name.caption",
+      "translation": "Name",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    },
+    {
+      "component": "lov.datatable.column.name.search",
+      "translation": "Search by name",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    },
+    {
+      "component": "lov.datatable.column.group.caption",
+      "translation": "Group",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    },
+    {
+      "component": "lov.datatable.column.group.search",
+      "translation": "Search by group",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    },
+    {
+      "component": "lov.datatable.column.value.caption",
+      "translation": "Value",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    },
+    {
+      "component": "lov.datatable.column.value.search",
+      "translation": "Search by value",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    },
+    {
+      "component": "lov.datatable.column.created_at.caption",
+      "translation": "Created At",
+      "menu": {
+        "id": "menu-67558e316838f1c99d0e3401",
+        "name": "LOV Management",
+        "url": "/lov"
+      }
+    }
+  ]

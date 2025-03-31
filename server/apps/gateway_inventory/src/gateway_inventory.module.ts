@@ -4,6 +4,7 @@ import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { GeneralReceiveNoteModule } from '@gateway_inventory/general_receive_note/general.receive.note.module'
+import { MaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
 import { PurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
 import { StockModule } from '@gateway_inventory/stock/stock.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
@@ -60,9 +61,7 @@ import * as redisStore from 'cache-manager-ioredis'
       useFactory: async (
         configService: ConfigService
       ): Promise<MongooseModuleOptions> => ({
-        uri: `${configService.get<string>(
-          'mongo.primary.uri'
-        )}?replicaSet=dbrs`,
+        uri: `${configService.get<string>('mongo.primary.uri')}`,
       }),
       inject: [ConfigService],
     }),
@@ -97,27 +96,28 @@ import * as redisStore from 'cache-manager-ioredis'
       },
       inject: [ConfigService],
     }),
-    KafkaProvider(
-      ['STOCK_SERVICE'],
-      [
-        {
-          configClass: 'kafka.stock',
-          producerModeOnly: true,
-          schema: [
-            {
-              topic: 'stock',
-              headers: 'stock/movement/header.avsc',
-              key: 'global/key.avsc',
-              value: 'stock/movement/value.avsc',
-            },
-          ],
-        },
-      ]
-    ),
+    // KafkaProvider(
+    //   ['STOCK_SERVICE'],
+    //   [
+    //     {
+    //       configClass: 'kafka.stock',
+    //       producerModeOnly: true,
+    //       schema: [
+    //         {
+    //           topic: 'stock',
+    //           headers: 'stock/movement/header.avsc',
+    //           key: 'global/key.avsc',
+    //           value: 'stock/movement/value.avsc',
+    //         },
+    //       ],
+    //     },
+    //   ]
+    // ),
     AuthModule,
-    GeneralReceiveNoteModule,
-    PurchaseOrderModule,
-    StockModule,
+    MaterialRequisitionModule,
+    // GeneralReceiveNoteModule,
+    // PurchaseOrderModule,
+    // StockModule,
   ],
   controllers: [],
   providers: [ClientDecoratorProcessorService],

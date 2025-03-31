@@ -64,6 +64,32 @@ export class CCurrency {
   timezone: string
 }
 
+export class CLocale {
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  language_code: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  iso_2_digits: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  currency: string
+
+  @ApiProperty({
+    type: String,
+    example: 'Asia/Jakarta',
+  })
+  timezone: string
+}
+
 export type i18nDocument = HydratedDocument<i18n>
 @Schema({ collection: 'core_i18n' })
 export class i18n {

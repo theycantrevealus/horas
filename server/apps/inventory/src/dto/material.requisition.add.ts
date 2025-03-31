@@ -1,5 +1,6 @@
 import { Prop } from '@nestjs/mongoose'
-import { Account, AccountJoin } from '@schemas/account/account.model'
+import { Account } from '@schemas/account/account.model'
+import { AccountJoin } from '@schemas/account/account.raw'
 import { SchemaTypes } from 'mongoose'
 
 import { MaterialRequisitionItemDTO } from './material.requisition.item'

@@ -162,7 +162,7 @@ export class MasterReceptionistCounterService {
           },
           {
             code: data.code,
-            type: data.type,
+            type: data.queue_type,
             remark: data.remark,
           }
         )

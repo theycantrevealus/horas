@@ -14,7 +14,7 @@ server.post('/v1/account/signin', (req, res) => {
       classCode: 'ACC'
     },
     message: 'Sign in success',
-    payload: require('./signin.json'),
+    payload: require('./signinv2.json'),
     transaction_classify: '',
     transaction_id: null
   })
@@ -22,6 +22,10 @@ server.post('/v1/account/signin', (req, res) => {
 
 server.get('/v1/menu/tree', (req, res) => {
   res.jsonp(require('./menu.tree.json'))
+})
+
+server.get('/v1/menu/tree/manager', (req, res) => {
+  res.jsonp(require('./menu.tree.manager.json'))
 })
 
 server.use((req, res, next) => {
@@ -69,6 +73,7 @@ router.render = (req, res) => {
         classCode: 'XXX'
       },
       payload: {},
+      message: 'Data processed successfully',
       transaction_classify: '',
       transaction_id: null
     })

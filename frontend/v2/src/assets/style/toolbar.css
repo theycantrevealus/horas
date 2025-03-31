@@ -1,0 +1,15 @@
+.p-toolbar {
+    padding: 10px !important;
+    box-shadow: 0 4px 2px -2px rgba(243, 243, 243, 0.5);
+    background: #fff;
+    border: none !important;
+}
+
+.p-toolbar button {
+    padding: 5px 10px !important;
+    font-size: 8pt !important;
+}
+
+.p-toolbar button span.pi {
+    font-size: 10pt !important;
+}

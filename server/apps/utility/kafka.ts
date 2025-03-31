@@ -15,6 +15,18 @@ dotenv.config({
   path: environmentIdentifier,
 })
 
+const CustomPartitioner = () => {
+  return ({ topic, partitionMetadata, message }) => {
+    // Nilai roundrobin
+    const partitionIndex = parseInt(message.key, 10) % partitionMetadata.length
+
+    // Find msisdn by message.value.msisdn on redis. If exist return the partition. Else return partitionIndex
+    console.log(topic)
+
+    return partitionIndex
+  }
+}
+
 export function KafkaProvider(
   providerNames: string[],
   configuration: KafkaProviderConfig[]
@@ -50,6 +62,7 @@ export function KafkaProvider(
             producer: {
               idempotent: true,
               maxInFlightRequests: 1,
+              createPartitioner: CustomPartitioner,
             },
             deserializer: new KafkaAvroResponseDeserializer({
               host: configService.get<string>('schema_registry.host'),

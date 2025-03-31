@@ -1,0 +1,25 @@
+.p-confirm-popup {
+    background: #fcfcfc;
+    box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.p-confirm-popup .p-confirm-popup-content {
+    padding: 10px !important;
+}
+
+.p-confirm-popup .p-confirm-popup-message {
+    font-size: 8pt !important;
+}
+
+.p-confirm-popup .p-confirm-popup-icon {
+    font-size: 10pt !important;
+}
+
+.p-confirm-popup-footer {
+    padding: 10px !important;
+}
+
+.p-confirm-popup-footer button {
+    padding: 5px 10px !important;
+    font-size: 8pt !important;
+}

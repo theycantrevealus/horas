@@ -1,4 +1,8 @@
 export const MongoConfig = () => {
+  const replicaSet = process.env.MONGO_REPLICASET
+    ? `&replicaSet=${process.env.MONGO_REPLICASET}`
+    : ''
+  const extra = [replicaSet]
   return {
     mongo: {
       primary: {
@@ -11,8 +15,8 @@ export const MongoConfig = () => {
         uri:
           process.env.MONGO_DB_USER !== '' &&
           process.env.MONGO_DB_PASSWORD !== ''
-            ? `mongodb://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@${process.env.MONGO_HOST}/${process.env.MONGO_DB_NAME}`
-            : `mongodb://${process.env.MONGO_HOST}/${process.env.MONGO_DB_NAME}`,
+            ? `mongodb://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@${process.env.MONGO_HOST}/${process.env.MONGO_DB_NAME}?${extra.join('&')}`
+            : `mongodb://${process.env.MONGO_HOST}/${process.env.MONGO_DB_NAME}?${extra.join('&')}`,
       },
     },
     mongo_test: {

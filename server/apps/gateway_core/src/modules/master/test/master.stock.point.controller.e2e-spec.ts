@@ -287,7 +287,7 @@ describe('Master Stock Point Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Item Brand - Edit data'),
+    testCaption('FLOW', 'feature', 'Master Stock Point - Edit data'),
     () => {
       it(
         testCaption('HANDLING', 'feature', 'Should handle invalid format', {

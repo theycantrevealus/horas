@@ -94,7 +94,10 @@ export async function errorHttpHandler(
     time: TM.getTimezone('Asia/Jakarta'),
   }
 
-  if (statusCode === HttpStatus.BAD_REQUEST) {
+  if (
+    statusCode === HttpStatus.BAD_REQUEST ||
+    statusCode === HttpStatus.FORBIDDEN
+  ) {
     logger.warn(dataSet)
   } else {
     logger.error(dataSet)
