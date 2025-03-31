@@ -22,7 +22,7 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
   const query = []
   const sort_set = {}
 
-  const filter_builder = { $and: [] }
+  const filter_builder = { $and: [], $or: [] }
   const filterSet = filters
   for (const a in filterSet) {
     if (
@@ -62,12 +62,22 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
         }
       }
 
-      filter_builder.$and.push(autoColumn)
+      if (filterSet[a]?.logic === 'or') {
+        filter_builder.$or.push(autoColumn)
+      } else {
+        filter_builder.$and.push(autoColumn)
+      }
     }
   }
 
   if (custom_filter && custom_filter.length > 0) {
-    filter_builder.$and.push(...custom_filter)
+    for (const b in custom_filter) {
+      if (custom_filter[b]?.logic === 'and') {
+        filter_builder.$and.push(custom_filter[b]?.filter)
+      } else {
+        filter_builder.$or.push(custom_filter[b]?.filter)
+      }
+    }
   }
 
   if (filter_builder.$and.length > 0) {
@@ -89,6 +99,12 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
       },
     })
   }
+
+  if (filter_builder.$or.length > 0) {
+    query[0].$match.$or = filter_builder.$or
+  }
+
+  console.log(JSON.stringify(query, null, 2))
 
   const allNoFilter = await model
     .aggregate([
