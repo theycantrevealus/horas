@@ -17,10 +17,14 @@ export class GatewayPipe implements PipeTransform<any> {
     const object = plainToInstance(metatype, value)
     const errors = await validate(object)
     if (errors.length > 0) {
-      const errorList = []
-      errors.forEach((e) => {
-        errorList.push(e.constraints)
-      })
+      const errorList = await this.getConstraints(errors)
+
+      // for (const e of errors) {
+      //   if (e && e.constraints) errorList.push(e.constraints)
+      // }
+      // errors.forEach((e) => {
+      //   if (e) errorList.push(e.constraints)
+      // })
 
       throw new Error(
         JSON.stringify({
@@ -37,6 +41,23 @@ export class GatewayPipe implements PipeTransform<any> {
       )
     }
     return value
+  }
+
+  private async getConstraints(obj) {
+    const constraints = []
+
+    function recursiveLoop(obj) {
+      obj.forEach((item) => {
+        if (item.constraints) constraints.push(item.constraints)
+        if (item.children.length > 0) {
+          recursiveLoop(item.children)
+        }
+      })
+    }
+
+    recursiveLoop(obj)
+
+    return constraints
   }
 
   private toValidate(metatype): boolean {

@@ -114,8 +114,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       return true
     } catch (jwtGuardError) {
-      response.message = `JWT guard error : ${jwtGuardError}`
-      console.error(jwtGuardError)
+      // response.message = `JWT guard error : ${jwtGuardError}`
+      response.message = jwtGuardError.message
       throw new Error(JSON.stringify(response))
     }
   }
