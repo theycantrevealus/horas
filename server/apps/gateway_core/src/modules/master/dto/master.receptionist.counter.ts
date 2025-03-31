@@ -45,7 +45,9 @@ export class MasterReceptionistCounterAddDTO {
   })
   @IsOptional()
   @IsArray()
-  type: ILOV[]
+  queue_type: ILOV[]
+
+  assigned_receptionist?: any
 
   @ApiProperty({
     example: 'Extra remark',
@@ -77,7 +79,9 @@ export class MasterReceptionistCounterEditDTO {
   })
   @IsOptional()
   @IsArray()
-  type: ILOV[]
+  queue_type: ILOV[]
+
+  assigned_receptionist?: any
 
   @ApiProperty({
     example: 'Extra remark',

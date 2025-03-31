@@ -229,7 +229,7 @@ describe('Master Queue Controller', () => {
       async () => {
         const data = {
           code: mockMasterQueue().code,
-        } satisfies MasterQueueMachineAddDTO
+        }
 
         delete data.code
 
@@ -257,6 +257,7 @@ describe('Master Queue Controller', () => {
       async () => {
         const data = {
           code: mockMasterQueue().code,
+          type: [],
         } satisfies MasterQueueMachineAddDTO
 
         return app
@@ -329,6 +330,7 @@ describe('Master Queue Controller', () => {
       async () => {
         const data = {
           code: mockMasterQueue().code,
+          type: [],
           __v: 0,
         } satisfies MasterQueueMachineEditDTO
 

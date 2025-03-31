@@ -309,11 +309,11 @@ describe('Master Department Controller', () => {
                   first_name: mockAccount().first_name,
                   last_name: mockAccount().last_name,
                   email: mockAccount().email,
+                  stock_point: [],
                 },
               ],
             },
-            __v: 1,
-          } satisfies MasterDepartmentEditDTO
+          } satisfies MasterDepartmentAddDTO
 
           return app
             .inject({
@@ -409,6 +409,7 @@ describe('Master Department Controller', () => {
                   first_name: mockAccount().first_name,
                   last_name: mockAccount().last_name,
                   email: mockAccount().email,
+                  stock_point: [],
                 },
               ],
             },

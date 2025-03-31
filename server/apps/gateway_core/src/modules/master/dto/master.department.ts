@@ -101,11 +101,12 @@ export class MasterDepartmentAddDTO {
   @ApiProperty({
     type: CDepartmentConfiguration,
     description: 'Target stock point',
+    required: false,
   })
   @Type(() => CDepartmentConfiguration)
   @ValidateNested({ each: true })
   @IsNotEmpty()
-  configuration: IDepartmentConfiguration
+  configuration?: IDepartmentConfiguration
 }
 
 export class MasterDepartmentEditDTO {
@@ -139,11 +140,12 @@ export class MasterDepartmentEditDTO {
   @ApiProperty({
     type: CDepartmentConfiguration,
     description: 'Target stock point',
+    required: false,
   })
   @Type(() => CDepartmentConfiguration)
   @ValidateNested({ each: true })
   @IsNotEmpty()
-  configuration: IDepartmentConfiguration
+  configuration?: IDepartmentConfiguration
 
   @ApiProperty({
     example: 0,

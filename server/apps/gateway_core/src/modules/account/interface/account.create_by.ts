@@ -5,5 +5,5 @@ export interface IAccount {
   email: string
   first_name: string
   last_name: string
-  stock_point?: IMasterStockPoint[]
+  stock_point?: IMasterStockPoint[] | null | undefined
 }

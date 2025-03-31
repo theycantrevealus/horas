@@ -1,17 +1,6 @@
 import { CommonErrorFilter } from '@filters/error'
 import { AccountService } from '@gateway_core/account/account.service'
 import { accountArray } from '@gateway_core/account/mock/account.mock'
-import { MasterStockPointController } from '@gateway_core/master/controllers/master.stock.point.controller'
-import {
-  MasterStockPointAddDTO,
-  MasterStockPointEditDTO,
-} from '@gateway_core/master/dto/master.stock.point'
-import {
-  masterStockPointDocArray,
-  mockMasterStockPoint,
-  mockMasterStockPointModel,
-} from '@gateway_core/master/mock/master.stock.point.mock'
-import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -26,9 +15,9 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
 import {
-  MasterStockPoint,
-  MasterStockPointDocument,
-} from '@schemas/master/master.stock.point'
+  MasterReceptionistCounter,
+  MasterReceptionistCounterDocument,
+} from '@schemas/master/master.receptionist.counter'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -36,19 +25,31 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
-describe('Master Stock Point Controller', () => {
+import { MasterReceptionistCounterController } from '../controllers/master.receptionist.counter.controller'
+import {
+  MasterReceptionistCounterAddDTO,
+  MasterReceptionistCounterEditDTO,
+} from '../dto/master.receptionist.counter'
+import {
+  masterReceptionistCounterArray,
+  mockMasterReceptionistCounter,
+  mockMasterReceptionistCounterModel,
+} from '../mock/master.receptionist.counter.mock'
+import { MasterReceptionistCounterService } from '../services/master.receptionist.counter.service'
+
+describe('Master Receptionist Counter Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
   let configService: ConfigService
-  let masterStockPointController: MasterStockPointController
-  let masterStockPointModel: Model<MasterStockPoint>
+  let masterReceptionistCounterController: MasterReceptionistCounterController
+  let masterReceptionistCounterModel: Model<MasterReceptionistCounter>
   let logger: Logger
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MasterStockPointController],
+      controllers: [MasterReceptionistCounterController],
       providers: [
-        MasterStockPointService,
+        MasterReceptionistCounterService,
         {
           provide: ConfigService,
           useValue: {
@@ -73,8 +74,8 @@ describe('Master Stock Point Controller', () => {
           },
         },
         {
-          provide: getModelToken(MasterStockPoint.name, 'primary'),
-          useValue: mockMasterStockPointModel,
+          provide: getModelToken(MasterReceptionistCounter.name, 'primary'),
+          useValue: mockMasterReceptionistCounterModel,
         },
         { provide: AuthService, useValue: {} },
         { provide: AccountService, useValue: {} },
@@ -96,12 +97,13 @@ describe('Master Stock Point Controller', () => {
     )
     configService = module.get<ConfigService>(ConfigService)
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
-    masterStockPointController = app.get<MasterStockPointController>(
-      MasterStockPointController
-    )
-    masterStockPointModel = module.get<Model<MasterStockPointDocument>>(
-      getModelToken(MasterStockPoint.name, 'primary')
-    )
+    masterReceptionistCounterController =
+      app.get<MasterReceptionistCounterController>(
+        MasterReceptionistCounterController
+      )
+    masterReceptionistCounterModel = module.get<
+      Model<MasterReceptionistCounterDocument>
+    >(getModelToken(MasterReceptionistCounter.name, 'primary'))
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
     await app.init()
@@ -117,21 +119,27 @@ describe('Master Stock Point Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(masterStockPointController).toBeDefined()
+      expect(masterReceptionistCounterController).toBeDefined()
     }
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Stock Point - Get data lazy loaded'),
+    testCaption(
+      'FLOW',
+      'feature',
+      'Master Receptionist Counter - Get data lazy loaded'
+    ),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterStockPointModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(masterStockPointDocArray),
-          } as any)
+          jest
+            .spyOn(masterReceptionistCounterModel, 'aggregate')
+            .mockReturnValue({
+              exec: jest.fn().mockReturnValue(masterReceptionistCounterArray),
+            } as any)
 
           return app
             .inject({
@@ -139,7 +147,7 @@ describe('Master Stock Point Controller', () => {
               headers: {
                 authorization: 'Bearer ey...',
               },
-              url: '/master/stock_point',
+              url: '/master/receptionist_counter',
               query: `lazyEvent=abc`,
             })
             .then((result) => {
@@ -154,9 +162,11 @@ describe('Master Stock Point Controller', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterStockPointModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(masterStockPointDocArray),
-          } as any)
+          jest
+            .spyOn(masterReceptionistCounterModel, 'aggregate')
+            .mockReturnValue({
+              exec: jest.fn().mockReturnValue(masterReceptionistCounterArray),
+            } as any)
 
           return app
             .inject({
@@ -164,7 +174,7 @@ describe('Master Stock Point Controller', () => {
               headers: {
                 authorization: 'Bearer ey...',
               },
-              url: '/master/stock_point',
+              url: '/master/receptionist_counter',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
@@ -177,7 +187,11 @@ describe('Master Stock Point Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Stock Point - Get data detail'),
+    testCaption(
+      'FLOW',
+      'feature',
+      'Master Receptionist Counter - Get data detail'
+    ),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return data', {
@@ -190,7 +204,7 @@ describe('Master Stock Point Controller', () => {
               headers: {
                 authorization: 'Bearer ey...',
               },
-              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              url: `/master/receptionist_counter/${mockMasterReceptionistCounter().id}`,
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.OK)
@@ -202,7 +216,7 @@ describe('Master Stock Point Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Stock Point - Add data'),
+    testCaption('FLOW', 'feature', 'Master Receptionist Counter - Add data'),
     () => {
       it(
         testCaption('HANDLING', 'feature', 'Should handle invalid format', {
@@ -216,38 +230,8 @@ describe('Master Stock Point Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: '/master/stock_point',
+              url: '/master/receptionist_counter',
               body: {},
-            })
-            .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
-            })
-        }
-      )
-
-      it(
-        testCaption('HANDLING', 'feature', 'Should handle invalid data', {
-          tab: 1,
-        }),
-        async () => {
-          const data = {
-            code: mockMasterStockPoint().code,
-            name: mockMasterStockPoint().name,
-            configuration: mockMasterStockPoint().configuration,
-          } satisfies MasterStockPointAddDTO
-
-          delete data.name
-
-          return app
-            .inject({
-              method: 'POST',
-              headers: {
-                authorization: 'Bearer ey...',
-                'Content-Type': 'application/json',
-              },
-              url: '/master/stock_point',
-              body: data,
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
@@ -262,10 +246,11 @@ describe('Master Stock Point Controller', () => {
         }),
         async () => {
           const data = {
-            code: mockMasterStockPoint().code,
-            name: mockMasterStockPoint().name,
-            configuration: mockMasterStockPoint().configuration,
-          } satisfies MasterStockPointAddDTO
+            code: mockMasterReceptionistCounter().code,
+            queue_type: mockMasterReceptionistCounter().queue_type,
+            assigned_receptionist:
+              mockMasterReceptionistCounter().assigned_receptionist,
+          } satisfies MasterReceptionistCounterAddDTO
 
           return app
             .inject({
@@ -274,7 +259,7 @@ describe('Master Stock Point Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: '/master/stock_point',
+              url: '/master/receptionist_counter',
               body: data,
             })
             .then((result) => {
@@ -287,7 +272,7 @@ describe('Master Stock Point Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Stock Point - Edit data'),
+    testCaption('FLOW', 'feature', 'Master Receptionist Counter - Edit data'),
     () => {
       it(
         testCaption('HANDLING', 'feature', 'Should handle invalid format', {
@@ -301,7 +286,7 @@ describe('Master Stock Point Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              url: `/master/receptionist_counter/${mockMasterReceptionistCounter().id}`,
               body: {},
             })
             .then((result) => {
@@ -323,7 +308,7 @@ describe('Master Stock Point Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              url: `/master/receptionist_counter/${mockMasterReceptionistCounter().id}`,
               body: {},
             })
             .then((result) => {
@@ -339,11 +324,12 @@ describe('Master Stock Point Controller', () => {
         }),
         async () => {
           const data = {
-            code: mockMasterStockPoint().code,
-            name: mockMasterStockPoint().name,
-            configuration: mockMasterStockPoint().configuration,
+            code: mockMasterReceptionistCounter().code,
+            queue_type: mockMasterReceptionistCounter().queue_type,
+            assigned_receptionist:
+              mockMasterReceptionistCounter().assigned_receptionist,
             __v: 0,
-          } satisfies MasterStockPointEditDTO
+          } satisfies MasterReceptionistCounterEditDTO
 
           return app
             .inject({
@@ -352,7 +338,7 @@ describe('Master Stock Point Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              url: `/master/receptionist_counter/${mockMasterReceptionistCounter().id}`,
               body: data,
             })
             .then((result) => {
@@ -365,7 +351,7 @@ describe('Master Stock Point Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Master Stock Point - Delete data'),
+    testCaption('FLOW', 'feature', 'Master Receptionist Counter - Delete data'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return success delete', {
@@ -381,7 +367,7 @@ describe('Master Stock Point Controller', () => {
                 authorization: 'Bearer ey...',
                 'Content-Type': 'application/json',
               },
-              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+              url: `/master/receptionist_counter/${mockMasterReceptionistCounter().id}`,
             })
             .then((result) => {
               expect(result.statusCode).toEqual(HttpStatus.OK)
