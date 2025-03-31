@@ -14,10 +14,41 @@ import {
 
 import { CMaterialRequisitionDetail } from './material.requisition.detail'
 
+export class CMaterialRequisition {
+  @ApiProperty({
+    example: 'xxx-xxxx',
+    minLength: 8,
+    maxLength: 24,
+    description: 'Unique code. Left it blank so it will generate auto code',
+  })
+  @MinLength(8)
+  @MaxLength(24)
+  @IsNotEmpty()
+  id: string
+
+  @ApiProperty({
+    example: 'xxx-xxxx',
+    minLength: 8,
+    maxLength: 24,
+    description: 'Unique code. Left it blank so it will generate auto code',
+  })
+  @MinLength(8)
+  @MaxLength(24)
+  @IsNotEmpty()
+  code: string
+
+  @ApiProperty({
+    example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
+    description: 'Material requisition date',
+  })
+  @IsNotEmpty()
+  transaction_date: Date
+}
+
 export class MaterialRequisitionAddDTO {
   @ApiProperty({
     type: CLocale,
-    description: 'Currency',
+    description: 'Locale',
   })
   @IsNotEmpty()
   @Type(() => CLocale)
