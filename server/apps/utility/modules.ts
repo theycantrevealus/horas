@@ -4,6 +4,24 @@ export const modCodes = {
   Global: {
     success: 'S0000',
     failed: 'F0000',
+    error: {
+      generalError: {
+        defaultCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        customCode: 'E0000',
+      },
+      databaseError: {
+        defaultCode: HttpStatus.BAD_REQUEST,
+        customCode: 'E0001',
+      },
+      isNotFound: {
+        defaultCode: HttpStatus.NOT_FOUND,
+        customCode: 'E0002',
+      },
+      isNoAccess: {
+        defaultCode: HttpStatus.FORBIDDEN,
+        customCode: 'E0003',
+      },
+    },
   },
   CoreService: 'CFG',
   CoreConfigGroupService: 'CFG-G',
@@ -42,20 +60,55 @@ export const modCodes = {
       },
     },
   },
-  AuthorityService: {
-    defaultCode: 'ATH',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+  Authority: {
+    defaultCode: 'AUTH',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Authority fetched successfully',
+        transaction_classify: 'AUTHORITY_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      fetch: {
+        responseCode: HttpStatus.OK,
+        message: 'Authority fetched successfully',
+        transaction_classify: 'AUTHORITY_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Authority detail fetched successfully',
+        transaction_classify: 'AUTHORITY_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Authority created successfully',
+        transaction_classify: 'AUTHORITY_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Authority updated successfully',
+        transaction_classify: 'AUTHORITY_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Authority deleted successfully',
+        transaction_classify: 'AUTHORITY_DELETE',
       },
     },
   },
@@ -110,37 +163,102 @@ export const modCodes = {
       },
     },
   },
-  MasterQueueMachineService: {
+  MasterQueueMachine: {
     defaultCode: 'MSRQM',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Queue Machine fetched successfully',
+        transaction_classify: 'MSRQM_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      fetch: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Queue Machine fetched successfully',
+        transaction_classify: 'MSRQM_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Queue Machine detail fetched successfully',
+        transaction_classify: 'MSRQM_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Master Queue Machine created successfully',
+        transaction_classify: 'MSRQM_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Master Queue Machine updated successfully',
+        transaction_classify: 'MSRQM_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Master Queue Machine deleted successfully',
+        transaction_classify: 'MSRQM_DELETE',
       },
     },
   },
-  MasterDepartmentService: {
+  MasterDepartment: {
     defaultCode: 'MSRD',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Department fetched successfully',
+        transaction_classify: 'MSRD_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Department detail fetched successfully',
+        transaction_classify: 'MSRD_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Master Department created successfully',
+        transaction_classify: 'MSRD_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Master Department updated successfully',
+        transaction_classify: 'MSRD_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Master Department deleted successfully',
+        transaction_classify: 'MSRD_DELETE',
       },
     },
   },
@@ -161,20 +279,50 @@ export const modCodes = {
       },
     },
   },
-  MasterStockPointService: {
+  MasterStockPoint: {
     defaultCode: 'MSRI-STCK',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Stock Point fetched successfully',
+        transaction_classify: 'MSRI-STCK_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Stock Point detail fetched successfully',
+        transaction_classify: 'MSRI-STCK_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Master Stock Point created successfully',
+        transaction_classify: 'MSRI-STCK_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Master Stock Point updated successfully',
+        transaction_classify: 'MSRI-STCK_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Master Stock Point deleted successfully',
+        transaction_classify: 'MSRI-STCK_DELETE',
       },
     },
   },
@@ -195,37 +343,97 @@ export const modCodes = {
       },
     },
   },
-  MasterItemSupplierService: {
+  MasterItemSupplier: {
     defaultCode: 'MSRI-SPP',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Item Supplier fetched successfully',
+        transaction_classify: 'MSRI-SPP_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Item Supplier detail fetched successfully',
+        transaction_classify: 'MSRI-SPP_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Master Item Supplier created successfully',
+        transaction_classify: 'MSRI-SPP_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Master Item Supplier updated successfully',
+        transaction_classify: 'MSRI-SPP_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Master Item Supplier deleted successfully',
+        transaction_classify: 'MSRI-SPP_DELETE',
       },
     },
   },
-  MasterItemBrandService: {
+  MasterItemBrand: {
     defaultCode: 'MSRI-BRD',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Item Brand fetched successfully',
+        transaction_classify: 'MSRI-BRD_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Item Brand detail fetched successfully',
+        transaction_classify: 'MSRI-BRD_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Master Item Brand created successfully',
+        transaction_classify: 'MSRI-BRD_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Master Item Brand updated successfully',
+        transaction_classify: 'MSRI-BRD_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Master Item Brand deleted successfully',
+        transaction_classify: 'MSRI-BRD_DELETE',
       },
     },
   },
@@ -246,20 +454,50 @@ export const modCodes = {
       },
     },
   },
-  MasterItemCategoryService: {
+  MasterItemCategory: {
     defaultCode: 'MSRI-CAT',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Item Category fetched successfully',
+        transaction_classify: 'MSRI-CAT_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Master Item Category detail fetched successfully',
+        transaction_classify: 'MSRI-CAT_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Master Item Category created successfully',
+        transaction_classify: 'MSRI-CAT_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Master Item Category updated successfully',
+        transaction_classify: 'MSRI-CAT_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Master Item Category deleted successfully',
+        transaction_classify: 'MSRI-CAT_DELETE',
       },
     },
   },
@@ -331,6 +569,53 @@ export const modCodes = {
       },
     },
   },
+  GeneralIssueNote: {
+    defaultCode: 'GIN',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'General Issue Note fetched successfully',
+        transaction_classify: 'GIN_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'General Issue Note detail fetched successfully',
+        transaction_classify: 'GIN_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'General Issue Note created successfully',
+        transaction_classify: 'GIN_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'General Issue Note updated successfully',
+        transaction_classify: 'GIN_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'General Issue Note deleted successfully',
+        transaction_classify: 'GIN_DELETE',
+      },
+    },
+  },
   PurchaseOrderService: {
     defaultCode: 'PO',
     error: {
@@ -382,20 +667,102 @@ export const modCodes = {
       },
     },
   },
-  I18nService: {
+  LOV: {
+    defaultCode: 'LOV',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'LOV fetched successfully',
+        transaction_classify: 'LOV_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'LOV detail fetched successfully',
+        transaction_classify: 'LOV_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'LOV created successfully',
+        transaction_classify: 'LOV_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'LOV updated successfully',
+        transaction_classify: 'LOV_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'LOV deleted successfully',
+        transaction_classify: 'LOV_DELETE',
+      },
+    },
+  },
+  I18n: {
     defaultCode: 'I18N',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Internationalization fetched successfully',
+        transaction_classify: 'I18N_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      fetch: {
+        responseCode: HttpStatus.OK,
+        message: 'Internationalization fetched successfully',
+        transaction_classify: 'I18N_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Internationalization detail fetched successfully',
+        transaction_classify: 'I18N_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Internationalization created successfully',
+        transaction_classify: 'I18N_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Internationalization updated successfully',
+        transaction_classify: 'I18N_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Internationalization deleted successfully',
+        transaction_classify: 'I18N_DELETE',
       },
     },
   },
@@ -553,4 +920,10 @@ export function isCustomErrorCode(object: any): object is CustomErrorCode {
     'classCode' in object &&
     'customCode' in object
   )
+}
+
+export function modCodesCoordinator(className: string) {
+  return className.replace(/Controller|Service/gi, '') in modCodes
+    ? modCodes[className.replace(/Controller|Service/gi, '')]
+    : '???'
 }
