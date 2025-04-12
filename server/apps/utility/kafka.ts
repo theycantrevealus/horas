@@ -15,17 +15,13 @@ dotenv.config({
   path: environmentIdentifier,
 })
 
-const CustomPartitioner = () => {
-  return ({ topic, partitionMetadata, message }) => {
-    // Nilai roundrobin
-    const partitionIndex = parseInt(message.key, 10) % partitionMetadata.length
-
-    // Find msisdn by message.value.msisdn on redis. If exist return the partition. Else return partitionIndex
-    console.log(topic)
-
-    return partitionIndex
-  }
-}
+// const CustomPartitioner = () => {
+//   return ({ topic, partitionMetadata, message }) => {
+//     const partitionIndex = parseInt(message.key, 10) % partitionMetadata.length
+//     console.log(`Emit to [${topic}] on partition :${partitionIndex}`)
+//     return partitionIndex
+//   }
+// }
 
 export function KafkaProvider(
   providerNames: string[],
@@ -52,6 +48,7 @@ export function KafkaProvider(
             ),
           })
         })
+
         providerLists.push({
           name: configService.get<string>(`${a.configClass}.service`),
           options: {
@@ -62,7 +59,7 @@ export function KafkaProvider(
             producer: {
               idempotent: true,
               maxInFlightRequests: 1,
-              createPartitioner: CustomPartitioner,
+              // createPartitioner: CustomPartitioner,
             },
             deserializer: new KafkaAvroResponseDeserializer({
               host: configService.get<string>('schema_registry.host'),
@@ -89,10 +86,10 @@ export function KafkaProvider(
                     'utf-8'
                   ),
                 ],
-                key: fs.readFileSync(
-                  configService.get<string>(`${a.configClass}.ssl.key`),
-                  'utf-8'
-                ),
+                // key: fs.readFileSync(
+                //   configService.get<string>(`${a.configClass}.ssl.key`),
+                //   'utf-8'
+                // ),
                 passphrase: configService.get<string>(
                   `${a.configClass}.ssl.passphrase`
                 ),
