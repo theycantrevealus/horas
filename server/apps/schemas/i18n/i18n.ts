@@ -6,6 +6,11 @@ import { AccountJoin } from '@schemas/account/account.raw'
 import { MenuJoin } from '@schemas/menu/menu'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+import { i18nDatetime } from './i18n.datetime'
+import { Ii18Datetime } from './i18n.datetime.interface'
+import { i18nNumber } from './i18n.number'
+import { Ii18nNumber } from './i18n.number.interface'
+
 export const i18nComponent = raw({
   component: { type: String },
   translation: { type: String },
@@ -50,12 +55,6 @@ export class CCurrency {
     example: '',
   })
   iso_2_digits: string
-
-  @ApiProperty({
-    type: String,
-    example: '',
-  })
-  currency: string
 
   @ApiProperty({
     type: String,
@@ -126,74 +125,11 @@ export class i18n {
   @Prop({ type: SchemaTypes.String, required: true })
   name: string
 
-  @Prop({
-    type: SchemaTypes.String,
-    default: '',
-  })
-  currency: string
+  @Prop(i18nDatetime)
+  datetime: Ii18Datetime
 
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['narrow', 'short', 'long'],
-    default: 'numeric',
-  })
-  datetime_weekday: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['narrow', 'short', 'long'],
-    default: 'long',
-  })
-  datetime_era: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['2-digit', 'numeric'],
-    default: 'numeric',
-  })
-  datetime_year: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['2-digit', 'numeric', 'narrow', 'short', 'long'],
-    default: 'long',
-  })
-  datetime_month: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['2-digit', 'numeric'],
-    default: 'numeric',
-  })
-  datetime_day: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['2-digit', 'numeric'],
-    default: 'numeric',
-  })
-  datetime_hour: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['2-digit', 'numeric'],
-    default: 'numeric',
-  })
-  datetime_minute: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['2-digit', 'numeric'],
-    default: 'numeric',
-  })
-  datetime_second: string
-
-  @Prop({
-    type: SchemaTypes.String,
-    enum: ['short', 'long'],
-    default: 'long',
-  })
-  datetime_timezone_name: string
+  @Prop(i18nNumber)
+  number: Ii18nNumber
 
   @Prop({ type: SchemaTypes.String })
   remark: string
