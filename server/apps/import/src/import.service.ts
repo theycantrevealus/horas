@@ -55,27 +55,27 @@ export class ImportService {
             }
             bulkData = []
           } else {
-            const targetUnit: IMasterItemUnit =
-              await this.masterItemUnitService.upsert({ name: unit }, account)
+            // const targetUnit: IMasterItemUnit =
+            //   await this.masterItemUnitService.upsert({ name: unit }, account)
 
-            const targetCategory: IMasterItemCategory =
-              await this.masterItemCategoryService.upsert(
-                {
-                  name: 'Drugs',
-                  parent: '',
-                  remark: '',
-                },
-                account
-              )
+            // const targetCategory: IMasterItemCategory =
+            //   await this.masterItemCategoryService.upsert(
+            //     {
+            //       name: 'Drugs',
+            //       parent: '',
+            //       remark: '',
+            //     },
+            //     account
+            //   )
 
-            const targetLOV: ILOV = await this.lovService.upsert(
-              {
-                name: 'Route',
-                parent: '',
-                remark: '',
-              },
-              account
-            )
+            // const targetLOV: ILOV = await this.lovService.upsert(
+            //   {
+            //     name: 'Route',
+            //     parent: '',
+            //     remark: '',
+            //   },
+            //   account
+            // )
 
             // bulkData.push({
             //   code: code,
