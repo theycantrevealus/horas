@@ -33,6 +33,7 @@ import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
+import { HTTPDefaultResponseCheck } from '@utility/test/response.default'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
@@ -143,8 +144,11 @@ describe('Master Stock Point Controller', () => {
               query: `lazyEvent=abc`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                null
+              )
             })
         }
       )
@@ -168,8 +172,7 @@ describe('Master Stock Point Controller', () => {
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
             })
         }
       )
@@ -193,8 +196,7 @@ describe('Master Stock Point Controller', () => {
               url: `/master/stock_point/${mockMasterStockPoint().id}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
             })
         }
       )
@@ -220,8 +222,11 @@ describe('Master Stock Point Controller', () => {
               body: {},
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -250,8 +255,11 @@ describe('Master Stock Point Controller', () => {
               body: data,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -278,8 +286,11 @@ describe('Master Stock Point Controller', () => {
               body: data,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.CREATED,
+                logger.verbose
+              )
             })
         }
       )
@@ -305,8 +316,11 @@ describe('Master Stock Point Controller', () => {
               body: {},
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -327,8 +341,11 @@ describe('Master Stock Point Controller', () => {
               body: {},
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -356,8 +373,11 @@ describe('Master Stock Point Controller', () => {
               body: data,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.ACCEPTED,
+                logger.verbose
+              )
             })
         }
       )
@@ -373,7 +393,9 @@ describe('Master Stock Point Controller', () => {
         }),
         async () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-
+          jest
+            .spyOn(masterStockPointModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
           return app
             .inject({
               method: 'DELETE',
@@ -384,8 +406,39 @@ describe('Master Stock Point Controller', () => {
               url: `/master/stock_point/${mockMasterStockPoint().id}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NOT_FOUND,
+                logger.warn
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return success delete', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(masterStockPointModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockMasterStockPoint())
+          return app
+            .inject({
+              method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/master/stock_point/${mockMasterStockPoint().id}`,
+            })
+            .then((result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NO_CONTENT,
+                logger.verbose
+              )
             })
         }
       )

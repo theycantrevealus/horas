@@ -1,24 +1,12 @@
 import { CommonErrorFilter } from '@filters/error'
-import { AuthorityController } from '@gateway_core/account/authority.controller'
-import { AuthorityService } from '@gateway_core/account/authority.service'
-import {
-  AuthorityAddDTO,
-  AuthorityEditDTO,
-} from '@gateway_core/account/dto/authority.dto'
 import {
   accountArray,
   mockAccount,
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
-import {
-  authorityDocArray,
-  mockAuthority,
-  mockAuthorityModel,
-} from '@gateway_core/account/mock/authority.mock'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
-import { mockKafkaTransaction } from '@mock/kafka'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { CanActivate, ExecutionContext, HttpStatus } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -30,7 +18,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing'
 import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
-import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
+import { LOV, LOVDocument } from '@schemas/lov/lov'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -39,7 +27,12 @@ import { HTTPDefaultResponseCheck } from '@utility/test/response.default'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
-describe('Authority Controller', () => {
+import { LOVAddDTO, LOVEditDTO } from '../dto/lov'
+import { LOVController } from '../lov.controller'
+import { LOVService } from '../lov.service'
+import { mockLOV, mockLOVDocArray, mockLOVModel } from '../mock/lov.mock'
+
+describe('LOV Controller', () => {
   const mock_Guard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
       const request = context.switchToHttp().getRequest()
@@ -49,19 +42,15 @@ describe('Authority Controller', () => {
   }
   let app: NestFastifyApplication
   let configService: ConfigService
-  let authorityController: AuthorityController
+  let lovController: LOVController
   let logger: Logger
-  let authorityModel: Model<Authority>
+  let lovModel: Model<LOV>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AuthorityController],
+      controllers: [LOVController],
       providers: [
-        AuthorityService,
-        {
-          provide: 'ACCOUNT_SERVICE',
-          useValue: mockKafkaTransaction,
-        },
+        LOVService,
         {
           provide: ConfigService,
           useValue: {
@@ -91,8 +80,8 @@ describe('Authority Controller', () => {
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(Authority.name, 'primary'),
-          useValue: mockAuthorityModel,
+          provide: getModelToken(LOV.name, 'primary'),
+          useValue: mockLOVModel,
         },
         { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
         { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
@@ -112,9 +101,9 @@ describe('Authority Controller', () => {
     )
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
     configService = app.get<ConfigService>(ConfigService)
-    authorityController = app.get<AuthorityController>(AuthorityController)
-    authorityModel = module.get<Model<AuthorityDocument>>(
-      getModelToken(Authority.name, 'primary')
+    lovController = app.get<LOVController>(LOVController)
+    lovModel = module.get<Model<LOVDocument>>(
+      getModelToken(LOV.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -131,99 +120,89 @@ describe('Authority Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(authorityController).toBeDefined()
+      expect(lovController).toBeDefined()
     }
   )
 
-  describe(
-    testCaption(
-      'FLOW',
-      'feature',
-      'Authority - Get authority data lazy loaded'
-    ),
-    () => {
-      it(
-        testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
-          tab: 1,
-        }),
-        async () => {
-          jest.spyOn(authorityModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(authorityDocArray),
-          } as any)
+  describe(testCaption('FLOW', 'feature', 'LOV - Get data lazy loaded'), () => {
+    it(
+      testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
+        tab: 1,
+      }),
+      async () => {
+        jest.spyOn(lovModel, 'aggregate').mockReturnValue({
+          exec: jest.fn().mockReturnValue(mockLOVDocArray),
+        } as any)
 
-          return app
-            .inject({
-              method: 'GET',
-              headers: {
-                authorization: 'Bearer ey...',
-                'content-type': 'application/json',
-              },
-              url: '/authority',
-              query: `lazyEvent=abc`,
-            })
-            .then((result) => {
-              HTTPDefaultResponseCheck(
-                result,
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                null
-              )
-            })
-        }
-      )
+        return app
+          .inject({
+            method: 'GET',
+            headers: {
+              authorization: 'Bearer ey...',
+              'content-type': 'application/json',
+            },
+            url: '/lov',
+            query: `lazyEvent=abc`,
+          })
+          .then((result) => {
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.INTERNAL_SERVER_ERROR,
+              null
+            )
+          })
+      }
+    )
 
-      it(
-        testCaption('HANDLING', 'data', 'Should return data', {
-          tab: 1,
-        }),
-        async () => {
-          jest.spyOn(authorityModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(authorityDocArray),
-          } as any)
+    it(
+      testCaption('HANDLING', 'data', 'Should return data', {
+        tab: 1,
+      }),
+      async () => {
+        jest.spyOn(lovModel, 'aggregate').mockReturnValue({
+          exec: jest.fn().mockReturnValue(mockLOVDocArray),
+        } as any)
 
-          return app
-            .inject({
-              method: 'GET',
-              headers: {
-                authorization: 'Bearer ey...',
-                'content-type': 'application/json',
-              },
-              url: '/authority',
-              query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
-            })
-            .then((result) => {
-              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
-            })
-        }
-      )
-    }
-  )
+        return app
+          .inject({
+            method: 'GET',
+            headers: {
+              authorization: 'Bearer ey...',
+              'content-type': 'application/json',
+            },
+            url: '/lov',
+            query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
+          })
+          .then((result) => {
+            HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
+          })
+      }
+    )
+  })
 
-  describe(
-    testCaption('FLOW', 'feature', 'Authority - Get data detail'),
-    () => {
-      it(
-        testCaption('HANDLING', 'data', 'Should return detail data', {
-          tab: 1,
-        }),
-        async () => {
-          return app
-            .inject({
-              method: 'GET',
-              headers: {
-                authorization: 'Bearer ey...',
-                'content-type': 'application/json',
-              },
-              url: `/authority/${mockAuthority().id}`,
-            })
-            .then((result) => {
-              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
-            })
-        }
-      )
-    }
-  )
+  describe(testCaption('FLOW', 'feature', 'LOV - Get data detail'), () => {
+    it(
+      testCaption('HANDLING', 'data', 'Should return detail data', {
+        tab: 1,
+      }),
+      async () => {
+        return app
+          .inject({
+            method: 'GET',
+            headers: {
+              authorization: 'Bearer ey...',
+              'content-type': 'application/json',
+            },
+            url: `/lov/${mockLOV().id}`,
+          })
+          .then((result) => {
+            HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
+          })
+      }
+    )
+  })
 
-  describe(testCaption('FLOW', 'feature', 'Authority - Add data'), () => {
+  describe(testCaption('FLOW', 'feature', 'LOV - Add data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -236,11 +215,10 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: '/authority',
+            url: '/lov',
             body: {},
           })
           .then((result) => {
-            // console.log(`Add`, result)
             HTTPDefaultResponseCheck(
               result,
               HttpStatus.BAD_REQUEST,
@@ -256,10 +234,11 @@ describe('Authority Controller', () => {
       }),
       async () => {
         const data = {
-          code: mockAuthority().code,
-          name: mockAuthority().name,
-          remark: mockAuthority().remark,
-        } satisfies AuthorityAddDTO
+          group: mockLOV().group,
+          name: mockLOV().name,
+          parent: mockLOV().parent,
+          remark: mockLOV().remark,
+        } satisfies LOVAddDTO
 
         delete data.name
 
@@ -270,7 +249,7 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: '/authority',
+            url: '/lov',
             body: data,
           })
           .then((result) => {
@@ -289,10 +268,11 @@ describe('Authority Controller', () => {
       }),
       async () => {
         const data = {
-          code: mockAuthority().code,
-          name: mockAuthority().name,
-          remark: mockAuthority().remark,
-        } satisfies AuthorityAddDTO
+          group: mockLOV().group,
+          name: mockLOV().name,
+          parent: mockLOV().parent,
+          remark: mockLOV().remark,
+        } satisfies LOVAddDTO
 
         return app
           .inject({
@@ -301,7 +281,7 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: '/authority',
+            url: '/lov',
             body: data,
           })
           .then((result) => {
@@ -311,7 +291,7 @@ describe('Authority Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Authority - Edit data'), () => {
+  describe(testCaption('FLOW', 'feature', 'LOV - Edit data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -324,7 +304,7 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/authority/${mockAuthority().id}`,
+            url: `/lov/${mockLOV().id}`,
             body: {},
           })
           .then((result) => {
@@ -349,7 +329,7 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/authority/${mockAuthority().id}`,
+            url: `/lov/${mockLOV().id}`,
             body: {},
           })
           .then((result) => {
@@ -368,11 +348,12 @@ describe('Authority Controller', () => {
       }),
       async () => {
         const data = {
-          code: mockAuthority().code,
-          name: mockAuthority().name,
-          remark: mockAuthority().remark,
+          group: mockLOV().group,
+          name: mockLOV().name,
+          parent: mockLOV().parent,
+          remark: mockLOV().remark,
           __v: 0,
-        } satisfies AuthorityEditDTO
+        } satisfies LOVEditDTO
 
         return app
           .inject({
@@ -381,7 +362,7 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/authority/${mockAuthority().id}`,
+            url: `/lov/${mockLOV().id}`,
             body: data,
           })
           .then((result) => {
@@ -395,7 +376,7 @@ describe('Authority Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Authority - Delete data'), () => {
+  describe(testCaption('FLOW', 'feature', 'LOV - Delete data'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -407,7 +388,7 @@ describe('Authority Controller', () => {
       ),
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest.spyOn(authorityModel, 'findOneAndUpdate').mockResolvedValue(null)
+        jest.spyOn(lovModel, 'findOneAndUpdate').mockResolvedValue(null)
         return app
           .inject({
             method: 'DELETE',
@@ -415,7 +396,7 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/authority/${mockAuthority().id}`,
+            url: `/lov/${mockLOV().id}`,
           })
           .then(async (result) => {
             HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
@@ -429,9 +410,7 @@ describe('Authority Controller', () => {
       }),
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest
-          .spyOn(authorityModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockAuthority())
+        jest.spyOn(lovModel, 'findOneAndUpdate').mockResolvedValue(mockLOV())
         return app
           .inject({
             method: 'DELETE',
@@ -439,7 +418,7 @@ describe('Authority Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/authority/${mockAuthority().id}`,
+            url: `/lov/${mockLOV().id}`,
           })
           .then((result) => {
             HTTPDefaultResponseCheck(

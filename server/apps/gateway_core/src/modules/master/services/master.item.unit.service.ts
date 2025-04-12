@@ -45,7 +45,7 @@ export class MasterItemUnitService {
       const parameter: PrimeParameter = JSON.parse(payload)
       return await prime_datatable(parameter, this.masterItemUnitModel).then(
         (result) => {
-          response.payload = result.payload
+          response.payload = result
           response.message = 'Master item unit fetch successfully'
           return response
         }

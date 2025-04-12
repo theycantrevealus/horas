@@ -13,7 +13,7 @@ import { MasterItemBrandService } from '@gateway_core/master/services/master.ite
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { HttpStatus } from '@nestjs/common'
+import { NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
@@ -25,15 +25,13 @@ import {
   MasterItemBrandDocument,
 } from '@schemas/master/master.item.brand'
 import { AuthService } from '@security/auth.service'
-import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
 describe('Master Item Brand Service', () => {
-  let configService: ConfigService
   let masterItemBrandService: MasterItemBrandService
+  let configService: ConfigService
   let masterItemBrandModel: Model<MasterItemBrand>
 
   beforeAll(async () => {
@@ -91,19 +89,14 @@ describe('Master Item Brand Service', () => {
       ],
     }).compile()
 
-    configService = module.get<ConfigService>(ConfigService)
-
     masterItemBrandService = module.get<MasterItemBrandService>(
       MasterItemBrandService
     )
+    configService = module.get<ConfigService>(ConfigService)
     masterItemBrandModel = module.get<Model<MasterItemBrandDocument>>(
       getModelToken(MasterItemBrand.name, 'primary')
     )
 
-    jest.clearAllMocks()
-  })
-
-  afterEach(() => {
     jest.clearAllMocks()
   })
 
@@ -135,25 +128,12 @@ describe('Master Item Brand Service', () => {
               "filters": {}
             }`
             )
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_BRAND_LIST'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-
+            .then((result) => {
               // Should be an array of data
-              expect(result.payload['data']).toBeInstanceOf(Array)
+              expect(result.data).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload['data']).toEqual(masterItemBrandDocArray)
+              expect(result.data).toEqual(masterItemBrandDocArray)
             })
         }
       )
@@ -163,19 +143,12 @@ describe('Master Item Brand Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(JSON, 'parse').mockImplementation(() => ({}))
           jest.spyOn(masterItemBrandModel, 'aggregate').mockImplementation({
             exec: jest.fn().mockRejectedValue(new Error()),
           } as any)
 
-          await expect(
-            masterItemBrandService.all({
-              first: 0,
-              rows: 10,
-              sortField: 'created_at',
-              sortOrder: 1,
-              filters: {},
-            })
-          ).rejects.toThrow(Error)
+          await expect(masterItemBrandService.all('')).rejects.toThrow(Error)
         }
       )
     }
@@ -196,25 +169,27 @@ describe('Master Item Brand Service', () => {
               return Promise.resolve(findMock)
             })
 
-          await masterItemBrandService
-            .detail(findMock.id)
-            .then((result: GlobalResponse) => {
-              // Deep equality check
-              expect(result.payload).toEqual(findMock)
+          await masterItemBrandService.detail(findMock.id).then((result) => {
+            // Deep equality check
+            expect(result).toEqual(findMock)
+          })
+        }
+      )
 
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_BRAND_GET'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Response error if detail data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(masterItemBrandModel, 'findOne').mockResolvedValue(null)
+          await expect(async () => {
+            await masterItemBrandService.detail(masterItemBrandDocArray[0].id)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -225,11 +200,9 @@ describe('Master Item Brand Service', () => {
         async () => {
           const targetData = masterItemBrandDocArray[0]
 
-          jest
-            .spyOn(masterItemBrandModel, 'findOne')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+          jest.spyOn(masterItemBrandModel, 'findOne').mockRejectedValue(() => {
+            throw new Error()
+          })
 
           await expect(async () => {
             await masterItemBrandService.detail(targetData.id)
@@ -249,22 +222,9 @@ describe('Master Item Brand Service', () => {
 
           await masterItemBrandService
             .add(mockMasterItemBrand(), mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_BRAND_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
         }
       )
@@ -277,26 +237,11 @@ describe('Master Item Brand Service', () => {
           delete dataTest.code
           await masterItemBrandService
             .add(dataTest, mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
+              expect(result).toHaveProperty('id')
 
-              expect(result.payload).toHaveProperty('code')
-
-              expect(result.payload['code']).not.toBe('')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_BRAND_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('code')
             })
         }
       )
@@ -306,11 +251,9 @@ describe('Master Item Brand Service', () => {
           tab: 1,
         }),
         async () => {
-          jest
-            .spyOn(masterItemBrandModel, 'create')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+          jest.spyOn(masterItemBrandModel, 'create').mockRejectedValue(() => {
+            throw new Error()
+          })
 
           await expect(async () => {
             await masterItemBrandService.add(
@@ -341,23 +284,32 @@ describe('Master Item Brand Service', () => {
               },
               accountDocArray[0].id
             )
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_BRAND_EDIT'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
+          tab: 1,
+        }),
+        async () => {
+          const targetID = mockMasterItemBrand().id
+          jest
+            .spyOn(masterItemBrandModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
+
+          await expect(async () => {
+            await masterItemBrandService.edit(
+              {
+                ...mockMasterItemBrand(),
+                __v: 0,
+              },
+              targetID
+            )
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -369,7 +321,7 @@ describe('Master Item Brand Service', () => {
           const targetID = mockMasterItemBrand().id
           jest
             .spyOn(masterItemBrandModel, 'findOneAndUpdate')
-            .mockImplementationOnce(() => {
+            .mockRejectedValue(() => {
               throw new Error()
             })
 
@@ -388,45 +340,22 @@ describe('Master Item Brand Service', () => {
   )
 
   describe(
-    testCaption('DELETE DATA', 'data', 'Master item brand - Delete data'),
+    testCaption('DELETE DATA', 'data', 'Master Item Brand - Delete data'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should delete master item brand', {
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
           tab: 1,
         }),
         async () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-
+          const targetID = mockMasterItemBrand().id
           jest
             .spyOn(masterItemBrandModel, 'findOneAndUpdate')
-            .mockResolvedValue({
-              statusCode: {
-                defaultCode: HttpStatus.OK,
-                customCode: modCodes.Global.success,
-                classCode: '',
-              },
-              message: 'Delete success message',
-              payload: {},
-              transaction_classify: 'MASTER_ITEM_BRAND_DELETE',
-              transaction_id: '',
-            } satisfies GlobalResponse)
+            .mockResolvedValue(null)
 
-          await masterItemBrandService
-            .delete(masterItemBrandDocArray[0].id)
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_ITEM_BRAND_DELETE'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+          await expect(async () => {
+            await masterItemBrandService.delete(targetID)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -435,21 +364,42 @@ describe('Master Item Brand Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
           const targetID = mockMasterItemBrand().id
-
           jest
             .spyOn(masterItemBrandModel, 'findOneAndUpdate')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+            .mockRejectedValue(new Error())
 
           await expect(async () => {
             await masterItemBrandService.delete(targetID)
           }).rejects.toThrow(Error)
         }
       )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should success delete data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(masterItemBrandModel, 'findOneAndUpdate')
+            .mockResolvedValue(masterItemBrandDocArray[0])
+
+          await masterItemBrandService
+            .delete(masterItemBrandDocArray[0].id)
+            .then((result) => {
+              // Should return name if document found
+              expect(result).toHaveProperty('name')
+            })
+        }
+      )
     }
   )
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
 
   afterAll(async () => {
     jest.clearAllMocks()

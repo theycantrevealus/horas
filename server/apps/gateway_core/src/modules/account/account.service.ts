@@ -64,7 +64,7 @@ export class AccountService {
       const parameter: PrimeParameter = JSON.parse(payload)
       return await prime_datatable(parameter, this.accountModel).then(
         (result) => {
-          response.payload = result.payload
+          response.payload = result
           response.message = 'Account fetch successfully'
           return response
         }
@@ -307,10 +307,7 @@ export class AccountService {
             id: id,
             __v: __v,
           },
-          {
-            $set: documentUpdate,
-          },
-          { upsert: false, new: true }
+          documentUpdate
         )
         .then(async (result) => {
           if (!result) {
@@ -322,7 +319,7 @@ export class AccountService {
             response.payload = {}
             throw new Error(JSON.stringify(response))
           } else {
-            await this.cacheManager.set(id, result)
+            // TODO : Update cache and notify socket
             response.message = 'Account updated successfully'
             response.payload = result
           }
@@ -435,7 +432,21 @@ export class AccountService {
                     account: accountSet,
                   })
                   .then(async (tokenSet) => {
-                    await this.cacheManager.set(result.id, result)
+                    // await this.cacheManager.set(result.id, result)
+                    const permission = []
+                    const menuMeta = result?.menu
+                    if (menuMeta?.length > 0) {
+                      await menuMeta.forEach((menuE) => {
+                        if (menuE?.access?.length > 0) {
+                          permission.push(...menuE?.access)
+                        }
+                      })
+                    }
+
+                    await this.cacheManager.set(result.id, {
+                      ...result,
+                      permission: permission,
+                    })
                     token = {
                       set: tokenSet.token,
                       expired_at: tokenSet.expired_at,
@@ -462,8 +473,9 @@ export class AccountService {
                   code: result.code,
                   first_name: result.first_name,
                   last_name: result.last_name,
-                  permission: result.permission,
-                  access: result.access,
+                  menu: result.menu,
+                  // permission: result.permission,
+                  // access: result.access,
                 },
                 token: token.set,
                 config: await this.configMeta(),

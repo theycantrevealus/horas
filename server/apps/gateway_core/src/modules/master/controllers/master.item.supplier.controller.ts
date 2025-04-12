@@ -7,7 +7,7 @@ import {
 } from '@gateway_core/master/dto/master.item.supplier'
 import { MasterItemSupplierService } from '@gateway_core/master/services/master.item.supplier.service'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
+import { HORASInterceptor } from '@interceptors/default'
 import {
   Body,
   Controller,
@@ -42,10 +42,10 @@ export class MasterItemSupplierController {
   @Get('supplier')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterItemSupplier', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all supplier',
     description: 'Showing supplier data',
@@ -58,10 +58,10 @@ export class MasterItemSupplierController {
   @Get('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterItemSupplier', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -76,10 +76,10 @@ export class MasterItemSupplierController {
   @Post('supplier')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterItemSupplier', action: 'add' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add new item supplier',
     description: ``,
@@ -94,10 +94,10 @@ export class MasterItemSupplierController {
   @Patch('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterItemSupplier', action: 'edit' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit new item supplier',
     description: ``,
@@ -115,10 +115,10 @@ export class MasterItemSupplierController {
   @Delete('supplier/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterItemSupplier', action: 'delete' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit new item supplier',
     description: ``,

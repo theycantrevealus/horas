@@ -40,7 +40,7 @@ export class MasterTreatmentService {
       const parameter: PrimeParameter = JSON.parse(payload)
       return await prime_datatable(parameter, this.masterTreatment).then(
         (result) => {
-          response.payload = result.payload
+          response.payload = result
           response.message = 'Treatment fetch successfully'
           return response
         }

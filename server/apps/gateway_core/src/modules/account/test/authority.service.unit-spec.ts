@@ -12,6 +12,7 @@ import {
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
@@ -19,7 +20,6 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Account } from '@schemas/account/account.model'
 import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
 import { AuthService } from '@security/auth.service'
-import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { mockResponse } from '@utility/mock/response'
 import { modCodes } from '@utility/modules'
@@ -73,10 +73,6 @@ describe('Authority Service', () => {
     )
   })
 
-  afterEach(async () => {
-    jest.clearAllMocks()
-  })
-
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
@@ -105,23 +101,12 @@ describe('Authority Service', () => {
               "filters": {}
             }`
             )
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual('AUTHORITY_GET')
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-
+            .then((result) => {
               // Should be an array of data
-              expect(result.payload).toBeInstanceOf(Array)
+              expect(result.data).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload).toEqual(authorityDocArray)
+              expect(result.data).toEqual(authorityDocArray)
             })
         }
       )
@@ -131,30 +116,13 @@ describe('Authority Service', () => {
           tab: 1,
         }),
         async () => {
-          const mockError = mockResponse({
-            code: modCodes[AuthorityService.name],
-            message: 'Authority failed to fetch',
-            payload: {},
-            transaction_id: '',
-            transaction_classify: 'AUTHORITY_GET',
-          })
+          jest.spyOn(JSON, 'parse').mockImplementation(() => ({}))
 
           jest.spyOn(authorityModel, 'aggregate').mockImplementation({
-            exec: jest
-              .fn()
-              .mockRejectedValue(new Error(JSON.stringify(mockError))),
+            exec: jest.fn().mockRejectedValue(new Error()),
           } as any)
 
-          await expect(
-            authorityService.all({
-              first: 0,
-              rows: 10,
-              sortField: 'created_at',
-              sortOrder: 1,
-              filters: {},
-              custom_filter: '123',
-            })
-          ).rejects.toThrow(Error)
+          await expect(authorityService.all('')).rejects.toThrow(Error)
         }
       )
     }
@@ -173,23 +141,27 @@ describe('Authority Service', () => {
             return Promise.resolve(findMockAuthority)
           })
 
-          await authorityService
-            .detail(findMockAuthority.id)
-            .then((result: GlobalResponse) => {
-              // Deep equality check
-              expect(result.payload).toEqual(findMockAuthority)
+          await authorityService.detail(findMockAuthority.id).then((result) => {
+            // Deep equality check
+            expect(result).toEqual(findMockAuthority)
+          })
+        }
+      )
 
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual('AUTHORITY_GET')
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Response error if detail data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(authorityModel, 'findOne').mockResolvedValue(null)
+          await expect(async () => {
+            await authorityService.detail(mockAuthority().id)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -198,22 +170,10 @@ describe('Authority Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetData = mockAuthority()
-          const mockError = mockResponse({
-            code: modCodes[AuthorityService.name],
-            message: 'Authority detail failed to fetch',
-            payload: {},
-            transaction_id: targetData.id,
-            transaction_classify: 'AUTHORITY_GET',
-          })
-
-          jest.spyOn(authorityModel, 'findOne').mockImplementationOnce(() => {
-            throw new Error(JSON.stringify(mockError))
-          })
-
+          jest.spyOn(authorityModel, 'findOne').mockRejectedValue(new Error())
           await expect(async () => {
-            await authorityService.detail(targetData.id)
-          }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
+            await authorityService.detail(mockAuthority().id)
+          }).rejects.toThrow(Error)
         }
       )
     }
@@ -233,20 +193,9 @@ describe('Authority Service', () => {
             },
             mockAccount()
           )
-          .then((result: GlobalResponse) => {
+          .then((result) => {
             // Should create id
-            expect(result.payload).toHaveProperty('id')
-
-            // Should classify transaction
-            expect(result.transaction_classify).toEqual('AUTHORITY_ADD')
-
-            // Not an empty string so be informative
-            expect(result.message).not.toBe('')
-
-            // Should return success code
-            expect(result.statusCode.customCode).toEqual(
-              modCodes.Global.success
-            )
+            expect(result).toHaveProperty('id')
           })
       })
 
@@ -255,18 +204,7 @@ describe('Authority Service', () => {
           tab: 1,
         }),
         async () => {
-          const mockError = mockResponse({
-            code: modCodes[AuthorityService.name],
-            message: 'Authority failed to create',
-            payload: {},
-            transaction_id: '',
-            transaction_classify: 'AUTHORITY_ADD',
-          })
-
-          jest.spyOn(authorityModel, 'create').mockImplementationOnce(() => {
-            throw new Error(JSON.stringify(mockError))
-          })
-
+          jest.spyOn(authorityModel, 'create').mockRejectedValue(new Error())
           await expect(async () => {
             await authorityService.add(
               {
@@ -275,7 +213,7 @@ describe('Authority Service', () => {
               },
               mockAccount()
             )
-          }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
+          }).rejects.toThrow(Error)
         }
       )
     }
@@ -298,20 +236,9 @@ describe('Authority Service', () => {
               },
               accountDocArray[0].id
             )
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual('AUTHORITY_EDIT')
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
         }
       )
@@ -333,7 +260,7 @@ describe('Authority Service', () => {
               },
               targetID
             )
-          }).rejects.toThrow(Error)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -344,7 +271,7 @@ describe('Authority Service', () => {
         async () => {
           const targetID = mockAuthority().id
           const mockError = mockResponse({
-            code: modCodes[AuthorityService.name],
+            code: modCodes['Authority'].defaultResponseCode,
             message: 'Authority failed to update',
             payload: {},
             transaction_id: targetID,
@@ -376,26 +303,16 @@ describe('Authority Service', () => {
     testCaption('DELETE DATA', 'data', 'Authority - Delete authority'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should delete authority', {
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(authorityModel, 'findOneAndUpdate')
+          const targetID = mockAuthority().id
+          jest.spyOn(authorityModel, 'findOneAndUpdate').mockResolvedValue(null)
 
-          await authorityService
-            .delete(authorityDocArray[0].id)
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual('AUTHORITY_DELETE')
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+          await expect(async () => {
+            await authorityService.delete(targetID)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -405,27 +322,39 @@ describe('Authority Service', () => {
         }),
         async () => {
           const targetID = mockAuthority().id
-          const mockError = mockResponse({
-            code: modCodes[AuthorityService.name],
-            message: 'Authority failed to delete',
-            payload: {},
-            transaction_id: targetID,
-            transaction_classify: 'AUTHORITY_DELETE',
-          })
-
           jest
             .spyOn(authorityModel, 'findOneAndUpdate')
-            .mockImplementationOnce(() => {
-              throw new Error(JSON.stringify(mockError))
-            })
+            .mockRejectedValue(new Error())
 
           await expect(async () => {
             await authorityService.delete(targetID)
-          }).rejects.toThrowError(new Error(JSON.stringify(mockError)))
+          }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should success delete authority', {
+          tab: 1,
+        }),
+        async () => {
+          jest
+            .spyOn(authorityModel, 'findOneAndUpdate')
+            .mockResolvedValue(authorityDocArray[0])
+
+          await authorityService
+            .delete(authorityDocArray[0].id)
+            .then((result) => {
+              // Should return code if document found
+              expect(result).toHaveProperty('code')
+            })
         }
       )
     }
   )
+
+  afterEach(async () => {
+    jest.clearAllMocks()
+  })
 
   afterAll(async () => {
     jest.clearAllMocks()

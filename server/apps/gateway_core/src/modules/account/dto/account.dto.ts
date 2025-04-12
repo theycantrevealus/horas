@@ -1,7 +1,6 @@
 import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
-import { CMenu, CMenuPermission } from '@gateway_core/menu/dto/menu'
+import { CMenu } from '@gateway_core/menu/dto/menu'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
-import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { ApiProperty } from '@nestjs/swagger'
 import { CAuthority, IAuthority } from '@schemas/account/authority.model'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
@@ -97,17 +96,27 @@ export class AccountAddDTO {
     isArray: true,
     required: false,
   })
+  @IsArray()
   @IsOptional()
-  access?: IMenu[]
+  menu?: IMenu[]
 
-  @ApiProperty({
-    type: CMenuPermission,
-    description: '',
-    isArray: true,
-    required: false,
-  })
-  @IsOptional()
-  permission?: IMenuPermission[]
+  // @ApiProperty({
+  //   type: CMenu,
+  //   description: '',
+  //   isArray: true,
+  //   required: false,
+  // })
+  // @IsOptional()
+  // access?: IMenu[]
+
+  // @ApiProperty({
+  //   type: CMenuPermission,
+  //   description: '',
+  //   isArray: true,
+  //   required: false,
+  // })
+  // @IsOptional()
+  // permission?: IMenuPermission[]
 }
 
 export class AccountEditDTO {
@@ -174,22 +183,14 @@ export class AccountEditDTO {
   stock_point?: IMasterStockPoint[]
 
   @ApiProperty({
-    required: false,
-    isArray: true,
     type: CMenu,
-  })
-  @IsArray()
-  @IsOptional()
-  access?: IMenu[]
-
-  @ApiProperty({
-    required: false,
+    description: '',
     isArray: true,
-    type: CMenuPermission,
+    required: false,
   })
-  @IsArray()
   @IsOptional()
-  permission?: IMenuPermission[]
+  @IsArray()
+  menu?: IMenu[]
 
   @ApiProperty({
     example: 0,

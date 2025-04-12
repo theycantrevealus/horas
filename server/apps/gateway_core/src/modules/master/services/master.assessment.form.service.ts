@@ -45,7 +45,7 @@ export class MasterAssessmentFormService {
         parameter,
         this.masterAssessmentFormModel
       ).then((result) => {
-        response.payload = result.payload
+        response.payload = result
         response.message = 'Assessment form fetch successfully'
         return response
       })

@@ -37,7 +37,7 @@ export class PatientService {
       const parameter: PrimeParameter = JSON.parse(payload)
       return await prime_datatable(parameter, this.patientModel).then(
         (result) => {
-          response.payload = result.payload
+          response.payload = result
           response.message = 'Patient fetch successfully'
           return response
         }

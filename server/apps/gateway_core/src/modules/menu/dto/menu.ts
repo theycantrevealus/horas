@@ -1,8 +1,24 @@
 import { CMenuGroup } from '@gateway_core/menu/dto/menu.group.add'
 import { IMenuGroup } from '@gateway_core/menu/interfaces/menu.group.interface'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator'
 import { Types } from 'mongoose'
+
+import { IAccess } from '../interfaces/menu.interface'
+
+export class CMenuPermission {
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  domIdentity: string
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  dispatchName: string
+}
 
 export class CMenu {
   @ApiProperty({
@@ -28,20 +44,15 @@ export class CMenu {
     example: '',
   })
   identifier: string
-}
-
-export class CMenuPermission {
-  @ApiProperty({
-    type: String,
-    example: '',
-  })
-  domIdentity: string
 
   @ApiProperty({
-    type: String,
-    example: '',
+    type: CMenuPermission,
+    description: '',
+    isArray: true,
+    required: false,
   })
-  dispatchName: string
+  @IsOptional()
+  access: IAccess[]
 }
 
 export class MenuAddDTO {

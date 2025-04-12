@@ -44,7 +44,7 @@ export class MasterReceptionistCounterService {
         parameter,
         this.masterReceptionistCounter
       ).then((result) => {
-        response.payload = result.payload
+        response.payload = result
         response.message = 'Master receptionist counter fetch successfully'
         return response
       })

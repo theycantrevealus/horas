@@ -7,7 +7,7 @@ import {
 } from '@gateway_core/master/dto/master.stock.point'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
+import { HORASInterceptor } from '@interceptors/default'
 import {
   Body,
   Controller,
@@ -30,7 +30,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
 @ApiTags('Master Data Stock Point Management')
@@ -43,26 +42,26 @@ export class MasterStockPointController {
   @Get('stock_point')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterStockPoint', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all account',
     description: 'Showing stock_point data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
+  async all(@Query('lazyEvent') parameter: string) {
     return await this.masterStockPointService.all(parameter)
   }
 
   @Get('stock_point/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterStockPoint', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -70,17 +69,17 @@ export class MasterStockPointController {
   @ApiParam({
     name: 'id',
   })
-  async detail(@Param() param: any): Promise<GlobalResponse> {
+  async detail(@Param() param: any) {
     return await this.masterStockPointService.detail(param.id)
   }
 
   @Post('stock_point')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterStockPoint', action: 'add' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add stock point',
     description: ``,
@@ -88,17 +87,17 @@ export class MasterStockPointController {
   async add(
     @Body() parameter: MasterStockPointAddDTO,
     @CredentialAccount() account: IAccount
-  ): Promise<GlobalResponse> {
+  ) {
     return await this.masterStockPointService.add(parameter, account)
   }
 
   @Patch('stock_point/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterStockPoint', action: 'edit' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit stock point',
     description: ``,
@@ -106,20 +105,17 @@ export class MasterStockPointController {
   @ApiParam({
     name: 'id',
   })
-  async edit(
-    @Body() parameter: MasterStockPointEditDTO,
-    @Param() param: any
-  ): Promise<GlobalResponse> {
+  async edit(@Body() parameter: MasterStockPointEditDTO, @Param() param: any) {
     return await this.masterStockPointService.edit(parameter, param.id)
   }
 
   @Delete('stock_point/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterStockPoint', action: 'delete' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Delete stock point',
     description: ``,
@@ -127,7 +123,7 @@ export class MasterStockPointController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param: any): Promise<GlobalResponse> {
+  async delete(@Param() param: any) {
     return await this.masterStockPointService.delete(param.id)
   }
 }
