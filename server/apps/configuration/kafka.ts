@@ -60,7 +60,7 @@ export const KafkaConfig = () => {
         },
         service: process.env.KAFKA_STOCK_SERVICE,
         topic: {
-          stock: process.env.KAFKA_STOCK_TOPIC_STOCK,
+          stock: process.env.KAFKA_STOCK_TOPIC,
         },
         client: process.env.KAFKA_STOCK_CLIENT_ID,
         broker: process.env.KAFKA_STOCK_BROKER,
