@@ -3,16 +3,20 @@ import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import {
+  GeneralIssueNote,
+  GeneralIssueNoteSchema,
+} from '@schemas/inventory/general.issue.note'
+import { MongoMiddlewareGeneralIssueNote } from '@schemas/inventory/general.issue.note.middleware'
+import {
   MaterialRequisition,
   MaterialRequisitionSchema,
 } from '@schemas/inventory/material.requisition'
-import { MongoMiddlewareMaterialRequisition } from '@schemas/inventory/material.requisition.middleware'
 import { AuthModule } from '@security/auth.module'
 import { SocketIoClientProvider } from '@socket/socket.provider'
 import { SocketIoClientProxyService } from '@socket/socket.proxy'
 
-import { MaterialRequisitionController } from './material.requisition.controller'
-import { MaterialRequisitionService } from './material.requisition.service'
+import { GeneralIssueNoteController } from './general.issue.note.controller'
+import { GeneralIssueNoteService } from './general.issue.note.service'
 
 @Module({
   imports: [
@@ -21,18 +25,19 @@ import { MaterialRequisitionService } from './material.requisition.service'
         { name: LogLogin.name, schema: LogLoginSchema },
         { name: LogActivity.name, schema: LogActivitySchema },
         { name: MaterialRequisition.name, schema: MaterialRequisitionSchema },
+        { name: GeneralIssueNote.name, schema: GeneralIssueNoteSchema },
       ],
       'primary'
     ),
     AuthModule,
   ],
-  controllers: [MaterialRequisitionController],
+  controllers: [GeneralIssueNoteController],
   providers: [
     SocketIoClientProvider,
     SocketIoClientProxyService,
-    MongoMiddlewareMaterialRequisition,
-    MaterialRequisitionService,
+    MongoMiddlewareGeneralIssueNote,
+    GeneralIssueNoteService,
   ],
-  exports: [MaterialRequisitionService],
+  exports: [GeneralIssueNoteService],
 })
-export class MaterialRequisitionModule {}
+export class GeneralIssueNoteModule {}

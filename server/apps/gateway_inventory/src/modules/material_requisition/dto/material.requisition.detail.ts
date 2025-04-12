@@ -16,12 +16,6 @@ export class CMaterialRequisitionDetail {
   qty: number
 
   @ApiProperty({
-    type: Number,
-    example: 102000.01,
-  })
-  issued: number
-
-  @ApiProperty({
     type: String,
     example: '',
   })
