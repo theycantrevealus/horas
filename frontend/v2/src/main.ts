@@ -30,6 +30,7 @@ import '@/assets/tnsol.css'
 
 // Module List
 import Account from '@/modules/core/account'
+import I18N from '@/modules/core/i18n'
 import Menu from '@/modules/core/menu'
 import LOV from '@/modules/master/lov'
 
@@ -47,6 +48,7 @@ const router = setUpRouter()
 const Modules: any = {
   // Core Module
   account: Account,
+  i18n: I18N,
   menu: Menu,
 
   // Master Module
@@ -55,11 +57,11 @@ const Modules: any = {
   masterItem: MasterItem,
 }
 
-Object.keys(Modules).forEach((moduleKey) => {
+Object.keys(Modules).forEach(async (moduleKey) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const module: any = Modules[moduleKey]
-  module.router.forEach((item: RouteRecordRaw) => {
-    router.addRoute('Builder', item)
+  await module.router.forEach(async (item: RouteRecordRaw) => {
+    router.addRoute('BuilderRouter', item)
   })
 })
 

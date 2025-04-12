@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="main-container p-grid vertical-container">
     <div class="col-4 col-offset-4" style="margin-top: 50px">
@@ -83,8 +84,18 @@ export default defineComponent({
       },
     }
   },
+  watch: {
+    authToken(token) {
+      if (token && token !== '') {
+        this.$router.push({ name: 'Dashboard' })
+      }
+    },
+  },
   computed: {
     ...mapStores(storeLogin, storeCore),
+    authToken() {
+      return this.coreStore.auth.token
+    },
   },
   validations: {
     email: {

@@ -23,7 +23,6 @@ export default defineComponent({
   watch: {
     toast: {
       handler() {
-        console.log(this.toast)
         if (this.toast.detail !== '') {
           this.$toast.add(this.toast)
         }

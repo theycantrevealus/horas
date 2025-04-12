@@ -122,7 +122,7 @@ export default {
   },
   methods: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onMenuItemClick(event, item: any, index: number) {
+    onMenuItemClick(event: any, item: any, index: number) {
       if (item.disabled) {
         event.preventDefault()
         return
@@ -131,8 +131,7 @@ export default {
       if (!item.to && !item.url) {
         event.preventDefault()
       } else {
-        // This will load router without reload page
-        this.$router.push(item.url)
+        this.$router.push({ path: item.url })
         // this.toogleMenuStatus()
       }
 

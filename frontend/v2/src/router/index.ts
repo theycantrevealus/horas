@@ -8,7 +8,7 @@ function setUpRouter() {
     routes: [
       {
         path: '/',
-        name: 'Builder',
+        name: 'BuilderRouter',
         component: Builder,
         meta: {
           requiresAuth: true,
@@ -55,11 +55,20 @@ function setUpRouter() {
       if (savedPosition) {
         return savedPosition
       }
+
+      const el = document.querySelector('#content-loader')
+
       if (to.hash) {
         return { el: to.hash, behavior: 'smooth' }
       } else {
-        return { el: '#content-loader', top: 0, left: 0 }
+        return { x: el?.scrollLeft, y: el?.scrollTop }
       }
+
+      // if (to.hash) {
+      //   return { el: to.hash, behavior: 'smooth' }
+      // } else {
+      //   return { el: '#content-loader', top: 0, left: 0 }
+      // }
     },
   })
 
@@ -81,11 +90,10 @@ function setUpRouter() {
         },
       })
     } else {
-      // Check if route need authentication
+      const token = store.getToken
+      const isAuthed = token && token !== '' && token !== null
+
       if (to.matched.some((record) => record.meta.requiresAuth)) {
-        // Check for token
-        const token = store.getToken
-        const isAuthed = token && token !== '' && token !== null
         if (isAuthed) {
           if (store.hasAccess(to.name?.toString() ?? '')) {
             next()
@@ -102,7 +110,9 @@ function setUpRouter() {
           next('/login')
         }
       } else {
-        // No need auth
+        if (isAuthed && to.path === '/login') {
+          next('/dashboard')
+        }
         next()
       }
     }
