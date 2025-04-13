@@ -184,7 +184,7 @@ This project using following format as committing message. If any suggestion of 
 
 ## License
 
-Distributed under the APACHE 2.0 License. See `LICENSE.txt` for more information.
+Distributed under the <a href="https://github.com/theycantrevealus/horas?tab=Apache-2.0-1-ov-file">APACHE 2.0 License</a>.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 <hr />
