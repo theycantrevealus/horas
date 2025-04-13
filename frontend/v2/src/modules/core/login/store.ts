@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia'
 import { storeCore } from '@/store'
-import { useRouter } from 'vue-router'
 import api from '@/utils/core/api.ts'
 import { CoreResponseLib } from '@/interfaces/api.js'
 
 export const storeLogin = defineStore('signIn', () => {
   const parentStore = storeCore()
-  const router = useRouter()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function signIn(payload: any) {
     api({ requiresAuth: false })
       .post(`${import.meta.env.VITE_API_URL}/v1/account/signin`, payload)
@@ -24,7 +23,7 @@ export const storeLogin = defineStore('signIn', () => {
           parentStore.auth.first_name = data.payload.account.first_name
           parentStore.auth.last_name = data.payload.account.last_name
           parentStore.auth.permission = data.payload.account.permission
-          parentStore.updatePermissionv2(data.payload.account.access)
+          parentStore.updatePermissionv2(data.payload.account.menu)
           parentStore.updateAppConfig(data.payload.config)
           // parentStore.updateAccess(data.payload.account)
           // parentStore.updatePermission(data.payload.account)
@@ -35,11 +34,14 @@ export const storeLogin = defineStore('signIn', () => {
       })
   }
 
-  parentStore.$subscribe((mutation, state) => {
-    if (state.auth.token !== '') {
-      router.push('/')
-    }
-  })
+  parentStore.$subscribe(
+    (mutation, state) => {
+      if (state.auth.token !== '') {
+        //
+      }
+    },
+    { flush: 'sync' },
+  )
 
   return { signIn }
 })

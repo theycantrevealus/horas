@@ -14,6 +14,7 @@ import { MasterStockPointService } from '@gateway_core/master/services/master.st
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
@@ -25,16 +26,14 @@ import {
   MasterStockPointDocument,
 } from '@schemas/master/master.stock.point'
 import { AuthService } from '@security/auth.service'
-import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
 describe('Master Stock Point Service', () => {
   let masterStockPointService: MasterStockPointService
-  let masterStockPointModel: Model<MasterStockPoint>
   let configService: ConfigService
+  let masterStockPointModel: Model<MasterStockPoint>
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -95,11 +94,10 @@ describe('Master Stock Point Service', () => {
       ],
     }).compile()
 
-    configService = module.get<ConfigService>(ConfigService)
-
     masterStockPointService = module.get<MasterStockPointService>(
       MasterStockPointService
     )
+    configService = module.get<ConfigService>(ConfigService)
     masterStockPointModel = module.get<Model<MasterStockPointDocument>>(
       getModelToken(MasterStockPoint.name, 'primary')
     )
@@ -139,25 +137,12 @@ describe('Master Stock Point Service', () => {
               "filters": {}
             }`
             )
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_STOCK_POINT_LIST'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-
+            .then((result) => {
               // Should be an array of data
-              expect(result.payload['data']).toBeInstanceOf(Array)
+              expect(result.data).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload['data']).toEqual(masterStockPointDocArray)
+              expect(result.data).toEqual(masterStockPointDocArray)
             })
         }
       )
@@ -167,21 +152,14 @@ describe('Master Stock Point Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(JSON, 'parse').mockImplementation(() => ({}))
           jest
             .spyOn(mockMasterStockPointModel, 'aggregate')
             .mockImplementation({
               exec: jest.fn().mockRejectedValue(new Error()),
             } as any)
 
-          await expect(
-            masterStockPointService.all({
-              first: 0,
-              rows: 10,
-              sortField: 'created_at',
-              sortOrder: 1,
-              filters: {},
-            })
-          ).rejects.toThrow(Error)
+          await expect(masterStockPointService.all('')).rejects.toThrow(Error)
         }
       )
     }
@@ -202,25 +180,27 @@ describe('Master Stock Point Service', () => {
               return Promise.resolve(findMock)
             })
 
-          await masterStockPointService
-            .detail(findMock.id)
-            .then((result: GlobalResponse) => {
-              // Deep equality check
-              expect(result.payload).toEqual(findMock)
+          await masterStockPointService.detail(findMock.id).then((result) => {
+            // Deep equality check
+            expect(result).toEqual(findMock)
+          })
+        }
+      )
 
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_STOCK_POINT_GET'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Response error if detail data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(masterStockPointModel, 'findOne').mockResolvedValue(null)
+          await expect(async () => {
+            await masterStockPointService.detail(mockMasterStockPoint().id)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -264,23 +244,27 @@ describe('Master Stock Point Service', () => {
             .find({
               id: findMock.id,
             })
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Deep equality check
-              expect(result.payload).toEqual(findMock)
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_STOCK_POINT_GET'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toEqual(findMock)
             })
+        }
+      )
+
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Response error if detail data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(masterStockPointModel, 'findOne').mockResolvedValue(null)
+          await expect(async () => {
+            await masterStockPointService.find(mockMasterStockPoint().id)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -291,11 +275,9 @@ describe('Master Stock Point Service', () => {
         async () => {
           const targetData = masterStockPointDocArray[0]
 
-          jest
-            .spyOn(masterStockPointModel, 'findOne')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+          jest.spyOn(masterStockPointModel, 'findOne').mockRejectedValue(() => {
+            throw new Error()
+          })
 
           await expect(async () => {
             await masterStockPointService.find({ id: targetData.id })
@@ -315,22 +297,9 @@ describe('Master Stock Point Service', () => {
 
           await masterStockPointService
             .add(mockMasterStockPoint(), mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_STOCK_POINT_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
         }
       )
@@ -343,26 +312,13 @@ describe('Master Stock Point Service', () => {
           delete dataTest.code
           await masterStockPointService
             .add(dataTest, mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
+              expect(result).toHaveProperty('id')
 
-              expect(result.payload).toHaveProperty('code')
+              expect(result).toHaveProperty('code')
 
-              expect(result.payload['code']).not.toBe('')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_STOCK_POINT_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result.code).not.toBe('')
             })
         }
       )
@@ -372,11 +328,9 @@ describe('Master Stock Point Service', () => {
           tab: 1,
         }),
         async () => {
-          jest
-            .spyOn(masterStockPointModel, 'create')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+          jest.spyOn(masterStockPointModel, 'create').mockRejectedValue(() => {
+            throw new Error()
+          })
 
           await expect(async () => {
             await masterStockPointService.add(
@@ -407,23 +361,32 @@ describe('Master Stock Point Service', () => {
               },
               accountDocArray[0].id
             )
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_STOCK_POINT_EDIT'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
+          tab: 1,
+        }),
+        async () => {
+          const targetID = mockMasterStockPoint().id
+          jest
+            .spyOn(masterStockPointModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
+
+          await expect(async () => {
+            await masterStockPointService.edit(
+              {
+                ...mockMasterStockPoint(),
+                __v: 0,
+              },
+              targetID
+            )
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -435,7 +398,7 @@ describe('Master Stock Point Service', () => {
           const targetID = mockMasterStockPoint().id
           jest
             .spyOn(masterStockPointModel, 'findOneAndUpdate')
-            .mockImplementationOnce(() => {
+            .mockRejectedValue(() => {
               throw new Error()
             })
 
@@ -457,30 +420,19 @@ describe('Master Stock Point Service', () => {
     testCaption('DELETE DATA', 'data', 'Master Stock Point - Delete data'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should delete master stock point', {
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
           tab: 1,
         }),
         async () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          const targetID = mockMasterStockPoint().id
+          jest
+            .spyOn(masterStockPointModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
 
-          jest.spyOn(masterStockPointModel, 'findOneAndUpdate')
-
-          await masterStockPointService
-            .delete(masterStockPointDocArray[0].id)
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_STOCK_POINT_DELETE'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+          await expect(async () => {
+            await masterStockPointService.delete(targetID)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -489,17 +441,34 @@ describe('Master Stock Point Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
           const targetID = mockMasterStockPoint().id
-
           jest
             .spyOn(masterStockPointModel, 'findOneAndUpdate')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+            .mockRejectedValue(new Error())
 
           await expect(async () => {
             await masterStockPointService.delete(targetID)
           }).rejects.toThrow(Error)
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should success delete data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(masterStockPointModel, 'findOneAndUpdate')
+            .mockResolvedValue(masterStockPointDocArray[0])
+
+          await masterStockPointService
+            .delete(masterStockPointDocArray[0].id)
+            .then((result) => {
+              // Should return code if document found
+              expect(result).toHaveProperty('name')
+            })
         }
       )
     }

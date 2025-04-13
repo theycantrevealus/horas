@@ -161,7 +161,21 @@
         "id": "menu-643c38916d198727bfbf301d",
         "name": "i18n",
         "url": "/setting/i18n",
-        "identifier": "i18n"
+        "identifier": "i18n",
+        "access":[
+          {
+            "domIdentity": "btnEditi18n",
+            "dispatchName": "i18nEdit"
+          },
+          {
+            "domIdentity": "btnAddi18n",
+            "dispatchName": "i18nAdd"
+          },
+          {
+            "domIdentity": "btnDeletei18n",
+            "dispatchName": "i18nDelete"
+          }
+        ]
       },
       {
         "id": "menu-643a68c5e6f975d6f3a5b131",

@@ -7,7 +7,7 @@ import {
 } from '@gateway_core/account/dto/authority.dto'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
+import { HORASInterceptor } from '@interceptors/default'
 import {
   Body,
   Controller,
@@ -42,13 +42,13 @@ export class AuthorityController {
   @Get()
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'CoreAuthority', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Fetch all account authority',
-    description: 'Showing account authority data',
+    summary: 'Fetch all authority',
+    description: 'Showing authority data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
@@ -58,10 +58,10 @@ export class AuthorityController {
   @Get(':id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'CoreAuthority', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiParam({
     name: 'id',
   })
@@ -76,12 +76,12 @@ export class AuthorityController {
   @Post()
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'CoreAuthority', action: 'add' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Add new account',
+    summary: 'Add new authority',
     description: ``,
   })
   async add(
@@ -97,10 +97,10 @@ export class AuthorityController {
     name: 'id',
   })
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'CoreAuthority', action: 'edit' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit data',
     description: ``,
@@ -116,12 +116,12 @@ export class AuthorityController {
     description: 'Data document id',
   })
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'CoreAuthority', action: 'delete' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Delete authority',
+    summary: 'Delete data',
     description: ``,
   })
   async delete(@Param() param) {

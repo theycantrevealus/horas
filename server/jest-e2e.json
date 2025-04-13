@@ -28,13 +28,17 @@
   },
   "rootDir": ".",
   "preset": "ts-jest",
-  "testRegex": "controller.e2e-spec\\.ts$",
+  "testRegex": ".*\\.e2e-spec\\.ts$",
   "testEnvironment": "node",
   "transform": {
     "^.+\\.ts?$": "ts-jest"
   },
   "transformIgnorePatterns": [
-    "<rootDir>/node_modules/"
+    "<rootDir>/node_modules/",
+    "<rootDir>/dist/"
+  ],
+  "roots": [
+    "<rootDir>/apps/"
   ],
   "collectCoverage": true,
   "coveragePathIgnorePatterns": [
@@ -53,6 +57,9 @@
   "collectCoverageFrom": [
     "<rootDir>/apps/gateway_core/src/modules/account/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_core/src/modules/master/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_core/src/modules/i18n/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_core/src/modules/lov/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_inventory/src/modules/general_issue_note/**/*.{js,jsx,ts,tsx}",
     "!<rootDir>/node_modules/",
     "!<rootDir>/**/*.mock.{js,jsx,ts,tsx}"
   ],

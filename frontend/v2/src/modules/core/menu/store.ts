@@ -62,7 +62,7 @@ export const storeMenu = defineStore('menu', {
     // },
     async edit(id: string, parameter: MenuParameterEdit) {
       return await api({ requiresAuth: true, responseToast: true })
-        .put(`${import.meta.env.VITE_API_URL}/v1/menu/${id}`, parameter)
+        .patch(`${import.meta.env.VITE_API_URL}/v1/menu/${id}`, parameter)
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data
           return data

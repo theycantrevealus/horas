@@ -1,42 +1,38 @@
 import { faker } from '@faker-js/faker'
-import {
-  AuthorityAddDTO,
-  AuthorityEditDTO,
-} from '@gateway_core/account/dto/authority.dto'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockAccount } from '@gateway_core/account/mock/account.mock'
 import { Authority, AuthorityDocument } from '@schemas/account/authority.model'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
-export const mockAuthorityService = {
-  all: jest.fn().mockResolvedValue((dto) => dto),
-  add: jest
-    .fn()
-    .mockImplementation((dto: AuthorityAddDTO, authority: Authority) => {
-      return Promise.resolve({
-        payload: {
-          ...dto,
-          id: `authority-${new Types.ObjectId().toString()}`,
-        },
-      })
-    }),
-  edit: jest.fn().mockImplementation((dto: AuthorityEditDTO, id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-  detail: jest.fn().mockResolvedValue((dto) => dto),
-  delete: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve({
-      payload: {
-        id: id,
-      },
-    })
-  }),
-}
+// export const mockAuthorityService = {
+//   all: jest.fn().mockResolvedValue((dto) => dto),
+//   add: jest
+//     .fn()
+//     .mockImplementation((dto: AuthorityAddDTO, authority: Authority) => {
+//       return Promise.resolve({
+//         payload: {
+//           ...dto,
+//           id: `authority-${new Types.ObjectId().toString()}`,
+//         },
+//       })
+//     }),
+//   edit: jest.fn().mockImplementation((dto: AuthorityEditDTO, id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+//   detail: jest.fn().mockResolvedValue((dto) => dto),
+//   delete: jest.fn().mockImplementation((id: string) => {
+//     return Promise.resolve({
+//       payload: {
+//         id: id,
+//       },
+//     })
+//   }),
+// }
 
 export const mockAuthority = (
   id = `authority-${new Types.ObjectId().toString()}`,

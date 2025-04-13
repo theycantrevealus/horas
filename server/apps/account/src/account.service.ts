@@ -91,8 +91,8 @@ export class AccountService {
             first_name: parameter.first_name,
             last_name: parameter.last_name,
             phone: parameter.phone,
-            access: parameter.access,
-            permission: parameter.permission,
+            // access: parameter.access,
+            // permission: parameter.permission,
           },
           { upsert: false, new: true }
         )

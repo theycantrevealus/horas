@@ -35,7 +35,7 @@ export const storeAccount = defineStore('account', {
     },
     async edit(id: string, parameter: AccountEdit) {
       return await api({ requiresAuth: true, responseToast: true })
-        .put(`${import.meta.env.VITE_API_URL}/v1/account/${id}`, parameter)
+        .patch(`${import.meta.env.VITE_API_URL}/v1/account/${id}`, parameter)
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data
           return data

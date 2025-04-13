@@ -1,7 +1,7 @@
+import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
 import { ApiProperty } from '@nestjs/swagger'
-import { CLocale } from '@schemas/i18n/i18n'
 import { IMaterialRequisitionDetail } from '@schemas/inventory/material.requisition.detail.interface'
-import { ILocale } from '@schemas/locale'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
@@ -14,15 +14,17 @@ import {
 
 import { CMaterialRequisitionDetail } from './material.requisition.detail'
 
-export class MaterialRequisitionAddDTO {
+export class CMaterialRequisition {
   @ApiProperty({
-    type: CLocale,
-    description: 'Currency',
+    example: 'xxx-xxxx',
+    minLength: 8,
+    maxLength: 24,
+    description: 'Unique code. Left it blank so it will generate auto code',
   })
+  @MinLength(8)
+  @MaxLength(24)
   @IsNotEmpty()
-  @Type(() => CLocale)
-  @ValidateNested({ each: true })
-  locale: ILocale
+  id: string
 
   @ApiProperty({
     example: 'xxx-xxxx',
@@ -41,6 +43,44 @@ export class MaterialRequisitionAddDTO {
   })
   @IsNotEmpty()
   transaction_date: Date
+}
+
+export class MaterialRequisitionAddDTO {
+  // @ApiProperty({
+  //   type: CLocale,
+  //   description: 'Locale',
+  // })
+  // @IsNotEmpty()
+  // @Type(() => CLocale)
+  // @ValidateNested({ each: true })
+  // locale: ILocale
+
+  @ApiProperty({
+    example: 'xxx-xxxx',
+    minLength: 8,
+    maxLength: 24,
+    description: 'Unique code. Left it blank so it will generate auto code',
+  })
+  @MinLength(8)
+  @MaxLength(24)
+  @IsNotEmpty()
+  code: string
+
+  @ApiProperty({
+    example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
+    description: 'Material requisition date',
+  })
+  @IsNotEmpty()
+  transaction_date: Date
+
+  @ApiProperty({
+    type: CMasterStockPoint,
+    description: 'Requester stock point',
+  })
+  @Type(() => CMasterStockPoint)
+  @ValidateNested({ each: true })
+  @IsNotEmpty()
+  stock_point: IMasterStockPoint
 
   @ApiProperty({
     type: CMaterialRequisitionDetail,
@@ -69,15 +109,6 @@ export class MaterialRequisitionAddDTO {
 }
 
 export class MaterialRequisitionEditDTO {
-  @ApiProperty({
-    type: CLocale,
-    description: 'Currency',
-  })
-  @IsNotEmpty()
-  @Type(() => CLocale)
-  @ValidateNested({ each: true })
-  locale: ILocale
-
   @ApiProperty({
     example: 'xxx-xxxx',
     minLength: 8,

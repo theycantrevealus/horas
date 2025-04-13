@@ -33,6 +33,7 @@ import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
+import { HTTPDefaultResponseCheck } from '@utility/test/response.default'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
@@ -143,8 +144,11 @@ describe('Master Item Brand Controller', () => {
               query: `lazyEvent=abc`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                null
+              )
             })
         }
       )
@@ -169,8 +173,7 @@ describe('Master Item Brand Controller', () => {
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
             })
         }
       )
@@ -195,8 +198,7 @@ describe('Master Item Brand Controller', () => {
               url: `/master/brand/${mockMasterItemBrand().id}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
             })
         }
       )
@@ -222,8 +224,11 @@ describe('Master Item Brand Controller', () => {
               body: {},
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -251,8 +256,11 @@ describe('Master Item Brand Controller', () => {
               body: data,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -278,8 +286,11 @@ describe('Master Item Brand Controller', () => {
               body: data,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.CREATED,
+                logger.verbose
+              )
             })
         }
       )
@@ -305,8 +316,11 @@ describe('Master Item Brand Controller', () => {
               body: {},
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -327,8 +341,11 @@ describe('Master Item Brand Controller', () => {
               body: {},
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
             })
         }
       )
@@ -355,8 +372,11 @@ describe('Master Item Brand Controller', () => {
               body: data,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.ACCEPTED,
+                logger.verbose
+              )
             })
         }
       )
@@ -372,6 +392,9 @@ describe('Master Item Brand Controller', () => {
         }),
         async () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(masterItemBrandModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
           return app
             .inject({
               method: 'DELETE',
@@ -382,8 +405,39 @@ describe('Master Item Brand Controller', () => {
               url: `/master/brand/${mockMasterItemBrand().id}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NOT_FOUND,
+                logger.warn
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return success delete', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(masterItemBrandModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockMasterItemBrand())
+          return app
+            .inject({
+              method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/master/brand/${mockMasterItemBrand().id}`,
+            })
+            .then((result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NO_CONTENT,
+                logger.verbose
+              )
             })
         }
       )

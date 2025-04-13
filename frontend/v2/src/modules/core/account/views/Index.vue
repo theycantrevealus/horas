@@ -169,6 +169,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
+    async accountDelete() {},
     async loadLazyData() {
       this.loading = true
       await this.accountStore
@@ -186,23 +187,26 @@ export default defineComponent({
           this.loading = false
         })
     },
-    formatDate(date, format) {
+    formatDate(date: string, format: string) {
       return DateManagement.formatDate(date, format)
     },
-    onPage(event) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onPage(event: any) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onSort(event) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onSort(event: any) {
       this.lazyParams = event
       this.loadLazyData()
     },
-    onFilter(event) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onFilter(event: any) {
       this.lazyParams = event
       // this.lazyParams.filters = this.filters
       this.loadLazyData()
     },
-    accountEdit(id) {
+    accountEdit(id: string) {
       this.$router.push({
         path: `/core/account/edit/${id}`,
         query: {

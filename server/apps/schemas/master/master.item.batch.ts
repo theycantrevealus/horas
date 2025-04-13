@@ -10,7 +10,7 @@ import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 export class CMasterItemBatch {
   @ApiProperty({
     type: String,
-    example: `item-${new Types.ObjectId().toString()}`,
+    example: `item_batch-${new Types.ObjectId().toString()}`,
   })
   id: string
 
@@ -22,9 +22,24 @@ export class CMasterItemBatch {
 
   @ApiProperty({
     type: CMasterItem,
-    example: 'XX-XX',
   })
   item: IMasterItem
+
+  @ApiProperty({
+    type: Number,
+    description:
+      'Value will set from purchase order price after approval and received via GRN flow',
+    example: 0,
+  })
+  price_buy: number
+
+  @ApiProperty({
+    type: Number,
+    description:
+      'Used for selling price or calculate stock point costs or revenue depends on system configuration',
+    example: 0,
+  })
+  price_sell: number
 
   @ApiProperty({
     type: Date,
@@ -45,6 +60,16 @@ export class MasterItemBatch {
 
   @Prop(MasterItemJoin)
   item: IMasterItem
+
+  @Prop({
+    type: SchemaTypes.Number,
+  })
+  price_buy: number
+
+  @Prop({
+    type: SchemaTypes.Number,
+  })
+  price_sell: number
 
   @Prop({
     type: SchemaTypes.Date,

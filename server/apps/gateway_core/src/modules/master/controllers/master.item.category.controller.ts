@@ -1,4 +1,5 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemCategoryAddDTO,
@@ -6,7 +7,7 @@ import {
 } from '@gateway_core/master/dto/master.item.category'
 import { MasterItemCategoryService } from '@gateway_core/master/services/master.item.category.service'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
+import { HORASInterceptor } from '@interceptors/default'
 import {
   Body,
   Controller,
@@ -41,9 +42,10 @@ export class MasterItemCategoryController {
   @Get('category')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemCategory', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all account',
     description: 'Showing categories data',
@@ -56,9 +58,10 @@ export class MasterItemCategoryController {
   @Get('category/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemCategory', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -70,9 +73,10 @@ export class MasterItemCategoryController {
   @Post('category')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemCategory', action: 'add' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add new item category',
     description: ``,
@@ -87,9 +91,10 @@ export class MasterItemCategoryController {
   @Patch('category/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemCategory', action: 'edit' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit new item category',
     description: ``,
@@ -107,9 +112,10 @@ export class MasterItemCategoryController {
   @Delete('category/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemCategory', action: 'delete' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit new item category',
     description: ``,

@@ -15,6 +15,7 @@ import { MasterQueueMachineService } from '@gateway_core/master/services/master.
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
@@ -26,16 +27,14 @@ import {
   MasterQueueMachineDocument,
 } from '@schemas/master/master.queue.machine'
 import { AuthService } from '@security/auth.service'
-import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
 describe('Master Queue Service', () => {
   let masterQueueService: MasterQueueMachineService
-  let masterQueueModel: Model<MasterQueueMachine>
   let configService: ConfigService
+  let masterQueueModel: Model<MasterQueueMachine>
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -96,19 +95,14 @@ describe('Master Queue Service', () => {
       ],
     }).compile()
 
-    configService = module.get<ConfigService>(ConfigService)
-
     masterQueueService = module.get<MasterQueueMachineService>(
       MasterQueueMachineService
     )
+    configService = module.get<ConfigService>(ConfigService)
     masterQueueModel = module.get<Model<MasterQueueMachineDocument>>(
       getModelToken(MasterQueueMachine.name, 'primary')
     )
 
-    jest.clearAllMocks()
-  })
-
-  afterEach(() => {
     jest.clearAllMocks()
   })
 
@@ -138,25 +132,12 @@ describe('Master Queue Service', () => {
               "filters": {}
             }`
           )
-          .then((result: GlobalResponse) => {
-            // Should classify transaction
-            expect(result.transaction_classify).toEqual(
-              'MASTER_QUEUE_MACHINE_LIST'
-            )
-
-            // Not an empty string so be informative
-            expect(result.message).not.toBe('')
-
-            // Should return success code
-            expect(result.statusCode.customCode).toEqual(
-              modCodes.Global.success
-            )
-
+          .then((result) => {
             // Should be an array of data
-            expect(result.payload['data']).toBeInstanceOf(Array)
+            expect(result.data).toBeInstanceOf(Array)
 
             // Data should be defined
-            expect(result.payload['data']).toEqual(masterQueueDocArray)
+            expect(result.data).toEqual(masterQueueDocArray)
           })
       }
     )
@@ -166,19 +147,13 @@ describe('Master Queue Service', () => {
         tab: 1,
       }),
       async () => {
+        jest.spyOn(JSON, 'parse').mockImplementation(() => ({}))
+
         jest.spyOn(mockMasterQueueModel, 'aggregate').mockImplementation({
           exec: jest.fn().mockRejectedValue(new Error()),
         } as any)
 
-        await expect(
-          masterQueueService.all({
-            first: 0,
-            rows: 10,
-            sortField: 'created_at',
-            sortOrder: 1,
-            filters: {},
-          })
-        ).rejects.toThrow(Error)
+        await expect(masterQueueService.all(``)).rejects.toThrow(Error)
       }
     )
   })
@@ -196,25 +171,27 @@ describe('Master Queue Service', () => {
             return Promise.resolve(findMock)
           })
 
-          await masterQueueService
-            .detail(findMock.id)
-            .then((result: GlobalResponse) => {
-              // Deep equality check
-              expect(result.payload).toEqual(findMock)
+          await masterQueueService.detail(findMock.id).then((result) => {
+            // Deep equality check
+            expect(result).toEqual(findMock)
+          })
+        }
+      )
 
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_QUEUE_MACHINE_GET'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Response error if detail data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(masterQueueModel, 'findOne').mockResolvedValue(null)
+          await expect(async () => {
+            await masterQueueService.detail(mockMasterQueue().id)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -225,7 +202,7 @@ describe('Master Queue Service', () => {
         async () => {
           const targetData = masterQueueDocArray[0]
 
-          jest.spyOn(masterQueueModel, 'findOne').mockImplementationOnce(() => {
+          jest.spyOn(masterQueueModel, 'findOne').mockRejectedValue(() => {
             throw new Error()
           })
 
@@ -247,22 +224,9 @@ describe('Master Queue Service', () => {
 
           await masterQueueService
             .add(mockMasterQueue(), mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_QUEUE_MACHINE_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
         }
       )
@@ -275,26 +239,13 @@ describe('Master Queue Service', () => {
           delete dataTest.code
           await masterQueueService
             .add(dataTest, mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
+              expect(result).toHaveProperty('id')
 
-              expect(result.payload).toHaveProperty('code')
+              expect(result).toHaveProperty('code')
 
-              expect(result.payload['code']).not.toBe('')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_QUEUE_MACHINE_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result.code).not.toBe('')
             })
         }
       )
@@ -304,7 +255,7 @@ describe('Master Queue Service', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(masterQueueModel, 'create').mockImplementationOnce(() => {
+          jest.spyOn(masterQueueModel, 'create').mockRejectedValue(() => {
             throw new Error()
           })
 
@@ -332,23 +283,30 @@ describe('Master Queue Service', () => {
             },
             accountDocArray[0].id
           )
-          .then((result: GlobalResponse) => {
+          .then((result) => {
             // Should create id
-            expect(result.payload).toHaveProperty('id')
-
-            // Should classify transaction
-            expect(result.transaction_classify).toEqual(
-              'MASTER_QUEUE_MACHINE_EDIT'
-            )
-
-            // Not an empty string so be informative
-            expect(result.message).not.toBe('')
-
-            // Should return success code
-            expect(result.statusCode.customCode).toEqual(
-              modCodes.Global.success
-            )
+            expect(result).toHaveProperty('id')
           })
+      }
+    )
+
+    it(
+      testCaption('HANDLING', 'data', 'Response error if data is not found', {
+        tab: 1,
+      }),
+      async () => {
+        const targetID = mockMasterQueue().id
+        jest.spyOn(masterQueueModel, 'findOneAndUpdate').mockResolvedValue(null)
+
+        await expect(async () => {
+          await masterQueueService.edit(
+            {
+              ...mockMasterQueue(),
+              __v: 0,
+            },
+            targetID
+          )
+        }).rejects.toThrow(NotFoundException)
       }
     )
 
@@ -381,30 +339,19 @@ describe('Master Queue Service', () => {
     testCaption('DELETE DATA', 'data', 'Master Queue - Delete data'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should delete master queue', {
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
           tab: 1,
         }),
         async () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          const targetID = mockMasterItemUnit().id
+          jest
+            .spyOn(masterQueueModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
 
-          jest.spyOn(masterQueueModel, 'findOneAndUpdate')
-
-          await masterQueueService
-            .delete(masterQueueDocArray[0].id)
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_QUEUE_MACHINE_DELETE'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+          await expect(async () => {
+            await masterQueueService.delete(targetID)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -413,21 +360,42 @@ describe('Master Queue Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
           const targetID = mockMasterItemUnit().id
-
           jest
             .spyOn(masterQueueModel, 'findOneAndUpdate')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+            .mockRejectedValue(new Error())
 
           await expect(async () => {
             await masterQueueService.delete(targetID)
           }).rejects.toThrow(Error)
         }
       )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should success delete data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(masterQueueModel, 'findOneAndUpdate')
+            .mockResolvedValue(masterQueueDocArray[0])
+
+          await masterQueueService
+            .delete(masterQueueDocArray[0].id)
+            .then((result) => {
+              // Should return code if document found
+              expect(result).toHaveProperty('code')
+            })
+        }
+      )
     }
   )
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
 
   afterAll(async () => {
     jest.clearAllMocks()

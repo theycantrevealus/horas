@@ -35,6 +35,7 @@ import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
+import { HTTPDefaultResponseCheck } from '@utility/test/response.default'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
@@ -161,8 +162,11 @@ describe('Authority Controller', () => {
               query: `lazyEvent=abc`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-              expect(logger.warn).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                null
+              )
             })
         }
       )
@@ -187,8 +191,7 @@ describe('Authority Controller', () => {
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
             })
         }
       )
@@ -199,7 +202,7 @@ describe('Authority Controller', () => {
     testCaption('FLOW', 'feature', 'Authority - Get data detail'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should return data', {
+        testCaption('HANDLING', 'data', 'Should return detail data', {
           tab: 1,
         }),
         async () => {
@@ -213,8 +216,7 @@ describe('Authority Controller', () => {
               url: `/authority/${mockAuthority().id}`,
             })
             .then((result) => {
-              expect(result.statusCode).toEqual(HttpStatus.OK)
-              expect(logger.verbose).toHaveBeenCalled()
+              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
             })
         }
       )
@@ -238,8 +240,12 @@ describe('Authority Controller', () => {
             body: {},
           })
           .then((result) => {
-            expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-            expect(logger.warn).toHaveBeenCalled()
+            // console.log(`Add`, result)
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.BAD_REQUEST,
+              logger.warn
+            )
           })
       }
     )
@@ -268,8 +274,11 @@ describe('Authority Controller', () => {
             body: data,
           })
           .then((result) => {
-            expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-            expect(logger.warn).toHaveBeenCalled()
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.BAD_REQUEST,
+              logger.warn
+            )
           })
       }
     )
@@ -296,8 +305,7 @@ describe('Authority Controller', () => {
             body: data,
           })
           .then((result) => {
-            expect(result.statusCode).toEqual(HttpStatus.OK)
-            expect(logger.verbose).toHaveBeenCalled()
+            HTTPDefaultResponseCheck(result, HttpStatus.CREATED, logger.verbose)
           })
       }
     )
@@ -320,8 +328,11 @@ describe('Authority Controller', () => {
             body: {},
           })
           .then((result) => {
-            expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-            expect(logger.warn).toHaveBeenCalled()
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.BAD_REQUEST,
+              logger.warn
+            )
           })
       }
     )
@@ -342,8 +353,11 @@ describe('Authority Controller', () => {
             body: {},
           })
           .then((result) => {
-            expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST)
-            expect(logger.warn).toHaveBeenCalled()
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.BAD_REQUEST,
+              logger.warn
+            )
           })
       }
     )
@@ -371,8 +385,11 @@ describe('Authority Controller', () => {
             body: data,
           })
           .then((result) => {
-            expect(result.statusCode).toEqual(HttpStatus.OK)
-            expect(logger.verbose).toHaveBeenCalled()
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.ACCEPTED,
+              logger.verbose
+            )
           })
       }
     )
@@ -380,11 +397,41 @@ describe('Authority Controller', () => {
 
   describe(testCaption('FLOW', 'feature', 'Authority - Delete data'), () => {
     it(
+      testCaption(
+        'HANDLING',
+        'data',
+        'Should return 404 if data is not found',
+        {
+          tab: 1,
+        }
+      ),
+      async () => {
+        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+        jest.spyOn(authorityModel, 'findOneAndUpdate').mockResolvedValue(null)
+        return app
+          .inject({
+            method: 'DELETE',
+            headers: {
+              authorization: 'Bearer ey...',
+              'content-type': 'application/json',
+            },
+            url: `/authority/${mockAuthority().id}`,
+          })
+          .then(async (result) => {
+            HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
+          })
+      }
+    )
+
+    it(
       testCaption('HANDLING', 'data', 'Should return success delete', {
         tab: 1,
       }),
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+        jest
+          .spyOn(authorityModel, 'findOneAndUpdate')
+          .mockResolvedValue(mockAuthority())
         return app
           .inject({
             method: 'DELETE',
@@ -395,11 +442,18 @@ describe('Authority Controller', () => {
             url: `/authority/${mockAuthority().id}`,
           })
           .then((result) => {
-            expect(result.statusCode).toEqual(HttpStatus.OK)
-            expect(logger.verbose).toHaveBeenCalled()
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.NO_CONTENT,
+              logger.verbose
+            )
           })
       }
     )
+  })
+
+  afterEach(async () => {
+    jest.clearAllMocks()
   })
 
   afterAll(async () => {

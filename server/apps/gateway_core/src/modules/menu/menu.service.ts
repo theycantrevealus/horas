@@ -46,7 +46,7 @@ export class MenuService {
 
     return await prime_datatable(parameter, this.menuModel)
       .then((result) => {
-        response.payload = result.payload
+        response.payload = result
         return response
       })
       .catch((error: Error) => {
@@ -220,7 +220,8 @@ export class MenuService {
                   parent: data.parent,
                   menu_group: data.menu_group,
                   identifier: data.identifier,
-                  permission: data.permission,
+                  // permission: data.permission,
+                  access: data.access,
                   to: data.url,
                   icon: data.icon,
                   show_on_menu: data.show_on_menu,

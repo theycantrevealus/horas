@@ -1,23 +1,29 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMenuGroup } from '@gateway_core/menu/interfaces/menu.group.interface'
-import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
+import { IAccess } from '@gateway_core/menu/interfaces/menu.interface'
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { MenuGroupJoin } from '@schemas/menu/menu.group'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
+
+export const AccessJoin = raw({
+  domIdentity: { type: String },
+  dispatchName: { type: String },
+})
 
 export const MenuJoin = raw({
   id: { type: String },
   name: { type: String },
   url: { type: String },
   identifier: { type: String },
+  access: { type: [AccessJoin], _id: false },
 })
 
-export const MenuPermissionJoin = raw({
-  domIdentity: { type: String },
-  dispatchName: { type: String },
-  menu: { type: MenuJoin, _id: false },
-})
+// export const MenuPermissionJoin = raw({
+//   domIdentity: { type: String },
+//   dispatchName: { type: String },
+//   menu: { type: MenuJoin, _id: false },
+// })
 
 export type MenuDocument = HydratedDocument<Menu>
 @Schema({ collection: 'core_menu' })
@@ -45,10 +51,17 @@ export class Menu {
 
   @Prop({
     unique: false,
-    type: [MenuPermissionJoin],
+    type: [AccessJoin],
     _id: false,
   })
-  permission: IMenuPermission
+  access: IAccess[]
+
+  // @Prop({
+  //   unique: false,
+  //   type: [MenuPermissionJoin],
+  //   _id: false,
+  // })
+  // permission: IMenuPermission
 
   @Prop({ type: SchemaTypes.Number })
   level: number

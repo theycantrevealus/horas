@@ -113,11 +113,21 @@ export default defineComponent({
       },
     }
   },
+  watch: {
+    authToken(token) {
+      if (!token && token == '') {
+        this.$router.push({ name: 'Login' })
+      }
+    },
+  },
   computed: {
     ...mapStores(storeCore),
     ...mapState(storeCore, {
       getMenuModeStatus: 'getSidePanel',
     }),
+    authToken() {
+      return this.coreStore.auth.token
+    },
   },
   created() {
     this.coreStore.$subscribe((_mutation, state) => {

@@ -6,7 +6,6 @@ import {
 } from '@gateway_core/account/dto/account.dto'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { IMenu } from '@gateway_core/menu/interfaces/menu.interface'
-import { IMenuPermission } from '@gateway_core/menu/interfaces/menu.permission.interface'
 import { HttpStatus } from '@nestjs/common'
 import { Account, AccountDocument } from '@schemas/account/account.model'
 import { IAuthority } from '@schemas/account/authority.model'
@@ -78,8 +77,9 @@ export const mockAccount = (
     faker.string.numeric(m.length)
   )}`,
   stock_point = [],
-  access: IMenu[] = [],
-  permission: IMenuPermission[] = [],
+  menu: IMenu[] = [],
+  // access: IMenu[] = [],
+  // permission: IMenuPermission[] = [],
   created_by: IAccount = {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
@@ -99,8 +99,9 @@ export const mockAccount = (
   password,
   phone,
   stock_point,
-  access,
-  permission,
+  menu,
+  // access,
+  // permission,
   created_by,
   created_at,
   updated_at,
@@ -137,7 +138,8 @@ export const mockAccountDoc = (
       faker.string.numeric(m.length)
     )}`,
   stock_point: [],
-  access: mock?.access || [],
+  menu: mock?.menu || [],
+  // access: mock?.access || [],
   created_by: mock?.created_by || {
     id: `account-${new Types.ObjectId().toString()}`,
     first_name: faker.person.firstName(),
@@ -168,7 +170,6 @@ export const accountArray = [
     '6285261516666',
     [],
     [],
-    [],
     mockAccount(),
     new TimeManagement().getTimezone('Asia/Jakarta'),
     new TimeManagement().getTimezone('Asia/Jakarta'),
@@ -187,7 +188,6 @@ export const accountArray = [
     faker.person.lastName(),
     '12345678',
     '6285261517777',
-    [],
     [],
     [],
     mockAccount(),
@@ -213,7 +213,8 @@ export const accountDocArray = [
       faker.string.numeric(m.length)
     )}`,
     stock_point: [],
-    access: [],
+    menu: [],
+    // access: [],
   }),
   mockAccountDoc({
     authority: {
@@ -229,6 +230,7 @@ export const accountDocArray = [
       faker.string.numeric(m.length)
     )}`,
     stock_point: [],
-    access: [],
+    menu: [],
+    // access: [],
   }),
 ]

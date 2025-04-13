@@ -63,10 +63,7 @@ export default {
   },
   methods: {
     logout() {
-      this.coreStore.signOut().then(() => {
-        // this.$socket.disconnect()
-        this.$router.push('/login')
-      })
+      this.coreStore.signOut()
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onMenuItemClick(event: any) {

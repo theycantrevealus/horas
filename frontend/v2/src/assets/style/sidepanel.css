@@ -7,13 +7,13 @@
 .sidepanel {
     z-index: 1000;
     position: absolute;
-    width: 3%;
+    width: 2%;
     left: 0;
     height: 100%;
     background: #fff;
     overflow: hidden;
     box-shadow: 2px 0 2px -2px #888;
-    transition-duration: 0.2s;
+    transition-duration: 0.5s;
 }
 
 .sidepanel li {
@@ -22,9 +22,9 @@
 
 .sidepanel-menu {
     position: absolute;
-    width: 100%;
+    width: 150%;
     top: 5%;
-    left: -20px;
+    left: -30px;
     height: 95%;
     overflow-y: scroll !important;
 }
@@ -78,9 +78,9 @@
 .sidepanel .layout-menu li a {
     display: block;
     font-weight: bolder;
-    padding: 10px !important;
-    margin: 0 !important;
-    left: 0 !important;
+    padding: 10px 10px 10px 100px !important;
+    margin: 0 0 0 -10px !important;
+    left: 100px !important;
     min-height: 20px !important;
     height: 40px;
     border-radius: 0;
@@ -89,7 +89,6 @@
     overflow-x: hidden;
     cursor: pointer;
     cursor: hand;
-    border-radius: 10px !important;
 }
 
 .sidepanel .layout-menu li a:hover {
@@ -112,13 +111,13 @@
     position: absolute;
     left: 50px;
     opacity: 0;
-    transition-duration: 0.5s;
 }
 
 .sidepanel.open .layout-menu li a span.caption {
     display: inline-block;
     position: absolute;
-    left: 70px;
+    /* left: 70px; */
+    left: 30px;
     opacity: 1;
 }
 
@@ -137,6 +136,7 @@
 .sidepanel.open .layout-menu li a .material-icons,
 .sidepanel.open .material-icons-outlined {
     margin: 0;
+    left: 0px;
 }
 
 .sidepanel .layout-menu li .layout-menuitem-root-text {
@@ -218,4 +218,5 @@ body.dark .main-container .sidepanel .layout-menu li .layout-menuitem-root-text 
     position: absolute;
     margin: 4px;
     font-size: 8pt !important;
+    display: none;
 }

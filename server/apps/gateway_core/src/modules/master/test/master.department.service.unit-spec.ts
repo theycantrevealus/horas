@@ -9,7 +9,7 @@ import { MasterDepartmentService } from '@gateway_core/master/services/master.de
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { HttpStatus } from '@nestjs/common'
+import { NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { getModelToken } from '@nestjs/mongoose'
@@ -21,15 +21,13 @@ import {
   MasterDepartmentDocument,
 } from '@schemas/master/master.department'
 import { AuthService } from '@security/auth.service'
-import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
-import { modCodes } from '@utility/modules'
 import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 
 describe('Master Department Service', () => {
-  let configService: ConfigService
   let masterDepartmentService: MasterDepartmentService
+  let configService: ConfigService
   let masterDepartmentModel: Model<MasterDepartment>
 
   beforeAll(async () => {
@@ -79,19 +77,14 @@ describe('Master Department Service', () => {
       ],
     }).compile()
 
-    configService = module.get<ConfigService>(ConfigService)
-
     masterDepartmentService = module.get<MasterDepartmentService>(
       MasterDepartmentService
     )
+    configService = module.get<ConfigService>(ConfigService)
     masterDepartmentModel = module.get<Model<MasterDepartmentDocument>>(
       getModelToken(MasterDepartment.name, 'primary')
     )
 
-    jest.clearAllMocks()
-  })
-
-  afterEach(() => {
     jest.clearAllMocks()
   })
 
@@ -123,25 +116,12 @@ describe('Master Department Service', () => {
               "filters": {}
             }`
             )
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_DEPARTMENT_LIST'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-
+            .then((result) => {
               // Should be an array of data
-              expect(result.payload['data']).toBeInstanceOf(Array)
+              expect(result.data).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.payload['data']).toEqual(masterDepartmentDocArray)
+              expect(result.data).toEqual(masterDepartmentDocArray)
             })
         }
       )
@@ -151,19 +131,13 @@ describe('Master Department Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(JSON, 'parse').mockImplementation(() => ({}))
+
           jest.spyOn(masterDepartmentModel, 'aggregate').mockImplementation({
             exec: jest.fn().mockRejectedValue(new Error()),
           } as any)
 
-          await expect(
-            masterDepartmentService.all({
-              first: 0,
-              rows: 10,
-              sortField: 'created_at',
-              sortOrder: 1,
-              filters: {},
-            })
-          ).rejects.toThrow(Error)
+          await expect(masterDepartmentService.all('')).rejects.toThrow(Error)
         }
       )
     }
@@ -184,25 +158,10 @@ describe('Master Department Service', () => {
               return Promise.resolve(findMock)
             })
 
-          await masterDepartmentService
-            .detail(findMock.id)
-            .then((result: GlobalResponse) => {
-              // Deep equality check
-              expect(result.payload).toEqual(findMock)
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_DEPARTMENT_GET'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+          await masterDepartmentService.detail(findMock.id).then((result) => {
+            // Deep equality check
+            expect(result).toEqual(findMock)
+          })
         }
       )
 
@@ -211,17 +170,11 @@ describe('Master Department Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetData = masterDepartmentDocArray[0]
-
-          jest
-            .spyOn(masterDepartmentModel, 'findOne')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+          jest.spyOn(masterDepartmentModel, 'findOne').mockResolvedValue(null)
 
           await expect(async () => {
-            await masterDepartmentService.detail(targetData.id)
-          }).rejects.toThrow(Error)
+            await masterDepartmentService.detail(masterDepartmentDocArray[0].id)
+          }).rejects.toThrow(NotFoundException)
         }
       )
     }
@@ -237,22 +190,9 @@ describe('Master Department Service', () => {
 
           await masterDepartmentService
             .add(mockMasterDepartment(), mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_DEPARTMENT_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
         }
       )
@@ -265,26 +205,15 @@ describe('Master Department Service', () => {
           delete dataTest.code
           await masterDepartmentService
             .add(dataTest, mockAccount())
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
+              expect(result).toHaveProperty('id')
 
-              expect(result.payload).toHaveProperty('code')
+              // Should have code
+              expect(result).toHaveProperty('code')
 
-              expect(result.payload['code']).not.toBe('')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_DEPARTMENT_ADD'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              // And not empty string
+              expect(result.code).not.toBe('')
             })
         }
       )
@@ -294,11 +223,9 @@ describe('Master Department Service', () => {
           tab: 1,
         }),
         async () => {
-          jest
-            .spyOn(masterDepartmentModel, 'create')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+          jest.spyOn(masterDepartmentModel, 'create').mockRejectedValue(() => {
+            throw new Error()
+          })
 
           await expect(async () => {
             await masterDepartmentService.add(
@@ -329,22 +256,9 @@ describe('Master Department Service', () => {
               },
               masterDepartmentDocArray[0].id
             )
-            .then((result: GlobalResponse) => {
+            .then((result) => {
               // Should create id
-              expect(result.payload).toHaveProperty('id')
-
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_DEPARTMENT_EDIT'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
+              expect(result).toHaveProperty('id')
             })
         }
       )
@@ -356,7 +270,7 @@ describe('Master Department Service', () => {
         async () => {
           jest
             .spyOn(masterDepartmentModel, 'findOneAndUpdate')
-            .mockReturnValue(null)
+            .mockResolvedValue(null)
 
           await expect(async () => {
             await masterDepartmentService.edit(
@@ -366,7 +280,7 @@ describe('Master Department Service', () => {
               },
               masterDepartmentDocArray[0].id
             )
-          }).rejects.toThrow(Error)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -397,45 +311,22 @@ describe('Master Department Service', () => {
   )
 
   describe(
-    testCaption('DELETE DATA', 'data', 'Master department - Delete data'),
+    testCaption('DELETE DATA', 'data', 'Master Department - Delete data'),
     () => {
       it(
-        testCaption('HANDLING', 'data', 'Should delete master department', {
+        testCaption('HANDLING', 'data', 'Response error if data is not found', {
           tab: 1,
         }),
         async () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-
+          const targetID = mockMasterDepartment().id
           jest
             .spyOn(masterDepartmentModel, 'findOneAndUpdate')
-            .mockResolvedValue({
-              statusCode: {
-                defaultCode: HttpStatus.OK,
-                customCode: modCodes.Global.success,
-                classCode: '',
-              },
-              message: 'Delete success message',
-              payload: {},
-              transaction_classify: 'MASTER_DEPARTMENT_DELETE',
-              transaction_id: '',
-            } satisfies GlobalResponse)
+            .mockResolvedValue(null)
 
-          await masterDepartmentService
-            .delete(masterDepartmentDocArray[0].id)
-            .then((result: GlobalResponse) => {
-              // Should classify transaction
-              expect(result.transaction_classify).toEqual(
-                'MASTER_DEPARTMENT_DELETE'
-              )
-
-              // Not an empty string so be informative
-              expect(result.message).not.toBe('')
-
-              // Should return success code
-              expect(result.statusCode.customCode).toEqual(
-                modCodes.Global.success
-              )
-            })
+          await expect(async () => {
+            await masterDepartmentService.delete(targetID)
+          }).rejects.toThrow(NotFoundException)
         }
       )
 
@@ -444,20 +335,42 @@ describe('Master Department Service', () => {
           tab: 1,
         }),
         async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
           const targetID = mockMasterDepartment().id
           jest
             .spyOn(masterDepartmentModel, 'findOneAndUpdate')
-            .mockImplementationOnce(() => {
-              throw new Error()
-            })
+            .mockRejectedValue(new Error())
 
           await expect(async () => {
             await masterDepartmentService.delete(targetID)
           }).rejects.toThrow(Error)
         }
       )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should success delete data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(masterDepartmentModel, 'findOneAndUpdate')
+            .mockResolvedValue(masterDepartmentDocArray[0])
+
+          await masterDepartmentService
+            .delete(masterDepartmentDocArray[0].id)
+            .then((result) => {
+              // Should return name if document found
+              expect(result).toHaveProperty('name')
+            })
+        }
+      )
     }
   )
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
 
   afterAll(async () => {
     jest.clearAllMocks()

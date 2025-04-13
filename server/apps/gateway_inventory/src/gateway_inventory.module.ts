@@ -3,9 +3,8 @@ import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
-import { GeneralReceiveNoteModule } from '@gateway_inventory/general_receive_note/general.receive.note.module'
+import { GeneralIssueNoteModule } from '@gateway_inventory/general_issue_note/general.issue.note.module'
 import { MaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
-import { PurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
 import { StockModule } from '@gateway_inventory/stock/stock.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -96,28 +95,29 @@ import * as redisStore from 'cache-manager-ioredis'
       },
       inject: [ConfigService],
     }),
-    // KafkaProvider(
-    //   ['STOCK_SERVICE'],
-    //   [
-    //     {
-    //       configClass: 'kafka.stock',
-    //       producerModeOnly: true,
-    //       schema: [
-    //         {
-    //           topic: 'stock',
-    //           headers: 'stock/movement/header.avsc',
-    //           key: 'global/key.avsc',
-    //           value: 'stock/movement/value.avsc',
-    //         },
-    //       ],
-    //     },
-    //   ]
-    // ),
+    KafkaProvider(
+      ['STOCK_SERVICE'],
+      [
+        {
+          configClass: 'kafka.stock',
+          producerModeOnly: true,
+          schema: [
+            {
+              topic: 'stock',
+              headers: 'stock/movement/header.avsc',
+              key: 'global/key.avsc',
+              value: 'stock/movement/value.avsc',
+            },
+          ],
+        },
+      ]
+    ),
     AuthModule,
     MaterialRequisitionModule,
+    GeneralIssueNoteModule,
     // GeneralReceiveNoteModule,
     // PurchaseOrderModule,
-    // StockModule,
+    StockModule, // TODO : Rename this redundant name
   ],
   controllers: [],
   providers: [ClientDecoratorProcessorService],

@@ -1,4 +1,5 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterQueueMachineAddDTO,
@@ -6,7 +7,7 @@ import {
 } from '@gateway_core/master/dto/master.queue.machine'
 import { MasterQueueMachineService } from '@gateway_core/master/services/master.queue.machine.service'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
+import { HORASInterceptor } from '@interceptors/default'
 import {
   Body,
   Controller,
@@ -29,7 +30,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
 @ApiTags('Master Data Queue Management')
@@ -42,24 +42,26 @@ export class MasterQueueMachineController {
   @Get('queue')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterQueueMachine', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all queue machine',
     description: '',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async all(@Query('lazyEvent') parameter: string): Promise<GlobalResponse> {
+  async all(@Query('lazyEvent') parameter: string) {
     return await this.masterQueueService.all(parameter)
   }
 
   @Get('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterQueueMachine', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiParam({
     name: 'id',
   })
@@ -67,16 +69,17 @@ export class MasterQueueMachineController {
     summary: 'Detail data',
     description: '',
   })
-  async detail(@Param() param: any): Promise<GlobalResponse> {
+  async detail(@Param() param: any) {
     return await this.masterQueueService.detail(param.id)
   }
 
   @Post('queue')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterQueueMachine', action: 'add' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add queue',
     description: ``,
@@ -84,16 +87,17 @@ export class MasterQueueMachineController {
   async add(
     @Body() parameter: MasterQueueMachineAddDTO,
     @CredentialAccount() account: IAccount
-  ): Promise<GlobalResponse> {
+  ) {
     return await this.masterQueueService.add(parameter, account)
   }
 
   @Patch('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterQueueMachine', action: 'edit' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit queue',
     description: ``,
@@ -104,16 +108,17 @@ export class MasterQueueMachineController {
   async edit(
     @Body() parameter: MasterQueueMachineEditDTO,
     @Param() param: any
-  ): Promise<GlobalResponse> {
+  ) {
     return await this.masterQueueService.edit(parameter, param.id)
   }
 
   @Delete('queue/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterQueueMachine', action: 'delete' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Delete queue',
     description: ``,
@@ -121,7 +126,7 @@ export class MasterQueueMachineController {
   @ApiParam({
     name: 'id',
   })
-  async delete(@Param() param: any): Promise<GlobalResponse> {
+  async delete(@Param() param: any) {
     return await this.masterQueueService.delete(param.id)
   }
 }

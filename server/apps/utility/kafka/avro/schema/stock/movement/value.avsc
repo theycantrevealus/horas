@@ -23,24 +23,28 @@
           },
           {
             "name": "brand",
-            "type": {
-              "type": "record",
-              "name": "brand.child",
-              "fields": [
-                {
-                  "name": "id",
-                  "type": "string"
-                },
-                {
-                  "name": "code",
-                  "type": "string"
-                },
-                {
-                  "name": "name",
-                  "type": "string"
-                }
-              ]
-            }
+            "type": [
+              "null",
+              {
+                "type": "record",
+                "name": "brand.child",
+                "default": "null",
+                "fields": [
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "code",
+                    "type": "string"
+                  },
+                  {
+                    "name": "name",
+                    "type": "string"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -110,10 +114,6 @@
     },
     {
       "name": "qty",
-      "type": "double"
-    },
-    {
-      "name": "balance",
       "type": "double"
     },
     {

@@ -3,22 +3,6 @@ import { IsNotEmpty, IsNumber } from 'class-validator'
 
 export class MaterialRequisitionApproval {
   @ApiProperty({
-    example: 'approved',
-    enum: [
-      'need_approval',
-      'approved',
-      'declined',
-      'processed',
-      'completed',
-      'purchase_requisition',
-      'cancelled',
-    ],
-    description: 'Approval status',
-  })
-  @IsNotEmpty()
-  status: string
-
-  @ApiProperty({
     example: 'Extra description',
     description: '',
   })

@@ -7,7 +7,7 @@ import {
 } from '@gateway_core/master/dto/master.department'
 import { MasterDepartmentService } from '@gateway_core/master/services/master.department.service'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
+import { HORASInterceptor } from '@interceptors/default'
 import {
   Body,
   Controller,
@@ -30,7 +30,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 
 @Controller('master')
 @ApiTags('Master Data Department Management')
@@ -43,28 +42,26 @@ export class MasterDepartmentController {
   @Get('department')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterDepartment', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all department',
     description: 'Showing department data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
-  async accountAll(
-    @Query('lazyEvent') parameter: string
-  ): Promise<GlobalResponse> {
+  async all(@Query('lazyEvent') parameter: string) {
     return await this.masterDepartmentService.all(parameter)
   }
 
   @Get('department/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterDepartment', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
   @ApiParam({
     name: 'id',
   })
@@ -79,10 +76,10 @@ export class MasterDepartmentController {
   @Post('department')
   @Version('1')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterDepartment', action: 'add' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add new department',
     description: ``,
@@ -90,8 +87,8 @@ export class MasterDepartmentController {
   async add(
     @Body() parameter: MasterDepartmentAddDTO,
     @CredentialAccount() account: IAccount
-  ): Promise<GlobalResponse> {
-    return await this.masterDepartmentService.add(parameter, account)
+  ) {
+    await this.masterDepartmentService.add(parameter, account)
   }
 
   @Patch('department/:id')
@@ -100,16 +97,16 @@ export class MasterDepartmentController {
     name: 'id',
   })
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterDepartment', action: 'edit' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit department',
     description: ``,
   })
   async edit(@Body() body: MasterDepartmentEditDTO, @Param() param: any) {
-    return await this.masterDepartmentService.edit(body, param.id)
+    await this.masterDepartmentService.edit(body, param.id)
   }
 
   @Delete('department/:id')
@@ -119,10 +116,10 @@ export class MasterDepartmentController {
     description: 'Data document id',
   })
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
   @PermissionManager({ group: 'MasterDepartment', action: 'delete' })
+  @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Delete department',
     description: ``,

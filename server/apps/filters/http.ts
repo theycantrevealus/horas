@@ -1,6 +1,7 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ArgumentsHost, HttpStatus } from '@nestjs/common'
 import { GlobalResponse } from '@utility/dto/response'
+import { hasSameKeys } from '@utility/filter'
 import { isExpressRequest } from '@utility/http'
 import { HorasLogging } from '@utility/logger/interfaces'
 import { modCodes } from '@utility/modules'
@@ -10,7 +11,7 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { Logger } from 'winston'
 
 export async function errorHttpHandler(
-  exception: GlobalResponse,
+  exception: any,
   host: ArgumentsHost,
   logger: Logger
 ) {
@@ -22,59 +23,54 @@ export async function errorHttpHandler(
     ? request.method
     : (request as FastifyRequest).method
 
-  let responseSet = {
-    message: exception.message,
-    ...exception,
-    timestamp: new Date().toISOString(),
-    path: request.url,
+  let responseSet: GlobalResponse = {
+    statusCode: {
+      defaultCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      customCode: modCodes.Global.failed,
+      classCode: 'CORE',
+    },
+    message: exception,
+    // message: `${exception.message.substring(0, 175)}...`,
+    transaction_classify: 'CORE',
+    transaction_id: '',
+    payload: {},
   }
 
-  let statusCode = HttpStatus.OK
-
   const errorPayload = exception.message.replace('Error: ', '').trim()
-
   if (isJSON(errorPayload)) {
-    const parseError: GlobalResponse = JSON.parse(errorPayload)
-    if (isJSON(parseError.message)) {
-      responseSet = {
-        ...JSON.parse(parseError.message),
-        timestamp: new Date().toISOString(),
-        path: request.url,
-      }
+    const errorParsed = JSON.parse(errorPayload)
+    if (hasSameKeys(errorParsed, responseSet)) {
+      responseSet = errorParsed
     } else {
-      responseSet = {
-        statusCode: parseError.statusCode,
-        // message: `${parseError.message.substring(0, 175)}...`,
-        message: `${parseError.message}`,
-        transaction_classify: parseError.transaction_classify,
-        transaction_id: parseError.transaction_id,
-        payload: parseError.payload,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-      }
+      responseSet.payload = errorParsed
     }
-
-    statusCode = parseError.statusCode.defaultCode
   } else {
-    responseSet = {
-      statusCode: {
-        defaultCode:
-          exception['response']?.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR,
-        customCode: modCodes.Global.failed,
-        classCode: 'CORE',
-      },
-      // message: `${exception.message.substring(0, 175)}...`,
-      message: `${exception}`,
-      transaction_classify: '',
-      transaction_id: '',
-      payload: {},
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    }
+    switch (exception.constructor.name) {
+      case 'MongoServerError':
+        responseSet.statusCode.defaultCode =
+          modCodes.Global.error.databaseError.defaultCode
+        responseSet.statusCode.customCode =
+          exception.errorResponse.code.toString()
+        responseSet.message = exception.errorResponse.errmsg
 
-    // statusCode = HttpStatus.BAD_REQUEST
-    statusCode =
-      exception['response']?.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR
+        break
+
+      case 'NotFoundException':
+        responseSet.statusCode.defaultCode =
+          modCodes.Global.error.isNotFound.defaultCode
+        responseSet.statusCode.customCode = '404'
+        responseSet.message = 'Data is not found'
+        break
+
+      default:
+        responseSet.statusCode.defaultCode =
+          modCodes.Global.error.generalError.defaultCode
+        responseSet.statusCode.customCode = '500'
+        responseSet.message = exception.message
+        responseSet.payload = {
+          stack: exception.stack,
+        }
+    }
   }
 
   const account: IAccount = request.credential
@@ -95,13 +91,14 @@ export async function errorHttpHandler(
   }
 
   if (
-    statusCode === HttpStatus.BAD_REQUEST ||
-    statusCode === HttpStatus.FORBIDDEN
+    responseSet.statusCode.defaultCode === HttpStatus.BAD_REQUEST ||
+    responseSet.statusCode.defaultCode === HttpStatus.NOT_FOUND ||
+    responseSet.statusCode.defaultCode === HttpStatus.FORBIDDEN
   ) {
     logger.warn(dataSet)
   } else {
     logger.error(dataSet)
   }
 
-  response.status(statusCode).send(dataSet.result)
+  response.status(responseSet.statusCode.defaultCode).send(responseSet)
 }

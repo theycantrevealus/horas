@@ -452,8 +452,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     background: transparent;
     z-index: 1000;
     position: fixed;
-    width: 97%;
-    left: 3%;
+    width: 98%;
+    left: 2%;
     transition-duration: 0.5s;
 }
 
@@ -535,8 +535,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     overflow-x: hidden !important;
     position: fixed;
     z-index: 998;
-    width: 97%;
-    left: 3%;
+    width: 98%;
+    left: 2%;
     height: 100%;
     transition-duration: 0.5s;
 }

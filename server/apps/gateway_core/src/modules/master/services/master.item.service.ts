@@ -39,7 +39,7 @@ export class MasterItemService {
       const parsedData = JSON.parse(parameter)
       return await prime_datatable(parsedData, this.masterItemModel).then(
         (result) => {
-          response.payload = result.payload
+          response.payload = result
           response.message = 'Data query success'
           return response
         }

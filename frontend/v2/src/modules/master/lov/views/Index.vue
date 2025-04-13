@@ -37,7 +37,7 @@
           @sort="onSort($event)"
           @filter="onFilter($event)"
         >
-          <Column header="#" class="text-left wrap_content">
+          <Column header="ID" class="text-left wrap_content">
             <template #body="slotProps">
               <strong class="d-inline-flex">
                 <span class="material-icons-outlined material-symbols-outlined">tag</span>

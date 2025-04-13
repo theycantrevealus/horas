@@ -8,6 +8,9 @@ import {
   ValidateNested,
 } from 'class-validator'
 
+import { Ci18nDatetime } from './i18n.datetime'
+import { Ci18nNumber } from './i18n.number'
+
 export class i18nAddDTO {
   @ApiProperty({
     example: 'xx',
@@ -50,83 +53,18 @@ export class i18nAddDTO {
   name: string
 
   @ApiProperty({
-    example: '',
-    description: '',
+    type: Ci18nDatetime,
   })
   @IsNotEmpty()
-  currency: string
+  @ValidateNested({ each: true })
+  datetime: Ci18nDatetime
 
   @ApiProperty({
-    example: 'long',
-    enum: ['narrow', 'short', 'long'],
-    description: '',
+    type: Ci18nNumber,
   })
   @IsNotEmpty()
-  datetime_weekday: string
-
-  @ApiProperty({
-    example: 'long',
-    enum: ['narrow', 'short', 'long'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_era: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_year: string
-
-  @ApiProperty({
-    example: 'long',
-    enum: ['2-digit', 'numeric', 'narrow', 'short', 'long'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_month: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_day: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_hour: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_minute: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_second: string
-
-  @ApiProperty({
-    example: 'long',
-    enum: ['short', 'long'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_timezone_name: string
+  @ValidateNested({ each: true })
+  number: Ci18nNumber
 
   @ApiProperty({
     type: Ci18nComponent,
@@ -185,84 +123,16 @@ export class i18nEditDTO {
   @IsNotEmpty()
   name: string
 
-  @ApiProperty({
-    example: '',
-    description: '',
-  })
   @IsNotEmpty()
-  currency: string
+  @ValidateNested({ each: true })
+  datetime: Ci18nDatetime
 
   @ApiProperty({
-    example: 'long',
-    enum: ['narrow', 'short', 'long'],
-    description: '',
+    type: Ci18nNumber,
   })
   @IsNotEmpty()
-  datetime_weekday: string
-
-  @ApiProperty({
-    example: 'long',
-    enum: ['narrow', 'short', 'long'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_era: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_year: string
-
-  @ApiProperty({
-    example: 'long',
-    enum: ['2-digit', 'numeric', 'narrow', 'short', 'long'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_month: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_day: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_hour: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_minute: string
-
-  @ApiProperty({
-    example: 'numeric',
-    enum: ['2-digit', 'numeric'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_second: string
-
-  @ApiProperty({
-    example: 'long',
-    enum: ['short', 'long'],
-    description: '',
-  })
-  @IsNotEmpty()
-  datetime_timezone_name: string
+  @ValidateNested({ each: true })
+  number: Ci18nNumber
 
   @ApiProperty({
     type: Ci18nComponent,

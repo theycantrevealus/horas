@@ -81,7 +81,6 @@ export default defineComponent({
     async onFilter(event) {
       this.loading = true
       await this.lovStore.find(event.value).then((response) => {
-        console.log(response)
         this.searchResult = response.payload.data
         this.loading = false
       })

@@ -188,7 +188,9 @@ export const storeCore = defineStore('core', {
   actions: {
     async fetch_i18n() {
       return await api({ requiresAuth: true })
-        .get(`${import.meta.env.VITE_API_URL}/v1/i18n`)
+        .get(
+          `${import.meta.env.VITE_API_URL}/v1/i18n?lazyEvent={"first":0,"rows":10,"sortField":"created_at","sortOrder":1,"filters":{}}`,
+        )
         .then((response) => {
           const data = response.data.payload.data
           return Promise.resolve(data)
@@ -247,7 +249,6 @@ export const storeCore = defineStore('core', {
       for (const pagesKey in access) {
         if (!pagesAccess[access[pagesKey].identifier]) {
           pagesAccess[access[pagesKey].identifier] = {}
-          console.log(`Registering ${access[pagesKey].identifier} permission`)
         }
 
         pagesAccess[access[pagesKey].identifier] = access[pagesKey]

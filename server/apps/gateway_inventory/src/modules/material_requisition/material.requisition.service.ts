@@ -72,7 +72,7 @@ export class MaterialRequisitionService {
         },
         this.materialRequisitionModel
       ).then((result) => {
-        response.payload = result.payload
+        response.payload = result
         response.message = 'Material requisition fetch successfully'
         return response
       })
@@ -124,7 +124,7 @@ export class MaterialRequisitionService {
     return await this.materialRequisitionModel
       .create({
         ...data,
-        stock_point: account.stock_point,
+        stock_point: data.stock_point,
         approval_history: [
           {
             status: 'new',
@@ -309,10 +309,8 @@ export class MaterialRequisitionService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    data.status = 'need_approval'
-
     const status: IMaterialRequisitionApproval = {
-      status: data.status,
+      status: 'need_approval',
       remark: data.remark,
       logged_at: new TimeManagement().getTimezone(
         this.configService.get<string>('application.timezone')
@@ -322,10 +320,10 @@ export class MaterialRequisitionService {
 
     return await this.materialRequisitionModel
       .findOneAndUpdate(
-        { id: id, created_by: account, status: 'new', __v: data.__v },
+        { id: id, 'created_by.id': account.id, status: 'new', __v: data.__v },
         {
           $set: {
-            status: data.status,
+            status: 'need_approval',
           },
           $push: {
             approval_history: status,
@@ -394,10 +392,8 @@ export class MaterialRequisitionService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    data.status = 'approved'
-
     const status: IMaterialRequisitionApproval = {
-      status: data.status,
+      status: 'approved',
       remark: data.remark,
       logged_at: new TimeManagement().getTimezone(
         this.configService.get<string>('application.timezone')
@@ -407,10 +403,15 @@ export class MaterialRequisitionService {
 
     return await this.materialRequisitionModel
       .findOneAndUpdate(
-        { id: id, created_by: account, status: 'need_approval', __v: data.__v },
+        {
+          id: id,
+          'created_by.id': account.id,
+          status: 'need_approval',
+          __v: data.__v,
+        },
         {
           $set: {
-            status: data.status,
+            status: 'approved',
           },
           $push: {
             approval_history: status,
@@ -479,10 +480,8 @@ export class MaterialRequisitionService {
       transaction_id: null,
     } satisfies GlobalResponse
 
-    data.status = 'declined'
-
     const status: IMaterialRequisitionApproval = {
-      status: data.status,
+      status: 'declined',
       remark: data.remark,
       logged_at: new TimeManagement().getTimezone(
         this.configService.get<string>('application.timezone')
@@ -492,10 +491,15 @@ export class MaterialRequisitionService {
 
     return await this.materialRequisitionModel
       .findOneAndUpdate(
-        { id: id, created_by: account, status: 'need_approval', __v: data.__v },
+        {
+          id: id,
+          'created_by.id': account.id,
+          status: 'need_approval',
+          __v: data.__v,
+        },
         {
           $set: {
-            status: data.status,
+            status: 'declined',
           },
           $push: {
             approval_history: status,

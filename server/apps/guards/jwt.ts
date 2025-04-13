@@ -1,5 +1,8 @@
 import { PermissionDescriptor } from '@decorators/permission'
-import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import {
+  IAccount,
+  IAccountAccess,
+} from '@gateway_core/account/interface/account.create_by'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import {
   ExecutionContext,
@@ -9,7 +12,6 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
-import { Account } from '@schemas/account/account.model'
 import { JWTTokenDecodeResponse } from '@security/auth.dto'
 import { AuthService } from '@security/auth.service'
 import { GlobalResponse } from '@utility/dto/response'
@@ -86,7 +88,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       delete decodeTokenResponse?.account?.created_at
       request.credential = decodeTokenResponse.account as IAccount
-      const accountDetail: Account = await this.cacheManager.get(
+      const accountDetail: IAccountAccess = await this.cacheManager.get(
         request?.credential?.id
       )
       const permissionFind = `${
@@ -94,9 +96,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       }${permissionIdentifier[0].action
         .charAt(0)
         .toUpperCase()}${permissionIdentifier[0].action.slice(1)}`
-      const permissionFound = accountDetail?.permission.find(
-        (o) => o.dispatchName === permissionFind
-      )
+
+      let permissionFound
+
+      if (accountDetail?.permission && accountDetail?.permission.length > 0) {
+        permissionFound = accountDetail?.permission.find(
+          (o) => o.dispatchName === permissionFind
+        )
+      }
 
       if (
         !decodeTokenResponse ||
@@ -114,7 +121,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       return true
     } catch (jwtGuardError) {
-      // response.message = `JWT guard error : ${jwtGuardError}`
       response.message = jwtGuardError.message
       throw new Error(JSON.stringify(response))
     }
