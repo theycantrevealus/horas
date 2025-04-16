@@ -1,3 +1,5 @@
+import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -12,8 +14,6 @@ import {
   MaterialRequisitionSchema,
 } from '@schemas/inventory/material.requisition'
 import { AuthModule } from '@security/auth.module'
-import { SocketIoClientProvider } from '@socket/socket.provider'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 
 import { GeneralIssueNoteController } from './general.issue.note.controller'
 import { GeneralIssueNoteService } from './general.issue.note.service'

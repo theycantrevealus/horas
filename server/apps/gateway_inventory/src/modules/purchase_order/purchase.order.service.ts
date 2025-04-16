@@ -55,7 +55,7 @@ export class PurchaseOrderService {
       const parameter: PrimeParameter = JSON.parse(payload)
       return await prime_datatable(parameter, this.purchaseOrderModel).then(
         (result) => {
-          response.payload = result.payload
+          response.payload = result
           response.message = 'Purchase order fetch successfully'
           return response
         }

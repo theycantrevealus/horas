@@ -126,7 +126,7 @@ export class StockProcessor {
             .find({
               name: singleData.stock_point,
             })
-            .then((stockPointResult) => stockPointResult.payload)
+            .then((stockPointResult) => stockPointResult)
 
           if (!stockPointDetail) {
             await this.masterStockPointService
@@ -149,7 +149,7 @@ export class StockProcessor {
                   .find({
                     name: singleData.stock_point,
                   })
-                  .then((stockPointResult) => stockPointResult.payload)
+                  .then((stockPointResult) => stockPointResult)
               })
           }
 
