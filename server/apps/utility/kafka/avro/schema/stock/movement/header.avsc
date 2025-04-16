@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "Stock",
-  "namespace": "com.horas.purchase_order",
+  "namespace": "com.horas.stock",
   "fields": [
     {
       "name": "id",
