@@ -22,5 +22,5 @@ export const ApprovalHistory = raw({
     required: true,
   },
   remark: { type: String },
-  created_by: { type: raw(AccountJoin) },
+  created_by: { type: raw(AccountJoin), _id: false },
 })
