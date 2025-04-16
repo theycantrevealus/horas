@@ -13,6 +13,7 @@
     "start:dev:gateway_queue": "nest build gateway_queue --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:gateway_inventory": "nest build gateway_inventory --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:gateway_example": "nest build gateway_example --webpack --webpackPath ./webpack.config.js --watch",
+    "start:dev:consumer_stock": "nest build consumer_stock --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:account": "nest build account --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:inventory": "nest build inventory --webpack --webpackPath ./webpack.config.js --watch",
     "start:dev:stock": "nest build stock --webpack --webpackPath ./webpack.config.js --watch",

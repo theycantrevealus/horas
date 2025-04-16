@@ -40,6 +40,9 @@
       "@gateway_inventory/*": [
         "./apps/gateway_inventory/src/modules/*"
       ],
+      "@consumer_stock/*": [
+        "./apps/consumer_stock/src/*"
+      ],
       "@stock/*": [
         "./apps/stock/src/*"
       ],
@@ -55,7 +58,7 @@
       "@configuration/*": [
         "./apps/configuration/*"
       ],
-      "@socket/*": [
+      "@gateway_socket/*": [
         "./apps/socket/src/*"
       ],
       "@seeds/*": [
