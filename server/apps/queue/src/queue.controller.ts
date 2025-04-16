@@ -1,4 +1,6 @@
 import { CommonErrorFilter } from '@filters/error'
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Controller,
@@ -8,8 +10,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { Ctx, KafkaContext, Payload } from '@nestjs/microservices'
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { KafkaTopic } from '@utility/decorator'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

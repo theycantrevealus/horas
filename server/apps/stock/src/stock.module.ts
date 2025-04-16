@@ -1,9 +1,13 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
+import { RedisConfig, RedisStock } from '@configuration/redis'
 import { SocketConfig } from '@configuration/socket'
+import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
+import { BullModule } from '@nestjs/bull'
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -17,8 +21,6 @@ import {
 import { MongoMiddlewareInventoryStockLog } from '@schemas/inventory/stock.log.middleware'
 import { MongoMiddlewareInventoryStock } from '@schemas/inventory/stock.middleware'
 import { AuthService } from '@security/auth.service'
-import { SocketIoClientProvider } from '@socket/socket.provider'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { StockController } from '@stock/stock.controller'
 import { DecoratorProcessorService } from '@utility/decorator'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
@@ -34,7 +36,13 @@ import { StockService } from './stock.service'
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: environmentIdentifier,
-      load: [ApplicationConfig, MongoConfig, KafkaConfig, SocketConfig],
+      load: [
+        ApplicationConfig,
+        MongoConfig,
+        KafkaConfig,
+        SocketConfig,
+        RedisConfig,
+      ],
     }),
     CacheModule.registerAsync({
       isGlobal: true,
@@ -102,6 +110,7 @@ import { StockService } from './stock.service'
         },
       ]
     ),
+    BullModule.registerQueueAsync(RedisStock),
   ],
   controllers: [StockController],
   providers: [

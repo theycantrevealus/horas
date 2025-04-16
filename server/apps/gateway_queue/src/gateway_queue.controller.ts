@@ -1,6 +1,8 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -22,8 +24,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'

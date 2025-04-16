@@ -446,6 +446,11 @@ describe('Account Controller', () => {
     }
   )
 
+  afterEach(async () => {
+    await app.close()
+    jest.clearAllMocks()
+  })
+
   afterAll(async () => {
     await app.close()
   })

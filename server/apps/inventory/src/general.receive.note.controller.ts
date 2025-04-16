@@ -1,8 +1,8 @@
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { GeneralReceiveNoteService } from '@inventory/general.receive.note.service'
 import { Controller, Inject } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Logger } from 'winston'
 

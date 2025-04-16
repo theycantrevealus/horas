@@ -1,5 +1,5 @@
+import { SocketIoAdapter } from '@gateway_socket/adapters/adapter'
 import { NestFactory } from '@nestjs/core'
-import { SocketIoAdapter } from '@socket/adapters/adapter'
 import { WINSTON_MODULE_NEST_PROVIDER } from '@utility/logger/constants'
 
 import { SocketModule } from './socket.module'
