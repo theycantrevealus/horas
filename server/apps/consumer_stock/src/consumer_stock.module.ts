@@ -1,13 +1,12 @@
 import { ApplicationConfig } from '@configuration/environtment'
 import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
-import { RedisConfig, RedisStock } from '@configuration/redis'
+import { RedisConfig } from '@configuration/redis'
 import { SocketConfig } from '@configuration/socket'
 import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import { BullModule } from '@nestjs/bull'
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -20,8 +19,11 @@ import {
 } from '@schemas/inventory/stock.log'
 import { MongoMiddlewareInventoryStockLog } from '@schemas/inventory/stock.log.middleware'
 import { MongoMiddlewareInventoryStock } from '@schemas/inventory/stock.middleware'
+import {
+  MasterStockPoint,
+  MasterStockPointSchema,
+} from '@schemas/master/master.stock.point'
 import { AuthService } from '@security/auth.service'
-import { StockController } from '@stock/stock.controller'
 import { DecoratorProcessorService } from '@utility/decorator'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { KafkaProvider } from '@utility/kafka'
@@ -29,7 +31,8 @@ import { WinstonModule } from '@utility/logger/module'
 import { WinstonCustomTransports } from '@utility/transport.winston'
 import * as redisStore from 'cache-manager-ioredis'
 
-import { StockService } from './stock.service'
+import { ConsumerStockController } from './consumer_stock.controller'
+import { ConsumerStockService } from './consumer_stock.service'
 
 @Module({
   imports: [
@@ -47,16 +50,14 @@ import { StockService } from './stock.service'
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        return {
-          store: redisStore,
-          host: configService.get<string>('redis.host'),
-          port: configService.get<string>('redis.port'),
-          username: configService.get<string>('redis.username'),
-          password: configService.get<string>('redis.password'),
-          isGlobal: true,
-        }
-      },
+      useFactory: async (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get<string>('redis.host'),
+        port: configService.get<string>('redis.port'),
+        username: configService.get<string>('redis.username'),
+        password: configService.get<string>('redis.password'),
+        isGlobal: true,
+      }),
       inject: [ConfigService],
     }),
     WinstonModule.forRootAsync({
@@ -77,19 +78,19 @@ import { StockService } from './stock.service'
       useFactory: async (
         configService: ConfigService
       ): Promise<MongooseModuleOptions> => ({
-        uri: `${configService.get<string>(
-          'mongo.primary.uri'
-        )}?replicaSet=dbrs`,
+        uri: `${configService.get<string>('mongo.primary.uri')}`,
       }),
       inject: [ConfigService],
     }),
     MongooseModule.forFeature(
       [
-        { name: InventoryStock.name, schema: InventoryStockSchema },
-        { name: InventoryStockLog.name, schema: InventoryStockLogSchema },
-
         { name: LogLogin.name, schema: LogLoginSchema },
         { name: LogActivity.name, schema: LogActivitySchema },
+
+        { name: MasterStockPoint.name, schema: MasterStockPointSchema },
+
+        { name: InventoryStock.name, schema: InventoryStockSchema },
+        { name: InventoryStockLog.name, schema: InventoryStockLogSchema },
       ],
       'primary'
     ),
@@ -110,19 +111,19 @@ import { StockService } from './stock.service'
         },
       ]
     ),
-    BullModule.registerQueueAsync(RedisStock),
   ],
-  controllers: [StockController],
+  controllers: [ConsumerStockController],
   providers: [
     JwtService,
     AuthService,
     DecoratorProcessorService,
     SocketIoClientProvider,
     SocketIoClientProxyService,
-    StockService,
+    ConsumerStockService,
 
     MongoMiddlewareInventoryStock,
     MongoMiddlewareInventoryStockLog,
   ],
+  exports: [ConsumerStockService],
 })
-export class StockModule {}
+export class ConsumerStockModule {}

@@ -1,4 +1,6 @@
 import { Authorization } from '@decorators/authorization'
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
@@ -24,8 +26,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { Config } from '@schemas/config/config'
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

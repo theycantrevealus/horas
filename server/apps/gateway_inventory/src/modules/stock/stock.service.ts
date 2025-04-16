@@ -275,7 +275,7 @@ export class StockService {
     for await (const a of payload.stock_point) {
       const checkStockPoint = await this.masterStockPointService.detail(a)
       if (checkStockPoint) {
-        stockPointToAdd.push(checkStockPoint.payload as IMasterStockPoint)
+        stockPointToAdd.push(checkStockPoint as IMasterStockPoint)
       }
     }
 

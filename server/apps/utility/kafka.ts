@@ -52,6 +52,9 @@ export function KafkaProvider(
         providerLists.push({
           name: configService.get<string>(`${a.configClass}.service`),
           options: {
+            consumeFromBeginning: configService.get<boolean>(
+              `${a.configClass}.from_beginning`
+            ),
             producerModeOnly: a.producerModeOnly,
             consumer: {
               groupId: configService.get<string>(`${a.configClass}.cons_group`),

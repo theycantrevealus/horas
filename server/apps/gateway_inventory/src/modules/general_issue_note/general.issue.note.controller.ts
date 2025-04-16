@@ -32,7 +32,7 @@ export class GeneralIssueNoteController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'MaterialRequisition', action: 'add' })
+  @PermissionManager({ group: 'GeneralIssueNote', action: 'add' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add new',

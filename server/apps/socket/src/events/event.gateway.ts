@@ -1,3 +1,4 @@
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
 import { LoggingInterceptor } from '@interceptors/logging'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, UseInterceptors } from '@nestjs/common'
@@ -15,7 +16,6 @@ import {
 import { IConfig } from '@schemas/config/config'
 import { JWTTokenDecodeResponse } from '@security/auth.dto'
 import { AuthService } from '@security/auth.service'
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Cache } from 'cache-manager'
 import { Server } from 'socket.io'

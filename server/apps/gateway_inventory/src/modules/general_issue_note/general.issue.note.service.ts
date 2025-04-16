@@ -79,88 +79,88 @@ export class GeneralIssueNoteService {
   async add(data: GeneralIssueNoteAddDTO, account: IAccount, token: string) {
     const transaction = await this.clientStock.transaction('stock_gin')
 
-    return await this.materialRequisitionModel
-      .findOne({
-        id: data.material_requisition,
-        status: 'approved',
-      })
-      .then(async (foundedMR) => {
-        if (foundedMR) {
-          const items = foundedMR.detail.reduce(
-            (acc, curr) => ({
-              ...acc,
-              [curr.item.id]: { qty: curr.qty, issued: 0 },
-            }),
-            {}
-          )
+    try {
+      return await this.materialRequisitionModel
+        .findOne({
+          id: data.material_requisition,
+          status: 'approved',
+        })
+        .then(async (foundedMR) => {
+          if (foundedMR) {
+            const items = foundedMR.detail.reduce(
+              (acc, curr) => ({
+                ...acc,
+                [curr.item.id]: { qty: curr.qty, issued: 0 },
+              }),
+              {}
+            )
 
-          for (const a in data.detail) {
-            const singleItem = data.detail[a]
+            for (const a in data.detail) {
+              const singleItem = data.detail[a]
 
-            singleItem[a] = {
-              ...singleItem[a],
-              qty: items[singleItem.batch.item.id].qty ?? 0,
+              singleItem[a] = {
+                ...singleItem[a],
+                qty: items[singleItem.batch.item.id].qty ?? 0,
+              }
             }
-          }
 
-          return await this.generalIssueNoteModel
-            .create({
-              ...data,
-              stock_point_from: data.stock_point,
-              stock_point_to: foundedMR.stock_point,
-              created_by: account,
-              locale: await this.cacheManager
-                .get('APPLICATION_LOCALE')
-                .then((response: IConfig) => response.setter),
-            })
-            .then(async (result) => {
-              const items = []
-              data.detail.forEach((item) => {
-                items.push({
-                  headers: {
-                    ...account,
-                    token: token,
-                  },
-                  key: {
-                    id: result.id.toString(),
-                    code: result.id.toString(),
-                    service: 'stock',
-                    method: 'stock_movement',
-                  },
-                  value: {
-                    item: item.batch.item,
-                    batch: item.batch,
-                    from: data.stock_point,
-                    to: foundedMR.stock_point,
-                    qty: item.issued,
-                    transaction_id: result.id.toString(),
-                    logged_at: new Date().toString(),
-                  },
+            return await this.generalIssueNoteModel
+              .create({
+                ...data,
+                stock_point_from: data.stock_point,
+                stock_point_to: foundedMR.stock_point,
+                created_by: account,
+                locale: await this.cacheManager
+                  .get('APPLICATION_LOCALE')
+                  .then((response: IConfig) => response.setter),
+              })
+              .then(async (result) => {
+                const items = []
+                data.detail.forEach((item) => {
+                  items.push({
+                    headers: {
+                      ...account,
+                      token: token,
+                    },
+                    key: {
+                      id: result.id.toString(),
+                      code: result.id.toString(),
+                      service: 'stock',
+                      method: 'stock_movement',
+                    },
+                    value: {
+                      // item: item.batch.item,
+                      batch: item.batch,
+                      from: data.stock_point,
+                      to: foundedMR.stock_point,
+                      qty: item.issued,
+                      transaction_id: result.id.toString(),
+                      logged_at: new Date().toString(),
+                    },
+                  })
                 })
+
+                await transaction.send({
+                  acks: -1,
+                  timeout: 5000,
+                  compression: CompressionTypes.None,
+                  topic: this.configService.get<string>(
+                    'kafka.stock.topic.stock'
+                  ),
+                  messages: items,
+                })
+
+                await transaction.commit()
+
+                return result
               })
-
-              await transaction.send({
-                acks: -1,
-                timeout: 5000,
-                compression: CompressionTypes.None,
-                topic: this.configService.get<string>(
-                  'kafka.stock.topic.stock'
-                ),
-                messages: items,
-              })
-
-              await transaction.commit()
-
-              return result
-            })
-        } else {
-          await transaction.abort()
-          throw new NotFoundException('MR not found')
-        }
-      })
-      .catch(async (error) => {
-        await transaction.abort()
-        throw error
-      })
+          } else {
+            throw new NotFoundException('MR not found')
+          }
+        })
+    } catch (error) {
+      await transaction.abort()
+      throw error
+    }
   }
 }

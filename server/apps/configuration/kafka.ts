@@ -64,6 +64,7 @@ export const KafkaConfig = () => {
         },
         client: process.env.KAFKA_STOCK_CLIENT_ID,
         broker: process.env.KAFKA_STOCK_BROKER,
+        from_beginning: process.env.KAFKA_STOCK_FROM_BEGINNING === 'true',
         cons_group: process.env.KAFKA_STOCK_CONSUMER_GROUP,
         ssl: {
           protocol: process.env.KAFKA_STOCK_SSL_SCP,

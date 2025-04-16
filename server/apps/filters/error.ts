@@ -15,7 +15,7 @@ export class CommonErrorFilter implements ExceptionFilter {
     if (host.getType() === 'http') {
       await errorHttpHandler(exception, host, this.logger)
     } else {
-      await errorRpcHandler(exception, host, this.logger)
+      await errorRpcHandler(exception, host)
     }
   }
 }

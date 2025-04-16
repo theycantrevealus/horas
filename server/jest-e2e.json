@@ -16,12 +16,13 @@
     "^@pipes(.*)$": "<rootDir>/apps/pipes$1",
     "^@gateway_core(.*)$": "<rootDir>/apps/gateway_core/src/modules$1",
     "^@gateway_inventory(.*)$": "<rootDir>/apps/gateway_inventory/src/modules$1",
+    "^@consumer_stock(.*)$": "<rootDir>/apps/consumer_stock/src$1",
     "^@log(.*)$": "<rootDir>/apps/log/src$1",
     "^@stock(.*)$": "<rootDir>/apps/stock$1",
     "^@security(.*)$": "<rootDir>/apps/security$1",
     "^@configuration(.*)$": "<rootDir>/apps/configuration$1",
     "^@utility(.*)$": "<rootDir>/apps/utility$1",
-    "^@socket(.*)$": "<rootDir>/apps/socket$1",
+    "^@gateway_socket(.*)$": "<rootDir>/apps/socket/src$1",
     "^@interceptors(.*)$": "<rootDir>/apps/interceptors$1",
     "^@guards(.*)$": "<rootDir>/apps/guards$1",
     "^@decorators(.*)$": "<rootDir>/apps/decorators$1"
@@ -52,7 +53,8 @@
     ".module.(t|j)s",
     ".model.(t|j)s",
     ".mock.(t|j)s",
-    ".stub.(t|j)s"
+    ".stub.(t|j)s",
+    "main.(t|j)s"
   ],
   "collectCoverageFrom": [
     "<rootDir>/apps/gateway_core/src/modules/account/**/*.{js,jsx,ts,tsx}",
@@ -60,6 +62,7 @@
     "<rootDir>/apps/gateway_core/src/modules/i18n/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_core/src/modules/lov/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/general_issue_note/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/consumer_stock/src/**/*.{js,jsx,ts,tsx}",
     "!<rootDir>/node_modules/",
     "!<rootDir>/**/*.mock.{js,jsx,ts,tsx}"
   ],

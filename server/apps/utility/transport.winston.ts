@@ -12,11 +12,11 @@ const lPad = {
   content: '',
 }
 
-const today = new TimeManagement()
+// const today = new TimeManagement()
 
 export const sPad = {
   pid: '           ',
-  ip: '                ',
+  ip: '                    ',
   method: '       ',
   level: '                        ',
   timestamp: '                          ',
@@ -107,16 +107,16 @@ export const WinstonLogCreator = (logLevel) => {
   }
 }
 
-const lastLine = `\n└${pad(lPad.level, '', false)}┴${pad(
-  lPad.timestamp,
-  '',
-  false
-)}┴${pad(lPad.content, '', false)}──┘`
+// const lastLine = `\n└${pad(lPad.level, '', false)}┴${pad(
+//   lPad.timestamp,
+//   '',
+//   false
+// )}┴${pad(lPad.content, '', false)}──┘`
 
-function clearLastLine() {
-  process.stdout.moveCursor(0, -1)
-  process.stdout.clearLine(1)
-}
+// function clearLastLine() {
+//   process.stdout.moveCursor(0, -1)
+//   process.stdout.clearLine(1)
+// }
 
 function delimitter(style = '-') {
   return '\n' + style.repeat(process.stdout.columns)

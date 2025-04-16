@@ -1,5 +1,5 @@
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { Logger } from 'winston'
 
 export async function socketNotifier(

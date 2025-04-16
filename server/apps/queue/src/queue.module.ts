@@ -6,6 +6,8 @@ import {
   OperationQueue,
   OperationQueueSchema,
 } from '@gateway_core/operation/queue/schemas/queue'
+import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogService } from '@log/log.service'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -26,8 +28,6 @@ import {
   MasterStockPointSchema,
 } from '@schemas/master/master.stock.point'
 import { AuthModule } from '@security/auth.module'
-import { SocketIoClientProvider } from '@socket/socket.provider'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { DecoratorProcessorService } from '@utility/decorator'
 import { environmentIdentifier, environmentName } from '@utility/environtment'
 import { WinstonModule } from '@utility/logger/module'

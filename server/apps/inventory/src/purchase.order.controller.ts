@@ -1,4 +1,6 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LoggingInterceptor } from '@interceptors/logging'
 import {
   Controller,
@@ -9,8 +11,6 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { Payload } from '@nestjs/microservices'
 import { ApiTags } from '@nestjs/swagger'
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { KafkaTopic } from '@utility/decorator'
 import { KafkaGlobalKey } from '@utility/kafka/avro/schema/global/key'
 import { KafkaService } from '@utility/kafka/avro/service'

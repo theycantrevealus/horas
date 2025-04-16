@@ -1,3 +1,5 @@
+import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -8,8 +10,6 @@ import {
 } from '@schemas/inventory/material.requisition'
 import { MongoMiddlewareMaterialRequisition } from '@schemas/inventory/material.requisition.middleware'
 import { AuthModule } from '@security/auth.module'
-import { SocketIoClientProvider } from '@socket/socket.provider'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 
 import { MaterialRequisitionController } from './material.requisition.controller'
 import { MaterialRequisitionService } from './material.requisition.service'

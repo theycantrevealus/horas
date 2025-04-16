@@ -3,8 +3,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { IMasterItemBatch } from '@schemas/master/master.item.batch.interface'
 import { MasterItemBatchJoin } from '@schemas/master/master.item.batch.join'
-import { IMasterItem } from '@schemas/master/master.item.interface'
-import { MasterItemJoin } from '@schemas/master/master.item.join'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -13,9 +11,6 @@ export type InventoryStockLogDocument = HydratedDocument<InventoryStockLog>
 
 @Schema({ collection: 'inventory_stock_log' })
 export class InventoryStockLog {
-  @Prop(MasterItemJoin)
-  item: IMasterItem
-
   @Prop(MasterItemBatchJoin)
   batch: IMasterItemBatch
 
@@ -32,10 +27,7 @@ export class InventoryStockLog {
   out: number
 
   @Prop({ type: SchemaTypes.Number })
-  balance_from: number
-
-  @Prop({ type: SchemaTypes.Number })
-  balance_to: number
+  balance: number
 
   @Prop({ type: SchemaTypes.String })
   transaction_id: string

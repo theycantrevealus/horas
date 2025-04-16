@@ -162,6 +162,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/gateway_queue/tsconfig.app.json"
       }
+    },
+    "consumer_stock": {
+      "type": "application",
+      "root": "apps/consumer_stock",
+      "entryFile": "main",
+      "sourceRoot": "apps/consumer_stock/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/consumer_stock/tsconfig.app.json"
+      }
     }
   }
 }

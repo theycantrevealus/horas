@@ -2,27 +2,50 @@ import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ArgumentsHost, HttpStatus } from '@nestjs/common'
 import { KafkaContext } from '@nestjs/microservices'
 import { GlobalResponse } from '@utility/dto/response'
+import { environmentName } from '@utility/environtment'
 import { HorasLogging } from '@utility/logger/interfaces'
 import { modCodes } from '@utility/modules'
 import { TimeManagement } from '@utility/time'
+import { WinstonCustomTransports } from '@utility/transport.winston'
 import { isJSON } from 'class-validator'
-import { Logger } from 'winston'
+import * as winston from 'winston'
 
 export async function errorRpcHandler(
   exception: GlobalResponse,
-  host: ArgumentsHost,
-  logger: Logger
+  host: ArgumentsHost
 ) {
   const TM = new TimeManagement()
   const ctx = host.switchToRpc()
   const response = ctx.getData()
   const request = ctx.getContext()
   const method = 'RPC'
+  const logger = winston.createLogger({
+    transports: WinstonCustomTransports[environmentName],
+    levels: {
+      error: 0,
+      warn: 1,
+      info: 2,
+    },
+  })
 
   const kafkaContext = request.getArgByIndex(0) satisfies KafkaContext
   const path = kafkaContext.topic
   const partition = kafkaContext.partition
   const offset = kafkaContext.offset
+
+  // TODO : Manual Commit Offsets Here ??? In case of any throw
+  // kafkaContext.commitOffsets()
+  console.error(
+    JSON.stringify(
+      {
+        topic: path,
+        offset: offset,
+        partition: partition,
+      },
+      null,
+      2
+    )
+  )
 
   let responseSet = {
     message: exception.message,

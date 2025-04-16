@@ -65,7 +65,7 @@ export class GeneralReceiveNoteService {
       .find({
         id: data.stock_point.id,
       })
-      .then((response) => response.payload)
+      .then((response) => response)
 
     if (stockPointConfig['configuration'].allow_grn) {
       await this.purchaseOrderService

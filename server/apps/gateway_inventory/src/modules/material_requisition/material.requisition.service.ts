@@ -1,4 +1,6 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -9,8 +11,6 @@ import {
   MaterialRequisitionDocument,
 } from '@schemas/inventory/material.requisition'
 import { IMaterialRequisitionApproval } from '@schemas/inventory/material.requisition.interface'
-import { ProceedDataTrafficDTO } from '@socket/dto/neuron'
-import { SocketIoClientProxyService } from '@socket/socket.proxy'
 import { PrimeParameter } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'

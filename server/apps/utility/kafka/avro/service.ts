@@ -282,29 +282,87 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       : {}
     this.consumer.run({
       ...runConfig,
-      autoCommit: false, // TODO : Test autocommit false
+      autoCommit: false,
+      // partitionsConsumedConcurrently: 1,
+      // eachBatch: async ({
+      //   batch,
+      //   resolveOffset,
+      //   heartbeat,
+      //   // commitOffsetsIfNecessary,
+      //   // uncommittedOffsets,
+      //   // isRunning,
+      //   // isStale,
+      //   // pause,
+      // }) => {
+      //   const TM = new TimeManagement()
+      //   const topic = batch.topic
+      //   const partition = batch.partition
+
+      //   for (const message of batch.messages) {
+      //     const objectRef = SUBSCRIBER_OBJECT_MAP.get(topic)
+      //     const callback = SUBSCRIBER_MAP.get(topic)
+      //     const { timestamp, response, offset, key, headers } =
+      //       await this.deserializer.deserialize(message, { topic })
+
+      //     const dataSet: HorasLogging = {
+      //       ip: `${topic}/${partition}/${offset}`,
+      //       path: topic,
+      //       url: topic,
+      //       method: 'KAFKA',
+      //       takeTime: Date.now() - timestamp,
+      //       payload: {
+      //         response: response,
+      //         key: key,
+      //       },
+      //       result: response,
+      //       account: headers,
+      //       time: TM.getTimezone('Asia/Jakarta'),
+      //     }
+
+      //     try {
+      //       this.logger.verbose(dataSet)
+      //       await callback.apply(objectRef, [
+      //         response,
+      //         key,
+      //         offset,
+      //         timestamp,
+      //         partition,
+      //         headers,
+      //         this.consumer,
+      //       ])
+      //     } catch (e) {
+      //       dataSet.result = e.message
+      //       this.logger.error(dataSet)
+      //     }
+
+      //     resolveOffset(offset)
+      //     await heartbeat()
+      //   }
+      // },
+
       eachMessage: async ({ topic, partition, message }) => {
         const objectRef = SUBSCRIBER_OBJECT_MAP.get(topic)
         const callback = SUBSCRIBER_MAP.get(topic)
+        const { timestamp, response, offset, key, headers } =
+          await this.deserializer.deserialize(message, { topic })
+
+        const TM = new TimeManagement()
+        const dataSet: HorasLogging = {
+          ip: `${topic}/${partition}/${offset}`,
+          path: topic,
+          url: topic,
+          method: 'KAFKA',
+          takeTime: Date.now() - timestamp,
+          payload: {
+            response: response,
+            key: key,
+          },
+          result: response,
+          account: headers,
+          time: TM.getTimezone('Asia/Jakarta'),
+        }
 
         try {
-          const { timestamp, response, offset, key, headers } =
-            await this.deserializer.deserialize(message, { topic })
-          const TM = new TimeManagement()
-          const dataSet: HorasLogging = {
-            ip: `${topic}/${partition}/${offset}`,
-            path: topic,
-            url: topic,
-            method: 'KAFKA',
-            takeTime: Date.now() - timestamp,
-            payload: {
-              response: response,
-              key: key,
-            },
-            result: response,
-            account: headers,
-            time: TM.getTimezone('Asia/Jakarta'),
-          }
           this.logger.verbose(dataSet)
           await callback.apply(objectRef, [
             response,
@@ -312,15 +370,22 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             offset,
             timestamp,
             partition,
-            headers,
+            topic,
             this.consumer,
+            headers,
           ])
         } catch (e) {
-          this.logger.error(
-            `Error processing data: ${e.message} from topic ${topic}.\n${e.stack}`
-          )
-          throw new Error(`Error for message ${topic}: ${e}`)
+          dataSet.result = e.message
+          this.logger.error(dataSet)
         }
+
+        await this.consumer.commitOffsets([
+          {
+            topic: topic,
+            partition: partition,
+            offset: (parseInt(offset) + 1).toString(),
+          },
+        ])
       },
     })
 
