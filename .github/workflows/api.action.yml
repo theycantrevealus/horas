@@ -13,7 +13,7 @@ jobs:
   test-api:
     env:
       NODE_ENV: development
-      MODE:
+      MODE: development
       APP_NAME: Vuenatic - Horas
       APP_HOST: http://localhost
       APP_PORT: 3000
@@ -22,8 +22,8 @@ jobs:
       MONGO_HOST: localhost
       MONGO_PORT: 27017
       MONGO_DB_NAME: HORAS
-      MONGO_DB_USER:
-      MONGO_DB_PASSWORD:
+      MONGO_DB_USER: admin
+      MONGO_DB_PASSWORD: admin
       REDIS_HOST: localhost
       REDIS_PORT: 6379
       REDIS_USERNAME: default
@@ -57,8 +57,9 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-        cache-dependency-path: '**/package-lock.json'
+        cache-dependency-path: './package-lock.json'
         cache: 'npm'
+    - run: ls -R ./server
     - run: npm i
     - run: npm ci
     - run: npm run test:unit --if-present

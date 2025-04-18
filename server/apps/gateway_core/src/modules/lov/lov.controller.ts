@@ -41,7 +41,7 @@ export class LOVController {
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all',
-    description: 'Showing brand data',
+    description: 'Showing data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {

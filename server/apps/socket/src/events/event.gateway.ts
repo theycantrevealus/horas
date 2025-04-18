@@ -81,7 +81,7 @@ export class EventsGateway
      * */
 
     // this.logger.verbose(`Data from ${client.id} : ${JSON.stringify(data)}`)
-    console.log(JSON.stringify(data, null, 2))
+    // console.log(JSON.stringify(data, null, 2))
     this.io.sockets.emit(
       this.configService.get<string>('neural.event.notify_result.data'),
       data
