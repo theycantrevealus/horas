@@ -59,6 +59,9 @@ export class ConsumerStockController implements OnModuleInit {
       case 'stock_movement':
         await this.consumerStockService.movement(payload, headers)
         break
+      case 'stock_adjustment':
+        await this.consumerStockService.movement(payload, headers, 'adjustment')
+        break
       default:
     }
   }

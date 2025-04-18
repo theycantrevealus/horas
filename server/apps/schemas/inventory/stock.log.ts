@@ -32,6 +32,13 @@ export class InventoryStockLog {
   @Prop({ type: SchemaTypes.String })
   transaction_id: string
 
+  @Prop({
+    type: SchemaTypes.String,
+    enum: ['normal', 'audit', 'adjusment'],
+    default: 'normal',
+  })
+  stock_flow_type: string
+
   @Prop(AccountJoin)
   created_by: IAccount
 
