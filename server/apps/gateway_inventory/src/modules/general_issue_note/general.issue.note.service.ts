@@ -155,6 +155,7 @@ export class GeneralIssueNoteService {
                 return result
               })
           } else {
+            await transaction.abort()
             throw new NotFoundException('MR not found')
           }
         })
