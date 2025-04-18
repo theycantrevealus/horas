@@ -579,6 +579,73 @@ export const modCodes = {
       },
     },
   },
+  GatewayInventoryMutation: {
+    defaultCode: 'MUT',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock Mutation fetched successfully',
+        transaction_classify: 'MUT_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock Mutation fetched successfully',
+        transaction_classify: 'MUT_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Stock Mutation created successfully',
+        transaction_classify: 'MUT_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock Mutation updated successfully',
+        transaction_classify: 'MUT_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Stock Mutation deleted successfully',
+        transaction_classify: 'MUT_DELETE',
+      },
+      askApproval: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock Mutation proposed successfully',
+        transaction_classify: 'MUT_ASK_APPROVAL',
+      },
+      approve: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock Mutation approved successfully',
+        transaction_classify: 'MUT_APPROVE',
+      },
+      decline: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock Mutation declined successfully',
+        transaction_classify: 'MUT_DECLINE',
+      },
+      proceed: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock Mutation processed successfully',
+        transaction_classify: 'MUT_PROCESS',
+      },
+    },
+  },
   GeneralIssueNote: {
     defaultCode: 'GIN',
     defaultResponseCode: {
