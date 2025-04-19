@@ -62,7 +62,6 @@ jobs:
         # Remove cache temporarily if issues persist
         # cache: 'npm'
         # cache-dependency-path: './server/package-lock.json'
-    - run: ls -R ./server
     - run: npm i
     - run: npm ci
     - run: npm run test:unit --if-present
