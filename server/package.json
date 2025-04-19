@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build core",
+    "build:gateway_inventory": "nest build gateway_inventory",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev:gateway_core": "nest build gateway_core --webpack --webpackPath ./webpack.config.js --watch",
@@ -115,6 +116,7 @@
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "4.2.0",
+    "typedoc": "^0.28.2",
     "typescript": "^5.3.3",
     "uuid": "^9.0.1",
     "webpack": "^5.89.0",

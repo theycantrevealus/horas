@@ -1,0 +1,4 @@
+{
+    "out": "docs/",
+    "entryPoints": ["./apps/*/src/main.ts"]
+}

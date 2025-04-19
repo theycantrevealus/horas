@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config'
 import { MongoMiddleware, MongoSubscriber } from '@schemas/subscriber'
 import { TimeManagement } from '@utility/time'
 
-import { Mutation, MutationSchema } from './mutation'
+import { StockAudit, StockAuditSchema } from './audit'
 
 @Injectable()
 @MongoSubscriber({
-  name: Mutation.name,
-  schema: MutationSchema,
+  name: StockAudit.name,
+  schema: StockAuditSchema,
 })
-export class MongoMiddlewareMutation {
+export class MongoMiddlewareStockAudit {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
@@ -29,7 +29,7 @@ export class MongoMiddlewareMutation {
   async beforeSave(message: any) {
     const time = new TimeManagement()
     if (message.isNew) {
-      message.id = `stock_mutation-${message._id}`
+      message.id = `stock_audit-${message._id}`
       // Code generator
       message.__v = 0
     }

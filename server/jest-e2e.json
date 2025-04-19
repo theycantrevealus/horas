@@ -63,6 +63,7 @@
     "<rootDir>/apps/gateway_core/src/modules/lov/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/general_issue_note/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/mutation/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_inventory/src/modules/audit/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/consumer_stock/src/**/*.{js,jsx,ts,tsx}",
     "!<rootDir>/node_modules/",
     "!<rootDir>/**/*.mock.{js,jsx,ts,tsx}"

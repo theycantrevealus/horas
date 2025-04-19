@@ -145,7 +145,8 @@ export class PrometheusModule {
     url: string,
     options?: unknown,
     registry?: promClient.Registry
-  ): promClient.Pushgateway {
+  ) {
+    // promClient.Pushgateway
     return new promClient.Pushgateway(url, options, registry)
   }
 
