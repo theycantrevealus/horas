@@ -57,11 +57,10 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-        cache-dependency-path: './package-lock.json'
+        cache-dependency-path: './server/package-lock.json'
         cache: 'npm'
     - run: ls -R ./server
     - run: npm i
     - run: npm ci
     - run: npm run test:unit --if-present
     - run: npm run test:e2e --if-present
-    
