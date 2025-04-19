@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import {
-  MutationAddDTO,
-  MutationEditDTO,
-} from '@gateway_inventory/mutation/dto/mutation'
-import { MutationApprovalDTO } from '@gateway_inventory/mutation/dto/mutation.approval'
+  StockAuditAddDTO,
+  StockAuditEditDTO,
+} from '@gateway_inventory/audit/dto/audit'
+import { StockAuditApprovalDTO } from '@gateway_inventory/audit/dto/audit.approval'
 import { testCaption } from '@utility/string'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
@@ -12,7 +12,7 @@ const falseCasePayload = {
   add: [
     {
       expectedToContain: 'code must be longer than or equal to 8 characters',
-      targetClass: MutationAddDTO,
+      targetClass: StockAuditAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
@@ -52,7 +52,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'code must be shorter than or equal to 24 characters',
-      targetClass: MutationAddDTO,
+      targetClass: StockAuditAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
@@ -92,17 +92,14 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: MutationAddDTO,
+      targetClass: StockAuditAddDTO,
       testType: 1,
       data: {
+        period_from: new Date(),
+        period_to: new Date(),
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
+        stock_point: {
           id: 'stock_point-xxxx',
           code: 'STCKP-0001',
           name: 'Sample Stock Point',
@@ -122,7 +119,7 @@ const falseCasePayload = {
               price_sell: 120000,
               expired: new Date(),
             },
-            qty: 10,
+            qty_actual: 10,
             remark: '',
           },
         ],
@@ -134,7 +131,7 @@ const falseCasePayload = {
   edit: [
     {
       expectedToContain: 'code must be longer than or equal to 8 characters',
-      targetClass: MutationEditDTO,
+      targetClass: StockAuditEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
@@ -175,7 +172,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'code must be shorter than or equal to 24 characters',
-      targetClass: MutationEditDTO,
+      targetClass: StockAuditEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
@@ -216,7 +213,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v should not be empty',
-      targetClass: MutationEditDTO,
+      targetClass: StockAuditEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
@@ -256,7 +253,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v must be a number',
-      targetClass: MutationEditDTO,
+      targetClass: StockAuditEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
@@ -297,17 +294,14 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: MutationEditDTO,
+      targetClass: StockAuditEditDTO,
       testType: 1,
       data: {
+        period_from: new Date(),
+        period_to: new Date(),
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
+        stock_point: {
           id: 'stock_point-xxxx',
           code: 'STCKP-0001',
           name: 'Sample Stock Point',
@@ -327,7 +321,7 @@ const falseCasePayload = {
               price_sell: 120000,
               expired: new Date(),
             },
-            qty: 10,
+            qty_actual: 10,
             remark: '',
           },
         ],
@@ -340,7 +334,7 @@ const falseCasePayload = {
   approval: [
     {
       expectedToContain: 'remark should not be empty',
-      targetClass: MutationApprovalDTO,
+      targetClass: StockAuditApprovalDTO,
       testType: -1,
       data: {
         remark: '',
@@ -349,7 +343,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v should not be empty',
-      targetClass: MutationApprovalDTO,
+      targetClass: StockAuditApprovalDTO,
       testType: -1,
       data: {
         remark: '-',
@@ -357,7 +351,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v must be a number',
-      targetClass: MutationApprovalDTO,
+      targetClass: StockAuditApprovalDTO,
       testType: -1,
       data: {
         remark: '-',
@@ -366,7 +360,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: MutationApprovalDTO,
+      targetClass: StockAuditApprovalDTO,
       testType: 1,
       data: {
         remark: '-',
@@ -376,7 +370,7 @@ const falseCasePayload = {
   ],
 }
 describe('Stock Mutation DTO Test', () => {
-  describe(testCaption('ADD', 'data', 'Stock Mutation Add'), () => {
+  describe(testCaption('ADD', 'data', 'Stock Audit Add'), () => {
     for (const tKey of falseCasePayload.add) {
       it(
         testCaption(
@@ -401,7 +395,7 @@ describe('Stock Mutation DTO Test', () => {
     }
   })
 
-  describe(testCaption('EDIT', 'data', 'Stock Mutation Add'), () => {
+  describe(testCaption('EDIT', 'data', 'Stock Audit Edit'), () => {
     for (const tKey of falseCasePayload.edit) {
       it(
         testCaption(
@@ -426,7 +420,7 @@ describe('Stock Mutation DTO Test', () => {
     }
   })
 
-  describe(testCaption('APPROVAL', 'data', 'Stock Mutation Approval'), () => {
+  describe(testCaption('APPROVAL', 'data', 'Stock Audit Approval'), () => {
     for (const tKey of falseCasePayload.approval) {
       it(
         testCaption(

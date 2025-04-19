@@ -1,6 +1,8 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
@@ -17,6 +19,9 @@ import {
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@schemas/master/master.stock.point'
+import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
+import { INVENTORY_CONFIGURATION_KEY_AUDIT } from '@utility/constants'
+import { Cache } from 'cache-manager'
 import { Connection, Model } from 'mongoose'
 
 import { StockLogDTO } from './dto/stock.log.dto'
@@ -25,6 +30,8 @@ import { StockMovement } from './interfaces/stock.movement'
 @Injectable()
 export class ConsumerStockService {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
     @InjectConnection('primary') private mongoConnection: Connection,
 
     @InjectModel(MasterStockPoint.name, 'primary')
@@ -50,21 +57,30 @@ export class ConsumerStockService {
    */
   async movement(
     payload: StockLogDTO,
-    account: IAccount
+    account: IAccount,
+    status = 'normal'
   ): Promise<StockMovement> {
+    const auditStockPoint: IMasterStockPoint[] = await this.cacheManager.get<
+      IMasterStockPoint[]
+    >(INVENTORY_CONFIGURATION_KEY_AUDIT)
+
+    const IsAuditing = (id: string) =>
+      auditStockPoint.some((item) => item.id === id)
+
     try {
       const stockPointUpdate = []
       const stockPointLog = []
       const session = await this.mongoConnection.startSession()
       const result = await session.withTransaction(async () => {
         if (!payload.from.id && !payload.to.id) {
-          console.log('TE')
-          throw new ForbiddenException('Forbidden process')
-        } else {
-          console.log('BE')
+          throw new ForbiddenException(
+            'Forbidden process. Origin stock and target stock are undefined'
+          )
         }
 
         if (payload.from.id) {
+          const fromIsAuditing = IsAuditing(payload.from.id)
+
           await this.inventoryStockModel
             .findOne({
               'stock_point.id': payload.from.id,
@@ -75,24 +91,25 @@ export class ConsumerStockService {
               if (stockPointOrigin) {
                 // Check if stock is sufficient
                 if (stockPointOrigin && stockPointOrigin.qty >= payload.qty) {
-                  stockPointUpdate.push({
-                    updateOne: {
-                      filter: {
-                        'stock_point.id': payload.from.id,
-                        'batch.id': payload.batch.id,
-                      },
-                      upsert: false,
-                      update: {
-                        $set: {
-                          stock_point: payload.from,
-                          batch: payload.batch,
+                  if (!fromIsAuditing)
+                    stockPointUpdate.push({
+                      updateOne: {
+                        filter: {
+                          'stock_point.id': payload.from.id,
+                          'batch.id': payload.batch.id,
                         },
-                        $inc: {
-                          qty: payload.qty * -1,
+                        upsert: false,
+                        update: {
+                          $set: {
+                            stock_point: payload.from,
+                            batch: payload.batch,
+                          },
+                          $inc: {
+                            qty: payload.qty * -1,
+                          },
                         },
                       },
-                    },
-                  })
+                    })
 
                   stockPointLog.push({
                     insertOne: {
@@ -103,6 +120,7 @@ export class ConsumerStockService {
                         out: payload.qty,
                         balance: stockPointOrigin.qty,
                         transaction_id: payload.transaction_id,
+                        stock_flow_type: fromIsAuditing ? 'audit' : status,
                         created_by: account,
                       },
                     },
@@ -119,6 +137,8 @@ export class ConsumerStockService {
         }
 
         if (payload.to.id) {
+          const toIsAuditing = IsAuditing(payload.from.id)
+
           await this.masterStockPointModel
             .findOne({
               id: payload.to.id,
@@ -133,24 +153,25 @@ export class ConsumerStockService {
                   })
                   .session(session)
                   .then((stockPointTarget) => {
-                    stockPointUpdate.push({
-                      updateOne: {
-                        filter: {
-                          'stock_point.id': payload.to.id,
-                          'batch.id': payload.batch.id,
-                        },
-                        upsert: true,
-                        update: {
-                          $set: {
-                            stock_point: payload.to,
-                            batch: payload.batch,
+                    if (!toIsAuditing)
+                      stockPointUpdate.push({
+                        updateOne: {
+                          filter: {
+                            'stock_point.id': payload.to.id,
+                            'batch.id': payload.batch.id,
                           },
-                          $inc: {
-                            qty: payload.qty,
+                          upsert: true,
+                          update: {
+                            $set: {
+                              stock_point: payload.to,
+                              batch: payload.batch,
+                            },
+                            $inc: {
+                              qty: payload.qty,
+                            },
                           },
                         },
-                      },
-                    })
+                      })
 
                     if (stockPointTarget) {
                       stockPointLog.push({
@@ -162,6 +183,7 @@ export class ConsumerStockService {
                             out: 0,
                             balance: stockPointTarget.qty,
                             transaction_id: payload.transaction_id,
+                            stock_flow_type: toIsAuditing ? 'audit' : status,
                             created_by: account,
                           },
                         },
@@ -176,6 +198,7 @@ export class ConsumerStockService {
                             out: 0,
                             balance: 0,
                             transaction_id: payload.transaction_id,
+                            stock_flow_type: toIsAuditing ? 'audit' : status,
                             created_by: account,
                           },
                         },

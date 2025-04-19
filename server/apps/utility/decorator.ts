@@ -67,3 +67,29 @@ export function getParamDecoratorFactory(Decorator) {
 
   return args[Object.keys(args)[0]].factory
 }
+
+export function HORASClassDoc(className, description): ClassDecorator {
+  return (target: any) => {
+    const authorName = 'Hendry Tanaka'
+    const authorEmail = 'hendrytanaka10@icloud.com'
+    const copyrightYear = '2025'
+    const copyrightHolder = 'HORAS'
+    const license = 'Apache-2.0'
+    const version = '0.9.0'
+
+    Reflect.defineMetadata(
+      'jsdoc',
+      `
+/**
+ * @class ${className}
+ * @description ${description}
+ * @author ${authorName} <${authorEmail}>
+ * @copyright ${copyrightYear} ${copyrightHolder}
+ * @license ${license}
+ * @version ${version}
+ */
+`,
+      target
+    )
+  }
+}

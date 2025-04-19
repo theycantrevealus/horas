@@ -12,7 +12,7 @@ import { IMutationDetail } from './mutation.detail.interface'
 
 export type MutationDocument = HydratedDocument<Mutation>
 
-@Schema({ collection: 'inventory_material_requisition' })
+@Schema({ collection: 'inventory_stock_mutation' })
 export class Mutation {
   @Prop({ type: SchemaTypes.String, unique: true })
   id: string
