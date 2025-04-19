@@ -54,7 +54,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Verify package-lock.json exists
-      run: ls -l ./server/package-lock.json
+      run: ls -l ./package-lock.json
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
