@@ -36,6 +36,7 @@ export class StockProcessor {
     @InjectModel(MasterItemBatch.name, 'primary')
     private masterItemBatchModel: Model<MasterItemBatchDocument>
   ) {}
+
   @OnQueueActive()
   onActive(job: Job) {
     job.log(
