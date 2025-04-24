@@ -23,34 +23,34 @@ export class GeneralReceiveNoteController {
   async add(@Payload() payload) {
     switch (payload.action) {
       case 'add':
-        await this.generalReceiveNoteService
-          .add(payload.id, payload.data, payload.account)
-          .then(async (response) => {
-            await this.socketProxy
-              .reconnect({
-                extraHeaders: {
-                  Authorization: payload.token,
-                },
-              })
-              .then(async (clientSet) => {
-                response.message = 'New purchase order created'
-                await clientSet
-                  .emit('proceed', {
-                    sender: payload.account,
-                    receiver: null,
-                    payload: response,
-                  } satisfies ProceedDataTrafficDTO)
-                  .then(() => {
-                    clientSet.disconnect()
-                  })
-              })
-              .catch((e: Error) => {
-                this.logger.warn(`Failed to connect: ${e}`)
-              })
-          })
-          .catch((e: Error) => {
-            this.logger.warn(e)
-          })
+        // await this.generalReceiveNoteService
+        //   .add(payload.id, payload.data, payload.account)
+        //   .then(async (response) => {
+        //     await this.socketProxy
+        //       .reconnect({
+        //         extraHeaders: {
+        //           Authorization: payload.token,
+        //         },
+        //       })
+        //       .then(async (clientSet) => {
+        //         response.message = 'New purchase order created'
+        //         await clientSet
+        //           .emit('proceed', {
+        //             sender: payload.account,
+        //             receiver: null,
+        //             payload: response,
+        //           } satisfies ProceedDataTrafficDTO)
+        //           .then(() => {
+        //             clientSet.disconnect()
+        //           })
+        //       })
+        //       .catch((e: Error) => {
+        //         this.logger.warn(`Failed to connect: ${e}`)
+        //       })
+        //   })
+        //   .catch((e: Error) => {
+        //     this.logger.warn(e)
+        //   })
         break
     }
   }

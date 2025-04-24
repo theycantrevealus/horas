@@ -1,19 +1,55 @@
-import { ICurrency } from '@gateway_core/i18n/interface/i18n'
-import { CMasterItemSupplier } from '@gateway_core/master/dto/master.item.supplier'
-import { CPurchaseOrderDetail } from '@inventory/dto/purchase.order.detail'
+import { CMasterItem } from '@gateway_core/master/dto/master.item'
 import { ApiProperty } from '@nestjs/swagger'
-import { CCurrency } from '@schemas/i18n/i18n'
-import { IMasterItemSupplier } from '@schemas/master/master.item.supplier.interface'
 import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  MaxLength,
-  MinLength,
+  IsString,
   ValidateNested,
 } from 'class-validator'
 import { Types } from 'mongoose'
+
+export class CPurchaseOrderDetail {
+  @ApiProperty({
+    type: CMasterItem,
+    required: true,
+  })
+  item: CMasterItem
+
+  @ApiProperty({
+    type: Number,
+    example: 10,
+  })
+  qty: number
+
+  @ApiProperty({
+    type: Number,
+    example: 102000.01,
+  })
+  price: number
+
+  @ApiProperty({
+    type: String,
+    example: 'n',
+    enum: ['p', 'v', 'n'],
+    description: 'P = Percentage; V = Value; N = None',
+    default: 'n',
+  })
+  discount_type: string
+
+  @ApiProperty({
+    type: Number,
+    example: 10,
+  })
+  discount_value: number
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  remark: string
+}
 
 export class CPurchaseOrder {
   @ApiProperty({
@@ -29,12 +65,12 @@ export class CPurchaseOrder {
   code: string
 
   @ApiProperty({
-    type: CMasterItemSupplier,
+    type: String,
+    description: 'Supplier ID',
   })
-  @Type(() => CMasterItemSupplier)
-  @ValidateNested({ each: true })
   @IsNotEmpty()
-  supplier: IMasterItemSupplier
+  @IsString()
+  supplier: string
 
   @ApiProperty({
     example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
@@ -54,29 +90,20 @@ export class CPurchaseOrder {
 export class PurchaseOrderAddDTO {
   @ApiProperty({
     example: 'xxx-xxxx',
-    minLength: 8,
-    maxLength: 24,
     description: 'Unique code. Left it blank so it will generate auto code',
-  })
-  @MinLength(8)
-  @MaxLength(24)
-  @IsNotEmpty()
-  code: string
-
-  @ApiProperty({
-    example: '',
-    description: 'Any extra object',
     required: false,
   })
   @IsOptional()
-  extras: any
+  @IsString()
+  code?: string
 
   @ApiProperty({
-    type: CMasterItemSupplier,
-    description: 'Supplier info',
+    type: String,
+    description: 'Supplier ID',
   })
   @IsNotEmpty()
-  supplier: IMasterItemSupplier
+  @IsString()
+  supplier: string
 
   @ApiProperty({
     example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
@@ -86,13 +113,11 @@ export class PurchaseOrderAddDTO {
   purchase_date: Date
 
   @ApiProperty({
-    type: CCurrency,
-    description: 'Currency',
+    example: 'xxx-xxxx',
+    description: 'Purchase requisition id',
   })
   @IsNotEmpty()
-  @Type(() => CCurrency)
-  @ValidateNested({ each: true })
-  locale: ICurrency
+  purchase_requisition: string
 
   @ApiProperty({
     type: CPurchaseOrderDetail,
@@ -119,6 +144,14 @@ export class PurchaseOrderAddDTO {
   })
   @IsNotEmpty()
   discount_value: number
+
+  @ApiProperty({
+    example: '',
+    description: 'Any extra object',
+    required: false,
+  })
+  @IsOptional()
+  extras: any
 
   @ApiProperty({
     example: 'Extra description',
@@ -131,28 +164,20 @@ export class PurchaseOrderAddDTO {
 export class PurchaseOrderEditDTO {
   @ApiProperty({
     example: 'xxx-xxxx',
-    minLength: 8,
-    maxLength: 24,
     description: 'Unique code. Left it blank so it will generate auto code',
+    required: false,
   })
-  @MinLength(8)
-  @MaxLength(24)
-  @IsNotEmpty()
-  code: string
+  @IsOptional()
+  @IsString()
+  code?: string
 
   @ApiProperty({
-    example: '',
-    description: 'Any extra object',
+    type: String,
+    description: 'Supplier ID',
   })
   @IsNotEmpty()
-  extras: any
-
-  @ApiProperty({
-    type: CMasterItemSupplier,
-    description: 'Supplier info',
-  })
-  @IsNotEmpty()
-  supplier: IMasterItemSupplier
+  @IsString()
+  supplier: string
 
   @ApiProperty({
     example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
@@ -162,13 +187,11 @@ export class PurchaseOrderEditDTO {
   purchase_date: Date
 
   @ApiProperty({
-    type: CCurrency,
-    description: 'Currency',
+    example: 'xxx-xxxx',
+    description: 'Purchase requisition id',
   })
   @IsNotEmpty()
-  @Type(() => CCurrency)
-  @ValidateNested({ each: true })
-  locale: ICurrency
+  purchase_requisition: string
 
   @ApiProperty({
     type: CPurchaseOrderDetail,
@@ -183,7 +206,7 @@ export class PurchaseOrderEditDTO {
   @ApiProperty({
     example: 'n',
     enum: ['p', 'v', 'n'],
-    description: 'P = Percentage; V = Value; N = None',
+    description: 'p = Percentage; v = Value; n = None',
   })
   @IsNotEmpty()
   discount_type: string
@@ -197,29 +220,12 @@ export class PurchaseOrderEditDTO {
   discount_value: number
 
   @ApiProperty({
-    example: 'Extra description',
-    description: '',
+    example: '',
+    description: 'Any extra object',
+    required: false,
   })
-  @IsNotEmpty()
-  remark: string
-
-  @ApiProperty({
-    example: 0,
-    description: 'Item brand document version',
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  __v: number
-}
-
-export class PurchaseOrderApproval {
-  @ApiProperty({
-    example: 'approved',
-    enum: ['new', 'need_approval', 'approved', 'declined'],
-    description: 'Approval status',
-  })
-  @IsNotEmpty()
-  status: string
+  @IsOptional()
+  extras: any
 
   @ApiProperty({
     example: 'Extra description',
@@ -230,7 +236,7 @@ export class PurchaseOrderApproval {
 
   @ApiProperty({
     example: 0,
-    description: 'Item brand document version',
+    description: 'Document version',
   })
   @IsNotEmpty()
   @IsNumber()

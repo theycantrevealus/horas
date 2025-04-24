@@ -852,7 +852,7 @@ export const modCodes = {
       },
     },
   },
-  GeneralIssueNote: {
+  GatewayInventoryGeneralIssueNote: {
     defaultCode: 'GIN',
     defaultResponseCode: {
       success: HttpStatus.OK,
@@ -899,20 +899,70 @@ export const modCodes = {
       },
     },
   },
-  PurchaseOrderService: {
+  GatewayInventoryPurchaseOrder: {
     defaultCode: 'PO',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Purchase order fetched successfully',
+        transaction_classify: 'PO_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      uncompletedDelivery: {
+        responseCode: HttpStatus.OK,
+        message: 'Purchase order fetched successfully',
+        transaction_classify: 'PO_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Purchase order detail fetched successfully',
+        transaction_classify: 'PO_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Purchase order created successfully',
+        transaction_classify: 'PO_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase order updated successfully',
+        transaction_classify: 'PO_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Purchase order deleted successfully',
+        transaction_classify: 'PO_DELETE',
+      },
+      askApproval: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase order proposed successfully',
+        transaction_classify: 'AUD_ASK_APPROVAL',
+      },
+      approve: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase order approved successfully',
+        transaction_classify: 'AUD_APPROVE',
+      },
+      decline: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase order declined successfully',
+        transaction_classify: 'AUD_DECLINE',
       },
     },
   },

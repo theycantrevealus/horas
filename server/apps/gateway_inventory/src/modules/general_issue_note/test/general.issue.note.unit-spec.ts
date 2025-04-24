@@ -26,7 +26,7 @@ import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 
 import { GeneralIssueNoteAddDTO } from '../dto/general.issue.note'
-import { GeneralIssueNoteService } from '../general.issue.note.service'
+import { GatewayInventoryGeneralIssueNoteService } from '../general.issue.note.service'
 import {
   generalIssueNoteDocArray,
   mockGeneralIssueNote,
@@ -40,7 +40,7 @@ import {
 describe('General Issue Note Service', () => {
   let configService: ConfigService
   let cacheManager: Cache
-  let generalIssueNoteService: GeneralIssueNoteService
+  let generalIssueNoteService: GatewayInventoryGeneralIssueNoteService
   let generalIssueNoteModel: Model<GeneralIssueNote>
   let materialRequisitionModel: Model<MaterialRequisition>
   let stockClient: KafkaService
@@ -49,7 +49,7 @@ describe('General Issue Note Service', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
-        GeneralIssueNoteService,
+        GatewayInventoryGeneralIssueNoteService,
         AuthService,
         JwtService,
         {
@@ -114,9 +114,10 @@ describe('General Issue Note Service', () => {
 
     configService = module.get<ConfigService>(ConfigService)
 
-    generalIssueNoteService = module.get<GeneralIssueNoteService>(
-      GeneralIssueNoteService
-    )
+    generalIssueNoteService =
+      module.get<GatewayInventoryGeneralIssueNoteService>(
+        GatewayInventoryGeneralIssueNoteService
+      )
     generalIssueNoteModel = module.get<Model<GeneralIssueNoteDocument>>(
       getModelToken(GeneralIssueNote.name, 'primary')
     )

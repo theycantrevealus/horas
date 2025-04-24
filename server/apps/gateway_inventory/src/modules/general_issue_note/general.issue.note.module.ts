@@ -15,8 +15,8 @@ import {
 } from '@schemas/inventory/material.requisition'
 import { AuthModule } from '@security/auth.module'
 
-import { GeneralIssueNoteController } from './general.issue.note.controller'
-import { GeneralIssueNoteService } from './general.issue.note.service'
+import { GatewayInventoryGeneralIssueNoteController } from './general.issue.note.controller'
+import { GatewayInventoryGeneralIssueNoteService } from './general.issue.note.service'
 
 @Module({
   imports: [
@@ -31,13 +31,13 @@ import { GeneralIssueNoteService } from './general.issue.note.service'
     ),
     AuthModule,
   ],
-  controllers: [GeneralIssueNoteController],
+  controllers: [GatewayInventoryGeneralIssueNoteController],
   providers: [
     SocketIoClientProvider,
     SocketIoClientProxyService,
     MongoMiddlewareGeneralIssueNote,
-    GeneralIssueNoteService,
+    GatewayInventoryGeneralIssueNoteService,
   ],
-  exports: [GeneralIssueNoteService],
+  exports: [GatewayInventoryGeneralIssueNoteService],
 })
-export class GeneralIssueNoteModule {}
+export class GatewayInventoryGeneralIssueNoteModule {}

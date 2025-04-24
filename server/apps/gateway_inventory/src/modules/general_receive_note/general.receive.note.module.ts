@@ -1,5 +1,5 @@
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
-import { PurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
+import { GatewayInventoryPurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -15,8 +15,8 @@ import {
 } from '@schemas/master/master.stock.point'
 import { AuthModule } from '@security/auth.module'
 
-import { GeneralReceiveNoteController } from './general.receive.note.controller'
-import { GeneralReceiveNoteService } from './general.receive.note.service'
+import { GatewayInventoryGeneralReceiveNoteController } from './general.receive.note.controller'
+import { GatewayInventoryGeneralReceiveNoteService } from './general.receive.note.service'
 
 @Module({
   imports: [
@@ -30,14 +30,14 @@ import { GeneralReceiveNoteService } from './general.receive.note.service'
       'primary'
     ),
     AuthModule,
-    PurchaseOrderModule,
+    GatewayInventoryPurchaseOrderModule,
   ],
-  controllers: [GeneralReceiveNoteController],
+  controllers: [GatewayInventoryGeneralReceiveNoteController],
   providers: [
     MongoMiddlewareGeneralReceiveNote,
-    GeneralReceiveNoteService,
+    GatewayInventoryGeneralReceiveNoteService,
     MasterStockPointService,
   ],
-  exports: [GeneralReceiveNoteService],
+  exports: [GatewayInventoryGeneralReceiveNoteService],
 })
-export class GeneralReceiveNoteModule {}
+export class GatewayInventoryGeneralReceiveNoteModule {}

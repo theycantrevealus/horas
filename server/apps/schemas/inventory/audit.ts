@@ -36,6 +36,17 @@ export class StockAudit {
   locale: ILocale
 
   /**
+   * @type { string }
+   * @description Audit code (it will generated if not defined)
+   */
+  @Prop({
+    type: SchemaTypes.String,
+    required: true,
+    unique: true,
+  })
+  code: string
+
+  /**
    * @type { Date }
    * @description Period when the audit will held
    */
@@ -54,17 +65,6 @@ export class StockAudit {
     required: true,
   })
   period_to: Date
-
-  /**
-   * @type { string }
-   * @description Audit code (it will generated if not defined)
-   */
-  @Prop({
-    type: SchemaTypes.String,
-    required: true,
-    unique: true,
-  })
-  code: string
 
   /**
    * @type { Date }

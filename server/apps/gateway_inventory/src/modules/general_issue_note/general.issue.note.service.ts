@@ -24,7 +24,7 @@ import { Logger } from 'winston'
 import { GeneralIssueNoteAddDTO } from './dto/general.issue.note'
 
 @Injectable()
-export class GeneralIssueNoteService {
+export class GatewayInventoryGeneralIssueNoteService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,

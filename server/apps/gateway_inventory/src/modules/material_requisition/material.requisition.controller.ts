@@ -25,14 +25,14 @@ import {
   MaterialRequisitionEditDTO,
 } from './dto/material.requisition'
 import { MaterialRequisitionApproval } from './dto/material.requisition.approval'
-import { MaterialRequisitionService } from './material.requisition.service'
+import { GatewayInventoryMaterialRequisitionService } from './material.requisition.service'
 
 @Controller('inventory')
 @ApiTags('Material Requisition')
-export class MaterialRequisitionController {
+export class GatewayInventoryMaterialRequisitionController {
   constructor(
-    @Inject(MaterialRequisitionService)
-    private readonly materialRequisitionService: MaterialRequisitionService
+    @Inject(GatewayInventoryMaterialRequisitionService)
+    private readonly materialRequisitionService: GatewayInventoryMaterialRequisitionService
   ) {}
 
   @Post('material_requisition')

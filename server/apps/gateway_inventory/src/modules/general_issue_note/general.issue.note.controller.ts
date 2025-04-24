@@ -17,14 +17,14 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { FastifyRequest } from 'fastify'
 
 import { GeneralIssueNoteAddDTO } from './dto/general.issue.note'
-import { GeneralIssueNoteService } from './general.issue.note.service'
+import { GatewayInventoryGeneralIssueNoteService } from './general.issue.note.service'
 
 @Controller('inventory')
 @ApiTags('General Issue Note')
-export class GeneralIssueNoteController {
+export class GatewayInventoryGeneralIssueNoteController {
   constructor(
-    @Inject(GeneralIssueNoteService)
-    private readonly generalIssueNoteService: GeneralIssueNoteService
+    @Inject(GatewayInventoryGeneralIssueNoteService)
+    private readonly generalIssueNoteService: GatewayInventoryGeneralIssueNoteService
   ) {}
 
   @Post('general_issue_note')

@@ -30,7 +30,7 @@ import {
 import { MaterialRequisitionApproval } from './dto/material.requisition.approval'
 
 @Injectable()
-export class MaterialRequisitionService {
+export class GatewayInventoryMaterialRequisitionService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,

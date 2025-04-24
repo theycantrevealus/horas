@@ -1,6 +1,5 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
-import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
@@ -15,10 +14,11 @@ import prime_datatable from '@utility/prime'
 import { CompressionTypes } from 'kafkajs'
 import { Model, Types } from 'mongoose'
 
-import { PurchaseOrderService } from '../purchase_order/purchase.order.service'
+import { GatewayInventoryPurchaseOrderService } from '../purchase_order/purchase.order.service'
+import { GeneralReceiveNoteAddDTO } from './dto/general.receive.note.dto'
 
 @Injectable()
-export class GeneralReceiveNoteService {
+export class GatewayInventoryGeneralReceiveNoteService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
@@ -26,8 +26,8 @@ export class GeneralReceiveNoteService {
     @InjectModel(GeneralReceiveNote.name, 'primary')
     private generalReceiveNoteModel: Model<GeneralReceiveNoteDocument>,
 
-    @Inject(PurchaseOrderService)
-    private readonly purchaseOrderService: PurchaseOrderService,
+    @Inject(GatewayInventoryPurchaseOrderService)
+    private readonly purchaseOrderService: GatewayInventoryPurchaseOrderService,
 
     @Inject(MasterStockPointService)
     private readonly masterStockPointService: MasterStockPointService,

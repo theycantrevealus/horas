@@ -3,7 +3,6 @@ import { PermissionManager } from '@decorators/permission'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LoggingInterceptor } from '@interceptors/logging'
-import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
 import {
   Body,
   Controller,
@@ -28,14 +27,15 @@ import { ApiQueryGeneral } from '@utility/dto/prime'
 import { GlobalResponse } from '@utility/dto/response'
 import { isJSON } from 'class-validator'
 
-import { GeneralReceiveNoteService } from './general.receive.note.service'
+import { GeneralReceiveNoteAddDTO } from './dto/general.receive.note.dto'
+import { GatewayInventoryGeneralReceiveNoteService } from './general.receive.note.service'
 
 @Controller('inventory')
 @ApiTags('General Receive Note')
-export class GeneralReceiveNoteController {
+export class GatewayInventoryGeneralReceiveNoteController {
   constructor(
-    @Inject(GeneralReceiveNoteService)
-    private readonly generalReceiveNoteService: GeneralReceiveNoteService
+    @Inject(GatewayInventoryGeneralReceiveNoteService)
+    private readonly generalReceiveNoteService: GatewayInventoryGeneralReceiveNoteService
   ) {}
 
   @Get('general_receive_note')

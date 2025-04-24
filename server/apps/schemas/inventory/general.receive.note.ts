@@ -19,8 +19,12 @@ export class GeneralReceiveNote {
   @Prop({ type: SchemaTypes.String, required: true, unique: true })
   code: string
 
-  @Prop({ type: SchemaTypes.Mixed, required: false })
-  extras: any
+  @Prop({
+    type: SchemaTypes.String,
+    default: () => 'Asia/Jakarta',
+    required: true,
+  })
+  timezone: string
 
   @Prop(MasterStockPointJoin)
   stock_point: IMasterStockPoint
@@ -40,12 +44,8 @@ export class GeneralReceiveNote {
   @Prop(AccountJoin)
   created_by: IAccount
 
-  @Prop({
-    type: SchemaTypes.String,
-    default: () => 'Asia/Jakarta',
-    required: true,
-  })
-  timezone: string
+  @Prop({ type: SchemaTypes.Mixed, required: false })
+  extras: any
 
   @Prop({
     type: SchemaTypes.Date,
