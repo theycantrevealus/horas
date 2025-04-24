@@ -3,14 +3,14 @@ import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
+import { GatewayInventoryStockAdjustmentModule } from '@gateway_inventory/adjustment/gateway.inventory.adjustment.module'
 import { GatewayInventoryStockAuditModule } from '@gateway_inventory/audit/gateway.inventory.audit.module'
 import { GeneralIssueNoteModule } from '@gateway_inventory/general_issue_note/general.issue.note.module'
 import { MaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
 import { GatewayInventoryMutationModule } from '@gateway_inventory/mutation/gateway.inventory.mutation.module'
-import { StockModule } from '@gateway_inventory/stock/stock.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
-import { BullModule, BullRootModuleOptions } from '@nestjs/bull'
+import { BullModule, BullRootModuleOptions } from '@nestjs/bullmq'
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -80,7 +80,7 @@ import * as redisStore from 'cache-manager-ioredis'
       ): Promise<BullRootModuleOptions> => {
         if (configService.get<string>('redis.password') !== '') {
           return {
-            redis: {
+            connection: {
               host: configService.get<string>('redis.host'),
               port: +configService.get<number>('redis.port'),
               password: configService.get<string>('redis.password'),
@@ -88,7 +88,7 @@ import * as redisStore from 'cache-manager-ioredis'
           }
         } else {
           return {
-            redis: {
+            connection: {
               host: configService.get<string>('redis.host'),
               port: +configService.get<number>('redis.port'),
             },
@@ -119,9 +119,10 @@ import * as redisStore from 'cache-manager-ioredis'
     GeneralIssueNoteModule,
     GatewayInventoryMutationModule,
     GatewayInventoryStockAuditModule,
+    GatewayInventoryStockAdjustmentModule,
     // GeneralReceiveNoteModule,
     // PurchaseOrderModule,
-    StockModule, // TODO : Rename this redundant name
+    // StockModule, // TODO : Rename this redundant name
   ],
   controllers: [],
   providers: [ClientDecoratorProcessorService],

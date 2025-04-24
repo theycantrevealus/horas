@@ -61,6 +61,9 @@
       "@gateway_socket/*": [
         "./apps/socket/src/*"
       ],
+      "@processor/stock/*": [
+        "./apps/processor/stock/src/*"
+      ],
       "@seeds/*": [
         "./apps/gateway/src/seeds/*"
       ],

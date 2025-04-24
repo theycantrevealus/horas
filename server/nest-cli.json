@@ -171,6 +171,24 @@
       "compilerOptions": {
         "tsConfigPath": "apps/consumer_stock/tsconfig.app.json"
       }
+    },
+    "processor_stock": {
+      "type": "application",
+      "root": "apps/processor/stock",
+      "entryFile": "main",
+      "sourceRoot": "apps/processor/stock/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/processor/stock/tsconfig.app.json"
+      }
+    },
+    "processor_master": {
+      "type": "application",
+      "root": "apps/processor/master",
+      "entryFile": "main",
+      "sourceRoot": "apps/processor/master/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/processor/master/tsconfig.app.json"
+      }
     }
   }
 }

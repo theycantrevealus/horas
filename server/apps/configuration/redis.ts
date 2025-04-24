@@ -1,4 +1,3 @@
-import { BullModuleOptions } from '@nestjs/bull'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { environmentIdentifier } from '@utility/environtment'
 import * as dotenv from 'dotenv'
@@ -15,7 +14,12 @@ export const RedisConfig = () => {
       password: process.env.REDIS_PASSWORD,
       clients: {
         master_item: process.env.REDIS_MASTER_ITEM,
+        stock: {
+          host: process.env.REDIS_STOCK_HOST,
+          port: process.env.REDIS_STOCK_PORT,
+        },
       },
+      topics: process.env.REDIS_TOPIC,
     },
   }
 }
@@ -24,30 +28,28 @@ export const RedisStock = {
   name: process.env.REDIS_STOCK,
   imports: [ConfigModule],
   inject: [ConfigService],
-  useFactory: async (
-    configService: ConfigService
-  ): Promise<BullModuleOptions> => {
+  useFactory: async (configService: ConfigService) => {
     if (configService.get<string>('redis.password') !== '') {
-      return {
-        url: `${configService.get<string>('redis.password')}@${configService.get<string>('redis.host')}:${configService.get<string>('redis.port')}`,
-      }
       // return {
-      //   redis: {
-      //     host: configService.get<string>('redis.host'),
-      //     port: +configService.get<number>('redis.port'),
-      //     password: configService.get<string>('redis.password'),
-      //   },
+      //   url: `redis://${configService.get<string>('redis.password')}@${configService.get<string>('redis.host')}:${configService.get<string>('redis.port')}`,
       // }
+      return {
+        connection: {
+          host: configService.get<string>('redis.host'),
+          port: +configService.get<number>('redis.port'),
+          password: configService.get<string>('redis.password'),
+        },
+      }
     } else {
-      return {
-        url: `redis://${configService.get<string>('redis.host')}:${configService.get<string>('redis.port')}`,
-      }
       // return {
-      //   redis: {
-      //     host: configService.get<string>('redis.host'),
-      //     port: +configService.get<number>('redis.port'),
-      //   },
+      //   url: `redis://${configService.get<string>('redis.host')}:${configService.get<string>('redis.port')}`,
       // }
+      return {
+        connection: {
+          host: configService.get<string>('redis.host'),
+          port: +configService.get<number>('redis.port'),
+        },
+      }
     }
   },
 }

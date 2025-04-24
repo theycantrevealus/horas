@@ -1,11 +1,6 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import {
   InventoryStock,
@@ -25,7 +20,6 @@ import { Cache } from 'cache-manager'
 import { Connection, Model } from 'mongoose'
 
 import { StockLogDTO } from './dto/stock.log.dto'
-import { StockMovement } from './interfaces/stock.movement'
 
 @Injectable()
 export class ConsumerStockService {
@@ -44,6 +38,14 @@ export class ConsumerStockService {
     private inventoryStockLogModel: Model<InventoryStockLogDocument>
   ) {}
 
+  async IsAuditing(id: string) {
+    const auditStockPoint: IMasterStockPoint[] = await this.cacheManager.get<
+      IMasterStockPoint[]
+    >(INVENTORY_CONFIGURATION_KEY_AUDIT)
+
+    return auditStockPoint.some((item) => item.id === id)
+  }
+
   /**
    * Origin Stock Point and Target Stock Point must defined
    * Only one of these are allowed to set null
@@ -55,176 +57,191 @@ export class ConsumerStockService {
    * @param {IAccount} account - Account credential
    * @returns {StockMovement} Stock processing result
    */
-  async movement(
-    payload: StockLogDTO,
-    account: IAccount,
-    status = 'normal'
-  ): Promise<StockMovement> {
-    const auditStockPoint: IMasterStockPoint[] = await this.cacheManager.get<
-      IMasterStockPoint[]
-    >(INVENTORY_CONFIGURATION_KEY_AUDIT)
+  async movement(payload: StockLogDTO, account: IAccount, status = 'normal') {
+    const stockPointUpdate = []
+    const stockPointLog = []
 
-    const IsAuditing = (id: string) =>
-      auditStockPoint.some((item) => item.id === id)
+    // const fromIsAuditing: boolean = false
 
     try {
-      const stockPointUpdate = []
-      const stockPointLog = []
-      const session = await this.mongoConnection.startSession()
-      const result = await session.withTransaction(async () => {
-        if (!payload.from.id && !payload.to.id) {
-          throw new ForbiddenException(
-            'Forbidden process. Origin stock and target stock are undefined'
-          )
-        }
+      if (!payload.from && !payload.to) {
+        throw new Error(
+          'Forbidden process. Origin stock and target stock are undefined'
+        )
+      }
+      // if (!payload.from && !payload.to) {
+      //   throw new Error(
+      //     'Forbidden process. Origin stock and target stock are undefined'
+      //   )
+      // } else {
+      //   if (payload.from) {
+      //     if (!payload.from.id) {
+      //       throw new Error(
+      //         'Forbidden process. Origin stock and target stock are undefined'
+      //       )
+      //     } else {
+      //       fromIsAuditing = await this.IsAuditing(payload.from.id)
+      //     }
+      //   }
 
-        if (payload.from.id) {
-          const fromIsAuditing = IsAuditing(payload.from.id)
+      //   if (payload.to) {
+      //     if (!payload.to.id) {
+      //       throw new Error(
+      //         'Forbidden process. Origin stock and target stock are undefined'
+      //       )
+      //     }
+      //   }
+      // }
 
-          await this.inventoryStockModel
-            .findOne({
-              'stock_point.id': payload.from.id,
-              'batch.id': payload.batch.id,
-            })
-            .session(session)
-            .then((stockPointOrigin) => {
-              if (stockPointOrigin) {
-                // Check if stock is sufficient
-                if (stockPointOrigin && stockPointOrigin.qty >= payload.qty) {
-                  if (!fromIsAuditing)
+      const fromIsAuditing = payload.from
+        ? await this.IsAuditing(payload.from.id)
+        : false
+
+      if (payload.from && payload.from.id) {
+        await this.inventoryStockModel
+          .findOne({
+            'stock_point.id': payload.from.id,
+            'batch.id': payload.batch.id,
+          })
+          .then((stockPointOrigin) => {
+            if (stockPointOrigin) {
+              // Check if stock is sufficient
+              if (stockPointOrigin && stockPointOrigin.qty >= payload.qty) {
+                if (!fromIsAuditing)
+                  stockPointUpdate.push({
+                    updateOne: {
+                      filter: {
+                        'stock_point.id': payload.from.id,
+                        'batch.id': payload.batch.id,
+                      },
+                      upsert: false,
+                      update: {
+                        $set: {
+                          stock_point: payload.from,
+                          batch: payload.batch,
+                        },
+                        $inc: {
+                          qty: payload.qty * -1,
+                        },
+                      },
+                    },
+                  })
+
+                stockPointLog.push({
+                  insertOne: {
+                    document: {
+                      batch: payload.batch,
+                      stock_point: payload.from,
+                      qty_in: 0,
+                      qty_out: payload.qty,
+                      balance: stockPointOrigin.qty,
+                      transaction_id: payload.transaction_id,
+                      stock_flow_type: fromIsAuditing ? 'audit' : status,
+                      created_by: account,
+                    },
+                  },
+                })
+              } else {
+                throw new Error('Unsufficient origin stock')
+              }
+            } else {
+              throw new Error(
+                'Origin stock point is not found or unsufficient balance'
+              )
+            }
+          })
+      }
+
+      if (payload.to && payload.to.id) {
+        const toIsAuditing = await this.IsAuditing(payload.to.id)
+
+        await this.masterStockPointModel
+          .findOne({
+            id: payload.to.id,
+          })
+          .then(async (targetStockPoint) => {
+            if (targetStockPoint) {
+              await this.inventoryStockModel
+                .findOne({
+                  'stock_point.id': payload.to.id,
+                  'batch.id': payload.batch.id,
+                })
+                .then((stockPointTarget) => {
+                  if (!toIsAuditing)
                     stockPointUpdate.push({
                       updateOne: {
                         filter: {
-                          'stock_point.id': payload.from.id,
+                          'stock_point.id': payload.to.id,
                           'batch.id': payload.batch.id,
                         },
-                        upsert: false,
+                        upsert: true,
                         update: {
                           $set: {
-                            stock_point: payload.from,
+                            stock_point: payload.to,
                             batch: payload.batch,
                           },
                           $inc: {
-                            qty: payload.qty * -1,
+                            qty: payload.qty,
                           },
                         },
                       },
                     })
 
-                  stockPointLog.push({
-                    insertOne: {
-                      document: {
-                        batch: payload.batch,
-                        stock_point: payload.from,
-                        in: 0,
-                        out: payload.qty,
-                        balance: stockPointOrigin.qty,
-                        transaction_id: payload.transaction_id,
-                        stock_flow_type: fromIsAuditing ? 'audit' : status,
-                        created_by: account,
+                  if (stockPointTarget) {
+                    stockPointLog.push({
+                      insertOne: {
+                        document: {
+                          batch: payload.batch,
+                          stock_point: payload.to,
+                          qty_in: payload.qty,
+                          qty_out: 0,
+                          balance: stockPointTarget.qty,
+                          transaction_id: payload.transaction_id,
+                          stock_flow_type: toIsAuditing ? 'audit' : status,
+                          created_by: account,
+                        },
                       },
-                    },
-                  })
-                } else {
-                  throw new Error('Unsufficient origin stock')
-                }
-              } else {
-                throw new NotFoundException(
-                  'Origin stock point is not found or unsufficient balance'
-                )
-              }
-            })
-        }
-
-        if (payload.to.id) {
-          const toIsAuditing = IsAuditing(payload.from.id)
-
-          await this.masterStockPointModel
-            .findOne({
-              id: payload.to.id,
-            })
-            .session(session)
-            .then(async (targetStockPoint) => {
-              if (targetStockPoint) {
-                await this.inventoryStockModel
-                  .findOne({
-                    'stock_point.id': payload.to.id,
-                    'batch.id': payload.batch.id,
-                  })
-                  .session(session)
-                  .then((stockPointTarget) => {
-                    if (!toIsAuditing)
-                      stockPointUpdate.push({
-                        updateOne: {
-                          filter: {
-                            'stock_point.id': payload.to.id,
-                            'batch.id': payload.batch.id,
-                          },
-                          upsert: true,
-                          update: {
-                            $set: {
-                              stock_point: payload.to,
-                              batch: payload.batch,
-                            },
-                            $inc: {
-                              qty: payload.qty,
-                            },
-                          },
+                    })
+                  } else {
+                    stockPointLog.push({
+                      insertOne: {
+                        document: {
+                          batch: payload.batch,
+                          stock_point: payload.to,
+                          qty_in: payload.qty,
+                          qty_out: 0,
+                          balance: 0,
+                          transaction_id: payload.transaction_id,
+                          stock_flow_type: toIsAuditing ? 'audit' : status,
+                          created_by: account,
                         },
-                      })
-
-                    if (stockPointTarget) {
-                      stockPointLog.push({
-                        insertOne: {
-                          document: {
-                            batch: payload.batch,
-                            stock_point: payload.to,
-                            in: payload.qty,
-                            out: 0,
-                            balance: stockPointTarget.qty,
-                            transaction_id: payload.transaction_id,
-                            stock_flow_type: toIsAuditing ? 'audit' : status,
-                            created_by: account,
-                          },
-                        },
-                      })
-                    } else {
-                      stockPointLog.push({
-                        insertOne: {
-                          document: {
-                            batch: payload.batch,
-                            stock_point: payload.to,
-                            in: payload.qty,
-                            out: 0,
-                            balance: 0,
-                            transaction_id: payload.transaction_id,
-                            stock_flow_type: toIsAuditing ? 'audit' : status,
-                            created_by: account,
-                          },
-                        },
-                      })
-                    }
-                  })
-              } else {
-                throw new NotFoundException('Target stock point is not found')
-              }
-            })
-        }
-
-        return await this.inventoryStockModel
-          .bulkWrite(stockPointUpdate)
-          .then(async (stockProcess) => {
-            return await this.inventoryStockLogModel
-              .bulkWrite(stockPointLog)
-              .then((stockLogProcess) => ({
-                stock: stockProcess,
-                log: stockLogProcess,
-              }))
+                      },
+                    })
+                  }
+                })
+            } else {
+              throw new Error('Target stock point is not found')
+            }
           })
-      })
+      }
 
-      await session.endSession()
-      return result
+      const session = await this.mongoConnection.startSession()
+      await session
+        .withTransaction(async () => {
+          await this.inventoryStockModel
+            .bulkWrite(stockPointUpdate, { session })
+            .then(async (stockProcess) => {
+              return await this.inventoryStockLogModel
+                .bulkWrite(stockPointLog, { session })
+                .then((stockLogProcess) => ({
+                  stock: stockProcess,
+                  log: stockLogProcess,
+                }))
+            })
+        })
+        .then(async () => {
+          await session.endSession()
+        })
     } catch (error) {
       throw error
     }

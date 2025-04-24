@@ -17,6 +17,7 @@
     "^@gateway_core(.*)$": "<rootDir>/apps/gateway_core/src/modules$1",
     "^@gateway_inventory(.*)$": "<rootDir>/apps/gateway_inventory/src/modules$1",
     "^@consumer_stock(.*)$": "<rootDir>/apps/consumer_stock/src$1",
+    "^@processor_stock(.*)$": "<rootDir>/apps/processor/stock/src$1",
     "^@log(.*)$": "<rootDir>/apps/log/src$1",
     "^@stock(.*)$": "<rootDir>/apps/stock$1",
     "^@security(.*)$": "<rootDir>/apps/security$1",
@@ -64,7 +65,9 @@
     "<rootDir>/apps/gateway_inventory/src/modules/general_issue_note/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/mutation/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/audit/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_inventory/src/modules/adjustment/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/consumer_stock/src/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/processor/stock/src/**/*.{js,jsx,ts,tsx}",
     "!<rootDir>/node_modules/",
     "!<rootDir>/**/*.mock.{js,jsx,ts,tsx}"
   ],

@@ -651,6 +651,73 @@ export const modCodes = {
       },
     },
   },
+  GatewayInventoryStockAdjustment: {
+    defaultCode: 'ADJ',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock adjustment fetched successfully',
+        transaction_classify: 'ADJ_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock adjustment fetched successfully',
+        transaction_classify: 'ADJ_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Stock adjustment created successfully',
+        transaction_classify: 'ADJ_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock adjustment updated successfully',
+        transaction_classify: 'ADJ_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Stock adjustment deleted successfully',
+        transaction_classify: 'ADJ_DELETE',
+      },
+      askApproval: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock adjustment proposed successfully',
+        transaction_classify: 'ADJ_ASK_APPROVAL',
+      },
+      approve: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock adjustment approved successfully',
+        transaction_classify: 'ADJ_APPROVE',
+      },
+      decline: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock adjustment declined successfully',
+        transaction_classify: 'ADJ_DECLINE',
+      },
+      process: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock adjustment processed successfully',
+        transaction_classify: 'ADJ_RUNNING',
+      },
+    },
+  },
   GatewayInventoryMutation: {
     defaultCode: 'MUT',
     defaultResponseCode: {

@@ -18,13 +18,13 @@ export class InventoryStockLog {
   from: IMasterStockPoint
 
   @Prop(MasterStockPointJoin)
-  to: IMasterStockPoint;
+  to: IMasterStockPoint
 
   @Prop({ type: SchemaTypes.Number })
-  in: number
+  qty_in: number
 
   @Prop({ type: SchemaTypes.Number })
-  out: number
+  qty_out: number
 
   @Prop({ type: SchemaTypes.Number })
   balance: number

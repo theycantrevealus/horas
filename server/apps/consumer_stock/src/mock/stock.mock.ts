@@ -43,7 +43,7 @@ export const mockInventoryStockModel = {
   create: jest.fn().mockResolvedValue(mockInventoryStock()),
   save: jest.fn().mockImplementation(),
   exec: jest.fn().mockImplementation(),
-  bulkWrite: jest.fn().mockImplementation(),
+  bulkWrite: jest.fn().mockResolvedValue({}),
 }
 
 export const mockInventoryStockDoc = (
@@ -71,13 +71,13 @@ export const mockInventoryStockDoc = (
   storing_label: mock?.storing_label ?? '',
 })
 
-export const accountArray = [
+export const mockInventoryStockArray = [
   mockInventoryStock(),
   mockInventoryStock(),
   mockInventoryStock(),
 ]
 
-export const accountDocArray = [
+export const mockInventoryStockDocArray = [
   mockInventoryStockDoc(),
   mockInventoryStockDoc(),
   mockInventoryStockDoc(),

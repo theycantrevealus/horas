@@ -69,6 +69,7 @@ module.exports = (options, webpack) => {
         '@consumer_stock': path.resolve(__dirname, 'apps/consumer_stock/src'),
         '@inventory': path.resolve(__dirname, 'apps/inventory/src'),
         '@stock': path.resolve(__dirname, 'apps/stock/src'),
+        '@processor_stock': path.resolve(__dirname, 'apps/processor/stock/src'),
         '@log': path.resolve(__dirname, 'apps/log/src'),
         '@security': path.resolve(__dirname, 'apps/security'),
         '@configuration': path.resolve(__dirname, 'apps/configuration'),
