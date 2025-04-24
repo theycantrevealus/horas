@@ -27,6 +27,13 @@ export function testCaption(
   )
 }
 
+export function codeGenerator(code, counter) {
+  return `${code}-${new Date()
+    .toJSON()
+    .slice(0, 7)
+    .replace(/-/g, '/')}/${pad('000000', counter + 1, true)}`
+}
+
 export function loggerColor(type) {
   const color = {
     reset: '\x1b[0m',
