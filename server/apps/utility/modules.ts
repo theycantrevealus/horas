@@ -785,6 +785,73 @@ export const modCodes = {
       },
     },
   },
+  GatewayInventoryPurchaseRequisition: {
+    defaultCode: 'PR',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Purchase requisition fetched successfully',
+        transaction_classify: 'PR_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Purchase requisition detail fetched successfully',
+        transaction_classify: 'PR_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Purchase requisition created successfully',
+        transaction_classify: 'PR_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase requisition updated successfully',
+        transaction_classify: 'PR_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Purchase requisition deleted successfully',
+        transaction_classify: 'PR_DELETE',
+      },
+      askApproval: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase requisition deleted successfully',
+        transaction_classify: 'PR_ASK_APPROVAL',
+      },
+      approve: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase requisition deleted successfully',
+        transaction_classify: 'PR_APPROVE',
+      },
+      decline: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase requisition deleted successfully',
+        transaction_classify: 'PR_DECLINE',
+      },
+      cancel: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Purchase requisition deleted successfully',
+        transaction_classify: 'PR_CANCEL',
+      },
+    },
+  },
   GeneralIssueNote: {
     defaultCode: 'GIN',
     defaultResponseCode: {
