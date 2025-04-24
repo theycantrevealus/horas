@@ -47,6 +47,7 @@
     ".(e2e|unit)-spec.(t|j)s",
     ".service.(t|j)s",
     ".provider.(t|j)s",
+    ".consumer.(t|j)s",
     ".dto.(t|j)s",
     ".batch.(t|j)s",
     ".join.(t|j)s",

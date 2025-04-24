@@ -9,8 +9,10 @@ import {
 import { Inject } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { KafkaService } from '@utility/kafka/avro/service'
+import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { Job } from 'bullmq'
 import { CompressionTypes } from 'kafkajs'
+import { Logger } from 'winston'
 
 @Processor('stock')
 export class StockProcessorConsumer {
@@ -18,40 +20,47 @@ export class StockProcessorConsumer {
     @Inject(ConfigService)
     private readonly configService: ConfigService,
 
-    @Inject('STOCK_SERVICE') private readonly clientStock: KafkaService
-  ) {}
+    @Inject('STOCK_SERVICE') private readonly clientStock: KafkaService,
 
-  @OnQueueActive()
-  onActive(job: Job) {
-    job.log(
-      `Processing job ${job.id} of type ${job.name} with data ${JSON.stringify(job.data, null, 2)}...`
-    )
-  }
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger
+  ) {}
 
   @OnQueueError()
   onError(error: Error) {
-    throw error
+    this.logger.error(error.message)
+  }
+
+  @OnQueueActive()
+  async onActive(job: Job) {
+    const logData = `Processing job ${job.id} of type ${job.name} with data ${JSON.stringify(job.data, null, 2)}...`
+    job.log(logData)
+    this.logger.verbose(logData)
   }
 
   @OnQueuePaused()
-  onPaused() {
-    // job.log('Job paused?');
+  async onPaused(job: Job) {
+    const logData = `Paused job ${job.id} of type ${job.name} with data ${JSON.stringify(job.data, null, 2)}...`
+    job.log(logData)
+    this.logger.verbose(logData)
   }
 
   @OnQueueCompleted()
   onCompleted(job: Job, result: any) {
-    // job.progress(100)
-    job.log(`Job finished with result: ${result}`)
+    const logData = `Finished job ${job.id} with result: ${result}`
+    job.log(logData)
+    this.logger.verbose(logData)
   }
 
   @Process('adjustment-manual')
   async process(job: Job) {
-    const transaction = await this.clientStock.transaction('grn')
-    const data = job.data.payload
-    const account = data.account
-    const token = data.token
+    const transaction = await this.clientStock.transaction('adjustment-manual')
     try {
+      const data = job.data.payload
+      const account = data.account
+      const token = data.token
       const items = []
+
       data.detail.forEach((item) => {
         items.push({
           headers: {
@@ -87,7 +96,6 @@ export class StockProcessorConsumer {
         topic: this.configService.get<string>('kafka.stock.topic.stock'),
         messages: items,
       })
-
       await transaction.commit()
     } catch (kafkaError) {
       await transaction.abort()

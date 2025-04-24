@@ -379,13 +379,13 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
           this.logger.error(dataSet)
         }
 
-        await this.consumer.commitOffsets([
-          {
-            topic: topic,
-            partition: partition,
-            offset: (parseInt(offset) + 1).toString(),
-          },
-        ])
+        // await this.consumer.commitOffsets([
+        //   {
+        //     topic: topic,
+        //     partition: partition,
+        //     offset: (parseInt(offset) + 1).toString(),
+        //   },
+        // ])
       },
     })
 
