@@ -83,7 +83,7 @@ export class GatewayInventoryPurchaseOrderService {
    * @returns
    */
   async detail(id: string) {
-    return this.purchaseOrderModel
+    return await this.purchaseOrderModel
       .findOne({ id: id })
       .then((result) => {
         if (result) {
@@ -119,6 +119,26 @@ export class GatewayInventoryPurchaseOrderService {
     } catch (error) {
       throw error
     }
+  }
+
+  /**
+   * @description Update delivered item from GRN to monitor order fullfilment
+   * @param { string } id what id to get
+   * @param { { item: string; qty: number }[] } items list of item to update from purchase order
+   * @returns
+   */
+  async updateDeliveredItem(
+    id: string,
+    items: { item: string; qty: number }[]
+  ) {
+    const bulkWriteOperations = items.map((d) => ({
+      updateOne: {
+        filter: { id: id, 'detail.item.id': d.item },
+        update: { $inc: { 'detail.$.delivered': d.qty } },
+      },
+    }))
+
+    await this.purchaseOrderModel.bulkWrite(bulkWriteOperations)
   }
 
   async add(data: PurchaseOrderAddDTO, account: IAccount) {

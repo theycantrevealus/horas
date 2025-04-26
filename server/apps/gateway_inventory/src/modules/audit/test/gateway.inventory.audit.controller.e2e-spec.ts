@@ -39,7 +39,7 @@ import {
   mockStockAuditModel,
 } from '../mock/stock.audit.mock'
 
-describe('Gateway Inventory Mutation Controller', () => {
+describe('Gateway Inventory Audit Controller', () => {
   const mock_Guard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
       const request = context.switchToHttp().getRequest()
@@ -186,7 +186,7 @@ describe('Gateway Inventory Mutation Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Mutation - Get data lazy loaded'),
+    testCaption('FLOW', 'feature', 'Stock Audit - Get data lazy loaded'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
@@ -245,7 +245,7 @@ describe('Gateway Inventory Mutation Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Mutation - Get data detail'),
+    testCaption('FLOW', 'feature', 'Stock Audit - Get data detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return detail data', {
@@ -269,7 +269,7 @@ describe('Gateway Inventory Mutation Controller', () => {
     }
   )
 
-  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Add data'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Add data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -366,7 +366,7 @@ describe('Gateway Inventory Mutation Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Edit data'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Edit data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -455,73 +455,64 @@ describe('Gateway Inventory Mutation Controller', () => {
     )
   })
 
-  describe(
-    testCaption('FLOW', 'feature', 'Stock Mutation - Delete data'),
-    () => {
-      it(
-        testCaption(
-          'HANDLING',
-          'data',
-          'Should return 404 if data is not found',
-          {
-            tab: 1,
-          }
-        ),
-        async () => {
-          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-          jest
-            .spyOn(stockAuditModel, 'findOneAndUpdate')
-            .mockResolvedValue(null)
-          return app
-            .inject({
-              method: 'DELETE',
-              headers: {
-                authorization: 'Bearer ey...',
-                'content-type': 'application/json',
-              },
-              url: `/inventory/audit/${mockStockAudit().id}`,
-            })
-            .then(async (result) => {
-              HTTPDefaultResponseCheck(
-                result,
-                HttpStatus.NOT_FOUND,
-                logger.warn
-              )
-            })
-        }
-      )
-
-      it(
-        testCaption('HANDLING', 'data', 'Should return success delete', {
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Delete data'), () => {
+    it(
+      testCaption(
+        'HANDLING',
+        'data',
+        'Should return 404 if data is not found',
+        {
           tab: 1,
-        }),
-        async () => {
-          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-          jest
-            .spyOn(stockAuditModel, 'findOneAndUpdate')
-            .mockResolvedValue(mockStockAudit())
-          return app
-            .inject({
-              method: 'DELETE',
-              headers: {
-                authorization: 'Bearer ey...',
-                'content-type': 'application/json',
-              },
-              url: `/inventory/audit/${mockStockAudit().id}`,
-            })
-            .then((result) => {
-              HTTPDefaultResponseCheck(
-                result,
-                HttpStatus.NO_CONTENT,
-                logger.verbose
-              )
-            })
         }
-      )
-    }
-  )
+      ),
+      async () => {
+        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
+        return app
+          .inject({
+            method: 'DELETE',
+            headers: {
+              authorization: 'Bearer ey...',
+              'content-type': 'application/json',
+            },
+            url: `/inventory/audit/${mockStockAudit().id}`,
+          })
+          .then(async (result) => {
+            HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
+          })
+      }
+    )
 
-  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Proposal'), () => {
+    it(
+      testCaption('HANDLING', 'data', 'Should return success delete', {
+        tab: 1,
+      }),
+      async () => {
+        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+        jest
+          .spyOn(stockAuditModel, 'findOneAndUpdate')
+          .mockResolvedValue(mockStockAudit())
+        return app
+          .inject({
+            method: 'DELETE',
+            headers: {
+              authorization: 'Bearer ey...',
+              'content-type': 'application/json',
+            },
+            url: `/inventory/audit/${mockStockAudit().id}`,
+          })
+          .then((result) => {
+            HTTPDefaultResponseCheck(
+              result,
+              HttpStatus.NO_CONTENT,
+              logger.verbose
+            )
+          })
+      }
+    )
+  })
+
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Proposal'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -622,7 +613,7 @@ describe('Gateway Inventory Mutation Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Approval'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Approval'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -723,7 +714,7 @@ describe('Gateway Inventory Mutation Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Decline'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Decline'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -824,7 +815,7 @@ describe('Gateway Inventory Mutation Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Running'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Running'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -925,7 +916,7 @@ describe('Gateway Inventory Mutation Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Complete'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Audit - Complete'), () => {
     it(
       testCaption(
         'HANDLING',

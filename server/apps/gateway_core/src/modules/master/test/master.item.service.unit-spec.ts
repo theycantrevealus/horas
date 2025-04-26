@@ -518,6 +518,11 @@ describe('Master Item Service', () => {
               alias: mockMasterItem().alias,
               configuration: {
                 allow_sell: true,
+                allow_destruction: true,
+                allow_incoming: true,
+                allow_outgoing: true,
+                benefit_margin_type: 'n',
+                benefit_margin_value: 0,
               },
               storing: [],
               category: [],
@@ -586,6 +591,11 @@ describe('Master Item Service', () => {
               alias: mockMasterItem().alias,
               configuration: {
                 allow_sell: true,
+                allow_destruction: true,
+                allow_incoming: true,
+                allow_outgoing: true,
+                benefit_margin_type: 'n',
+                benefit_margin_value: 0,
               },
               storing: [],
               category: [],

@@ -1,20 +1,55 @@
-import { ICurrency } from '@gateway_core/i18n/interface/i18n'
+import { CMasterItem } from '@gateway_core/master/dto/master.item'
 import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
 import { CPurchaseOrder } from '@gateway_inventory/purchase_order/dto/purchase.order'
-import { CGeneralReceiveNoteDetail } from '@inventory/dto/general.receive.note.detail'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { ApiProperty } from '@nestjs/swagger'
-import { CCurrency } from '@schemas/i18n/i18n'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
   IsNumber,
-  IsString,
+  IsOptional,
   MaxLength,
   MinLength,
   ValidateNested,
 } from 'class-validator'
+
+export class CGeneralReceiveNoteDetail {
+  @ApiProperty({
+    type: CMasterItem,
+    required: true,
+  })
+  @Type(() => CMasterItem)
+  @ValidateNested({
+    each: true,
+  })
+  item: CMasterItem
+
+  @ApiProperty({
+    type: Number,
+    example: 10,
+  })
+  qty: number
+
+  @ApiProperty({
+    type: String,
+    example: 'XXXXX',
+  })
+  batch: string
+
+  @ApiProperty({
+    example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
+    description: 'Expired date',
+  })
+  @IsNotEmpty()
+  expired: Date
+
+  @ApiProperty({
+    type: String,
+    example: '',
+  })
+  remark: string
+}
 
 export class GeneralReceiveNoteAddDTO {
   @ApiProperty({
@@ -28,22 +63,14 @@ export class GeneralReceiveNoteAddDTO {
   @IsNotEmpty()
   code: string
 
-  @ApiProperty({
-    type: CCurrency,
-    description: 'Currency',
-  })
-  @IsNotEmpty()
-  @Type(() => CCurrency)
-  @ValidateNested({ each: true })
-  locale: ICurrency
-
-  @ApiProperty({
-    example: '',
-    description: 'Any extra object',
-    required: false,
-  })
-  @IsString()
-  extras: any
+  // @ApiProperty({
+  //   type: CCurrency,
+  //   description: 'Currency',
+  // })
+  // @IsNotEmpty()
+  // @Type(() => CCurrency)
+  // @ValidateNested({ each: true })
+  // locale: ICurrency
 
   @ApiProperty({
     type: CMasterStockPoint,
@@ -61,7 +88,7 @@ export class GeneralReceiveNoteAddDTO {
   @Type(() => CPurchaseOrder)
   @ValidateNested({ each: true })
   @IsNotEmpty()
-  purchase_order: IPurchaseOrder
+  purchase_order: CPurchaseOrder
 
   @ApiProperty({
     type: CGeneralReceiveNoteDetail,
@@ -72,6 +99,14 @@ export class GeneralReceiveNoteAddDTO {
   @ValidateNested({ each: true })
   @IsNotEmpty()
   detail: CGeneralReceiveNoteDetail[]
+
+  @ApiProperty({
+    example: '',
+    description: 'Any extra object',
+    required: false,
+  })
+  @IsOptional()
+  extras: any
 
   @ApiProperty({
     example: 'Extra description',

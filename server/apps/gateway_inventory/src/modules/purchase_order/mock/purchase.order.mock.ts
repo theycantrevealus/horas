@@ -31,8 +31,10 @@ export const mockPurchaseOrder = (
       },
       qty: 2,
       price: 10,
+      delivered: 0,
       discount_type: 'n',
       discount_value: 0,
+      total: 20,
       remark: '-',
     },
   ],
@@ -85,6 +87,7 @@ export const mockPurchaseOrderModel = {
   update: jest.fn().mockResolvedValue(mockPurchaseOrder()),
   countDocuments: jest.fn().mockResolvedValue(1),
   create: jest.fn().mockResolvedValue(mockPurchaseOrder()),
+  bulkWrite: jest.fn(),
   save: jest.fn().mockImplementation(),
   exec: jest.fn().mockImplementation(),
 }

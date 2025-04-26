@@ -966,20 +966,40 @@ export const modCodes = {
       },
     },
   },
-  GeneralReceiveNoteService: {
+  GatewayInventoryGeneralReceiveNote: {
     defaultCode: 'GRN',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'General receive note fetched successfully',
+        transaction_classify: 'GRN_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'General receive note detail fetched successfully',
+        transaction_classify: 'GRN_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'General receive note created successfully',
+        transaction_classify: 'GRN_ADD',
       },
     },
   },

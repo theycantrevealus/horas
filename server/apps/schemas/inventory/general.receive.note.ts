@@ -5,6 +5,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { GeneralReceiveNoteDetail } from '@schemas/inventory/general.receive.note.detail'
 import { PurchaseOrderJoin } from '@schemas/inventory/purchase.order.join'
+import { ILocale, LocaleJoin } from '@schemas/locale'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
@@ -19,12 +20,12 @@ export class GeneralReceiveNote {
   @Prop({ type: SchemaTypes.String, required: true, unique: true })
   code: string
 
-  @Prop({
-    type: SchemaTypes.String,
-    default: () => 'Asia/Jakarta',
-    required: true,
-  })
-  timezone: string
+  /**
+   * @type { ILocale }
+   * @description Stock adjustment locale
+   */
+  @Prop(LocaleJoin)
+  locale: ILocale
 
   @Prop(MasterStockPointJoin)
   stock_point: IMasterStockPoint
@@ -36,16 +37,16 @@ export class GeneralReceiveNote {
     type: [GeneralReceiveNoteDetail],
     _id: false,
   })
-  detail: IGeneralReceiveNoteDetail
+  detail: IGeneralReceiveNoteDetail[]
+
+  @Prop({ type: SchemaTypes.Mixed, required: false })
+  extras: any
 
   @Prop({ type: SchemaTypes.String })
   remark: string
 
   @Prop(AccountJoin)
   created_by: IAccount
-
-  @Prop({ type: SchemaTypes.Mixed, required: false })
-  extras: any
 
   @Prop({
     type: SchemaTypes.Date,
