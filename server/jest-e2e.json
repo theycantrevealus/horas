@@ -67,6 +67,8 @@
     "<rootDir>/apps/gateway_inventory/src/modules/audit/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/adjustment/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/purchase_requisition/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_inventory/src/modules/purchase_order/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_inventory/src/modules/general_receive_note/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/consumer_stock/src/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/processor/stock/src/**/*.{js,jsx,ts,tsx}",
     "!<rootDir>/node_modules/",

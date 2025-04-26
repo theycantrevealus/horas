@@ -29,8 +29,8 @@ import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
 import { GeneralIssueNoteAddDTO } from '../dto/general.issue.note'
-import { GeneralIssueNoteController } from '../general.issue.note.controller'
-import { GeneralIssueNoteService } from '../general.issue.note.service'
+import { GatewayInventoryGeneralIssueNoteController } from '../general.issue.note.controller'
+import { GatewayInventoryGeneralIssueNoteService } from '../general.issue.note.service'
 import {
   mockGeneralIssueNote,
   mockGeneralIssueNoteModel,
@@ -44,16 +44,16 @@ describe('General Issue Note Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
   let configService: ConfigService
-  let generalIssueNoteController: GeneralIssueNoteController
+  let generalIssueNoteController: GatewayInventoryGeneralIssueNoteController
   let generalIssueNoteModel: Model<GeneralIssueNote>
   let materialRequisitionModel: Model<MaterialRequisition>
   let logger: Logger
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [GeneralIssueNoteController],
+      controllers: [GatewayInventoryGeneralIssueNoteController],
       providers: [
-        GeneralIssueNoteService,
+        GatewayInventoryGeneralIssueNoteService,
         {
           provide: ConfigService,
           useValue: {
@@ -123,9 +123,10 @@ describe('General Issue Note Controller', () => {
     )
     logger = app.get<Logger>(WINSTON_MODULE_PROVIDER)
     configService = app.get<ConfigService>(ConfigService)
-    generalIssueNoteController = app.get<GeneralIssueNoteController>(
-      GeneralIssueNoteController
-    )
+    generalIssueNoteController =
+      app.get<GatewayInventoryGeneralIssueNoteController>(
+        GatewayInventoryGeneralIssueNoteController
+      )
     generalIssueNoteModel = module.get<Model<GeneralIssueNoteDocument>>(
       getModelToken(GeneralIssueNote.name, 'primary')
     )

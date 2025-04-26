@@ -28,19 +28,11 @@ export class CGeneralReceiveNoteDetail {
   batch: string
 
   @ApiProperty({
-    type: String,
-    example: 'XXXXX',
-    required: false,
-    description: 'Storing label to tracking',
-  })
-  storing_label: string
-
-  @ApiProperty({
     example: new Date().toJSON().slice(0, 10).replace(/-/g, '-'),
     description: 'Expired date',
   })
   @IsNotEmpty()
-  expired_date: Date
+  expired: Date
 
   @ApiProperty({
     type: String,

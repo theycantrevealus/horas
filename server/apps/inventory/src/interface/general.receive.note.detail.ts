@@ -1,11 +1,8 @@
-import { IMasterItem } from '@schemas/master/master.item.interface'
+import { IMasterItemBatch } from '@schemas/master/master.item.batch.interface'
 
 export interface IGeneralReceiveNoteDetail {
-  item: IMasterItem
   qty: number
-  pending: number
-  batch: string
-  storing_label: string
-  expired_date: Date
+  batch: IMasterItemBatch
+  expired: Date
   remark: string
 }

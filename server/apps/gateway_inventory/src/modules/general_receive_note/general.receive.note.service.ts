@@ -1,152 +1,250 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
-import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
-import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import {
   GeneralReceiveNote,
   GeneralReceiveNoteDocument,
 } from '@schemas/inventory/general.receive.note'
-import { GlobalResponse } from '@utility/dto/response'
+import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
+import {
+  MasterItemBatch,
+  MasterItemBatchDocument,
+} from '@schemas/master/master.item.batch'
+import { PrimeParameter } from '@utility/dto/prime'
 import { KafkaService } from '@utility/kafka/avro/service'
-import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
 import { CompressionTypes } from 'kafkajs'
-import { Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
-import { PurchaseOrderService } from '../purchase_order/purchase.order.service'
+import { GatewayInventoryPurchaseOrderService } from '../purchase_order/purchase.order.service'
+import { GeneralReceiveNoteAddDTO } from './dto/general.receive.note.dto'
 
 @Injectable()
-export class GeneralReceiveNoteService {
+export class GatewayInventoryGeneralReceiveNoteService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
 
+    @InjectModel(MasterItem.name, 'primary')
+    private masterItemModel: Model<MasterItemDocument>,
+
+    @InjectModel(MasterItemBatch.name, 'primary')
+    private masterItemBacthModel: Model<MasterItemBatchDocument>,
+
     @InjectModel(GeneralReceiveNote.name, 'primary')
     private generalReceiveNoteModel: Model<GeneralReceiveNoteDocument>,
 
-    @Inject(PurchaseOrderService)
-    private readonly purchaseOrderService: PurchaseOrderService,
+    @Inject(GatewayInventoryPurchaseOrderService)
+    private readonly purchaseOrderService: GatewayInventoryPurchaseOrderService,
 
     @Inject(MasterStockPointService)
     private readonly masterStockPointService: MasterStockPointService,
 
-    // @Inject('STOCK_SERVICE') private readonly clientStock: ClientKafka
     @Inject('STOCK_SERVICE') private readonly clientStock: KafkaService
   ) {}
 
-  async all(parameter: any) {
-    return await prime_datatable(parameter, this.generalReceiveNoteModel)
+  /**
+   * @description List of general receive note
+   * @param { any } payload should JSON format string. Try to send wrong format lol
+   * @returns
+   */
+  async all(payload: any) {
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+      return await prime_datatable(parameter, this.generalReceiveNoteModel)
+    } catch (error) {
+      throw error
+    }
   }
 
-  async detail(id: string): Promise<GeneralReceiveNote> {
-    return this.generalReceiveNoteModel.findOne({ id: id }).exec()
-  }
-
-  async add(
-    data: GeneralReceiveNoteAddDTO,
-    account: IAccount,
-    token: string
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'GENERAL_RECEIVE_NOTE_ADD',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    const stockPointConfig = await this.masterStockPointService
-      .find({
-        id: data.stock_point.id,
+  /**
+   * @description General Receive detail
+   * @param { string } id what id to get
+   * @returns
+   */
+  async detail(id: string) {
+    return this.generalReceiveNoteModel
+      .findOne({ id: id })
+      .then((result) => {
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
+        }
       })
-      .then((response) => response)
+      .catch((error: Error) => {
+        throw error
+      })
+  }
 
-    if (stockPointConfig['configuration'].allow_grn) {
-      await this.purchaseOrderService
+  /**
+   * @description General Receive new data
+   * @param { GeneralReceiveNoteAddDTO } data minimum data to add
+   * @param { IAccount } account creator
+   * @param { string } token account token
+   * @returns
+   */
+  async add(data: GeneralReceiveNoteAddDTO, account: IAccount, token: string) {
+    const stockPointConfig = await this.masterStockPointService.find({
+      id: data.stock_point.id,
+    })
+
+    if (stockPointConfig && stockPointConfig['configuration'].allow_grn) {
+      return await this.purchaseOrderService
         .detail(data.purchase_order.id)
         .then(async (purchaseOrder) => {
           if (purchaseOrder && purchaseOrder.status === 'approved') {
-            const generatedID = new Types.ObjectId().toString()
-            const transaction = await this.clientStock.transaction('grn')
-            try {
-              const items = []
-              data.detail.forEach((item) => {
-                items.push({
-                  headers: {
-                    ...account,
-                    token: token,
-                  },
-                  key: {
-                    id: `general_receive_note-${generatedID.toString()}`,
-                    code: generatedID.toString(),
-                    service: 'stock',
-                    method: 'stock_movement',
-                  },
-                  value: {
-                    item: item.item,
-                    batch: item.batch,
-                    from: {
-                      id: '-',
-                      code: '-',
-                      name: '-',
-                    },
-                    to: data.stock_point,
-                    qty: item.qty,
-                    balance: item.qty,
-                    transaction_id: `general_receive_note-${generatedID.toString()}`,
-                    logged_at: new Date().toString(),
-                  },
+            const poDetail = purchaseOrder.detail
+
+            const detailItem = []
+            const itemStock = []
+
+            data.detail.forEach(async (item) => {
+              await this.masterItemModel
+                .findOne({ id: item.item.id })
+                .exec()
+                .then(async (foundedItem) => {
+                  if (foundedItem) {
+                    const POItem = poDetail.find(
+                      (d) => d.item.id === foundedItem.id
+                    )
+
+                    const buyPrice = POItem ? POItem.total : 0
+                    let sellPrice = 0
+
+                    if (foundedItem.configuration.benefit_margin_type === 'v') {
+                      sellPrice =
+                        buyPrice +
+                        foundedItem.configuration.benefit_margin_value
+                    } else if (
+                      foundedItem.configuration.benefit_margin_type === 'p'
+                    ) {
+                      sellPrice =
+                        buyPrice +
+                        (buyPrice *
+                          foundedItem.configuration.benefit_margin_value) /
+                          100
+                    } else {
+                      sellPrice = buyPrice
+                    }
+
+                    await this.masterItemBacthModel
+                      .findOneAndUpdate(
+                        {
+                          code: item.batch,
+                        },
+                        {
+                          $set: {
+                            code: item.batch,
+                            item: item.item,
+                            price_buy: buyPrice,
+                            price_sell: sellPrice,
+                            expired: item.expired,
+                          },
+                        },
+                        { upsert: true, new: true }
+                      )
+                      .then(async (foundedItemBatch) => {
+                        detailItem.push({
+                          qty: item.qty,
+                          batch: foundedItemBatch,
+                          expired: item.expired,
+                          remark: item.remark,
+                        })
+
+                        itemStock.push({
+                          headers: {
+                            ...account,
+                            token: token,
+                          },
+                          key: {
+                            id: '',
+                            code: '',
+                            service: 'stock',
+                            method: 'stock_movement',
+                          },
+                          value: {
+                            batch: foundedItemBatch,
+                            from: {
+                              id: '-',
+                              code: '-',
+                              name: '-',
+                            },
+                            to: data.stock_point,
+                            qty: item.qty,
+                            balance: 0,
+                            transaction_id: '',
+                            logged_at: new Date().toString(),
+                          },
+                        })
+                      })
+                  }
                 })
-              })
+            })
 
-              await transaction.send({
-                acks: -1, // TODO : Configurable
-                timeout: 5000, // TODO : Configurable,
-                compression: CompressionTypes.None,
-                topic: this.configService.get<string>(
-                  'kafka.stock.topic.stock'
-                ),
-                messages: items,
-              })
+            const transaction = await this.clientStock.transaction('grn')
 
-              await transaction.commit().then(() => {
-                response.message = 'General receive note created successfully'
-                response.transaction_id = `general_receive_note-${generatedID}`
+            await this.generalReceiveNoteModel
+              .create({
+                code: data.code,
+                stock_point: data.stock_point,
+                purchase_order: purchaseOrder,
+                detail: detailItem,
+                extras: data.extras,
+                remark: data.remark,
+                created_by: account,
               })
-            } catch (kafkaError) {
-              await transaction.abort()
-              response.message = `General receive note failed to create. ${kafkaError}`
-              response.statusCode =
-                modCodes[this.constructor.name].error.databaseError
-              throw new Error(JSON.stringify(response))
-            }
+              .then(async (createdGRN) => {
+                await this.purchaseOrderService.updateDeliveredItem(
+                  data.purchase_order.id,
+                  detailItem.map((d) => ({
+                    item: d.batch.item.id,
+                    qty: d.qty,
+                  }))
+                )
+
+                itemStock.forEach((item) => {
+                  item.key.id = createdGRN.id
+                  item.key.code = createdGRN.code
+
+                  item.value.transaction_id = createdGRN.id
+                })
+
+                await transaction.send({
+                  acks: -1,
+                  timeout: 5000,
+                  compression: CompressionTypes.None,
+                  topic: this.configService.get<string>(
+                    'kafka.stock.topic.stock'
+                  ),
+                  messages: itemStock,
+                })
+
+                await transaction.commit()
+                return createdGRN
+              })
+              .catch(async (error: Error) => {
+                await transaction.abort()
+                throw error
+              })
           } else {
-            response.message = `General receive note failed to create. Purchase order is not valid`
-            response.statusCode =
-              modCodes[this.constructor.name].error.databaseError
-            throw new Error(JSON.stringify(response))
+            throw new ForbiddenException(
+              'General receive note failed to create. Purchase order is not valid'
+            )
           }
         })
         .catch((error: Error) => {
-          response.message = `General receive note failed to create. Purchase order error : ${error.message}`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          response.payload = error
-          throw new Error(JSON.stringify(response))
+          throw error
         })
     } else {
-      response.message = `General receive note failed to create. Target stock point not allowed to receive grn`
-      response.statusCode = modCodes[this.constructor.name].error.databaseError
-      response.payload = {}
-      throw new Error(JSON.stringify(response))
+      throw new ForbiddenException('Stock point is not allowed to GRN')
     }
-
-    return response
   }
 }

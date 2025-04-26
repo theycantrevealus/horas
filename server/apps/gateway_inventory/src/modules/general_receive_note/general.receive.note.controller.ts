@@ -2,8 +2,7 @@ import { Authorization, CredentialAccount } from '@decorators/authorization'
 import { PermissionManager } from '@decorators/permission'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { JwtAuthGuard } from '@guards/jwt'
-import { LoggingInterceptor } from '@interceptors/logging'
-import { GeneralReceiveNoteAddDTO } from '@inventory/dto/general.receive.note'
+import { HORASInterceptor } from '@interceptors/default'
 import {
   Body,
   Controller,
@@ -25,17 +24,16 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
-import { isJSON } from 'class-validator'
 
-import { GeneralReceiveNoteService } from './general.receive.note.service'
+import { GeneralReceiveNoteAddDTO } from './dto/general.receive.note.dto'
+import { GatewayInventoryGeneralReceiveNoteService } from './general.receive.note.service'
 
 @Controller('inventory')
 @ApiTags('General Receive Note')
-export class GeneralReceiveNoteController {
+export class GatewayInventoryGeneralReceiveNoteController {
   constructor(
-    @Inject(GeneralReceiveNoteService)
-    private readonly generalReceiveNoteService: GeneralReceiveNoteService
+    @Inject(GatewayInventoryGeneralReceiveNoteService)
+    private readonly generalReceiveNoteService: GatewayInventoryGeneralReceiveNoteService
   ) {}
 
   @Get('general_receive_note')
@@ -43,6 +41,7 @@ export class GeneralReceiveNoteController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @UseInterceptors(HORASInterceptor)
   @PermissionManager({ group: 'GeneralReceiveNote', action: 'view' })
   @ApiOperation({
     summary: 'Fetch all',
@@ -50,21 +49,7 @@ export class GeneralReceiveNoteController {
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    if (isJSON(parameter)) {
-      const parsedData = JSON.parse(parameter)
-      return await this.generalReceiveNoteService.all({
-        first: parsedData.first,
-        rows: parsedData.rows,
-        sortField: parsedData.sortField,
-        sortOrder: parsedData.sortOrder,
-        filters: parsedData.filters,
-      })
-    } else {
-      return {
-        message: 'filters is not a valid json',
-        payload: {},
-      }
-    }
+    return await this.generalReceiveNoteService.all(parameter)
   }
 
   @Get('general_receive_note/:id')
@@ -72,6 +57,7 @@ export class GeneralReceiveNoteController {
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @UseInterceptors(HORASInterceptor)
   @PermissionManager({ group: 'GeneralReceiveNote', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
@@ -88,8 +74,8 @@ export class GeneralReceiveNoteController {
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
-  @UseInterceptors(LoggingInterceptor)
   @ApiBearerAuth('JWT')
+  @UseInterceptors(HORASInterceptor)
   @PermissionManager({ group: 'GeneralReceiveNote', action: 'add' })
   @ApiOperation({
     summary: 'Add new',
@@ -99,7 +85,7 @@ export class GeneralReceiveNoteController {
     @Body() parameter: GeneralReceiveNoteAddDTO,
     @CredentialAccount() account: IAccount,
     @Req() request: any
-  ): Promise<GlobalResponse> {
+  ) {
     return await this.generalReceiveNoteService.add(
       parameter,
       account,

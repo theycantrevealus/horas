@@ -1,9 +1,9 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { IPurchaseOrder } from '@inventory/interface/purchase.order'
-import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
+import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { IConfig } from '@schemas/config/config'
@@ -11,352 +11,362 @@ import {
   PurchaseOrder,
   PurchaseOrderDocument,
 } from '@schemas/inventory/purchase.order'
+import {
+  PurchaseRequisition,
+  PurchaseRequisitionDocument,
+} from '@schemas/inventory/purchase.requisition'
+import {
+  MasterItemSupplier,
+  MasterItemSupplierDocument,
+} from '@schemas/master/master.item.supplier'
 import { PrimeParameter } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
-import { pad } from '@utility/string'
+import { codeGenerator } from '@utility/string'
 import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
-import { Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
+import { Socket } from 'socket.io-client'
 
-import {
-  PurchaseOrderAddDTO,
-  PurchaseOrderApproval,
-  PurchaseOrderEditDTO,
-} from './dto/purchase.order'
+import { PurchaseOrderAddDTO, PurchaseOrderEditDTO } from './dto/purchase.order'
+import { PurchaseOrderApprovalDTO } from './dto/purchase.order.approval'
 
 @Injectable()
-export class PurchaseOrderService {
+export class GatewayInventoryPurchaseOrderService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
 
+    @InjectModel(MasterItemSupplier.name, 'primary')
+    private masterItemSupplierModel: Model<MasterItemSupplierDocument>,
+
+    @InjectModel(PurchaseRequisition.name, 'primary')
+    private purchaseRequisitionModel: Model<PurchaseRequisitionDocument>,
+
     @InjectModel(PurchaseOrder.name, 'primary')
     private purchaseOrderModel: Model<PurchaseOrderDocument>,
 
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
+    @Inject(SocketIoClientProxyService)
+    private readonly socketProxy: SocketIoClientProxyService
   ) {}
 
-  async all(payload: any): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'PURCHASE_ORDER_GET',
-      transaction_id: '',
-    } satisfies GlobalResponse
-
+  /**
+   * @description List of purchase order
+   * @param { any } payload should JSON format string. Try to send wrong format lol
+   * @returns
+   */
+  async all(payload: any) {
     try {
       const parameter: PrimeParameter = JSON.parse(payload)
-      return await prime_datatable(parameter, this.purchaseOrderModel).then(
-        (result) => {
-          response.payload = result
-          response.message = 'Purchase order fetch successfully'
-          return response
-        }
+      return await prime_datatable(
+        {
+          custom_filter: [
+            {
+              logic: 'or',
+              filter: {},
+            },
+          ],
+          ...parameter,
+        },
+        this.purchaseOrderModel
       )
     } catch (error) {
-      response.message = `Purchase order failed to fetch`
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
+      throw error
     }
   }
 
-  async detail(id: string): Promise<PurchaseOrder> {
-    return this.purchaseOrderModel.findOne({ id: id, deleted_at: null }).exec()
-  }
-
-  async uncompletedDelivery(parameter: any) {
-    parameter.custom_filter = [
-      { $expr: { $ne: ['$detail.qty', '$detail.delivered'] } },
-      { status: 'approved' },
-    ]
-    return await prime_datatable(parameter, this.purchaseOrderModel)
-  }
-
-  async add(
-    payload: PurchaseOrderAddDTO,
-    account: IAccount
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'PURCHASE_ORDER_ADD',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    const generatedID = new Types.ObjectId().toString()
-    const data: IPurchaseOrder = {
-      id: `purchase_order-${generatedID}`,
-      ...payload,
-      approval_history: [],
-      total: 0,
-      grand_total: 0,
-      status: 'new',
-    }
-
-    const detailData: IPurchaseOrderDetail[] = []
-
-    if (!data.code) {
-      const now = new Date()
-      await this.purchaseOrderModel
-        .countDocuments({
-          created_at: {
-            $gte: new Date(now.getFullYear(), now.getMonth(), 1),
-            $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0),
-          },
-        })
-        .then((counter) => {
-          data.code = `${modCodes[this.constructor.name]}-${new Date()
-            .toJSON()
-            .slice(0, 7)
-            .replace(/-/g, '/')}/${pad('000000', counter + 1, true)}`
-        })
-    }
-
-    data.detail.forEach((row) => {
-      const detail = {
-        ...row,
-        delivered: 0,
-        total: 0,
-      }
-
-      const itemTotal = row.qty * row.price
-      let totalRow = 0
-      if (row.discount_type === 'n') {
-        totalRow = itemTotal
-      } else if (row.discount_type === 'p') {
-        totalRow = itemTotal - (itemTotal * row.discount_value) / 100
-      } else if (row.discount_type === 'v') {
-        totalRow = itemTotal - row.discount_value
-      }
-
-      detail.total = totalRow
-      data.total += totalRow
-      detailData.push(detail)
-    })
-
-    data.detail = detailData
-
-    if (data.discount_type === 'p') {
-      data.grand_total = data.total - (data.total * data.discount_value) / 100
-    } else if (data.discount_type === 'v') {
-      data.grand_total = data.total - data.discount_value
-    }
-
-    data.approval_history = [
-      {
-        status: 'new',
-        remark: data.remark,
-        created_by: account,
-        logged_at: new TimeManagement().getTimezone('Asia/Jakarta'),
-      },
-    ]
-
-    await this.purchaseOrderModel
-      .create({
-        ...data,
-        locale: await this.cacheManager
-          .get('APPLICATION_LOCALE')
-          .then((response: IConfig) => {
-            return response.setter
-          }),
-        created_by: account,
-      })
-      .then(async (result) => {
-        response.message = 'Purchase Order created successfully'
-        response.statusCode = {
-          defaultCode: HttpStatus.OK,
-          customCode: modCodes.Global.success,
-          classCode: modCodes[this.constructor.name].defaultCode,
+  /**
+   * @description Purchase order detail
+   * @param { string } id what id to get
+   * @returns
+   */
+  async detail(id: string) {
+    return await this.purchaseOrderModel
+      .findOne({ id: id })
+      .then((result) => {
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
         }
-        response.transaction_id = result._id
-        response.payload = result
       })
       .catch((error: Error) => {
-        response.message = `Purchase Order failed to create. ${error.message}`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
+        throw error
       })
-
-    return response
   }
 
+  async uncompletedDelivery(payload: any) {
+    try {
+      const parameter: PrimeParameter = JSON.parse(payload)
+      parameter.custom_filter = [
+        { $expr: { $ne: ['$detail.qty', '$detail.delivered'] } },
+        { status: 'approved' },
+      ]
+      return await prime_datatable(
+        {
+          custom_filter: [
+            {
+              logic: 'or',
+              filter: {},
+            },
+          ],
+          ...parameter,
+        },
+        this.purchaseOrderModel
+      )
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * @description Update delivered item from GRN to monitor order fullfilment
+   * @param { string } id what id to get
+   * @param { { item: string; qty: number }[] } items list of item to update from purchase order
+   * @returns
+   */
+  async updateDeliveredItem(
+    id: string,
+    items: { item: string; qty: number }[]
+  ) {
+    const bulkWriteOperations = items.map((d) => ({
+      updateOne: {
+        filter: { id: id, 'detail.item.id': d.item },
+        update: { $inc: { 'detail.$.delivered': d.qty } },
+      },
+    }))
+
+    await this.purchaseOrderModel.bulkWrite(bulkWriteOperations)
+  }
+
+  async add(data: PurchaseOrderAddDTO, account: IAccount) {
+    try {
+      const now = new Date()
+      return await this.masterItemSupplierModel
+        .findOne({
+          id: data.supplier,
+          deleted_at: null,
+        })
+        .then(async (foundedSupplier) => {
+          if (foundedSupplier) {
+            return await this.purchaseRequisitionModel
+              .findOne({
+                id: data.purchase_requisition,
+                deleted_at: null,
+              })
+              .then(async (foundedPurchaseRequisition) => {
+                if (foundedPurchaseRequisition) {
+                  if (!data.code) {
+                    await this.purchaseOrderModel
+                      .countDocuments({
+                        created_at: {
+                          $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                          $lte: new Date(
+                            now.getFullYear(),
+                            now.getMonth() + 1,
+                            0
+                          ),
+                        },
+                      })
+                      .then((counter) => {
+                        data.code = codeGenerator(
+                          modCodes[
+                            this.constructor.name.toString().split('Service')[0]
+                          ].defaultCode,
+                          counter
+                        )
+                      })
+                  }
+
+                  const detailData: IPurchaseOrderDetail[] = []
+                  let totalPurchase = 0
+                  let grandTotal = 0
+
+                  data.detail.forEach((row) => {
+                    const detail = {
+                      ...row,
+                      delivered: 0,
+                      total: 0,
+                    }
+
+                    const itemTotal = row.qty * row.price
+                    let totalRow = 0
+                    if (row.discount_type === 'n') {
+                      totalRow = itemTotal
+                    } else if (row.discount_type === 'p') {
+                      totalRow =
+                        itemTotal - (itemTotal * row.discount_value) / 100
+                    } else if (row.discount_type === 'v') {
+                      totalRow = itemTotal - row.discount_value
+                    }
+
+                    detail.total = totalRow
+                    totalPurchase += totalRow
+                    detailData.push(detail)
+                  })
+
+                  data.detail = detailData
+
+                  if (data.discount_type === 'p') {
+                    grandTotal =
+                      totalPurchase -
+                      (totalPurchase * data.discount_value) / 100
+                  } else if (data.discount_type === 'v') {
+                    grandTotal = totalPurchase - data.discount_value
+                  }
+
+                  const approvalHistory = [
+                    {
+                      status: 'new',
+                      remark: data.remark,
+                      created_by: account,
+                      logged_at: new TimeManagement().getTimezone(
+                        'Asia/Jakarta'
+                      ),
+                    },
+                  ]
+
+                  return await this.purchaseOrderModel
+                    .create({
+                      locale: await this.cacheManager
+                        .get('APPLICATION_LOCALE')
+                        .then((response: IConfig) => {
+                          return response.setter
+                        }),
+                      code: data.code,
+                      supplier: data.supplier,
+                      purchase_date: data.purchase_date,
+                      purchase_requisition: {},
+                      detail: detailData,
+                      total: totalPurchase,
+                      discount_type: data.discount_type,
+                      discount_value: data.discount_value,
+                      grand_total: grandTotal,
+                      approval_history: approvalHistory,
+                      extras: data.extras,
+                      remark: data.remark,
+                      created_by: account,
+                    })
+                    .catch((error: Error) => {
+                      throw error
+                    })
+                } else {
+                  throw new NotFoundException(
+                    'Purchase requisition is not found'
+                  )
+                }
+              })
+          } else {
+            throw new NotFoundException('Supplier is not found')
+          }
+        })
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * @description Propose audit for approval
+   * @param { PurchaseOrderApprovalDTO } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
   async askApproval(
-    data: PurchaseOrderApproval,
+    data: PurchaseOrderApprovalDTO,
     id: string,
     account: IAccount
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'PURCHASE_ORDER_APPROVE',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    data.status = 'need_approval'
-
-    const status: IPurchaseOrderApproval = {
-      status: data.status,
-      remark: data.remark,
-      logged_at: new TimeManagement().getTimezone(
-        this.configService.get<string>('application.timezone')
-      ),
-      created_by: account,
-    }
-
-    await this.purchaseOrderModel
+  ) {
+    return await this.purchaseOrderModel
       .findOneAndUpdate(
-        { id: id, status: 'new', created_by: account, __v: data.__v },
+        { id: id, 'created_by.id': account.id, status: 'new', __v: data.__v },
         {
           $set: {
             status: 'need_approval',
           },
           $push: {
-            approval_history: status,
+            approval_history: {
+              status: 'need_approval',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
           },
         }
       )
       .then(async (result) => {
         if (result) {
-          response.message = 'Purchase order proposed successfully'
-          response.transaction_id = id
-          response.payload = result
+          return result
         } else {
-          response.message = `Purchase order failed to proposed. Invalid document`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          throw new Error(JSON.stringify(response))
+          throw new NotFoundException()
         }
       })
       .catch((error: Error) => {
-        response.message = `Purchase order failed to proposed. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
+        throw error
       })
-
-    return response
   }
 
-  async approve(
-    data: PurchaseOrderApproval,
-    id: string,
-    account: IAccount
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'PURCHASE_ORDER_APPROVE',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    data.status = 'approved'
-
-    const status: IPurchaseOrderApproval = {
-      status: data.status,
-      remark: data.remark,
-      logged_at: new TimeManagement().getTimezone(
-        this.configService.get<string>('application.timezone')
-      ),
-      created_by: account,
-    }
-
-    await this.purchaseOrderModel
+  /**
+   * @description Approve audit
+   * @param { PurchaseOrderApprovalDTO } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
+  async approve(data: PurchaseOrderApprovalDTO, id: string, account: IAccount) {
+    return await this.purchaseOrderModel
       .findOneAndUpdate(
-        { id: id, status: 'need_approval', __v: data.__v },
+        {
+          id: id,
+          'created_by.id': account.id,
+          status: 'need_approval',
+          __v: data.__v,
+        },
         {
           $set: {
             status: 'approved',
           },
           $push: {
-            approval_history: status,
+            approval_history: {
+              status: 'approved',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
           },
         }
       )
       .then(async (result) => {
         if (result) {
-          response.message = 'Purchase order approved successfully'
-          response.transaction_id = id
-          response.payload = result
+          return result
         } else {
-          response.message = `Purchase order failed to approve. Invalid document`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          throw new Error(JSON.stringify(response))
+          throw new NotFoundException()
         }
       })
       .catch((error: Error) => {
-        response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
+        throw error
       })
-
-    return response
   }
 
-  async decline(
-    data: PurchaseOrderApproval,
-    id: string,
-    account: IAccount
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'PURCHASE_ORDER_DECLINE',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    data.status = 'declined'
-
-    const status: IPurchaseOrderApproval = {
-      status: data.status,
-      remark: data.remark,
-      logged_at: new TimeManagement().getTimezone(
-        this.configService.get<string>('application.timezone')
-      ),
-      created_by: account,
-    }
-
-    await this.purchaseOrderModel
+  /**
+   * @description Decline audit
+   * @param { PurchaseOrderApprovalDTO } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
+  async decline(data: PurchaseOrderApprovalDTO, id: string, account: IAccount) {
+    return await this.purchaseOrderModel
       .findOneAndUpdate(
         {
           id: id,
+          'created_by.id': account.id,
           status: 'need_approval',
           __v: data.__v,
         },
@@ -365,51 +375,38 @@ export class PurchaseOrderService {
             status: 'declined',
           },
           $push: {
-            approval_history: status,
+            approval_history: {
+              status: 'declined',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
           },
         }
       )
       .then(async (result) => {
         if (result) {
-          response.message = 'Purchase order approved successfully'
-          response.transaction_id = id
-          response.payload = result
+          return result
         } else {
-          response.message = `Purchase order failed to decline. Invalid document`
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          throw new Error(JSON.stringify(response))
+          throw new NotFoundException()
         }
       })
       .catch((error: Error) => {
-        response.message = `Purchase order failed to approve. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
+        throw error
       })
-
-    return response
   }
 
-  async edit(
-    data: PurchaseOrderEditDTO,
-    id: string,
-    account: IAccount
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'PURCHASE_ORDER_EDIT',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    await this.purchaseOrderModel
+  /**
+   * @description Edit purchase order (Only for status new)
+   * @param { PurchaseOrderEditDTO } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
+  async edit(data: PurchaseOrderEditDTO, id: string, account: IAccount) {
+    return await this.purchaseOrderModel
       .findOneAndUpdate(
         {
           $and: [
@@ -423,41 +420,24 @@ export class PurchaseOrderService {
       )
       .then(async (result) => {
         if (result) {
-          response.message = 'Purchase Order updated successfully'
-          response.transaction_id = id
-          response.payload = result
+          return result
         } else {
-          response.message = `Purchase Order failed to update. Invalid document`
-          response.transaction_id = id
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          throw new Error(JSON.stringify(response))
+          throw new NotFoundException()
         }
       })
       .catch((error: Error) => {
-        response.message = `Purchase Order failed to update. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
+        throw error
       })
-    return response
   }
 
-  async delete(id: string, account: IAccount): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'PURCHASE_ORDER_DELETE',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    await this.purchaseOrderModel
+  /**
+   * @description Delete purchase order (Only for status new)
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
+  async delete(id: string, account: IAccount) {
+    return await this.purchaseOrderModel
       .findOneAndUpdate(
         {
           id: id,
@@ -473,25 +453,32 @@ export class PurchaseOrderService {
       )
       .then((result) => {
         if (result) {
-          response.message = 'Purchase Order deleted successfully'
-          response.transaction_id = id
-          response.payload = result
+          return result
         } else {
-          response.message = `Purchase Order failed to delete. Invalid document`
-          response.transaction_id = id
-          response.statusCode =
-            modCodes[this.constructor.name].error.databaseError
-          throw new Error(JSON.stringify(response))
+          throw new NotFoundException()
         }
       })
       .catch((error: Error) => {
-        response.message = `Purchase Order failed to delete. ${error.message}`
-        response.statusCode =
-          modCodes[this.constructor.name].error.databaseError
-        response.payload = error
-        throw new Error(JSON.stringify(response))
+        throw error
       })
+  }
 
-    return response
+  async notifier(payload: any, account: IAccount, token: string) {
+    await this.socketProxy
+      .reconnect({
+        extraHeaders: {
+          Authorization: `${token}`,
+        },
+      })
+      .then(async (clientSet: Socket) => {
+        clientSet.emit('proceed', {
+          sender: account,
+          receiver: null,
+          payload: payload,
+        } satisfies ProceedDataTrafficDTO)
+      })
+      .catch((error: Error) => {
+        throw error
+      })
   }
 }

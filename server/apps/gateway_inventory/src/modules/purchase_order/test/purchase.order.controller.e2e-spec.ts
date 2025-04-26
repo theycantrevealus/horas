@@ -4,6 +4,14 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
+import {
+  mockMasterItemSupplier,
+  mockMasterItemSupplierModel,
+} from '@gateway_core/master/mock/master.item.supplier.mock'
+import {
+  mockPurchaseRequisition,
+  mockPurchaseRequisitionModel,
+} from '@gateway_inventory/purchase_requisition/mock/purchase.requisition.mock'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -19,7 +27,18 @@ import {
 import { Test, TestingModule } from '@nestjs/testing'
 import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
-import { StockAudit, StockAuditDocument } from '@schemas/inventory/audit'
+import {
+  PurchaseOrder,
+  PurchaseOrderDocument,
+} from '@schemas/inventory/purchase.order'
+import {
+  PurchaseRequisition,
+  PurchaseRequisitionDocument,
+} from '@schemas/inventory/purchase.requisition'
+import {
+  MasterItemSupplier,
+  MasterItemSupplierDocument,
+} from '@schemas/master/master.item.supplier'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -29,17 +48,20 @@ import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
-import { StockAuditAddDTO, StockAuditEditDTO } from '../dto/audit'
-import { StockAuditApprovalDTO } from '../dto/audit.approval'
-import { GatewayInventoryStockAuditController } from '../gateway.inventory.audit.controller'
-import { GatewayInventoryStockAuditService } from '../gateway.inventory.audit.service'
 import {
-  mockStockAudit,
-  mockStockAuditDocArray,
-  mockStockAuditModel,
-} from '../mock/stock.audit.mock'
+  PurchaseOrderAddDTO,
+  PurchaseOrderEditDTO,
+} from '../dto/purchase.order'
+import { PurchaseOrderApprovalDTO } from '../dto/purchase.order.approval'
+import {
+  mockPurchaseOrder,
+  mockPurchaseOrderDocArray,
+  mockPurchaseOrderModel,
+} from '../mock/purchase.order.mock'
+import { GatewayInventoryPurchaseOrderController } from '../purchase.order.controller'
+import { GatewayInventoryPurchaseOrderService } from '../purchase.order.service'
 
-describe('Gateway Inventory Audit Controller', () => {
+describe('Gateway Inventory Purchase Order Controller', () => {
   const mock_Guard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
       const request = context.switchToHttp().getRequest()
@@ -51,15 +73,17 @@ describe('Gateway Inventory Audit Controller', () => {
   let configService: ConfigService
   let cacheManager: Cache
   let socketProxy: SocketIoClientProxyService
-  let gatewayInventoryStockAuditController: GatewayInventoryStockAuditController
+  let gatewayInventoryPurchaseOrderController: GatewayInventoryPurchaseOrderController
   let logger: Logger
-  let stockAuditModel: Model<StockAudit>
+  let masterItemSupplierModel: Model<MasterItemSupplier>
+  let purchaseRequisitionModel: Model<PurchaseRequisition>
+  let purchaseOrderModel: Model<PurchaseOrder>
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [GatewayInventoryStockAuditController],
+      controllers: [GatewayInventoryPurchaseOrderController],
       providers: [
-        GatewayInventoryStockAuditService,
+        GatewayInventoryPurchaseOrderService,
         {
           provide: ConfigService,
           useValue: {
@@ -129,8 +153,16 @@ describe('Gateway Inventory Audit Controller', () => {
           useValue: mockAccountModel,
         },
         {
-          provide: getModelToken(StockAudit.name, 'primary'),
-          useValue: mockStockAuditModel,
+          provide: getModelToken(MasterItemSupplier.name, 'primary'),
+          useValue: mockMasterItemSupplierModel,
+        },
+        {
+          provide: getModelToken(PurchaseRequisition.name, 'primary'),
+          useValue: mockPurchaseRequisitionModel,
+        },
+        {
+          provide: getModelToken(PurchaseOrder.name, 'primary'),
+          useValue: mockPurchaseOrderModel,
         },
         { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
         { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
@@ -154,12 +186,18 @@ describe('Gateway Inventory Audit Controller', () => {
       SocketIoClientProxyService
     )
     cacheManager = module.get(CACHE_MANAGER)
-    gatewayInventoryStockAuditController =
-      app.get<GatewayInventoryStockAuditController>(
-        GatewayInventoryStockAuditController
+    gatewayInventoryPurchaseOrderController =
+      app.get<GatewayInventoryPurchaseOrderController>(
+        GatewayInventoryPurchaseOrderController
       )
-    stockAuditModel = module.get<Model<StockAuditDocument>>(
-      getModelToken(StockAudit.name, 'primary')
+    masterItemSupplierModel = module.get<Model<MasterItemSupplierDocument>>(
+      getModelToken(MasterItemSupplier.name, 'primary')
+    )
+    purchaseRequisitionModel = module.get<Model<PurchaseRequisitionDocument>>(
+      getModelToken(PurchaseRequisition.name, 'primary')
+    )
+    purchaseOrderModel = module.get<Model<PurchaseOrderDocument>>(
+      getModelToken(PurchaseOrder.name, 'primary')
     )
     await app.useGlobalFilters(new CommonErrorFilter(logger))
     app.useGlobalPipes(new GatewayPipe())
@@ -181,20 +219,20 @@ describe('Gateway Inventory Audit Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(gatewayInventoryStockAuditController).toBeDefined()
+      expect(gatewayInventoryPurchaseOrderController).toBeDefined()
     }
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Audit - Get data lazy loaded'),
+    testCaption('FLOW', 'feature', 'Stock Mutation - Get data lazy loaded'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(stockAuditModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(mockStockAuditDocArray),
+          jest.spyOn(purchaseOrderModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(mockPurchaseOrderDocArray),
           } as any)
 
           return app
@@ -204,7 +242,7 @@ describe('Gateway Inventory Audit Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: '/inventory/audit',
+              url: '/inventory/purchase_order',
               query: `lazyEvent=abc`,
             })
             .then((result) => {
@@ -222,8 +260,8 @@ describe('Gateway Inventory Audit Controller', () => {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(stockAuditModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(mockStockAuditDocArray),
+          jest.spyOn(purchaseOrderModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(mockPurchaseOrderDocArray),
           } as any)
 
           return app
@@ -233,7 +271,32 @@ describe('Gateway Inventory Audit Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: '/inventory/audit',
+              url: '/inventory/purchase_order',
+              query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
+            })
+            .then((result) => {
+              HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return undelivered PO data', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(purchaseOrderModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(mockPurchaseOrderDocArray),
+          } as any)
+
+          return app
+            .inject({
+              method: 'GET',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: '/inventory/purchase_order/uncompleted',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
@@ -245,7 +308,7 @@ describe('Gateway Inventory Audit Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Audit - Get data detail'),
+    testCaption('FLOW', 'feature', 'Stock Mutation - Get data detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return detail data', {
@@ -259,7 +322,7 @@ describe('Gateway Inventory Audit Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/audit/${mockStockAudit().id}`,
+              url: `/inventory/purchase_order/${mockPurchaseOrder().id}`,
             })
             .then((result) => {
               HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
@@ -269,7 +332,7 @@ describe('Gateway Inventory Audit Controller', () => {
     }
   )
 
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Add data'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Add data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -282,7 +345,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: '/inventory/audit',
+            url: '/inventory/purchase_order',
             body: {},
           })
           .then((result) => {
@@ -301,17 +364,17 @@ describe('Gateway Inventory Audit Controller', () => {
       }),
       async () => {
         const data = {
-          period_from: new Date(),
-          period_to: new Date(),
-          code: mockStockAudit().code,
-          transaction_date: mockStockAudit().transaction_date,
-          stock_point: mockStockAudit().stock_point,
-          detail: mockStockAudit().detail,
-          extras: mockStockAudit().extras,
-          remark: mockStockAudit().remark,
-        } satisfies StockAuditAddDTO
+          supplier: '',
+          purchase_date: new Date(),
+          purchase_requisition: '',
+          detail: mockPurchaseOrder().detail,
+          discount_type: mockPurchaseOrder().discount_type,
+          discount_value: mockPurchaseOrder().discount_value,
+          extras: mockPurchaseOrder().extras,
+          remark: mockPurchaseOrder().remark,
+        } satisfies PurchaseOrderAddDTO
 
-        delete data.stock_point
+        delete data.detail
 
         return app
           .inject({
@@ -320,7 +383,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: '/inventory/audit',
+            url: '/inventory/purchase_order',
             body: data,
           })
           .then((result) => {
@@ -339,15 +402,23 @@ describe('Gateway Inventory Audit Controller', () => {
       }),
       async () => {
         const data = {
-          period_from: new Date(),
-          period_to: new Date(),
-          code: mockStockAudit().code,
-          transaction_date: mockStockAudit().transaction_date,
-          stock_point: mockStockAudit().stock_point,
-          detail: mockStockAudit().detail,
-          extras: mockStockAudit().extras,
-          remark: mockStockAudit().remark,
-        } satisfies StockAuditAddDTO
+          supplier: '-',
+          purchase_date: new Date(),
+          purchase_requisition: '-',
+          detail: mockPurchaseOrder().detail,
+          discount_type: mockPurchaseOrder().discount_type,
+          discount_value: mockPurchaseOrder().discount_value,
+          extras: mockPurchaseOrder().extras,
+          remark: mockPurchaseOrder().remark,
+        } satisfies PurchaseOrderAddDTO
+
+        jest
+          .spyOn(masterItemSupplierModel, 'findOne')
+          .mockResolvedValue(mockMasterItemSupplier())
+
+        jest
+          .spyOn(purchaseRequisitionModel, 'findOne')
+          .mockResolvedValue(mockPurchaseRequisition())
 
         return app
           .inject({
@@ -356,7 +427,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: '/inventory/audit',
+            url: '/inventory/purchase_order',
             body: data,
           })
           .then((result) => {
@@ -366,7 +437,7 @@ describe('Gateway Inventory Audit Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Edit data'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Edit data'), () => {
     it(
       testCaption('HANDLING', 'feature', 'Should handle invalid format', {
         tab: 1,
@@ -379,7 +450,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/edit/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/${mockPurchaseOrder().id}`,
             body: {},
           })
           .then((result) => {
@@ -404,7 +475,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/edit/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/${mockPurchaseOrder().id}`,
             body: {},
           })
           .then((result) => {
@@ -423,16 +494,20 @@ describe('Gateway Inventory Audit Controller', () => {
       }),
       async () => {
         const data = {
-          period_from: new Date(),
-          period_to: new Date(),
-          code: mockStockAudit().code,
-          transaction_date: mockStockAudit().transaction_date,
-          stock_point: mockStockAudit().stock_point,
-          detail: mockStockAudit().detail,
-          extras: mockStockAudit().extras,
-          remark: mockStockAudit().remark,
+          supplier: '-',
+          purchase_date: new Date(),
+          purchase_requisition: '-',
+          detail: mockPurchaseOrder().detail,
+          discount_type: mockPurchaseOrder().discount_type,
+          discount_value: mockPurchaseOrder().discount_value,
+          extras: mockPurchaseOrder().extras,
+          remark: mockPurchaseOrder().remark,
           __v: 0,
-        } satisfies StockAuditEditDTO
+        } satisfies PurchaseOrderEditDTO
+
+        jest
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(mockPurchaseOrder())
 
         return app
           .inject({
@@ -441,7 +516,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/edit/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/${mockPurchaseOrder().id}`,
             body: data,
           })
           .then((result) => {
@@ -455,64 +530,73 @@ describe('Gateway Inventory Audit Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Delete data'), () => {
-    it(
-      testCaption(
-        'HANDLING',
-        'data',
-        'Should return 404 if data is not found',
-        {
-          tab: 1,
+  describe(
+    testCaption('FLOW', 'feature', 'Stock Mutation - Delete data'),
+    () => {
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Should return 404 if data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
+          return app
+            .inject({
+              method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_order/${mockPurchaseOrder().id}`,
+            })
+            .then(async (result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NOT_FOUND,
+                logger.warn
+              )
+            })
         }
-      ),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'DELETE',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/${mockStockAudit().id}`,
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
-          })
-      }
-    )
+      )
 
-    it(
-      testCaption('HANDLING', 'data', 'Should return success delete', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest
-          .spyOn(stockAuditModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockStockAudit())
-        return app
-          .inject({
-            method: 'DELETE',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/${mockStockAudit().id}`,
-          })
-          .then((result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.NO_CONTENT,
-              logger.verbose
-            )
-          })
-      }
-    )
-  })
+      it(
+        testCaption('HANDLING', 'data', 'Should return success delete', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest
+            .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockPurchaseOrder())
+          return app
+            .inject({
+              method: 'DELETE',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_order/${mockPurchaseOrder().id}`,
+            })
+            .then((result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NO_CONTENT,
+                logger.verbose
+              )
+            })
+        }
+      )
+    }
+  )
 
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Proposal'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Proposal'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -525,11 +609,13 @@ describe('Gateway Inventory Audit Controller', () => {
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
         const data = {
-          remark: mockStockAudit().remark,
+          remark: mockPurchaseOrder().remark,
           __v: 0,
-        } satisfies StockAuditApprovalDTO
+        } satisfies PurchaseOrderApprovalDTO
 
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
+        jest
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(null)
         return app
           .inject({
             method: 'PATCH',
@@ -537,7 +623,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/ask_approval/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/ask_approval/${mockPurchaseOrder().id}`,
             body: data,
           })
           .then(async (result) => {
@@ -553,7 +639,9 @@ describe('Gateway Inventory Audit Controller', () => {
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
 
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
+        jest
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(null)
         return app
           .inject({
             method: 'PATCH',
@@ -561,9 +649,9 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/ask_approval/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/ask_approval/${mockPurchaseOrder().id}`,
             body: {
-              remark: mockStockAudit().remark,
+              remark: mockPurchaseOrder().remark,
             },
           })
           .then(async (result) => {
@@ -586,12 +674,12 @@ describe('Gateway Inventory Audit Controller', () => {
           emit: jest.fn(),
         })
         jest
-          .spyOn(stockAuditModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockStockAudit())
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(mockPurchaseOrder())
         const data = {
-          remark: mockStockAudit().remark,
+          remark: mockPurchaseOrder().remark,
           __v: 0,
-        } satisfies StockAuditApprovalDTO
+        } satisfies PurchaseOrderApprovalDTO
         return app
           .inject({
             method: 'PATCH',
@@ -599,7 +687,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/ask_approval/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/ask_approval/${mockPurchaseOrder().id}`,
             body: data,
           })
           .then((result) => {
@@ -613,7 +701,7 @@ describe('Gateway Inventory Audit Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Approval'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Approval'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -626,11 +714,13 @@ describe('Gateway Inventory Audit Controller', () => {
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
         const data = {
-          remark: mockStockAudit().remark,
+          remark: mockPurchaseOrder().remark,
           __v: 0,
-        } satisfies StockAuditApprovalDTO
+        } satisfies PurchaseOrderApprovalDTO
 
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
+        jest
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(null)
         return app
           .inject({
             method: 'PATCH',
@@ -638,7 +728,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/approve/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/approve/${mockPurchaseOrder().id}`,
             body: data,
           })
           .then(async (result) => {
@@ -654,7 +744,9 @@ describe('Gateway Inventory Audit Controller', () => {
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
 
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
+        jest
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(null)
         return app
           .inject({
             method: 'PATCH',
@@ -662,9 +754,9 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/approve/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/approve/${mockPurchaseOrder().id}`,
             body: {
-              remark: mockStockAudit().remark,
+              remark: mockPurchaseOrder().remark,
             },
           })
           .then(async (result) => {
@@ -687,12 +779,12 @@ describe('Gateway Inventory Audit Controller', () => {
           emit: jest.fn(),
         })
         jest
-          .spyOn(stockAuditModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockStockAudit())
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(mockPurchaseOrder())
         const data = {
-          remark: mockStockAudit().remark,
+          remark: mockPurchaseOrder().remark,
           __v: 0,
-        } satisfies StockAuditApprovalDTO
+        } satisfies PurchaseOrderApprovalDTO
         return app
           .inject({
             method: 'PATCH',
@@ -700,7 +792,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/approve/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/approve/${mockPurchaseOrder().id}`,
             body: data,
           })
           .then((result) => {
@@ -714,7 +806,7 @@ describe('Gateway Inventory Audit Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Decline'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Mutation - Decline'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -727,11 +819,13 @@ describe('Gateway Inventory Audit Controller', () => {
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
         const data = {
-          remark: mockStockAudit().remark,
+          remark: mockPurchaseOrder().remark,
           __v: 0,
-        } satisfies StockAuditApprovalDTO
+        } satisfies PurchaseOrderApprovalDTO
 
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
+        jest
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(null)
         return app
           .inject({
             method: 'PATCH',
@@ -739,7 +833,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/decline/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/decline/${mockPurchaseOrder().id}`,
             body: data,
           })
           .then(async (result) => {
@@ -755,7 +849,9 @@ describe('Gateway Inventory Audit Controller', () => {
       async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
 
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
+        jest
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(null)
         return app
           .inject({
             method: 'PATCH',
@@ -763,9 +859,9 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/decline/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/decline/${mockPurchaseOrder().id}`,
             body: {
-              remark: mockStockAudit().remark,
+              remark: mockPurchaseOrder().remark,
             },
           })
           .then(async (result) => {
@@ -788,12 +884,12 @@ describe('Gateway Inventory Audit Controller', () => {
           emit: jest.fn(),
         })
         jest
-          .spyOn(stockAuditModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockStockAudit())
+          .spyOn(purchaseOrderModel, 'findOneAndUpdate')
+          .mockResolvedValue(mockPurchaseOrder())
         const data = {
-          remark: mockStockAudit().remark,
+          remark: mockPurchaseOrder().remark,
           __v: 0,
-        } satisfies StockAuditApprovalDTO
+        } satisfies PurchaseOrderApprovalDTO
         return app
           .inject({
             method: 'PATCH',
@@ -801,209 +897,7 @@ describe('Gateway Inventory Audit Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/audit/decline/${mockStockAudit().id}`,
-            body: data,
-          })
-          .then((result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.ACCEPTED,
-              logger.verbose
-            )
-          })
-      }
-    )
-  })
-
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Running'), () => {
-    it(
-      testCaption(
-        'HANDLING',
-        'data',
-        'Should return 404 if data is not found',
-        {
-          tab: 1,
-        }
-      ),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        const data = {
-          remark: mockStockAudit().remark,
-          __v: 0,
-        } satisfies StockAuditApprovalDTO
-
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/running/${mockStockAudit().id}`,
-            body: data,
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
-          })
-      }
-    )
-
-    it(
-      testCaption('HANDLING', 'data', 'Should return 400 if data is invalid', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/running/${mockStockAudit().id}`,
-            body: {
-              remark: mockStockAudit().remark,
-            },
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.BAD_REQUEST,
-              logger.warn
-            )
-          })
-      }
-    )
-
-    it(
-      testCaption('HANDLING', 'data', 'Should return update status running', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest.spyOn(socketProxy, 'reconnect').mockResolvedValue({
-          emit: jest.fn(),
-        })
-        jest
-          .spyOn(stockAuditModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockStockAudit())
-        const data = {
-          remark: mockStockAudit().remark,
-          __v: 0,
-        } satisfies StockAuditApprovalDTO
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/running/${mockStockAudit().id}`,
-            body: data,
-          })
-          .then((result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.ACCEPTED,
-              logger.verbose
-            )
-          })
-      }
-    )
-  })
-
-  describe(testCaption('FLOW', 'feature', 'Stock Audit - Complete'), () => {
-    it(
-      testCaption(
-        'HANDLING',
-        'data',
-        'Should return 404 if data is not found',
-        {
-          tab: 1,
-        }
-      ),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        const data = {
-          remark: mockStockAudit().remark,
-          __v: 0,
-        } satisfies StockAuditApprovalDTO
-
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/complete/${mockStockAudit().id}`,
-            body: data,
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
-          })
-      }
-    )
-
-    it(
-      testCaption('HANDLING', 'data', 'Should return 400 if data is invalid', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-
-        jest.spyOn(stockAuditModel, 'findOneAndUpdate').mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/complete/${mockStockAudit().id}`,
-            body: {
-              remark: mockStockAudit().remark,
-            },
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.BAD_REQUEST,
-              logger.warn
-            )
-          })
-      }
-    )
-
-    it(
-      testCaption('HANDLING', 'data', 'Should return update status complete', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest.spyOn(socketProxy, 'reconnect').mockResolvedValue({
-          emit: jest.fn(),
-        })
-        jest
-          .spyOn(stockAuditModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockStockAudit())
-        const data = {
-          remark: mockStockAudit().remark,
-          __v: 0,
-        } satisfies StockAuditApprovalDTO
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/audit/complete/${mockStockAudit().id}`,
+            url: `/inventory/purchase_order/decline/${mockPurchaseOrder().id}`,
             body: data,
           })
           .then((result) => {

@@ -46,7 +46,7 @@ import {
 import { GatewayInventoryPurchaseRequisitionController } from '../purchase.requisition.controller'
 import { GatewayInventoryPurchaseRequisitionService } from '../purchase.requisition.service'
 
-describe('Gateway Inventory Adjustment Controller', () => {
+describe('Gateway Inventory Purchase Requisition Controller', () => {
   const mock_Guard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
       const request = context.switchToHttp().getRequest()
@@ -199,7 +199,11 @@ describe('Gateway Inventory Adjustment Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Adjustment - Get data lazy loaded'),
+    testCaption(
+      'FLOW',
+      'feature',
+      'Purchase Requisition - Get data lazy loaded'
+    ),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle invalid JSON format', {
@@ -258,7 +262,7 @@ describe('Gateway Inventory Adjustment Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Adjustment - Get data detail'),
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Get data detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should return detail data', {
@@ -283,7 +287,7 @@ describe('Gateway Inventory Adjustment Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Adjustment - Add data'),
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Add data'),
     () => {
       it(
         testCaption('HANDLING', 'feature', 'Should handle invalid format', {
@@ -383,7 +387,7 @@ describe('Gateway Inventory Adjustment Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Adjustment - Edit data'),
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Edit data'),
     () => {
       it(
         testCaption('HANDLING', 'feature', 'Should handle invalid format', {
@@ -473,7 +477,7 @@ describe('Gateway Inventory Adjustment Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Adjustment - Delete data'),
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Delete data'),
     () => {
       it(
         testCaption(
@@ -539,7 +543,7 @@ describe('Gateway Inventory Adjustment Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Adjustment - Proposal'),
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Proposal'),
     () => {
       it(
         testCaption(
@@ -661,7 +665,7 @@ describe('Gateway Inventory Adjustment Controller', () => {
   )
 
   describe(
-    testCaption('FLOW', 'feature', 'Stock Adjustment - Approval'),
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Approval'),
     () => {
       it(
         testCaption(
@@ -777,215 +781,239 @@ describe('Gateway Inventory Adjustment Controller', () => {
     }
   )
 
-  describe(testCaption('FLOW', 'feature', 'Stock Adjustment - Decline'), () => {
-    it(
-      testCaption(
-        'HANDLING',
-        'data',
-        'Should return 404 if data is not found',
-        {
-          tab: 1,
+  describe(
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Decline'),
+    () => {
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Should return 404 if data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          const data = {
+            remark: mockPurchaseRequisition().remark,
+            __v: 0,
+          } satisfies PurchaseRequisitionApprovalDTO
+
+          jest
+            .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
+          return app
+            .inject({
+              method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
+              body: data,
+            })
+            .then(async (result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NOT_FOUND,
+                logger.warn
+              )
+            })
         }
-      ),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        const data = {
-          remark: mockPurchaseRequisition().remark,
-          __v: 0,
-        } satisfies PurchaseRequisitionApprovalDTO
+      )
 
-        jest
-          .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
-          .mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
-            body: data,
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
-          })
-      }
-    )
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Should return 400 if data is invalid',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
 
-    it(
-      testCaption('HANDLING', 'data', 'Should return 400 if data is invalid', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-
-        jest
-          .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
-          .mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
-            body: {
-              remark: mockPurchaseRequisition().remark,
-            },
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.BAD_REQUEST,
-              logger.warn
-            )
-          })
-      }
-    )
-
-    it(
-      testCaption('HANDLING', 'data', 'Should return update status decline', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest.spyOn(socketProxy, 'reconnect').mockResolvedValue({
-          emit: jest.fn(),
-        })
-        jest
-          .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockPurchaseRequisition())
-        const data = {
-          remark: mockPurchaseRequisition().remark,
-          __v: 0,
-        } satisfies PurchaseRequisitionApprovalDTO
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
-            body: data,
-          })
-          .then((result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.ACCEPTED,
-              logger.verbose
-            )
-          })
-      }
-    )
-  })
-
-  describe(testCaption('FLOW', 'feature', 'Stock Adjustment - Cancel'), () => {
-    it(
-      testCaption(
-        'HANDLING',
-        'data',
-        'Should return 404 if data is not found',
-        {
-          tab: 1,
+          jest
+            .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
+          return app
+            .inject({
+              method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
+              body: {
+                remark: mockPurchaseRequisition().remark,
+              },
+            })
+            .then(async (result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
+            })
         }
-      ),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        const data = {
-          remark: mockPurchaseRequisition().remark,
-          __v: 0,
-        } satisfies PurchaseRequisitionApprovalDTO
+      )
 
-        jest
-          .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
-          .mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
-            body: data,
+      it(
+        testCaption('HANDLING', 'data', 'Should return update status decline', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest.spyOn(socketProxy, 'reconnect').mockResolvedValue({
+            emit: jest.fn(),
           })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(result, HttpStatus.NOT_FOUND, logger.warn)
-          })
-      }
-    )
+          jest
+            .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockPurchaseRequisition())
+          const data = {
+            remark: mockPurchaseRequisition().remark,
+            __v: 0,
+          } satisfies PurchaseRequisitionApprovalDTO
+          return app
+            .inject({
+              method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
+              body: data,
+            })
+            .then((result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.ACCEPTED,
+                logger.verbose
+              )
+            })
+        }
+      )
+    }
+  )
 
-    it(
-      testCaption('HANDLING', 'data', 'Should return 400 if data is invalid', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+  describe(
+    testCaption('FLOW', 'feature', 'Purchase Requisition - Cancel'),
+    () => {
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Should return 404 if data is not found',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          const data = {
+            remark: mockPurchaseRequisition().remark,
+            __v: 0,
+          } satisfies PurchaseRequisitionApprovalDTO
 
-        jest
-          .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
-          .mockResolvedValue(null)
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
-            body: {
-              remark: mockPurchaseRequisition().remark,
-            },
-          })
-          .then(async (result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.BAD_REQUEST,
-              logger.warn
-            )
-          })
-      }
-    )
+          jest
+            .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
+          return app
+            .inject({
+              method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
+              body: data,
+            })
+            .then(async (result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.NOT_FOUND,
+                logger.warn
+              )
+            })
+        }
+      )
 
-    it(
-      testCaption('HANDLING', 'data', 'Should return update status running', {
-        tab: 1,
-      }),
-      async () => {
-        jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
-        jest.spyOn(socketProxy, 'reconnect').mockResolvedValue({
-          emit: jest.fn(),
-        })
-        jest
-          .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
-          .mockResolvedValue(mockPurchaseRequisition())
-        const data = {
-          remark: mockPurchaseRequisition().remark,
-          __v: 0,
-        } satisfies PurchaseRequisitionApprovalDTO
-        return app
-          .inject({
-            method: 'PATCH',
-            headers: {
-              authorization: 'Bearer ey...',
-              'content-type': 'application/json',
-            },
-            url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
-            body: data,
+      it(
+        testCaption(
+          'HANDLING',
+          'data',
+          'Should return 400 if data is invalid',
+          {
+            tab: 1,
+          }
+        ),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+
+          jest
+            .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
+            .mockResolvedValue(null)
+          return app
+            .inject({
+              method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
+              body: {
+                remark: mockPurchaseRequisition().remark,
+              },
+            })
+            .then(async (result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.BAD_REQUEST,
+                logger.warn
+              )
+            })
+        }
+      )
+
+      it(
+        testCaption('HANDLING', 'data', 'Should return update status running', {
+          tab: 1,
+        }),
+        async () => {
+          jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
+          jest.spyOn(socketProxy, 'reconnect').mockResolvedValue({
+            emit: jest.fn(),
           })
-          .then((result) => {
-            HTTPDefaultResponseCheck(
-              result,
-              HttpStatus.ACCEPTED,
-              logger.verbose
-            )
-          })
-      }
-    )
-  })
+          jest
+            .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockPurchaseRequisition())
+          const data = {
+            remark: mockPurchaseRequisition().remark,
+            __v: 0,
+          } satisfies PurchaseRequisitionApprovalDTO
+          return app
+            .inject({
+              method: 'PATCH',
+              headers: {
+                authorization: 'Bearer ey...',
+                'content-type': 'application/json',
+              },
+              url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
+              body: data,
+            })
+            .then((result) => {
+              HTTPDefaultResponseCheck(
+                result,
+                HttpStatus.ACCEPTED,
+                logger.verbose
+              )
+            })
+        }
+      )
+    }
+  )
 
   afterEach(async () => {
     jest.clearAllMocks()

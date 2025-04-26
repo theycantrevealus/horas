@@ -35,7 +35,7 @@ export class GatewayInventoryStockAuditService {
   ) {}
 
   /**
-   * @description Add exist audit
+   * @description List of audit
    * @param { any } payload should JSON format string. Try to send wrong format lol
    * @returns
    */

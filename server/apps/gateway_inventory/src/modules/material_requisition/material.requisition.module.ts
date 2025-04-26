@@ -11,8 +11,8 @@ import {
 import { MongoMiddlewareMaterialRequisition } from '@schemas/inventory/material.requisition.middleware'
 import { AuthModule } from '@security/auth.module'
 
-import { MaterialRequisitionController } from './material.requisition.controller'
-import { MaterialRequisitionService } from './material.requisition.service'
+import { GatewayInventoryMaterialRequisitionController } from './material.requisition.controller'
+import { GatewayInventoryMaterialRequisitionService } from './material.requisition.service'
 
 @Module({
   imports: [
@@ -26,13 +26,13 @@ import { MaterialRequisitionService } from './material.requisition.service'
     ),
     AuthModule,
   ],
-  controllers: [MaterialRequisitionController],
+  controllers: [GatewayInventoryMaterialRequisitionController],
   providers: [
     SocketIoClientProvider,
     SocketIoClientProxyService,
     MongoMiddlewareMaterialRequisition,
-    MaterialRequisitionService,
+    GatewayInventoryMaterialRequisitionService,
   ],
-  exports: [MaterialRequisitionService],
+  exports: [GatewayInventoryMaterialRequisitionService],
 })
-export class MaterialRequisitionModule {}
+export class GatewayInventoryMaterialRequisitionModule {}

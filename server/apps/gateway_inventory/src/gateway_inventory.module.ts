@@ -5,9 +5,11 @@ import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { GatewayInventoryStockAdjustmentModule } from '@gateway_inventory/adjustment/gateway.inventory.adjustment.module'
 import { GatewayInventoryStockAuditModule } from '@gateway_inventory/audit/gateway.inventory.audit.module'
-import { GeneralIssueNoteModule } from '@gateway_inventory/general_issue_note/general.issue.note.module'
-import { MaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
+import { GatewayInventoryGeneralIssueNoteModule } from '@gateway_inventory/general_issue_note/general.issue.note.module'
+import { GatewayInventoryGeneralReceiveNoteModule } from '@gateway_inventory/general_receive_note/general.receive.note.module'
+import { GatewayInventoryMaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
 import { GatewayInventoryMutationModule } from '@gateway_inventory/mutation/gateway.inventory.mutation.module'
+import { GatewayInventoryPurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
 import { GatewayInventoryPurchaseRequisitionModule } from '@gateway_inventory/purchase_requisition/purchase.requisition.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
@@ -116,14 +118,14 @@ import * as redisStore from 'cache-manager-ioredis'
       ]
     ),
     AuthModule,
-    MaterialRequisitionModule,
-    GeneralIssueNoteModule,
+    GatewayInventoryMaterialRequisitionModule,
+    GatewayInventoryGeneralIssueNoteModule,
     GatewayInventoryMutationModule,
     GatewayInventoryStockAuditModule,
     GatewayInventoryStockAdjustmentModule,
     GatewayInventoryPurchaseRequisitionModule,
-    // GeneralReceiveNoteModule,
-    // PurchaseOrderModule,
+    GatewayInventoryGeneralReceiveNoteModule,
+    GatewayInventoryPurchaseOrderModule,
     // StockModule, // TODO : Rename this redundant name
   ],
   controllers: [],
