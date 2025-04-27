@@ -651,6 +651,73 @@ export const modCodes = {
       },
     },
   },
+  GatewayInventoryStockDisposal: {
+    defaultCode: 'DIS',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock disposal fetched successfully',
+        transaction_classify: 'DIS_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock disposal fetched successfully',
+        transaction_classify: 'DIS_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Stock disposal created successfully',
+        transaction_classify: 'DIS_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock disposal updated successfully',
+        transaction_classify: 'DIS_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Stock disposal deleted successfully',
+        transaction_classify: 'DIS_DELETE',
+      },
+      askApproval: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock disposal proposed successfully',
+        transaction_classify: 'DIS_ASK_APPROVAL',
+      },
+      approve: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock disposal approved successfully',
+        transaction_classify: 'DIS_APPROVE',
+      },
+      decline: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock disposal declined successfully',
+        transaction_classify: 'DIS_DECLINE',
+      },
+      completed: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock disposal processed successfully',
+        transaction_classify: 'DIS_COMPLETED',
+      },
+    },
+  },
   GatewayInventoryStockAdjustment: {
     defaultCode: 'ADJ',
     defaultResponseCode: {

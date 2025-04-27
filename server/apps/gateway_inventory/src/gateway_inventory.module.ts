@@ -5,6 +5,7 @@ import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
 import { GatewayInventoryStockAdjustmentModule } from '@gateway_inventory/adjustment/gateway.inventory.adjustment.module'
 import { GatewayInventoryStockAuditModule } from '@gateway_inventory/audit/gateway.inventory.audit.module'
+import { GatewayInventoryStockDisposalModule } from '@gateway_inventory/disposal/gateway.inventory.disposal.module'
 import { GatewayInventoryGeneralIssueNoteModule } from '@gateway_inventory/general_issue_note/general.issue.note.module'
 import { GatewayInventoryGeneralReceiveNoteModule } from '@gateway_inventory/general_receive_note/general.receive.note.module'
 import { GatewayInventoryMaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
@@ -126,6 +127,7 @@ import * as redisStore from 'cache-manager-ioredis'
     GatewayInventoryPurchaseRequisitionModule,
     GatewayInventoryGeneralReceiveNoteModule,
     GatewayInventoryPurchaseOrderModule,
+    GatewayInventoryStockDisposalModule,
     // StockModule, // TODO : Rename this redundant name
   ],
   controllers: [],

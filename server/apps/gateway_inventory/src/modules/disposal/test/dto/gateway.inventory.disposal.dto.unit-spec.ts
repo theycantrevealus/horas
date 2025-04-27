@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import {
-  StockAuditAddDTO,
-  StockAuditEditDTO,
-} from '@gateway_inventory/audit/dto/audit'
-import { StockAuditApprovalDTO } from '@gateway_inventory/audit/dto/audit.approval'
+  StockDisposalAddDTO,
+  StockDisposalEditDTO,
+} from '@gateway_inventory/disposal/dto/disposal'
+import { StockDisposalApprovalDTO } from '@gateway_inventory/disposal/dto/disposal.approva'
 import { testCaption } from '@utility/string'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
@@ -12,17 +12,12 @@ const falseCasePayload = {
   add: [
     {
       expectedToContain: 'code must be longer than or equal to 8 characters',
-      targetClass: StockAuditAddDTO,
+      targetClass: StockDisposalAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
         transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
+        stock_point: {
           id: 'stock_point-xxxx',
           code: 'STCKP-0001',
           name: 'Sample Stock Point',
@@ -43,26 +38,22 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
+            type: 'Expired Products',
             remark: '',
           },
         ],
         extras: {},
-        remark: '',
+        remark: '-',
       },
     },
     {
       expectedToContain: 'code must be shorter than or equal to 24 characters',
-      targetClass: StockAuditAddDTO,
+      targetClass: StockDisposalAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
         transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
+        stock_point: {
           id: 'stock_point-xxxx',
           code: 'STCKP-0001',
           name: 'Sample Stock Point',
@@ -83,20 +74,19 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
+            type: 'Expired Products',
             remark: '',
           },
         ],
         extras: {},
-        remark: '',
+        remark: '-',
       },
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: StockAuditAddDTO,
+      targetClass: StockDisposalAddDTO,
       testType: 1,
       data: {
-        period_from: new Date(),
-        period_to: new Date(),
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         transaction_date: new Date(),
         stock_point: {
@@ -119,7 +109,8 @@ const falseCasePayload = {
               price_sell: 120000,
               expired: new Date(),
             },
-            qty_actual: 10,
+            qty: 10,
+            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -131,17 +122,12 @@ const falseCasePayload = {
   edit: [
     {
       expectedToContain: 'code must be longer than or equal to 8 characters',
-      targetClass: StockAuditEditDTO,
+      targetClass: StockDisposalEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
         transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
+        stock_point: {
           id: 'stock_point-xxxx',
           code: 'STCKP-0001',
           name: 'Sample Stock Point',
@@ -162,27 +148,23 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
+            type: 'Expired Products',
             remark: '',
           },
         ],
         extras: {},
-        remark: '',
+        remark: '-',
         __v: 0,
       },
     },
     {
       expectedToContain: 'code must be shorter than or equal to 24 characters',
-      targetClass: StockAuditEditDTO,
+      targetClass: StockDisposalEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
         transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
+        stock_point: {
           id: 'stock_point-xxxx',
           code: 'STCKP-0001',
           name: 'Sample Stock Point',
@@ -203,102 +185,20 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
+            type: 'Expired Products',
             remark: '',
           },
         ],
         extras: {},
-        remark: '',
+        remark: '-',
         __v: 0,
       },
     },
     {
       expectedToContain: '__v should not be empty',
-      targetClass: StockAuditEditDTO,
+      targetClass: StockDisposalEditDTO,
       testType: -1,
       data: {
-        code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        detail: [
-          {
-            batch: {
-              id: 'item_batch-xxxxx',
-              code: faker.string.alpha({ length: 5, casing: 'upper' }),
-              item: {
-                id: 'item-xxxxxx',
-                code: faker.string.alpha({ length: 5, casing: 'upper' }),
-                name: 'Item 1',
-                brand: null,
-              },
-              price_buy: 10000,
-              price_sell: 120000,
-              expired: new Date(),
-            },
-            qty: 10,
-            remark: '',
-          },
-        ],
-        extras: {},
-        remark: '',
-      },
-    },
-    {
-      expectedToContain: '__v must be a number',
-      targetClass: StockAuditEditDTO,
-      testType: -1,
-      data: {
-        code: faker.string.alpha({ length: 24, casing: 'upper' }),
-        transaction_date: new Date(),
-        from: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        to: {
-          id: 'stock_point-xxxx',
-          code: 'STCKP-0001',
-          name: 'Sample Stock Point',
-        },
-        detail: [
-          {
-            batch: {
-              id: 'item_batch-xxxxx',
-              code: faker.string.alpha({ length: 5, casing: 'upper' }),
-              item: {
-                id: 'item-xxxxxx',
-                code: faker.string.alpha({ length: 5, casing: 'upper' }),
-                name: 'Item 1',
-                brand: null,
-              },
-              price_buy: 10000,
-              price_sell: 120000,
-              expired: new Date(),
-            },
-            qty: 10,
-            remark: '',
-          },
-        ],
-        extras: {},
-        remark: '',
-        __v: 'testing',
-      },
-    },
-    {
-      expectedToContain: 'Correct data',
-      targetClass: StockAuditEditDTO,
-      testType: 1,
-      data: {
-        period_from: new Date(),
-        period_to: new Date(),
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
         transaction_date: new Date(),
         stock_point: {
@@ -321,7 +221,81 @@ const falseCasePayload = {
               price_sell: 120000,
               expired: new Date(),
             },
-            qty_actual: 10,
+            qty: 10,
+            type: 'Expired Products',
+            remark: '',
+          },
+        ],
+        extras: {},
+        remark: '-',
+      },
+    },
+    {
+      expectedToContain: '__v must be a number',
+      targetClass: StockDisposalEditDTO,
+      testType: -1,
+      data: {
+        code: faker.string.alpha({ length: 24, casing: 'upper' }),
+        transaction_date: new Date(),
+        stock_point: {
+          id: 'stock_point-xxxx',
+          code: 'STCKP-0001',
+          name: 'Sample Stock Point',
+        },
+        detail: [
+          {
+            batch: {
+              id: 'item_batch-xxxxx',
+              code: faker.string.alpha({ length: 5, casing: 'upper' }),
+              item: {
+                id: 'item-xxxxxx',
+                code: faker.string.alpha({ length: 5, casing: 'upper' }),
+                name: 'Item 1',
+                brand: null,
+              },
+              price_buy: 10000,
+              price_sell: 120000,
+              expired: new Date(),
+            },
+            qty: 10,
+            type: 'Expired Products',
+            remark: '',
+          },
+        ],
+        extras: {},
+        remark: '-',
+        __v: 'testing',
+      },
+    },
+    {
+      expectedToContain: 'Correct data',
+      targetClass: StockDisposalEditDTO,
+      testType: 1,
+      data: {
+        code: faker.string.alpha({ length: 24, casing: 'upper' }),
+        transaction_date: new Date(),
+        stock_point: {
+          id: 'stock_point-xxxx',
+          code: 'STCKP-0001',
+          name: 'Sample Stock Point',
+        },
+        detail: [
+          {
+            batch: {
+              id: 'item_batch-xxxxx',
+              code: faker.string.alpha({ length: 5, casing: 'upper' }),
+              item: {
+                id: 'item-xxxxxx',
+                code: faker.string.alpha({ length: 5, casing: 'upper' }),
+                name: 'Item 1',
+                brand: null,
+              },
+              price_buy: 10000,
+              price_sell: 120000,
+              expired: new Date(),
+            },
+            qty: 10,
+            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -334,7 +308,7 @@ const falseCasePayload = {
   approval: [
     {
       expectedToContain: 'remark should not be empty',
-      targetClass: StockAuditApprovalDTO,
+      targetClass: StockDisposalApprovalDTO,
       testType: -1,
       data: {
         remark: '',
@@ -343,7 +317,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v should not be empty',
-      targetClass: StockAuditApprovalDTO,
+      targetClass: StockDisposalApprovalDTO,
       testType: -1,
       data: {
         remark: '-',
@@ -351,7 +325,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v must be a number',
-      targetClass: StockAuditApprovalDTO,
+      targetClass: StockDisposalApprovalDTO,
       testType: -1,
       data: {
         remark: '-',
@@ -360,7 +334,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: StockAuditApprovalDTO,
+      targetClass: StockDisposalApprovalDTO,
       testType: 1,
       data: {
         remark: '-',
@@ -369,8 +343,8 @@ const falseCasePayload = {
     },
   ],
 }
-describe('Stock Audit DTO Test', () => {
-  describe(testCaption('ADD', 'data', 'Stock Audit Add'), () => {
+describe('Stock Disposal DTO Test', () => {
+  describe(testCaption('ADD', 'data', 'Stock Disposal Add'), () => {
     for (const tKey of falseCasePayload.add) {
       it(
         testCaption(
@@ -395,7 +369,7 @@ describe('Stock Audit DTO Test', () => {
     }
   })
 
-  describe(testCaption('EDIT', 'data', 'Stock Audit Edit'), () => {
+  describe(testCaption('EDIT', 'data', 'Stock Disposal Edit'), () => {
     for (const tKey of falseCasePayload.edit) {
       it(
         testCaption(
@@ -420,7 +394,7 @@ describe('Stock Audit DTO Test', () => {
     }
   })
 
-  describe(testCaption('APPROVAL', 'data', 'Stock Audit Approval'), () => {
+  describe(testCaption('APPROVAL', 'data', 'Stock Disposal Approval'), () => {
     for (const tKey of falseCasePayload.approval) {
       it(
         testCaption(
