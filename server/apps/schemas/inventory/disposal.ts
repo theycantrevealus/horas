@@ -7,20 +7,17 @@ import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
-import { StockAuditDetail } from './audit.detail'
-import { IStockAuditDetail } from './audit.detail.interface'
+import { StockDisposalDetail } from './disposal.detail'
+import { IStockDisposalDetail } from './disposal.detail.interface'
 
-export type StockAuditDocument = HydratedDocument<StockAudit>
+export type StockDisposalDocument = HydratedDocument<StockDisposal>
 
 /**
- * @class StockAudit
- * @description Stock audit model. Audit process and history will recorded here.
- * Stock audit refers to the physical verification of a company's stock based on maintained records.
- * It's a process that involves verifying and detecting discrepancies, finding deviations, and reporting accordingly.
- * This audit can be carried out by an internal auditor or an external vendor.
+ * @class StockDiposal
+ * @description Stock disposal refers to the process of permanently removing or eliminating inventory or stock from a warehouse, store, or other storage facility.
  */
-@Schema({ collection: 'inventory_stock_audit' })
-export class StockAudit {
+@Schema({ collection: 'inventory_stock_disposal' })
+export class StockDisposal {
   /**
    * Unique identifier for the stock audit.
    * @type { string }
@@ -48,26 +45,6 @@ export class StockAudit {
 
   /**
    * @type { Date }
-   * @description Period when the audit will held
-   */
-  @Prop({
-    type: SchemaTypes.Date,
-    required: true,
-  })
-  period_from: Date
-
-  /**
-   * @type { Date }
-   * @description Period when the audit will completed
-   */
-  @Prop({
-    type: SchemaTypes.Date,
-    required: true,
-  })
-  period_to: Date
-
-  /**
-   * @type { Date }
    * @description Actual start of the audit
    */
   @Prop({
@@ -89,17 +66,10 @@ export class StockAudit {
    * @description Audit detail. Contains batch list and stock information
    */
   @Prop({
-    type: [StockAuditDetail],
+    type: [StockDisposalDetail],
     _id: false,
   })
-  detail: IStockAuditDetail[]
-
-  /**
-   * @type { any }
-   * @description Additional field for extra data
-   */
-  @Prop({ type: SchemaTypes.Mixed, required: false })
-  extras: any
+  detail: IStockDisposalDetail[]
 
   /**
    * @type { string }
@@ -109,20 +79,12 @@ export class StockAudit {
    * - 'need_approval': Department supervisor must approve to continue
    * - 'approved': Approved by department supervisor to execute
    * - 'declined': Requisition declined by department supervisor
-   * - 'running': Audit is running
    * - 'completed': Audit is completed
    * @default 'new'
    */
   @Prop({
     type: SchemaTypes.String,
-    enum: [
-      'new',
-      'need_approval',
-      'approved',
-      'declined',
-      'running',
-      'completed',
-    ],
+    enum: ['new', 'need_approval', 'approved', 'declined', 'completed'],
     default: 'new',
   })
   status: string
@@ -133,6 +95,13 @@ export class StockAudit {
    */
   @Prop({ type: [ApprovalHistory], _id: false })
   approval_history: IApprovalHistory[]
+
+  /**
+   * @type { any }
+   * @description Additional field for extra data
+   */
+  @Prop({ type: SchemaTypes.Mixed, required: false })
+  extras: any
 
   /**
    * @type { string }
@@ -178,4 +147,4 @@ export class StockAudit {
   deleted_at: Date | null
 }
 
-export const StockAuditSchema = SchemaFactory.createForClass(StockAudit)
+export const StockDisposalSchema = SchemaFactory.createForClass(StockDisposal)

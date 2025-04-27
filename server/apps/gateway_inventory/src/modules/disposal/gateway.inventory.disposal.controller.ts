@@ -24,28 +24,26 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger'
-import { HORASClassDoc } from '@utility/decorator'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { FastifyRequest } from 'fastify'
 
-import { StockAuditAddDTO, StockAuditEditDTO } from './dto/audit'
-import { StockAuditApprovalDTO } from './dto/audit.approval'
-import { GatewayInventoryStockAuditService } from './gateway.inventory.audit.service'
+import { StockDisposalAddDTO, StockDisposalEditDTO } from './dto/disposal'
+import { StockDisposalApprovalDTO } from './dto/disposal.approva'
+import { GatewayInventoryStockDisposalService } from './gateway.inventory.disposal.service'
 
 @Controller('inventory')
-@HORASClassDoc('GatewayInventoryStockAuditController', 'Stock audit gateway')
-export class GatewayInventoryStockAuditController {
+export class GatewayInventoryStockDisposalController {
   constructor(
-    @Inject(GatewayInventoryStockAuditService)
-    private readonly gatewayInventoryAuditService: GatewayInventoryStockAuditService
+    @Inject(GatewayInventoryStockDisposalService)
+    private readonly gatewayInventoryDisposalService: GatewayInventoryStockDisposalService
   ) {}
 
-  @Get('audit')
+  @Get('disposal')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'view' })
+  @PermissionManager({ group: 'StockDisposal', action: 'view' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all',
@@ -53,15 +51,15 @@ export class GatewayInventoryStockAuditController {
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    return await this.gatewayInventoryAuditService.all(parameter)
+    return await this.gatewayInventoryDisposalService.all(parameter)
   }
 
-  @Get('audit/:id')
+  @Get('disposal/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'view' })
+  @PermissionManager({ group: 'StockDisposal', action: 'view' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Detail data',
@@ -71,33 +69,33 @@ export class GatewayInventoryStockAuditController {
     name: 'id',
   })
   async detail(@Param() param) {
-    return await this.gatewayInventoryAuditService.detail(param.id)
+    return await this.gatewayInventoryDisposalService.detail(param.id)
   }
 
-  @Post('audit')
+  @Post('disposal')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'add' })
+  @PermissionManager({ group: 'StockDisposal', action: 'add' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add new',
     description: ``,
   })
   async add(
-    @Body() parameter: StockAuditAddDTO,
+    @Body() parameter: StockDisposalAddDTO,
     @CredentialAccount() account: IAccount
   ) {
-    return await this.gatewayInventoryAuditService.add(parameter, account)
+    return await this.gatewayInventoryDisposalService.add(parameter, account)
   }
 
-  @Patch('audit/edit/:id')
+  @Patch('disposal/edit/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'edit' })
+  @PermissionManager({ group: 'StockDisposal', action: 'edit' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Edit mutation',
@@ -107,23 +105,23 @@ export class GatewayInventoryStockAuditController {
     name: 'id',
   })
   async edit(
-    @Body() parameter: StockAuditEditDTO,
+    @Body() parameter: StockDisposalEditDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount
   ) {
-    return await this.gatewayInventoryAuditService.edit(
+    return await this.gatewayInventoryDisposalService.edit(
       parameter,
       param.id,
       account
     )
   }
 
-  @Delete('audit/:id')
+  @Delete('disposal/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'delete' })
+  @PermissionManager({ group: 'StockDisposal', action: 'delete' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Delete mutation',
@@ -133,15 +131,15 @@ export class GatewayInventoryStockAuditController {
     name: 'id',
   })
   async delete(@Param() param: any, @CredentialAccount() account: IAccount) {
-    return await this.gatewayInventoryAuditService.delete(param.id, account)
+    return await this.gatewayInventoryDisposalService.delete(param.id, account)
   }
 
-  @Patch('audit/ask_approval/:id')
+  @Patch('disposal/ask_approval/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'Mutation', action: 'ask_approval' })
+  @PermissionManager({ group: 'StockDisposal', action: 'ask_approval' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Ask for approval new mutation',
@@ -151,15 +149,15 @@ export class GatewayInventoryStockAuditController {
     name: 'id',
   })
   async askApproval(
-    @Body() parameter: StockAuditApprovalDTO,
+    @Body() parameter: StockDisposalApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryAuditService
+    return await this.gatewayInventoryDisposalService
       .askApproval(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryAuditService.notifier(
+        await this.gatewayInventoryDisposalService.notifier(
           {
             transaction_id: param.id,
             message: 'Mutation need approval',
@@ -171,12 +169,12 @@ export class GatewayInventoryStockAuditController {
       })
   }
 
-  @Patch('audit/approve/:id')
+  @Patch('disposal/approve/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'approve' })
+  @PermissionManager({ group: 'StockDisposal', action: 'approve' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Approve mutation',
@@ -186,15 +184,15 @@ export class GatewayInventoryStockAuditController {
     name: 'id',
   })
   async approve(
-    @Body() parameter: StockAuditApprovalDTO,
+    @Body() parameter: StockDisposalApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryAuditService
+    return await this.gatewayInventoryDisposalService
       .askApproval(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryAuditService.notifier(
+        await this.gatewayInventoryDisposalService.notifier(
           {
             transaction_id: param.id,
             message: 'Mutation approved',
@@ -206,12 +204,12 @@ export class GatewayInventoryStockAuditController {
       })
   }
 
-  @Patch('audit/decline/:id')
+  @Patch('disposal/decline/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'decline' })
+  @PermissionManager({ group: 'StockDisposal', action: 'decline' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Decline mutation',
@@ -221,15 +219,15 @@ export class GatewayInventoryStockAuditController {
     name: 'id',
   })
   async decline(
-    @Body() parameter: StockAuditApprovalDTO,
+    @Body() parameter: StockDisposalApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryAuditService
+    return await this.gatewayInventoryDisposalService
       .decline(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryAuditService.notifier(
+        await this.gatewayInventoryDisposalService.notifier(
           {
             transaction_id: param.id,
             message: 'Mutation declined',
@@ -241,12 +239,12 @@ export class GatewayInventoryStockAuditController {
       })
   }
 
-  @Patch('audit/complete/:id')
+  @Patch('disposal/complete/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'complete' })
+  @PermissionManager({ group: 'StockDisposal', action: 'complete' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Decline mutation',
@@ -256,50 +254,15 @@ export class GatewayInventoryStockAuditController {
     name: 'id',
   })
   async completed(
-    @Body() parameter: StockAuditApprovalDTO,
+    @Body() parameter: StockDisposalApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryAuditService
+    return await this.gatewayInventoryDisposalService
       .completed(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryAuditService.notifier(
-          {
-            transaction_id: param.id,
-            message: 'Mutation declined',
-          },
-          account,
-          request.headers.authorization
-        )
-        return result
-      })
-  }
-
-  @Patch('audit/running/:id')
-  @Version('1')
-  @UseGuards(JwtAuthGuard)
-  @Authorization(true)
-  @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockAudit', action: 'running' })
-  @UseInterceptors(HORASInterceptor)
-  @ApiOperation({
-    summary: 'Decline mutation',
-    description: ``,
-  })
-  @ApiParam({
-    name: 'id',
-  })
-  async running(
-    @Body() parameter: StockAuditApprovalDTO,
-    @Param() param: any,
-    @CredentialAccount() account: IAccount,
-    @Req() request: FastifyRequest
-  ) {
-    return await this.gatewayInventoryAuditService
-      .running(parameter, param.id, account)
-      .then(async (result) => {
-        await this.gatewayInventoryAuditService.notifier(
+        await this.gatewayInventoryDisposalService.notifier(
           {
             transaction_id: param.id,
             message: 'Mutation declined',
