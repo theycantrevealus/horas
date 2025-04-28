@@ -12,34 +12,34 @@ import { getConnectionToken, getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Authority } from '@schemas/account/authority.model'
 import {
-  StockDisposal,
-  StockDisposalDocument,
-} from '@schemas/inventory/disposal'
+  StockInitiation,
+  StockInitiationDocument,
+} from '@schemas/inventory/initiation'
 import { AuthService } from '@security/auth.service'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 
-import { GatewayInventoryStockDisposalService } from '../gateway.inventory.disposal.service'
+import { GatewayInventoryStockInitiationService } from '../gateway.inventory.initiation.service'
 import {
-  mockStockDisposal,
-  mockStockDisposalDocArray,
-  mockStockDisposalModel,
-} from '../mock/stock.disposal.mock'
+  mockStockInitiation,
+  mockStockInitiationDocArray,
+  mockStockInitiationModel,
+} from '../mock/initiation.mock'
 
-describe('Gateway Inventory Stock Disposal Service', () => {
+describe('Gateway Inventory Stock Initiation Service', () => {
   let configService: ConfigService
   let cacheManager: Cache
-  let gatewayInventoryStockDisposalService: GatewayInventoryStockDisposalService
-  let stockDisposalModel: Model<StockDisposal>
+  let gatewayInventoryStockInitiationService: GatewayInventoryStockInitiationService
+  let stockInitiationModel: Model<StockInitiation>
   let socketProxy: SocketIoClientProxyService
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
-        GatewayInventoryStockDisposalService,
+        GatewayInventoryStockInitiationService,
         JwtService,
         AuthService,
         {
@@ -112,8 +112,8 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           },
         },
         {
-          provide: getModelToken(StockDisposal.name, 'primary'),
-          useValue: mockStockDisposalModel,
+          provide: getModelToken(StockInitiation.name, 'primary'),
+          useValue: mockStockInitiationModel,
         },
         {
           provide: getModelToken(Authority.name, 'primary'),
@@ -130,12 +130,12 @@ describe('Gateway Inventory Stock Disposal Service', () => {
       SocketIoClientProxyService
     )
 
-    gatewayInventoryStockDisposalService =
-      module.get<GatewayInventoryStockDisposalService>(
-        GatewayInventoryStockDisposalService
+    gatewayInventoryStockInitiationService =
+      module.get<GatewayInventoryStockInitiationService>(
+        GatewayInventoryStockInitiationService
       )
-    stockDisposalModel = module.get<Model<StockDisposalDocument>>(
-      getModelToken(StockDisposal.name, 'primary')
+    stockInitiationModel = module.get<Model<StockInitiationDocument>>(
+      getModelToken(StockInitiation.name, 'primary')
     )
 
     cacheManager = module.get(CACHE_MANAGER)
@@ -146,22 +146,22 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(gatewayInventoryStockDisposalService).toBeDefined()
+      expect(gatewayInventoryStockInitiationService).toBeDefined()
     }
   )
 
   describe(
-    testCaption('GET DATA', 'data', 'Stock Disposal - Fetch list'),
+    testCaption('GET DATA', 'data', 'Stock Initiation - Fetch list'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Response validity', {
           tab: 1,
         }),
         async () => {
-          jest.spyOn(stockDisposalModel, 'aggregate').mockReturnValue({
-            exec: jest.fn().mockReturnValue(mockStockDisposalDocArray),
+          jest.spyOn(stockInitiationModel, 'aggregate').mockReturnValue({
+            exec: jest.fn().mockReturnValue(mockStockInitiationDocArray),
           } as any)
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .all(
               `{
               "first": 0,
@@ -176,7 +176,7 @@ describe('Gateway Inventory Stock Disposal Service', () => {
               expect(result.data).toBeInstanceOf(Array)
 
               // Data should be defined
-              expect(result.data).toEqual(mockStockDisposalDocArray)
+              expect(result.data).toEqual(mockStockInitiationDocArray)
             })
         }
       )
@@ -188,12 +188,12 @@ describe('Gateway Inventory Stock Disposal Service', () => {
         async () => {
           jest.spyOn(JSON, 'parse').mockImplementation(() => ({}))
 
-          jest.spyOn(stockDisposalModel, 'aggregate').mockImplementation({
+          jest.spyOn(stockInitiationModel, 'aggregate').mockImplementation({
             exec: jest.fn().mockRejectedValue(new Error()),
           } as any)
 
           await expect(
-            gatewayInventoryStockDisposalService.all('')
+            gatewayInventoryStockInitiationService.all('')
           ).rejects.toThrow(Error)
         }
       )
@@ -201,19 +201,21 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('GET DETAIL', 'data', 'Stock Disposal - Fetch detail'),
+    testCaption('GET DETAIL', 'data', 'Stock Initiation - Fetch detail'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Response validity', {
           tab: 1,
         }),
         async () => {
-          const findMock = mockStockDisposalDocArray[0]
-          stockDisposalModel.findOne = jest.fn().mockImplementationOnce(() => {
-            return Promise.resolve(findMock)
-          })
+          const findMock = mockStockInitiationDocArray[0]
+          stockInitiationModel.findOne = jest
+            .fn()
+            .mockImplementationOnce(() => {
+              return Promise.resolve(findMock)
+            })
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .detail(findMock.id)
             .then((result) => {
               // Deep equality check
@@ -232,10 +234,10 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           }
         ),
         async () => {
-          jest.spyOn(stockDisposalModel, 'findOne').mockResolvedValue(null)
+          jest.spyOn(stockInitiationModel, 'findOne').mockResolvedValue(null)
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.detail(
-              mockStockDisposal().id
+            await gatewayInventoryStockInitiationService.detail(
+              mockStockInitiation().id
             )
           }).rejects.toThrow(NotFoundException)
         }
@@ -247,11 +249,11 @@ describe('Gateway Inventory Stock Disposal Service', () => {
         }),
         async () => {
           jest
-            .spyOn(stockDisposalModel, 'findOne')
+            .spyOn(stockInitiationModel, 'findOne')
             .mockRejectedValue(new Error())
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.detail(
-              mockStockDisposal().id
+            await gatewayInventoryStockInitiationService.detail(
+              mockStockInitiation().id
             )
           }).rejects.toThrow(Error)
         }
@@ -260,21 +262,21 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('ADD DATA', 'data', 'Stock Disposal - Add new data'),
+    testCaption('ADD DATA', 'data', 'Stock Initiation - Add new data'),
     () => {
       it(testCaption('DATA', 'data', 'Should add new data'), async () => {
         jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
         jest.spyOn(cacheManager, 'get').mockResolvedValueOnce({})
-        jest.spyOn(stockDisposalModel, 'create')
-        await gatewayInventoryStockDisposalService
+        jest.spyOn(stockInitiationModel, 'create')
+        await gatewayInventoryStockInitiationService
           .add(
             {
-              code: mockStockDisposal().code,
+              code: mockStockInitiation().code,
               transaction_date: new Date(),
-              stock_point: mockStockDisposal().stock_point,
-              detail: mockStockDisposal().detail,
-              extras: mockStockDisposal().extras,
-              remark: mockStockDisposal().remark,
+              stock_point: mockStockInitiation().stock_point,
+              detail: mockStockInitiation().detail,
+              extras: mockStockInitiation().extras,
+              remark: mockStockInitiation().remark,
             },
             mockAccount()
           )
@@ -292,17 +294,17 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           jest.spyOn(configService, 'get').mockReturnValue('Asia/Jakarta')
           jest.spyOn(cacheManager, 'get').mockResolvedValueOnce({})
           jest
-            .spyOn(stockDisposalModel, 'create')
+            .spyOn(stockInitiationModel, 'create')
             .mockRejectedValue(new Error())
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.add(
+            await gatewayInventoryStockInitiationService.add(
               {
-                code: mockStockDisposal().code,
+                code: mockStockInitiation().code,
                 transaction_date: new Date(),
-                stock_point: mockStockDisposal().stock_point,
-                detail: mockStockDisposal().detail,
-                extras: mockStockDisposal().extras,
-                remark: mockStockDisposal().remark,
+                stock_point: mockStockInitiation().stock_point,
+                detail: mockStockInitiation().detail,
+                extras: mockStockInitiation().extras,
+                remark: mockStockInitiation().remark,
               },
               mockAccount()
             )
@@ -313,25 +315,25 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('EDIT DATA', 'data', 'Stock Disposal - Edit data'),
+    testCaption('EDIT DATA', 'data', 'Stock Initiation - Edit data'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should edit data', { tab: 1 }),
         async () => {
-          jest.spyOn(stockDisposalModel, 'findOneAndUpdate')
+          jest.spyOn(stockInitiationModel, 'findOneAndUpdate')
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .edit(
               {
-                code: mockStockDisposal().code,
+                code: mockStockInitiation().code,
                 transaction_date: new Date(),
-                stock_point: mockStockDisposal().stock_point,
-                detail: mockStockDisposal().detail,
-                extras: mockStockDisposal().extras,
-                remark: mockStockDisposal().remark,
+                stock_point: mockStockInitiation().stock_point,
+                detail: mockStockInitiation().detail,
+                extras: mockStockInitiation().extras,
+                remark: mockStockInitiation().remark,
                 __v: 0,
               },
-              mockStockDisposal().id,
+              mockStockInitiation().id,
               mockAccount()
             )
             .then((result) => {
@@ -347,21 +349,21 @@ describe('Gateway Inventory Stock Disposal Service', () => {
         }),
         async () => {
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.edit(
+            await gatewayInventoryStockInitiationService.edit(
               {
-                code: mockStockDisposal().code,
+                code: mockStockInitiation().code,
                 transaction_date: new Date(),
-                stock_point: mockStockDisposal().stock_point,
-                detail: mockStockDisposal().detail,
-                extras: mockStockDisposal().extras,
-                remark: mockStockDisposal().remark,
+                stock_point: mockStockInitiation().stock_point,
+                detail: mockStockInitiation().detail,
+                extras: mockStockInitiation().extras,
+                remark: mockStockInitiation().remark,
                 __v: 0,
               },
-              mockStockDisposal().id,
+              mockStockInitiation().id,
               mockAccount()
             )
           }).rejects.toThrow(NotFoundException)
@@ -374,23 +376,23 @@ describe('Gateway Inventory Stock Disposal Service', () => {
         }),
         async () => {
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.edit(
+            await gatewayInventoryStockInitiationService.edit(
               {
-                code: mockStockDisposal().code,
+                code: mockStockInitiation().code,
                 transaction_date: new Date(),
-                stock_point: mockStockDisposal().stock_point,
-                detail: mockStockDisposal().detail,
-                extras: mockStockDisposal().extras,
-                remark: mockStockDisposal().remark,
+                stock_point: mockStockInitiation().stock_point,
+                detail: mockStockInitiation().detail,
+                extras: mockStockInitiation().extras,
+                remark: mockStockInitiation().remark,
                 __v: 0,
               },
-              mockStockDisposal().id,
+              mockStockInitiation().id,
               mockAccount()
             )
           }).rejects.toThrow(Error)
@@ -400,20 +402,20 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('DELETE DATA', 'data', 'Stock Disposal - Delete data'),
+    testCaption('DELETE DATA', 'data', 'Stock Initiation - Delete data'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Response error if data is not found', {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.delete(
+            await gatewayInventoryStockInitiationService.delete(
               targetID,
               mockAccount()
             )
@@ -426,13 +428,13 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockRejectedValue(new Error())
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.delete(
+            await gatewayInventoryStockInitiationService.delete(
               targetID,
               mockAccount()
             )
@@ -446,11 +448,11 @@ describe('Gateway Inventory Stock Disposal Service', () => {
         }),
         async () => {
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
-            .mockResolvedValue(mockStockDisposalDocArray[0])
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockStockInitiationDocArray[0])
 
-          await gatewayInventoryStockDisposalService
-            .delete(mockStockDisposalDocArray[0].id, mockAccount())
+          await gatewayInventoryStockInitiationService
+            .delete(mockStockInitiationDocArray[0].id, mockAccount())
             .then((result) => {
               expect(result).toHaveProperty('transaction_date')
             })
@@ -460,7 +462,7 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('APPROVAL DATA', 'data', 'Stock Disposal - Ask Approval'),
+    testCaption('APPROVAL DATA', 'data', 'Stock Initiation - Ask Approval'),
     () => {
       it(
         testCaption(
@@ -472,13 +474,13 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           }
         ),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.askApproval(
+            await gatewayInventoryStockInitiationService.askApproval(
               {
                 remark: '',
                 __v: 0,
@@ -500,15 +502,15 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           }
         ),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.askApproval(
+            await gatewayInventoryStockInitiationService.askApproval(
               {
                 remark: '',
                 __v: 0,
@@ -525,12 +527,12 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
-            .mockResolvedValue(mockStockDisposalDocArray[0])
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockStockInitiationDocArray[0])
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .askApproval(
               {
                 remark: '',
@@ -548,20 +550,20 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('APPROVAL DATA', 'data', 'Stock Disposal - Approval'),
+    testCaption('APPROVAL DATA', 'data', 'Stock Initiation - Approval'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle if data is not found', {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.approve(
+            await gatewayInventoryStockInitiationService.approve(
               {
                 remark: '',
                 __v: 0,
@@ -583,15 +585,15 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           }
         ),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.approve(
+            await gatewayInventoryStockInitiationService.approve(
               {
                 remark: '',
                 __v: 0,
@@ -608,12 +610,12 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
-            .mockResolvedValue(mockStockDisposalDocArray[0])
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockStockInitiationDocArray[0])
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .approve(
               {
                 remark: '',
@@ -631,20 +633,20 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('APPROVAL DATA', 'data', 'Stock Disposal - Decline'),
+    testCaption('APPROVAL DATA', 'data', 'Stock Initiation - Decline'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle if data is not found', {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.decline(
+            await gatewayInventoryStockInitiationService.decline(
               {
                 remark: '',
                 __v: 0,
@@ -666,15 +668,15 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           }
         ),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.decline(
+            await gatewayInventoryStockInitiationService.decline(
               {
                 remark: '',
                 __v: 0,
@@ -691,12 +693,12 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
-            .mockResolvedValue(mockStockDisposalDocArray[0])
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockStockInitiationDocArray[0])
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .decline(
               {
                 remark: '',
@@ -714,20 +716,20 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('APPROVAL DATA', 'data', 'Stock Disposal - Running'),
+    testCaption('APPROVAL DATA', 'data', 'Stock Initiation - Running'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle if data is not found', {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.running(
+            await gatewayInventoryStockInitiationService.running(
               {
                 remark: '',
                 __v: 0,
@@ -750,15 +752,15 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           }
         ),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.running(
+            await gatewayInventoryStockInitiationService.running(
               {
                 remark: '',
                 __v: 0,
@@ -776,12 +778,12 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
-            .mockResolvedValue(mockStockDisposalDocArray[0])
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockStockInitiationDocArray[0])
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .running(
               {
                 remark: '',
@@ -800,20 +802,20 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('APPROVAL DATA', 'data', 'Stock Disposal - Complete'),
+    testCaption('APPROVAL DATA', 'data', 'Stock Initiation - Complete'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should handle if data is not found', {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.completed(
+            await gatewayInventoryStockInitiationService.completed(
               {
                 remark: '',
                 __v: 0,
@@ -835,15 +837,15 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           }
         ),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
             .mockImplementationOnce(() => {
               throw new Error()
             })
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.completed(
+            await gatewayInventoryStockInitiationService.completed(
               {
                 remark: '',
                 __v: 0,
@@ -860,12 +862,12 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           tab: 1,
         }),
         async () => {
-          const targetID = mockStockDisposal().id
+          const targetID = mockStockInitiation().id
           jest
-            .spyOn(stockDisposalModel, 'findOneAndUpdate')
-            .mockResolvedValue(mockStockDisposalDocArray[0])
+            .spyOn(stockInitiationModel, 'findOneAndUpdate')
+            .mockResolvedValue(mockStockInitiationDocArray[0])
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .completed(
               {
                 remark: '',
@@ -883,7 +885,7 @@ describe('Gateway Inventory Stock Disposal Service', () => {
   )
 
   describe(
-    testCaption('NOTIFIER', 'data', 'Stock Disposal - Notification'),
+    testCaption('NOTIFIER', 'data', 'Stock Initiation - Notification'),
     () => {
       it(
         testCaption('HANDLING', 'data', 'Should send notification', {
@@ -894,7 +896,7 @@ describe('Gateway Inventory Stock Disposal Service', () => {
             emit: jest.fn(),
           })
 
-          await gatewayInventoryStockDisposalService
+          await gatewayInventoryStockInitiationService
             .notifier(
               {
                 remark: '',
@@ -931,7 +933,7 @@ describe('Gateway Inventory Stock Disposal Service', () => {
           })
 
           await expect(async () => {
-            await gatewayInventoryStockDisposalService.notifier(
+            await gatewayInventoryStockInitiationService.notifier(
               {
                 remark: '',
                 __v: 0,

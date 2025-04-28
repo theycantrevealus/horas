@@ -70,6 +70,7 @@
     "<rootDir>/apps/gateway_inventory/src/modules/purchase_order/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/general_receive_note/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/gateway_inventory/src/modules/disposal/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/apps/gateway_inventory/src/modules/initiation/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/consumer_stock/src/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/apps/processor/stock/src/**/*.{js,jsx,ts,tsx}",
     "!<rootDir>/node_modules/",

@@ -579,6 +579,73 @@ export const modCodes = {
       },
     },
   },
+  GatewayInventoryStockInitiation: {
+    defaultCode: 'INI',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
+      },
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock initiation fetched successfully',
+        transaction_classify: 'INI_GET',
+      },
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Stock initiation fetched successfully',
+        transaction_classify: 'INI_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Stock initiation created successfully',
+        transaction_classify: 'INI_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock initiation updated successfully',
+        transaction_classify: 'INI_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Stock initiation deleted successfully',
+        transaction_classify: 'INI_DELETE',
+      },
+      askApproval: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock initiation proposed successfully',
+        transaction_classify: 'INI_ASK_APPROVAL',
+      },
+      approve: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock initiation approved successfully',
+        transaction_classify: 'INI_APPROVE',
+      },
+      decline: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock initiation declined successfully',
+        transaction_classify: 'INI_DECLINE',
+      },
+      running: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Stock initiation processed successfully',
+        transaction_classify: 'INI_RUNNING',
+      },
+    },
+  },
   GatewayInventoryStockAudit: {
     defaultCode: 'AUD',
     defaultResponseCode: {
@@ -711,7 +778,7 @@ export const modCodes = {
         message: 'Stock disposal declined successfully',
         transaction_classify: 'DIS_DECLINE',
       },
-      completed: {
+      running: {
         responseCode: HttpStatus.ACCEPTED,
         message: 'Stock disposal processed successfully',
         transaction_classify: 'DIS_COMPLETED',

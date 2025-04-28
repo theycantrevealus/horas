@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import {
-  StockDisposalAddDTO,
-  StockDisposalEditDTO,
-} from '@gateway_inventory/disposal/dto/disposal'
-import { StockDisposalApprovalDTO } from '@gateway_inventory/disposal/dto/disposal.approval'
+  StockInitiationAddDTO,
+  StockInitiationEditDTO,
+} from '@gateway_inventory/initiation/dto/initiation'
+import { StockInitiationApprovalDTO } from '@gateway_inventory/initiation/dto/initiation.approval'
 import { testCaption } from '@utility/string'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
@@ -12,7 +12,7 @@ const falseCasePayload = {
   add: [
     {
       expectedToContain: 'code must be longer than or equal to 8 characters',
-      targetClass: StockDisposalAddDTO,
+      targetClass: StockInitiationAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
@@ -38,7 +38,6 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
-            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -48,7 +47,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'code must be shorter than or equal to 24 characters',
-      targetClass: StockDisposalAddDTO,
+      targetClass: StockInitiationAddDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
@@ -74,7 +73,6 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
-            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -84,7 +82,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: StockDisposalAddDTO,
+      targetClass: StockInitiationAddDTO,
       testType: 1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
@@ -110,7 +108,6 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
-            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -122,7 +119,7 @@ const falseCasePayload = {
   edit: [
     {
       expectedToContain: 'code must be longer than or equal to 8 characters',
-      targetClass: StockDisposalEditDTO,
+      targetClass: StockInitiationEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 5, casing: 'upper' }),
@@ -148,7 +145,6 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
-            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -159,7 +155,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'code must be shorter than or equal to 24 characters',
-      targetClass: StockDisposalEditDTO,
+      targetClass: StockInitiationEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 25, casing: 'upper' }),
@@ -185,7 +181,6 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
-            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -196,7 +191,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v should not be empty',
-      targetClass: StockDisposalEditDTO,
+      targetClass: StockInitiationEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
@@ -222,7 +217,6 @@ const falseCasePayload = {
               expired: new Date(),
             },
             qty: 10,
-            type: 'Expired Products',
             remark: '',
           },
         ],
@@ -232,7 +226,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v must be a number',
-      targetClass: StockDisposalEditDTO,
+      targetClass: StockInitiationEditDTO,
       testType: -1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
@@ -269,7 +263,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: StockDisposalEditDTO,
+      targetClass: StockInitiationEditDTO,
       testType: 1,
       data: {
         code: faker.string.alpha({ length: 24, casing: 'upper' }),
@@ -308,7 +302,7 @@ const falseCasePayload = {
   approval: [
     {
       expectedToContain: 'remark should not be empty',
-      targetClass: StockDisposalApprovalDTO,
+      targetClass: StockInitiationApprovalDTO,
       testType: -1,
       data: {
         remark: '',
@@ -317,7 +311,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v should not be empty',
-      targetClass: StockDisposalApprovalDTO,
+      targetClass: StockInitiationApprovalDTO,
       testType: -1,
       data: {
         remark: '-',
@@ -325,7 +319,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: '__v must be a number',
-      targetClass: StockDisposalApprovalDTO,
+      targetClass: StockInitiationApprovalDTO,
       testType: -1,
       data: {
         remark: '-',
@@ -334,7 +328,7 @@ const falseCasePayload = {
     },
     {
       expectedToContain: 'Correct data',
-      targetClass: StockDisposalApprovalDTO,
+      targetClass: StockInitiationApprovalDTO,
       testType: 1,
       data: {
         remark: '-',
@@ -343,8 +337,8 @@ const falseCasePayload = {
     },
   ],
 }
-describe('Stock Disposal DTO Test', () => {
-  describe(testCaption('ADD', 'data', 'Stock Disposal Add'), () => {
+describe('Stock Initiation DTO Test', () => {
+  describe(testCaption('ADD', 'data', 'Stock Initiation Add'), () => {
     for (const tKey of falseCasePayload.add) {
       it(
         testCaption(
@@ -369,7 +363,7 @@ describe('Stock Disposal DTO Test', () => {
     }
   })
 
-  describe(testCaption('EDIT', 'data', 'Stock Disposal Edit'), () => {
+  describe(testCaption('EDIT', 'data', 'Stock Initiation Edit'), () => {
     for (const tKey of falseCasePayload.edit) {
       it(
         testCaption(
@@ -394,7 +388,7 @@ describe('Stock Disposal DTO Test', () => {
     }
   })
 
-  describe(testCaption('APPROVAL', 'data', 'Stock Disposal Approval'), () => {
+  describe(testCaption('APPROVAL', 'data', 'Stock Initiation Approval'), () => {
     for (const tKey of falseCasePayload.approval) {
       it(
         testCaption(

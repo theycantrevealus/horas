@@ -1,7 +1,9 @@
+import { RedisStock } from '@configuration/redis'
 import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
+import { BullModule } from '@nestjs/bullmq'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { StockDisposal, StockDisposalSchema } from '@schemas/inventory/disposal'
@@ -21,6 +23,7 @@ import { GatewayInventoryStockDisposalService } from './gateway.inventory.dispos
       ],
       'primary'
     ),
+    BullModule.registerQueueAsync(RedisStock),
     AuthModule,
   ],
   controllers: [GatewayInventoryStockDisposalController],
