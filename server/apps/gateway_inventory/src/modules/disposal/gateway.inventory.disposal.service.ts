@@ -1,6 +1,7 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
+import { InjectQueue } from '@nestjs/bullmq'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -13,12 +14,13 @@ import {
 import { PrimeParameter } from '@utility/dto/prime'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
+import { Queue } from 'bullmq'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { Socket } from 'socket.io-client'
 
 import { StockDisposalAddDTO, StockDisposalEditDTO } from './dto/disposal'
-import { StockDisposalApprovalDTO } from './dto/disposal.approva'
+import { StockDisposalApprovalDTO } from './dto/disposal.approval'
 
 @Injectable()
 export class GatewayInventoryStockDisposalService {
@@ -32,7 +34,9 @@ export class GatewayInventoryStockDisposalService {
     private readonly stockDisposalModel: Model<StockDisposalDocument>,
 
     @Inject(SocketIoClientProxyService)
-    private readonly socketProxy: SocketIoClientProxyService
+    private readonly socketProxy: SocketIoClientProxyService,
+
+    @InjectQueue('stock') private readonly stockImportQueue: Queue
   ) {}
 
   /**
@@ -279,6 +283,65 @@ export class GatewayInventoryStockDisposalService {
       )
       .then(async (result) => {
         if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
+        }
+      })
+      .catch((error: Error) => {
+        throw error
+      })
+  }
+
+  /**
+   * @description Update disposal as completed state
+   * @param { StockDisposalApprovalDTO } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @param { string } token
+   * @returns
+   */
+  async running(
+    data: StockDisposalApprovalDTO,
+    id: string,
+    account: IAccount,
+    token: string
+  ) {
+    return await this.stockDisposalModel
+      .findOneAndUpdate(
+        {
+          id: id,
+          'created_by.id': account.id,
+          status: 'approved',
+          __v: data.__v,
+        },
+        {
+          $set: {
+            status: 'running',
+          },
+          $push: {
+            approval_history: {
+              status: 'running',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
+          },
+        }
+      )
+      .then(async (result) => {
+        if (result) {
+          await this.stockImportQueue.add(
+            'disposal',
+            {
+              payload: result,
+              account: account,
+              token: token,
+            },
+            { removeOnComplete: true }
+          )
           return result
         } else {
           throw new NotFoundException()

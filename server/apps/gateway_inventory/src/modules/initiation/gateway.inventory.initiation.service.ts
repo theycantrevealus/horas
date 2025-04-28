@@ -8,9 +8,9 @@ import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { IConfig } from '@schemas/config/config'
 import {
-  StockAdjustment,
-  StockAdjustmentDocument,
-} from '@schemas/inventory/adjustment'
+  StockInitiation,
+  StockInitiationDocument,
+} from '@schemas/inventory/initiation'
 import { PrimeParameter } from '@utility/dto/prime'
 import prime_datatable from '@utility/prime'
 import { TimeManagement } from '@utility/time'
@@ -19,19 +19,19 @@ import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { Socket } from 'socket.io-client'
 
-import { StockAdjustmentAddDTO, StockAdjustmentEditDTO } from './dto/adjustment'
-import { StockAdjustmentApprovalDTO } from './dto/adjustment.approval'
+import { StockInitiationAddDTO, StockInitiationEditDTO } from './dto/initiation'
+import { StockInitiationApprovalDTO } from './dto/initiation.approval'
 
 @Injectable()
-export class GatewayInventoryStockAdjustmentService {
+export class GatewayInventoryStockInitiationService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
 
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
 
-    @InjectModel(StockAdjustment.name, 'primary')
-    private readonly stockAdjustmentModel: Model<StockAdjustmentDocument>,
+    @InjectModel(StockInitiation.name, 'primary')
+    private readonly stockInitiationModel: Model<StockInitiationDocument>,
 
     @Inject(SocketIoClientProxyService)
     private readonly socketProxy: SocketIoClientProxyService,
@@ -40,7 +40,7 @@ export class GatewayInventoryStockAdjustmentService {
   ) {}
 
   /**
-   * @description List of adjustment
+   * @description List of initiation
    * @param { any } payload should JSON format string. Try to send wrong format lol
    * @returns
    */
@@ -57,7 +57,7 @@ export class GatewayInventoryStockAdjustmentService {
           ],
           ...parameter,
         },
-        this.stockAdjustmentModel
+        this.stockInitiationModel
       )
     } catch (error) {
       throw error
@@ -65,12 +65,12 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Adjustment detail
+   * @description Initiation detail
    * @param { string } id what id to get
    * @returns
    */
   async detail(id: string) {
-    return this.stockAdjustmentModel
+    return this.stockInitiationModel
       .findOne({ id: id })
       .then((result) => {
         if (result) {
@@ -85,13 +85,13 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Add new adjustment
-   * @param { StockAdjustmentAddDTO } data
+   * @description Add new initiation
+   * @param { StockInitiationAddDTO } data
    * @param { IAccount } account
    * @returns
    */
-  async add(data: StockAdjustmentAddDTO, account: IAccount) {
-    return await this.stockAdjustmentModel
+  async add(data: StockInitiationAddDTO, account: IAccount) {
+    return await this.stockInitiationModel
       .create({
         ...data,
         approval_history: [
@@ -113,14 +113,14 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Edit adjustment (Only for status new)
-   * @param { StockAdjustmentEditDTO } data
+   * @description Edit initiation (Only for status new)
+   * @param { StockInitiationEditDTO } data
    * @param { string } id
    * @param { IAccount } account
    * @returns
    */
-  async edit(data: StockAdjustmentEditDTO, id: string, account: IAccount) {
-    return await this.stockAdjustmentModel
+  async edit(data: StockInitiationEditDTO, id: string, account: IAccount) {
+    return await this.stockInitiationModel
       .findOneAndUpdate({ id: id, created_by: account, status: 'new' }, data)
       .then((result) => {
         if (result) {
@@ -135,13 +135,13 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Delete adjustment (Only for status new)
+   * @description Delete initiation (Only for status new)
    * @param { string } id
    * @param { IAccount } account
    * @returns
    */
   async delete(id: string, account: IAccount) {
-    return await this.stockAdjustmentModel
+    return await this.stockInitiationModel
       .findOneAndUpdate(
         { id: id, created_by: account, status: 'new' },
         {
@@ -163,18 +163,18 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Propose adjustment for approval
-   * @param { StockAdjustmentApprovalDTO } data
+   * @description Propose initiation for approval
+   * @param { StockInitiationApprovalDTO } data
    * @param { string } id
    * @param { IAccount } account
    * @returns
    */
   async askApproval(
-    data: StockAdjustmentApprovalDTO,
+    data: StockInitiationApprovalDTO,
     id: string,
     account: IAccount
   ) {
-    return await this.stockAdjustmentModel
+    return await this.stockInitiationModel
       .findOneAndUpdate(
         { id: id, 'created_by.id': account.id, status: 'new', __v: data.__v },
         {
@@ -206,18 +206,18 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Approve adjustment
-   * @param { StockAdjustmentApprovalDTO } data
+   * @description Approve initiation
+   * @param { StockInitiationApprovalDTO } data
    * @param { string } id
    * @param { IAccount } account
    * @returns
    */
   async approve(
-    data: StockAdjustmentApprovalDTO,
+    data: StockInitiationApprovalDTO,
     id: string,
     account: IAccount
   ) {
-    return await this.stockAdjustmentModel
+    return await this.stockInitiationModel
       .findOneAndUpdate(
         {
           id: id,
@@ -254,18 +254,18 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Decline adjustment
-   * @param { StockAdjustmentApprovalDTO } data
+   * @description Decline initiation
+   * @param { StockInitiationApprovalDTO } data
    * @param { string } id
    * @param { IAccount } account
    * @returns
    */
   async decline(
-    data: StockAdjustmentApprovalDTO,
+    data: StockInitiationApprovalDTO,
     id: string,
     account: IAccount
   ) {
-    return await this.stockAdjustmentModel
+    return await this.stockInitiationModel
       .findOneAndUpdate(
         {
           id: id,
@@ -302,20 +302,20 @@ export class GatewayInventoryStockAdjustmentService {
   }
 
   /**
-   * @description Update audit as running state
-   * @param { StockAdjustmentApprovalDTO } data
+   * @description Update initiation as completed state
+   * @param { StockInitiationApprovalDTO } data
    * @param { string } id
    * @param { IAccount } account
    * @param { string } token
    * @returns
    */
-  async process(
-    data: StockAdjustmentApprovalDTO,
+  async running(
+    data: StockInitiationApprovalDTO,
     id: string,
     account: IAccount,
     token: string
   ) {
-    return await this.stockAdjustmentModel
+    return await this.stockInitiationModel
       .findOneAndUpdate(
         {
           id: id,
@@ -342,7 +342,7 @@ export class GatewayInventoryStockAdjustmentService {
       .then(async (result) => {
         if (result) {
           await this.stockImportQueue.add(
-            'adjustment-manual',
+            'initiation',
             {
               payload: result,
               account: account,
@@ -350,7 +350,54 @@ export class GatewayInventoryStockAdjustmentService {
             },
             { removeOnComplete: true }
           )
+          return result
+        } else {
+          throw new NotFoundException()
+        }
+      })
+      .catch((error: Error) => {
+        throw error
+      })
+  }
 
+  /**
+   * @description Update initiation as completed state
+   * @param { StockInitiationApprovalDTO } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
+  async completed(
+    data: StockInitiationApprovalDTO,
+    id: string,
+    account: IAccount
+  ) {
+    return await this.stockInitiationModel
+      .findOneAndUpdate(
+        {
+          id: id,
+          'created_by.id': account.id,
+          status: 'running',
+          __v: data.__v,
+        },
+        {
+          $set: {
+            status: 'completed',
+          },
+          $push: {
+            approval_history: {
+              status: 'completed',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
+          },
+        }
+      )
+      .then(async (result) => {
+        if (result) {
           return result
         } else {
           throw new NotFoundException()

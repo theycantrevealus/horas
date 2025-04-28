@@ -27,23 +27,23 @@ import {
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { FastifyRequest } from 'fastify'
 
-import { StockDisposalAddDTO, StockDisposalEditDTO } from './dto/disposal'
-import { StockDisposalApprovalDTO } from './dto/disposal.approval'
-import { GatewayInventoryStockDisposalService } from './gateway.inventory.disposal.service'
+import { StockInitiationAddDTO, StockInitiationEditDTO } from './dto/initiation'
+import { StockInitiationApprovalDTO } from './dto/initiation.approval'
+import { GatewayInventoryStockInitiationService } from './gateway.inventory.initiation.service'
 
 @Controller('inventory')
-export class GatewayInventoryStockDisposalController {
+export class GatewayInventoryStockInitiationController {
   constructor(
-    @Inject(GatewayInventoryStockDisposalService)
-    private readonly gatewayInventoryDisposalService: GatewayInventoryStockDisposalService
+    @Inject(GatewayInventoryStockInitiationService)
+    private readonly gatewayInventoryInitiationService: GatewayInventoryStockInitiationService
   ) {}
 
-  @Get('disposal')
+  @Get('initiation')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'view' })
+  @PermissionManager({ group: 'StockInitiation', action: 'view' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Fetch all',
@@ -51,15 +51,15 @@ export class GatewayInventoryStockDisposalController {
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    return await this.gatewayInventoryDisposalService.all(parameter)
+    return await this.gatewayInventoryInitiationService.all(parameter)
   }
 
-  @Get('disposal/:id')
+  @Get('initiation/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'view' })
+  @PermissionManager({ group: 'StockInitiation', action: 'view' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Detail data',
@@ -69,95 +69,98 @@ export class GatewayInventoryStockDisposalController {
     name: 'id',
   })
   async detail(@Param() param) {
-    return await this.gatewayInventoryDisposalService.detail(param.id)
+    return await this.gatewayInventoryInitiationService.detail(param.id)
   }
 
-  @Post('disposal')
+  @Post('initiation')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'add' })
+  @PermissionManager({ group: 'StockInitiation', action: 'add' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
     summary: 'Add new',
     description: ``,
   })
   async add(
-    @Body() parameter: StockDisposalAddDTO,
+    @Body() parameter: StockInitiationAddDTO,
     @CredentialAccount() account: IAccount
   ) {
-    return await this.gatewayInventoryDisposalService.add(parameter, account)
+    return await this.gatewayInventoryInitiationService.add(parameter, account)
   }
 
-  @Patch('disposal/edit/:id')
+  @Patch('initiation/edit/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'edit' })
+  @PermissionManager({ group: 'StockInitiation', action: 'edit' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Edit disposal',
+    summary: 'Edit initiation',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
   async edit(
-    @Body() parameter: StockDisposalEditDTO,
+    @Body() parameter: StockInitiationEditDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount
   ) {
-    return await this.gatewayInventoryDisposalService.edit(
+    return await this.gatewayInventoryInitiationService.edit(
       parameter,
       param.id,
       account
     )
   }
 
-  @Delete('disposal/:id')
+  @Delete('initiation/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'delete' })
+  @PermissionManager({ group: 'StockInitiation', action: 'delete' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Delete disposal',
+    summary: 'Delete initiation',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
   async delete(@Param() param: any, @CredentialAccount() account: IAccount) {
-    return await this.gatewayInventoryDisposalService.delete(param.id, account)
+    return await this.gatewayInventoryInitiationService.delete(
+      param.id,
+      account
+    )
   }
 
-  @Patch('disposal/ask_approval/:id')
+  @Patch('initiation/ask_approval/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'ask_approval' })
+  @PermissionManager({ group: 'StockInitiation', action: 'ask_approval' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Ask for approval new disposal',
+    summary: 'Ask for approval new initiation',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
   async askApproval(
-    @Body() parameter: StockDisposalApprovalDTO,
+    @Body() parameter: StockInitiationApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryDisposalService
+    return await this.gatewayInventoryInitiationService
       .askApproval(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryDisposalService.notifier(
+        await this.gatewayInventoryInitiationService.notifier(
           {
             transaction_id: param.id,
             message: 'Disposal need approval',
@@ -169,30 +172,30 @@ export class GatewayInventoryStockDisposalController {
       })
   }
 
-  @Patch('disposal/approve/:id')
+  @Patch('initiation/approve/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'approve' })
+  @PermissionManager({ group: 'StockInitiation', action: 'approve' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Approve disposal',
+    summary: 'Approve initiation',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
   async approve(
-    @Body() parameter: StockDisposalApprovalDTO,
+    @Body() parameter: StockInitiationApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryDisposalService
+    return await this.gatewayInventoryInitiationService
       .askApproval(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryDisposalService.notifier(
+        await this.gatewayInventoryInitiationService.notifier(
           {
             transaction_id: param.id,
             message: 'Disposal approved',
@@ -204,30 +207,30 @@ export class GatewayInventoryStockDisposalController {
       })
   }
 
-  @Patch('disposal/decline/:id')
+  @Patch('initiation/decline/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'decline' })
+  @PermissionManager({ group: 'StockInitiation', action: 'decline' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Decline disposal',
+    summary: 'Decline initiation',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
   async decline(
-    @Body() parameter: StockDisposalApprovalDTO,
+    @Body() parameter: StockInitiationApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryDisposalService
+    return await this.gatewayInventoryInitiationService
       .decline(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryDisposalService.notifier(
+        await this.gatewayInventoryInitiationService.notifier(
           {
             transaction_id: param.id,
             message: 'Disposal declined',
@@ -239,30 +242,30 @@ export class GatewayInventoryStockDisposalController {
       })
   }
 
-  @Patch('disposal/running/:id')
+  @Patch('initiation/running/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
   @ApiBearerAuth('JWT')
-  @PermissionManager({ group: 'StockDisposal', action: 'running' })
+  @PermissionManager({ group: 'StockInitiation', action: 'running' })
   @UseInterceptors(HORASInterceptor)
   @ApiOperation({
-    summary: 'Running disposal',
+    summary: 'Running initiation',
     description: ``,
   })
   @ApiParam({
     name: 'id',
   })
   async running(
-    @Body() parameter: StockDisposalApprovalDTO,
+    @Body() parameter: StockInitiationApprovalDTO,
     @Param() param: any,
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryDisposalService
+    return await this.gatewayInventoryInitiationService
       .running(parameter, param.id, account, request.headers.authorization)
       .then(async (result) => {
-        await this.gatewayInventoryDisposalService.notifier(
+        await this.gatewayInventoryInitiationService.notifier(
           {
             transaction_id: param.id,
             message: 'Disposal running',

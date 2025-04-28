@@ -8,6 +8,7 @@ import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
+import { getQueueToken } from '@nestjs/bullmq'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { CanActivate, ExecutionContext, HttpStatus } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -33,7 +34,7 @@ import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
 import { StockDisposalAddDTO, StockDisposalEditDTO } from '../dto/disposal'
-import { StockDisposalApprovalDTO } from '../dto/disposal.approva'
+import { StockDisposalApprovalDTO } from '../dto/disposal.approval'
 import { GatewayInventoryStockDisposalController } from '../gateway.inventory.disposal.controller'
 import { GatewayInventoryStockDisposalService } from '../gateway.inventory.disposal.service'
 import {
@@ -124,6 +125,12 @@ describe('Gateway Inventory Stock Disposal Controller', () => {
                 .mockImplementation((callback) => callback()),
               endSession: jest.fn(),
             })),
+          },
+        },
+        {
+          provide: getQueueToken('stock'),
+          useValue: {
+            add: () => jest.fn().mockResolvedValue({ id: 'queue-1' }),
           },
         },
         { provide: AuthService, useValue: {} },
@@ -833,7 +840,7 @@ describe('Gateway Inventory Stock Disposal Controller', () => {
     )
   })
 
-  describe(testCaption('FLOW', 'feature', 'Stock Disposal - Complete'), () => {
+  describe(testCaption('FLOW', 'feature', 'Stock Disposal - Running'), () => {
     it(
       testCaption(
         'HANDLING',
@@ -860,7 +867,7 @@ describe('Gateway Inventory Stock Disposal Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/disposal/complete/${mockStockDisposal().id}`,
+            url: `/inventory/disposal/running/${mockStockDisposal().id}`,
             body: data,
           })
           .then(async (result) => {
@@ -886,7 +893,7 @@ describe('Gateway Inventory Stock Disposal Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/disposal/complete/${mockStockDisposal().id}`,
+            url: `/inventory/disposal/running/${mockStockDisposal().id}`,
             body: {
               remark: mockStockDisposal().remark,
             },
@@ -902,7 +909,7 @@ describe('Gateway Inventory Stock Disposal Controller', () => {
     )
 
     it(
-      testCaption('HANDLING', 'data', 'Should return update status complete', {
+      testCaption('HANDLING', 'data', 'Should return update status running', {
         tab: 1,
       }),
       async () => {
@@ -924,7 +931,7 @@ describe('Gateway Inventory Stock Disposal Controller', () => {
               authorization: 'Bearer ey...',
               'content-type': 'application/json',
             },
-            url: `/inventory/disposal/complete/${mockStockDisposal().id}`,
+            url: `/inventory/disposal/running/${mockStockDisposal().id}`,
             body: data,
           })
           .then((result) => {
