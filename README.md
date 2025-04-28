@@ -5,7 +5,7 @@
   <img src="horas.png" width="180" />
   <h3 align="center">HORAS Project</h3>
   <p align="center">
-    Hospital Responsive Assistant System
+    Hospital Responsive Assistance System
     <br />
     <a href="#">View Demo</a>
     ·
