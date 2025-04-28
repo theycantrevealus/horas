@@ -2,11 +2,8 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <img src="horas.png" width="180" />
-  <h3 align="center">HORAS Project</h3>
+  <img src="horas.png" width="380" />
   <p align="center">
-    Hospital Responsive Assistance System
-    <br />
     <a href="#">View Demo</a>
     ·
     <a href="https://github.com/theycantrevealus/horas/issues">Report Bug</a>
