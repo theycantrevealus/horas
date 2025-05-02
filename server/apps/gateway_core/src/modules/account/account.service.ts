@@ -523,19 +523,24 @@ export class AccountService {
       if (dataSet.setter) {
         const setter = dataSet.setter
         for (const e in setter) {
-          if (!fields[e]) {
-            fields[e] = {}
+          if (!fields[setter[e]]) {
+            fields[setter[e]] = {}
           }
 
-          fields[e] = (await this.cacheManager.get(e)) satisfies IConfig
+          fields[setter[e]] = (await this.cacheManager.get(
+            setter[e]
+          )) satisfies IConfig
 
-          if (e === 'APPLICATION_ICON' || e === 'APPLICATION_LOGO') {
-            if (!fields[e].image) {
-              fields[e].image = `${this.configService.get<string>(
+          if (
+            setter[e] === 'APPLICATION_ICON' ||
+            setter[e] === 'APPLICATION_LOGO'
+          ) {
+            if (!fields[setter[e]].image) {
+              fields[setter[e]].image = `${this.configService.get<string>(
                 'application.host_port'
               )}/${this.configService.get<string>(
                 'application.images.core_prefix'
-              )}/${fields[e].image}`
+              )}/${fields[setter[e]].setter.image}`
             }
           }
         }
