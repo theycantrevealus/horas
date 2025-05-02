@@ -12,7 +12,6 @@ export const storeLogin = defineStore('signIn', () => {
       .post(`${import.meta.env.VITE_API_URL}/v1/account/signin`, payload)
       .then(async (response) => {
         const data = response.data
-
         if (
           `${data.statusCode['classCode']}_I_${data.statusCode['customCode']}` ===
           CoreResponseLib.Login.success

@@ -13,16 +13,16 @@
         <img
           v-if="getMenuModeStatus"
           class="panel-logo"
-          :style="{ width: parseFloat(logo[`${layoutColorMode}`].image.size.sidepanel.width) }"
+          :style="{ width: '100px' }"
           :src="logo[layoutColorMode].image.target ?? ''"
-          alt="horas"
+          alt="HORAS"
         />
         <img
           v-if="!getMenuModeStatus"
           class="panel-logo2"
-          :style="{ width: logo[layoutColorMode].icon.size.sidepanel.width }"
+          :style="{ width: '27.5px' }"
           :src="logo[layoutColorMode].icon.target ?? ''"
-          alt="horas"
+          alt="HORAS"
         />
       </div>
       <div class="wrapper sidepanel-menu">
@@ -141,6 +141,13 @@ export default defineComponent({
         document.body.classList.remove('dark')
       }
       this.darkMode = darkMode
+
+      // console.clear()
+      // console.log(JSON.stringify(state.setting, null, 2))
+
+      this.logo.light = state.setting.logo.light
+      this.logo.dark = state.setting.logo.dark
+      // console.log(JSON.stringify(this.logo.light, null, 2))
     })
   },
   mounted() {

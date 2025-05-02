@@ -281,7 +281,7 @@ export default defineComponent({
   },
   async mounted() {
     this.selectedLanguage = this.coreStore.setting.language
-    await this.coreStore.getLanguage()
+    // await this.coreStore.getLanguage()
   },
   methods: {
     toggleDarkMode() {

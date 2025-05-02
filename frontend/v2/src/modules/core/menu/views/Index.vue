@@ -333,7 +333,7 @@ export default defineComponent({
         this.nodes = data
       })
     },
-    expandAll(children) {
+    expandAll(children: any) {
       for (const a in children) {
         if (!this.expandedKeys[children[a].key]) {
           this.expandedKeys[children[a].key] = true

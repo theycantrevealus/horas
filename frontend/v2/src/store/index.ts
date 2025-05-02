@@ -212,7 +212,12 @@ export const storeCore = defineStore('core', {
       }
     },
     hasAccess(name: string): boolean {
-      return name in this.auth.pagesAllow
+      const dispatcher = this.auth.domAllow
+      const dispatchFound = dispatcher.find(
+        (foundedDispatch) => foundedDispatch.dispatchName === name,
+      )
+      const pageFound = name in this.auth.pagesAllow
+      return pageFound || dispatchFound !== undefined
       // return this.auth.pagesAllow.hasOwnProperty(name)
     },
     allowDispatch(domIdentity: string): boolean {
@@ -228,17 +233,28 @@ export const storeCore = defineStore('core', {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateAppConfig(data: any) {
-      this.setting.logo.light.image = data.application_logo?.setter
-      this.setting.logo.light.image.target = `${import.meta.env.VITE_API_URL}/${data.application_logo?.setter.target}`
+      this.setting.logo.light.image = data.APPLICATION_LOGO?.setter
+      this.setting.logo.light.image.target = `${data.APPLICATION_LOGO?.image}`
 
-      this.setting.logo.light.icon = data.application_icon?.setter
-      this.setting.logo.light.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon?.setter.target}`
+      this.setting.logo.light.icon = data.APPLICATION_ICON?.setter
+      this.setting.logo.light.icon.target = `${data.APPLICATION_ICON?.image}`
 
-      this.setting.logo.dark.image = data.application_logo?.setter
-      this.setting.logo.dark.image.target = `${import.meta.env.VITE_API_URL}/${data.application_logo?.setter.target}`
+      this.setting.logo.dark.image = data.APPLICATION_LOGO?.setter
+      this.setting.logo.dark.image.target = `${data.APPLICATION_LOGO?.image}`
 
-      this.setting.logo.dark.icon = data.application_icon?.setter
-      this.setting.logo.dark.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon.setter?.target}`
+      this.setting.logo.dark.icon = data.APPLICATION_ICON?.setter
+      this.setting.logo.dark.icon.target = `${data.APPLICATION_ICON?.image}`
+
+      // this.setting.logo.light.icon = data.application_icon?.setter
+      // this.setting.logo.light.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon?.setter.target}`
+      // this.setting.logo.light.icon.target = `${data.APPLICATION_ICON?.image}`
+
+      // this.setting.logo.dark.image = data.APPLICATION_LOGO?.setter
+      // this.setting.logo.dark.image.target = `${import.meta.env.VITE_API_URL}/${data.APPLICATION_LOGO?.setter.image}`
+      // this.setting.logo.dark.image.target = `${data.APPLICATION_LOGO?.image}`
+
+      // this.setting.logo.dark.icon = data.application_icon?.setter
+      // this.setting.logo.dark.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon.setter?.target}`
     },
     updatePermissionv2(access: AccountAccess[]) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -340,7 +356,7 @@ export const storeCore = defineStore('core', {
     },
     async getLanguage() {
       await api({ requiresAuth: true })
-        .get(`${import.meta.env.VITE_API_URL}/v1/i18n/all`)
+        .get(`${import.meta.env.VITE_API_URL}/v1/i18n`)
         .then((response) => {
           const data = response.data
           return Promise.resolve(data)
@@ -372,6 +388,7 @@ export const storeCore = defineStore('core', {
     async setBrowserLanguage(data: any) {
       // Fetch language from server
       const language_data = await this.fetch_i18n()
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const i18nConfig: any = {
         messages: {},
@@ -424,7 +441,7 @@ export const storeCore = defineStore('core', {
 
       if (
         this.setting.language &&
-        Object.keys(this.setting.language).length === 0 &&
+        // Object.keys(this.setting.language).length === 0 &&
         Object.getPrototypeOf(this.setting.language) === Object.prototype
       ) {
         const selectedLanguage: string = getBrowserLocale({

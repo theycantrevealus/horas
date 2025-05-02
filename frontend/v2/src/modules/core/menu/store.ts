@@ -31,8 +31,7 @@ export const storeMenu = defineStore('menu', {
           },
         })
         .then((response: AxiosResponse) => {
-          const data: CoreResponse = response.data
-          return data
+          return response.data
         })
         .catch((e) => {
           throw e
