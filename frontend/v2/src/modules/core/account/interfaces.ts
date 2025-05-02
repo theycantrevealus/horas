@@ -4,7 +4,7 @@ export interface AccountAdd {
   last_name: string
   email: string
   phone: string
-  password: string
+  password?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   menu: any[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
