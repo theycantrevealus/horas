@@ -452,8 +452,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     background: transparent;
     z-index: 1000;
     position: fixed;
-    width: 98%;
-    left: 2%;
+    width: 97%;
+    left: 3%;
     transition-duration: 0.5s;
 }
 
@@ -535,8 +535,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     overflow-x: hidden !important;
     position: fixed;
     z-index: 998;
-    width: 98%;
-    left: 2%;
+    width: 97%;
+    left: 3%;
     height: 100%;
     transition-duration: 0.5s;
 }
@@ -677,6 +677,7 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-panel {
     font-size: 0.7rem !important;
+    border: none !important;
 }
 
 .p-panel-content {
@@ -764,7 +765,8 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-panel .p-panel-header {
     border: none !important;
-    background: #fff;
+    background: transparent !important;
+    padding: 20px 30px !important;
 }
 
 .p-card {
@@ -1406,4 +1408,12 @@ label[for] {
     body {
         /**/
     }
+}
+
+.handling-page {
+    position: fixed;
+    left: 25%;
+    top: 25%;
+    width: 50%;
+    height: 50%;
 }

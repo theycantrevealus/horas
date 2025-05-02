@@ -7,7 +7,7 @@
 .sidepanel {
     z-index: 1000;
     position: absolute;
-    width: 2%;
+    width: 3%;
     left: 0;
     height: 100%;
     background: #fff;
@@ -24,7 +24,7 @@
     position: absolute;
     width: 150%;
     top: 5%;
-    left: -30px;
+    left: -20px;
     height: 95%;
     overflow-y: scroll !important;
 }
@@ -44,13 +44,12 @@
 
 .sidepanel .panel-logo {
     position: relative;
-    margin: 12.5px 13% 0px;
+    margin: 12.5px 6.5% 0px;
 }
 
 .sidepanel .panel-logo2 {
     position: relative;
-    width: 15%;
-    margin: 12.5px 13% 0px;
+    margin: 16.5px 6.5% 0px 14px;
 }
 
 .sidepanel-container {
