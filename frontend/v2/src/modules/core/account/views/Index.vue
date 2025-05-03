@@ -47,7 +47,7 @@
                 <span class="p-buttonset wrap_content">
                   <Button
                     :disabled="!allowDispatch('btnAccountEdit')"
-                    class="button p-button-success button-sm button-raised"
+                    class="button p-button-info button-sm button-raised"
                     @click="accountEdit(slotProps.data.id)"
                   >
                     <span class="material-icons">edit</span> Edit

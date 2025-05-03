@@ -12,7 +12,7 @@
             <template #icons>
               <Button
                 class="p-button-secondary p-button-rounded p-button-raised button-sm"
-                @click="backAccount"
+                @click="back"
                 ><span class="material-icons">arrow_back</span> Back</Button
               >
             </template>
@@ -149,22 +149,23 @@
             <Button
               class="p-button-success p-button-rounded p-button-raised button-sm m-2"
               label="Save and Quit"
-              v-on:click="updateData($event, false)"
+              v-on:click="updateData($event)"
             />
             <Button
               class="p-button-info p-button-rounded p-button-raised button-sm m-2"
               label="Save and Stay"
-              v-on:click="updateData($event, true)"
+              v-on:click="updateData($event)"
             />
             <Button
               class="p-button-secondary p-button-rounded p-button-raised button-sm m-2"
               label="Cancel"
-              v-on:click="backAccount"
+              v-on:click="back"
             />
           </div>
         </template>
       </Card>
-      <ConfirmPopup group="confirm_edit"></ConfirmPopup>
+      <ConfirmPopup group="confirm_changes"></ConfirmPopup>
+      <ConfirmDialog group="keep_editing"></ConfirmDialog>
     </div>
   </div>
 </template>
@@ -209,7 +210,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
-    backAccount() {
+    back() {
       this.$router.push({
         path: `/core/account`,
       })
@@ -261,9 +262,9 @@ export default defineComponent({
         })
       })
     },
-    async updateData(event: MouseEvent, stay: boolean = false) {
+    async updateData(event: MouseEvent) {
       this.$confirm.require({
-        group: 'confirm_edit',
+        group: 'confirm_changes',
         header: 'Edit Confirmation',
         target: event.currentTarget as HTMLElement,
         message: 'Are you sure to update this account?',
@@ -302,12 +303,28 @@ export default defineComponent({
             __v: this.v,
           }
 
-          await this.accountStore.edit(this.id, payload).then(async () => {
-            if (stay) {
-              await this.loadData()
-            } else {
-              this.backAccount()
-            }
+          await this.accountStore.edit(this.id, payload).then(async (response) => {
+            this.$confirm.require({
+              group: 'keep_editing',
+              message: `${response.message}. Back to account list?`,
+              header: 'Keep editting?',
+              icon: 'pi pi-exclamation-triangle',
+              acceptClass: 'p-button-success',
+              rejectClass: 'p-button-secondary',
+              acceptLabel: 'Yes',
+              acceptIcon: 'pi pi-check-circle',
+              rejectLabel: 'Keep Editing',
+              rejectIcon: 'pi pi-times-circle',
+              accept: () => {
+                this.back()
+              },
+              reject: () => {
+                //
+              },
+              onHide: () => {
+                //
+              },
+            })
           })
         },
         reject: () => {
