@@ -7,7 +7,7 @@
 .sidepanel {
     z-index: 1000;
     position: absolute;
-    width: 3%;
+    width: 60px;
     left: 0;
     height: 100%;
     background: #fff;

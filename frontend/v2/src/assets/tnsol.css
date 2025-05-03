@@ -372,7 +372,8 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-tree {
     border: none !important;
-    height: calc(100vh - 300px);
+    /* height: calc(100vh - 300px); */
+    height: auto;
     overflow: auto;
 }
 
@@ -421,7 +422,7 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .inline-block.custom {
     position: relative;
-    width: 70%;
+    width: 1000%;
 }
 
 .inline-block.custom .flex {
@@ -440,10 +441,16 @@ body.dark .p-treenode .p-treenode-content:hover {
     height: 25px !important;
     margin: 0 5px;
     float: left;
+    text-align: center;
 }
 
 .inline-block.custom .action-container .p-button .pi {
-    font-size: 8pt;
+    font-size: 6pt;
+    margin: 0 auto;
+}
+
+.inline-block.custom .action-container .p-button span {
+    margin: 0 !important;
 }
 
 /* ============================================================================================================ */
@@ -452,8 +459,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     background: transparent;
     z-index: 1000;
     position: fixed;
-    width: 97%;
-    left: 3%;
+    width: calc(100% - 60px);
+    left: 60px;
     transition-duration: 0.5s;
 }
 
@@ -535,8 +542,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     overflow-x: hidden !important;
     position: fixed;
     z-index: 998;
-    width: 97%;
-    left: 3%;
+    width: calc(100% - 60px);
+    left: 60px;
     height: 100%;
     transition-duration: 0.5s;
 }
