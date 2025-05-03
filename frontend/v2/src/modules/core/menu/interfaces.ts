@@ -4,12 +4,12 @@ export interface MenuParameterAdd {
   identifier: string
   url: string
   remark: string
-  parent: object
+  parent: string
   icon: string
   show_order: number
   level: number
   group_color: string
-  permission: object
+  access: object[]
   show_on_menu: boolean
 }
 

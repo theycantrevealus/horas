@@ -25,7 +25,7 @@
             >
               <template #filter>
                 <InputText
-                  v-model="filtersNode['label']"
+                  v-model="filtersNode.label"
                   type="text"
                   class="column-filter"
                   :placeholder="$t('menu.datatable.column.label.placeholder')"
@@ -47,7 +47,7 @@
             <Column field="to" :header="$t('menu.datatable.column.link.caption')">
               <template #filter>
                 <InputText
-                  v-model="filtersNode['url']"
+                  v-model="filtersNode.url"
                   type="text"
                   class="column-filter"
                   :placeholder="$t('menu.datatable.column.link.placeholder')"
@@ -57,7 +57,7 @@
             <Column field="show_on_menu" :header="$t('menu.datatable.column.visibility.caption')">
               <template #filter>
                 <InputText
-                  v-model="filtersNode['show_on_menu']"
+                  v-model="filtersNode.show_on_menu"
                   type="text"
                   class="column-filter"
                   :placeholder="$t('menu.datatable.column.visibility.placeholder')"
@@ -193,12 +193,21 @@
         </div>
       </div>
       <template #footer>
-        <Button class="p-button-text p-button-sm" @click="toggleModal">
-          <span class="material-icons">highlight_off</span> Cancel
-        </Button>
-        <Button class="p-button-sm" autofocus @click="processForm">
-          <span class="material-icons">task_alt</span> Submit
-        </Button>
+        <div class="flex flex-row-reverse p-6">
+          <Button
+            class="p-button-success p-button-rounded p-button-raised button-sm m-2"
+            autofocus
+            @click="processForm"
+          >
+            <span class="material-icons">task_alt</span> Submit
+          </Button>
+          <Button
+            class="p-button-secondary p-button-rounded p-button-raised button-sm m-2"
+            @click="toggleModal"
+          >
+            <span class="material-icons">highlight_off</span> Cancel
+          </Button>
+        </div>
       </template>
     </Dialog>
     <Dialog
@@ -271,7 +280,8 @@ export default defineComponent({
         permission: [] as any,
         __v: 0,
       },
-      expandedKeys: {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expandedKeys: {} as any,
       position: 'center',
       ui: {
         modal: {
@@ -288,7 +298,11 @@ export default defineComponent({
         },
       },
       selectedNode: {},
-      filtersNode: {},
+      filtersNode: {
+        label: '',
+        url: '',
+        show_on_menu: '',
+      },
       nodes: [],
       columns: [
         { field: 'label', header: 'Label', expander: true },
@@ -329,10 +343,9 @@ export default defineComponent({
       this.setterPermission = []
     },
     async reloadMenu() {
-      await this.menuStore.tree().then((data) => {
-        this.nodes = data
-      })
+      this.nodes = await this.menuStore.tree({})
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expandAll(children: any) {
       for (const a in children) {
         if (!this.expandedKeys[children[a].key]) {
@@ -350,7 +363,8 @@ export default defineComponent({
       this.ui.modal.manageFeature.state = !this.ui.modal.manageFeature.state
     },
 
-    onNodeDelete(event, target: number) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onNodeDelete(event: any, target: string) {
       this.$confirm.require({
         target: event.currentTarget,
         message: 'Are you sure to delete this menu?',
@@ -376,7 +390,7 @@ export default defineComponent({
       this.form.txt_route = data.identifier
       this.form.txt_route_url = data.to
       this.form.txt_icon = data.icon
-      this.setterPermission = data.permission || []
+      this.setterPermission = data.access || []
       this.form.showMenu = target.show_on_menu
       this.formMode = 'edit'
       this.ui.modal.manageMenu.title = `${mode}  ${data.label}`
@@ -421,7 +435,7 @@ export default defineComponent({
       const showMenu = this.form.showMenu
       this.form.permission = this.setterPermission
       return await this.menuStore
-        .edit(this.form.targetID, {
+        .edit(this.form.targetID.toString(), {
           name: label,
           menu_group: this.form.targetGroup,
           identifier: routeTo,
@@ -432,7 +446,7 @@ export default defineComponent({
           show_order: 1,
           level: 2,
           group_color: '',
-          permission: this.setterPermission,
+          access: this.setterPermission,
           show_on_menu: showMenu,
           __v: this.form.__v,
         })
@@ -452,7 +466,8 @@ export default defineComponent({
         this.editMenu()
       }
     },
-    autoFeature(featureData) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    autoFeature(featureData: any) {
       this.setterPermission.push(featureData)
     },
     processFeature() {
@@ -488,12 +503,14 @@ export default defineComponent({
         .add({
           name: label,
           // menu_group: (checkParent[0] === 'menu_group') ? this.form.targetParent : this.form.targetGroup,
+          level: 0,
+          group_color: '',
           menu_group: this.form.targetGroup,
           identifier: routeTo,
           url: routeToUrl,
           remark: '',
-          parent: checkParent[0] === 'menu_group' ? '' : this.form.targetParent,
-          permission: this.setterPermission,
+          parent: checkParent[0] === 'menu_group' ? '' : this.form.targetParent.toString(),
+          access: this.setterPermission,
           icon: icon,
           show_order: 1,
           show_on_menu: showMenu,
