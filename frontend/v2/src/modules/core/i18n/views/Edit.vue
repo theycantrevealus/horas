@@ -2,198 +2,309 @@
   <div class="grid">
     <div class="col-12">
       <Card class="slim">
-        <template #content>
-          <Panel header="i18n Management" :toggleable="false">
+        <template #header>
+          <Panel :toggleable="false">
+            <template #header>
+              <p class="font-bold text-2xl w-10">{{ $t('i18n.label.title.caption') }}</p>
+              <p class="text-blue-600">Doc Ver. {{ formData.v }}</p>
+            </template>
             <template #icons>
               <Button
-                type="button"
-                class="button-raised button-sm p-button-info px-3 m-1"
-                @click="duplicateComponent($event)"
-                ><span class="material-icons-outlined material-symbols-outlined">add</span>
-                {{ $t('i18n.button.duplicate_component') }}
-              </Button>
-              <Button
-                type="button"
-                class="button-raised button-sm p-button-info px-3 m-1"
-                @click="addGrouper()"
-                ><span class="material-icons-outlined material-symbols-outlined">add</span>
-                {{ $t('i18n.button.add_grouper') }}
-              </Button>
+                class="p-button-secondary p-button-rounded p-button-raised button-sm"
+                @click="back"
+                ><span class="material-icons">arrow_back</span> Back</Button
+              >
             </template>
           </Panel>
+        </template>
+        <template #content>
           <div class="grid">
-            <div class="col-4 form-mode">
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">map</span>
-                  &nbsp;
-                  <small>{{ $t('i18n.input.name.caption') }}</small>
-                </span>
-                <InputText
-                  v-model="formData.name"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.input.name.placeholder')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">public</span>
-                  &nbsp;
-                  <small>{{ $t('i18n.input.language_code.caption') }}</small>
-                </span>
-                <InputText
-                  v-model="formData.language_code"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.input.language_code.placeholder')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">map</span>
-                  &nbsp;
-                  <small>{{ $t('i18n.input.iso_3_digits.caption') }}</small>
-                </span>
-                <InputText
-                  v-model="formData.iso_3_digits"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.input.iso_3_digits.placeholder')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">map</span>
-                  &nbsp;
-                  <small>{{ $t('i18n.input.iso_2_digits.caption') }}</small>
-                </span>
-                <InputText
-                  v-model="formData.iso_2_digits"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.input.iso_2_digits.placeholder')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined"
-                    >calendar_month</span
-                  >
-                  &nbsp;
-                  <small>Weekday</small>
-                </span>
-                <InputText
-                  v-model="formData.datetime_weekday"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.input.datetime_weekday.placeholder')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined"
-                    >calendar_month</span
-                  >
-                  &nbsp;
-                  <small>Era</small>
-                </span>
-                <InputText
-                  v-model="formData.datetime_era"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.input.iso_2_digits.placeholder')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined"
-                    >calendar_month</span
-                  >
-                  &nbsp;
-                  <small>Year</small>
-                </span>
-                <InputText
-                  v-model="formData.datetime_year"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_year')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined"
-                    >calendar_month</span
-                  >
-                  &nbsp;
-                  <small>Month</small>
-                </span>
-                <InputText
-                  v-model="formData.datetime_month"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_month')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined"
-                    >calendar_month</span
-                  >
-                  &nbsp;
-                  <small>Day</small>
-                </span>
-                <InputText
-                  v-model="formData.datetime_day"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_day')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
-                  &nbsp;
-                  <small>Hour</small>
-                </span>
-                <InputText
-                  v-model="formData.datetime_hour"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_hour')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
-                  &nbsp;
-                  <small>Minute</small>
-                </span>
-                <InputText
-                  v-model="formData.datetime_minute"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_minute')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
-                  &nbsp;
-                  <small>Second</small>
-                </span>
+            <div class="col-6 form-mode">
+              <Fieldset legend="Basic">
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.name.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.name"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.name.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">public</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.language_code.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.language_code"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.language_code.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.iso_2_digits.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.iso_2_digits"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.iso_2_digits.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.iso_3_digits.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.iso_3_digits"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.iso_3_digits.placeholder')"
+                  />
+                </div>
+              </Fieldset>
 
-                <InputText
-                  v-model="formData.datetime_second"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_second')"
-                />
-              </div>
-              <div class="p-inputgroup">
-                <span class="p-inputgroup-addon">
-                  <span class="material-icons-outlined material-symbols-outlined">schedule</span>
-                  &nbsp;
-                  <small>Timezone</small>
-                </span>
-
-                <InputText
-                  v-model="formData.datetime_timezone_name"
-                  class="inputtext-sm"
-                  :placeholder="$t('i18n.form.datetime_timezone_name')"
-                />
-              </div>
+              <Fieldset legend="Date-Time">
+                <p class="m-0 p-3">
+                  Internationalization (i18n) datetime configuration involves defining how dates and
+                  times are formatted and displayed for different locales or regions.
+                </p>
+                <table>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Short</th>
+                      <th>Long</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Weekday</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.weekday"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.weekday.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.weekday"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.weekday.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Era</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.era"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.era.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.era"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.era.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Year</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.year"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.year.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.year"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.year.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Month</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.month"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.month.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.month"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.month.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Day</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.day"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.day.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.day"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.day.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Hour</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.hour"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.hour.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.hour"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.hour.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Minute</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.minute"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.minute.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.minute"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.minute.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Second</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.second"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.second.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.second"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.second.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Timezone Name</td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.short.timezone_name"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.short.timezone_name.placeholder')"
+                        />
+                      </td>
+                      <td>
+                        <InputText
+                          v-model="formData.datetime.long.timezone_name"
+                          class="inputtext-sm"
+                          :placeholder="$t('i18n.input.datetime.long.timezone_name.placeholder')"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </Fieldset>
+              <Fieldset legend="Currency">
+                <p class="m-0 p-3">
+                  Internationalization (i18n) currency configuration involves defining how
+                  currencies are formatted and displayed for different locales or regions.
+                </p>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.currency.style.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.number.currency.style"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.input.currency.style.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.currency.name.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.number.currency.currency"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.input.currency.name.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.currency.notation.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.number.currency.notation"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.input.currency.notation.placeholder')"
+                  />
+                </div>
+              </Fieldset>
             </div>
-            <div class="col-8 form-mode">
-              <div class="card-container">
+            <div class="col-6 form-mode">
+              <Fieldset legend="Translation Meta">
+                <p class="m-0 p-3">
+                  i18n (Internationalization) refers to the process of designing and developing
+                  software, applications, or content to be adaptable to different languages,
+                  cultures, and regions (based on json meta structure)
+                </p>
+                <Button
+                  type="button"
+                  class="button-raised button-sm p-button-info px-3 m-1"
+                  @click="duplicateComponent"
+                  ><span class="material-icons-outlined material-symbols-outlined">add</span>
+                  {{ $t('i18n.button.duplicate_component') }}
+                </Button>
+                <Button
+                  type="button"
+                  class="button-raised button-sm p-button-info px-3 m-1"
+                  @click="addGrouper()"
+                  ><span class="material-icons-outlined material-symbols-outlined">add</span>
+                  {{ $t('i18n.button.add_grouper') }}
+                </Button>
                 <Tree
                   v-model:selectionKeys="selectedComponent"
                   scrollHeight="500px"
@@ -222,7 +333,7 @@
                           <Button
                             icon="pi pi-pencil"
                             class="p-button-rounded button-sm p-button-warning"
-                            @click="editChild($event, slotProps.node)"
+                            @click="editChild(slotProps.node)"
                           />
                         </div>
                         <div class="flex align-items-center block">
@@ -239,45 +350,101 @@
                     </div>
                   </template>
                 </Tree>
-              </div>
+              </Fieldset>
+              <Fieldset legend="Decimal">
+                <p class="m-0 p-3">
+                  Internationalization (i18n) decimal configuration involves defining how decimals
+                  are formatted and displayed for different locales or regions.
+                </p>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.decimal.style.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.number.decimal.style"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.input.decimal.style.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.decimal.max_fraction.caption') }}</small>
+                  </span>
+                  <InputNumber
+                    v-model="formData.number.decimal.maximumFractionDigits"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.input.decimal.max_fraction.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.decimal.min_fraction.caption') }}</small>
+                  </span>
+                  <InputNumber
+                    v-model="formData.number.decimal.minimumFractionDigits"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.input.decimal.min_fraction.placeholder')"
+                  />
+                </div>
+              </Fieldset>
+              <Fieldset legend="Percent">
+                <p class="m-0 p-3">
+                  Internationalization (i18n) percent configuration involves defining how
+                  percentages are formatted and displayed for different locales or regions.
+                </p>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.percent.style.caption') }}</small>
+                  </span>
+                  <InputText
+                    v-model="formData.number.percent.style"
+                    class="inputtext-sm"
+                    :placeholder="$t('i18n.input.input.percent.style.placeholder')"
+                  />
+                </div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <span class="material-icons-outlined material-symbols-outlined">map</span>
+                    &nbsp;
+                    <small>{{ $t('i18n.input.percent.grouping.caption') }}</small>
+                  </span>
+                  <div class="flex flex-wrap gap-4 m-1">
+                    <div class="flex items-center gap-1">
+                      <ToggleButton
+                        v-model="formData.number.percent.useGrouping"
+                        onIcon="pi pi-check"
+                        offIcon="pi pi-times"
+                        :invalid="!formData.number.percent.useGrouping"
+                        class="w-full sm:w-40"
+                        aria-label="Confirmation"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Fieldset>
             </div>
           </div>
-          <div class="p-grid">
-            <div class="p-col-12">
-              <div class="flex jc-between">
-                <div
-                  class="flex-initial flex align-items-center justify-content-center m-2 px-5 py-3"
-                >
-                  <Button
-                    type="button"
-                    class="button-raised button-sm p-button-danger px-3"
-                    @click="back()"
-                  >
-                    <span class="material-icons-outlined material-symbols-outlined"
-                      >arrow_back</span
-                    >
-                    Back
-                  </Button>
-                </div>
-                <div
-                  class="flex-grow-1 flex align-items-center justify-content-center m-2 px-5 py-3"
-                ></div>
-                <div
-                  class="flex-initial flex align-items-right justify-content-center m-2 px-5 py-3"
-                >
-                  <Button
-                    type="button"
-                    class="button-raised button-sm p-button-success px-3"
-                    @click="submitLanguage($event)"
-                  >
-                    <span class="material-icons-outlined material-symbols-outlined"
-                      >check_circle</span
-                    >
-                    Save Data
-                  </Button>
-                </div>
-              </div>
-            </div>
+        </template>
+        <template #footer>
+          <div class="flex flex-row-reverse p-6">
+            <Button
+              class="p-button-success p-button-rounded p-button-raised button-sm m-2"
+              label="Save"
+              v-on:click="submitLanguage($event)"
+            />
+            <Button
+              class="p-button-secondary p-button-rounded p-button-raised button-sm m-2"
+              label="Cancel"
+              v-on:click="back"
+            />
           </div>
         </template>
       </Card>
@@ -327,7 +494,7 @@
               v-model="selectedComponentData.component"
               :disabled="selectedComponentData.editMode"
               class="inputtext-sm"
-              :placeholder="$t('i18n.form.name')"
+              :placeholder="$t('i18n.input.component.name.placeholder')"
             />
             <span class="p-inputgroup-addon">
               <span class="material-icons-outlined material-symbols-outlined">public</span>
@@ -335,7 +502,7 @@
             <InputText
               v-model="selectedComponentData.translation"
               class="inputtext-sm"
-              :placeholder="$t('i18n.form.iso_3_digits')"
+              :placeholder="$t('i18n.input.component.translation.placeholder')"
             />
           </div>
         </div>
@@ -361,15 +528,20 @@
 import { deepen, parsedT, sort } from '@/utils/core/object'
 import { storeCore } from '@/store/index'
 import { storei18n } from '../store'
+import { storeMenu } from '../../menu/store'
 import { mapStores, mapActions } from 'pinia'
 import { defineComponent } from 'vue'
+import type { CoreResponse } from '@/interfaces/api'
 
 export default defineComponent({
   name: 'Corei18nEdit',
   data() {
     return {
       formData: {
-        id: 0,
+        v: 0,
+        id: '',
+        name: '',
+        remark: '',
         language_code: '',
         iso_2_digits: '',
         iso_3_digits: '',
@@ -422,11 +594,14 @@ export default defineComponent({
         // datetime_minute: '',
         // datetime_second: '',
         // datetime_timezone_name: '',
-        components: [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        components: [] as any[],
         componentTree: {
-          root: [],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          root: [] as any[],
         },
-        componentIden: {},
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        componentIden: {} as any,
         menu: {},
         menuData: [],
       },
@@ -452,6 +627,7 @@ export default defineComponent({
   },
   computed: {
     ...mapStores(storei18n),
+    ...mapStores(storeMenu),
   },
   async mounted() {
     this.allowSave = false
@@ -461,11 +637,16 @@ export default defineComponent({
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
     async getDetail(id: string) {
-      await this.i18nStore.detail(id).then((response) => {
-        const components = response.components
-        const ab = {}
-        const Objectidentifier = {}
-        components.map((e) => {
+      await this.i18nStore.detail(id).then((response: CoreResponse) => {
+        const data = response.payload
+        this.formData.v = data.__v
+        const components = data.components
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ab: any = {}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const Objectidentifier: any = {}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        components.map((e: any) => {
           const b = e.component
           if (!Objectidentifier[b]) {
             Objectidentifier[b] = {}
@@ -480,15 +661,16 @@ export default defineComponent({
           ab[b] = {}
         })
 
-        response.componentTree = { root: parsedT(deepen(ab)) }
-        response.componentIden = Objectidentifier
+        data.componentTree = { root: parsedT(deepen(ab)) }
+        data.componentIden = Objectidentifier
 
         if (this.duplicateCompsMode) {
           this.formData.components = components
           this.formData.componentTree = { root: parsedT(deepen(ab)) }
           this.formData.componentIden = Objectidentifier
         } else {
-          this.formData = response
+          this.formData = data
+          this.formData.v = data.__v
         }
       })
     },
@@ -496,7 +678,7 @@ export default defineComponent({
       //
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async reformatTree(data: any, condition: any, appendix: any) {
+    async reformatTree(data: any, condition: any, appendix: any): Promise<any[]> {
       const result = []
       for (const ab in data) {
         const checkGroup = new RegExp(`^${condition}`).test(data[ab].data)
@@ -518,6 +700,7 @@ export default defineComponent({
     async getSelectMenu() {
       const targetObject = this.formData.componentIden
       const targetGroup = this.selectedComponentData.identifier
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const _this = this
       Object.keys(targetObject).some(function (key) {
         const checkGroup = new RegExp(`^${targetGroup}`).test(key)
@@ -529,7 +712,7 @@ export default defineComponent({
         }
       })
 
-      const resultTree = this.reformatTree(this.formData.componentTree.root, targetGroup, {
+      const resultTree = await this.reformatTree(this.formData.componentTree.root, targetGroup, {
         menu: this.selectedComponentData.menu,
       })
 
@@ -538,20 +721,25 @@ export default defineComponent({
     },
     async loadMenu(event = { value: '' }) {
       const targetSearch = event.value ?? ''
-      // await CoreService.menuSearch({
-      //   first: 0,
-      //   rows: 10,
-      //   sortField: 'created_at',
-      //   sortOrder: 1,
-      //   filters: {
-      //     name: {
-      //       matchMode: 'contains',
-      //       value: targetSearch,
-      //     },
-      //   },
-      // }).then((response) => {
-      //   this.formData.menuData = response.payload.data
-      // })
+      this.formData.menuData = await this.menuStore
+        .list({
+          first: 0,
+          rows: 10,
+          projection: {},
+          sortField: 'name',
+          sortOrder: 1,
+          filters: { name: { value: targetSearch, matchMode: 'contains' } },
+        })
+        .then((response) => {
+          const data = response.payload.data
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return data.map((e: any) => {
+            return {
+              name: e.name,
+              id: e.id,
+            }
+          })
+        })
     },
     closeComponentDialog() {
       this.displayEditorDialog = false
@@ -560,7 +748,7 @@ export default defineComponent({
       this.displayResponseError = false
     },
     back() {
-      this.$router.push('/setting/i18n')
+      this.$router.push('/core/i18n')
     },
     submitComponentChanges() {
       if (!this.nodeEditParentMode) {
@@ -630,6 +818,7 @@ export default defineComponent({
       // const target = event.target
       this.nodeEditParentMode = true
       this.selectedComponentData = {
+        menu: {},
         identifier: `${node.data}.`,
         translation: '',
         component: `${node.data}.`,
@@ -648,7 +837,8 @@ export default defineComponent({
         header: 'Delete node',
         message: `All child node will be deleted also`,
         icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'button-success',
+        acceptClass: 'p-button-danger',
+        rejectClass: 'p-button-secondary  ',
         acceptIcon: 'pi pi-check-circle',
         acceptLabel: 'Yes',
         rejectLabel: 'Abort',
@@ -676,8 +866,7 @@ export default defineComponent({
       })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    editChild(event: any, node: any) {
-      const target = event.target
+    editChild(node: any) {
       if (node.children && node.children.length < 1) {
         this.nodeEditParentMode = false
         this.selectedComponentData = {
@@ -701,11 +890,10 @@ export default defineComponent({
       }
       this.displayEditorDialog = true
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    submitLanguage(event: any) {
-      const target = event.target
+    submitLanguage(event: MouseEvent) {
       const componentRaw = this.formData.componentIden
-      const componentParsed = []
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const componentParsed: any = []
       for (const a in componentRaw) {
         componentParsed.push(componentRaw[a])
       }
@@ -713,18 +901,19 @@ export default defineComponent({
       const confirmation = this.$confirm
       confirmation.require({
         group: 'confirm_changes',
-        target: target,
+        target: event.currentTarget as HTMLElement,
         header: 'Confirmation',
         message: `Update language?`,
         icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'button-success',
+        acceptClass: 'p-button-warning',
+        rejectClass: 'p-button-secondary',
         acceptIcon: 'pi pi-check-circle',
         acceptLabel: 'Yes',
         rejectLabel: 'Abort',
         rejectIcon: 'pi pi-times-circle',
         accept: async () => {
           await this.i18nStore
-            .edit(this.formData.id.toString(), this.formData)
+            .edit(this.formData.id.toString(), { __v: this.formData.v, ...this.formData })
             .then(async (response) => {
               this.$confirm.require({
                 group: 'keep_editing',
@@ -732,13 +921,13 @@ export default defineComponent({
                 header: 'Keep editting?',
                 icon: 'pi pi-exclamation-triangle',
                 acceptClass: 'p-button-success',
-                rejectClass: 'p-button-warning',
+                rejectClass: 'p-button-secondary',
                 acceptLabel: 'Yes',
                 acceptIcon: 'pi pi-check-circle',
                 rejectLabel: 'Keep Editing',
                 rejectIcon: 'pi pi-times-circle',
                 accept: () => {
-                  this.$router.push('/setting/i18n')
+                  this.$router.push('/core/i18n')
                 },
                 reject: () => {
                   //

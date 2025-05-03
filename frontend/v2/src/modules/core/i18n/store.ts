@@ -22,18 +22,15 @@ export const storei18n = defineStore('i18n', {
           throw e
         })
     },
-    async detail(id: string) {
+    async detail(id: string): Promise<CoreResponse> {
       return await api({ requiresAuth: true })
         .get(`${import.meta.env.VITE_API_URL}/v1/i18n/${id}`)
-        .then((response: AxiosResponse) => {
-          const data: CoreResponse = response.data
-          return data
-        })
+        .then((response: AxiosResponse) => response.data)
         .catch((e) => {
           throw e
         })
     },
-    async edit(id: string, parameter: i18nAdd) {
+    async edit(id: string, parameter: i18nEdit) {
       return await api({ requiresAuth: true, responseToast: true })
         .patch(`${import.meta.env.VITE_API_URL}/v1/i18n/${id}`, parameter)
         .then((response: AxiosResponse) => {
@@ -44,7 +41,7 @@ export const storei18n = defineStore('i18n', {
           throw e
         })
     },
-    async add(parameter: i18nEdit) {
+    async add(parameter: i18nAdd) {
       return await api({ requiresAuth: true, responseToast: true })
         .post(`${import.meta.env.VITE_API_URL}/v1/i18n`, parameter)
         .then((response: AxiosResponse) => {
