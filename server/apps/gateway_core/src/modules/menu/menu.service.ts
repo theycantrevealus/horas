@@ -378,7 +378,7 @@ export class MenuService {
           remark: parameter.remark,
           channel: parameter.channel,
           menu_group: parameter.menu_group,
-          permission: parameter.permission,
+          access: parameter.access,
         }
       )
       .exec()
