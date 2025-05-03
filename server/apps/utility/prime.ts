@@ -102,6 +102,8 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
 
     if (filter_builder.$or.length > 0) {
       query[0].$match.$or = filter_builder.$or
+    } else {
+      delete query[0].$match.$or
     }
 
     const allNoFilter = await model
