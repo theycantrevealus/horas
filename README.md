@@ -3,7 +3,14 @@
 <br />
 <div align="center">
   <img src="horas.png" width="380" />
+  
+  [![language](https://img.shields.io/badge/language-typescript-4fc4ff)](https://www.typescriptlang.org/)
+  [![front_end](https://img.shields.io/badge/front_end-VueJS-41B883)](https://www.typescriptlang.org/)
+  [![back_end](https://img.shields.io/badge/back_end-NestJS-e0234e)](https://www.typescriptlang.org/)
+  [![Free](https://img.shields.io/badge/free_for_non_commercial_use-brightgreen)](#-license)
+
   <p align="center">
+    ⭐ Star us on GitHub — it motivates us a lot! ❤️‍🔥 <br />
     <a href="#">View Demo</a>
     ·
     <a href="https://github.com/theycantrevealus/horas/issues">Report Bug</a>
@@ -41,15 +48,11 @@
 
 <!-- ABOUT THE PROJECT -->
 
-## About The Project
+## 🚀 About The Project
 
-HORAS is an open source Hospital Information System. It was created for helping hospital as an assistant to run business easily, help to make business or medical decisions by datas, faster department integity, universal business core.
+HORAS is an open-source Hospital Information System designed to assist hospitals in managing their operations efficiently. It provides data-driven insights to support business and medical decision-making, promotes faster departmental integration, and offers a universal business core.
 
-Here's why:
-
-- Humanity. Helping hospital faster to save lives
-- Minimize unnecessary expense leakage in order to maximize health services
-- A kind of expensive paid application that makes it difficult for small scale hospitals to run faster
+Here's why: Humanity. We aim to help hospitals operate more efficiently to save lives, minimize unnecessary expenses, and maximize health services. Many existing hospital management systems are expensive, paid applications that can be a barrier for small-scale hospitals, hindering their ability to run efficiently.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 <hr />
@@ -65,7 +68,7 @@ Built using these awesome frameworks
 <hr />
 <!-- GETTING STARTED -->
 
-## Getting Started
+## ✨ Getting Started
 
 ### Requirements
 1. Nodejs
@@ -73,15 +76,22 @@ Built using these awesome frameworks
    1. @nestjs/cli@9.2.0
    2. jest@29.4.3
 
+### Data Seeds
+Of course you need it, feel free to get in touch
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- STRUCTURE -->
 <hr />
-## Project Structure
 
-<b>HORAS</b> contains 2 main project directory (server and app). You need to run npm start/serve on each folder to run it.
+## 🏗️ Project Structure
+<p>
+  <b>HORAS</b> contains 2 main project directory (server and frontend, currently working hard on v2).
+</p>
 
-API default run on port 3000. You can access Open API at `<hostname>:3000/api`
+Services:
+  1. server : You need to run npm start/serve on each apps service.
+  2. frontend : Using pnpm
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -118,7 +128,7 @@ _Below is an example of how you can instruct your audience on installing and set
    ```sh
    git clone https://github.com/theycantrevealus/horas.git
    ```
-2. Enter your config in `.env`
+2. Enter your configuration on `.env` based on provided example
 3. Install NPM packages (for each folder api and app)
    ```sh
    npm install
@@ -128,7 +138,7 @@ _Below is an example of how you can instruct your audience on installing and set
 <hr />
 <!-- ROADMAP -->
 
-## Roadmap
+## 🏁 Roadmap
 
 - [ ] Application Design
 - [ ] Discussion and Evaluation
@@ -146,7 +156,7 @@ See the [open issues](https://github.com/theycantrevealus/horas/issues) for a fu
 <hr />
 <!-- CONTRIBUTING -->
 
-## Contributing
+## 🎁 Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated (God Bless Your Kind Heart)**.
 
@@ -179,7 +189,7 @@ This project using following format as committing message. If any suggestion of 
 
 <!-- LICENSE -->
 
-## License
+## 🔐 License
 
 Distributed under the <a href="https://github.com/theycantrevealus/horas?tab=Apache-2.0-1-ov-file">APACHE 2.0 License</a>.
 
@@ -187,7 +197,7 @@ Distributed under the <a href="https://github.com/theycantrevealus/horas?tab=Apa
 <hr />
 <!-- CONTACT -->
 
-## Contact
+## ☎️ Contact
 
 Hendry Tanaka - [@takashitanaka\_](https://twitter.com/takashitanaka_) - theycantrevealus@gmail.com
 
@@ -197,7 +207,7 @@ Project Link: [documentation and paper](https://theycantrevealus.github.io/horas
 <hr />
 <!-- ACKNOWLEDGMENTS -->
 
-## Acknowledgments
+## 🎖️ Acknowledgments
 
 Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
@@ -216,6 +226,6 @@ Use this space to list resources you find helpful and would like to give credit 
 
 <!-- CONTRIBUTORS -->
 
-## Contributors
+## 💼 Contributors
 <img src="https://contrib.rocks/image?repo=theycantrevealus/horas" alt="Horas Contributors"/>
 <p align="right">(<a href="#top">back to top</a>)</p>
