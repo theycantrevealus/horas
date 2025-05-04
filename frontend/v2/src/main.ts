@@ -36,6 +36,7 @@ import LOV from '@/modules/master/lov'
 
 import MasterItemBrand from '@/modules/master/item/brand'
 import MasterItem from '@/modules/master/item'
+import MasterStockPoint from '@/modules/master/stock_point'
 
 import type { RouteRecordRaw } from 'vue-router'
 import { i18n } from '@/utils/core/i18n.ts'
@@ -55,6 +56,7 @@ const Modules: any = {
   lov: LOV,
   masterItemBrand: MasterItemBrand,
   masterItem: MasterItem,
+  masterStockPoint: MasterStockPoint,
 }
 
 Object.keys(Modules).forEach(async (moduleKey) => {
