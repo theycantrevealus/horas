@@ -148,12 +148,7 @@
           <div class="flex flex-row-reverse p-6">
             <Button
               class="p-button-success p-button-rounded p-button-raised button-sm m-2"
-              label="Save and Quit"
-              v-on:click="updateData($event)"
-            />
-            <Button
-              class="p-button-info p-button-rounded p-button-raised button-sm m-2"
-              label="Save and Stay"
+              label="Save"
               v-on:click="updateData($event)"
             />
             <Button
