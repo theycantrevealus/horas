@@ -430,6 +430,10 @@ body.dark .p-treenode .p-treenode-content:hover {
     min-height: 20px;
 }
 
+.flex-col {
+    flex-direction: column;
+}
+
 .inline-block.custom .action-container {
     right: 5px;
     top: -2.5px;
@@ -1121,11 +1125,31 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .form-mode {
-    padding: 40px !important;
+    padding: 5px 40px !important;
+}
+
+.form-mode .p-message-text {
+    color: red;
 }
 
 .form-mode .p-inputgroup {
     margin-bottom: 10px;
+}
+
+.form-mode .flex-col {
+    width: 100%;
+}
+
+.form-mode .p-inputtext {
+    width: 100%;
+}
+
+.form-mode .p-select {
+    width: 100%;
+}
+
+.form-mode .p-dropdown-label.p-inputtext.p-placeholder {
+    margin-top: 0px;
 }
 
 .p-dropdown-label.p-inputtext {
@@ -1134,10 +1158,6 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-datatable-table tbody tr td .p-inputnumber {
     margin-top: -10px !important;
-}
-
-.form-mode .p-dropdown-label.p-inputtext.p-placeholder {
-    margin-top: 0px;
 }
 
 .p-chip.sm {
