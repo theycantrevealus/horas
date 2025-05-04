@@ -332,7 +332,7 @@
                           />
                           <Button
                             icon="pi pi-pencil"
-                            class="p-button-rounded button-sm p-button-warning"
+                            class="p-button-rounded button-sm p-button-info"
                             @click="editChild(slotProps.node)"
                           />
                         </div>
