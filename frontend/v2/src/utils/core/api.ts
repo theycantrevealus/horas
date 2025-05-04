@@ -86,6 +86,14 @@ export default ({ requiresAuth = true, responseToast = false } = {}) => {
               return Promise.reject(response)
             }
           } else {
+            if (response.status === 204) {
+              store.setToast({
+                severity: 'success',
+                summary: '[204/CORE_X]',
+                detail: 'Data processed successfully. No Content',
+                life: 5000,
+              })
+            }
             return Promise.resolve(response)
           }
         }
