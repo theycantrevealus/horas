@@ -916,7 +916,9 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .p-inputgroup-addon {
+    display: inline-block;
     border: none !important;
+    white-space: nowrap !important;
 }
 
 .p-tabview-nav-link {
@@ -1141,7 +1143,7 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .form-mode .p-inputtext {
-    width: 100%;
+    width: auto;
 }
 
 .form-mode .p-select {
