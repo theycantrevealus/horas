@@ -103,6 +103,7 @@ export default defineComponent({
       countries: [
         { name: 'United States', code: 'us', lang: 'en' },
         { name: 'Indonesia', code: 'id', lang: 'id' },
+        { name: 'China', code: 'zh', lang: 'cn' },
       ],
       sidemenu: [
         {
