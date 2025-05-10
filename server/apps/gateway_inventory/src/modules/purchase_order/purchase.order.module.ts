@@ -1,4 +1,6 @@
 import { GatewayInventoryPurchaseOrderController } from '@gateway_inventory/purchase_order/purchase.order.controller'
+import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -38,6 +40,8 @@ import { GatewayInventoryPurchaseOrderService } from './purchase.order.service'
   providers: [
     MongoMiddlewarePurchaseOrder,
     GatewayInventoryPurchaseOrderService,
+    SocketIoClientProvider,
+    SocketIoClientProxyService,
   ],
   exports: [GatewayInventoryPurchaseOrderService],
 })

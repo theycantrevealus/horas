@@ -1,6 +1,8 @@
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
 import { GatewayInventoryPurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
 import { GatewayInventoryPurchaseOrderService } from '@gateway_inventory/purchase_order/purchase.order.service'
+import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
+import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
@@ -10,11 +12,23 @@ import {
   GeneralReceiveNoteSchema,
 } from '@schemas/inventory/general.receive.note'
 import { MongoMiddlewareGeneralReceiveNote } from '@schemas/inventory/general.receive.note.middleware'
+import {
+  PurchaseOrder,
+  PurchaseOrderSchema,
+} from '@schemas/inventory/purchase.order'
+import {
+  PurchaseRequisition,
+  PurchaseRequisitionSchema,
+} from '@schemas/inventory/purchase.requisition'
 import { MasterItem, MasterItemSchema } from '@schemas/master/master.item'
 import {
   MasterItemBatch,
   MasterItemBatchSchema,
 } from '@schemas/master/master.item.batch'
+import {
+  MasterItemSupplier,
+  MasterItemSupplierSchema,
+} from '@schemas/master/master.item.supplier'
 import {
   MasterStockPoint,
   MasterStockPointSchema,
@@ -35,6 +49,9 @@ import { GatewayInventoryGeneralReceiveNoteService } from './general.receive.not
         { name: MasterItemBatch.name, schema: MasterItemBatchSchema },
         { name: GeneralReceiveNote.name, schema: GeneralReceiveNoteSchema },
         { name: MasterStockPoint.name, schema: MasterStockPointSchema },
+        { name: MasterItemSupplier.name, schema: MasterItemSupplierSchema },
+        { name: PurchaseOrder.name, schema: PurchaseOrderSchema },
+        { name: PurchaseRequisition.name, schema: PurchaseRequisitionSchema },
       ],
       'primary'
     ),
@@ -43,6 +60,8 @@ import { GatewayInventoryGeneralReceiveNoteService } from './general.receive.not
   ],
   controllers: [GatewayInventoryGeneralReceiveNoteController],
   providers: [
+    SocketIoClientProvider,
+    SocketIoClientProxyService,
     MongoMiddlewareGeneralReceiveNote,
     GatewayInventoryPurchaseOrderService,
     GatewayInventoryGeneralReceiveNoteService,

@@ -23,6 +23,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { FastifyRequest } from 'fastify'
@@ -35,6 +36,7 @@ import { PurchaseRequisitionApprovalDTO } from './dto/purchase.requisition.appro
 import { GatewayInventoryPurchaseRequisitionService } from './purchase.requisition.service'
 
 @Controller('inventory')
+@ApiTags('Purchase Requisition')
 export class GatewayInventoryPurchaseRequisitionController {
   constructor(
     @Inject(GatewayInventoryPurchaseRequisitionService)
