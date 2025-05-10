@@ -12,7 +12,7 @@
         }
     ],
     "compilerOptions": {
-        "types": ["node"],
+        "types": ["node", "vue"],
         "typeRoots": ["../node_modules/@types"],
         "declaration": false,
         "module": "NodeNext",

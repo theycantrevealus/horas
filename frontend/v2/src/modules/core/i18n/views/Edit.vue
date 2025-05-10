@@ -76,6 +76,7 @@
                   Internationalization (i18n) datetime configuration involves defining how dates and
                   times are formatted and displayed for different locales or regions.
                 </p>
+                <Divider />
                 <table>
                   <thead>
                     <tr>
@@ -246,6 +247,7 @@
                   Internationalization (i18n) currency configuration involves defining how
                   currencies are formatted and displayed for different locales or regions.
                 </p>
+                <Divider />
                 <div class="p-inputgroup">
                   <span class="p-inputgroup-addon">
                     <span class="material-icons-outlined material-symbols-outlined">map</span>
@@ -291,6 +293,7 @@
                   software, applications, or content to be adaptable to different languages,
                   cultures, and regions (based on json meta structure)
                 </p>
+                <Divider />
                 <Button
                   type="button"
                   class="button-raised button-sm p-button-info px-3 m-1"
@@ -356,6 +359,7 @@
                   Internationalization (i18n) decimal configuration involves defining how decimals
                   are formatted and displayed for different locales or regions.
                 </p>
+                <Divider />
                 <div class="p-inputgroup">
                   <span class="p-inputgroup-addon">
                     <span class="material-icons-outlined material-symbols-outlined">map</span>
@@ -398,6 +402,7 @@
                   Internationalization (i18n) percent configuration involves defining how
                   percentages are formatted and displayed for different locales or regions.
                 </p>
+                <Divider />
                 <div class="p-inputgroup">
                   <span class="p-inputgroup-addon">
                     <span class="material-icons-outlined material-symbols-outlined">map</span>

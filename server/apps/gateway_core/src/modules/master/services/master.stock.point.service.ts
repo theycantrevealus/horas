@@ -90,6 +90,7 @@ export class MasterStockPointService {
             code: data.code,
             name: data.name,
             remark: data.remark,
+            configuration: data.configuration,
           },
         },
         { upsert: false, new: false }

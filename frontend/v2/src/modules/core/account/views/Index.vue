@@ -37,12 +37,12 @@
             @sort="onSort($event)"
             @filter="onFilter($event)"
           >
-            <Column header="#" class="align-right">
+            <Column header="#" class="align-right wrap_content">
               <template #body="slotProps">
                 <h6 class="d-inline-flex">#{{ slotProps.data.autonum }}</h6>
               </template>
             </Column>
-            <Column header="Action">
+            <Column class="wrap_content" header="Action">
               <template #body="slotProps">
                 <span class="p-buttonset wrap_content">
                   <Button

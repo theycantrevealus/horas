@@ -9,8 +9,6 @@ import { IMasterItemCategory } from '@schemas/master/master.item.category.interf
 import { MasterItemCategoryJoin } from '@schemas/master/master.item.category.join'
 import { MasterItemConfiguration } from '@schemas/master/master.item.configuration'
 import { IMasterItemConfiguration } from '@schemas/master/master.item.configuration.interface'
-import { MasterItemStoring } from '@schemas/master/master.item.storing'
-import { IMasterItemStoring } from '@schemas/master/master.item.storing.interface'
 import {
   MasterItemStructureCoordinatorSchema,
   registerMasterItemStructureSchemaDiscriminator,
@@ -51,10 +49,10 @@ export class MasterItem {
 
   @Prop({
     unique: false,
-    type: MasterItemUnitJoin,
+    type: [MasterItemUnitJoin],
     _id: false,
   })
-  unit: IMasterItemUnit
+  unit: IMasterItemUnit[]
 
   @Prop({
     unique: false,
@@ -74,13 +72,13 @@ export class MasterItem {
   })
   properties: ILOV[]
 
-  @Prop({
-    unique: false,
-    required: false,
-    type: [MasterItemStoring],
-    _id: false,
-  })
-  storing: IMasterItemStoring[]
+  // @Prop({
+  //   unique: false,
+  //   required: false,
+  //   type: [MasterItemStoring],
+  //   _id: false,
+  // })
+  // storing: IMasterItemStoring[]
 
   @Prop({ type: SchemaTypes.String })
   remark: string

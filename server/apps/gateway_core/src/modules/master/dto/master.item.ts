@@ -2,15 +2,9 @@ import { CLOV } from '@gateway_core/lov/dto/lov'
 import { CMasterItemBrand } from '@gateway_core/master/dto/master.item.brand'
 import { CMasterItemCategory } from '@gateway_core/master/dto/master.item.category'
 import { CMasterItemConfiguration } from '@gateway_core/master/dto/master.item.configuration'
-import { CMasterItemStoring } from '@gateway_core/master/dto/master.item.storing'
 import { CMasterItemUnit } from '@gateway_core/master/dto/master.item.unit'
 import { ApiProperty } from '@nestjs/swagger'
 import { ILOV } from '@schemas/lov/lov.interface'
-import { IMasterItemBrand } from '@schemas/master/master.item.brand.interface'
-import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
-import { IMasterItemConfiguration } from '@schemas/master/master.item.configuration.interface'
-import { IMasterItemStoring } from '@schemas/master/master.item.storing.interface'
-import { IMasterItemUnit } from '@schemas/master/master.item.unit.interface'
 import {
   IsNotEmpty,
   IsNumber,
@@ -45,7 +39,7 @@ export class CMasterItem {
     type: CMasterItemBrand,
   })
   @IsNotEmpty()
-  brand: IMasterItemBrand
+  brand: CMasterItemBrand
 }
 
 export class MasterItemAddDTO {
@@ -84,16 +78,16 @@ export class MasterItemAddDTO {
     description: 'Stock point configuration',
   })
   @IsNotEmpty()
-  configuration: IMasterItemConfiguration
+  configuration: CMasterItemConfiguration
 
-  @ApiProperty({
-    type: CMasterItemStoring,
-    isArray: true,
-    required: false,
-    description: 'Storing configuration',
-  })
-  @IsNotEmpty()
-  storing: IMasterItemStoring[]
+  // @ApiProperty({
+  //   type: CMasterItemStoring,
+  //   isArray: true,
+  //   required: false,
+  //   description: 'Storing configuration',
+  // })
+  // @IsNotEmpty()
+  // storing: IMasterItemStoring[]
 
   @ApiProperty({
     type: CMasterItemCategory,
@@ -101,19 +95,20 @@ export class MasterItemAddDTO {
   })
   @ValidateNested({ each: true })
   @IsNotEmpty()
-  category: IMasterItemCategory[]
+  category: CMasterItemCategory[]
 
   @ApiProperty({
     type: CMasterItemUnit,
+    isArray: true,
   })
   @IsNotEmpty()
-  unit: IMasterItemUnit
+  unit: CMasterItemUnit[]
 
   @ApiProperty({
     type: CMasterItemBrand,
   })
   @IsNotEmpty()
-  brand: IMasterItemBrand
+  brand: CMasterItemBrand
 
   @ApiProperty({
     required: false,
@@ -177,16 +172,16 @@ export class MasterItemEditDTO {
     description: 'Stock point configuration',
   })
   @IsNotEmpty()
-  configuration: IMasterItemConfiguration
+  configuration: CMasterItemConfiguration
 
-  @ApiProperty({
-    type: CMasterItemStoring,
-    isArray: true,
-    required: false,
-    description: 'Storing configuration',
-  })
-  @IsNotEmpty()
-  storing: IMasterItemStoring[]
+  // @ApiProperty({
+  //   type: CMasterItemStoring,
+  //   isArray: true,
+  //   required: false,
+  //   description: 'Storing configuration',
+  // })
+  // @IsNotEmpty()
+  // storing: IMasterItemStoring[]
 
   @ApiProperty({
     type: CMasterItemCategory,
@@ -194,19 +189,20 @@ export class MasterItemEditDTO {
   })
   @ValidateNested({ each: true })
   @IsNotEmpty()
-  category: IMasterItemCategory[]
+  category: CMasterItemCategory[]
 
   @ApiProperty({
     type: CMasterItemUnit,
+    isArray: true,
   })
   @IsNotEmpty()
-  unit: IMasterItemUnit
+  unit: CMasterItemUnit[]
 
   @ApiProperty({
     type: CMasterItemBrand,
   })
   @IsNotEmpty()
-  brand: IMasterItemBrand
+  brand: CMasterItemBrand
 
   @ApiProperty({
     type: CLOV,

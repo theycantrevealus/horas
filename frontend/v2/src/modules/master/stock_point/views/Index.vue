@@ -41,12 +41,15 @@
             @sort="onSort($event)"
             @filter="onFilter($event)"
           >
-            <Column header="ID" class="align-right">
+            <Column header="ID" class="align-right wrap_content">
               <template #body="slotProps">
                 <h6 class="d-inline-flex">#{{ slotProps.data.autonum }}</h6>
               </template>
             </Column>
-            <Column :header="$t('master.stock_point.datatable.column.action.caption')">
+            <Column
+              class="wrap_content"
+              :header="$t('master.stock_point.datatable.column.action.caption')"
+            >
               <template #body="slotProps">
                 <span class="p-buttonset wrap_content">
                   <Button
@@ -161,7 +164,8 @@ export default defineComponent({
     ...mapStores(storeMasterStockPoint),
   },
   mounted() {
-    this.ui.table.lazyParams.rows = this.$refs.dt.rows
+    const dataTable = this.$refs.dt as { rows: number }
+    this.ui.table.lazyParams.rows = dataTable.rows
     this.loadLazyData()
   },
   methods: {

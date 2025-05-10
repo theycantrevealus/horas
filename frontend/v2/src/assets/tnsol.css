@@ -1175,6 +1175,23 @@ body.dark .p-treenode .p-treenode-content:hover {
     border-color: #1cb973 !important;
 }
 
+.p-tab {
+    font-size: 0.7rem !important;
+    padding: 10px !important;
+}
+
+.p-tabpanels {
+    padding: 0 !important;
+}
+
+.p-tabpanels .form-mode {
+    padding: 5px 8px !important;
+}
+
+.p-tab .material-icons-outlined {
+    font-size: 1.1rem !important;
+}
+
 .p-tag {
     padding: 0.25rem 1rem !important;
     font-size: 7pt !important;
@@ -1445,4 +1462,8 @@ label[for] {
     top: 25%;
     width: 50%;
     height: 50%;
+}
+
+.p-multiselect-chip-item .p-chip-label {
+    font-size: 0.7rem;
 }

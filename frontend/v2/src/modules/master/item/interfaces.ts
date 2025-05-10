@@ -12,3 +12,33 @@ export interface MasterItemAdd {
 export interface MasterItemEdit extends MasterItemAdd {
   __v: number
 }
+
+export interface MasterItemBrandAdd {
+  code: string
+  name: string
+  remark: string
+}
+
+export interface MasterItemBrandEdit extends MasterItemBrandAdd {
+  __v: number
+}
+
+export interface MasterItemCategoryAdd {
+  code: string
+  name: string
+  remark: string
+}
+
+export interface MasterItemCategoryEdit extends MasterItemCategoryAdd {
+  __v: number
+}
+
+export interface MasterItemUnitAdd {
+  code: string
+  name: string
+  remark: string
+}
+
+export interface MasterItemUnitEdit extends MasterItemUnitAdd {
+  __v: number
+}
