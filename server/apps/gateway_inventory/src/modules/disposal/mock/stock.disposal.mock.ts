@@ -33,6 +33,11 @@ export const mockStockDisposal = (
         price_buy: 10,
         price_sell: 11,
         expired: new Date(),
+        brand: {
+          id: 'brand-xx1',
+          code: 'BRAND-001',
+          name: 'Brand 1',
+        },
       },
       qty: 2,
       type: 'Damaged Goods' as const,

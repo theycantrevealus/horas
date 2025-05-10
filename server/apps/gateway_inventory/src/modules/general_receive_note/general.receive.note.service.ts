@@ -135,6 +135,8 @@ export class GatewayInventoryGeneralReceiveNoteService {
                       sellPrice = buyPrice
                     }
 
+                    // TODO : Handle brand here
+
                     await this.masterItemBacthModel
                       .findOneAndUpdate(
                         {

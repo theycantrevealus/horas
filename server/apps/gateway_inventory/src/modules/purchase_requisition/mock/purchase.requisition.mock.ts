@@ -143,7 +143,6 @@ export const mockPurchaseRequisitionDocArray = [
           id: 'item-xxx',
           code: 'ITM01',
           name: 'Item 1',
-          brand: null,
         },
         qty: 2,
         remark: '-',

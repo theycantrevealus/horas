@@ -5,6 +5,7 @@ import {
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
 import { mockMasterItemBatchModel } from '@gateway_core/master/mock/master.item.batch.mock'
+import { mockMasterItemBrand } from '@gateway_core/master/mock/master.item.brand.mock'
 import {
   mockMasterItem,
   mockMasterItemModel,
@@ -386,6 +387,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'X01192D',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },
@@ -393,6 +395,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'AV3D112',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },
@@ -459,6 +462,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'X01192D',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },
@@ -466,6 +470,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'AV3D112',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },

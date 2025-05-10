@@ -7,12 +7,15 @@ import {
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 
+import { mockMasterItemBrand } from './master.item.brand.mock'
 import { mockMasterItem } from './master.item.mock'
+const time = new TimeManagement()
 
 export const mockMasterItemBatch = (
   id = `item-${new Types.ObjectId().toString()}`,
   code = 'BRD-0001',
   item = mockMasterItem(),
+  brand = mockMasterItemBrand(),
   price_buy = 10,
   price_sell = 11,
   expired = new Date(),
@@ -23,13 +26,14 @@ export const mockMasterItemBatch = (
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
-  created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
-  updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
+  created_at = time.getTimezone('Asia/Jakarta'),
+  updated_at = time.getTimezone('Asia/Jakarta'),
   deleted_at = null
 ): MasterItemBatch => ({
   id,
   code,
   item,
+  brand,
   price_buy,
   price_sell,
   expired,
@@ -68,10 +72,8 @@ export const mockMasterItemBatchDoc = (
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
-  created_at:
-    mock?.created_at || new TimeManagement().getTimezone('Asia/Jakarta'),
-  updated_at:
-    mock?.updated_at || new TimeManagement().getTimezone('Asia/Jakarta'),
+  created_at: mock?.created_at || time.getTimezone('Asia/Jakarta'),
+  updated_at: mock?.updated_at || time.getTimezone('Asia/Jakarta'),
   deleted_at: mock?.deleted_at || null,
 })
 

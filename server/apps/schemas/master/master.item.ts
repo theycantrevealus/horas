@@ -3,8 +3,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { ILOV } from '@schemas/lov/lov.interface'
 import { LOVJoin } from '@schemas/lov/lov.join'
-import { IMasterItemBrand } from '@schemas/master/master.item.brand.interface'
-import { MasterItemBrandJoin } from '@schemas/master/master.item.brand.join'
 import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
 import { MasterItemCategoryJoin } from '@schemas/master/master.item.category.join'
 import { MasterItemConfiguration } from '@schemas/master/master.item.configuration'
@@ -54,12 +52,12 @@ export class MasterItem {
   })
   unit: IMasterItemUnit[]
 
-  @Prop({
-    unique: false,
-    type: MasterItemBrandJoin,
-    _id: false,
-  })
-  brand: IMasterItemBrand
+  // @Prop({
+  //   unique: false,
+  //   type: MasterItemBrandJoin,
+  //   _id: false,
+  // })
+  // brand: IMasterItemBrand
 
   @Prop({ type: MasterItemStructureCoordinatorSchema, required: false })
   structure?: unknown

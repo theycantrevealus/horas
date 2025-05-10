@@ -1,14 +1,13 @@
 import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockAccount } from '@gateway_core/account/mock/account.mock'
-import { masterItemBrandArray } from '@gateway_core/master/mock/master.item.brand.mock'
 import { masterItemCategoryArray } from '@gateway_core/master/mock/master.item.category.mock'
 import { masterItemUnitArray } from '@gateway_core/master/mock/master.item.unit.mock'
 import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import { IMasterItemConfiguration } from '@schemas/master/master.item.configuration.interface'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
-
+const time = new TimeManagement()
 // export const mockMasterItemService = {
 //   all: jest.fn().mockResolvedValue((dto: any) => dto),
 //   add: jest.fn().mockImplementation((dto: MasterItemAddDTO) => {
@@ -51,8 +50,7 @@ export const mockMasterItem = (
     benefit_margin_value: 0,
   },
   category = masterItemCategoryArray,
-  unit = masterItemUnitArray[0],
-  brand = masterItemBrandArray[0],
+  unit = masterItemUnitArray,
   properties = [
     {
       id: `lov-${new Types.ObjectId().toString()}`,
@@ -67,8 +65,8 @@ export const mockMasterItem = (
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
-  created_at = new TimeManagement().getTimezone('Asia/Jakarta'),
-  updated_at = new TimeManagement().getTimezone('Asia/Jakarta'),
+  created_at = time.getTimezone('Asia/Jakarta'),
+  updated_at = time.getTimezone('Asia/Jakarta'),
   deleted_at = null
 ): MasterItem => ({
   id,
@@ -78,7 +76,6 @@ export const mockMasterItem = (
   configuration,
   category,
   unit,
-  brand,
   properties,
   remark,
   created_by,
@@ -113,10 +110,8 @@ export const mockMasterItemDoc = (
     last_name: faker.person.lastName(),
     email: faker.internet.email(),
   },
-  created_at:
-    mock?.created_at || new TimeManagement().getTimezone('Asia/Jakarta'),
-  updated_at:
-    mock?.updated_at || new TimeManagement().getTimezone('Asia/Jakarta'),
+  created_at: mock?.created_at || time.getTimezone('Asia/Jakarta'),
+  updated_at: mock?.updated_at || time.getTimezone('Asia/Jakarta'),
   deleted_at: mock?.deleted_at || null,
 })
 
@@ -136,8 +131,7 @@ export const masterItemArray = [
       benefit_margin_value: 0,
     },
     [],
-    masterItemUnitArray[0],
-    masterItemBrandArray[0],
+    masterItemUnitArray,
     [
       {
         id: `lov-${new Types.ObjectId().toString()}`,
@@ -159,8 +153,8 @@ export const masterItemArray = [
     // ],
     '',
     mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
+    time.getTimezone('Asia/Jakarta'),
+    time.getTimezone('Asia/Jakarta'),
     null
   ),
   mockMasterItem(
@@ -177,8 +171,7 @@ export const masterItemArray = [
       benefit_margin_value: 0,
     },
     [],
-    masterItemUnitArray[0],
-    masterItemBrandArray[0],
+    masterItemUnitArray,
     [
       {
         id: `lov-${new Types.ObjectId().toString()}`,
@@ -188,8 +181,8 @@ export const masterItemArray = [
     ],
     '',
     mockAccount(),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
-    new TimeManagement().getTimezone('Asia/Jakarta'),
+    time.getTimezone('Asia/Jakarta'),
+    time.getTimezone('Asia/Jakarta'),
     null
   ),
 ]

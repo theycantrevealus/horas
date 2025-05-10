@@ -20,6 +20,11 @@ export const mockInventoryStockLog = (
     price_buy: 10,
     price_sell: 11,
     expired: new Date(),
+    brand: {
+      id: 'brand-xx1',
+      code: 'BRAND-001',
+      name: 'Brand 1',
+    },
   },
   from = {
     id: mockMasterStockPoint().id,
@@ -74,11 +79,11 @@ export const mockInventoryStockLogDoc = (
       id: mock?.batch?.item?.id ?? mockMasterItem().id,
       code: mock?.batch?.item?.code ?? mockMasterItem().code,
       name: mock?.batch?.item?.name ?? mockMasterItem().name,
-      brand: mock?.batch?.item?.brand ?? null,
     },
     price_buy: mock?.batch?.price_buy ?? 10,
     price_sell: mock?.batch?.price_sell ?? 11,
     expired: mock?.batch?.expired ?? new Date(),
+    brand: mock?.batch?.brand,
   },
   from: {
     id: mockMasterStockPoint().id,

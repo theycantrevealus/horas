@@ -34,6 +34,9 @@ import { testCaption } from '@utility/string'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
 
+import { mockMasterItemCategory } from '../mock/master.item.category.mock'
+import { mockMasterItemUnit } from '../mock/master.item.unit.mock'
+
 describe('Master Item Controller', () => {
   const mock_Guard: CanActivate = { canActivate: jest.fn(() => true) }
   let app: NestFastifyApplication
@@ -239,10 +242,8 @@ describe('Master Item Controller', () => {
           name: mockMasterItem().name,
           alias: mockMasterItem().alias,
           configuration: mockMasterItem().configuration,
-          storing: mockMasterItem().storing,
-          category: mockMasterItem().category,
-          unit: mockMasterItem().unit,
-          brand: mockMasterItem().brand,
+          category: [mockMasterItemCategory()],
+          unit: [mockMasterItemUnit()],
           properties: mockMasterItem().properties,
           structure: [],
         } satisfies MasterItemAddDTO
@@ -276,10 +277,8 @@ describe('Master Item Controller', () => {
           name: mockMasterItem().name,
           alias: mockMasterItem().alias,
           configuration: mockMasterItem().configuration,
-          storing: mockMasterItem().storing,
-          category: mockMasterItem().category,
-          unit: mockMasterItem().unit,
-          brand: mockMasterItem().brand,
+          category: [mockMasterItemCategory()],
+          unit: [mockMasterItemUnit()],
           properties: mockMasterItem().properties,
           structure: [],
         } satisfies MasterItemAddDTO
@@ -357,10 +356,8 @@ describe('Master Item Controller', () => {
           name: mockMasterItem().name,
           alias: mockMasterItem().alias,
           configuration: mockMasterItem().configuration,
-          storing: mockMasterItem().storing,
-          category: mockMasterItem().category,
-          unit: mockMasterItem().unit,
-          brand: mockMasterItem().brand,
+          category: [mockMasterItemCategory()],
+          unit: [mockMasterItemUnit()],
           properties: mockMasterItem().properties,
           __v: 0,
         } satisfies MasterItemEditDTO

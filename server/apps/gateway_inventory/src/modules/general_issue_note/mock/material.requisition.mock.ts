@@ -31,11 +31,6 @@ export const mockMaterialRequisition = (
         id: 'master_item-xxxxxxx',
         code: faker.commerce.isbn.toString(),
         name: 'Item 1',
-        brand: {
-          id: 'master_item_brand-xxxxxx',
-          code: faker.commerce.isbn.toString(),
-          name: '',
-        },
       },
       qty: 10,
       issued: 10,

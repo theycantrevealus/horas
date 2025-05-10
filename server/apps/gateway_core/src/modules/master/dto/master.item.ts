@@ -1,5 +1,4 @@
 import { CLOV } from '@gateway_core/lov/dto/lov'
-import { CMasterItemBrand } from '@gateway_core/master/dto/master.item.brand'
 import { CMasterItemCategory } from '@gateway_core/master/dto/master.item.category'
 import { CMasterItemConfiguration } from '@gateway_core/master/dto/master.item.configuration'
 import { CMasterItemUnit } from '@gateway_core/master/dto/master.item.unit'
@@ -35,11 +34,11 @@ export class CMasterItem {
   })
   name: string
 
-  @ApiProperty({
-    type: CMasterItemBrand,
-  })
-  @IsNotEmpty()
-  brand: CMasterItemBrand
+  // @ApiProperty({
+  //   type: CMasterItemBrand,
+  // })
+  // @IsNotEmpty()
+  // brand: CMasterItemBrand
 }
 
 export class MasterItemAddDTO {
@@ -104,11 +103,11 @@ export class MasterItemAddDTO {
   @IsNotEmpty()
   unit: CMasterItemUnit[]
 
-  @ApiProperty({
-    type: CMasterItemBrand,
-  })
-  @IsNotEmpty()
-  brand: CMasterItemBrand
+  // @ApiProperty({
+  //   type: CMasterItemBrand,
+  // })
+  // @IsNotEmpty()
+  // brand: CMasterItemBrand
 
   @ApiProperty({
     required: false,
@@ -128,7 +127,7 @@ export class MasterItemAddDTO {
 
   @ApiProperty({
     example: 'Extra remark',
-    description: 'Item brand extra remark',
+    description: 'Item extra remark',
     required: false,
   })
   @IsNotEmpty()
@@ -198,11 +197,11 @@ export class MasterItemEditDTO {
   @IsNotEmpty()
   unit: CMasterItemUnit[]
 
-  @ApiProperty({
-    type: CMasterItemBrand,
-  })
-  @IsNotEmpty()
-  brand: CMasterItemBrand
+  // @ApiProperty({
+  //   type: CMasterItemBrand,
+  // })
+  // @IsNotEmpty()
+  // brand: CMasterItemBrand
 
   @ApiProperty({
     type: CLOV,
@@ -216,7 +215,7 @@ export class MasterItemEditDTO {
 
   @ApiProperty({
     example: 'Extra remark',
-    description: 'Item brand extra remark',
+    description: 'Item extra remark',
     required: false,
   })
   @IsNotEmpty()
@@ -225,7 +224,7 @@ export class MasterItemEditDTO {
 
   @ApiProperty({
     example: 0,
-    description: 'Item brand document version',
+    description: 'Item document version',
   })
   @IsNotEmpty()
   @IsNumber()
