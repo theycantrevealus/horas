@@ -173,6 +173,10 @@ export const storeCore = defineStore('core', {
     },
   },
   getters: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getAccount(state): any {
+      return state.auth
+    },
     getToken(state): string {
       return state.auth.token
     },

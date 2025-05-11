@@ -1,3 +1,9 @@
+export interface SubMasterStockPoint {
+  id: string
+  code: string
+  name: string
+}
+
 export interface MasterStockPointConfiguration {
   allow_grn: boolean
   allow_incoming: boolean

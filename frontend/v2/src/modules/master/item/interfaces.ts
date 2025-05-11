@@ -1,3 +1,9 @@
+export interface SubMasterItem {
+  id: string
+  code: string
+  name: string
+}
+
 export interface MasterItemCongiguration {
   allow_sell: boolean
 }

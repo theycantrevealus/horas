@@ -153,7 +153,7 @@
                           display="chip"
                           optionLabel="name"
                           size="small"
-                          @filter="filterCategory"
+                          @filter="filterUnit"
                           filter
                           showClear
                           resetFilterOnHide
@@ -165,44 +165,6 @@
                           </template></MultiSelect
                         >
                         <label for="unit">Unit</label>
-                      </FloatLabel>
-                      <Message
-                        v-if="$field?.invalid"
-                        severity="error"
-                        size="small"
-                        variant="simple"
-                        >{{ $field.error?.message }}</Message
-                      >
-                    </FormField>
-                    <FormField v-slot="$field" name="brand" class="flex flex-col gap-1 w-3">
-                      <FloatLabel variant="on">
-                        <Select
-                          v-model="initialValues.brand"
-                          :options="ui.brand.item"
-                          class="w-full md:w-56"
-                          :loading="ui.brand.loading"
-                          optionLabel="name"
-                          size="small"
-                          @filter="filterBrand"
-                          filter
-                        >
-                          <template #value="slotProps">
-                            <Tag
-                              v-if="slotProps.value.name"
-                              severity="info"
-                              :value="slotProps.value.code"
-                            ></Tag
-                            >&nbsp;<small>{{ slotProps.value.name }}</small>
-                          </template>
-                          <template #option="slotProps">
-                            <Tag severity="info" :value="slotProps.option.code"></Tag
-                            >&nbsp;<small>{{ slotProps.option.name }}</small>
-                          </template>
-                          <template #header>
-                            <div class="font-medium p-3">Search item brand</div>
-                          </template>
-                        </Select>
-                        <label for="brand">Brand</label>
                       </FloatLabel>
                       <Message
                         v-if="$field?.invalid"
@@ -391,12 +353,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { storeCore } from '@/store/index'
-import {
-  storeMasterItem,
-  storeMasterItemUnit,
-  storeMasterItemCategory,
-  storeMasterItemBrand,
-} from '../store'
+import { storeMasterItem, storeMasterItemUnit, storeMasterItemCategory } from '../store'
 import { mapStores, mapActions } from 'pinia'
 import { valibotResolver } from '@primevue/forms/resolvers/valibot'
 import * as valibot from 'valibot'
@@ -425,11 +382,6 @@ export default defineComponent({
         remark: '',
         category: [],
         unit: [],
-        brand: {
-          id: '',
-          code: '',
-          name: '',
-        },
         configuration: {
           allow_grn: false,
           allow_incoming: false,
@@ -447,11 +399,6 @@ export default defineComponent({
           item: [] as any,
         },
         unit: {
-          loading: false,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          item: [] as any,
-        },
-        brand: {
           loading: false,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           item: [] as any,
@@ -497,7 +444,6 @@ export default defineComponent({
   computed: {
     ...mapStores(storeMasterItem),
     ...mapStores(storeMasterItemUnit),
-    ...mapStores(storeMasterItemBrand),
     ...mapStores(storeMasterItemCategory),
   },
   methods: {
@@ -508,15 +454,15 @@ export default defineComponent({
       })
     },
     calculate_price() {
-      if (this.initialValues.configuration.benefit_margin_type.code === 'n') {
-        this.simulator.sell_price = this.simulator.basic_price
+      if (this.initialValues.configuration.benefit_margin_type.code === 'v') {
+        this.simulator.sell_price =
+          this.simulator.basic_price + this.initialValues.configuration.benefit_margin_value
       } else if (this.initialValues.configuration.benefit_margin_type.code === 'p') {
         this.simulator.sell_price =
           this.simulator.basic_price +
           (this.initialValues.configuration.benefit_margin_value * this.simulator.basic_price) / 100
       } else {
-        this.simulator.sell_price =
-          this.simulator.basic_price + this.initialValues.configuration.benefit_margin_value
+        this.simulator.sell_price = this.simulator.basic_price
       }
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -554,37 +500,23 @@ export default defineComponent({
           filters: { name: { value: filterValue, matchMode: 'contains' } },
         })
         .then((response: CoreResponse) => {
-          const data = response.payload.data
-          this.ui.unit.item = data
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const data: any = response.payload.data
+          const mergedArray = [...this.initialValues.unit, ...data]
+          this.ui.unit.item = [...new Map(mergedArray.map((item) => [item.id, item])).values()]
           this.ui.unit.loading = false
         })
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async filterBrand(event: any) {
-      const filterValue = event.value
-      this.ui.brand.loading = true
-      await this.masterItemBrandStore
-        .list({
-          first: 0,
-          rows: 10,
-          projection: { _id: 0, id: 1, code: 1, name: 1 },
-          sortField: 'name',
-          sortOrder: 1,
-          filters: { name: { value: filterValue, matchMode: 'contains' } },
-        })
-        .then((response: CoreResponse) => {
-          const data = response.payload.data
-          this.ui.brand.item = data
-          this.ui.brand.loading = false
-        })
-    },
+
     async detail(id: string) {
       await this.masterItemStore.detail(id).then((response: CoreResponse) => {
         const data = response.payload
+
         this.initialValues.code = data.code
         this.initialValues.name = data.name
         this.initialValues.alias = data.alias
         this.initialValues.remark = data.remark
+
         this.initialValues.category.push(...data.category)
         this.initialValues.category = [
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -592,18 +524,26 @@ export default defineComponent({
         ]
         this.ui.category.item.push(...data.category)
 
-        const unit = [data.unit]
-        this.initialValues.unit.push(...unit)
+        this.initialValues.unit.push(...data.unit)
         this.initialValues.unit = [
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...new Map(this.initialValues.unit.map((item: any) => [item.id, item])).values(),
         ]
-        this.ui.unit.item.push(...unit)
-        if (data.brand) this.initialValues.brand = data.brand
+        this.ui.unit.item.push(...data.unit)
+
         this.initialValues.configuration = data.configuration
+
+        if (!data.configuration.benefit_margin_type) data.configuration.benefit_margin_type = 'n'
+
         this.initialValues.configuration.benefit_margin_type = this.benefit_type.filter(
           (item) => item.code === data.configuration.benefit_margin_type,
         )[0]
+
+        if (!this.initialValues.configuration.benefit_margin_type)
+          this.initialValues.configuration.benefit_margin_type = this.benefit_type.filter(
+            (item) => item.code === 'n',
+          )[0]
+
         this.v = data.__v
 
         this.calculate_price()
@@ -618,8 +558,6 @@ export default defineComponent({
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async submit(event: any) {
-      console.clear()
-      console.log(JSON.stringify(this.initialValues, null, 2))
       if (event.valid) {
         const confirmation = this.$confirm
         confirmation.require({
