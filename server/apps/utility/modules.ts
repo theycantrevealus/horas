@@ -562,23 +562,85 @@ export const modCodes = {
       },
     },
   },
-  MaterialRequisitionService: {
+  GatewayInventoryMaterialRequisition: {
     defaultCode: 'MR',
-    error: {
-      databaseError: {
-        defaultCode: HttpStatus.BAD_REQUEST,
-        customCode: 'E0001',
+    defaultResponseCode: {
+      success: HttpStatus.OK,
+      error: {
+        databaseError: {
+          defaultCode: HttpStatus.BAD_REQUEST,
+          customCode: 'E0001',
+        },
+        isNotFound: {
+          defaultCode: HttpStatus.NOT_FOUND,
+          customCode: 'E0002',
+        },
+        isNoAccess: {
+          defaultCode: HttpStatus.FORBIDDEN,
+          customCode: 'E0003',
+        },
       },
-      isNotFound: {
-        defaultCode: HttpStatus.NOT_FOUND,
-        customCode: 'E0002',
+    },
+    methods: {
+      all: {
+        responseCode: HttpStatus.OK,
+        message: 'Material requisition fetched successfully',
+        transaction_classify: 'MR_GET',
       },
-      isNoAccess: {
-        defaultCode: HttpStatus.FORBIDDEN,
-        customCode: 'E0003',
+      detail: {
+        responseCode: HttpStatus.OK,
+        message: 'Material requisition fetched successfully',
+        transaction_classify: 'MR_GET',
+      },
+      add: {
+        responseCode: HttpStatus.CREATED,
+        message: 'Material requisition created successfully',
+        transaction_classify: 'MR_ADD',
+      },
+      edit: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Material requisition updated successfully',
+        transaction_classify: 'MR_EDIT',
+      },
+      delete: {
+        responseCode: HttpStatus.NO_CONTENT,
+        message: 'Material requisition deleted successfully',
+        transaction_classify: 'MR_DELETE',
+      },
+      askApproval: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Material requisition proposed successfully',
+        transaction_classify: 'MR_ASK_APPROVAL',
+      },
+      approve: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Material requisition approved successfully',
+        transaction_classify: 'MR_APPROVE',
+      },
+      decline: {
+        responseCode: HttpStatus.ACCEPTED,
+        message: 'Material requisition declined successfully',
+        transaction_classify: 'MR_DECLINE',
       },
     },
   },
+  // MaterialRequisitionService: {
+  //   defaultCode: 'MR',
+  //   error: {
+  //     databaseError: {
+  //       defaultCode: HttpStatus.BAD_REQUEST,
+  //       customCode: 'E0001',
+  //     },
+  //     isNotFound: {
+  //       defaultCode: HttpStatus.NOT_FOUND,
+  //       customCode: 'E0002',
+  //     },
+  //     isNoAccess: {
+  //       defaultCode: HttpStatus.FORBIDDEN,
+  //       customCode: 'E0003',
+  //     },
+  //   },
+  // },
   GatewayInventoryStockInitiation: {
     defaultCode: 'INI',
     defaultResponseCode: {

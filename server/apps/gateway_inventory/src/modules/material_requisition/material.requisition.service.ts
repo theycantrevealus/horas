@@ -2,7 +2,7 @@ import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { IConfig } from '@schemas/config/config'
@@ -10,9 +10,7 @@ import {
   MaterialRequisition,
   MaterialRequisitionDocument,
 } from '@schemas/inventory/material.requisition'
-import { IMaterialRequisitionApproval } from '@schemas/inventory/material.requisition.interface'
 import { PrimeParameter } from '@utility/dto/prime'
-import { GlobalResponse } from '@utility/dto/response'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -47,19 +45,7 @@ export class GatewayInventoryMaterialRequisitionService {
     private readonly socketProxy: SocketIoClientProxyService
   ) {}
 
-  async list(payload: any, account: IAccount): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MATERIAL_REQUISITION_GET',
-      transaction_id: '',
-    } satisfies GlobalResponse
-
+  async all(payload: any, account: IAccount) {
     try {
       const parameter: PrimeParameter = JSON.parse(payload)
       return await prime_datatable(
@@ -71,39 +57,30 @@ export class GatewayInventoryMaterialRequisitionService {
           ...parameter,
         },
         this.materialRequisitionModel
-      ).then((result) => {
-        response.payload = result
-        response.message = 'Material requisition fetch successfully'
-        return response
+      ).catch((error: Error) => {
+        throw error
       })
     } catch (error) {
-      response.message = `Material requisition failed to fetch`
-      response.statusCode = {
-        ...modCodes[this.constructor.name].error.databaseError,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      }
-      response.payload = error
-      throw new Error(JSON.stringify(response))
+      throw error
     }
   }
 
-  async add(
-    data: MaterialRequisitionAddDTO,
-    account: IAccount,
-    token: string
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MATERIAL_REQUISITION_ADD',
-      transaction_id: null,
-    } satisfies GlobalResponse
+  async detail(id: string) {
+    return this.materialRequisitionModel
+      .findOne({ id: id })
+      .then((result) => {
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
+        }
+      })
+      .catch((error: Error) => {
+        throw error
+      })
+  }
 
+  async add(data: MaterialRequisitionAddDTO, account: IAccount) {
     if (!data.code) {
       const now = new Date()
       await this.materialRequisitionModel
@@ -142,182 +119,53 @@ export class GatewayInventoryMaterialRequisitionService {
           }),
         created_by: account,
       })
-      .then(async (result) => {
-        response.statusCode = {
-          defaultCode: HttpStatus.OK,
-          customCode: modCodes.Global.success,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.transaction_id = result._id
-        response.payload = result
-
-        await this.socketProxy
-          .reconnect({
-            extraHeaders: {
-              Authorization: `${token}`,
-            },
-          })
-          .then(async (clientSet: Socket) => {
-            response.message =
-              'Material requisition created and notified successfully'
-
-            clientSet.emit('proceed', {
-              sender: account,
-              receiver: null,
-              payload: response,
-            } satisfies ProceedDataTrafficDTO)
-          })
-          .catch((e: Error) => {
-            response.message = 'Material requisition created successfully'
-            this.logger.error(`Failed to connect: ${e}]`)
-          })
-
-        return response
-      })
       .catch((error: Error) => {
-        response.message = `Material requisition failed to create. ${error.message}`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
-
-        return response
+        throw error
       })
   }
 
-  async edit(
-    data: MaterialRequisitionEditDTO,
-    id: string,
-    account: IAccount
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MATERIAL_REQUISITION_EDIT',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
+  async edit(data: MaterialRequisitionEditDTO, id: string, account: IAccount) {
     return await this.materialRequisitionModel
       .findOneAndUpdate({ id: id, created_by: account, status: 'new' }, data)
       .then((result) => {
-        response.message = 'Material requisition updated successfully'
-        response.statusCode = {
-          defaultCode: HttpStatus.OK,
-          customCode: modCodes.Global.success,
-          classCode: modCodes[this.constructor.name].defaultCode,
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
         }
-        response.transaction_id = result._id
-        response.payload = result
-        return response
       })
       .catch((error) => {
-        response.message = `Material requisition failed to update : ${error.message}`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
-
-        return response
+        throw error
       })
   }
 
-  async delete(
-    id: string,
-    account: IAccount,
-    token: string
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MATERIAL_REQUISITION_DELETE',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
+  async delete(id: string, account: IAccount) {
     return await this.materialRequisitionModel
       .findOneAndDelete({ id: id, created_by: account, status: 'new' })
       .then(async (result) => {
-        response.statusCode = {
-          defaultCode: HttpStatus.OK,
-          customCode: modCodes.Global.success,
-          classCode: modCodes[this.constructor.name].defaultCode,
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
         }
-        response.transaction_id = result._id
-        response.payload = result
-
-        await this.socketProxy
-          .reconnect({
-            extraHeaders: {
-              Authorization: `${token}`,
-            },
-          })
-          .then(async (clientSet: Socket) => {
-            response.message =
-              'Material requisition deleted and notified successfully'
-
-            clientSet.emit('proceed', {
-              sender: account,
-              receiver: null,
-              payload: response,
-            } satisfies ProceedDataTrafficDTO)
-          })
-          .catch((e: Error) => {
-            response.message = 'Material requisition deleted successfully'
-            this.logger.error(`Failed to connect: ${e}]`)
-          })
-
-        return response
       })
       .catch((error) => {
-        response.message = `Material requisition failed to delete : ${error.message}`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
-
-        return response
+        throw error
       })
   }
 
+  /**
+   * @description Propose for approval
+   * @param { MaterialRequisitionApproval } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
   async askApproval(
     data: MaterialRequisitionApproval,
     id: string,
-    account: IAccount,
-    token: string
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MATERIAL_REQUISITION_ASK_APPROVAL',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    const status: IMaterialRequisitionApproval = {
-      status: 'need_approval',
-      remark: data.remark,
-      logged_at: new TimeManagement().getTimezone(
-        this.configService.get<string>('application.timezone')
-      ),
-      created_by: account,
-    }
-
+    account: IAccount
+  ) {
     return await this.materialRequisitionModel
       .findOneAndUpdate(
         { id: id, 'created_by.id': account.id, status: 'new', __v: data.__v },
@@ -326,86 +174,45 @@ export class GatewayInventoryMaterialRequisitionService {
             status: 'need_approval',
           },
           $push: {
-            approval_history: status,
+            approval_history: {
+              status: 'need_approval',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
           },
         }
       )
       .then(async (result) => {
-        response.statusCode = {
-          defaultCode: HttpStatus.OK,
-          customCode: modCodes.Global.success,
-          classCode: modCodes[this.constructor.name].defaultCode,
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
         }
-        response.transaction_id = result._id
-        response.payload = result
-
-        await this.socketProxy
-          .reconnect({
-            extraHeaders: {
-              Authorization: `${token}`,
-            },
-          })
-          .then(async (clientSet: Socket) => {
-            response.message =
-              'Material requisition proposed and notified successfully'
-
-            clientSet.emit('proceed', {
-              sender: account,
-              receiver: null,
-              payload: response,
-            } satisfies ProceedDataTrafficDTO)
-          })
-          .catch((e: Error) => {
-            response.message = 'Material requisition proposed successfully'
-            this.logger.error(`Failed to connect: ${e}]`)
-          })
-
-        return response
       })
       .catch((error) => {
-        response.message = `Material requisition failed to proposed : ${error.message}`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
-
-        return response
+        throw error
       })
   }
 
+  /**
+   * @description Approve MR
+   * @param { MaterialRequisitionApproval } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
   async approve(
     data: MaterialRequisitionApproval,
     id: string,
-    account: IAccount,
-    token: string
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MATERIAL_REQUISITION_APPROVE',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    const status: IMaterialRequisitionApproval = {
-      status: 'approved',
-      remark: data.remark,
-      logged_at: new TimeManagement().getTimezone(
-        this.configService.get<string>('application.timezone')
-      ),
-      created_by: account,
-    }
-
+    account: IAccount
+  ) {
     return await this.materialRequisitionModel
       .findOneAndUpdate(
         {
           id: id,
-          'created_by.id': account.id,
           status: 'need_approval',
           __v: data.__v,
         },
@@ -414,86 +221,45 @@ export class GatewayInventoryMaterialRequisitionService {
             status: 'approved',
           },
           $push: {
-            approval_history: status,
+            approval_history: {
+              status: 'approved',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
           },
         }
       )
       .then(async (result) => {
-        response.statusCode = {
-          defaultCode: HttpStatus.OK,
-          customCode: modCodes.Global.success,
-          classCode: modCodes[this.constructor.name].defaultCode,
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
         }
-        response.transaction_id = result._id
-        response.payload = result
-
-        await this.socketProxy
-          .reconnect({
-            extraHeaders: {
-              Authorization: `${token}`,
-            },
-          })
-          .then(async (clientSet: Socket) => {
-            response.message =
-              'Material requisition approved and notified successfully'
-
-            clientSet.emit('proceed', {
-              sender: account,
-              receiver: null,
-              payload: response,
-            } satisfies ProceedDataTrafficDTO)
-          })
-          .catch((e: Error) => {
-            response.message = 'Material requisition approved successfully'
-            this.logger.error(`Failed to connect: ${e}]`)
-          })
-
-        return response
       })
       .catch((error) => {
-        response.message = `Material requisition failed to approved : ${error.message}`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
-
-        return response
+        throw error
       })
   }
 
+  /**
+   * @description Decline MR
+   * @param { MaterialRequisitionApproval } data
+   * @param { string } id
+   * @param { IAccount } account
+   * @returns
+   */
   async decline(
     data: MaterialRequisitionApproval,
     id: string,
-    account: IAccount,
-    token: string
-  ): Promise<GlobalResponse> {
-    const response = {
-      statusCode: {
-        defaultCode: HttpStatus.OK,
-        customCode: modCodes.Global.success,
-        classCode: modCodes[this.constructor.name].defaultCode,
-      },
-      message: '',
-      payload: {},
-      transaction_classify: 'MATERIAL_REQUISITION_DECLINE',
-      transaction_id: null,
-    } satisfies GlobalResponse
-
-    const status: IMaterialRequisitionApproval = {
-      status: 'declined',
-      remark: data.remark,
-      logged_at: new TimeManagement().getTimezone(
-        this.configService.get<string>('application.timezone')
-      ),
-      created_by: account,
-    }
-
+    account: IAccount
+  ) {
     return await this.materialRequisitionModel
       .findOneAndUpdate(
         {
           id: id,
-          'created_by.id': account.id,
           status: 'need_approval',
           __v: data.__v,
         },
@@ -502,51 +268,45 @@ export class GatewayInventoryMaterialRequisitionService {
             status: 'declined',
           },
           $push: {
-            approval_history: status,
+            approval_history: {
+              status: 'declined',
+              remark: data.remark,
+              logged_at: new TimeManagement().getTimezone(
+                this.configService.get<string>('application.timezone')
+              ),
+              created_by: account,
+            },
           },
         }
       )
       .then(async (result) => {
-        response.statusCode = {
-          defaultCode: HttpStatus.OK,
-          customCode: modCodes.Global.success,
-          classCode: modCodes[this.constructor.name].defaultCode,
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
         }
-        response.transaction_id = result._id
-        response.payload = result
-
-        await this.socketProxy
-          .reconnect({
-            extraHeaders: {
-              Authorization: `${token}`,
-            },
-          })
-          .then(async (clientSet: Socket) => {
-            response.message =
-              'Material requisition declined and notified successfully'
-
-            clientSet.emit('proceed', {
-              sender: account,
-              receiver: null,
-              payload: response,
-            } satisfies ProceedDataTrafficDTO)
-          })
-          .catch((e: Error) => {
-            response.message = 'Material requisition declined successfully'
-            this.logger.error(`Failed to connect: ${e}]`)
-          })
-
-        return response
       })
       .catch((error) => {
-        response.message = `Material requisition failed to declined : ${error.message}`
-        response.statusCode = {
-          ...modCodes[this.constructor.name].error.databaseError,
-          classCode: modCodes[this.constructor.name].defaultCode,
-        }
-        response.payload = error
+        throw error
+      })
+  }
 
-        return response
+  async notifier(payload: any, account: IAccount, token: string) {
+    await this.socketProxy
+      .reconnect({
+        extraHeaders: {
+          Authorization: `${token}`,
+        },
+      })
+      .then(async (clientSet: Socket) => {
+        clientSet.emit('proceed', {
+          sender: account,
+          receiver: null,
+          payload: payload,
+        } satisfies ProceedDataTrafficDTO)
+      })
+      .catch((error: Error) => {
+        throw error
       })
   }
 }

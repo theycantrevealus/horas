@@ -16,7 +16,7 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
     const sortField = parameter.sortField ? parameter.sortField : 'created_at'
     const sortOrder = parameter.sortOrder ? parseInt(parameter.sortOrder) : 1
     const projection = parameter.projection ?? {}
-    const search_term = parameter.search_term ?? {}
+    // const search_term = parameter.search_term ?? {}
     const filters = parameter.filters
     const custom_filter = parameter.custom_filter || []
     const query = []
@@ -25,47 +25,108 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
     const filter_builder = { $and: [], $or: [] }
     const filterSet = filters
     for (const a in filterSet) {
-      if (
-        a &&
-        a !== '' &&
-        filterSet[a].value !== '' &&
-        filterSet[a].value !== null
-      ) {
-        const autoColumn = {}
-        if (autoColumn[a] === undefined) {
-          autoColumn[a] = {}
+      const eFilter = filterSet[a]
+      if (eFilter.constraints && eFilter.operator) {
+        const eConstraints = eFilter.constraints
+        const autoColumn = []
+
+        for (const b in eConstraints) {
+          if (
+            a &&
+            a !== '' &&
+            eConstraints[b].value !== '' &&
+            eConstraints[b].value !== null
+          ) {
+            if (eConstraints[b].matchMode === 'contains') {
+              autoColumn.push({
+                [a]: {
+                  $regex: new RegExp(`${eConstraints[b].value}`, 'i'),
+                },
+              })
+            } else if (eConstraints[b].matchMode === 'notContains') {
+              autoColumn.push({
+                [a]: {
+                  $not: {
+                    $regex: new RegExp(`${filterSet[a].value}`, 'i'),
+                  },
+                },
+              })
+            } else if (eConstraints[b].matchMode === 'endsWith') {
+              autoColumn.push({
+                [a]: {
+                  $regex: new RegExp(`${filterSet[a].value}$`, 'i'),
+                },
+              })
+            } else if (eConstraints[b].matchMode === 'equals') {
+              autoColumn.push({
+                [a]: {
+                  $eq: eConstraints[b].value,
+                },
+              })
+            } else if (eConstraints[b].matchMode === 'notEquals') {
+              autoColumn.push({
+                [a]: {
+                  $not: {
+                    $eq: eConstraints[b].value,
+                  },
+                },
+              })
+            }
+          }
         }
 
-        if (filterSet[a].matchMode === 'contains') {
-          autoColumn[a] = {
-            $regex: new RegExp(`${filterSet[a].value}`, 'i'),
-          }
-        } else if (filterSet[a].matchMode === 'notContains') {
-          autoColumn[a] = {
-            $not: {
-              $regex: new RegExp(`${filterSet[a].value}`, 'i'),
-            },
-          }
-        } else if (filterSet[a].matchMode === 'endsWith') {
-          autoColumn[a] = {
-            $regex: new RegExp(`${filterSet[a].value}$`, 'i'),
-          }
-        } else if (filterSet[a].matchMode === 'equals') {
-          autoColumn[a] = {
-            $eq: filterSet[a].value,
-          }
-        } else if (filterSet[a].matchMode === 'notEquals') {
-          autoColumn[a] = {
-            $not: {
-              $eq: filterSet[a].value,
-            },
-          }
-        }
-
-        if (filterSet[a]?.logic === 'or') {
-          filter_builder.$or.push(autoColumn)
+        if (eFilter.operator.toString().trim().toUpperCase() === 'AND') {
+          filter_builder.$and.push(...autoColumn)
         } else {
-          filter_builder.$and.push(autoColumn)
+          filter_builder.$or.push(...autoColumn)
+        }
+      } else {
+        if (
+          a &&
+          a !== '' &&
+          filterSet[a].value !== '' &&
+          filterSet[a].value !== null
+        ) {
+          const autoColumn = {}
+          if (autoColumn[a] === undefined) {
+            autoColumn[a] = {}
+          }
+
+          if (filterSet[a].matchMode === 'contains') {
+            autoColumn[a] = {
+              $regex: new RegExp(`${filterSet[a].value}`, 'i'),
+            }
+          } else if (filterSet[a].matchMode === 'notContains') {
+            autoColumn[a] = {
+              $not: {
+                $regex: new RegExp(`${filterSet[a].value}`, 'i'),
+              },
+            }
+          } else if (filterSet[a].matchMode === 'endsWith') {
+            autoColumn[a] = {
+              $regex: new RegExp(`${filterSet[a].value}$`, 'i'),
+            }
+          } else if (filterSet[a].matchMode === 'equals') {
+            autoColumn[a] = {
+              $eq: filterSet[a].value,
+            }
+          } else if (filterSet[a].matchMode === 'notEquals') {
+            autoColumn[a] = {
+              $not: {
+                $eq: filterSet[a].value,
+              },
+            }
+          } else if (filterSet[a].matchMode === 'in') {
+            autoColumn[a] = {
+              $in: filterSet[a].value,
+            }
+          }
+
+          if (filterSet[a]?.logic === 'or') {
+            filter_builder.$or.push(autoColumn)
+          } else {
+            filter_builder.$and.push(autoColumn)
+          }
         }
       }
     }
@@ -80,24 +141,36 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
       }
     }
 
-    if (filter_builder.$and.length > 0) {
-      if (Object.keys(search_term).length) {
-        filter_builder.$and.push({
-          $text: {
-            $search: search_term.value,
-          },
-        })
-      }
+    // if (filter_builder.$and.length > 0) {
+    //   if (Object.keys(search_term).length) {
+    //     filter_builder.$and.push({
+    //       $text: {
+    //         $search: search_term.value,
+    //       },
+    //     })
+    //   }
 
-      query.push({
-        $match: filter_builder,
-      })
+    //   query.push({
+    //     $match: filter_builder,
+    //   })
+    // } else {
+    //   query.push({
+    //     $match: {
+    //       $and: [{ deleted_at: null }],
+    //     },
+    //   })
+    // }
+
+    query.push({
+      $match: {
+        $and: [{ deleted_at: null }],
+      },
+    })
+
+    if (filter_builder.$and.length > 0) {
+      query[0].$match.$and = filter_builder.$and
     } else {
-      query.push({
-        $match: {
-          $and: [{ deleted_at: null }],
-        },
-      })
+      delete query[0].$match.$or
     }
 
     if (filter_builder.$or.length > 0) {
