@@ -44,17 +44,27 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
                 },
               })
             } else if (eConstraints[b].matchMode === 'notContains') {
-              autoColumn.push({
-                [a]: {
-                  $not: {
-                    $regex: new RegExp(`${filterSet[a].value}`, 'i'),
+              if (typeof eConstraints[b].value === 'string') {
+                autoColumn.push({
+                  [a]: {
+                    $not: {
+                      $regex: new RegExp(`${eConstraints[b].value}`, 'i'),
+                    },
                   },
-                },
-              })
+                })
+              } else if (Array.isArray(eConstraints[b].value)) {
+                if (eConstraints[b].value.length > 0) {
+                  autoColumn.push({
+                    [a]: {
+                      $nin: eConstraints[b].value,
+                    },
+                  })
+                }
+              }
             } else if (eConstraints[b].matchMode === 'endsWith') {
               autoColumn.push({
                 [a]: {
-                  $regex: new RegExp(`${filterSet[a].value}$`, 'i'),
+                  $regex: new RegExp(`${eConstraints[b].value}$`, 'i'),
                 },
               })
             } else if (eConstraints[b].matchMode === 'equals') {
@@ -97,10 +107,18 @@ const prime_datatable = async (parameter: any, model: Model<any>) => {
               $regex: new RegExp(`${filterSet[a].value}`, 'i'),
             }
           } else if (filterSet[a].matchMode === 'notContains') {
-            autoColumn[a] = {
-              $not: {
-                $regex: new RegExp(`${filterSet[a].value}`, 'i'),
-              },
+            if (typeof filterSet[a].value === 'string') {
+              autoColumn[a] = {
+                $not: {
+                  $regex: new RegExp(`${filterSet[a].value}`, 'i'),
+                },
+              }
+            } else if (Array.isArray(filterSet[a].value)) {
+              if (filterSet[a].value.length > 0) {
+                autoColumn[a] = {
+                  $nin: filterSet[a].value,
+                }
+              }
             }
           } else if (filterSet[a].matchMode === 'endsWith') {
             autoColumn[a] = {
