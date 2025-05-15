@@ -267,9 +267,10 @@
               class="wrap_content"
             >
               <template #body="slotProps">
-                {{
-                  `${slotProps.data.created_by.last_name}, ${slotProps.data.created_by.first_name}`
-                }}
+                <AccountBadge
+                  :first_name="slotProps.data.created_by.first_name"
+                  :last_name="slotProps.data.created_by.last_name"
+                />
               </template>
               <template #filter="{ filterModel, filterCallback }">
                 <InputText
@@ -308,6 +309,7 @@ import { storeCore } from '@/store/index'
 import { storeInventoryMaterialRequisition } from '@/modules/inventory/material_requisition/store'
 import { mapStores, mapActions } from 'pinia'
 import { defineComponent, defineAsyncComponent } from 'vue'
+import AccountBadge from '@/components/Account.Badge.vue'
 
 const FormMaterialRequisitionApproval = defineAsyncComponent(
   () => import('@/modules/inventory/material_requisition/components/Form.Approval.vue'),
@@ -315,6 +317,7 @@ const FormMaterialRequisitionApproval = defineAsyncComponent(
 
 export default defineComponent({
   name: 'InventoryMaterialRequisitionList',
+  components: { AccountBadge },
   data() {
     return {
       ui: {
