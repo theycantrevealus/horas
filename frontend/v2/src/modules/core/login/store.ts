@@ -22,6 +22,7 @@ export const storeLogin = defineStore('signIn', () => {
           parentStore.auth.first_name = data.payload.account.first_name
           parentStore.auth.last_name = data.payload.account.last_name
           parentStore.auth.permission = data.payload.account.permission
+          parentStore.auth.stock_point = data.payload.account.stock_point
           parentStore.updatePermissionv2(data.payload.account.menu)
           parentStore.updateAppConfig(data.payload.config)
           // parentStore.updateAccess(data.payload.account)

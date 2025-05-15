@@ -8,6 +8,11 @@
     src: url('./fonts/greycliff/GreycliffCF-Bold.ttf');
 }
 
+b,
+strong {
+    font-weight: bolder !important;
+}
+
 /* @font-face {
     font-family: Karla;
     src: url('./fonts/karla/static/Karla-Regular.ttf');
@@ -1466,4 +1471,12 @@ label[for] {
 
 .p-multiselect-chip-item .p-chip-label {
     font-size: 0.7rem;
+}
+
+.p-fieldset-content .p-datepicker {
+    padding: 0 !important;
+}
+
+.p-datepicker:not(.p-datepicker-inline) {
+    box-shadow: none !important;
 }

@@ -220,8 +220,6 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async submit(event: any) {
       if (event.valid) {
-        console.clear()
-        console.log(this.initialValues)
         const confirmation = this.$confirm
         confirmation.require({
           group: 'confirm_changes',

@@ -62,6 +62,24 @@ export class GatewayInventoryMaterialRequisitionController {
     return await this.materialRequisitionService.all(parameter, account)
   }
 
+  @Get('material_requisition/:id')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @Authorization(true)
+  @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MaterialRequisition', action: 'view' })
+  @UseInterceptors(HORASInterceptor)
+  @ApiParam({
+    name: 'id',
+  })
+  @ApiOperation({
+    summary: 'Detail data',
+    description: '',
+  })
+  async detail(@Param() param: any) {
+    return await this.materialRequisitionService.detail(param.id)
+  }
+
   @Post('material_requisition')
   @Version('1')
   @UseGuards(JwtAuthGuard)

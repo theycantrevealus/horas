@@ -32,6 +32,8 @@ interface Authentication {
   permission: Permission[] // TODO : Consider to take out
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pagesAllow: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  stock_point: any[],
   domAllow: AccountAccessItem[]
 }
 
@@ -84,6 +86,7 @@ export const storeCore = defineStore('core', {
       permission: [],
       pagesAllow: {},
       domAllow: [],
+      stock_point: [],
     },
     ui_status: {
       isEditData: false,

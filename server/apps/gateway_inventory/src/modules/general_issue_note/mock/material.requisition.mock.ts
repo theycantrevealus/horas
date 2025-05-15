@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { mockMasterItemUnit } from '@gateway_core/master/mock/master.item.unit.mock'
 import {
   MaterialRequisition,
   MaterialRequisitionDocument,
@@ -33,6 +34,7 @@ export const mockMaterialRequisition = (
         name: 'Item 1',
       },
       qty: 10,
+      unit: mockMasterItemUnit(),
       issued: 10,
       remark: '',
     },

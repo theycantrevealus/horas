@@ -12,9 +12,6 @@ export const storeInventoryMaterialRequisition = defineStore('inventoryMaterialR
   actions: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async list(parameter: any) {
-      // console.clear()
-      // console.log(JSON.stringify(parameter, null, 2))
-
       return await api({ requiresAuth: true })
         .get(`${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/material_requisition`, {
           params: {

@@ -142,12 +142,8 @@ export default defineComponent({
       }
       this.darkMode = darkMode
 
-      // console.clear()
-      // console.log(JSON.stringify(state.setting, null, 2))
-
       this.logo.light = state.setting.logo.light
       this.logo.dark = state.setting.logo.dark
-      // console.log(JSON.stringify(this.logo.light, null, 2))
     })
   },
   mounted() {

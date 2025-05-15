@@ -125,8 +125,12 @@ export class GatewayInventoryMaterialRequisitionService {
   }
 
   async edit(data: MaterialRequisitionEditDTO, id: string, account: IAccount) {
+    const { __v, ...dataSet } = data
     return await this.materialRequisitionModel
-      .findOneAndUpdate({ id: id, created_by: account, status: 'new' }, data)
+      .findOneAndUpdate(
+        { id: id, 'created_by.id': account.id, status: 'new', __v: __v },
+        dataSet
+      )
       .then((result) => {
         if (result) {
           return result
@@ -141,7 +145,7 @@ export class GatewayInventoryMaterialRequisitionService {
 
   async delete(id: string, account: IAccount) {
     return await this.materialRequisitionModel
-      .findOneAndDelete({ id: id, created_by: account, status: 'new' })
+      .findOneAndDelete({ id: id, 'created_by.id': account.id, status: 'new' })
       .then(async (result) => {
         if (result) {
           return result

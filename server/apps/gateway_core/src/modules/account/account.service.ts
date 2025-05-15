@@ -474,6 +474,7 @@ export class AccountService {
                   first_name: result.first_name,
                   last_name: result.last_name,
                   menu: result.menu,
+                  stock_point: result.stock_point,
                   // permission: result.permission,
                   // access: result.access,
                 },
