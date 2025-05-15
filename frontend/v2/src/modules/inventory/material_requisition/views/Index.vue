@@ -49,11 +49,16 @@
             <template #expansion="slotProps">
               <div class="p-2">
                 <Splitter>
-                  <SplitterPanel class="p-3">
-                    <h4>{{ slotProps.data.code }}</h4>
-                    <Divider />
-                    <h5>Remark:</h5>
-                    <p v-html="slotProps.data.remark"></p>
+                  <SplitterPanel :size="50">
+                    <Splitter layout="vertical">
+                      <SplitterPanel class="p-3" :size="15">
+                        <h4>{{ slotProps.data.code }}</h4>
+                      </SplitterPanel>
+                      <SplitterPanel class="p-3" :size="15">
+                        <h5>Remark:</h5>
+                        <small v-html="slotProps.data.remark"></small>
+                      </SplitterPanel>
+                    </Splitter>
                   </SplitterPanel>
                   <SplitterPanel class="flex items-center justify-center p-3">
                     <Timeline :value="slotProps.data.approval_history">
