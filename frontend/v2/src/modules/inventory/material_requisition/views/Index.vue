@@ -27,6 +27,8 @@
             :paginator="true"
             :rows="20"
             stripedRows
+            scrollable
+            scrollHeight="800px"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             :rowsPerPageOptions="[20, 50, 100]"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
@@ -35,12 +37,53 @@
             filterDisplay="menu"
             :globalFilterFields="['code', 'stock_point', 'status', 'created_at']"
             responsiveLayout="scroll"
+            dataKey="id"
+            v-model:expandedRows="ui.table.expandedRows"
             @page="onPage($event)"
             @sort="onSort($event)"
             @filter="onFilter($event)"
           >
             <template #empty> No material requisitions found. </template>
             <template #loading> Loading material requisitions. Please wait. </template>
+            <Column expander style="width: 5rem" />
+            <template #expansion="slotProps">
+              <div class="p-2">
+                <Splitter>
+                  <SplitterPanel class="p-3">
+                    <h4>{{ slotProps.data.code }}</h4>
+                    <Divider />
+                    <h5>Remark:</h5>
+                    <p v-html="slotProps.data.remark"></p>
+                  </SplitterPanel>
+                  <SplitterPanel class="flex items-center justify-center p-3">
+                    <Timeline :value="slotProps.data.approval_history">
+                      <template #opposite="TimeLineSlotProps">
+                        <small class="text-surface-500 dark:text-surface-400"
+                          ><strong
+                            >{{ TimeLineSlotProps.item.created_by.last_name }},
+                            {{ TimeLineSlotProps.item.created_by.first_name }}</strong
+                          ></small
+                        ><br />
+                        <small class="text-surface-500 dark:text-surface-400">{{
+                          formatDate(TimeLineSlotProps.item.logged_at, 'DD MMMM YYYY, HH:mm')
+                        }}</small>
+                      </template>
+                      <template #content="TimeLineSlotProps">
+                        <Message
+                          class="mt-3"
+                          :severity="`${ui.timeline.severity[TimeLineSlotProps.item.status].class}`"
+                          ><strong>{{
+                            ui.timeline.severity[TimeLineSlotProps.item.status].caption
+                          }}</strong>
+                          :
+                          <p v-html="TimeLineSlotProps.item.remark"></p>
+                        </Message>
+                      </template>
+                    </Timeline>
+                  </SplitterPanel>
+                </Splitter>
+              </div>
+            </template>
             <Column header="ID" class="align-right wrap_content">
               <template #body="slotProps">
                 <h6 class="d-inline-flex">#{{ slotProps.data.autonum }}</h6>
@@ -275,6 +318,27 @@ export default defineComponent({
   data() {
     return {
       ui: {
+        timeline: {
+          severity: {
+            new: {
+              class: 'info',
+              caption: 'New',
+            },
+            need_approval: {
+              class: 'warn',
+              caption: 'Need Approval',
+            },
+            approved: {
+              class: 'success',
+              caption: 'Approved',
+            },
+            declined: {
+              class: 'error',
+              caption: 'Declined',
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
         availStatus: [
           { name: 'New', code: 'new', class: 'info', icon: 'pi-bolt' },
           {
@@ -287,6 +351,7 @@ export default defineComponent({
           { name: 'Declined', code: 'declined', class: 'danger', icon: 'pi-times' },
         ],
         table: {
+          expandedRows: {},
           loading: true,
           totalRecords: 0,
           data: [],

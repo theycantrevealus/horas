@@ -1480,3 +1480,8 @@ label[for] {
 .p-datepicker:not(.p-datepicker-inline) {
     box-shadow: none !important;
 }
+
+.p-datatable-row-toggle-button svg {
+    width: 10px !important;
+    height: 10px !important;
+}

@@ -122,7 +122,7 @@
                   v-slot="$field"
                   :initialValue="initialValues.remark"
                   name="remark"
-                  class="flex flex-col gap-1"
+                  class="flex flex-col gap-1 w-full"
                 >
                   <FloatLabel variant="on">
                     <Editor
