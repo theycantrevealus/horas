@@ -51,10 +51,10 @@
                 <Splitter>
                   <SplitterPanel :size="50">
                     <Splitter layout="vertical">
-                      <SplitterPanel class="p-3" :size="15">
-                        <h4>{{ slotProps.data.code }}</h4>
+                      <SplitterPanel class="p-3 items-center justify-center" :size="10">
+                        <div>{{ slotProps.data.code }}</div>
                       </SplitterPanel>
-                      <SplitterPanel class="p-3" :size="15">
+                      <SplitterPanel class="p-3" :size="80">
                         <h5>Remark:</h5>
                         <small v-html="slotProps.data.remark"></small>
                       </SplitterPanel>
@@ -96,7 +96,21 @@
             </Column>
             <Column class="wrap_content" header="Action">
               <template #body="slotProps">
-                <span class="p-buttonset wrap_content">
+                <Button
+                  type="button"
+                  @click="toggleMenu($event, slotProps.data.id)"
+                  class="min-w-48"
+                  severity="secondary"
+                >
+                  <small><span class="material-icons">more_vert</span></small>
+                </Button>
+                <TieredMenu
+                  :ref="`mr_menu_${slotProps.data.id}`"
+                  id="overlay_tmenu"
+                  :model="slotProps.data.permission"
+                  popup
+                />
+                <!--span class="p-buttonset wrap_content">
                   <Button
                     v-if="slotProps.data.status.code === 'new'"
                     :disabled="
@@ -196,7 +210,7 @@
                     <span class="material-icons">dangerous</span>
                     Decline
                   </Button>
-                </span>
+                </span-->
               </template>
             </Column>
             <Column
@@ -302,8 +316,7 @@
         </template>
       </Card>
       <DynamicDialog />
-      <ConfirmPopup group="confirm_delete"></ConfirmPopup>
-      <ConfirmPopup group="confirm_approval"></ConfirmPopup>
+      <ConfirmDialog group="confirm_delete"></ConfirmDialog>
     </div>
   </div>
 </template>
@@ -362,7 +375,8 @@ export default defineComponent({
           expandedRows: {},
           loading: true,
           totalRecords: 0,
-          data: [],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data: [] as any[],
           lazyParams: {
             first: 0,
             rows: 0,
@@ -422,6 +436,12 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    toggleMenu(event: any, id: string) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const MRToogle: any = this.$refs[`mr_menu_${id}`]
+      MRToogle.toggle(event)
+    },
     checkPermission(target: string, account: string, status: string): boolean {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const notCreatorPrivileges: any = {
@@ -454,7 +474,7 @@ export default defineComponent({
         }
       }
 
-      return !permission
+      return permission
     },
     formatDate(date: string, format: string) {
       return DateManagement.formatDate(date, format)
@@ -478,12 +498,149 @@ export default defineComponent({
       this.ui.table.loading = true
       await this.inventoryMaterialRequisitionStore
         .list(this.ui.table.lazyParams)
-        .then((response) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const parsedData = response.payload.data.map((item: any) => ({
-            ...item,
-            status: this.ui.availStatus.find((statusItem) => statusItem.code === item.status),
-          }))
+        .then(async (response) => {
+          const parsedData = await Promise.all(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            response.payload.data.map(async (item: any) => ({
+              ...item,
+              permission: [
+                {
+                  label: 'Approval',
+                  icon: 'pi pi-check-square',
+                  items: [
+                    {
+                      label: 'Ask Approval',
+                      icon: 'pi pi-exclamation-circle',
+                      creator: item.created_by.id.toString(),
+                      status: item.status,
+                      permission: 'btnMaterialRequisitionAskApproval',
+                      command: () => {
+                        if (
+                          this.checkPermission(
+                            'btnMaterialRequisitionDelete',
+                            item.created_by.id.toString(),
+                            item.status,
+                          )
+                        ) {
+                          this.dataApproval('ask_approval', item.id, item.code, item.__v)
+                        } else {
+                          this.coreStore.setToast({
+                            severity: 'warn',
+                            summary: 'Forbidden Method',
+                            detail: 'You are not allowed to perform this action',
+                            life: 5000,
+                          })
+                        }
+                      },
+                    },
+                    {
+                      label: 'Approve',
+                      icon: 'pi pi-check-circle',
+                      creator: item.created_by.id.toString(),
+                      status: item.status,
+                      permission: 'btnMaterialRequisitionApprove',
+                      command: () => {
+                        if (
+                          this.checkPermission(
+                            'btnMaterialRequisitionDelete',
+                            item.created_by.id.toString(),
+                            item.status,
+                          )
+                        ) {
+                          this.dataApproval('approve', item.id, item.code, item.__v)
+                        } else {
+                          this.coreStore.setToast({
+                            severity: 'warn',
+                            summary: 'Forbidden Method',
+                            detail: 'You are not allowed to perform this action',
+                            life: 5000,
+                          })
+                        }
+                      },
+                    },
+                    {
+                      label: 'Decline',
+                      icon: 'pi pi-times-circle',
+                      creator: item.created_by.id.toString(),
+                      status: item.status,
+                      permission: 'btnMaterialRequisitionDecline',
+                      command: () => {
+                        if (
+                          this.checkPermission(
+                            'btnMaterialRequisitionDelete',
+                            item.created_by.id.toString(),
+                            item.status,
+                          )
+                        ) {
+                          this.dataApproval('decline', item.id, item.code, item.__v)
+                        } else {
+                          this.coreStore.setToast({
+                            severity: 'warn',
+                            summary: 'Forbidden Method',
+                            detail: 'You are not allowed to perform this action',
+                            life: 5000,
+                          })
+                        }
+                      },
+                    },
+                  ],
+                },
+                {
+                  label: 'Edit',
+                  icon: 'pi pi-file-edit',
+                  creator: item.created_by.id.toString(),
+                  status: item.status,
+                  permission: 'btnMaterialRequisitionEdit',
+                  allowStatus: 'new',
+                  command: () => {
+                    if (
+                      this.checkPermission(
+                        'btnMaterialRequisitionEdit',
+                        item.created_by.id.toString(),
+                        item.status,
+                      )
+                    ) {
+                      this.dataEdit(item.id)
+                    } else {
+                      this.coreStore.setToast({
+                        severity: 'warn',
+                        summary: 'Forbidden Method',
+                        detail: 'You are not allowed to edit',
+                        life: 5000,
+                      })
+                    }
+                  },
+                },
+                {
+                  label: 'Delete',
+                  icon: 'pi pi-trash',
+                  creator: item.created_by.id.toString(),
+                  status: item.status,
+                  permission: 'btnMaterialRequisitionDelete',
+                  command: () => {
+                    if (
+                      this.checkPermission(
+                        'btnMaterialRequisitionDelete',
+                        item.created_by.id.toString(),
+                        item.status,
+                      )
+                    ) {
+                      this.dataDelete(item.id)
+                    } else {
+                      this.coreStore.setToast({
+                        severity: 'warn',
+                        summary: 'Forbidden Method',
+                        detail: 'You are not allowed to delete',
+                        life: 5000,
+                      })
+                    }
+                  },
+                },
+              ],
+              status: this.ui.availStatus.find((statusItem) => statusItem.code === item.status),
+            })),
+          )
+
           this.ui.table.data = parsedData
           this.ui.table.totalRecords = response.payload.totalRecords
           this.ui.table.loading = false
@@ -502,11 +659,10 @@ export default defineComponent({
         },
       })
     },
-    async dataDelete(event: MouseEvent, id: string) {
+    async dataDelete(id: string) {
       const confirmation = this.$confirm
       confirmation.require({
         group: 'confirm_delete',
-        target: event.currentTarget as HTMLElement,
         header: 'Confirmation',
         message: `Delete data?`,
         acceptClass: 'p-button-danger',
@@ -525,7 +681,7 @@ export default defineComponent({
         },
       })
     },
-    async dataApproval(event: MouseEvent, mode: string, id: string, code: string, v: number) {
+    async dataApproval(mode: string, id: string, code: string, v: number) {
       this.$dialog.open(FormMaterialRequisitionApproval, {
         props: {
           header: 'Ask Material Requisition Approval',
