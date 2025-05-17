@@ -9,6 +9,7 @@ import { Types } from 'mongoose'
 
 import { mockMasterItemBrand } from './master.item.brand.mock'
 import { mockMasterItem } from './master.item.mock'
+import { mockMasterItemUnit } from './master.item.unit.mock'
 const time = new TimeManagement()
 
 export const mockMasterItemBatch = (
@@ -16,6 +17,7 @@ export const mockMasterItemBatch = (
   code = 'BRD-0001',
   item = mockMasterItem(),
   brand = mockMasterItemBrand(),
+  unit = mockMasterItemUnit(),
   price_buy = 10,
   price_sell = 11,
   expired = new Date(),
@@ -34,6 +36,7 @@ export const mockMasterItemBatch = (
   code,
   item,
   brand,
+  unit,
   price_buy,
   price_sell,
   expired,
@@ -63,6 +66,8 @@ export const mockMasterItemBatchDoc = (
   id: mock?.id || `item-${new Types.ObjectId().toString()}`,
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   item: mock?.item || mockMasterItem(),
+  brand: mock?.brand || mockMasterItemBrand(),
+  unit: mock?.unit || mockMasterItemUnit(),
   price_buy: mock?.price_buy || 10,
   price_sell: mock?.price_sell || 11,
   remark: mock?.remark || '',

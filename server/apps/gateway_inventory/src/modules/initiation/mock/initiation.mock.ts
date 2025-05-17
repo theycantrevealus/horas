@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { mockMasterItemBatch } from '@gateway_core/master/mock/master.item.batch.mock'
 import { mockMasterStockPoint } from '@gateway_core/master/mock/master.stock.point.mock'
 import {
   StockInitiation,
@@ -21,24 +22,26 @@ export const mockStockInitiation = (
   stock_point = mockMasterStockPoint(),
   detail = [
     {
-      batch: {
-        id: 'batch-xx1',
-        code: 'BAT-001',
-        item: {
-          id: 'item-xxx',
-          code: 'ITM01',
-          name: 'Item 1',
-          brand: null,
-        },
-        price_buy: 10,
-        price_sell: 11,
-        expired: new Date(),
-        brand: {
-          id: 'brand-xx1',
-          code: 'BRAND-001',
-          name: 'Brand 1',
-        },
-      },
+      // batch: {
+      //   id: 'batch-xx1',
+      //   code: 'BAT-001',
+      //   item: {
+      //     id: 'item-xxx',
+      //     code: 'ITM01',
+      //     name: 'Item 1',
+      //     brand: null,
+      //   },
+      //   price_buy: 10,
+      //   price_sell: 11,
+      //   expired: new Date(),
+      //   brand: {
+      //     id: 'brand-xx1',
+      //     code: 'BRAND-001',
+      //     name: 'Brand 1',
+      //   },
+      //   unit: mockMasterItemUnit(),
+      // },
+      batch: mockMasterItemBatch(),
       qty: 2,
       remark: '-',
     },

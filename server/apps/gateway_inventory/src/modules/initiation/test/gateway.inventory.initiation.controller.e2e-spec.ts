@@ -4,6 +4,7 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
+import { mockMasterItemBatch } from '@gateway_core/master/mock/master.item.batch.mock'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -319,7 +320,7 @@ describe('Gateway Inventory Stock Initiation Controller', () => {
             code: mockStockInitiation().code,
             transaction_date: mockStockInitiation().transaction_date,
             stock_point: mockStockInitiation().stock_point,
-            detail: mockStockInitiation().detail,
+            detail: [{ batch: mockMasterItemBatch(), qty: 10, remark: '' }],
             extras: mockStockInitiation().extras,
             remark: mockStockInitiation().remark,
           } satisfies StockInitiationAddDTO
@@ -355,7 +356,7 @@ describe('Gateway Inventory Stock Initiation Controller', () => {
             code: mockStockInitiation().code,
             transaction_date: mockStockInitiation().transaction_date,
             stock_point: mockStockInitiation().stock_point,
-            detail: mockStockInitiation().detail,
+            detail: [{ batch: mockMasterItemBatch(), qty: 10, remark: '' }],
             extras: mockStockInitiation().extras,
             remark: mockStockInitiation().remark,
           } satisfies StockInitiationAddDTO
@@ -444,7 +445,7 @@ describe('Gateway Inventory Stock Initiation Controller', () => {
             code: mockStockInitiation().code,
             transaction_date: mockStockInitiation().transaction_date,
             stock_point: mockStockInitiation().stock_point,
-            detail: mockStockInitiation().detail,
+            detail: [{ batch: mockMasterItemBatch(), qty: 10, remark: '' }],
             extras: mockStockInitiation().extras,
             remark: mockStockInitiation().remark,
             __v: 0,
