@@ -51,10 +51,10 @@
                 <Splitter>
                   <SplitterPanel :size="50">
                     <Splitter layout="vertical">
-                      <SplitterPanel class="p-3 items-center justify-center" :size="10">
-                        <div>{{ slotProps.data.code }}</div>
+                      <SplitterPanel class="p-3" :size="5">
+                        <h4>{{ slotProps.data.code }}</h4>
                       </SplitterPanel>
-                      <SplitterPanel class="p-3" :size="80">
+                      <SplitterPanel class="p-3" :size="30">
                         <h5>Remark:</h5>
                         <small v-html="slotProps.data.remark"></small>
                       </SplitterPanel>
@@ -315,19 +315,45 @@
           </DataTable>
         </template>
       </Card>
+      <Drawer v-model:visible="ui.drawer.visibility" header="Print Options" position="right">
+        <div class="p-3">
+          <FloatLabel class="w-full md:w-56" variant="on">
+            <Select
+              inputId="paper_size"
+              v-model="ui.drawer.selectedPaperSize"
+              :options="ui.drawer.paperSizes"
+              optionLabel="name"
+              placeholder="Select a paper size"
+              class="w-full md:w-56"
+            /><label for="paper_size">Paper Size</label>
+          </FloatLabel>
+
+          <div class="flex flex-row-reverse p-6">
+            <Button
+              class="p-button-info p-button-rounded p-button-raised button-sm"
+              @click="processPrint"
+              ><span class="material-icons">print</span> Print</Button
+            >
+          </div>
+        </div>
+      </Drawer>
       <DynamicDialog />
       <ConfirmDialog group="confirm_delete"></ConfirmDialog>
+      <PrintModule ref="printModule" />
+      <PrintTemplateMaterialRequisition ref="printTemplateMaterialRequisition" />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
+import PrintModule from '@/components/print/Print.vue'
+import PrintTemplateMaterialRequisition from '@/components/print/templates/MaterialRequisition.vue'
+import AccountBadge from '@/components/Account.Badge.vue'
 import DateManagement from '@/utils/core/date.management'
 import { storeCore } from '@/store/index'
 import { storeInventoryMaterialRequisition } from '@/modules/inventory/material_requisition/store'
 import { mapStores, mapActions } from 'pinia'
 import { defineComponent, defineAsyncComponent } from 'vue'
-import AccountBadge from '@/components/Account.Badge.vue'
 
 const FormMaterialRequisitionApproval = defineAsyncComponent(
   () => import('@/modules/inventory/material_requisition/components/Form.Approval.vue'),
@@ -335,10 +361,29 @@ const FormMaterialRequisitionApproval = defineAsyncComponent(
 
 export default defineComponent({
   name: 'InventoryMaterialRequisitionList',
-  components: { AccountBadge },
+  components: {
+    AccountBadge,
+    PrintModule,
+    PrintTemplateMaterialRequisition,
+  },
   data() {
     return {
       ui: {
+        drawer: {
+          targetData: null,
+
+          selectedPaperSize: {
+            code: 'con_small',
+            name: 'Continuous Small',
+            orientation: 'landscape',
+          } as any,
+          paperSizes: [
+            { code: 'con_small', name: 'Continuous Small', orientation: 'landscape' },
+            { code: 'con_medium', name: 'Continuous Medium', orientation: 'landscape' },
+            { code: 'con_long', name: 'Continuous Long', orientation: 'portrait' },
+          ],
+          visibility: false,
+        },
         timeline: {
           severity: {
             new: {
@@ -517,7 +562,7 @@ export default defineComponent({
                       command: () => {
                         if (
                           this.checkPermission(
-                            'btnMaterialRequisitionDelete',
+                            'btnMaterialRequisitionAskApproval',
                             item.created_by.id.toString(),
                             item.status,
                           )
@@ -542,7 +587,7 @@ export default defineComponent({
                       command: () => {
                         if (
                           this.checkPermission(
-                            'btnMaterialRequisitionDelete',
+                            'btnMaterialRequisitionApprove',
                             item.created_by.id.toString(),
                             item.status,
                           )
@@ -567,7 +612,7 @@ export default defineComponent({
                       command: () => {
                         if (
                           this.checkPermission(
-                            'btnMaterialRequisitionDelete',
+                            'btnMaterialRequisitionDecline',
                             item.created_by.id.toString(),
                             item.status,
                           )
@@ -633,6 +678,29 @@ export default defineComponent({
                         detail: 'You are not allowed to delete',
                         life: 5000,
                       })
+                    }
+                  },
+                },
+                {
+                  separator: true,
+                },
+                {
+                  label: 'Print',
+                  icon: 'pi pi-print',
+                  creator: item.created_by.id.toString(),
+                  status: item.status,
+                  permission: 'btnMaterialRequisitionPrint',
+                  command: async () => {
+                    if (item.status !== 'approved') {
+                      this.coreStore.setToast({
+                        severity: 'warn',
+                        summary: 'Forbidden Method',
+                        detail: 'Document is not approved yet',
+                        life: 5000,
+                      })
+                    } else {
+                      this.ui.drawer.targetData = item
+                      this.ui.drawer.visibility = true
                     }
                   },
                 },
@@ -709,6 +777,71 @@ export default defineComponent({
       this.$router.push({
         path: '/inventory/material_requisition/add',
       })
+    },
+    processPrint() {
+      this.ui.drawer.visibility = false
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const item: any = this.ui.drawer.targetData
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const MRRef: any = this.$refs
+
+      MRRef.printTemplateMaterialRequisition
+        .generateViewer({
+          code: item.code,
+          transaction_date: this.formatDate(item.transaction_date, 'DD MMMM YYYY, HH:mm'),
+          requester_name: `${item.created_by.first_name} ${item.created_by.last_name}`,
+          requester_stock_point: item.stock_point.name,
+          remark: item.remark ? `${item.remark.substring(0, 150)}...` : '-',
+          approved_at: this.formatDate(
+            item.approval_history[item.approval_history.length - 1].logged_at,
+            'DD MMMM YYYY, HH:mm',
+          ),
+          approved_by: `${item.approval_history[item.approval_history.length - 1].created_by.first_name} ${item.approval_history[item.approval_history.length - 1].created_by.last_name}`,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          detail: item.detail.map((printDetail: any) => ({
+            name: printDetail.item.name,
+            qty: printDetail.qty,
+            unit: printDetail.unit.name,
+            remark: printDetail.remark ? `${printDetail.remark.substring(0, 100)}...` : '-',
+          })),
+        })
+        .then(async () => {
+          const elements = this.$el.querySelectorAll('.print-container')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const hiddenElements = Array.from(elements).filter((element: any) => {
+            return window.getComputedStyle(element).display === 'none'
+          })
+
+          const parser = new DOMParser()
+          const htmlContent = hiddenElements
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((element: any) => {
+              const doc = parser.parseFromString(element.outerHTML, 'text/html')
+              const elements = doc.body.children
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              Array.from(elements).forEach((element: any) => {
+                if (element.style.display === 'none') {
+                  element.style.display = ''
+                }
+              })
+              return doc.body.innerHTML
+            })
+            .join('')
+
+          // console.log(htmlContent)
+
+          await MRRef.printModule.generateReport(
+            {
+              fileName: `material_requisition_${item.code}`,
+              contentWidth: 241,
+              orientation: this.ui.drawer.selectedPaperSize.orientation,
+              paperSize: this.ui.drawer.selectedPaperSize.code,
+              quality: 2,
+              margin: 0,
+            },
+            htmlContent,
+          )
+        })
     },
   },
 })

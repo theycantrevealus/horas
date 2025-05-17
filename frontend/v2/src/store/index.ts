@@ -33,13 +33,15 @@ interface Authentication {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pagesAllow: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stock_point: any[],
+  stock_point: any[]
   domAllow: AccountAccessItem[]
 }
 
 interface Setting {
   theme: string
   dark: boolean
+  name: string
+  __v: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logo: any
   sidePanel: boolean
@@ -94,6 +96,8 @@ export const storeCore = defineStore('core', {
     setting: {
       theme: '',
       dark: false,
+      name: '',
+      __v: 0,
       logo: {
         light: {
           image: {
@@ -251,6 +255,9 @@ export const storeCore = defineStore('core', {
 
       this.setting.logo.dark.icon = data.APPLICATION_ICON?.setter
       this.setting.logo.dark.icon.target = `${data.APPLICATION_ICON?.image}`
+
+      this.setting.name = data.APPLICATION_NAME?.setter
+      this.setting.__v = data.APPLICATION_NAME?.__v
 
       // this.setting.logo.light.icon = data.application_icon?.setter
       // this.setting.logo.light.icon.target = `${import.meta.env.VITE_API_URL}/${data.application_icon?.setter.target}`

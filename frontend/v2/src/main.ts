@@ -26,6 +26,7 @@ import '@/assets/style/table.css'
 import '@/assets/style/modal.css'
 import '@/assets/style/light.css'
 import '@/assets/style/sidepanel.css'
+import '@/assets/style/print.css'
 import '@/assets/tnsol.css'
 
 // Module List

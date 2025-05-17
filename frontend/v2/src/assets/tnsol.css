@@ -1326,12 +1326,6 @@ label[for] {
     border-bottom: solid 2px #ccc;
 }
 
-.print-container {
-    position: relative;
-    font-size: 8pt !important;
-    font-weight: normal !important;
-}
-
 .print {
     position: relative;
     padding: 2.5cm 1cm 2cm 2cm;
@@ -1484,4 +1478,8 @@ label[for] {
 .p-datatable-row-toggle-button svg {
     width: 10px !important;
     height: 10px !important;
+}
+
+.p-tieredmenu-item-link {
+    font-size: 10pt !important;
 }
