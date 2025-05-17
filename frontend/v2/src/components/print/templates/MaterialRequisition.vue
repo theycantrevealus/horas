@@ -13,19 +13,19 @@
               />
             </h2>
           </th>
-          <th class="wrap_content">Code Ref</th>
-          <th class="input">{{ code }}</th>
-          <th class="wrap_content">Requester</th>
-          <th class="input">{{ requester_name }}</th>
+          <th class="wrap_content text-right">Code Ref</th>
+          <th class="input text-left">{{ code }}</th>
+          <th class="wrap_content text-right">Requester</th>
+          <th class="input text-left">{{ requester_name }}</th>
           <th rowspan="2" style="padding: 2px; width: 10%">
             <h2>MATERIAL<br />REQUISITION</h2>
           </th>
         </tr>
         <tr>
-          <th class="wrap_content">Request Date</th>
-          <th class="input">{{ transaction_date }}</th>
-          <th class="wrap_content">Requester Stock Point</th>
-          <th class="input">{{ requester_stock_point }}</th>
+          <th class="wrap_content text-right">Request Date</th>
+          <th class="input text-left">{{ transaction_date }}</th>
+          <th class="wrap_content text-right">Requester Stock Point</th>
+          <th class="input text-left">{{ requester_stock_point }}</th>
         </tr>
       </thead>
     </table>

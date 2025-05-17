@@ -75,7 +75,8 @@
     background: #fff !important;
 }
 
-.print-container table tr td.input {
+.print-container table tr td.input,
+.print-container table tr th.input {
     font-size: 6pt !important;
     letter-spacing: 1px;
     font-family: 'Courier New', monospace !important;

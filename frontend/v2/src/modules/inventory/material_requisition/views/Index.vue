@@ -110,107 +110,6 @@
                   :model="slotProps.data.permission"
                   popup
                 />
-                <!--span class="p-buttonset wrap_content">
-                  <Button
-                    v-if="slotProps.data.status.code === 'new'"
-                    :disabled="
-                      checkPermission(
-                        'btnMaterialRequisitionEdit',
-                        slotProps.data.created_by.id.toString(),
-                        slotProps.data.status.code,
-                      )
-                    "
-                    class="p-button-info p-button-sm p-button-raised"
-                    @click="dataEdit(slotProps.data.id)"
-                  >
-                    <span class="material-icons">edit</span>
-                    Edit
-                  </Button>
-                  <Button
-                    v-if="slotProps.data.status.code === 'new'"
-                    :disabled="
-                      checkPermission(
-                        'btnMaterialRequisitionDelete',
-                        slotProps.data.created_by.id.toString(),
-                        slotProps.data.status.code,
-                      )
-                    "
-                    class="p-button-danger p-button-sm p-button-raised"
-                    @click="dataDelete($event, slotProps.data.id)"
-                  >
-                    <span class="material-icons">delete</span>
-                    Delete
-                  </Button>
-                  <Button
-                    v-if="slotProps.data.status.code === 'new'"
-                    :disabled="
-                      checkPermission(
-                        'btnMaterialRequisitionAskApproval',
-                        slotProps.data.created_by.id.toString(),
-                        slotProps.data.status.code,
-                      )
-                    "
-                    class="p-button-secondary p-button-sm p-button-raised"
-                    @click="
-                      dataApproval(
-                        $event,
-                        'ask_approval',
-                        slotProps.data.id,
-                        slotProps.data.code,
-                        slotProps.data.__v,
-                      )
-                    "
-                  >
-                    <span class="material-icons">schedule</span>
-                    Ask Approval
-                  </Button>
-                  <Button
-                    v-if="slotProps.data.status.code === 'need_approval'"
-                    :disabled="
-                      checkPermission(
-                        'btnMaterialRequisitionApprove',
-                        slotProps.data.created_by.id.toString(),
-                        slotProps.data.status.code,
-                      )
-                    "
-                    class="p-button-success p-button-sm p-button-raised"
-                    @click="
-                      dataApproval(
-                        $event,
-                        'approve',
-                        slotProps.data.id,
-                        slotProps.data.code,
-                        slotProps.data.__v,
-                      )
-                    "
-                  >
-                    <span class="material-icons">task_alt</span>
-                    Approve
-                  </Button>
-                  <Button
-                    v-if="slotProps.data.status.code === 'need_approval'"
-                    :disabled="
-                      checkPermission(
-                        'btnMaterialRequisitionDecline',
-                        slotProps.data.created_by.id.toString(),
-                        slotProps.data.status.code,
-                      )
-                    "
-                    class="p-button-warn p-button-sm p-button-raised"
-                    @click="
-                      dataApproval(
-                        $event,
-                        'decline',
-                        slotProps.data.id,
-                        slotProps.data.code,
-                        slotProps.data.__v,
-                      )
-                    "
-                  >
-                    <span class="material-icons">dangerous</span>
-                    Decline
-                  </Button>
-                </span-->
               </template>
             </Column>
             <Column
@@ -315,28 +214,7 @@
           </DataTable>
         </template>
       </Card>
-      <Drawer v-model:visible="ui.drawer.visibility" header="Print Options" position="right">
-        <div class="p-3">
-          <FloatLabel class="w-full md:w-56" variant="on">
-            <Select
-              inputId="paper_size"
-              v-model="ui.drawer.selectedPaperSize"
-              :options="ui.drawer.paperSizes"
-              optionLabel="name"
-              placeholder="Select a paper size"
-              class="w-full md:w-56"
-            /><label for="paper_size">Paper Size</label>
-          </FloatLabel>
-
-          <div class="flex flex-row-reverse p-6">
-            <Button
-              class="p-button-info p-button-rounded p-button-raised button-sm"
-              @click="processPrint"
-              ><span class="material-icons">print</span> Print</Button
-            >
-          </div>
-        </div>
-      </Drawer>
+      <PrintOptions :visibility="ui.drawer.visibility" @process-print="processPrint" />
       <DynamicDialog />
       <ConfirmDialog group="confirm_delete"></ConfirmDialog>
       <PrintModule ref="printModule" />
@@ -347,6 +225,7 @@
 <script lang="ts">
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
 import PrintModule from '@/components/print/Print.vue'
+import PrintOptions from '@/components/print/Option.vue'
 import PrintTemplateMaterialRequisition from '@/components/print/templates/MaterialRequisition.vue'
 import AccountBadge from '@/components/Account.Badge.vue'
 import DateManagement from '@/utils/core/date.management'
@@ -365,23 +244,13 @@ export default defineComponent({
     AccountBadge,
     PrintModule,
     PrintTemplateMaterialRequisition,
+    PrintOptions,
   },
   data() {
     return {
       ui: {
         drawer: {
           targetData: null,
-
-          selectedPaperSize: {
-            code: 'con_small',
-            name: 'Continuous Small',
-            orientation: 'landscape',
-          } as any,
-          paperSizes: [
-            { code: 'con_small', name: 'Continuous Small', orientation: 'landscape' },
-            { code: 'con_medium', name: 'Continuous Medium', orientation: 'landscape' },
-            { code: 'con_long', name: 'Continuous Long', orientation: 'portrait' },
-          ],
           visibility: false,
         },
         timeline: {
@@ -443,26 +312,6 @@ export default defineComponent({
               },
             },
           },
-          // columns: [
-          //   {
-          //     field: 'code',
-          //     header: this.$t('inventory.material_requisition.datatable.column.code.caption'),
-          //   },
-          //   {
-          //     field: 'stock_point',
-          //     header: this.$t(
-          //       'inventory.material_requisition.datatable.column.stock_point.caption',
-          //     ),
-          //   },
-          //   {
-          //     field: 'created_by',
-          //     header: this.$t('inventory.material_requisition.datatable.column.created_by.caption'),
-          //   },
-          //   {
-          //     field: 'created_at',
-          //     header: this.$t('inventory.material_requisition.datatable.column.created_at.caption'),
-          //   },
-          // ],
         },
       },
     }
@@ -778,7 +627,8 @@ export default defineComponent({
         path: '/inventory/material_requisition/add',
       })
     },
-    processPrint() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    processPrint(selectedPaperSize: any) {
       this.ui.drawer.visibility = false
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const item: any = this.ui.drawer.targetData
@@ -828,14 +678,12 @@ export default defineComponent({
             })
             .join('')
 
-          // console.log(htmlContent)
-
           await MRRef.printModule.generateReport(
             {
               fileName: `material_requisition_${item.code}`,
               contentWidth: 241,
-              orientation: this.ui.drawer.selectedPaperSize.orientation,
-              paperSize: this.ui.drawer.selectedPaperSize.code,
+              orientation: selectedPaperSize.orientation,
+              paperSize: selectedPaperSize.code,
               quality: 2,
               margin: 0,
             },
