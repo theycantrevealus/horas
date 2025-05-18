@@ -77,15 +77,15 @@
 
 .print-container table tr td.input,
 .print-container table tr th.input {
-    font-size: 6pt !important;
-    letter-spacing: 1px;
+    font-size: 7.2pt !important;
+    letter-spacing: 0.5mm;
     font-family: 'Courier New', monospace !important;
 }
 
-.print-container table tr th,
-.print-container table tr td {
+.print-container table thead tr th,
+.print-container table tbody tr td {
     font-size: 7.2pt !important;
-    padding: 2.5px !important;
+    padding: 5px !important;
     background: #fff;
 }
 .print-container table tr td.wrap_content,

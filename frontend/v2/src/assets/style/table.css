@@ -306,3 +306,9 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
 .vert-top tr td {
     vertical-align: top !important;
 }
+
+.custom-edit-row-button .p-button-icon,
+.custom-edit-row-button .p-button-label {
+    margin-right: 0 !important;
+    color: red;
+}

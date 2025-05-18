@@ -39,7 +39,7 @@ import { defineComponent } from 'vue'
 import type { InventoryMaterialRequisitionApproval } from '../interfaces'
 
 export default defineComponent({
-  name: 'FormUnit',
+  name: 'FormMaterialRequisitionApproval',
   inject: {
     dialogRef: {
       from: 'dialogRef',

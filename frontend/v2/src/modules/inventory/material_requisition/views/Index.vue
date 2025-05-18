@@ -534,6 +534,27 @@ export default defineComponent({
                   separator: true,
                 },
                 {
+                  label: 'Create Purchase Requisition',
+                  icon: 'pi pi-shopping-cart',
+                  creator: item.created_by.id.toString(),
+                  status: item.status,
+                  permission: 'btnMaterialRequisitionCreatePurchaseRequisition',
+                  command: async () => {
+                    if (item.status !== 'approved') {
+                      this.coreStore.setToast({
+                        severity: 'warn',
+                        summary: 'Forbidden Method',
+                        detail: 'Document is not approved yet',
+                        life: 5000,
+                      })
+                    } else {
+                      this.$router.push({
+                        path: `/procurement/purchase_requisition/add/${item.id}`,
+                      })
+                    }
+                  },
+                },
+                {
                   label: 'Print',
                   icon: 'pi pi-print',
                   creator: item.created_by.id.toString(),
@@ -571,9 +592,9 @@ export default defineComponent({
     async dataEdit(id: string) {
       this.$router.push({
         path: `/inventory/material_requisition/edit/${id}`,
-        query: {
-          id: id,
-        },
+        // query: {
+        //   id: id,
+        // },
       })
     },
     async dataDelete(id: string) {

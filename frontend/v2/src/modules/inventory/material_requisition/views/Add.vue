@@ -122,16 +122,40 @@
               </div>
             </Fieldset>
             <Fieldset legend="Detail" class="m-3">
-              <DataTable :value="initialValues.detail" tableStyle="min-width: 50rem">
+              <div class="flex flex-row-reverse">
+                <Button
+                  class="p-button-secondary p-button-rounded p-button-raised button-sm m-2"
+                  label="Add Item"
+                  v-on:click="autorow"
+                />
+              </div>
+              <DataTable
+                v-model:editingRows="ui.items.editing"
+                editMode="row"
+                :value="initialValues.detail"
+                tableStyle="min-width: 50rem"
+                @row-edit-save="onRowEditSave"
+              >
+                <template #empty> No detail item. Please add item </template>
                 <Column field="id" header="ID" class="wrap_content">
                   <template #body="slotProps">
                     <h6 class="d-inline-flex">#{{ slotProps.data.id }}</h6>
                   </template>
                 </Column>
-                <Column field="name" header="Item" class="w-5">
+                <Column field="item" header="Item" class="w-4">
                   <template #body="slotProps">
+                    <div class="flex overflow-hidden" v-if="slotProps.data.item.id !== ''">
+                      <div class="flex-none flex">
+                        <Tag severity="info" :value="slotProps.data.item.code"></Tag>
+                      </div>
+                      <div class="flex-grow-1 flex mx-3 align-items-center">
+                        <small>{{ slotProps.data.item.name }}</small>
+                      </div>
+                    </div>
+                  </template>
+                  <template #editor="{ data, field }">
                     <Select
-                      v-model="slotProps.data.item"
+                      v-model="data[field]"
                       :options="ui.items.data"
                       filter
                       optionLabel="name"
@@ -139,7 +163,6 @@
                       class="w-full md:w-56"
                       size="small"
                       @filter="filterItem"
-                      @change="setItem($event, slotProps.data.id)"
                     >
                       <template #value="slotProps">
                         <div v-if="slotProps.value" class="flex items-center">
@@ -178,30 +201,34 @@
                     </Select>
                   </template>
                 </Column>
-                <Column field="qty" header="Qty" class="w-2">
+                <Column field="qty" header="Qty" class="w-1">
                   <template #body="slotProps">
+                    {{ slotProps.data.qty }}
+                  </template>
+                  <template #editor="{ data, field }">
                     <InputNumber
                       class="w-12"
-                      v-model="slotProps.data.qty"
+                      v-model="data[field]"
                       inputId="minmaxfraction"
                       :minFractionDigits="2"
                       :maxFractionDigits="5"
-                      @keyup.enter="autorow"
                       fluid
                     />
                   </template>
                 </Column>
                 <Column field="unit" header="Unit" class="w-2">
                   <template #body="slotProps">
+                    {{ slotProps.data.unit.name }}
+                  </template>
+                  <template #editor="{ data, field }">
                     <Select
-                      v-model="slotProps.data.unit"
-                      :options="slotProps.data.unit_avail"
+                      v-model="data[field]"
+                      :options="data['item'].unit"
                       filter
                       optionLabel="name"
                       placeholder="Select item unit"
                       class="w-full md:w-56"
                       size="small"
-                      @change="autorow"
                     >
                       <template #value="slotProps">
                         <div v-if="slotProps.value" class="flex items-center">
@@ -242,7 +269,25 @@
                 </Column>
                 <Column field="remark" header="Remark">
                   <template #body="slotProps">
-                    <InputText type="text" v-model="slotProps.data.remark" class="w-full" />
+                    {{ slotProps.data.remark }}
+                  </template>
+                  <template #editor="{ data, field }">
+                    <InputText type="text" v-model="data[field]" class="w-full" />
+                  </template>
+                </Column>
+                <Column
+                  :rowEditor="true"
+                  style="width: 10%; min-width: 8rem"
+                  class="wrap_content"
+                  bodyStyle="text-align:center"
+                ></Column>
+                <Column field="qty" header="" class="wrap-content">
+                  <template #body="slotProps">
+                    <Button
+                      class="p-button p-component p-button-icon-only p-button-secondary p-button-rounded p-button-text p-datatable-row-editor-cancel custom-edit-row-button"
+                      icon="pi pi-trash"
+                      v-on:click="removeRow(slotProps.data.id)"
+                    />
                   </template>
                 </Column>
               </DataTable>
@@ -283,11 +328,13 @@ export default defineComponent({
   name: 'MaterialRequisitionAdd',
   data() {
     return {
+      ava: [],
       ui: {
         stock_point: [],
         items: {
           loading: false,
           data: [],
+          editing: [],
         },
       },
       initialValues: {
@@ -299,24 +346,8 @@ export default defineComponent({
         },
         remark: '-',
         transaction_date: new Date(),
-        detail: [
-          {
-            id: 1,
-            item: {
-              id: '',
-              code: '',
-              name: '',
-            },
-            qty: 0,
-            unit: {
-              id: '',
-              code: '',
-              name: '',
-            },
-            unit_avail: [],
-            remark: '-',
-          },
-        ],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        detail: [] as any[],
       },
       resolver: valibotResolver(
         valibot.object({
@@ -364,33 +395,22 @@ export default defineComponent({
   },
   methods: {
     async autorow() {
-      this.ui.items.data = []
-      let allowAdd = true
-      for await (const i of this.initialValues.detail) {
-        if (i.item.id === '' || i.unit.id === '' || i.qty <= 0) {
-          allowAdd = false
-          break
-        }
-      }
-
-      if (allowAdd) {
-        this.initialValues.detail.push({
-          id: this.initialValues.detail.length + 1,
-          item: {
-            id: '',
-            code: '',
-            name: '',
-          },
-          qty: 0,
-          unit: {
-            id: '',
-            code: '',
-            name: '',
-          },
-          unit_avail: [],
-          remark: '',
-        })
-      }
+      this.initialValues.detail.push({
+        id: this.initialValues.detail.length + 1,
+        item: {
+          id: '',
+          code: '',
+          name: '',
+          unit: [],
+        },
+        qty: 0,
+        unit: {
+          id: '',
+          code: '',
+          name: '',
+        },
+        remark: '',
+      })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async filterItem(event: any) {
@@ -429,9 +449,21 @@ export default defineComponent({
         })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setItem(event: any, id: string) {
-      this.initialValues.detail[parseInt(id) - 1].unit_avail = event.value.unit
-      await this.autorow()
+    async onRowEditSave(event: any) {
+      const data = event.newData
+
+      this.ui.items.data = []
+
+      this.initialValues.detail[event.index] = data
+    },
+    async removeRow(id: number) {
+      this.initialValues.detail.splice(id - 1, 1)
+      this.reOrderRow()
+    },
+    async reOrderRow() {
+      for (const a in this.initialValues.detail) {
+        this.initialValues.detail[a].id = parseInt(a) + 1
+      }
     },
     back() {
       this.$router.push({
@@ -440,6 +472,16 @@ export default defineComponent({
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async submit(event: any) {
+      if (this.ui.items.editing.length > 0) {
+        this.coreStore.setToast({
+          severity: 'warn',
+          summary: 'Forbidden Method',
+          detail: 'Please confirm all editing item first',
+          life: 5000,
+        })
+        return
+      }
+
       if (event.valid) {
         const confirmation = this.$confirm
         confirmation.require({
@@ -456,7 +498,7 @@ export default defineComponent({
           accept: async () => {
             const detail = this.initialValues.detail
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              .map(({ id, unit_avail, ...detail }) => detail)
+              .map(({ id, ...detail }) => detail)
               .filter((detail) => detail.item.id !== '' && detail.unit.id !== '' && detail.qty > 0)
             await this.inventoryMaterialRequisitionStore
               .add({ ...this.initialValues, detail: detail, extras: '' })
