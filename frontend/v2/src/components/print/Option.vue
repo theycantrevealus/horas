@@ -1,5 +1,10 @@
 <template>
-  <Drawer v-model:visible="ui.drawer.visibility" header="Print Options" position="right">
+  <Drawer
+    v-model:visible="ui.drawer.visibility"
+    header="Print Options"
+    position="right"
+    @update:visible="updateVisibility"
+  >
     <div class="p-3">
       <FloatLabel class="w-full md:w-56" variant="on">
         <Select
@@ -59,6 +64,9 @@ export default defineComponent({
     },
   },
   methods: {
+    updateVisibility() {
+      this.$emit('update-visibility', this.ui.drawer.visibility)
+    },
     processPrint() {
       this.$emit('process-print', this.ui.drawer.selectedPaperSize)
     },

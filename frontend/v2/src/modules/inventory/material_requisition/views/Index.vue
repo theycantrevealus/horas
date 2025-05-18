@@ -214,7 +214,11 @@
           </DataTable>
         </template>
       </Card>
-      <PrintOptions :visibility="ui.drawer.visibility" @process-print="processPrint" />
+      <PrintOptions
+        :visibility="ui.drawer.visibility"
+        @process-print="processPrint"
+        @update-visibility="updateVisibility"
+      />
       <DynamicDialog />
       <ConfirmDialog group="confirm_delete"></ConfirmDialog>
       <PrintModule ref="printModule" />
@@ -330,6 +334,9 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
+    updateVisibility(value: boolean) {
+      this.ui.drawer.visibility = value
+    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     toggleMenu(event: any, id: string) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
