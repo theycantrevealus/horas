@@ -1483,3 +1483,11 @@ label[for] {
 .p-tieredmenu-item-link {
     font-size: 10pt !important;
 }
+
+.message-icon-top {
+    position: relative;
+    align-self: flex-start;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
