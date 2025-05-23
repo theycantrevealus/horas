@@ -1,4 +1,5 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { GatewayInventoryMaterialRequisitionService } from '@gateway_inventory/material_requisition/material.requisition.service'
 import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -42,7 +43,10 @@ export class GatewayInventoryPurchaseRequisitionService {
     private readonly logger: Logger,
 
     @Inject(SocketIoClientProxyService)
-    private readonly socketProxy: SocketIoClientProxyService
+    private readonly socketProxy: SocketIoClientProxyService,
+
+    @Inject(GatewayInventoryMaterialRequisitionService)
+    private readonly gatewayInventoryMaterialRequisitionService: GatewayInventoryMaterialRequisitionService
   ) {}
 
   async all(payload: any) {
@@ -99,12 +103,16 @@ export class GatewayInventoryPurchaseRequisitionService {
 
     return await this.purchaseRequisitionModel
       .create({
+        ...data,
+        material_requisition:
+          await this.gatewayInventoryMaterialRequisitionService.detail(
+            data.material_requisition
+          ),
         locale: await this.cacheManager
           .get('APPLICATION_LOCALE')
           .then((response: IConfig) => {
             return response.setter
           }),
-        ...data,
         created_by: account,
       })
       .catch((error: Error) => {

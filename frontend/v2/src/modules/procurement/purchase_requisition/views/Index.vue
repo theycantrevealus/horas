@@ -6,15 +6,9 @@
         <template #header>
           <Panel :toggleable="false">
             <template #header>
-              <p class="font-bold text-2xl w-10">Material Requisition</p>
+              <p class="font-bold text-2xl w-10">Purchase Requisition</p>
             </template>
-            <template #icons>
-              <Button
-                class="p-button-info p-button-rounded p-button-raised button-sm"
-                @click="dataAdd"
-                ><span class="material-icons">add</span> Create Material Requisition</Button
-              >
-            </template>
+            <template #icons> </template>
           </Panel>
         </template>
 
@@ -43,8 +37,8 @@
             @sort="onSort($event)"
             @filter="onFilter($event)"
           >
-            <template #empty> No material requisitions found. </template>
-            <template #loading> Loading material requisitions. Please wait. </template>
+            <template #empty> No purchase requisitions found. </template>
+            <template #loading> Loading purchase requisitions. Please wait. </template>
             <Column expander style="width: 5rem" />
             <template #expansion="slotProps">
               <div class="p-2">
@@ -63,20 +57,15 @@
                   <SplitterPanel class="flex items-center justify-center p-3">
                     <Timeline :value="slotProps.data.approval_history">
                       <template #opposite="TimeLineSlotProps">
-                        <div class="flex flex-row-reverse flex-wrap">
-                          <AccountBadge
-                            :first_name="TimeLineSlotProps.item.created_by.first_name"
-                            :last_name="TimeLineSlotProps.item.created_by.last_name"
-                            :ltr="true"
-                          />
-                        </div>
                         <small class="text-surface-500 dark:text-surface-400"
-                          ><strong>
-                            {{
-                              formatDate(TimeLineSlotProps.item.logged_at, 'DD MMMM YYYY, HH:mm')
-                            }}
-                          </strong></small
-                        >
+                          ><strong
+                            >{{ TimeLineSlotProps.item.created_by.last_name }},
+                            {{ TimeLineSlotProps.item.created_by.first_name }}</strong
+                          ></small
+                        ><br />
+                        <small class="text-surface-500 dark:text-surface-400">{{
+                          formatDate(TimeLineSlotProps.item.logged_at, 'DD MMMM YYYY, HH:mm')
+                        }}</small>
                       </template>
                       <template #content="TimeLineSlotProps">
                         <Message
@@ -107,7 +96,7 @@
                   class="min-w-48"
                   severity="secondary"
                 >
-                  <small><span class="material-icons">more_vert</span></small>
+                  <small><span class="purchase-icons">more_vert</span></small>
                 </Button>
                 <TieredMenu
                   :ref="`mr_menu_${slotProps.data.id}`"
@@ -134,28 +123,25 @@
                   @keydown.enter="filterCallback()"
                 />
               </template>
-              <template #body="slotProps">
-                <LabelCode :text="slotProps.data.code" />
-              </template>
             </Column>
             <Column
-              ref="stock_point"
-              field="stock_point"
-              header="Stock Point"
+              ref="material_requisition"
+              field="material_requisition"
+              header="Material Requisition"
               filterMatchMode="startsWith"
               :sortable="true"
             >
-              <template #body="slotProps">
-                {{ slotProps.data.stock_point.name }}
-              </template>
               <template #filter="{ filterModel, filterCallback }">
                 <InputText
                   v-model="filterModel.value"
                   type="text"
                   class="column-filter"
-                  placeholder="Search by stock point"
+                  placeholder="Search by MR Code"
                   @keydown.enter="filterCallback()"
                 />
+              </template>
+              <template #body="slotProps">
+                {{ slotProps.data.material_requisition.code }}
               </template>
             </Column>
             <Column
@@ -182,45 +168,6 @@
                   optionValue="code"
                   placeholder="Search by status"
                 />
-              </template>
-            </Column>
-            <Column header="Approval" :sortable="false" class="wrap_content">
-              <template #body="slotProps">
-                <div class="card flex justify-center">
-                  <AvatarGroup>
-                    <AccountBadge
-                      v-for="(item, index) in slotProps.data.approval_history.reduce(
-                        (acc: any[], current: any) => {
-                          if (!acc.find((it: any) => it.created_by.id === current.created_by.id)) {
-                            acc.push(current)
-                          }
-                          return acc
-                        },
-                        [],
-                      )"
-                      :key="index"
-                      :first_name="item.created_by.first_name"
-                      :last_name="item.created_by.last_name"
-                      :withName="false"
-                    />
-                    <Avatar
-                      image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
-                      shape="circle"
-                    />
-                    <Avatar
-                      image="https://primefaces.org/cdn/primevue/images/avatar/asiyajavayant.png"
-                      shape="circle"
-                    />
-                    <Avatar
-                      image="https://primefaces.org/cdn/primevue/images/avatar/xuxuefeng.png"
-                      shape="circle"
-                    /><Avatar
-                      image="https://avatars.githubusercontent.com/u/44671357?v=4"
-                      shape="circle"
-                    />
-                    <Avatar label="+2" shape="circle" />
-                  </AvatarGroup>
-                </div>
               </template>
             </Column>
             <Column
@@ -261,15 +208,11 @@
           </DataTable>
         </template>
       </Card>
-      <PrintOptions
-        :visibility="ui.drawer.visibility"
-        @process-print="processPrint"
-        @update-visibility="updateVisibility"
-      />
+      <PrintOptions :visibility="ui.drawer.visibility" @process-print="processPrint" />
       <DynamicDialog />
       <ConfirmDialog group="confirm_delete"></ConfirmDialog>
       <PrintModule ref="printModule" />
-      <PrintTemplateMaterialRequisition ref="printTemplateMaterialRequisition" />
+      <PrintTemplatePurchaseRequisition ref="printTemplatePurchaseRequisition" />
     </div>
   </div>
 </template>
@@ -277,26 +220,24 @@
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
 import PrintModule from '@/components/print/Print.vue'
 import PrintOptions from '@/components/print/Option.vue'
-import PrintTemplateMaterialRequisition from '@/components/print/templates/MaterialRequisition.vue'
+import PrintTemplatePurchaseRequisition from '@/components/print/templates/PurchaseRequisition.vue'
 import AccountBadge from '@/components/Account.Badge.vue'
-import LabelCode from '@/components/Label.Code.vue'
 import DateManagement from '@/utils/core/date.management'
 import { storeCore } from '@/store/index'
-import { storeInventoryMaterialRequisition } from '@/modules/inventory/material_requisition/store'
+import { storeProcurementPurchaseRequisition } from '@/modules/procurement/purchase_requisition/store'
 import { mapStores, mapActions } from 'pinia'
 import { defineComponent, defineAsyncComponent } from 'vue'
 
-const FormMaterialRequisitionApproval = defineAsyncComponent(
-  () => import('@/modules/inventory/material_requisition/components/Form.Approval.vue'),
+const FormPurchaseRequisitionApproval = defineAsyncComponent(
+  () => import('@/modules/procurement/purchase_requisition/components/Form.Approval.vue'),
 )
 
 export default defineComponent({
-  name: 'InventoryMaterialRequisitionList',
+  name: 'InventoryPurchaseRequisitionList',
   components: {
     AccountBadge,
-    LabelCode,
     PrintModule,
-    PrintTemplateMaterialRequisition,
+    PrintTemplatePurchaseRequisition,
     PrintOptions,
   },
   data() {
@@ -370,7 +311,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapStores(storeInventoryMaterialRequisition),
+    ...mapStores(storeProcurementPurchaseRequisition),
     ...mapStores(storeCore),
     getAccount() {
       return this.coreStore.getAccount
@@ -383,9 +324,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
-    updateVisibility(value: boolean) {
-      this.ui.drawer.visibility = value
-    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     toggleMenu(event: any, id: string) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -395,15 +333,15 @@ export default defineComponent({
     checkPermission(target: string, account: string, status: string): boolean {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const notCreatorPrivileges: any = {
-        btnMaterialRequisitionApprove: ['need_approval'],
-        btnMaterialRequisitionDecline: ['need_approval'],
+        btnPurchaseRequisitionApprove: ['need_approval'],
+        btnPurchaseRequisitionDecline: ['need_approval'],
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const creatorPrivileges: any = {
-        btnMaterialRequisitionEdit: ['new'],
-        btnMaterialRequisitionDelete: ['new'],
-        btnMaterialRequisitionAskApproval: ['new'],
+        btnPurchaseRequisitionEdit: ['new'],
+        btnPurchaseRequisitionDelete: ['new'],
+        btnPurchaseRequisitionAskApproval: ['new'],
       }
 
       const isCreator = account.toString() === this.getAccount.id.toString()
@@ -446,7 +384,7 @@ export default defineComponent({
     },
     async loadLazyData() {
       this.ui.table.loading = true
-      await this.inventoryMaterialRequisitionStore
+      await this.procurementPurchaseRequisitionStore
         .list(this.ui.table.lazyParams)
         .then(async (response) => {
           const parsedData = await Promise.all(
@@ -454,17 +392,6 @@ export default defineComponent({
             response.payload.data.map(async (item: any) => ({
               ...item,
               permission: [
-                {
-                  label: 'View',
-                  icon: 'pi pi-eye',
-                  creator: item.created_by.id.toString(),
-                  status: item.status,
-                  permission: 'btnMaterialRequisitionView',
-                  allowStatus: 'new',
-                  command: () => {
-                    // TODO : View detail
-                  },
-                },
                 {
                   label: 'Approval',
                   icon: 'pi pi-check-square',
@@ -474,11 +401,11 @@ export default defineComponent({
                       icon: 'pi pi-exclamation-circle',
                       creator: item.created_by.id.toString(),
                       status: item.status,
-                      permission: 'btnMaterialRequisitionAskApproval',
+                      permission: 'btnPurchaseRequisitionAskApproval',
                       command: () => {
                         if (
                           this.checkPermission(
-                            'btnMaterialRequisitionAskApproval',
+                            'btnPurchaseRequisitionAskApproval',
                             item.created_by.id.toString(),
                             item.status,
                           )
@@ -499,11 +426,11 @@ export default defineComponent({
                       icon: 'pi pi-check-circle',
                       creator: item.created_by.id.toString(),
                       status: item.status,
-                      permission: 'btnMaterialRequisitionApprove',
+                      permission: 'btnPurchaseRequisitionApprove',
                       command: () => {
                         if (
                           this.checkPermission(
-                            'btnMaterialRequisitionApprove',
+                            'btnPurchaseRequisitionApprove',
                             item.created_by.id.toString(),
                             item.status,
                           )
@@ -524,11 +451,11 @@ export default defineComponent({
                       icon: 'pi pi-times-circle',
                       creator: item.created_by.id.toString(),
                       status: item.status,
-                      permission: 'btnMaterialRequisitionDecline',
+                      permission: 'btnPurchaseRequisitionDecline',
                       command: () => {
                         if (
                           this.checkPermission(
-                            'btnMaterialRequisitionDecline',
+                            'btnPurchaseRequisitionDecline',
                             item.created_by.id.toString(),
                             item.status,
                           )
@@ -551,12 +478,12 @@ export default defineComponent({
                   icon: 'pi pi-file-edit',
                   creator: item.created_by.id.toString(),
                   status: item.status,
-                  permission: 'btnMaterialRequisitionEdit',
+                  permission: 'btnPurchaseRequisitionEdit',
                   allowStatus: 'new',
                   command: () => {
                     if (
                       this.checkPermission(
-                        'btnMaterialRequisitionEdit',
+                        'btnPurchaseRequisitionEdit',
                         item.created_by.id.toString(),
                         item.status,
                       )
@@ -577,11 +504,11 @@ export default defineComponent({
                   icon: 'pi pi-trash',
                   creator: item.created_by.id.toString(),
                   status: item.status,
-                  permission: 'btnMaterialRequisitionDelete',
+                  permission: 'btnPurchaseRequisitionDelete',
                   command: () => {
                     if (
                       this.checkPermission(
-                        'btnMaterialRequisitionDelete',
+                        'btnPurchaseRequisitionDelete',
                         item.created_by.id.toString(),
                         item.status,
                       )
@@ -601,32 +528,11 @@ export default defineComponent({
                   separator: true,
                 },
                 {
-                  label: 'Create Purchase Requisition',
-                  icon: 'pi pi-shopping-cart',
-                  creator: item.created_by.id.toString(),
-                  status: item.status,
-                  permission: 'btnMaterialRequisitionCreatePurchaseRequisition',
-                  command: async () => {
-                    if (item.status !== 'approved') {
-                      this.coreStore.setToast({
-                        severity: 'warn',
-                        summary: 'Forbidden Method',
-                        detail: 'Document is not approved yet',
-                        life: 5000,
-                      })
-                    } else {
-                      this.$router.push({
-                        path: `/procurement/purchase_requisition/add/${item.id}`,
-                      })
-                    }
-                  },
-                },
-                {
                   label: 'Print',
                   icon: 'pi pi-print',
                   creator: item.created_by.id.toString(),
                   status: item.status,
-                  permission: 'btnMaterialRequisitionPrint',
+                  permission: 'btnPurchaseRequisitionPrint',
                   command: async () => {
                     if (item.status !== 'approved') {
                       this.coreStore.setToast({
@@ -658,10 +564,10 @@ export default defineComponent({
     },
     async dataEdit(id: string) {
       this.$router.push({
-        path: `/inventory/material_requisition/edit/${id}`,
-        // query: {
-        //   id: id,
-        // },
+        path: `/procurement/purchase_requisition/edit/${id}`,
+        query: {
+          id: id,
+        },
       })
     },
     async dataDelete(id: string) {
@@ -677,7 +583,7 @@ export default defineComponent({
         rejectLabel: 'Abort',
         rejectIcon: 'pi pi-times-circle',
         accept: async () => {
-          await this.inventoryMaterialRequisitionStore.delete(id).then(async () => {
+          await this.procurementPurchaseRequisitionStore.delete(id).then(async () => {
             await this.loadLazyData()
           })
         },
@@ -687,9 +593,9 @@ export default defineComponent({
       })
     },
     async dataApproval(mode: string, id: string, code: string, v: number) {
-      this.$dialog.open(FormMaterialRequisitionApproval, {
+      this.$dialog.open(FormPurchaseRequisitionApproval, {
         props: {
-          header: 'Ask Material Requisition Approval',
+          header: 'Ask Purchase Requisition Approval',
           style: {
             width: '45vw',
           },
@@ -710,11 +616,6 @@ export default defineComponent({
         },
       })
     },
-    async dataAdd() {
-      this.$router.push({
-        path: '/inventory/material_requisition/add',
-      })
-    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     processPrint(selectedPaperSize: any) {
       this.ui.drawer.visibility = false
@@ -723,7 +624,7 @@ export default defineComponent({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const MRRef: any = this.$refs
 
-      MRRef.printTemplateMaterialRequisition
+      MRRef.printTemplatePurchaseRequisition
         .generateViewer({
           code: item.code,
           transaction_date: this.formatDate(item.transaction_date, 'DD MMMM YYYY, HH:mm'),
@@ -768,7 +669,7 @@ export default defineComponent({
 
           await MRRef.printModule.generateReport(
             {
-              fileName: `material_requisition_${item.code}`,
+              fileName: `purchase_requisition_${item.code}`,
               contentWidth: 241,
               orientation: selectedPaperSize.orientation,
               paperSize: selectedPaperSize.code,

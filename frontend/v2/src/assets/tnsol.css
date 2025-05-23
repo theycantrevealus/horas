@@ -1491,3 +1491,19 @@ label[for] {
     right: 0;
     z-index: 1;
 }
+
+.custom-disabled .p-inputtext:disabled {
+    background: #fff !important;
+}
+
+.p-inputtext.custom-disabled:disabled {
+    background: #fff !important;
+}
+
+.p-select.p-disabled.custom-disabled {
+    background: #fff !important;
+}
+
+.p-button-icon-only span {
+    margin-right: 0 !important;
+}

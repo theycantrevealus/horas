@@ -1,15 +1,32 @@
 <template>
-  <div class="flex overflow-hidden">
-    <div
-      class="border-circle w-2rem h-2rem m-2 font-bold flex align-items-center justify-content-center"
-      :style="{ background: generateRandomColor(parse(first_name, last_name)), color: '#fff' }"
-    >
-      {{ parse(first_name, last_name) }}
+  <div v-if="withName">
+    <div v-if="ltr" class="flex overflow-hidden align-items-center justify-content-center">
+      <div class="flex-grow-1 flex align-items-center justify-content-center m-2">
+        {{ last_name }}, {{ first_name }}
+      </div>
+      <Avatar
+        :label="parse(first_name, last_name)"
+        shape="circle"
+        :style="{ background: generateRandomColor(parse(first_name, last_name)), color: '#fff' }"
+      />
     </div>
-    <div class="flex-grow-1 flex align-items-center justify-content-center m-2">
-      {{ last_name }}, {{ first_name }}
+    <div v-else class="flex overflow-hidden align-items-center justify-content-center">
+      <Avatar
+        :label="parse(first_name, last_name)"
+        shape="circle"
+        :style="{ background: generateRandomColor(parse(first_name, last_name)), color: '#fff' }"
+      />
+      <div class="flex-grow-1 flex align-items-center justify-content-center m-2">
+        {{ last_name }}, {{ first_name }}
+      </div>
     </div>
   </div>
+  <Avatar
+    v-else
+    :label="parse(first_name, last_name)"
+    shape="circle"
+    :style="{ background: generateRandomColor(parse(first_name, last_name)), color: '#fff' }"
+  />
 </template>
 
 <script lang="ts">
@@ -17,6 +34,16 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'AccountBadge',
   props: {
+    withName: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    ltr: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     first_name: {
       type: String,
       required: true,

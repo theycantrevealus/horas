@@ -65,6 +65,21 @@ export class GatewayInventoryMaterialRequisitionService {
     }
   }
 
+  async find(filter: any) {
+    return this.materialRequisitionModel
+      .find(filter)
+      .then((result) => {
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
+        }
+      })
+      .catch((error: Error) => {
+        throw error
+      })
+  }
+
   async detail(id: string) {
     return this.materialRequisitionModel
       .findOne({ id: id })
