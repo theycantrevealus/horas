@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockMasterItemSupplier } from '@gateway_core/master/mock/master.item.supplier.mock'
-import { mockPurchaseRequisition } from '@gateway_inventory/purchase_requisition/mock/purchase.requisition.mock'
+import { mockPurchaseRequisition } from '@gateway_procurement/purchase_requisition/mock/purchase.requisition.mock'
 import {
   PurchaseOrder,
   PurchaseOrderDocument,
-} from '@schemas/inventory/purchase.order'
+} from '@schemas/procurement/purchase.order'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

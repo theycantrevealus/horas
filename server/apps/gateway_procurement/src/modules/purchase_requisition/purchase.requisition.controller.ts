@@ -33,14 +33,14 @@ import {
   PurchaseRequisitionEditDTO,
 } from './dto/purchase.requisition'
 import { PurchaseRequisitionApprovalDTO } from './dto/purchase.requisition.approval'
-import { GatewayInventoryPurchaseRequisitionService } from './purchase.requisition.service'
+import { GatewayProcurementPurchaseRequisitionService } from './purchase.requisition.service'
 
-@Controller('inventory')
+@Controller('procurement')
 @ApiTags('Purchase Requisition')
-export class GatewayInventoryPurchaseRequisitionController {
+export class GatewayProcurementPurchaseRequisitionController {
   constructor(
-    @Inject(GatewayInventoryPurchaseRequisitionService)
-    private readonly gatewayInventoryPurchaseRequisitionService: GatewayInventoryPurchaseRequisitionService
+    @Inject(GatewayProcurementPurchaseRequisitionService)
+    private readonly gatewayProcurementPurchaseRequisitionService: GatewayProcurementPurchaseRequisitionService
   ) {}
 
   @Get('purchase_requisition')
@@ -56,7 +56,9 @@ export class GatewayInventoryPurchaseRequisitionController {
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
   async all(@Query('lazyEvent') parameter: string) {
-    return await this.gatewayInventoryPurchaseRequisitionService.all(parameter)
+    return await this.gatewayProcurementPurchaseRequisitionService.all(
+      parameter
+    )
   }
 
   @Get('purchase_requisition/:id')
@@ -74,7 +76,7 @@ export class GatewayInventoryPurchaseRequisitionController {
     name: 'id',
   })
   async detail(@Param() param) {
-    return await this.gatewayInventoryPurchaseRequisitionService.detail(
+    return await this.gatewayProcurementPurchaseRequisitionService.detail(
       param.id
     )
   }
@@ -94,7 +96,7 @@ export class GatewayInventoryPurchaseRequisitionController {
     @Body() parameter: PurchaseRequisitionAddDTO,
     @CredentialAccount() account: IAccount
   ) {
-    return await this.gatewayInventoryPurchaseRequisitionService.add(
+    return await this.gatewayProcurementPurchaseRequisitionService.add(
       parameter,
       account
     )
@@ -119,7 +121,7 @@ export class GatewayInventoryPurchaseRequisitionController {
     @Param() param: any,
     @CredentialAccount() account: IAccount
   ) {
-    return await this.gatewayInventoryPurchaseRequisitionService.edit(
+    return await this.gatewayProcurementPurchaseRequisitionService.edit(
       parameter,
       param.id,
       account
@@ -141,7 +143,7 @@ export class GatewayInventoryPurchaseRequisitionController {
     name: 'id',
   })
   async delete(@Param() param: any, @CredentialAccount() account: IAccount) {
-    return await this.gatewayInventoryPurchaseRequisitionService.delete(
+    return await this.gatewayProcurementPurchaseRequisitionService.delete(
       param.id,
       account
     )
@@ -167,10 +169,10 @@ export class GatewayInventoryPurchaseRequisitionController {
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryPurchaseRequisitionService
+    return await this.gatewayProcurementPurchaseRequisitionService
       .askApproval(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryPurchaseRequisitionService.notifier(
+        await this.gatewayProcurementPurchaseRequisitionService.notifier(
           {
             transaction_id: param.id,
             message: 'Purchase requisition need approval',
@@ -202,10 +204,10 @@ export class GatewayInventoryPurchaseRequisitionController {
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryPurchaseRequisitionService
+    return await this.gatewayProcurementPurchaseRequisitionService
       .askApproval(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryPurchaseRequisitionService.notifier(
+        await this.gatewayProcurementPurchaseRequisitionService.notifier(
           {
             transaction_id: param.id,
             message: 'Purchase requisition approved',
@@ -237,10 +239,10 @@ export class GatewayInventoryPurchaseRequisitionController {
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryPurchaseRequisitionService
+    return await this.gatewayProcurementPurchaseRequisitionService
       .decline(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryPurchaseRequisitionService.notifier(
+        await this.gatewayProcurementPurchaseRequisitionService.notifier(
           {
             transaction_id: param.id,
             message: 'Purchase requisition declined',
@@ -272,10 +274,10 @@ export class GatewayInventoryPurchaseRequisitionController {
     @CredentialAccount() account: IAccount,
     @Req() request: FastifyRequest
   ) {
-    return await this.gatewayInventoryPurchaseRequisitionService
+    return await this.gatewayProcurementPurchaseRequisitionService
       .cancel(parameter, param.id, account)
       .then(async (result) => {
-        await this.gatewayInventoryPurchaseRequisitionService.notifier(
+        await this.gatewayProcurementPurchaseRequisitionService.notifier(
           {
             transaction_id: param.id,
             message: 'Purchase requisition cancelled',

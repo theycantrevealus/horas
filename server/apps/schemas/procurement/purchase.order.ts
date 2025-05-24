@@ -3,11 +3,11 @@ import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.appr
 import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
-import { PurchaseOrderApproval } from '@schemas/inventory/purchase.order.approval'
-import { PurchaseOrderDetail } from '@schemas/inventory/purchase.order.detail'
 import { ILocale, LocaleJoin } from '@schemas/locale'
 import { IMasterItemSupplier } from '@schemas/master/master.item.supplier.interface'
 import { MasterItemSupplierJoin } from '@schemas/master/master.item.supplier.join'
+import { PurchaseOrderApproval } from '@schemas/procurement/purchase.order.approval'
+import { PurchaseOrderDetail } from '@schemas/procurement/purchase.order.detail'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 import { IPurchaseRequisition } from './purchase.requisition.interface'

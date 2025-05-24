@@ -3,13 +3,8 @@ import { KafkaConfig } from '@configuration/kafka'
 import { MongoConfig } from '@configuration/mongo'
 import { RedisConfig } from '@configuration/redis'
 import { ClientDecoratorProcessorService } from '@decorators/kafka/client'
-import { GatewayInventoryStockAdjustmentModule } from '@gateway_inventory/adjustment/gateway.inventory.adjustment.module'
-import { GatewayInventoryStockAuditModule } from '@gateway_inventory/audit/gateway.inventory.audit.module'
-import { GatewayInventoryStockDisposalModule } from '@gateway_inventory/disposal/gateway.inventory.disposal.module'
-import { GatewayInventoryGeneralIssueNoteModule } from '@gateway_inventory/general_issue_note/general.issue.note.module'
-import { GatewayInventoryGeneralReceiveNoteModule } from '@gateway_inventory/general_receive_note/general.receive.note.module'
-import { GatewayInventoryMaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
-import { GatewayInventoryMutationModule } from '@gateway_inventory/mutation/gateway.inventory.mutation.module'
+import { GatewayProcurementPurchaseOrderModule } from '@gateway_procurement/purchase_order/purchase.order.module'
+import { GatewayProcurementPurchaseRequisitionModule } from '@gateway_procurement/purchase_requisition/purchase.requisition.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { BullModule, BullRootModuleOptions } from '@nestjs/bullmq'
@@ -117,19 +112,11 @@ import * as redisStore from 'cache-manager-ioredis'
       ]
     ),
     AuthModule,
-    GatewayInventoryMaterialRequisitionModule,
-    GatewayInventoryGeneralIssueNoteModule,
-    GatewayInventoryMutationModule,
-    GatewayInventoryStockAuditModule,
-    GatewayInventoryStockAdjustmentModule,
-    // GatewayInventoryPurchaseRequisitionModule,
-    GatewayInventoryGeneralReceiveNoteModule,
-    // GatewayInventoryPurchaseOrderModule,
-    GatewayInventoryStockDisposalModule,
-    // StockModule, // TODO : Rename this redundant name
+    GatewayProcurementPurchaseOrderModule,
+    GatewayProcurementPurchaseRequisitionModule,
   ],
   controllers: [],
   providers: [ClientDecoratorProcessorService],
   exports: [],
 })
-export class GatewayInventoryModule {}
+export class GatewayProcurementModule {}

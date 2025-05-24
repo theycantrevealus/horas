@@ -1,24 +1,24 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { ProceedDataTrafficDTO } from '@gateway_socket/dto/neuron'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
-import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { IConfig } from '@schemas/config/config'
 import {
-  PurchaseOrder,
-  PurchaseOrderDocument,
-} from '@schemas/inventory/purchase.order'
-import {
-  PurchaseRequisition,
-  PurchaseRequisitionDocument,
-} from '@schemas/inventory/purchase.requisition'
-import {
   MasterItemSupplier,
   MasterItemSupplierDocument,
 } from '@schemas/master/master.item.supplier'
+import {
+  PurchaseOrder,
+  PurchaseOrderDocument,
+} from '@schemas/procurement/purchase.order'
+import { IPurchaseOrderDetail } from '@schemas/procurement/purchase.order.detail.interface'
+import {
+  PurchaseRequisition,
+  PurchaseRequisitionDocument,
+} from '@schemas/procurement/purchase.requisition'
 import { PrimeParameter } from '@utility/dto/prime'
 import { modCodes } from '@utility/modules'
 import prime_datatable from '@utility/prime'
@@ -32,7 +32,7 @@ import { PurchaseOrderAddDTO, PurchaseOrderEditDTO } from './dto/purchase.order'
 import { PurchaseOrderApprovalDTO } from './dto/purchase.order.approval'
 
 @Injectable()
-export class GatewayInventoryPurchaseOrderService {
+export class GatewayProcurementPurchaseOrderService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,

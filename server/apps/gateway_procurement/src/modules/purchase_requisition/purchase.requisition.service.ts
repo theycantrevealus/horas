@@ -10,7 +10,7 @@ import { IConfig } from '@schemas/config/config'
 import {
   PurchaseRequisition,
   PurchaseRequisitionDocument,
-} from '@schemas/inventory/purchase.requisition'
+} from '@schemas/procurement/purchase.requisition'
 import { PrimeParameter } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
@@ -29,7 +29,7 @@ import {
 import { PurchaseRequisitionApprovalDTO } from './dto/purchase.requisition.approval'
 
 @Injectable()
-export class GatewayInventoryPurchaseRequisitionService {
+export class GatewayProcurementPurchaseRequisitionService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,

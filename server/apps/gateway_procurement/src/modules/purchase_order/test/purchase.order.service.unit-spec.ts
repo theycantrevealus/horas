@@ -7,7 +7,7 @@ import {
 import {
   mockPurchaseRequisition,
   mockPurchaseRequisitionModel,
-} from '@gateway_inventory/purchase_requisition/mock/purchase.requisition.mock'
+} from '@gateway_procurement/purchase_requisition/mock/purchase.requisition.mock'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -19,17 +19,17 @@ import { getConnectionToken, getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Authority } from '@schemas/account/authority.model'
 import {
-  PurchaseOrder,
-  PurchaseOrderDocument,
-} from '@schemas/inventory/purchase.order'
-import {
-  PurchaseRequisition,
-  PurchaseRequisitionDocument,
-} from '@schemas/inventory/purchase.requisition'
-import {
   MasterItemSupplier,
   MasterItemSupplierDocument,
 } from '@schemas/master/master.item.supplier'
+import {
+  PurchaseOrder,
+  PurchaseOrderDocument,
+} from '@schemas/procurement/purchase.order'
+import {
+  PurchaseRequisition,
+  PurchaseRequisitionDocument,
+} from '@schemas/procurement/purchase.requisition'
 import { AuthService } from '@security/auth.service'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { testCaption } from '@utility/string'
@@ -41,12 +41,12 @@ import {
   mockPurchaseOrderDocArray,
   mockPurchaseOrderModel,
 } from '../mock/purchase.order.mock'
-import { GatewayInventoryPurchaseOrderService } from '../purchase.order.service'
+import { GatewayProcurementPurchaseOrderService } from '../purchase.order.service'
 
-describe('Gateway Inventory Audit Service', () => {
+describe('Gateway Procurement Audit Service', () => {
   let configService: ConfigService
   let cacheManager: Cache
-  let gatewayInventoryPurchaseOrderService: GatewayInventoryPurchaseOrderService
+  let gatewayProcurementPurchaseOrderService: GatewayProcurementPurchaseOrderService
   let masterItemSupplierModel: Model<MasterItemSupplier>
   let purchaseRequisitionModel: Model<PurchaseRequisition>
   let purchaseOrderModel: Model<PurchaseOrder>
@@ -56,7 +56,7 @@ describe('Gateway Inventory Audit Service', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
       providers: [
-        GatewayInventoryPurchaseOrderService,
+        GatewayProcurementPurchaseOrderService,
         JwtService,
         AuthService,
         {
@@ -149,9 +149,9 @@ describe('Gateway Inventory Audit Service', () => {
       SocketIoClientProxyService
     )
 
-    gatewayInventoryPurchaseOrderService =
-      module.get<GatewayInventoryPurchaseOrderService>(
-        GatewayInventoryPurchaseOrderService
+    gatewayProcurementPurchaseOrderService =
+      module.get<GatewayProcurementPurchaseOrderService>(
+        GatewayProcurementPurchaseOrderService
       )
 
     masterItemSupplierModel = module.get<Model<MasterItemSupplierDocument>>(
@@ -174,7 +174,7 @@ describe('Gateway Inventory Audit Service', () => {
   it(
     testCaption('SERVICE STATE', 'component', 'Service should be defined'),
     () => {
-      expect(gatewayInventoryPurchaseOrderService).toBeDefined()
+      expect(gatewayProcurementPurchaseOrderService).toBeDefined()
     }
   )
 
@@ -189,7 +189,7 @@ describe('Gateway Inventory Audit Service', () => {
           jest.spyOn(purchaseOrderModel, 'aggregate').mockReturnValue({
             exec: jest.fn().mockReturnValue(mockPurchaseOrderDocArray),
           } as any)
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .all(
               `{
               "first": 0,
@@ -221,7 +221,7 @@ describe('Gateway Inventory Audit Service', () => {
           } as any)
 
           await expect(
-            gatewayInventoryPurchaseOrderService.all('')
+            gatewayProcurementPurchaseOrderService.all('')
           ).rejects.toThrow(Error)
         }
       )
@@ -234,7 +234,7 @@ describe('Gateway Inventory Audit Service', () => {
           jest.spyOn(purchaseOrderModel, 'aggregate').mockReturnValue({
             exec: jest.fn().mockReturnValue(mockPurchaseOrderDocArray),
           } as any)
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .uncompletedDelivery({
               first: 0,
               rows: 10,
@@ -269,7 +269,7 @@ describe('Gateway Inventory Audit Service', () => {
           } as any)
 
           await expect(
-            gatewayInventoryPurchaseOrderService.uncompletedDelivery({})
+            gatewayProcurementPurchaseOrderService.uncompletedDelivery({})
           ).rejects.toThrow(Error)
         }
       )
@@ -289,7 +289,7 @@ describe('Gateway Inventory Audit Service', () => {
             return Promise.resolve(findMock)
           })
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .detail(findMock.id)
             .then((result) => {
               // Deep equality check
@@ -310,7 +310,7 @@ describe('Gateway Inventory Audit Service', () => {
         async () => {
           jest.spyOn(purchaseOrderModel, 'findOne').mockResolvedValue(null)
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.detail(
+            await gatewayProcurementPurchaseOrderService.detail(
               mockPurchaseOrder().id
             )
           }).rejects.toThrow(NotFoundException)
@@ -326,7 +326,7 @@ describe('Gateway Inventory Audit Service', () => {
             .spyOn(purchaseOrderModel, 'findOne')
             .mockRejectedValue(new Error())
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.detail(
+            await gatewayProcurementPurchaseOrderService.detail(
               mockPurchaseOrder().id
             )
           }).rejects.toThrow(Error)
@@ -350,7 +350,7 @@ describe('Gateway Inventory Audit Service', () => {
           jest.spyOn(masterItemSupplierModel, 'findOne').mockResolvedValue(null)
 
           expect(async () => {
-            await gatewayInventoryPurchaseOrderService.add(
+            await gatewayProcurementPurchaseOrderService.add(
               {
                 supplier: '',
                 purchase_date: new Date(),
@@ -384,7 +384,7 @@ describe('Gateway Inventory Audit Service', () => {
             .mockResolvedValue(null)
 
           expect(async () => {
-            await gatewayInventoryPurchaseOrderService.add(
+            await gatewayProcurementPurchaseOrderService.add(
               {
                 supplier: '',
                 purchase_date: new Date(),
@@ -435,7 +435,7 @@ describe('Gateway Inventory Audit Service', () => {
             },
           ]
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .add(
               {
                 supplier: '',
@@ -500,7 +500,7 @@ describe('Gateway Inventory Audit Service', () => {
             },
           ]
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .add(
               {
                 supplier: '',
@@ -570,7 +570,7 @@ describe('Gateway Inventory Audit Service', () => {
             },
           ]
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .add(
               {
                 supplier: '',
@@ -637,7 +637,7 @@ describe('Gateway Inventory Audit Service', () => {
             },
           ]
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .add(
               {
                 supplier: '',
@@ -700,7 +700,7 @@ describe('Gateway Inventory Audit Service', () => {
             },
           ]
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .add(
               {
                 supplier: '',
@@ -738,7 +738,7 @@ describe('Gateway Inventory Audit Service', () => {
             .spyOn(purchaseOrderModel, 'create')
             .mockRejectedValue(new Error())
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.add(
+            await gatewayProcurementPurchaseOrderService.add(
               {
                 supplier: '',
                 purchase_date: new Date(),
@@ -765,7 +765,7 @@ describe('Gateway Inventory Audit Service', () => {
         async () => {
           jest.spyOn(purchaseOrderModel, 'findOneAndUpdate')
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .edit(
               {
                 supplier: '',
@@ -798,7 +798,7 @@ describe('Gateway Inventory Audit Service', () => {
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.edit(
+            await gatewayProcurementPurchaseOrderService.edit(
               {
                 supplier: '',
                 purchase_date: new Date(),
@@ -829,7 +829,7 @@ describe('Gateway Inventory Audit Service', () => {
             })
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.edit(
+            await gatewayProcurementPurchaseOrderService.edit(
               {
                 supplier: '',
                 purchase_date: new Date(),
@@ -864,7 +864,7 @@ describe('Gateway Inventory Audit Service', () => {
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.delete(
+            await gatewayProcurementPurchaseOrderService.delete(
               targetID,
               mockAccount()
             )
@@ -883,7 +883,7 @@ describe('Gateway Inventory Audit Service', () => {
             .mockRejectedValue(new Error())
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.delete(
+            await gatewayProcurementPurchaseOrderService.delete(
               targetID,
               mockAccount()
             )
@@ -900,7 +900,7 @@ describe('Gateway Inventory Audit Service', () => {
             .spyOn(purchaseOrderModel, 'findOneAndUpdate')
             .mockResolvedValue(mockPurchaseOrderDocArray[0])
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .delete(mockPurchaseOrderDocArray[0].id, mockAccount())
             .then((result) => {
               expect(result).toHaveProperty('code')
@@ -929,7 +929,7 @@ describe('Gateway Inventory Audit Service', () => {
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.askApproval(
+            await gatewayProcurementPurchaseOrderService.askApproval(
               {
                 remark: '',
                 __v: 0,
@@ -959,7 +959,7 @@ describe('Gateway Inventory Audit Service', () => {
             })
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.askApproval(
+            await gatewayProcurementPurchaseOrderService.askApproval(
               {
                 remark: '',
                 __v: 0,
@@ -981,7 +981,7 @@ describe('Gateway Inventory Audit Service', () => {
             .spyOn(purchaseOrderModel, 'findOneAndUpdate')
             .mockResolvedValue(mockPurchaseOrderDocArray[0])
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .askApproval(
               {
                 remark: '',
@@ -1012,7 +1012,7 @@ describe('Gateway Inventory Audit Service', () => {
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.approve(
+            await gatewayProcurementPurchaseOrderService.approve(
               {
                 remark: '',
                 __v: 0,
@@ -1042,7 +1042,7 @@ describe('Gateway Inventory Audit Service', () => {
             })
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.approve(
+            await gatewayProcurementPurchaseOrderService.approve(
               {
                 remark: '',
                 __v: 0,
@@ -1064,7 +1064,7 @@ describe('Gateway Inventory Audit Service', () => {
             .spyOn(purchaseOrderModel, 'findOneAndUpdate')
             .mockResolvedValue(mockPurchaseOrderDocArray[0])
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .approve(
               {
                 remark: '',
@@ -1095,7 +1095,7 @@ describe('Gateway Inventory Audit Service', () => {
             .mockResolvedValue(null)
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.decline(
+            await gatewayProcurementPurchaseOrderService.decline(
               {
                 remark: '',
                 __v: 0,
@@ -1125,7 +1125,7 @@ describe('Gateway Inventory Audit Service', () => {
             })
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.decline(
+            await gatewayProcurementPurchaseOrderService.decline(
               {
                 remark: '',
                 __v: 0,
@@ -1147,7 +1147,7 @@ describe('Gateway Inventory Audit Service', () => {
             .spyOn(purchaseOrderModel, 'findOneAndUpdate')
             .mockResolvedValue(mockPurchaseOrderDocArray[0])
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .decline(
               {
                 remark: '',
@@ -1176,7 +1176,7 @@ describe('Gateway Inventory Audit Service', () => {
             emit: jest.fn(),
           })
 
-          await gatewayInventoryPurchaseOrderService
+          await gatewayProcurementPurchaseOrderService
             .notifier(
               {
                 remark: '',
@@ -1213,7 +1213,7 @@ describe('Gateway Inventory Audit Service', () => {
           })
 
           await expect(async () => {
-            await gatewayInventoryPurchaseOrderService.notifier(
+            await gatewayProcurementPurchaseOrderService.notifier(
               {
                 remark: '',
                 __v: 0,

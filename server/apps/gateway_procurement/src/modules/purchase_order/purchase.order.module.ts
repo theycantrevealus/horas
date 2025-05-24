@@ -1,4 +1,4 @@
-import { GatewayInventoryPurchaseOrderController } from '@gateway_inventory/purchase_order/purchase.order.controller'
+import { GatewayProcurementPurchaseOrderController } from '@gateway_procurement/purchase_order/purchase.order.controller'
 import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
@@ -6,21 +6,21 @@ import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import {
-  PurchaseOrder,
-  PurchaseOrderSchema,
-} from '@schemas/inventory/purchase.order'
-import { MongoMiddlewarePurchaseOrder } from '@schemas/inventory/purchase.order.middleware'
-import {
-  PurchaseRequisition,
-  PurchaseRequisitionSchema,
-} from '@schemas/inventory/purchase.requisition'
-import {
   MasterItemSupplier,
   MasterItemSupplierSchema,
 } from '@schemas/master/master.item.supplier'
+import {
+  PurchaseOrder,
+  PurchaseOrderSchema,
+} from '@schemas/procurement/purchase.order'
+import { MongoMiddlewarePurchaseOrder } from '@schemas/procurement/purchase.order.middleware'
+import {
+  PurchaseRequisition,
+  PurchaseRequisitionSchema,
+} from '@schemas/procurement/purchase.requisition'
 import { AuthModule } from '@security/auth.module'
 
-import { GatewayInventoryPurchaseOrderService } from './purchase.order.service'
+import { GatewayProcurementPurchaseOrderService } from './purchase.order.service'
 
 @Module({
   imports: [
@@ -36,13 +36,13 @@ import { GatewayInventoryPurchaseOrderService } from './purchase.order.service'
     ),
     AuthModule,
   ],
-  controllers: [GatewayInventoryPurchaseOrderController],
+  controllers: [GatewayProcurementPurchaseOrderController],
   providers: [
     MongoMiddlewarePurchaseOrder,
-    GatewayInventoryPurchaseOrderService,
+    GatewayProcurementPurchaseOrderService,
     SocketIoClientProvider,
     SocketIoClientProxyService,
   ],
-  exports: [GatewayInventoryPurchaseOrderService],
+  exports: [GatewayProcurementPurchaseOrderService],
 })
-export class GatewayInventoryPurchaseOrderModule {}
+export class GatewayProcurementPurchaseOrderModule {}

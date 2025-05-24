@@ -40,6 +40,9 @@
       "@gateway_inventory/*": [
         "./apps/gateway_inventory/src/modules/*"
       ],
+      "@gateway_procurement/*": [
+        "./apps/gateway_procurement/src/modules/*"
+      ],
       "@consumer_stock/*": [
         "./apps/consumer_stock/src/*"
       ],

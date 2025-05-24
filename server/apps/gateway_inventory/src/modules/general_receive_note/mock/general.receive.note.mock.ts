@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockAccount } from '@gateway_core/account/mock/account.mock'
 import { mockMasterStockPoint } from '@gateway_core/master/mock/master.stock.point.mock'
-import { mockPurchaseOrder } from '@gateway_inventory/purchase_order/mock/purchase.order.mock'
+import { mockPurchaseOrder } from '@gateway_procurement/purchase_order/mock/purchase.order.mock'
 import {
   GeneralReceiveNote,
   GeneralReceiveNoteDocument,

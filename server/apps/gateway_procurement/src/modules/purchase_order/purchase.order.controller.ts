@@ -28,14 +28,14 @@ import { ApiQueryGeneral } from '@utility/dto/prime'
 
 import { PurchaseOrderAddDTO, PurchaseOrderEditDTO } from './dto/purchase.order'
 import { PurchaseOrderApprovalDTO } from './dto/purchase.order.approval'
-import { GatewayInventoryPurchaseOrderService } from './purchase.order.service'
+import { GatewayProcurementPurchaseOrderService } from './purchase.order.service'
 
-@Controller('inventory')
+@Controller('procurement')
 @ApiTags('Purchase Order')
-export class GatewayInventoryPurchaseOrderController {
+export class GatewayProcurementPurchaseOrderController {
   constructor(
-    @Inject(GatewayInventoryPurchaseOrderService)
-    private readonly purchaseOrderService: GatewayInventoryPurchaseOrderService
+    @Inject(GatewayProcurementPurchaseOrderService)
+    private readonly purchaseOrderService: GatewayProcurementPurchaseOrderService
   ) {}
 
   @Get('purchase_order')

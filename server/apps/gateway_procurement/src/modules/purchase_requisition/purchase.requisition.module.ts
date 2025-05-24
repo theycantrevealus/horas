@@ -10,12 +10,12 @@ import { MongooseModule } from '@nestjs/mongoose'
 import {
   PurchaseRequisition,
   PurchaseRequisitionSchema,
-} from '@schemas/inventory/purchase.requisition'
-import { MongoMiddlewarePurchaseRequisition } from '@schemas/inventory/purchase.requisition.middleware'
+} from '@schemas/procurement/purchase.requisition'
+import { MongoMiddlewarePurchaseRequisition } from '@schemas/procurement/purchase.requisition.middleware'
 import { AuthModule } from '@security/auth.module'
 
-import { GatewayInventoryPurchaseRequisitionController } from './purchase.requisition.controller'
-import { GatewayInventoryPurchaseRequisitionService } from './purchase.requisition.service'
+import { GatewayProcurementPurchaseRequisitionController } from './purchase.requisition.controller'
+import { GatewayProcurementPurchaseRequisitionService } from './purchase.requisition.service'
 
 @Module({
   imports: [
@@ -31,13 +31,13 @@ import { GatewayInventoryPurchaseRequisitionService } from './purchase.requisiti
     BullModule.registerQueueAsync(RedisStock),
     AuthModule,
   ],
-  controllers: [GatewayInventoryPurchaseRequisitionController],
+  controllers: [GatewayProcurementPurchaseRequisitionController],
   providers: [
     SocketIoClientProvider,
     SocketIoClientProxyService,
     MongoMiddlewarePurchaseRequisition,
-    GatewayInventoryPurchaseRequisitionService,
+    GatewayProcurementPurchaseRequisitionService,
   ],
-  exports: [GatewayInventoryPurchaseRequisitionService],
+  exports: [GatewayProcurementPurchaseRequisitionService],
 })
-export class GatewayInventoryPurchaseRequisitionModule {}
+export class GatewayProcurementPurchaseRequisitionModule {}

@@ -4,7 +4,7 @@ import { mockAccount } from '@gateway_core/account/mock/account.mock'
 import {
   PurchaseRequisition,
   PurchaseRequisitionDocument,
-} from '@schemas/inventory/purchase.requisition'
+} from '@schemas/procurement/purchase.requisition'
 import { TimeManagement } from '@utility/time'
 import { Types } from 'mongoose'
 

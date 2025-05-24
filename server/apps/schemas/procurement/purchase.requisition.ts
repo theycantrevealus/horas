@@ -2,11 +2,11 @@ import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { ApprovalHistory, IApprovalHistory } from '@schemas/approval.history'
+import { IMaterialRequisition } from '@schemas/inventory/material.requisition.interface'
+import { MaterialRequisitionJoin } from '@schemas/inventory/material.requisition.join'
 import { ILocale, LocaleJoin } from '@schemas/locale'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
-import { IMaterialRequisition } from './material.requisition.interface'
-import { MaterialRequisitionJoin } from './material.requisition.join'
 import { PurchaseRequisitionDetail } from './purchase.requisition.detail'
 import { IPurchaseRequisitionDetail } from './purchase.requisition.detail.interface'
 

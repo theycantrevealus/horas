@@ -1,6 +1,6 @@
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
-import { GatewayInventoryPurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
-import { GatewayInventoryPurchaseOrderService } from '@gateway_inventory/purchase_order/purchase.order.service'
+import { GatewayProcurementPurchaseOrderModule } from '@gateway_procurement/purchase_order/purchase.order.module'
+import { GatewayProcurementPurchaseOrderService } from '@gateway_procurement/purchase_order/purchase.order.service'
 import { SocketIoClientProvider } from '@gateway_socket/socket.provider'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
@@ -12,14 +12,6 @@ import {
   GeneralReceiveNoteSchema,
 } from '@schemas/inventory/general.receive.note'
 import { MongoMiddlewareGeneralReceiveNote } from '@schemas/inventory/general.receive.note.middleware'
-import {
-  PurchaseOrder,
-  PurchaseOrderSchema,
-} from '@schemas/inventory/purchase.order'
-import {
-  PurchaseRequisition,
-  PurchaseRequisitionSchema,
-} from '@schemas/inventory/purchase.requisition'
 import { MasterItem, MasterItemSchema } from '@schemas/master/master.item'
 import {
   MasterItemBatch,
@@ -33,6 +25,14 @@ import {
   MasterStockPoint,
   MasterStockPointSchema,
 } from '@schemas/master/master.stock.point'
+import {
+  PurchaseOrder,
+  PurchaseOrderSchema,
+} from '@schemas/procurement/purchase.order'
+import {
+  PurchaseRequisition,
+  PurchaseRequisitionSchema,
+} from '@schemas/procurement/purchase.requisition'
 import { AuthModule } from '@security/auth.module'
 
 import { GatewayInventoryGeneralReceiveNoteController } from './general.receive.note.controller'
@@ -56,14 +56,14 @@ import { GatewayInventoryGeneralReceiveNoteService } from './general.receive.not
       'primary'
     ),
     AuthModule,
-    GatewayInventoryPurchaseOrderModule,
+    GatewayProcurementPurchaseOrderModule,
   ],
   controllers: [GatewayInventoryGeneralReceiveNoteController],
   providers: [
     SocketIoClientProvider,
     SocketIoClientProxyService,
     MongoMiddlewareGeneralReceiveNote,
-    GatewayInventoryPurchaseOrderService,
+    GatewayProcurementPurchaseOrderService,
     GatewayInventoryGeneralReceiveNoteService,
     MasterStockPointService,
   ],

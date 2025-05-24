@@ -4,6 +4,8 @@ import {
   mockAccount,
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
+import { mockMaterialRequisitionModel } from '@gateway_inventory/general_issue_note/mock/material.requisition.mock'
+import { GatewayInventoryMaterialRequisitionService } from '@gateway_inventory/material_requisition/material.requisition.service'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -20,10 +22,11 @@ import {
 import { Test, TestingModule } from '@nestjs/testing'
 import { GatewayPipe } from '@pipes/gateway.pipe'
 import { Account } from '@schemas/account/account.model'
+import { MaterialRequisition } from '@schemas/inventory/material.requisition'
 import {
   PurchaseRequisition,
   PurchaseRequisitionDocument,
-} from '@schemas/inventory/purchase.requisition'
+} from '@schemas/procurement/purchase.requisition'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -43,10 +46,10 @@ import {
   mockPurchaseRequisitionDocArray,
   mockPurchaseRequisitionModel,
 } from '../mock/purchase.requisition.mock'
-import { GatewayInventoryPurchaseRequisitionController } from '../purchase.requisition.controller'
-import { GatewayInventoryPurchaseRequisitionService } from '../purchase.requisition.service'
+import { GatewayProcurementPurchaseRequisitionController } from '../purchase.requisition.controller'
+import { GatewayProcurementPurchaseRequisitionService } from '../purchase.requisition.service'
 
-describe('Gateway Inventory Purchase Requisition Controller', () => {
+describe('Gateway Procurement Purchase Requisition Controller', () => {
   const mock_Guard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
       const request = context.switchToHttp().getRequest()
@@ -58,15 +61,16 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
   let configService: ConfigService
   let cacheManager: Cache
   let socketProxy: SocketIoClientProxyService
-  let gatewayInventoryPurchaseRequisitionController: GatewayInventoryPurchaseRequisitionController
+  let gatewayProcurementPurchaseRequisitionController: GatewayProcurementPurchaseRequisitionController
   let logger: Logger
   let purchaseRequisitionModel: Model<PurchaseRequisition>
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [GatewayInventoryPurchaseRequisitionController],
+      controllers: [GatewayProcurementPurchaseRequisitionController],
       providers: [
-        GatewayInventoryPurchaseRequisitionService,
+        GatewayInventoryMaterialRequisitionService,
+        GatewayProcurementPurchaseRequisitionService,
         {
           provide: ConfigService,
           useValue: {
@@ -145,6 +149,10 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
           provide: getModelToken(PurchaseRequisition.name, 'primary'),
           useValue: mockPurchaseRequisitionModel,
         },
+        {
+          provide: getModelToken(MaterialRequisition.name, 'primary'),
+          useValue: mockMaterialRequisitionModel,
+        },
         { provide: getModelToken(LogLogin.name, 'primary'), useValue: {} },
         { provide: getModelToken(LogActivity.name, 'primary'), useValue: {} },
       ],
@@ -167,9 +175,9 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
       SocketIoClientProxyService
     )
     cacheManager = module.get(CACHE_MANAGER)
-    gatewayInventoryPurchaseRequisitionController =
-      app.get<GatewayInventoryPurchaseRequisitionController>(
-        GatewayInventoryPurchaseRequisitionController
+    gatewayProcurementPurchaseRequisitionController =
+      app.get<GatewayProcurementPurchaseRequisitionController>(
+        GatewayProcurementPurchaseRequisitionController
       )
     purchaseRequisitionModel = module.get<Model<PurchaseRequisitionDocument>>(
       getModelToken(PurchaseRequisition.name, 'primary')
@@ -194,7 +202,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
       'Controller should be defined'
     ),
     () => {
-      expect(gatewayInventoryPurchaseRequisitionController).toBeDefined()
+      expect(gatewayProcurementPurchaseRequisitionController).toBeDefined()
     }
   )
 
@@ -221,7 +229,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: '/inventory/purchase_requisition',
+              url: '/procurement/purchase_requisition',
               query: `lazyEvent=abc`,
             })
             .then((result) => {
@@ -250,7 +258,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: '/inventory/purchase_requisition',
+              url: '/procurement/purchase_requisition',
               query: `lazyEvent=${ApiQueryGeneral.primeDT.example}`,
             })
             .then((result) => {
@@ -276,7 +284,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/${mockPurchaseRequisition().id}`,
             })
             .then((result) => {
               HTTPDefaultResponseCheck(result, HttpStatus.OK, null)
@@ -301,7 +309,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: '/inventory/purchase_requisition',
+              url: '/procurement/purchase_requisition',
               body: {},
             })
             .then((result) => {
@@ -337,7 +345,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: '/inventory/purchase_requisition',
+              url: '/procurement/purchase_requisition',
               body: data,
             })
             .then((result) => {
@@ -371,7 +379,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: '/inventory/purchase_requisition',
+              url: '/procurement/purchase_requisition',
               body: data,
             })
             .then((result) => {
@@ -401,7 +409,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
               body: {},
             })
             .then((result) => {
@@ -426,7 +434,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
               body: {},
             })
             .then((result) => {
@@ -461,7 +469,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then((result) => {
@@ -500,7 +508,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/${mockPurchaseRequisition().id}`,
             })
             .then(async (result) => {
               HTTPDefaultResponseCheck(
@@ -528,7 +536,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/${mockPurchaseRequisition().id}`,
             })
             .then((result) => {
               HTTPDefaultResponseCheck(
@@ -571,7 +579,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/ask_approval/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/ask_approval/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then(async (result) => {
@@ -606,7 +614,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/ask_approval/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/ask_approval/${mockPurchaseRequisition().id}`,
               body: {
                 remark: mockPurchaseRequisition().remark,
               },
@@ -649,7 +657,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/ask_approval/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/ask_approval/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then((result) => {
@@ -693,7 +701,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/approve/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/approve/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then(async (result) => {
@@ -728,7 +736,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/approve/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/approve/${mockPurchaseRequisition().id}`,
               body: {
                 remark: mockPurchaseRequisition().remark,
               },
@@ -766,7 +774,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/approve/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/approve/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then((result) => {
@@ -810,7 +818,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then(async (result) => {
@@ -845,7 +853,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
               body: {
                 remark: mockPurchaseRequisition().remark,
               },
@@ -883,7 +891,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/decline/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then((result) => {
@@ -927,7 +935,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then(async (result) => {
@@ -962,7 +970,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
               body: {
                 remark: mockPurchaseRequisition().remark,
               },
@@ -1000,7 +1008,7 @@ describe('Gateway Inventory Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/inventory/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/cancel/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then((result) => {

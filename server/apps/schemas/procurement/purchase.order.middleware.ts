@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import {
   PurchaseOrder,
   PurchaseOrderSchema,
-} from '@schemas/inventory/purchase.order'
+} from '@schemas/procurement/purchase.order'
 import { MongoMiddleware, MongoSubscriber } from '@schemas/subscriber'
 import { TimeManagement } from '@utility/time'
 

@@ -14,6 +14,11 @@ export const ApplicationConfig = () => ({
     port: process.env.GATEWAY_PORT_INVENTORY,
     host_port: process.env.GATEWAY_HOST_PORT_INVENTORY,
   },
+  gateway_procurement: {
+    host: process.env.GATEWAY_HOST_PROCUREMENT,
+    port: process.env.GATEWAY_PORT_PROCUREMENT,
+    host_port: process.env.GATEWAY_HOST_PORT_PROCUREMENT,
+  },
   application: {
     node_env: process.env.NODE_ENV,
     timezone: process.env.TZ,

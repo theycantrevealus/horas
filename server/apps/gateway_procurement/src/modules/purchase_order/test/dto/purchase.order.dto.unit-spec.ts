@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker'
 import {
   PurchaseOrderAddDTO,
   PurchaseOrderEditDTO,
-} from '@gateway_inventory/purchase_order/dto/purchase.order'
-import { PurchaseOrderApprovalDTO } from '@gateway_inventory/purchase_order/dto/purchase.order.approval'
+} from '@gateway_procurement/purchase_order/dto/purchase.order'
+import { PurchaseOrderApprovalDTO } from '@gateway_procurement/purchase_order/dto/purchase.order.approval'
 import { testCaption } from '@utility/string'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'

@@ -4,7 +4,11 @@ module.exports = {
   moduleDirectories: ['node_modules'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   moduleNameMapper: {
-    '^@gateway_core(.*)$': '<rootDir>/apps/core/src/modules$1',
+    '^@gateway_core(.*)$': '<rootDir>/apps/gateway_core/src/modules$1',
+    '^@gateway_inventory(.*)$':
+      '<rootDir>/apps/gateway_inventory/src/modules$1',
+    '^@gateway_procurement(.*)$':
+      '<rootDir>/apps/gateway_procurement/src/modules$1',
     '^@schemas(.*)$': '<rootDir>/apps/schemas$1',
     '^@log(.*)$': '<rootDir>/apps/log/src$1',
     '^@security(.*)$': '<rootDir>/apps/security$1',

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IPurchaseRequisitionDetail } from '@schemas/inventory/purchase.requisition.detail.interface'
+import { IPurchaseRequisitionDetail } from '@schemas/procurement/purchase.requisition.detail.interface'
 import { Type } from 'class-transformer'
 import {
   IsArray,

@@ -17,9 +17,9 @@ import { MasterStockPointService } from '@gateway_core/master/services/master.st
 import {
   mockPurchaseOrder,
   mockPurchaseOrderModel,
-} from '@gateway_inventory/purchase_order/mock/purchase.order.mock'
-import { GatewayInventoryPurchaseOrderService } from '@gateway_inventory/purchase_order/purchase.order.service'
-import { mockPurchaseRequisitionModel } from '@gateway_inventory/purchase_requisition/mock/purchase.requisition.mock'
+} from '@gateway_procurement/purchase_order/mock/purchase.order.mock'
+import { GatewayProcurementPurchaseOrderService } from '@gateway_procurement/purchase_order/purchase.order.service'
+import { mockPurchaseRequisitionModel } from '@gateway_procurement/purchase_requisition/mock/purchase.requisition.mock'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { LogActivity } from '@log/schemas/log.activity'
 import { LogLogin } from '@log/schemas/log.login'
@@ -34,11 +34,6 @@ import {
   GeneralReceiveNote,
   GeneralReceiveNoteDocument,
 } from '@schemas/inventory/general.receive.note'
-import {
-  PurchaseOrder,
-  PurchaseOrderDocument,
-} from '@schemas/inventory/purchase.order'
-import { PurchaseRequisition } from '@schemas/inventory/purchase.requisition'
 import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import {
   MasterItemBatch,
@@ -49,6 +44,11 @@ import {
   MasterStockPoint,
   MasterStockPointDocument,
 } from '@schemas/master/master.stock.point'
+import {
+  PurchaseOrder,
+  PurchaseOrderDocument,
+} from '@schemas/procurement/purchase.order'
+import { PurchaseRequisition } from '@schemas/procurement/purchase.requisition'
 import { AuthService } from '@security/auth.service'
 import { KafkaService } from '@utility/kafka/avro/service'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -73,7 +73,7 @@ describe('Gateway Inventory General Receive Note Service', () => {
   let purchaseOrderModel: Model<PurchaseOrder>
   let generalReceiveNoteModel: Model<GeneralReceiveNote>
   let stockPointService: MasterStockPointService
-  let purchaseOrderService: GatewayInventoryPurchaseOrderService
+  let purchaseOrderService: GatewayProcurementPurchaseOrderService
   let stockClient: KafkaService
   //   let socketProxy: SocketIoClientProxyService
 
@@ -82,7 +82,7 @@ describe('Gateway Inventory General Receive Note Service', () => {
       controllers: [],
       providers: [
         MasterStockPointService,
-        GatewayInventoryPurchaseOrderService,
+        GatewayProcurementPurchaseOrderService,
         GatewayInventoryGeneralReceiveNoteService,
         JwtService,
         AuthService,
@@ -201,8 +201,8 @@ describe('Gateway Inventory General Receive Note Service', () => {
     //   SocketIoClientProxyService
     // )
 
-    purchaseOrderService = module.get<GatewayInventoryPurchaseOrderService>(
-      GatewayInventoryPurchaseOrderService
+    purchaseOrderService = module.get<GatewayProcurementPurchaseOrderService>(
+      GatewayProcurementPurchaseOrderService
     )
 
     stockPointService = module.get<MasterStockPointService>(
