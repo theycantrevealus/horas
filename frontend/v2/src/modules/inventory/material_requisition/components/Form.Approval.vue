@@ -77,14 +77,18 @@ export default defineComponent({
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     closeDialog(e: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dialogRef: any = this.dialogRef
       this.UIToggleEditingData(false)
-      this.dialogRef?.close({
-        ...this.dialogRef?.data,
+      dialogRef?.close({
+        ...dialogRef?.data,
         response: e,
       })
     },
     async submitData(event: MouseEvent) {
       const confirmation = this.$confirm
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dialogRef: any = this.dialogRef
       confirmation.require({
         group: 'confirm_approval_changes',
         target: event.currentTarget as HTMLElement,
@@ -99,24 +103,24 @@ export default defineComponent({
         accept: async () => {
           const parameter: InventoryMaterialRequisitionApproval = {
             remark: this.remark,
-            __v: this.dialogRef?.data.v ?? 0,
+            __v: dialogRef?.data.v ?? 0,
           }
 
-          if (this.dialogRef?.data.mode === 'ask_approval') {
+          if (dialogRef?.data.mode === 'ask_approval') {
             await this.inventoryMaterialRequisitionStore
-              .askApproval(this.dialogRef?.data.id, parameter)
+              .askApproval(dialogRef?.data.id, parameter)
               .then((response) => {
                 this.closeDialog(response)
               })
-          } else if (this.dialogRef?.data.mode === 'approve') {
+          } else if (dialogRef?.data.mode === 'approve') {
             await this.inventoryMaterialRequisitionStore
-              .approve(this.dialogRef?.data.id, parameter)
+              .approve(dialogRef?.data.id, parameter)
               .then((response) => {
                 this.closeDialog(response)
               })
-          } else if (this.dialogRef?.data.mode === 'decline') {
+          } else if (dialogRef?.data.mode === 'decline') {
             await this.inventoryMaterialRequisitionStore
-              .decline(this.dialogRef?.data.id, parameter)
+              .decline(dialogRef?.data.id, parameter)
               .then((response) => {
                 this.closeDialog(response)
               })

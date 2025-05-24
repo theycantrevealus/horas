@@ -51,10 +51,10 @@
                 <Splitter>
                   <SplitterPanel :size="50">
                     <Splitter layout="vertical">
-                      <SplitterPanel class="p-3" :size="5">
-                        <h4>{{ slotProps.data.code }}</h4>
-                      </SplitterPanel>
                       <SplitterPanel class="p-3" :size="30">
+                        <h4 class="text-blue-900">
+                          {{ slotProps.data.code }}
+                        </h4>
                         <h5>Remark:</h5>
                         <small v-html="slotProps.data.remark"></small>
                       </SplitterPanel>
@@ -290,6 +290,10 @@ const FormMaterialRequisitionApproval = defineAsyncComponent(
   () => import('@/modules/inventory/material_requisition/components/Form.Approval.vue'),
 )
 
+const MaterialRequisitionDetail = defineAsyncComponent(
+  () => import('@/modules/inventory/material_requisition/components/Detail.vue'),
+)
+
 export default defineComponent({
   name: 'InventoryMaterialRequisitionList',
   components: {
@@ -347,8 +351,8 @@ export default defineComponent({
           lazyParams: {
             first: 0,
             rows: 0,
-            sortField: '',
-            sortOrder: '',
+            sortField: 'created_at',
+            sortOrder: '-1',
             filters: {
               code: {
                 operator: FilterOperator.OR,
@@ -462,7 +466,25 @@ export default defineComponent({
                   permission: 'btnMaterialRequisitionView',
                   allowStatus: 'new',
                   command: () => {
-                    // TODO : View detail
+                    this.$dialog.open(MaterialRequisitionDetail, {
+                      props: {
+                        header: `Material Requisition <${item.code}>`,
+                        style: {
+                          width: '75vw',
+                        },
+                        breakpoints: {
+                          '960px': '75vw',
+                          '640px': '90vw',
+                        },
+                        modal: true,
+                      },
+                      data: {
+                        id: item.id,
+                      },
+                      onClose: async () => {
+                        await this.loadLazyData()
+                      },
+                    })
                   },
                 },
                 {

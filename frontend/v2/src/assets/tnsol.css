@@ -1507,3 +1507,11 @@ label[for] {
 .p-button-icon-only span {
     margin-right: 0 !important;
 }
+
+.p-dialog-content .p-card {
+    padding: 0 !important;
+}
+
+.p-dialog-content .p-card .p-card-content {
+    padding: 0 !important;
+}

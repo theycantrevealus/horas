@@ -15,7 +15,26 @@ export const storeInventoryMaterialRequisition = defineStore('inventoryMaterialR
       return await api({ requiresAuth: true })
         .get(`${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/material_requisition`, {
           params: {
-            lazyEvent: JSON.stringify(parameter),
+            lazyEvent: JSON.stringify({
+              ...parameter,
+              projection: {
+                _id: 1,
+                locale: 1,
+                code: 1,
+                transaction_date: 1,
+                stock_point: 1,
+                extras: 1,
+                status: 1,
+                approval_history: 1,
+                remark: 1,
+                created_by: 1,
+                created_at: 1,
+                updated_at: 1,
+                id: 1,
+                __v: 1,
+                autonum: 1,
+              },
+            }),
           },
         })
         .then((response: AxiosResponse) => {
