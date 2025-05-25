@@ -164,7 +164,7 @@
                   v-if="slotProps.data.purchase_requisition"
                   :text="slotProps.data.purchase_requisition.code"
                 />
-                <center v-else>-</center>
+                <div v-else>-</div>
               </template>
             </Column>
             <Column
@@ -294,6 +294,7 @@ import { storeCore } from '@/store/index'
 import { storeInventoryMaterialRequisition } from '@/modules/inventory/material_requisition/store'
 import { mapStores, mapActions } from 'pinia'
 import { defineComponent, defineAsyncComponent } from 'vue'
+import type { CoreResponse } from '@/interfaces/api'
 
 const FormMaterialRequisitionApproval = defineAsyncComponent(
   () => import('@/modules/inventory/material_requisition/components/Form.Approval.vue'),
@@ -756,68 +757,72 @@ export default defineComponent({
       })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    processPrint(selectedPaperSize: any) {
+    async processPrint(selectedPaperSize: any) {
       this.ui.drawer.visibility = false
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const item: any = this.ui.drawer.targetData
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const MRRef: any = this.$refs
+      await this.inventoryMaterialRequisitionStore.detail(item.id).then((result: CoreResponse) => {
+        const MRDetail = result.payload
 
-      MRRef.printTemplateMaterialRequisition
-        .generateViewer({
-          code: item.code,
-          transaction_date: this.formatDate(item.transaction_date, 'DD MMMM YYYY, HH:mm'),
-          requester_name: `${item.created_by.first_name} ${item.created_by.last_name}`,
-          requester_stock_point: item.stock_point.name,
-          remark: item.remark ? `${item.remark.substring(0, 150)}...` : '-',
-          approved_at: this.formatDate(
-            item.approval_history[item.approval_history.length - 1].logged_at,
-            'DD MMMM YYYY, HH:mm',
-          ),
-          approved_by: `${item.approval_history[item.approval_history.length - 1].created_by.first_name} ${item.approval_history[item.approval_history.length - 1].created_by.last_name}`,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          detail: item.detail.map((printDetail: any) => ({
-            name: printDetail.item.name,
-            qty: printDetail.qty,
-            unit: printDetail.unit.name,
-            remark: printDetail.remark ? `${printDetail.remark.substring(0, 100)}...` : '-',
-          })),
-        })
-        .then(async () => {
-          const elements = this.$el.querySelectorAll('.print-container')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const hiddenElements = Array.from(elements).filter((element: any) => {
-            return window.getComputedStyle(element).display === 'none'
-          })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const MRRef: any = this.$refs
 
-          const parser = new DOMParser()
-          const htmlContent = hiddenElements
+        MRRef.printTemplateMaterialRequisition
+          .generateViewer({
+            code: item.code,
+            transaction_date: this.formatDate(item.transaction_date, 'DD MMMM YYYY, HH:mm'),
+            requester_name: `${item.created_by.first_name} ${item.created_by.last_name}`,
+            requester_stock_point: item.stock_point.name,
+            remark: item.remark ? `${item.remark.substring(0, 150)}...` : '-',
+            approved_at: this.formatDate(
+              item.approval_history[item.approval_history.length - 1].logged_at,
+              'DD MMMM YYYY, HH:mm',
+            ),
+            approved_by: `${item.approval_history[item.approval_history.length - 1].created_by.first_name} ${item.approval_history[item.approval_history.length - 1].created_by.last_name}`,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .map((element: any) => {
-              const doc = parser.parseFromString(element.outerHTML, 'text/html')
-              const elements = doc.body.children
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              Array.from(elements).forEach((element: any) => {
-                if (element.style.display === 'none') {
-                  element.style.display = ''
-                }
-              })
-              return doc.body.innerHTML
+            detail: MRDetail.detail.map((printDetail: any) => ({
+              name: printDetail.item.name,
+              qty: printDetail.qty,
+              unit: printDetail.unit.name,
+              remark: printDetail.remark ? `${printDetail.remark.substring(0, 100)}...` : '-',
+            })),
+          })
+          .then(async () => {
+            const elements = this.$el.querySelectorAll('.print-container')
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const hiddenElements = Array.from(elements).filter((element: any) => {
+              return window.getComputedStyle(element).display === 'none'
             })
-            .join('')
 
-          await MRRef.printModule.generateReport(
-            {
-              fileName: `material_requisition_${item.code}`,
-              contentWidth: 241,
-              orientation: selectedPaperSize.orientation,
-              paperSize: selectedPaperSize.code,
-              quality: 2,
-              margin: 0,
-            },
-            htmlContent,
-          )
-        })
+            const parser = new DOMParser()
+            const htmlContent = hiddenElements
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              .map((element: any) => {
+                const doc = parser.parseFromString(element.outerHTML, 'text/html')
+                const elements = doc.body.children
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                Array.from(elements).forEach((element: any) => {
+                  if (element.style.display === 'none') {
+                    element.style.display = ''
+                  }
+                })
+                return doc.body.innerHTML
+              })
+              .join('')
+
+            await MRRef.printModule.generateReport(
+              {
+                fileName: `material_requisition_${item.code}`,
+                contentWidth: 241,
+                orientation: selectedPaperSize.orientation,
+                paperSize: selectedPaperSize.code,
+                quality: 2,
+                margin: 0,
+              },
+              htmlContent,
+            )
+          })
+      })
     },
   },
 })
