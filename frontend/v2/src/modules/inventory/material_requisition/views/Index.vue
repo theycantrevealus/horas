@@ -164,7 +164,7 @@
                   v-if="slotProps.data.purchase_requisition"
                   :text="slotProps.data.purchase_requisition.code"
                 />
-                <div v-else>-</div>
+                <div v-else><i class="text-gray-400">Not created yet</i></div>
               </template>
             </Column>
             <Column
