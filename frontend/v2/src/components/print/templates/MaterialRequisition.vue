@@ -168,7 +168,6 @@ export default defineComponent({
     async generateViewer(configuration: any) {
       this.code = configuration.code
       this.transaction_date = configuration.transaction_date
-      this.requester_name = configuration.transaction_date
       this.requester_name = configuration.requester_name
       this.requester_stock_point = configuration.requester_stock_point
       this.remark = configuration.remark

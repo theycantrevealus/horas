@@ -13,19 +13,23 @@
               />
             </h2>
           </th>
-          <th class="wrap_content text-right">Code Ref</th>
-          <th class="input text-left">{{ code }}</th>
-          <th class="wrap_content text-right">Requester</th>
-          <th class="input text-left">{{ requester_name }}</th>
+          <th class="wrap_content text-right">PR Code Ref</th>
+          <th class="input text-left">{{ pr_code }}</th>
+          <th class="wrap_content text-right">PR Date</th>
+          <th class="input text-left">{{ pr_transaction_date }}</th>
+          <th class="wrap_content text-right">PR Requester</th>
+          <th class="input text-left">{{ pr_requester_name }}</th>
           <th rowspan="2" style="padding: 2px; width: 10%">
-            <h2>MATERIAL<br />REQUISITION</h2>
+            <h2>PURCHASE<br />REQUISITION</h2>
           </th>
         </tr>
         <tr>
-          <th class="wrap_content text-right">Request Date</th>
-          <th class="input text-left">{{ transaction_date }}</th>
-          <th class="wrap_content text-right">Requester Stock Point</th>
-          <th class="input text-left">{{ requester_stock_point }}</th>
+          <th class="wrap_content text-right">MR Code Ref</th>
+          <th class="input text-left">{{ mr_code }}</th>
+          <th class="wrap_content text-right">MR Date</th>
+          <th class="input text-left">{{ mr_transaction_date }}</th>
+          <th class="wrap_content text-right">MR Requester</th>
+          <th class="input text-left">{{ mr_requester_name }}</th>
         </tr>
       </thead>
     </table>
@@ -69,7 +73,7 @@
           <td>Sign:</td>
         </tr>
         <tr>
-          <td class="input">Requested by : {{ requester_name }}</td>
+          <td class="input">Requested by : {{ pr_requester_name }}</td>
           <td class="input">Approved by : {{ approved_by }}</td>
         </tr>
       </tbody>
@@ -129,9 +133,12 @@ export default defineComponent({
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
-      code: '<code>',
-      transaction_date: '<transaction_date>',
-      requester_name: '<requester_name>',
+      pr_code: '<pr_code>',
+      mr_code: '<mr_code>',
+      pr_transaction_date: '<pr_transaction_date>',
+      mr_transaction_date: '<mr_transaction_date>',
+      mr_requester_name: '<mr_requester_name>',
+      pr_requester_name: '<pr_requester_name>',
       requester_stock_point: '<requester_stock_point>',
       remark: '<remark>',
       approved_at: '<approved_at>',
@@ -166,10 +173,12 @@ export default defineComponent({
   methods: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async generateViewer(configuration: any) {
-      this.code = configuration.code
-      this.transaction_date = configuration.transaction_date
-      this.requester_name = configuration.transaction_date
-      this.requester_name = configuration.requester_name
+      this.mr_code = configuration.mr_code
+      this.pr_code = configuration.pr_code
+      this.mr_transaction_date = configuration.mr_transaction_date
+      this.pr_transaction_date = configuration.pr_transaction_date
+      this.mr_requester_name = configuration.mr_requester_name
+      this.pr_requester_name = configuration.pr_requester_name
       this.requester_stock_point = configuration.requester_stock_point
       this.remark = configuration.remark
       this.approved_at = configuration.approved_at

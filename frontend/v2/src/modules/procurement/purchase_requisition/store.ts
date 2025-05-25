@@ -13,7 +13,7 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async list(parameter: any) {
       return await api({ requiresAuth: true })
-        .get(`${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition`, {
+        .get(`${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition`, {
           params: {
             lazyEvent: JSON.stringify(parameter),
           },
@@ -28,7 +28,7 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     },
     async detail(id: string) {
       return await api({ requiresAuth: true })
-        .get(`${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition/${id}`)
+        .get(`${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition/${id}`)
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data
           return data
@@ -39,7 +39,10 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     },
     async add(parameter: ProcurementPurchaseRequisitionAdd) {
       return await api({ requiresAuth: true, responseToast: true })
-        .post(`${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition`, parameter)
+        .post(
+          `${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition`,
+          parameter,
+        )
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data
           return data
@@ -51,7 +54,7 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     async edit(id: string, parameter: ProcurementPurchaseRequisitionEdit) {
       return await api({ requiresAuth: true, responseToast: true })
         .patch(
-          `${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition/${id}`,
+          `${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition/${id}`,
           parameter,
         )
         .then((response: AxiosResponse) => {
@@ -64,7 +67,7 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     },
     async delete(id: string) {
       return await api({ requiresAuth: true, responseToast: true })
-        .delete(`${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition/${id}`)
+        .delete(`${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition/${id}`)
         .then((response: AxiosResponse) => {
           const data: CoreResponse = response.data
           return data
@@ -76,7 +79,7 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     async askApproval(id: string, parameter: ProcurementPurchaseRequisitionApproval) {
       return await api({ requiresAuth: true, responseToast: true })
         .patch(
-          `${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition/ask_approval/${id}`,
+          `${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition/ask_approval/${id}`,
           parameter,
         )
         .then((response: AxiosResponse) => {
@@ -90,7 +93,7 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     async approve(id: string, parameter: ProcurementPurchaseRequisitionApproval) {
       return await api({ requiresAuth: true, responseToast: true })
         .patch(
-          `${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition/approve/${id}`,
+          `${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition/approve/${id}`,
           parameter,
         )
         .then((response: AxiosResponse) => {
@@ -104,7 +107,7 @@ export const storeProcurementPurchaseRequisition = defineStore('procurementPurch
     async decline(id: string, parameter: ProcurementPurchaseRequisitionApproval) {
       return await api({ requiresAuth: true, responseToast: true })
         .patch(
-          `${import.meta.env.VITE_INVENTORY_URL}/v1/inventory/purchase_requisition/decline/${id}`,
+          `${import.meta.env.VITE_PROCUREMENT_URL}/v1/procurement/purchase_requisition/decline/${id}`,
           parameter,
         )
         .then((response: AxiosResponse) => {

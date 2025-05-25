@@ -111,8 +111,18 @@ export class GatewayProcurementPurchaseRequisitionService {
         locale: await this.cacheManager
           .get('APPLICATION_LOCALE')
           .then((response: IConfig) => {
-            return response.setter
+            return response?.setter
           }),
+        approval_history: [
+          {
+            status: 'new',
+            remark: data.remark,
+            created_by: account,
+            logged_at: new TimeManagement().getTimezone(
+              await this.configService.get<string>('application.timezone')
+            ),
+          },
+        ],
         created_by: account,
       })
       .catch((error: Error) => {
@@ -235,7 +245,6 @@ export class GatewayProcurementPurchaseRequisitionService {
       .findOneAndUpdate(
         {
           id: id,
-          'created_by.id': account.id,
           status: 'need_approval',
           __v: data.__v,
         },
@@ -283,7 +292,6 @@ export class GatewayProcurementPurchaseRequisitionService {
       .findOneAndUpdate(
         {
           id: id,
-          'created_by.id': account.id,
           status: 'need_approval',
           __v: data.__v,
         },

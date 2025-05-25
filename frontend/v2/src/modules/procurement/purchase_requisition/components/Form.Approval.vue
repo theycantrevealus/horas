@@ -34,9 +34,9 @@
 import { minLength, required } from '@vuelidate/validators'
 import { mapActions, mapStores } from 'pinia'
 import { storeCore } from '@/store/index.ts'
-import { storeInventoryMaterialRequisition } from '@/modules/inventory/material_requisition/store'
 import { defineComponent } from 'vue'
-import type { InventoryMaterialRequisitionApproval } from '../interfaces'
+import type { ProcurementPurchaseRequisitionApproval } from '../interfaces'
+import { storeProcurementPurchaseRequisition } from '../store'
 
 export default defineComponent({
   name: 'FormPurchaseRequisitionApproval',
@@ -54,7 +54,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapStores(storeInventoryMaterialRequisition),
+    ...mapStores(storeProcurementPurchaseRequisition),
   },
   validations() {
     return {
@@ -77,9 +77,11 @@ export default defineComponent({
     ...mapActions(storeCore, ['allowDispatch', 'UIToggleEditingData']),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     closeDialog(e: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dialogRef: any = this.dialogRef
       this.UIToggleEditingData(false)
-      this.dialogRef?.close({
-        ...this.dialogRef?.data,
+      dialogRef?.close({
+        ...dialogRef?.data,
         response: e,
       })
     },
@@ -97,26 +99,29 @@ export default defineComponent({
         rejectLabel: 'Abort',
         rejectIcon: 'pi pi-times-circle',
         accept: async () => {
-          const parameter: InventoryMaterialRequisitionApproval = {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const dialogRef: any = this.dialogRef
+
+          const parameter: ProcurementPurchaseRequisitionApproval = {
             remark: this.remark,
-            __v: this.dialogRef?.data.v ?? 0,
+            __v: dialogRef?.data.v ?? 0,
           }
 
-          if (this.dialogRef?.data.mode === 'ask_approval') {
-            await this.inventoryMaterialRequisitionStore
-              .askApproval(this.dialogRef?.data.id, parameter)
+          if (dialogRef?.data.mode === 'ask_approval') {
+            await this.procurementPurchaseRequisitionStore
+              .askApproval(dialogRef?.data.id, parameter)
               .then((response) => {
                 this.closeDialog(response)
               })
-          } else if (this.dialogRef?.data.mode === 'approve') {
-            await this.inventoryMaterialRequisitionStore
-              .approve(this.dialogRef?.data.id, parameter)
+          } else if (dialogRef?.data.mode === 'approve') {
+            await this.procurementPurchaseRequisitionStore
+              .approve(dialogRef?.data.id, parameter)
               .then((response) => {
                 this.closeDialog(response)
               })
-          } else if (this.dialogRef?.data.mode === 'decline') {
-            await this.inventoryMaterialRequisitionStore
-              .decline(this.dialogRef?.data.id, parameter)
+          } else if (dialogRef?.data.mode === 'decline') {
+            await this.procurementPurchaseRequisitionStore
+              .decline(dialogRef?.data.id, parameter)
               .then((response) => {
                 this.closeDialog(response)
               })

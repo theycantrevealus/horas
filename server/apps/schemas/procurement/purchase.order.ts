@@ -1,6 +1,4 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
-import { IPurchaseOrderApproval } from '@inventory/interface/purchase.order.approval'
-import { IPurchaseOrderDetail } from '@inventory/interface/purchase.order.detail'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { ILocale, LocaleJoin } from '@schemas/locale'
@@ -10,7 +8,9 @@ import { PurchaseOrderApproval } from '@schemas/procurement/purchase.order.appro
 import { PurchaseOrderDetail } from '@schemas/procurement/purchase.order.detail'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+import { IPurchaseOrderDetail } from './purchase.order.detail.interface'
 import { IPurchaseRequisition } from './purchase.requisition.interface'
+import { IPurchaseOrderApproval } from './purchase_order.approval.interface'
 
 export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
 
@@ -19,7 +19,7 @@ export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
  * @description If purchase requisition is approved, user can process procurement. It will recorded here
  * Purchase Order (PO) is a commercial document issued by a buyer to a seller, indicating the type, quantities, and agreed prices for products or services to be purchased
  */
-@Schema({ collection: 'inventory_purchase_order' })
+@Schema({ collection: 'procurement_purchase_order' })
 export class PurchaseOrder {
   /**
    * Unique identifier for the stock audit.

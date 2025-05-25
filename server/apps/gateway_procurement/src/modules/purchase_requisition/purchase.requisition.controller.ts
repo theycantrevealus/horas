@@ -205,7 +205,7 @@ export class GatewayProcurementPurchaseRequisitionController {
     @Req() request: FastifyRequest
   ) {
     return await this.gatewayProcurementPurchaseRequisitionService
-      .askApproval(parameter, param.id, account)
+      .approve(parameter, param.id, account)
       .then(async (result) => {
         await this.gatewayProcurementPurchaseRequisitionService.notifier(
           {

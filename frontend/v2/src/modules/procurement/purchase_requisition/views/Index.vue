@@ -45,10 +45,10 @@
                 <Splitter>
                   <SplitterPanel :size="50">
                     <Splitter layout="vertical">
-                      <SplitterPanel class="p-3" :size="5">
-                        <h4>{{ slotProps.data.code }}</h4>
-                      </SplitterPanel>
                       <SplitterPanel class="p-3" :size="30">
+                        <h4 class="text-blue-900">
+                          {{ slotProps.data.code }}
+                        </h4>
                         <h5>Remark:</h5>
                         <small v-html="slotProps.data.remark"></small>
                       </SplitterPanel>
@@ -57,15 +57,20 @@
                   <SplitterPanel class="flex items-center justify-center p-3">
                     <Timeline :value="slotProps.data.approval_history">
                       <template #opposite="TimeLineSlotProps">
+                        <div class="flex flex-row-reverse flex-wrap">
+                          <AccountBadge
+                            :first_name="TimeLineSlotProps.item.created_by.first_name"
+                            :last_name="TimeLineSlotProps.item.created_by.last_name"
+                            :ltr="true"
+                          />
+                        </div>
                         <small class="text-surface-500 dark:text-surface-400"
-                          ><strong
-                            >{{ TimeLineSlotProps.item.created_by.last_name }},
-                            {{ TimeLineSlotProps.item.created_by.first_name }}</strong
-                          ></small
-                        ><br />
-                        <small class="text-surface-500 dark:text-surface-400">{{
-                          formatDate(TimeLineSlotProps.item.logged_at, 'DD MMMM YYYY, HH:mm')
-                        }}</small>
+                          ><strong>
+                            {{
+                              formatDate(TimeLineSlotProps.item.logged_at, 'DD MMMM YYYY, HH:mm')
+                            }}
+                          </strong></small
+                        >
                       </template>
                       <template #content="TimeLineSlotProps">
                         <Message
@@ -96,7 +101,7 @@
                   class="min-w-48"
                   severity="secondary"
                 >
-                  <small><span class="purchase-icons">more_vert</span></small>
+                  <small><span class="material-icons">more_vert</span></small>
                 </Button>
                 <TieredMenu
                   :ref="`mr_menu_${slotProps.data.id}`"
@@ -123,6 +128,9 @@
                   @keydown.enter="filterCallback()"
                 />
               </template>
+              <template #body="slotProps">
+                <LabelCode :text="slotProps.data.code" />
+              </template>
             </Column>
             <Column
               ref="material_requisition"
@@ -141,7 +149,7 @@
                 />
               </template>
               <template #body="slotProps">
-                {{ slotProps.data.material_requisition.code }}
+                <LabelCode :text="slotProps.data.material_requisition.code" />
               </template>
             </Column>
             <Column
@@ -168,6 +176,29 @@
                   optionValue="code"
                   placeholder="Search by status"
                 />
+              </template>
+            </Column>
+            <Column header="Approval" :sortable="false" class="wrap_content">
+              <template #body="slotProps">
+                <div class="card flex justify-center">
+                  <AvatarGroup>
+                    <AccountBadge
+                      v-for="(item, index) in slotProps.data.approval_history.reduce(
+                        (acc: any[], current: any) => {
+                          if (!acc.find((it: any) => it.created_by.id === current.created_by.id)) {
+                            acc.push(current)
+                          }
+                          return acc
+                        },
+                        [],
+                      )"
+                      :key="index"
+                      :first_name="item.created_by.first_name"
+                      :last_name="item.created_by.last_name"
+                      :withName="false"
+                    />
+                  </AvatarGroup>
+                </div>
               </template>
             </Column>
             <Column
@@ -222,6 +253,7 @@ import PrintModule from '@/components/print/Print.vue'
 import PrintOptions from '@/components/print/Option.vue'
 import PrintTemplatePurchaseRequisition from '@/components/print/templates/PurchaseRequisition.vue'
 import AccountBadge from '@/components/Account.Badge.vue'
+import LabelCode from '@/components/Label.Code.vue'
 import DateManagement from '@/utils/core/date.management'
 import { storeCore } from '@/store/index'
 import { storeProcurementPurchaseRequisition } from '@/modules/procurement/purchase_requisition/store'
@@ -232,10 +264,15 @@ const FormPurchaseRequisitionApproval = defineAsyncComponent(
   () => import('@/modules/procurement/purchase_requisition/components/Form.Approval.vue'),
 )
 
+const PurchaseRequisitionDetail = defineAsyncComponent(
+  () => import('@/modules/procurement/purchase_requisition/components/Detail.vue'),
+)
+
 export default defineComponent({
   name: 'InventoryPurchaseRequisitionList',
   components: {
     AccountBadge,
+    LabelCode,
     PrintModule,
     PrintTemplatePurchaseRequisition,
     PrintOptions,
@@ -392,6 +429,35 @@ export default defineComponent({
             response.payload.data.map(async (item: any) => ({
               ...item,
               permission: [
+                {
+                  label: 'View',
+                  icon: 'pi pi-eye',
+                  creator: item.created_by.id.toString(),
+                  status: item.status,
+                  permission: 'btnMaterialRequisitionView',
+                  allowStatus: 'new',
+                  command: () => {
+                    this.$dialog.open(PurchaseRequisitionDetail, {
+                      props: {
+                        header: `Purchase Requisition <${item.code}>`,
+                        style: {
+                          width: '75vw',
+                        },
+                        breakpoints: {
+                          '960px': '75vw',
+                          '640px': '90vw',
+                        },
+                        modal: true,
+                      },
+                      data: {
+                        id: item.id,
+                      },
+                      onClose: async () => {
+                        await this.loadLazyData()
+                      },
+                    })
+                  },
+                },
                 {
                   label: 'Approval',
                   icon: 'pi pi-check-square',
@@ -621,15 +687,22 @@ export default defineComponent({
       this.ui.drawer.visibility = false
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const item: any = this.ui.drawer.targetData
+      console.clear()
+      console.log(item)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const MRRef: any = this.$refs
+      const PRRef: any = this.$refs
 
-      MRRef.printTemplatePurchaseRequisition
+      PRRef.printTemplatePurchaseRequisition
         .generateViewer({
-          code: item.code,
-          transaction_date: this.formatDate(item.transaction_date, 'DD MMMM YYYY, HH:mm'),
-          requester_name: `${item.created_by.first_name} ${item.created_by.last_name}`,
-          requester_stock_point: item.stock_point.name,
+          mr_code: item.material_requisition.code,
+          pr_code: item.code,
+          mr_transaction_date: this.formatDate(
+            item.material_requisition.transaction_date,
+            'DD MMMM YYYY, HH:mm',
+          ),
+          pr_transaction_date: this.formatDate(item.transaction_date, 'DD MMMM YYYY, HH:mm'),
+          mr_requester_name: `${item.material_requisition.created_by.first_name} ${item.material_requisition.created_by.last_name}`,
+          pr_requester_name: `${item.created_by.first_name} ${item.created_by.last_name}`,
           remark: item.remark ? `${item.remark.substring(0, 150)}...` : '-',
           approved_at: this.formatDate(
             item.approval_history[item.approval_history.length - 1].logged_at,
@@ -667,7 +740,7 @@ export default defineComponent({
             })
             .join('')
 
-          await MRRef.printModule.generateReport(
+          await PRRef.printModule.generateReport(
             {
               fileName: `purchase_requisition_${item.code}`,
               contentWidth: 241,
