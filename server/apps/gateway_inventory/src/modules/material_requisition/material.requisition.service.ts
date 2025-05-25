@@ -10,6 +10,7 @@ import {
   MaterialRequisition,
   MaterialRequisitionDocument,
 } from '@schemas/inventory/material.requisition'
+import { IPurchaseRequisition } from '@schemas/procurement/purchase.requisition.interface'
 import { PrimeParameter } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
 import { modCodes } from '@utility/modules'
@@ -145,6 +146,32 @@ export class GatewayInventoryMaterialRequisitionService {
       .findOneAndUpdate(
         { id: id, 'created_by.id': account.id, status: 'new', __v: __v },
         dataSet
+      )
+      .then((result) => {
+        if (result) {
+          return result
+        } else {
+          throw new NotFoundException()
+        }
+      })
+      .catch((error) => {
+        throw error
+      })
+  }
+
+  async updatePurchaseRequisitionInformation(
+    id: string,
+    data: IPurchaseRequisition,
+    __v: number
+  ) {
+    return await this.materialRequisitionModel
+      .findOneAndUpdate(
+        { id: id, __v: __v },
+        {
+          $set: {
+            purchase_requisition: data,
+          },
+        }
       )
       .then((result) => {
         if (result) {

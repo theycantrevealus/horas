@@ -158,6 +158,15 @@
                 />
               </template>
             </Column>
+            <Column header="Purchase Requisition" :sortable="true" class="wrap_content">
+              <template #body="slotProps">
+                <LabelCode
+                  v-if="slotProps.data.purchase_requisition"
+                  :text="slotProps.data.purchase_requisition.code"
+                />
+                <center v-else>-</center>
+              </template>
+            </Column>
             <Column
               ref="status"
               field="status"
@@ -637,9 +646,18 @@ export default defineComponent({
                         life: 5000,
                       })
                     } else {
-                      this.$router.push({
-                        path: `/procurement/purchase_requisition/add/${item.id}`,
-                      })
+                      if (item.purchase_requisition) {
+                        this.coreStore.setToast({
+                          severity: 'warn',
+                          summary: 'Forbidden Method',
+                          detail: 'Material Requisition already have purchase requisition',
+                          life: 5000,
+                        })
+                      } else {
+                        this.$router.push({
+                          path: `/procurement/purchase_requisition/add/${item.id}`,
+                        })
+                      }
                     }
                   },
                 },

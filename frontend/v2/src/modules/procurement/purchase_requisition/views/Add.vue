@@ -371,7 +371,7 @@ import { mapStores } from 'pinia'
 import type { CoreResponse } from '@/interfaces/api'
 
 export default defineComponent({
-  name: 'MaterialRequisitionAdd',
+  name: 'PurchaseRequisitionAdd',
   data() {
     return {
       ui: {

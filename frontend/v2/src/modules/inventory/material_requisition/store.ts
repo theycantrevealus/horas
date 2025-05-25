@@ -22,6 +22,7 @@ export const storeInventoryMaterialRequisition = defineStore('inventoryMaterialR
                 locale: 1,
                 code: 1,
                 transaction_date: 1,
+                purchase_requisition: 1,
                 stock_point: 1,
                 extras: 1,
                 status: 1,

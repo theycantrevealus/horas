@@ -5,7 +5,7 @@ import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { InjectModel } from '@nestjs/mongoose'
+import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { IConfig } from '@schemas/config/config'
 import {
   PurchaseRequisition,
@@ -19,6 +19,7 @@ import { codeGenerator } from '@utility/string'
 import { TimeManagement } from '@utility/time'
 import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
+import { Connection } from 'mongoose'
 import { Socket } from 'socket.io-client'
 import { Logger } from 'winston'
 
@@ -33,6 +34,8 @@ export class GatewayProcurementPurchaseRequisitionService {
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
+
+    @InjectConnection('primary') private mongoConnection: Connection,
 
     @InjectModel(PurchaseRequisition.name, 'primary')
     private readonly purchaseRequisitionModel: Model<PurchaseRequisitionDocument>,
@@ -79,6 +82,8 @@ export class GatewayProcurementPurchaseRequisitionService {
   }
 
   async add(data: PurchaseRequisitionAddDTO, account: IAccount) {
+    const session = await this.mongoConnection.startSession()
+
     if (!data.code) {
       const now = new Date()
       await this.purchaseRequisitionModel
@@ -101,33 +106,47 @@ export class GatewayProcurementPurchaseRequisitionService {
         })
     }
 
-    return await this.purchaseRequisitionModel
-      .create({
-        ...data,
-        material_requisition:
-          await this.gatewayInventoryMaterialRequisitionService.detail(
-            data.material_requisition
-          ),
-        locale: await this.cacheManager
-          .get('APPLICATION_LOCALE')
-          .then((response: IConfig) => {
-            return response?.setter
-          }),
-        approval_history: [
-          {
-            status: 'new',
-            remark: data.remark,
-            created_by: account,
-            logged_at: new TimeManagement().getTimezone(
-              await this.configService.get<string>('application.timezone')
-            ),
-          },
-        ],
-        created_by: account,
-      })
-      .catch((error: Error) => {
-        throw error
-      })
+    return await session.withTransaction(async () => {
+      const material_requisition =
+        await this.gatewayInventoryMaterialRequisitionService.detail(
+          data.material_requisition
+        )
+
+      return await this.purchaseRequisitionModel
+        .create({
+          ...data,
+          material_requisition: material_requisition,
+          locale: await this.cacheManager
+            .get('APPLICATION_LOCALE')
+            .then((response: IConfig) => {
+              return response?.setter
+            }),
+          approval_history: [
+            {
+              status: 'new',
+              remark: data.remark,
+              created_by: account,
+              logged_at: new TimeManagement().getTimezone(
+                await this.configService.get<string>('application.timezone')
+              ),
+            },
+          ],
+          created_by: account,
+        })
+        .then(async (result) => {
+          await this.gatewayInventoryMaterialRequisitionService.updatePurchaseRequisitionInformation(
+            data.material_requisition,
+            result,
+            material_requisition.__v
+          )
+
+          await session.endSession()
+          return result
+        })
+        .catch((error: Error) => {
+          throw error
+        })
+    })
   }
 
   async edit(data: PurchaseRequisitionEditDTO, id: string, account: IAccount) {

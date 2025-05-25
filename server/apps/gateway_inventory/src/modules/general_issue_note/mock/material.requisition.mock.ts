@@ -20,6 +20,7 @@ export const mockMaterialRequisition = (
     timezone: 'Asia/Jakarta',
   },
   code = 'MR-0001',
+  purchase_requisition = null,
   transaction_date = new Date(),
   stock_point: IMasterStockPoint = {
     id: '',
@@ -56,6 +57,7 @@ export const mockMaterialRequisition = (
   id,
   locale,
   code,
+  purchase_requisition,
   transaction_date,
   stock_point,
   detail,
@@ -87,6 +89,7 @@ export const mockMaterialRequisitionDoc = (
   locale: mock?.locale,
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   transaction_date: mock?.transaction_date || new Date(),
+  purchase_requisition: mock?.purchase_requisition || null,
   stock_point: mock?.stock_point,
   detail: mock?.detail,
   extras: mock?.extras,
