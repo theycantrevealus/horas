@@ -65,14 +65,10 @@
               </template>
               <template #body="slotProps">
                 <label
-                  :class="`${slotProps.node.data.show_on_menu ? 'text-green-500' : 'text-red-500'}`"
+                  :class="`${slotProps.node.data.show_on_menu ? 'text-green-500' : 'text-red-500'} text-center`"
                 >
-                  <center>
-                    <span v-if="slotProps.node.data.show_on_menu" class="material-icons">done</span>
-                    <span v-if="!slotProps.node.data.show_on_menu" class="material-icons"
-                      >close</span
-                    >
-                  </center>
+                  <span v-if="slotProps.node.data.show_on_menu" class="material-icons">done</span>
+                  <span v-if="!slotProps.node.data.show_on_menu" class="material-icons">close</span>
                 </label>
               </template>
             </Column>
