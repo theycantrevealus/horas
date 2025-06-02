@@ -409,7 +409,7 @@ describe('Gateway Procurement Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/procurement/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/${mockPurchaseRequisition().id}`,
               body: {},
             })
             .then((result) => {
@@ -434,7 +434,7 @@ describe('Gateway Procurement Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/procurement/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/${mockPurchaseRequisition().id}`,
               body: {},
             })
             .then((result) => {
@@ -469,7 +469,7 @@ describe('Gateway Procurement Purchase Requisition Controller', () => {
                 authorization: 'Bearer ey...',
                 'content-type': 'application/json',
               },
-              url: `/procurement/purchase_requisition/edit/${mockPurchaseRequisition().id}`,
+              url: `/procurement/purchase_requisition/${mockPurchaseRequisition().id}`,
               body: data,
             })
             .then((result) => {

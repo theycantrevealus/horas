@@ -497,6 +497,10 @@ describe('Gateway Procurement Ajustment Service', () => {
         }),
         async () => {
           jest
+            .spyOn(purchaseRequisitionModel, 'findOne')
+            .mockResolvedValue(mockPurchaseRequisitionDocArray[0])
+
+          jest
             .spyOn(purchaseRequisitionModel, 'findOneAndUpdate')
             .mockResolvedValue(mockPurchaseRequisitionDocArray[0])
 
