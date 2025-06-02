@@ -154,13 +154,13 @@ export class GatewayProcurementPurchaseRequisitionService {
       .findOneAndUpdate(
         {
           id: id,
-          created_by: account,
+          'created_by.id': account.id,
           __v: data.__v,
         },
         {
           $set: {
             transaction_date: data.transaction_date,
-            material_requisition: data.material_requisition,
+            // material_requisition: data.material_requisition,
             detail: data.detail,
             extras: data.extras,
             remark: data.remark,
@@ -185,7 +185,7 @@ export class GatewayProcurementPurchaseRequisitionService {
       .findOneAndUpdate(
         {
           id: id,
-          created_by: account,
+          'created_by.id': account.id,
         },
         {
           deleted_at: new TimeManagement().getTimezone(
@@ -193,8 +193,19 @@ export class GatewayProcurementPurchaseRequisitionService {
           ),
         }
       )
-      .then((result) => {
+      .then(async (result) => {
         if (result) {
+          await this.detail(id).then(async (detail) => {
+            await this.gatewayInventoryMaterialRequisitionService
+              .detail(detail.material_requisition.id)
+              .then(async (MRDetail) => {
+                await this.gatewayInventoryMaterialRequisitionService.updatePurchaseRequisitionInformation(
+                  detail.material_requisition.id,
+                  null,
+                  MRDetail.__v
+                )
+              })
+          })
           return result
         } else {
           throw new NotFoundException()

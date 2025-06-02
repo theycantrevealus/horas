@@ -631,9 +631,6 @@ export default defineComponent({
     async dataEdit(id: string) {
       this.$router.push({
         path: `/procurement/purchase_requisition/edit/${id}`,
-        query: {
-          id: id,
-        },
       })
     },
     async dataDelete(id: string) {

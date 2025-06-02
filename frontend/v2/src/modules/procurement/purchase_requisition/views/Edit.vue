@@ -15,7 +15,7 @@
           <template #header>
             <Panel :toggleable="false">
               <template #header>
-                <p class="font-bold text-2xl w-10">Create Purchase Requisition</p>
+                <p class="font-bold text-2xl w-10">Edit Purchase Requisition</p>
                 <p class="text-blue-600">Doc Ver. {{ v }}</p>
               </template>
               <template #icons>
@@ -438,10 +438,35 @@ export default defineComponent({
   async mounted() {
     const path = this.$route.path
     this.id = path.split('/').pop()?.toString() || ''
-    this.material_requisition.id = this.$route.params.id.toString().trim()
-    await this.MRLoad(this.$route.params.id.toString().trim())
+    await this.PRLoad(this.id)
   },
   methods: {
+    async PRLoad(id: string) {
+      await this.procurementPurchaseRequisitionStore
+        .detail(id)
+        .then(async (response: CoreResponse) => {
+          const data = response.payload
+
+          this.initialValues.code = data.code
+          this.initialValues.remark = data.remark
+          this.initialValues.transaction_date = data.transaction_date
+          this.initialValues.detail = data.detail
+          this.v = data.__v
+          this.ui.items.data = data.detail
+          this.ui.items.editing = []
+
+          this.material_requisition.id = data.material_requisition.id
+          await this.MRLoad(data.material_requisition.id)
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const refs: any = this.$refs.form
+          refs.setValues({
+            code: data.code,
+            transaction_date: data.transaction_date,
+            remark: data.remark,
+          })
+        })
+    },
     async MRLoad(id: string) {
       await this.inventoryMaterialRequisitionStore.detail(id).then((response: CoreResponse) => {
         const data = response.payload
@@ -450,17 +475,10 @@ export default defineComponent({
         this.material_requisition.transaction_date = data.transaction_date
         this.material_requisition.remark = data.remark
         this.material_requisition.stock_point = data.stock_point
-        this.material_requisition.detail = data.detail
+        // this.material_requisition.detail = data.detail
         this.material_requisition.created_by = data.created_by
 
-        this.initialValues.detail = data.detail
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const refs: any = this.$refs.form
-        refs.setValues({
-          code: data.code,
-          remark: data.remark,
-        })
+        // this.initialValues.detail = data.detail
 
         this.ui.blocked = false
       })
@@ -487,7 +505,7 @@ export default defineComponent({
     },
     back() {
       this.$router.push({
-        path: `/inventory/material_requisition`,
+        path: `/procurement/purchase_requisition`,
       })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -520,12 +538,14 @@ export default defineComponent({
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               .map(({ id, ...detail }) => detail)
               .filter((detail) => detail.item.id !== '' && detail.unit.id !== '' && detail.qty > 0)
+
             await this.procurementPurchaseRequisitionStore
-              .add({
+              .edit(this.id, {
                 ...this.initialValues,
                 material_requisition: this.material_requisition.id,
                 detail: detail,
                 extras: '',
+                __v: this.v,
               })
               .then(async () => {
                 this.$router.push({

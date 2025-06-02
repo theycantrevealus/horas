@@ -102,7 +102,7 @@ export class GatewayProcurementPurchaseRequisitionController {
     )
   }
 
-  @Patch('purchase_requisition/edit/:id')
+  @Patch('purchase_requisition/:id')
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @Authorization(true)
