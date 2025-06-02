@@ -158,15 +158,6 @@
                 />
               </template>
             </Column>
-            <Column header="Purchase Requisition" :sortable="true" class="wrap_content">
-              <template #body="slotProps">
-                <LabelCode
-                  v-if="slotProps.data.purchase_requisition"
-                  :text="slotProps.data.purchase_requisition.code"
-                />
-                <div v-else><i class="text-gray-400">Not created yet</i></div>
-              </template>
-            </Column>
             <Column
               ref="status"
               field="status"
@@ -191,6 +182,21 @@
                   optionValue="code"
                   placeholder="Search by status"
                 />
+              </template>
+            </Column>
+            <Column
+              ref="purchase_requisition"
+              field="purchase_requisition"
+              header="Purchase Requisition"
+              :sortable="true"
+              class="wrap_content"
+            >
+              <template #body="slotProps">
+                <LabelCode
+                  v-if="slotProps.data.purchase_requisition"
+                  :text="slotProps.data.purchase_requisition.code"
+                />
+                <div v-else><i class="text-gray-400">Not created yet</i></div>
               </template>
             </Column>
             <Column header="Approval" :sortable="false" class="wrap_content">
