@@ -8,6 +8,11 @@
     src: url('./fonts/greycliff/GreycliffCF-Bold.ttf');
 }
 
+b,
+strong {
+    font-weight: bolder !important;
+}
+
 /* @font-face {
     font-family: Karla;
     src: url('./fonts/karla/static/Karla-Regular.ttf');
@@ -372,7 +377,8 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-tree {
     border: none !important;
-    height: calc(100vh - 300px);
+    /* height: calc(100vh - 300px); */
+    height: auto;
     overflow: auto;
 }
 
@@ -421,12 +427,16 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .inline-block.custom {
     position: relative;
-    width: 70%;
+    width: 1000%;
 }
 
 .inline-block.custom .flex {
     position: relative;
     min-height: 20px;
+}
+
+.flex-col {
+    flex-direction: column;
 }
 
 .inline-block.custom .action-container {
@@ -440,10 +450,16 @@ body.dark .p-treenode .p-treenode-content:hover {
     height: 25px !important;
     margin: 0 5px;
     float: left;
+    text-align: center;
 }
 
 .inline-block.custom .action-container .p-button .pi {
-    font-size: 8pt;
+    font-size: 6pt;
+    margin: 0 auto;
+}
+
+.inline-block.custom .action-container .p-button span {
+    margin: 0 !important;
 }
 
 /* ============================================================================================================ */
@@ -452,8 +468,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     background: transparent;
     z-index: 1000;
     position: fixed;
-    width: 98%;
-    left: 2%;
+    width: calc(100% - 60px);
+    left: 60px;
     transition-duration: 0.5s;
 }
 
@@ -535,8 +551,8 @@ body.dark .p-treenode .p-treenode-content:hover {
     overflow-x: hidden !important;
     position: fixed;
     z-index: 998;
-    width: 98%;
-    left: 2%;
+    width: calc(100% - 60px);
+    left: 60px;
     height: 100%;
     transition-duration: 0.5s;
 }
@@ -677,6 +693,7 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-panel {
     font-size: 0.7rem !important;
+    border: none !important;
 }
 
 .p-panel-content {
@@ -764,7 +781,8 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-panel .p-panel-header {
     border: none !important;
-    background: #fff;
+    background: transparent !important;
+    padding: 20px 30px !important;
 }
 
 .p-card {
@@ -903,7 +921,9 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .p-inputgroup-addon {
+    display: inline-block;
     border: none !important;
+    white-space: nowrap !important;
 }
 
 .p-tabview-nav-link {
@@ -1112,11 +1132,31 @@ body.dark .p-treenode .p-treenode-content:hover {
 }
 
 .form-mode {
-    padding: 40px !important;
+    padding: 5px 40px !important;
+}
+
+.form-mode .p-message-text {
+    color: red;
 }
 
 .form-mode .p-inputgroup {
     margin-bottom: 10px;
+}
+
+.form-mode .flex-col {
+    width: 100%;
+}
+
+.form-mode .p-inputtext {
+    width: auto;
+}
+
+.form-mode .p-select {
+    width: 100%;
+}
+
+.form-mode .p-dropdown-label.p-inputtext.p-placeholder {
+    margin-top: 0px;
 }
 
 .p-dropdown-label.p-inputtext {
@@ -1125,10 +1165,6 @@ body.dark .p-treenode .p-treenode-content:hover {
 
 .p-datatable-table tbody tr td .p-inputnumber {
     margin-top: -10px !important;
-}
-
-.form-mode .p-dropdown-label.p-inputtext.p-placeholder {
-    margin-top: 0px;
 }
 
 .p-chip.sm {
@@ -1142,6 +1178,23 @@ body.dark .p-treenode .p-treenode-content:hover {
 .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
     color: #1cb973 !important;
     border-color: #1cb973 !important;
+}
+
+.p-tab {
+    font-size: 0.7rem !important;
+    padding: 10px !important;
+}
+
+.p-tabpanels {
+    padding: 0 !important;
+}
+
+.p-tabpanels .form-mode {
+    padding: 5px 8px !important;
+}
+
+.p-tab .material-icons-outlined {
+    font-size: 1.1rem !important;
 }
 
 .p-tag {
@@ -1273,12 +1326,6 @@ label[for] {
     border-bottom: solid 2px #ccc;
 }
 
-.print-container {
-    position: relative;
-    font-size: 8pt !important;
-    font-weight: normal !important;
-}
-
 .print {
     position: relative;
     padding: 2.5cm 1cm 2cm 2cm;
@@ -1406,4 +1453,65 @@ label[for] {
     body {
         /**/
     }
+}
+
+.handling-page {
+    position: fixed;
+    left: 25%;
+    top: 25%;
+    width: 50%;
+    height: 50%;
+}
+
+.p-multiselect-chip-item .p-chip-label {
+    font-size: 0.7rem;
+}
+
+.p-fieldset-content .p-datepicker {
+    padding: 0 !important;
+}
+
+.p-datepicker:not(.p-datepicker-inline) {
+    box-shadow: none !important;
+}
+
+.p-datatable-row-toggle-button svg {
+    width: 10px !important;
+    height: 10px !important;
+}
+
+.p-tieredmenu-item-link {
+    font-size: 10pt !important;
+}
+
+.message-icon-top {
+    position: relative;
+    align-self: flex-start;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.custom-disabled .p-inputtext:disabled {
+    background: #fff !important;
+}
+
+.p-inputtext.custom-disabled:disabled {
+    background: #fff !important;
+}
+
+.p-select.p-disabled.custom-disabled {
+    background: #fff !important;
+}
+
+.p-button-icon-only span {
+    margin-right: 0 !important;
+}
+
+.p-dialog-content .p-card {
+    padding: 0 !important;
+}
+
+.p-dialog-content .p-card .p-card-content {
+    padding: 0 !important;
 }

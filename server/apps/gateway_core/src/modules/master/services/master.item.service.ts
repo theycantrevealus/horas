@@ -233,9 +233,9 @@ export class MasterItemService {
           {
             code: data.code,
             name: data.name,
-            brand: data.brand,
             category: data.category,
             unit: data.unit,
+            configuration: data.configuration,
             properties: data.properties,
             remark: data.remark,
           }

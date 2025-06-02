@@ -4,10 +4,10 @@ import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { GeneralReceiveNoteDetail } from '@schemas/inventory/general.receive.note.detail'
-import { PurchaseOrderJoin } from '@schemas/inventory/purchase.order.join'
 import { ILocale, LocaleJoin } from '@schemas/locale'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
+import { PurchaseOrderJoin } from '@schemas/procurement/purchase.order.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 export type GeneralReceiveNoteDocument = HydratedDocument<GeneralReceiveNote>

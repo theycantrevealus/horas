@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { mockAccount } from '@gateway_core/account/mock/account.mock'
 import { mockMasterStockPoint } from '@gateway_core/master/mock/master.stock.point.mock'
-import { mockPurchaseOrder } from '@gateway_inventory/purchase_order/mock/purchase.order.mock'
+import { mockPurchaseOrder } from '@gateway_procurement/purchase_order/mock/purchase.order.mock'
 import {
   GeneralReceiveNote,
   GeneralReceiveNoteDocument,
@@ -35,7 +35,13 @@ export const mockGeneralReceiveNote = (
         price_buy: 10,
         price_sell: 11,
         expired: new Date(),
+        brand: {
+          id: 'brand-xx1',
+          code: 'BRAND-001',
+          name: 'Brand 1',
+        },
       },
+
       qty: 2,
       pending: 0,
       expired: new Date(),

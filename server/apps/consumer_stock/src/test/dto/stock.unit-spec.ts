@@ -1,4 +1,5 @@
 import { StockDTO } from '@consumer_stock/dto/stock.dto'
+import { faker } from '@faker-js/faker'
 import { testCaption } from '@utility/string'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
@@ -27,15 +28,15 @@ const falseCasePayload = {
             id: '',
             code: '',
             name: '',
-            brand: {
-              id: '',
-              code: '',
-              name: '',
-            },
           },
           price_buy: 10,
           price_sell: 11,
           expired: new Date(),
+          brand: {
+            id: 'master_item_brand-xxxxxx',
+            code: faker.commerce.isbn.toString(),
+            name: '',
+          },
         },
         stock_point: {},
         qty: 10,

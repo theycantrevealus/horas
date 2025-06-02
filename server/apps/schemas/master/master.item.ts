@@ -3,14 +3,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { ILOV } from '@schemas/lov/lov.interface'
 import { LOVJoin } from '@schemas/lov/lov.join'
-import { IMasterItemBrand } from '@schemas/master/master.item.brand.interface'
-import { MasterItemBrandJoin } from '@schemas/master/master.item.brand.join'
 import { IMasterItemCategory } from '@schemas/master/master.item.category.interface'
 import { MasterItemCategoryJoin } from '@schemas/master/master.item.category.join'
 import { MasterItemConfiguration } from '@schemas/master/master.item.configuration'
 import { IMasterItemConfiguration } from '@schemas/master/master.item.configuration.interface'
-import { MasterItemStoring } from '@schemas/master/master.item.storing'
-import { IMasterItemStoring } from '@schemas/master/master.item.storing.interface'
 import {
   MasterItemStructureCoordinatorSchema,
   registerMasterItemStructureSchemaDiscriminator,
@@ -51,17 +47,17 @@ export class MasterItem {
 
   @Prop({
     unique: false,
-    type: MasterItemUnitJoin,
+    type: [MasterItemUnitJoin],
     _id: false,
   })
-  unit: IMasterItemUnit
+  unit: IMasterItemUnit[]
 
-  @Prop({
-    unique: false,
-    type: MasterItemBrandJoin,
-    _id: false,
-  })
-  brand: IMasterItemBrand
+  // @Prop({
+  //   unique: false,
+  //   type: MasterItemBrandJoin,
+  //   _id: false,
+  // })
+  // brand: IMasterItemBrand
 
   @Prop({ type: MasterItemStructureCoordinatorSchema, required: false })
   structure?: unknown
@@ -74,13 +70,13 @@ export class MasterItem {
   })
   properties: ILOV[]
 
-  @Prop({
-    unique: false,
-    required: false,
-    type: [MasterItemStoring],
-    _id: false,
-  })
-  storing: IMasterItemStoring[]
+  // @Prop({
+  //   unique: false,
+  //   required: false,
+  //   type: [MasterItemStoring],
+  //   _id: false,
+  // })
+  // storing: IMasterItemStoring[]
 
   @Prop({ type: SchemaTypes.String })
   remark: string

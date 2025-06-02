@@ -45,7 +45,7 @@ export default {
   emits: ['display'],
   mounted() {},
   methods: {
-    format(num) {
+    format(num: number) {
       const formatter = new Intl.NumberFormat(
         `${this.lang.toLowerCase()}-${this.code.toUpperCase()}`,
         {

@@ -1,5 +1,6 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { MasterStockPointService } from '@gateway_core/master/services/master.stock.point.service'
+import { GatewayProcurementPurchaseOrderService } from '@gateway_procurement/purchase_order/purchase.order.service'
 import {
   ForbiddenException,
   Inject,
@@ -23,7 +24,6 @@ import prime_datatable from '@utility/prime'
 import { CompressionTypes } from 'kafkajs'
 import { Model } from 'mongoose'
 
-import { GatewayInventoryPurchaseOrderService } from '../purchase_order/purchase.order.service'
 import { GeneralReceiveNoteAddDTO } from './dto/general.receive.note.dto'
 
 @Injectable()
@@ -41,8 +41,8 @@ export class GatewayInventoryGeneralReceiveNoteService {
     @InjectModel(GeneralReceiveNote.name, 'primary')
     private generalReceiveNoteModel: Model<GeneralReceiveNoteDocument>,
 
-    @Inject(GatewayInventoryPurchaseOrderService)
-    private readonly purchaseOrderService: GatewayInventoryPurchaseOrderService,
+    @Inject(GatewayProcurementPurchaseOrderService)
+    private readonly purchaseOrderService: GatewayProcurementPurchaseOrderService,
 
     @Inject(MasterStockPointService)
     private readonly masterStockPointService: MasterStockPointService,
@@ -134,6 +134,8 @@ export class GatewayInventoryGeneralReceiveNoteService {
                     } else {
                       sellPrice = buyPrice
                     }
+
+                    // TODO : Handle brand here
 
                     await this.masterItemBacthModel
                       .findOneAndUpdate(

@@ -1,4 +1,5 @@
 import { Authorization, CredentialAccount } from '@decorators/authorization'
+import { PermissionManager } from '@decorators/permission'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import {
   MasterItemUnitAddDTO,
@@ -44,8 +45,9 @@ export class MasterItemUnitController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemUnit', action: 'view' })
   @ApiOperation({
-    summary: 'Fetch all account',
+    summary: 'Fetch all data',
     description: 'Showing unit data',
   })
   @ApiQuery(ApiQueryGeneral.primeDT)
@@ -59,6 +61,7 @@ export class MasterItemUnitController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemUnit', action: 'view' })
   @ApiOperation({
     summary: 'Detail data',
     description: '',
@@ -73,6 +76,7 @@ export class MasterItemUnitController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemUnit', action: 'add' })
   @ApiOperation({
     summary: 'Add new item unit',
     description: ``,
@@ -90,8 +94,9 @@ export class MasterItemUnitController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemUnit', action: 'edit' })
   @ApiOperation({
-    summary: 'Edit new item unit',
+    summary: 'Edit item unit',
     description: ``,
   })
   @ApiParam({
@@ -107,8 +112,9 @@ export class MasterItemUnitController {
   @UseInterceptors(LoggingInterceptor)
   @Authorization(true)
   @ApiBearerAuth('JWT')
+  @PermissionManager({ group: 'MasterItemUnit', action: 'delete' })
   @ApiOperation({
-    summary: 'Edit new item unit',
+    summary: 'Delete item unit',
     description: ``,
   })
   @ApiParam({

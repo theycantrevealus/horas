@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { mockMasterItemUnit } from '@gateway_core/master/mock/master.item.unit.mock'
 import {
   MaterialRequisition,
   MaterialRequisitionDocument,
@@ -19,6 +20,7 @@ export const mockMaterialRequisition = (
     timezone: 'Asia/Jakarta',
   },
   code = 'MR-0001',
+  purchase_requisition = null,
   transaction_date = new Date(),
   stock_point: IMasterStockPoint = {
     id: '',
@@ -31,13 +33,9 @@ export const mockMaterialRequisition = (
         id: 'master_item-xxxxxxx',
         code: faker.commerce.isbn.toString(),
         name: 'Item 1',
-        brand: {
-          id: 'master_item_brand-xxxxxx',
-          code: faker.commerce.isbn.toString(),
-          name: '',
-        },
       },
       qty: 10,
+      unit: mockMasterItemUnit(),
       issued: 10,
       remark: '',
     },
@@ -59,6 +57,7 @@ export const mockMaterialRequisition = (
   id,
   locale,
   code,
+  purchase_requisition,
   transaction_date,
   stock_point,
   detail,
@@ -90,6 +89,7 @@ export const mockMaterialRequisitionDoc = (
   locale: mock?.locale,
   code: mock?.code || `SPP-${new Types.ObjectId().toString()}`,
   transaction_date: mock?.transaction_date || new Date(),
+  purchase_requisition: mock?.purchase_requisition || null,
   stock_point: mock?.stock_point,
   detail: mock?.detail,
   extras: mock?.extras,

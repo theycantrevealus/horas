@@ -6,7 +6,7 @@ import { Types } from 'mongoose'
 
 import { IAccess } from '../interfaces/menu.interface'
 
-export class CMenuPermission {
+export class CMenuAccess {
   @ApiProperty({
     type: String,
     example: '',
@@ -46,7 +46,7 @@ export class CMenu {
   identifier: string
 
   @ApiProperty({
-    type: CMenuPermission,
+    type: CMenuAccess,
     description: '',
     isArray: true,
     required: false,
@@ -127,11 +127,11 @@ export class MenuAddDTO {
   parent: string
 
   @ApiProperty({
-    type: CMenuPermission,
+    type: CMenuAccess,
     isArray: true,
   })
   @IsNotEmpty()
-  permission: CMenuPermission[]
+  access: CMenuAccess[]
 
   @ApiProperty({
     type: String,
@@ -232,11 +232,11 @@ export class MenuEditDTO {
   menu_group: IMenuGroup
 
   @ApiProperty({
-    type: CMenuPermission,
+    type: CMenuAccess,
     isArray: true,
   })
   @IsNotEmpty()
-  permission: CMenuPermission[]
+  access: CMenuAccess[]
 
   @ApiProperty({
     example: 0,

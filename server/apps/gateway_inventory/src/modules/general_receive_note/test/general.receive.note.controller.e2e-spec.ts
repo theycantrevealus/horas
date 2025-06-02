@@ -5,6 +5,7 @@ import {
   mockAccountModel,
 } from '@gateway_core/account/mock/account.mock'
 import { mockMasterItemBatchModel } from '@gateway_core/master/mock/master.item.batch.mock'
+import { mockMasterItemBrand } from '@gateway_core/master/mock/master.item.brand.mock'
 import {
   mockMasterItem,
   mockMasterItemModel,
@@ -21,9 +22,9 @@ import { MasterStockPointService } from '@gateway_core/master/services/master.st
 import {
   mockPurchaseOrder,
   mockPurchaseOrderModel,
-} from '@gateway_inventory/purchase_order/mock/purchase.order.mock'
-import { GatewayInventoryPurchaseOrderService } from '@gateway_inventory/purchase_order/purchase.order.service'
-import { mockPurchaseRequisitionModel } from '@gateway_inventory/purchase_requisition/mock/purchase.requisition.mock'
+} from '@gateway_procurement/purchase_order/mock/purchase.order.mock'
+import { GatewayProcurementPurchaseOrderService } from '@gateway_procurement/purchase_order/purchase.order.service'
+import { mockPurchaseRequisitionModel } from '@gateway_procurement/purchase_requisition/mock/purchase.requisition.mock'
 import { SocketIoClientProxyService } from '@gateway_socket/socket.proxy'
 import { JwtAuthGuard } from '@guards/jwt'
 import { LogActivity } from '@log/schemas/log.activity'
@@ -44,15 +45,15 @@ import {
   GeneralReceiveNote,
   GeneralReceiveNoteDocument,
 } from '@schemas/inventory/general.receive.note'
-import {
-  PurchaseOrder,
-  PurchaseOrderDocument,
-} from '@schemas/inventory/purchase.order'
-import { PurchaseRequisition } from '@schemas/inventory/purchase.requisition'
 import { MasterItem, MasterItemDocument } from '@schemas/master/master.item'
 import { MasterItemBatch } from '@schemas/master/master.item.batch'
 import { MasterItemSupplier } from '@schemas/master/master.item.supplier'
 import { MasterStockPoint } from '@schemas/master/master.stock.point'
+import {
+  PurchaseOrder,
+  PurchaseOrderDocument,
+} from '@schemas/procurement/purchase.order'
+import { PurchaseRequisition } from '@schemas/procurement/purchase.requisition'
 import { AuthService } from '@security/auth.service'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { WINSTON_MODULE_PROVIDER } from '@utility/logger/constants'
@@ -93,7 +94,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
       controllers: [GatewayInventoryGeneralReceiveNoteController],
       providers: [
         MasterStockPointService,
-        GatewayInventoryPurchaseOrderService,
+        GatewayProcurementPurchaseOrderService,
         GatewayInventoryGeneralReceiveNoteService,
         JwtService,
         AuthService,
@@ -386,6 +387,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'X01192D',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },
@@ -393,6 +395,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'AV3D112',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },
@@ -459,6 +462,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'X01192D',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },
@@ -466,6 +470,7 @@ describe('Gateway Inventory General Receive Note Controller', () => {
                 item: mockMasterItem(),
                 qty: 10,
                 batch: 'AV3D112',
+                brand: mockMasterItemBrand(),
                 expired: new Date(),
                 remark: '-',
               },

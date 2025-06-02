@@ -6,7 +6,6 @@ import {
 } from '@gateway_core/account/mock/account.mock'
 import { mockAuthority } from '@gateway_core/account/mock/authority.mock'
 import { MasterItemAddDTO } from '@gateway_core/master/dto/master.item'
-import { mockMasterItemBrand } from '@gateway_core/master/mock/master.item.brand.mock'
 import {
   masterItemDocArray,
   mockMasterItem,
@@ -280,8 +279,6 @@ describe('Master Item Service', () => {
             category: mockMasterItem().category,
             configuration: mockMasterItem().configuration,
             unit: mockMasterItem().unit,
-            storing: mockMasterItem().storing,
-            brand: mockMasterItem().brand,
             structure: mockMasterItem().structure,
             properties: mockMasterItem().properties,
           }
@@ -317,8 +314,6 @@ describe('Master Item Service', () => {
             category: mockMasterItem().category,
             configuration: mockMasterItem().configuration,
             unit: mockMasterItem().unit,
-            storing: mockMasterItem().storing,
-            brand: mockMasterItem().brand,
             structure: mockMasterItem().structure,
             properties: mockMasterItem().properties,
           }
@@ -364,8 +359,6 @@ describe('Master Item Service', () => {
             category: mockMasterItem().category,
             configuration: mockMasterItem().configuration,
             unit: mockMasterItem().unit,
-            storing: mockMasterItem().storing,
-            brand: mockMasterItem().brand,
             structure: mockMasterItem().structure,
             properties: mockMasterItem().properties,
           }
@@ -524,18 +517,14 @@ describe('Master Item Service', () => {
                 benefit_margin_type: 'n',
                 benefit_margin_value: 0,
               },
-              storing: [],
               category: [],
-              unit: {
-                id: mockMasterItemUnit().id,
-                code: mockMasterItemUnit().code,
-                name: mockMasterItemUnit().name,
-              },
-              brand: {
-                id: mockMasterItemBrand().id,
-                code: mockMasterItemBrand().code,
-                name: mockMasterItemBrand().name,
-              },
+              unit: [
+                {
+                  id: mockMasterItemUnit().id,
+                  code: mockMasterItemUnit().code,
+                  name: mockMasterItemUnit().name,
+                },
+              ],
               structure: mockMasterItem().structure,
               properties: [],
               remark: mockMasterItem().remark,
@@ -597,18 +586,14 @@ describe('Master Item Service', () => {
                 benefit_margin_type: 'n',
                 benefit_margin_value: 0,
               },
-              storing: [],
               category: [],
-              unit: {
-                id: mockMasterItemUnit().id,
-                code: mockMasterItemUnit().code,
-                name: mockMasterItemUnit().name,
-              },
-              brand: {
-                id: mockMasterItemBrand().id,
-                code: mockMasterItemBrand().code,
-                name: mockMasterItemBrand().name,
-              },
+              unit: [
+                {
+                  id: mockMasterItemUnit().id,
+                  code: mockMasterItemUnit().code,
+                  name: mockMasterItemUnit().name,
+                },
+              ],
               structure: mockMasterItem().structure,
               properties: [],
               remark: mockMasterItem().remark,

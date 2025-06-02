@@ -23,6 +23,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger'
 import { ApiQueryGeneral } from '@utility/dto/prime'
 import { FastifyRequest } from 'fastify'
@@ -32,6 +33,7 @@ import { StockDisposalApprovalDTO } from './dto/disposal.approval'
 import { GatewayInventoryStockDisposalService } from './gateway.inventory.disposal.service'
 
 @Controller('inventory')
+@ApiTags('Disposal')
 export class GatewayInventoryStockDisposalController {
   constructor(
     @Inject(GatewayInventoryStockDisposalService)

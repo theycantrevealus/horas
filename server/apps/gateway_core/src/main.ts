@@ -80,7 +80,7 @@ async function bootstrap() {
       __dirname,
       configService.get<string>('application.images.core_dir')
     ),
-    prefix: `/${configService.get<string>('application.images.core_prefix')}`,
+    prefix: `/${configService.get<string>('application.images.core_prefix')}/`,
   })
 
   app.useGlobalFilters(new CommonErrorFilter(logger))
@@ -131,7 +131,7 @@ async function bootstrap() {
     .topbar { box-shadow: 0 -30px 30px 30px #f6f3f3 inset !important; width: 100%; margin: 0 auto; position:fixed; top: 0; left: 0; z-index: 100; background-color: #fff !important; }
     .topbar-wrapper { width:137px; height:40px; margin: 24px; background: url(\'./${configService.get<string>(
       'application.images.core_prefix'
-    )}/logo.png\')no-repeat !important; background-size: contain !important; background-position: center !important; }
+    )}/horas.png\')no-repeat !important; background-size: contain !important; background-position: center !important; }
     .topbar-wrapper a { display: none !important; }
     .swagger-ui .topbar { background-color: #fff !important; z-index: 100; }
     .scheme-container { position: fixed; top: 80px; width: 100%; padding: 15px 0 !important; z-index: 200; box-shadow: 0 2px 4px 0 rgba(0,0,0,.15) !important; }
@@ -201,7 +201,7 @@ async function bootstrap() {
     customSiteTitle: configService.get<string>('application.name'),
     customfavIcon: `./${configService.get<string>(
       'application.images.core_prefix'
-    )}/icon.png`,
+    )}/icon.ico`,
     swaggerOptions: {
       filter: true,
       tagsSorter: 'alpha',

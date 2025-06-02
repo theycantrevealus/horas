@@ -23,6 +23,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger'
 import { HORASClassDoc } from '@utility/decorator'
 import { ApiQueryGeneral } from '@utility/dto/prime'
@@ -33,6 +34,7 @@ import { StockAuditApprovalDTO } from './dto/audit.approval'
 import { GatewayInventoryStockAuditService } from './gateway.inventory.audit.service'
 
 @Controller('inventory')
+@ApiTags('Audit')
 @HORASClassDoc('GatewayInventoryStockAuditController', 'Stock audit gateway')
 export class GatewayInventoryStockAuditController {
   constructor(

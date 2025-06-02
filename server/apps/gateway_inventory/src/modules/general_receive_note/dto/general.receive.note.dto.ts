@@ -1,6 +1,7 @@
 import { CMasterItem } from '@gateway_core/master/dto/master.item'
+import { CMasterItemBrand } from '@gateway_core/master/dto/master.item.brand'
 import { CMasterStockPoint } from '@gateway_core/master/dto/master.stock.point'
-import { CPurchaseOrder } from '@gateway_inventory/purchase_order/dto/purchase.order'
+import { CPurchaseOrder } from '@gateway_procurement/purchase_order/dto/purchase.order'
 import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { ApiProperty } from '@nestjs/swagger'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
@@ -24,6 +25,12 @@ export class CGeneralReceiveNoteDetail {
     each: true,
   })
   item: CMasterItem
+
+  @ApiProperty({
+    type: CMasterItemBrand,
+  })
+  @IsNotEmpty()
+  brand: CMasterItemBrand
 
   @ApiProperty({
     type: Number,

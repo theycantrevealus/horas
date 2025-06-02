@@ -5,6 +5,8 @@ import { ApprovalHistory, IApprovalHistory } from '@schemas/approval.history'
 import { ILocale, LocaleJoin } from '@schemas/locale'
 import { MasterStockPointJoin } from '@schemas/master/master.stock.point'
 import { IMasterStockPoint } from '@schemas/master/master.stock.point.interface'
+import { IPurchaseRequisition } from '@schemas/procurement/purchase.requisition.interface'
+import { PurchaseRequisitionJoin } from '@schemas/procurement/purchase.requisition.join'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 import { MaterialRequisitionDetail } from './material.requisition.detail'
@@ -36,6 +38,14 @@ export class MaterialRequisition {
 
   @Prop(MasterStockPointJoin)
   stock_point: IMasterStockPoint
+
+  @Prop({
+    type: PurchaseRequisitionJoin,
+    _id: false,
+    required: false,
+    default: null,
+  })
+  purchase_requisition: IPurchaseRequisition | null
 
   @Prop({
     type: [MaterialRequisitionDetail],

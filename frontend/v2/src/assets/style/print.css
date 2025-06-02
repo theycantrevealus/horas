@@ -1,5 +1,10 @@
 /* Styles go here */
 
+.pdf-content {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
 .page-header,
 .page-header-space {
     height: 100px;
@@ -49,4 +54,61 @@
     body {
         margin: 0;
     }
+}
+
+.print-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 2mm 10mm;
+    font-family: GreyCliff;
+    border-collapse: collapse;
+    border: double 3px black;
+    font-size: 6pt !important;
+}
+
+.print-container table {
+    width: 100%;
+}
+
+.print-container table tr td {
+    background: #fff !important;
+}
+
+.print-container table tr td.input,
+.print-container table tr th.input {
+    font-size: 7.2pt !important;
+    letter-spacing: 0.5mm;
+    font-family: 'Courier New', monospace !important;
+}
+
+.print-container table thead tr th,
+.print-container table tbody tr td {
+    font-size: 7.2pt !important;
+    padding: 5px !important;
+    background: #fff;
+}
+.print-container table tr td.wrap_content,
+.print-container table tr th.wrap_content {
+    word-wrap: break-word !important;
+    white-space: nowrap !important;
+    width: 1% !important;
+}
+
+.print-container table tr.detail-item td {
+    padding: 0 10px !important;
+    vertical-align: top;
+}
+
+.print-container table tr td .item-remark {
+    margin-left: 20px;
+    font-size: 6pt !important;
+}
+
+.print-container table.signer tr:first-child td {
+    height: 50px !important;
+}
+
+.print-container table.signer tr:last-child td {
+    text-align: center;
 }

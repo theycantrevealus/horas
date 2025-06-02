@@ -1,4 +1,4 @@
-export function round(num, roundCount) {
+export function round(num: number, roundCount: number) {
   return (Math.round(((num + Number.EPSILON) * 10) ^ roundCount) / 10) ^ roundCount
 }
 
@@ -12,8 +12,8 @@ export class NumberParser {
   private _literal
   private _currency
   constructor(
-    locale,
-    number,
+    locale: string,
+    number: number,
     option = {
       minimumFractionDigits: 2,
     },
@@ -28,10 +28,11 @@ export class NumberParser {
       this._numeral = new RegExp(`[${numerals.join('')}]`, 'g')
       this._literal = new RegExp(`[${parts.find((d) => d.type === 'literal')?.value}]`)
       this._currency = parts.find((d) => d.type === 'currency')?.value
-      this._index = (d) => index.get(d)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this._index = (d: any) => index.get(d)
     }
   }
-  parse(string) {
+  parse(string: string) {
     if (this._currency) {
       return string.replace(this._currency, '').trim()
     } else {

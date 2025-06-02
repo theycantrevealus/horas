@@ -66,6 +66,10 @@ module.exports = (options, webpack) => {
           __dirname,
           'apps/gateway_inventory/src/modules'
         ),
+        '@gateway_procurement': path.resolve(
+          __dirname,
+          'apps/gateway_procurement/src/modules'
+        ),
         '@consumer_stock': path.resolve(__dirname, 'apps/consumer_stock/src'),
         '@inventory': path.resolve(__dirname, 'apps/inventory/src'),
         '@stock': path.resolve(__dirname, 'apps/stock/src'),

@@ -62,7 +62,7 @@ table thead tr th {
 }
 
 .p-datatable .p-button-text.p-button-secondary svg {
-    width: 20px;
+    width: 10px;
     margin-left: 5px;
 }
 
@@ -169,7 +169,7 @@ tbody tr td {
 }
 
 tbody tr:hover td {
-    background: #a4f6d1 !important;
+    background: #e9fff5 !important;
 }
 
 .p-treetable .p-treetable-tbody > tr > td {
@@ -283,15 +283,14 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     font-size: 10pt !important;
 }
 
-.p-datatable-table tbody tr td img {
+/* .p-datatable-table tbody tr td img {
     border: solid 1px #ccc !important;
     height: 20px !important;
     border-radius: 2.5px !important;
-}
+} */
 
 .p-datatable-table tbody tr td button.p-button {
     font-size: 7pt !important;
-    padding: 5px !important;
 }
 
 .p-datatable-table tbody tr td button.p-button span.material-icons {
@@ -305,4 +304,10 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
 
 .vert-top tr td {
     vertical-align: top !important;
+}
+
+.custom-edit-row-button .p-button-icon,
+.custom-edit-row-button .p-button-label {
+    margin-right: 0 !important;
+    color: red;
 }

@@ -1,11 +1,19 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
 import { CMasterItem } from '@gateway_core/master/dto/master.item'
+import { CMasterItemBrand } from '@gateway_core/master/dto/master.item.brand'
+import { CMasterItemUnit } from '@gateway_core/master/dto/master.item.unit'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { IMasterItem } from '@schemas/master/master.item.interface'
 import { MasterItemJoin } from '@schemas/master/master.item.join'
+import { IsNotEmpty } from 'class-validator'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
+
+import { IMasterItemBrand } from './master.item.brand.interface'
+import { MasterItemBrandJoin } from './master.item.brand.join'
+import { IMasterItemUnit } from './master.item.unit.interface'
+import { MasterItemUnitJoin } from './master.item.unit.join'
 
 export class CMasterItemBatch {
   @ApiProperty({
@@ -24,6 +32,18 @@ export class CMasterItemBatch {
     type: CMasterItem,
   })
   item: IMasterItem
+
+  @ApiProperty({
+    type: CMasterItemBrand,
+  })
+  @IsNotEmpty()
+  brand: CMasterItemBrand
+
+  @ApiProperty({
+    type: CMasterItemUnit,
+  })
+  @IsNotEmpty()
+  unit: CMasterItemUnit
 
   @ApiProperty({
     type: Number,
@@ -60,6 +80,20 @@ export class MasterItemBatch {
 
   @Prop(MasterItemJoin)
   item: IMasterItem
+
+  @Prop({
+    unique: false,
+    type: MasterItemBrandJoin,
+    _id: false,
+  })
+  brand: IMasterItemBrand
+
+  @Prop({
+    unique: false,
+    type: MasterItemUnitJoin,
+    _id: false,
+  })
+  unit: IMasterItemUnit
 
   @Prop({
     type: SchemaTypes.Number,

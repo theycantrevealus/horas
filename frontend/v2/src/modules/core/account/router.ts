@@ -33,7 +33,7 @@ const moduleRoute: RouteRecordRaw[] = [
       },
       {
         path: 'add',
-        name: 'AccountAdd',
+        name: 'CoreAccountAdd',
         meta: {
           pageTitle: 'Add New Account',
           requiresAuth: true,
@@ -48,7 +48,7 @@ const moduleRoute: RouteRecordRaw[] = [
       },
       {
         path: 'edit/:id',
-        name: 'AccountEdit',
+        name: 'CoreAccountEdit',
         meta: {
           pageTitle: 'Edit Account',
           requiresAuth: true,

@@ -103,6 +103,7 @@ export default defineComponent({
       countries: [
         { name: 'United States', code: 'us', lang: 'en' },
         { name: 'Indonesia', code: 'id', lang: 'id' },
+        { name: 'China', code: 'zh', lang: 'cn' },
       ],
       sidemenu: [
         {
@@ -281,7 +282,7 @@ export default defineComponent({
   },
   async mounted() {
     this.selectedLanguage = this.coreStore.setting.language
-    await this.coreStore.getLanguage()
+    // await this.coreStore.getLanguage()
   },
   methods: {
     toggleDarkMode() {

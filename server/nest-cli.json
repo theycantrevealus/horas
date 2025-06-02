@@ -136,6 +136,15 @@
         "tsConfigPath": "apps/gateway_inventory/tsconfig.app.json"
       }
     },
+    "gateway_procurement": {
+      "type": "application",
+      "root": "apps/gateway_procurement",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway_procurement/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway_procurement/tsconfig.app.json"
+      }
+    },
     "gateway_example": {
       "type": "application",
       "root": "apps/gateway_example",

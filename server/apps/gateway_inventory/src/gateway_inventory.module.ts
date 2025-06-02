@@ -10,8 +10,6 @@ import { GatewayInventoryGeneralIssueNoteModule } from '@gateway_inventory/gener
 import { GatewayInventoryGeneralReceiveNoteModule } from '@gateway_inventory/general_receive_note/general.receive.note.module'
 import { GatewayInventoryMaterialRequisitionModule } from '@gateway_inventory/material_requisition/material.requisition.module'
 import { GatewayInventoryMutationModule } from '@gateway_inventory/mutation/gateway.inventory.mutation.module'
-import { GatewayInventoryPurchaseOrderModule } from '@gateway_inventory/purchase_order/purchase.order.module'
-import { GatewayInventoryPurchaseRequisitionModule } from '@gateway_inventory/purchase_requisition/purchase.requisition.module'
 import { LogActivity, LogActivitySchema } from '@log/schemas/log.activity'
 import { LogLogin, LogLoginSchema } from '@log/schemas/log.login'
 import { BullModule, BullRootModuleOptions } from '@nestjs/bullmq'
@@ -124,9 +122,9 @@ import * as redisStore from 'cache-manager-ioredis'
     GatewayInventoryMutationModule,
     GatewayInventoryStockAuditModule,
     GatewayInventoryStockAdjustmentModule,
-    GatewayInventoryPurchaseRequisitionModule,
+    // GatewayInventoryPurchaseRequisitionModule,
     GatewayInventoryGeneralReceiveNoteModule,
-    GatewayInventoryPurchaseOrderModule,
+    // GatewayInventoryPurchaseOrderModule,
     GatewayInventoryStockDisposalModule,
     // StockModule, // TODO : Rename this redundant name
   ],

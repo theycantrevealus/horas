@@ -321,7 +321,6 @@ export class MenuService {
       menu_group: data.menu_group,
     })
     data.show_order = getLateOrder.payload['data'].length + 1
-    console.log(this.configService.get<string>('application.timezone'))
     return await this.menuModel
       .create({
         ...data,
@@ -378,7 +377,7 @@ export class MenuService {
           remark: parameter.remark,
           channel: parameter.channel,
           menu_group: parameter.menu_group,
-          permission: parameter.permission,
+          access: parameter.access,
         }
       )
       .exec()

@@ -31,6 +31,36 @@ const moduleRoute: RouteRecordRaw[] = [
         },
         component: () => import('@/modules/master/item/views/Index.vue'),
       },
+      {
+        path: 'add',
+        name: 'MasterItemAdd',
+        meta: {
+          pageTitle: 'Add Master Item',
+          requiresAuth: true,
+          breadcrumb: [
+            {
+              label: 'Master Item Management',
+              to: '/master/item',
+            },
+          ],
+        },
+        component: () => import('@/modules/master/item/views/Add.vue'),
+      },
+      {
+        path: 'edit/:id',
+        name: 'MasterItemEdit',
+        meta: {
+          pageTitle: 'Edit Master Item',
+          requiresAuth: true,
+          breadcrumb: [
+            {
+              label: 'Master Item Management',
+              to: '/master/item',
+            },
+          ],
+        },
+        component: () => import('@/modules/master/item/views/Edit.vue'),
+      },
     ],
   },
 ]

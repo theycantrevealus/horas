@@ -31,21 +31,21 @@ const moduleRoute: RouteRecordRaw[] = [
         },
         component: () => import('@/modules/core/i18n/views/Index.vue'),
       },
-      {
-        path: 'add',
-        name: 'i18nAdd',
-        meta: {
-          pageTitle: 'Add New i18n',
-          requiresAuth: true,
-          breadcrumb: [
-            {
-              label: 'i18n Management',
-              to: '/core/i18n',
-            },
-          ],
-        },
-        component: () => import('@/modules/core/i18n/views/Add.vue'),
-      },
+      // {
+      //   path: 'add',
+      //   name: 'i18nAdd',
+      //   meta: {
+      //     pageTitle: 'Add New i18n',
+      //     requiresAuth: true,
+      //     breadcrumb: [
+      //       {
+      //         label: 'i18n Management',
+      //         to: '/core/i18n',
+      //       },
+      //     ],
+      //   },
+      //   component: () => import('@/modules/core/i18n/views/Add.vue'),
+      // },
       {
         path: 'edit/:id',
         name: 'i18nEdit',

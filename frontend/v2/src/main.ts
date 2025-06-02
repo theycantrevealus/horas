@@ -26,6 +26,7 @@ import '@/assets/style/table.css'
 import '@/assets/style/modal.css'
 import '@/assets/style/light.css'
 import '@/assets/style/sidepanel.css'
+import '@/assets/style/print.css'
 import '@/assets/tnsol.css'
 
 // Module List
@@ -36,6 +37,10 @@ import LOV from '@/modules/master/lov'
 
 import MasterItemBrand from '@/modules/master/item/brand'
 import MasterItem from '@/modules/master/item'
+import MasterStockPoint from '@/modules/master/stock_point'
+
+import InventoryMaterialRequisition from '@/modules/inventory/material_requisition'
+import ProcurementPurchaseRequisition from '@/modules/procurement/purchase_requisition'
 
 import type { RouteRecordRaw } from 'vue-router'
 import { i18n } from '@/utils/core/i18n.ts'
@@ -55,6 +60,13 @@ const Modules: any = {
   lov: LOV,
   masterItemBrand: MasterItemBrand,
   masterItem: MasterItem,
+  masterStockPoint: MasterStockPoint,
+
+  // Inventory Module
+  inventoryMaterialRequisition: InventoryMaterialRequisition,
+
+  // Procurement Module
+  procurementPurchaseRequisition: ProcurementPurchaseRequisition,
 }
 
 Object.keys(Modules).forEach(async (moduleKey) => {
