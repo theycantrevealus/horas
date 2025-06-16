@@ -10,6 +10,7 @@ import { HydratedDocument, SchemaTypes } from 'mongoose'
 
 import { IPurchaseOrderDetail } from './purchase.order.detail.interface'
 import { IPurchaseRequisition } from './purchase.requisition.interface'
+import { PurchaseRequisitionJoin } from './purchase.requisition.join'
 import { IPurchaseOrderApproval } from './purchase_order.approval.interface'
 
 export type PurchaseOrderDocument = HydratedDocument<PurchaseOrder>
@@ -63,7 +64,7 @@ export class PurchaseOrder {
    * @type { IPurchaseRequisition }
    * @description Refer to purchase requisition
    */
-  @Prop(LocaleJoin)
+  @Prop(PurchaseRequisitionJoin)
   purchase_requisition: IPurchaseRequisition
 
   /**

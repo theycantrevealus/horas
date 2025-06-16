@@ -1,4 +1,5 @@
 import { IAccount } from '@gateway_core/account/interface/account.create_by'
+import { IPurchaseOrder } from '@inventory/interface/purchase.order'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { AccountJoin } from '@schemas/account/account.raw'
 import { ApprovalHistory, IApprovalHistory } from '@schemas/approval.history'
@@ -7,6 +8,7 @@ import { MaterialRequisitionJoin } from '@schemas/inventory/material.requisition
 import { ILocale, LocaleJoin } from '@schemas/locale'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
 
+import { PurchaseOrderJoin } from './purchase.order.join'
 import { PurchaseRequisitionDetail } from './purchase.requisition.detail'
 import { IPurchaseRequisitionDetail } from './purchase.requisition.detail.interface'
 
@@ -56,6 +58,9 @@ export class PurchaseRequisition {
 
   @Prop(MaterialRequisitionJoin)
   material_requisition: IMaterialRequisition
+
+  @Prop(PurchaseOrderJoin)
+  purchase_order: IPurchaseOrder
 
   /**
    * @type { IPurchaseRequisitionDetail }

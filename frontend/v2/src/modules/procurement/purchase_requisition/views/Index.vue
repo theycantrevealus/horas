@@ -594,6 +594,36 @@ export default defineComponent({
                   separator: true,
                 },
                 {
+                  label: 'Create Purchase Order',
+                  icon: 'pi pi-shopping-cart',
+                  creator: item.created_by.id.toString(),
+                  status: item.status,
+                  permission: 'btnMaterialRequisitionCreatePurchaseOrder',
+                  command: async () => {
+                    if (item.status !== 'approved') {
+                      this.coreStore.setToast({
+                        severity: 'warn',
+                        summary: 'Forbidden Method',
+                        detail: 'Document is not approved yet',
+                        life: 5000,
+                      })
+                    } else {
+                      if (item.purchase_order) {
+                        this.coreStore.setToast({
+                          severity: 'warn',
+                          summary: 'Forbidden Method',
+                          detail: 'Material Requisition already have purchase order',
+                          life: 5000,
+                        })
+                      } else {
+                        this.$router.push({
+                          path: `/procurement/purchase_order/add/${item.id}`,
+                        })
+                      }
+                    }
+                  },
+                },
+                {
                   label: 'Print',
                   icon: 'pi pi-print',
                   creator: item.created_by.id.toString(),

@@ -238,7 +238,7 @@ export class GatewayProcurementPurchaseOrderService {
                       code: data.code,
                       supplier: data.supplier,
                       purchase_date: data.purchase_date,
-                      purchase_requisition: {},
+                      purchase_requisition: foundedPurchaseRequisition,
                       detail: detailData,
                       total: totalPurchase,
                       discount_type: data.discount_type,
@@ -248,6 +248,21 @@ export class GatewayProcurementPurchaseOrderService {
                       extras: data.extras,
                       remark: data.remark,
                       created_by: account,
+                    })
+                    .then(async (processedPurchaseOrder) => {
+                      await this.purchaseRequisitionModel.findOneAndUpdate(
+                        {
+                          id: data.purchase_requisition,
+                          deleted_at: null,
+                        },
+                        {
+                          $set: {
+                            purchase_order: processedPurchaseOrder,
+                          },
+                        }
+                      )
+
+                      return processedPurchaseOrder
                     })
                     .catch((error: Error) => {
                       throw error
@@ -410,7 +425,7 @@ export class GatewayProcurementPurchaseOrderService {
       .findOneAndUpdate(
         {
           $and: [
-            { id: id, created_by: account, __v: data.__v },
+            { id: id, 'created_by.id': account.id, __v: data.__v },
             { $or: [{ status: 'new' }, { status: 'declined' }] },
           ],
         },
@@ -441,7 +456,7 @@ export class GatewayProcurementPurchaseOrderService {
       .findOneAndUpdate(
         {
           id: id,
-          created_by: account,
+          'created_by.id': account.id,
         },
         {
           $set: {

@@ -29,6 +29,7 @@ export const mockPurchaseRequisition = (
       email: faker.internet.email(),
     },
   },
+  purchase_order = null,
   detail = [
     {
       item: {
@@ -60,6 +61,7 @@ export const mockPurchaseRequisition = (
   code,
   transaction_date,
   material_requisition,
+  purchase_order,
   detail,
   status,
   approval_history,

@@ -41,6 +41,7 @@ import MasterStockPoint from '@/modules/master/stock_point'
 
 import InventoryMaterialRequisition from '@/modules/inventory/material_requisition'
 import ProcurementPurchaseRequisition from '@/modules/procurement/purchase_requisition'
+import ProcurementPurchaseOrder from '@/modules/procurement/purchase_order'
 
 import type { RouteRecordRaw } from 'vue-router'
 import { i18n } from '@/utils/core/i18n.ts'
@@ -67,6 +68,7 @@ const Modules: any = {
 
   // Procurement Module
   procurementPurchaseRequisition: ProcurementPurchaseRequisition,
+  procurementPurchaseOrder: ProcurementPurchaseOrder,
 }
 
 Object.keys(Modules).forEach(async (moduleKey) => {

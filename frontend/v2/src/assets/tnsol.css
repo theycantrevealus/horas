@@ -1163,6 +1163,10 @@ body.dark .p-treenode .p-treenode-content:hover {
     padding: 7.5px !important;
 }
 
+.p-inputnumber-fluid .p-inputnumber-input {
+    text-align: right !important;
+}
+
 .p-datatable-table tbody tr td .p-inputnumber {
     margin-top: -10px !important;
 }
@@ -1514,4 +1518,8 @@ label[for] {
 
 .p-dialog-content .p-card .p-card-content {
     padding: 0 !important;
+}
+
+td .p-select-label {
+    font-size: 10pt !important;
 }

@@ -8,10 +8,6 @@ table thead tr th {
     padding: 10pt 1.5rem !important;
 }
 
-.p-datatable .p-datatable-tbody > tr > td {
-    border: none !important;
-}
-
 .p-treetable-thead tr th {
     /* background: #1cb973 !important; */
     background: #fff !important;
@@ -80,13 +76,6 @@ table thead tr th {
 }
 
 /*==============================================================*/
-.p-treetable .p-treetable-thead > tr > th {
-    border: none !important;
-}
-
-.p-datatable .p-datatable-thead > tr > th {
-    border: none !important;
-}
 
 /* .p-datatable .p-datatable-thead > tr:nth-child(odd) > th {
     border-bottom: solid 1.5px #fff !important;
@@ -146,10 +135,6 @@ table thead tr th {
     margin-top: 10px !important;
 }
 
-tbody tr:nth-child(odd) td {
-    background: #f1f1f1 !important;
-}
-
 .p-datatable-filter-constraint {
     font-size: 0.75rem !important;
 }
@@ -170,10 +155,6 @@ tbody tr td {
 
 tbody tr:hover td {
     background: #e9fff5 !important;
-}
-
-.p-treetable .p-treetable-tbody > tr > td {
-    border: none !important;
 }
 
 tbody.p-treetable-tbody tr td .p-treetable-toggler {
@@ -223,11 +204,6 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
     height: auto !important;
     padding: 10px !important;
 }
-
-.p-datatable-header {
-    border: none !important;
-}
-
 .p-paginator .p-paginator-icon,
 .p-paginator .p-paginator-page {
     font-size: 8pt !important;
@@ -309,5 +285,23 @@ tbody.p-treetable-tbody tr td .p-buttonset button span {
 .custom-edit-row-button .p-button-icon,
 .custom-edit-row-button .p-button-label {
     margin-right: 0 !important;
-    color: red;
+    font-size: 8pt !important;
+}
+
+.p-datatable-scrollable td.p-datatable-frozen-column {
+    z-index: 2 !important;
+}
+
+.p-datatable-scrollable td.p-datatable-frozen-column.shadow-left {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.75);
+    clip-path: inset(0 0 0 -5px);
+}
+
+.p-datatable-scrollable td.p-datatable-frozen-column.shadow-right {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.75);
+    clip-path: inset(0 -5px 0 0);
+}
+
+.p-datatable-scrollable-table > .p-datatable-thead {
+    z-index: 3 !important;
 }
