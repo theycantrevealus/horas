@@ -18,7 +18,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator'
-import { IsTimeZone } from '../common/is-time-zone'
+import { IsTimeZone } from '@utility/validation/is-time-zone'
 
 /**
  * Account statuses a list can filter by.

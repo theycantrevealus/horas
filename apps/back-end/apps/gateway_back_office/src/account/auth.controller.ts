@@ -19,7 +19,7 @@ import {
   CurrentUser,
   Public,
 } from '@identity/guard/decorators'
-import { type ClientRequest, toClientInfo } from '../common/client-request'
+import { type ClientRequest, toClientInfo } from '../http/client-request'
 import { ChangePasswordDto, LoginDto, RefreshDto } from './auth.dto'
 
 /**
