@@ -20,11 +20,18 @@
     "test:back-end": "pnpm --filter @horas/back-end run test",
     "test:back-end:e2e": "pnpm --filter @horas/back-end run test:e2e",
     "test:front-end:unit": "pnpm --filter @horas/front-end run test:unit",
-    "test:front-end:e2e": "pnpm --filter @horas/front-end run test:e2e"
+    "test:front-end:e2e": "pnpm --filter @horas/front-end run test:e2e",
+    "prepare": "husky"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "cypress"
     ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "husky": "^9.1.7",
+    "typescript": "~6.0.0"
   }
 }
