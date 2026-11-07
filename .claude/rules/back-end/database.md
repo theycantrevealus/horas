@@ -64,6 +64,7 @@ Rules:
 
 - Each model has an interface in `apps/repository/interface/<name>.ts` that extends `Repository<Model>`, for example `LovRepository`.
 - Declare model-specific queries there as named methods (`findByGroup(groupName)`), instead of building `where` objects in services. The engine query stays inside the implementation.
+- **Name every read `find*`** (`findAll`, `findOne`, `findByGroup`, `findInForce`). Any other name (`create`, `update`, `consume`, `revokeFamily`, `registerFailedAttempt`) is a write. The logs depend on it: reads are never logged and failed reads are not logged by `RepositoryExceptionFilter` (`logging.md` 4.3), while writes are logged and recorded in the change history (section 6.1). Do not hide a write behind a `find*` name.
 
 ### 4.3 Schemas
 
@@ -163,7 +164,7 @@ Repositories reject only with these classes from `@utility/database/error`, neve
 - Every error carries `operation` (for example `LovRepository.update`) and the original driver error as `cause`.
 - Error messages never include document values; duplicate-key messages from drivers can contain patient data. The `cause` is for logs only and is never sent to clients.
 - Business code may catch these classes, for example to turn `RepositoryConflictError` into a business rejection. It must never catch driver errors.
-- `RepositoryExceptionFilter` (`@utility/filter/repository`) maps them to HTTP responses. Register it with `APP_FILTER` in each HTTP application's root module.
+- `RepositoryExceptionFilter` (`@utility/filter/repository`) maps them to HTTP responses. Register it with `APP_FILTER` in each HTTP application's root module. It logs the errors of writes only; a failed read (`find*`) is answered but not logged (`logging.md` 4.3).
 
 ## 6. Repository implementation
 

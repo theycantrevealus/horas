@@ -30,6 +30,21 @@ export class RepositoryError extends Error {
 }
 
 /**
+ * Checks whether a repository operation only reads data.
+ * By the repository contract (`database.md` 5.1 and 4.2) every read is named `find*`
+ * (`findAll`, `findOne`, `findByGroup`, ...) and every write has another name, so the method
+ * part of `operation` (`LovRepository.findAll`) is enough to tell them apart. Reads are never
+ * logged (`logging.md` 4.3).
+ *
+ * @param operation - Operation as `Class.method`, for example `LovRepository.findAll`.
+ * @returns `true` when the method is a read.
+ */
+export function isReadOperation(operation: string): boolean {
+  const method = operation.slice(operation.lastIndexOf('.') + 1)
+  return /^find[A-Z]/.test(method)
+}
+
+/**
  * The requested record does not exist or is soft-deleted.
  */
 export class RepositoryNotFoundError extends RepositoryError {}

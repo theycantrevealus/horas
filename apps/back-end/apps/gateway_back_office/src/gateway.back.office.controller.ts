@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common'
+import { Public } from '@identity/guard/decorators'
 import { GatewayBackOfficeService } from './gateway.back.office.service'
 
 /**
@@ -16,6 +17,7 @@ export class GatewayBackOfficeController {
    *
    * @returns The starter greeting message.
    */
+  @Public()
   @Get()
   getHello(): string {
     return this.gatewayService.getHello()
