@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { TimeManagement } from '@utility/time'
 import { HydratedDocument, SchemaTypes } from 'mongoose'
-import { RawAccount } from './account.raw'
-import { type IAccount } from '@repository/interface/account'
+import { type ActorRef } from '@utility/history/actor'
+import { ActorRefSchema } from './common/actor-ref'
 
 /**
  * Hydrated Mongoose document of a LOV record.
@@ -37,8 +37,8 @@ export class LovEntity {
   @Prop({ type: SchemaTypes.Mixed })
   additional?: Record<string, unknown>
 
-  @Prop(RawAccount)
-  created_by?: IAccount
+  @Prop({ type: ActorRefSchema })
+  created_by?: ActorRef
 
   @Prop({
     type: SchemaTypes.Date,

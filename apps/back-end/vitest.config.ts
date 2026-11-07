@@ -12,7 +12,7 @@ const path = (folder: string): string =>
 
 export default defineConfig({
   // Resolves the path aliases declared in the app tsconfig files. Shared folders
-  // (apps/utility, apps/repository, apps/configuration) are not in any tsconfig
+  // (apps/utility, apps/repository, apps/configuration, apps/identity) are not in any tsconfig
   // `include`, so their aliases and decorator settings are also declared here.
   resolve: {
     tsconfigPaths: true,
@@ -20,6 +20,7 @@ export default defineConfig({
       '@utility': path('./apps/utility'),
       '@configuration': path('./apps/configuration'),
       '@repository': path('./apps/repository'),
+      '@identity': path('./apps/identity'),
     },
   },
   oxc: { decorator: { legacy: true, emitDecoratorMetadata: true } },

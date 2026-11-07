@@ -669,6 +669,8 @@ All indexes start with `tenant_id`. "Partial" uses `partialFilterExpression`.
 
 ### 12.1 Existing code to replace
 
+> **Done (2026-11-07):** `AccountEntity`, the `Account` model and repository replace the old files, and `ActorRef` replaces `IAccount`/`RawAccount`. The `getTimezone` defaults in `schema/lov.ts` and `mongo/lov.ts` remain until the D1 migration. Authentication, credentials, sessions, security events, roles and role bindings are implemented as described in `../rules/back-end/authentication.md`.
+
 - `apps/repository/mongo/schema/account.ts`: no pinned collection, no `SchemaFactory`, `status` as free string, `birthdate` and `phone` (personal data that belongs to HRM), and named `Account` like the future model. Replace with `AccountEntity` per 5.1.
 - `apps/repository/interface/account.ts` (`IAccount`) is an embedded actor summary, not a repository interface (`database.md` 4.2). Replace with `ActorRef` in `model/common/`, and `RawAccount` (`user_id`, `user_name`, ...) with a raw `ActorRef` schema.
 - `TimeManagement.getTimezone` defaults in `schema/lov.ts`, `schema/account.ts` and `mongo/lov.ts` (section 2.3, `database.md` 4.4).

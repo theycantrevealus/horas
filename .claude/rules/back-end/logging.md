@@ -6,7 +6,7 @@ The operational log is built on `winston` through `nest-winston`. Business code 
 
 ## 1. Principles
 
-For every relevant processing step, the logs must let someone investigating find out:
+For every relevant processing step that changes data or state, the logs must let someone investigating find out:
 
 - What operation was attempted.
 - Which service processed it.
@@ -20,6 +20,7 @@ Rules:
 - Use structured logs: objects with the shared fields of section 4.2, never interpolated strings.
 - Keep one correlation identifier per request, across services and asynchronous boundaries (section 8).
 - Never log credentials, secrets, or patient and personal data. Log identifiers and counts instead of payloads (section 4.3).
+- Do not log reads. Fetching data writes no log entry (section 4.3).
 - Do not log inside high-volume loops. Log one summary entry after the loop.
 - When adding a processing stage (endpoint, consumer, job, relay), make its success, failure, latency and retry behaviour observable, and assert those entries in a test (section 12).
 
@@ -27,7 +28,7 @@ Rules:
 
 | Channel | Content | Written by | Rules |
 |---|---|---|---|
-| Operational log | Operations, outcomes, latency, retries, errors and the access log. | `AppLogger` | Sections 3 to 12. Never payloads or record values. |
+| Operational log | Operations that change data or state, their outcomes, latency, retries and errors, and the access log. Not data reads. | `AppLogger` | Sections 3 to 12. Never payloads or record values. |
 | Change log | One record per created, changed or deleted entity (who, when, before and after per field, reason), and reads of highly confidential records. | `ChangeRecorder`, then the change relay and `ChangeLogger` | Section 13 and `.claude/design/data-change-history.md`. Values only in masked form; secrets never. |
 
 - Record data changes in the change log only: never in the operational log, and never as `updated_by` or history fields in the records themselves (`database.md` 4.5).
@@ -95,10 +96,15 @@ this.logger.warn({
 ```
 
 - The service name (`context`), timestamp, level, process and `correlationId` are added automatically. Do not add them by hand.
-- `GatewayBackOfficeService.getLovByGroup` is the reference example: one entry per call with `event`, `operation`, `outcome`, `durationMs`, and `retryable` on failure; it logs the count, not the records.
+- `GatewayBackOfficeService.createLov` and `updateLov` (through `writeLov`) are the reference example: one entry per write with `event`, `operation`, `outcome`, `durationMs`, and `error` and `retryable` on failure; they log neither the values written nor the record.
 
 ### 4.3 What not to log
 
+- **Never log a data read.** Fetching data (`findAll`, `findOne`, `findBy*`, and the service methods that only call them: `get`, `list`, `getLovByGroup`) writes no entry, on success or on failure. Wrapping a read in `observe(...)` or a hand-written `try`/`catch` that logs is not allowed. Log the writes: create, update, delete, soft delete, holds, grants, revocations, sign-in and sign-out.
+  - A failed read is not logged by the data layer either. `RepositoryExceptionFilter` skips repository errors whose operation is a read (`isReadOperation`: the method is named `find*`), and `IdentityExceptionFilter` skips `not_found` rejections of `GET` and `HEAD` requests. The client still gets the error response, and the access log (section 9) still records the status, error name and retry flag of the request.
+  - Authentication and permission rejections (401, 403) are not data reads and stay logged, whatever the method.
+  - A repository method is a read only if its name starts with `find`; any other name is treated as a write (`database.md` 4.2). A read with another name would be logged as a write, so name reads `find*`.
+  - The one deliberate exception is the change-log access record of a highly confidential record (`recordAccess`, section 13.2), an audit requirement (`HR-AUD-003`). It is opt-in per service, never written by a repository, and no service calls it yet.
 - Never log request payloads, response results, full documents, query strings or path parameters. Log identifiers (`accountId`, record `id`) and counts instead.
 - Never log before and after values of a change. They belong to the change log (section 2).
 - Inside `TransactionManager.run` work, do not write logs that must happen once; the work may be retried (`database.md` section 7). Log after `run` resolves.
@@ -228,6 +234,7 @@ In `main.ts`, call `app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))` right 
 - To capture log entries in a Nest test, register `WinstonModule.forRoot` with `levels: LOG_LEVELS`, the same `requestContext()` and `sanitize()` formats, and a `transports.Stream` over an object-mode `Writable`. Add `AppLogger` to the providers and call `app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))`. See `apps/utility/logger/service.spec.ts` and `apps/utility/logger/interceptor.spec.ts`.
 - The access log is written when the response closes; wait for the entry instead of reading it right after `app.inject` returns.
 - When a change adds a log entry that section 1 requires (failure, retry, latency), assert its fields in a test, including that no payload values appear.
+- When a change adds a read (a `find*` method or a service method that only reads), assert that it writes no log entry, on success and on failure. See `apps/gateway_back_office/src/gateway.back.office.service.spec.ts` (fake logger) and the read-only test in `apps/gateway_back_office/src/account/account-management.spec.ts` (spies on every log level, expects only the access log).
 
 ## 13. Change log
 

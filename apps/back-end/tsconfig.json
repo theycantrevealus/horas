@@ -21,7 +21,8 @@
     "paths": {
       "@utility/*": ["./apps/utility/*"],
       "@configuration/*": ["./apps/configuration/*"],
-      "@repository/*": ["./apps/repository/*"]
+      "@repository/*": ["./apps/repository/*"],
+      "@identity/*": ["./apps/identity/*"]
     }
   },
   "files": [],

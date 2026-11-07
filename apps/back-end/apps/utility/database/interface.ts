@@ -42,9 +42,19 @@ export interface Timestamped {
 }
 
 /**
- * Data a caller provides to create a record: the model without its identifier and timestamps.
+ * Fields the repository manages itself, besides the identifier and timestamps (`database.md` 4.5):
+ * the concurrency `version`, the `schema_version` and the `created_by` actor.
  */
-export type NewEntity<T extends Entity> = Omit<T, 'id' | keyof Timestamped>
+export type RepositoryManagedField = 'version' | 'schema_version' | 'created_by'
+
+/**
+ * Data a caller provides to create a record: the model without its identifier, timestamps
+ * and the fields the repository manages.
+ */
+export type NewEntity<T extends Entity> = Omit<
+  T,
+  'id' | keyof Timestamped | RepositoryManagedField
+>
 
 /**
  * Fields a caller may change on an existing record.
@@ -162,6 +172,16 @@ export interface FindOneOptions {
 }
 
 /**
+ * Options for updating one record.
+ *
+ * @property expectedVersion - Version the caller read. The update rejects with
+ * `RepositoryConflictError` when the stored version differs (optimistic concurrency).
+ */
+export interface UpdateOptions {
+  expectedVersion?: number
+}
+
+/**
  * Storage-agnostic data-access contract. Each database engine provides its own implementation.
  * Implementations reject with `RepositoryError` subclasses, never with driver errors.
  */
@@ -201,9 +221,14 @@ export interface Repository<T extends Entity> {
    *
    * @param id - Record identifier.
    * @param changes - Fields to change.
+   * @param options - Optional concurrency check.
    * @returns The record after the change.
    */
-  update(id: string, changes: EntityChanges<T>): Promise<T>
+  update(
+    id: string,
+    changes: EntityChanges<T>,
+    options?: UpdateOptions,
+  ): Promise<T>
   /**
    * Permanently deletes a record.
    *

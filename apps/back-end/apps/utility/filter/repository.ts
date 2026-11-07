@@ -12,6 +12,7 @@ import {
   RepositoryNotFoundError,
   RepositoryUnavailableError,
   RepositoryValidationError,
+  isReadOperation,
 } from '@utility/database/error'
 import { runInRequestContextOf } from '@utility/logger/context'
 
@@ -71,6 +72,9 @@ function describeCause(cause: unknown): Record<string, unknown> | undefined {
 /**
  * Turns repository errors into HTTP responses, so the data layer stays free of transport concerns.
  * Logs the failed operation, error kind and whether it is retryable, but no data values.
+ * A failed read (`find*` operation) is not logged: reading data writes no log entry
+ * (`logging.md` 4.3). The client still gets the error response, and the access log still
+ * records the status, error name and retry flag of the request.
  */
 @Catch(RepositoryError)
 export class RepositoryExceptionFilter implements ExceptionFilter<RepositoryError> {
@@ -98,13 +102,15 @@ export class RepositoryExceptionFilter implements ExceptionFilter<RepositoryErro
       cause: describeCause(error.cause),
     }
     const http = host.switchToHttp()
-    runInRequestContextOf(http.getRequest(), () => {
-      if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-        this.logger.error(entry)
-      } else {
-        this.logger.warn(entry)
-      }
-    })
+    if (!isReadOperation(error.operation)) {
+      runInRequestContextOf(http.getRequest(), () => {
+        if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+          this.logger.error(entry)
+        } else {
+          this.logger.warn(entry)
+        }
+      })
+    }
 
     const response: unknown = http.getResponse()
     this.adapterHost.httpAdapter.reply(
