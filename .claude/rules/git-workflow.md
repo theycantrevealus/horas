@@ -8,7 +8,22 @@ These rules apply to every developer and every AI agent working in this reposito
 - Trunk-based: every change is a short-lived branch cut from the latest `main` and merged back by pull request. Delete the branch after merging.
 - Name branches `<type>/<scope>-<short-description>` in lowercase kebab-case, for example `feat/identity-authentication` or `fix/worker-relay-lease`.
   - `<type>` and `<scope>` use the same values as commits (section 2).
-- Keep a branch focused on one purpose. Rebase on `main` before opening the PR if `main` moved (`git pull --rebase origin main`).
+- Keep a branch focused on one purpose, and never reuse a branch after its PR was merged.
+- Catch up with `main` by merging, not rebasing: `git fetch origin`, then `git merge origin/main`. PRs are squash-merged, so the extra merge commit never reaches `main`, and a merge needs no force-push. Do not rebase a branch that is already pushed.
+
+### 1.1 Starting a task
+
+Every new task starts from the latest `main`, on its own branch:
+
+```bash
+git fetch origin
+git switch -c <type>/<scope>-<short-description> --no-track origin/main
+```
+
+- Branch from `origin/main`, not from local `main` or from the branch you happen to be on. This keeps a stale local `main` or a finished branch out of the new work.
+- `--no-track` keeps the new branch from tracking `origin/main`, so a plain `git push` can never target `main`. The first push is `git push -u origin <branch>`.
+- Start with a clean working tree. If there are uncommitted changes, commit or stash them first, or ask the developer. Do not carry them onto the new branch silently.
+- Continuing an existing task stays on its branch: fetch, then merge `origin/main` if it moved.
 
 ## 2. Commits
 
@@ -87,6 +102,7 @@ Also confirm that:
 
 - A change to a collection, repository, permission or business rule updates the matching document in `.claude/design/` or `.claude/business/`.
 - Back-end changes follow `.claude/rules/back-end/` (repositories, change recording, logging, error handling).
+- The branch contains `origin/main` (merge it if `main` moved) and only this task's commits (`git log origin/main..HEAD`).
 - No secrets, personal data or real hospital data appear in code, tests, fixtures or the PR text.
 
 ## 4. Pull requests
@@ -103,7 +119,7 @@ Also confirm that:
 ## 5. Rules for AI agents
 
 - Never commit, push or open a PR unless the developer asked for it in the current conversation. Approval for one commit does not cover the next one.
-- Work on a feature branch. If the current branch is `main`, create a branch first.
+- Before the first change of a new task, run the `start` skill (section 1.1) so the work is on a fresh branch cut from the latest `origin/main`. Never start a task on `main`, on a branch whose PR was merged, or on a branch that carries unrelated work.
 - Check `git config commit.gpgsign` before committing. If it is not `true`, stop and ask the developer to configure signing. Verify with `git log -1 --format='%G?'` that the new commit shows `G`.
 - Never force-push, rewrite published history, delete remote branches or change repository settings.
 - Run the section 3 checks before proposing a PR, and report any check that failed or was skipped. Do not claim "done" without the output.
