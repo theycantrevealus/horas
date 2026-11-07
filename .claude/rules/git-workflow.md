@@ -58,6 +58,7 @@ When a change touches several areas, use the area that owns the behaviour, or sp
 - One logical change per commit. Do not mix a refactor with a feature. Each commit should build and pass type-check.
 - Never put secrets, `.env` files, `logs/` or `dist/` in a commit. Stage files by name, not with `git add -A`.
 - Do not bypass hooks (`--no-verify`). Fix the failure instead.
+- **Every commit must be signed with a verified signature.** `main` rejects pushes that contain unsigned or unverified commits. Configure signing once per clone (`git config commit.gpgsign true` and `user.signingkey`), and make sure the signing key's email is a verified email on your GitHub account. Never use `--no-gpg-sign`, and never commit with signing off. If signing fails (for example the key is locked), stop and tell the developer; do not work around it.
 - AI agents end the message with the attribution line their tool provides (for example `Co-Authored-By: ...`).
 
 Example:
@@ -103,6 +104,7 @@ Also confirm that:
 
 - Never commit, push or open a PR unless the developer asked for it in the current conversation. Approval for one commit does not cover the next one.
 - Work on a feature branch. If the current branch is `main`, create a branch first.
+- Check `git config commit.gpgsign` before committing. If it is not `true`, stop and ask the developer to configure signing. Verify with `git log -1 --format='%G?'` that the new commit shows `G`.
 - Never force-push, rewrite published history, delete remote branches or change repository settings.
 - Run the section 3 checks before proposing a PR, and report any check that failed or was skipped. Do not claim "done" without the output.
 - Write commit messages and PR descriptions from the actual diff and the developer's stated intent, not from guesses. Describe what was and was not verified.
