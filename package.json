@@ -1,0 +1,30 @@
+{
+  "name": "horas",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HORAS - Hospital Information Management System (pnpm monorepo)",
+  "packageManager": "pnpm@10.5.2",
+  "engines": {
+    "node": "^22.18.0",
+    "pnpm": ">=10.5.0"
+  },
+  "scripts": {
+    "build": "pnpm -r run build",
+    "build:packages": "pnpm --filter \"./packages/**\" run build",
+    "dev:front-end": "pnpm --filter @horas/front-end run dev",
+    "dev:gateway": "pnpm --filter @horas/back-end run start:dev",
+    "dev:worker": "pnpm --filter @horas/back-end run start:dev:worker",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "test": "pnpm -r --if-present run test",
+    "test:back-end": "pnpm --filter @horas/back-end run test",
+    "test:back-end:e2e": "pnpm --filter @horas/back-end run test:e2e",
+    "test:front-end:unit": "pnpm --filter @horas/front-end run test:unit",
+    "test:front-end:e2e": "pnpm --filter @horas/front-end run test:e2e"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "cypress"
+    ]
+  }
+}

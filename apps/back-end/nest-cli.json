@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/gateway_back_office/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "builder": "rspack",
+    "tsConfigPath": "apps/gateway_back_office/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/gateway_back_office",
+  "projects": {
+    "gateway_back_office": {
+      "type": "application",
+      "root": "apps/gateway_back_office",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway_back_office/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway_back_office/tsconfig.app.json"
+      }
+    },
+    "worker": {
+      "type": "application",
+      "root": "apps/worker",
+      "entryFile": "main",
+      "sourceRoot": "apps/worker/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/worker/tsconfig.app.json"
+      }
+    }
+  }
+}

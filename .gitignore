@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Test output
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Caches
+.eslintcache
+
+# Editors / OS
+.idea/
+.DS_Store
+*.sw?
+
+.editorconfig
+.nvmrc
+*.env
