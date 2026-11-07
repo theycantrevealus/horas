@@ -22,4 +22,4 @@ The structure is:
 ### Git workflow
 
 - Read `.claude/rules/git-workflow.md` before committing, pushing or opening a pull request. It is the source of truth for branches, commit messages and PRs.
-- To commit, use the `commit` skill. To open a pull request, use the `pr` skill (only when the user asks). Do not commit or push unless the user asked in the current conversation.
+- To start a new task, use the `start` skill (new branch from the latest `origin/main`). To commit, use the `commit` skill. To open a pull request, use the `pr` skill (only when the user asks). Do not commit or push unless the user asked in the current conversation.

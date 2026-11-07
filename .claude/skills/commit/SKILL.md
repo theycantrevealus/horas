@@ -7,7 +7,7 @@ description: Create a git commit that follows the project's Git workflow standar
 
 The standard lives in `.claude/rules/git-workflow.md`. Read sections 1, 2, 3 and 5 before you start, and follow them. Do not rely on memory of them.
 
-1. **Branch.** Run `git branch --show-current`. If it is `main`, create a branch named `<type>/<scope>-<description>` (section 1) before anything else.
+1. **Branch.** Run `git fetch origin` and `git branch --show-current`. If it is `main`, or `gh pr list --head <branch> --state merged --json number` is not empty (the branch was already merged), stop and use the `start` skill to create a fresh branch from `origin/main` first. Do not commit new work onto a finished branch. If `git rev-list --count HEAD..origin/main` is not `0`, tell the user the branch is behind `main`; do not change anything on your own.
 2. **Inspect.** Run `git status` and `git diff` (and `git diff --staged`). Understand the whole change. If it mixes unrelated purposes, propose splitting it into several commits and commit them one at a time.
 3. **Exclude.** Never stage `.env` files, `logs/`, `dist/`, secrets or unrelated formatting changes. Stage files **by name**, never with `git add -A` or `git add .`.
 4. **Check.** Run `pnpm lint`, `pnpm type-check` and `pnpm test` from the repository root (section 3). If a check fails, stop, report the output and fix the cause. Do not commit failing work, and do not use `--no-verify`.
