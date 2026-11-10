@@ -1,6 +1,6 @@
 # gateway_hr 1.1: Organizations
 
-Status: **In discussion** (2026-11-10). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 1). Endpoints: `../hr-endpoints.md` 1.1. Collection: `../human-resource-collections.md` and `../account-and-workforce-collections.md` 3.2.
+Status: **Built** (2026-11-10, PR #7 merged). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 1). Endpoints: `../hr-endpoints.md` 1.1. Collection: `../human-resource-collections.md` and `../account-and-workforce-collections.md` 3.2.
 
 Group 1.1 is the first thing built, so its code PR also creates what every later group reuses: the `gateway_hr` application, the `workforce` context and its error handling. Nothing else is added in advance (no encryption, no date validation, no other repositories); each later group adds what it needs.
 
@@ -21,7 +21,7 @@ The commit scope table (`git-workflow.md` 2.2) changes together with `commitlint
 
 | Endpoint | Behaviour |
 |---|---|
-| `GET /v1/organizations` | Lists the tenant's organizations. Filters `status`; paging `limit` (1 to 100, default 20) and `offset`; sorted by `code`. Writes no log entry. |
+| `GET /v1/organizations` | Lists the tenant's organizations. Filters `status`; paging `limit` (1 to 100, repository default 10 when omitted) and `offset`; sorted by `code`. Writes no log entry. |
 | `POST /v1/organizations` | Creates one. Body: `code`, `legalName`, `country`, `currency`, `identifiers` (list of `{ system, value }`, optional). Starts `active`. Duplicate code in the tenant answers 409 `organization_exists`. |
 | `GET /v1/organizations/:id` | Returns one. A missing, malformed or other-tenant id answers 404 `organization_not_found`. |
 | `PATCH /v1/organizations/:id` | Edits `legalName`, `currency`, `identifiers`, `status`. Optional `version` makes the edit conditional (409 `stale_version` when someone changed it meanwhile). Optional `reason` is stored in the change history. An empty body answers 422. |

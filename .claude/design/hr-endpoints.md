@@ -4,6 +4,8 @@ Status: **Draft for discussion** (2026-11-10). Collections: `human-resource-coll
 
 We walk through the groups in order; each group is agreed before it is built.
 
+Built so far: **1.1 Organizations** (PR #7). Next: 1.2 Facilities. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
+
 ## 1. Organization structure and reference data
 
 ### 1.1 Organizations (legal employers)

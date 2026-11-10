@@ -1,6 +1,6 @@
 # gateway_hr Plan
 
-Status: **In discussion** (2026-11-10). Replaces `2026-11-07-workforce-core-implementation.md`.
+Status: **In progress** (2026-11-10). Group 1.1 built (PR #7). Replaces `2026-11-07-workforce-core-implementation.md`.
 
 **Goal:** a new NestJS application `gateway_hr`, built like `gateway_back_office`, that serves the HR endpoints of `../hr-endpoints.md` on top of the approved collections (`../human-resource-collections.md`, `../account-and-workforce-collections.md`).
 
@@ -39,11 +39,11 @@ Each HR area has a domain folder in `workforce/` (services and rules) and an HTT
 
 | # | Step | Content | Status |
 |---|---|---|---|
-| 0 | Commit the models | Split into two PRs: documentation (design documents, HR specification, plans) and code (the 28 models), never mixed. See `gateway-hr-1-1-organizations.md` section 1. | Waiting for your go-ahead |
-| 1 | Shared foundations | Built inside the first code PR (group 1.1) and then group by group, never in advance: `@workforce` alias, workforce errors, filter and logging helper, shared in-memory test repository and commit scopes arrive with 1.1; field encryption arrives with 2.2 (private profile); local-date validation with the first group that stores dates. | Not started |
-| 2 | Application skeleton | `gateway_hr` project in `nest-cli.json`, `tsconfig`, `main.ts` (`NODE_PORT=3001`), root module, health endpoint, `package.json` scripts (build, dev, type-check). Built in the group 1.1 PR. | Not started |
-| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | Not started |
-| 4 | Docs and checks | `workforce.md` rule file, `authentication.md` update, lint, type-check, full test suite on Node 22, each time a group is finished. | Not started |
+| 0 | Commit the models | Two PRs, documentation and code, never mixed (#5 models, #6 documents). | Done |
+| 1 | Shared foundations | Built inside the first code PR (group 1.1) and then group by group, never in advance: `@workforce` alias, workforce errors, filter and logging helper, shared in-memory test repository and commit scopes arrive with 1.1; field encryption arrives with 2.2 (private profile); local-date validation with the first group that stores dates. | Partly done in PR #7 (alias, errors, filter, logging helper, shared test repository, commit scopes) |
+| 2 | Application skeleton | `gateway_hr` project in `nest-cli.json`, `tsconfig`, `main.ts` (`NODE_PORT=3001`), root module, health endpoint, `package.json` scripts (build, dev, type-check). Built in the group 1.1 PR. | Done (PR #7) |
+| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 done, 1.2 in progress |
+| 4 | Docs and checks | `workforce.md` rule file, `authentication.md` update, lint, type-check, full test suite on Node 22, each time a group is finished. | `workforce.md` written (docs PR after 1.1); repeated per group |
 
 ## 3. Walkthrough order
 
@@ -51,8 +51,8 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 
 | Order | Group (`hr-endpoints.md`) | Endpoints | Discussion | Build |
 |---|---|---|---|---|
-| 1 | 1.1 Organizations | 4 | In discussion (`gateway-hr-1-1-organizations.md`) | — |
-| 2 | 1.2 Facilities | 4 | — | — |
+| 1 | 1.1 Organizations | 4 | Done (`gateway-hr-1-1-organizations.md`) | Built, PR #7 |
+| 2 | 1.2 Facilities | 4 | Agreed (`gateway-hr-1-2-facilities.md`) | In progress |
 | 3 | 1.3 Code concepts | 4 | — | — |
 | 4 | 1.4 Organization units | 7 | — | — |
 | 5 | 1.5 Positions | 5 | — | — |
@@ -85,7 +85,7 @@ Each is settled when we reach the group that first needs it. The proposed defaul
 
 | # | Decision | Proposed default | Settle at |
 |---|---|---|---|
-| D1 | Sign-in for `gateway_hr` | Reuse identity's guards and the shared JWT secret (same database, same deployment); login stays on `gateway_back_office`. Switching to asymmetric keys (`authentication.md` 3) is a separate task. | Step 2 |
+| D1 | Sign-in for `gateway_hr` (decided, built in 1.1) | Reuse identity's guards and the shared JWT secret (same database, same deployment); login stays on `gateway_back_office`. Switching to asymmetric keys (`authentication.md` 3) is a separate task. | Step 2 |
 | D2 | "Own record" and "units I head" access | "Own" through the account's `employee_id` now; Head of Unit access stays tenant-wide until scoped permissions exist. | 2.1 Employee records |
 | D3 | File uploads (licence scans, SPK letters) | Accept file references only; no file service yet. | 3.1 Licences |
 | D4 | CSV imports | `text/csv` request body with a size limit; parse with the `csv-parse` package. | 5.2 Holiday calendars |
