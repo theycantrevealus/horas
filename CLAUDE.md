@@ -14,6 +14,7 @@ The structure is:
 
 ### Primary Technology Stack and Rules
 
+- Read `.claude/rules/engineering-workflow.md` first: the general rules for every task (role, inspecting before editing, planning, focused changes, verification and reporting).
 - Read `.claude/rules/typescript.md` to understand typescript standard in common use.
 - Read all markdown documents inside `.claude/rules/back-end` to understand the back end standard.
 - Read `.claude/business/glossary.md` and the business specification of the module you work on in `.claude/business/` before designing or changing business behaviour.
