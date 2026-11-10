@@ -13,6 +13,7 @@
     "build:packages": "pnpm --filter \"./packages/**\" run build",
     "dev:front-end": "pnpm --filter @horas/front-end run dev",
     "dev:gateway": "pnpm --filter @horas/back-end run start:dev",
+    "dev:hr": "pnpm --filter @horas/back-end run start:dev:hr",
     "dev:worker": "pnpm --filter @horas/back-end run start:dev:worker",
     "lint": "pnpm -r run lint",
     "type-check": "pnpm -r run type-check",
