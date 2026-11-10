@@ -15,7 +15,7 @@ The identity context (`apps/back-end/apps/identity`, alias `@identity/*`) authen
 | `identity.error.ts`, `identity.filter.ts` | Transport-neutral business errors and the filter that maps them to HTTP. |
 | `testing/in-memory.ts` | In-memory repositories for tests that need real services without MongoDB. |
 
-The HTTP side is in the gateway: `gateway_back_office/src/account/` (`AuthController`, `AccountController`, `RoleController`).
+The HTTP side is in the gateway: `gateway_back_office/src/account/` (`AuthController`, `AccountController`, `RoleController`). `gateway_hr` reuses the guards, decorators, permission catalog and exception filter of this context but has no login route.
 
 ## 2. Protecting a route
 
@@ -39,7 +39,7 @@ export class LovController {
 
 ## 3. Tokens and sessions
 
-- Access token: JWT (HS256, `typ: at+jwt`), 15 minutes by default, claims `sub`, `tid`, `emp`, `authz`, `sid`, `pwd`. Secret in `auth.env` (`AUTH_JWT_SECRET`, at least 32 characters, no default). Use asymmetric keys before another service verifies tokens.
+- Access token: JWT (HS256, `typ: at+jwt`), 15 minutes by default, claims `sub`, `tid`, `emp`, `authz`, `sid`, `pwd`. Secret in `auth.env` (`AUTH_JWT_SECRET`, at least 32 characters, no default). Use asymmetric keys before a service outside the trusted deployment verifies tokens. `gateway_hr` verifies tokens with the same secret as `gateway_back_office` because both run as one trusted deployment (`workforce.md` 2); a third service, or a different trust boundary, needs asymmetric keys first.
 - Refresh token: 256-bit random, stored as SHA-256, **single use**. Each refresh creates a new session in the same family. Presenting a used token revokes the whole family and writes `token_reuse_detected`.
 - `authz_version` on the account is part of the token. Changing roles, holds or status increments it; the next request answers `401 token_stale` and the client refreshes. Services that change access must increment it in the same transaction.
 - A session replaced by rotation keeps its access token valid until it expires, so requests in flight do not fail. Explicit revocation (logout, hold, password change or reset) ends the whole family.
