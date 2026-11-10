@@ -51,7 +51,9 @@ The scope is required and must be one of:
 | Scope | Area |
 |---|---|
 | `identity` | `apps/back-end/apps/identity` |
+| `workforce` | `apps/back-end/apps/workforce` (HR domain) |
 | `gateway` | `apps/back-end/apps/gateway_back_office` |
+| `gateway-hr` | `apps/back-end/apps/gateway_hr` |
 | `worker` | `apps/back-end/apps/worker` |
 | `repository` | `apps/back-end/apps/repository` and `apps/utility/database` |
 | `history` | Change history and logging (`apps/utility/history`, `apps/utility/logger`) |

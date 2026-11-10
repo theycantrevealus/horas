@@ -16,7 +16,9 @@ export default {
       'always',
       [
         'identity',
+        'workforce',
         'gateway',
+        'gateway-hr',
         'worker',
         'repository',
         'history',
