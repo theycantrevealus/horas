@@ -11,8 +11,10 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/workforce.filter.ts` | `WorkforceExceptionFilter`: 404, 409, 422, 403. A 404 on `GET` or `HEAD` is answered but not logged. |
 | `apps/workforce/observe.ts` | `observe(logger, event, operation, work)`: one structured log entry per write. |
 | `apps/workforce/<area>/` | Services and their specs, one folder per HR area (`structure/`, later `employee/`, `license/`, ...). |
+| `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. |
 | `apps/workforce/testing/in-memory.ts` | In-memory repositories for service and gateway tests. |
 | `apps/gateway_hr/src/<area>/` | `<area>-management.module.ts`, controllers, DTOs and the gateway test. No business rules. |
+| `apps/gateway_hr/src/testing/` | `hr-gateway.ts` (`createHrGateway`: boots the gateway in memory, signs accounts in, sends requests) and `in-memory-workforce.ts` (`createInMemoryWorkforce`: in-memory repositories of every collection `WorkforceModule` uses). |
 | `apps/gateway_hr/src/gateway.hr.module.ts` | Root module: config, logger, Mongo, `IdentityModule` (guards), filters, access log. |
 
 Rules:
@@ -32,6 +34,7 @@ Rules:
 - **Writes** go through `observe` with an event name `<noun>_<verb>` (for example `organization_create`) and write one entry with the shared fields. Never log request values, names, identifiers or numbers; log the error class and the workforce `code`.
 - **Change history.** Every write is recorded by the repository (`database.md` 6.1). An optional `reason` in the request body is passed with `withChangeReason`. Do not add `updated_by` or history fields.
 - **Concurrency.** Update bodies accept an optional `version`. A stale version answers 409 `stale_version`.
+- **Parents.** A record that points to a parent (a facility to its organization) checks that the parent exists in the tenant, is active and is not soft-deleted. A missing, deleted and foreign parent give one answer (422 `<parent>_not_found`), so nothing leaks across tenants. Deactivating a parent is refused (409 `<parent>_in_use`) while it has active children.
 - **Immutable fields.** A field that other records depend on (a code, a country, a time zone, a parent) is not in the repository's `updatableFields`, not in the update DTO, and not in the update service input. A request that sends only immutable fields answers 422 `empty_update`.
 - **No delete.** HR records are set inactive or closed, never deleted, unless the collection design says otherwise.
 - **Validation.** The DTO checks shape and length (400). The service checks business rules (422), so a second transport would get the same rules. Codes from code systems are validated against `code_concepts` when that group exists.
@@ -46,15 +49,17 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 |---|---|
 | `workforce.organization:read` | `GET /v1/organizations`, `GET /v1/organizations/:id` |
 | `workforce.organization:write` | `POST /v1/organizations`, `PATCH /v1/organizations/:id` |
+| `workforce.facility:read` | `GET /v1/facilities`, `GET /v1/facilities/:id` |
+| `workforce.facility:write` | `POST /v1/facilities`, `PATCH /v1/facilities/:id` |
 
 ## 5. Adding an HR area
 
 1. Read the group in `hr-endpoints.md` and its plan in `.claude/design/plans/`; settle the open decisions with the user first.
 2. Add the repository when the area needs one (`database.md` 12): token, interface with named `find*` queries, schema with indexes starting with `tenant_id`, Mongo implementation on `MongoRepositoryBase`, module, and a repository spec. The model and classification already exist in `apps/repository/model/`.
-3. Add the in-memory repository to `workforce/testing/in-memory.ts`, with the same uniqueness rules as the indexes.
+3. Add the in-memory repository to `workforce/testing/in-memory.ts`, with the same uniqueness rules as the indexes, and register it (token and entity) in `gateway_hr/src/testing/in-memory-workforce.ts`.
 4. Add the service in `workforce/<area>/` with its spec (in-memory repositories): happy paths, every rejection, tenant isolation, stale version, reads write no log, writes log no values.
 5. Add the permissions to the catalog.
-6. Add the controller, DTOs and module in `gateway_hr/src/<area>/`, import the module in `GatewayHrModule`, and write the gateway test (`organization.spec.ts` is the reference): 401, 403, happy paths, 404 for malformed, missing and foreign ids, 409 cases, validation, list limits, reads write only the access log, writes log no values.
+6. Add the controller, DTOs and module in `gateway_hr/src/<area>/`, import the module in `GatewayHrModule`, and write the gateway test with `createHrGateway` (`facility.spec.ts` is the reference): 401, 403, happy paths, 404 for malformed, missing and foreign ids, 409 cases, validation, list limits, reads write only the access log, writes log no values.
 7. Update `workforce.md` (permissions, rules), the status in `hr-endpoints.md` and the plan, in a **separate documentation PR** after the code merged. Code and documentation never share a PR (the commit scope table in `git-workflow.md` changing together with `commitlint.config.mjs` is the one exception).
 
 ## 6. Running

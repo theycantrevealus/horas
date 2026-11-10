@@ -1,6 +1,6 @@
 # gateway_hr 1.2: Facilities
 
-Status: **Decisions F1 to F10 confirmed** (2026-11-10; F1 amended to include the soft-delete condition). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 2). Endpoints: `../hr-endpoints.md` 1.2. Collection: `../account-and-workforce-collections.md` 3.3 and `../human-resource-collections.md` 5.2. Model: `apps/back-end/apps/repository/model/facility.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built reference: group 1.1 (organizations, PR #7).
+Status: **Built** (2026-11-10, PR #10 merged). Decisions F1 to F10 confirmed; F1 amended to include the soft-delete condition. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 2). Endpoints: `../hr-endpoints.md` 1.2. Collection: `../account-and-workforce-collections.md` 3.3 and `../human-resource-collections.md` 5.2. Model: `apps/back-end/apps/repository/model/facility.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built reference: group 1.1 (organizations, PR #7).
 
 A facility is one hospital or clinic site. It carries the time zone that every local date and time of that site is read in, so most later groups (units, positions, rostering, licences) hang on it.
 
