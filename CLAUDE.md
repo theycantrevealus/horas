@@ -17,7 +17,7 @@ The structure is:
 - Read `.claude/rules/typescript.md` to understand typescript standard in common use.
 - Read all markdown documents inside `.claude/rules/back-end` to understand the back end standard.
 - Read `.claude/business/glossary.md` and the business specification of the module you work on in `.claude/business/` before designing or changing business behaviour.
-- Read the relevant design documents in `.claude/design/` before adding or changing collections: `account-and-workforce-collections.md` (approved), `data-change-history.md` (approved).
+- Read the relevant design documents in `.claude/design/` before adding or changing collections: `account-and-workforce-collections.md` (approved), `data-change-history.md` (approved), `human-resource-collections.md` (approved).
 
 ### Git workflow
 
