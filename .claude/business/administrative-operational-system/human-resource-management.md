@@ -227,6 +227,7 @@ pending_verification → valid → expired
 | `rejected` | Verification failed. The record is kept for audit; a corrected license is submitted as a new record. |
 | `expired` | Past the expiry date. Set by the System. |
 | `revoked` | Withdrawn by the issuing authority before expiry. Recorded by HR Admin. |
+| `superseded` | Replaced by a verified renewal for the same facility and profession (HR-LIC-006). Terminal. |
 
 "Expiring" is not a status. A license is **expiring** when it is `valid` and its expiry date falls within the alert window (section 10, `LICENSE_ALERT_DAYS`).
 
@@ -265,7 +266,7 @@ pending_verification → valid → expired
 - **HR-LIC-003**: A license whose profession or specialty differs from the employee's profession or specialty cannot be verified.
 - **HR-LIC-004**: An STR has no expiry date unless the document states one. An STR issued before `REG-UU17` with an expiry date is handled per open question Q1.
 - **HR-LIC-005**: A SIP must have an expiry date.
-- **HR-LIC-006**: At most one `valid` SIP for this hospital may exist per employee and profession at a time. Registering a new one that overlaps the old one is allowed only when the new one starts on or after the old one's issue date; the old one stays valid until its own expiry.
+- **HR-LIC-006**: A SIP names exactly one hospital or clinic. At most one `valid` SIP may exist per employee, profession and facility at a time. A renewal may be registered while the old SIP is still valid; verifying it makes the old SIP `superseded` from the renewal's issue date. A renewal whose issue date is in the future cannot be verified before that date.
 - **HR-LIC-007**: A Tenaga Medis may hold SIPs for a limited number of practice locations (`MAX_PRACTICE_LOCATIONS_MEDIS`, section 10). HR records SIPs for other locations when the employee declares them, and warns when the limit would be exceeded.
 - **HR-LIC-008**: License records are never deleted. Corrections are made by rejecting the record and registering a new one.
 - **HR-LIC-009**: An employee cannot leave `onboarding` for a clinical position until both STR and SIP are `valid`. HR Manager may approve the move to `probation` without a SIP, but the employee is then not clinically eligible (5.5) until the SIP is valid.
@@ -328,7 +329,8 @@ The hospital's list of privileges that can be requested, maintained by each comm
 | SPK number | Hospital letter number. |
 | Employee | |
 | Source application | |
-| Units | Units the SPK covers. |
+| Credentialing facility | Facility whose committee recommended the SPK and whose Director issued it. |
+| Units | Units the SPK covers: units of the credentialing facility; units of several facilities only when the tenant credentials at group level (`CREDENTIALING_SCOPE` `group`). |
 | Valid from, valid until | |
 | Status | See 7.3. |
 | Issued by, issue date | Director or delegate. |
@@ -428,7 +430,7 @@ For urgent needs (disaster, an unexpected absence, a visiting specialist), the D
 - **HR-CRD-006**: A `supervised` grant requires a supervisor whose own grant for the same privilege is `full` and active. When the supervisor loses that grant, the supervised grant is flagged and the committee is notified.
 - **HR-CRD-007**: Privileges can be requested only from active catalog items for the applicant's profession, specialty and, for nurses and midwives, clinical career level.
 - **HR-CRD-008**: The committee may recommend fewer privileges or stricter conditions than requested, but never more than requested.
-- **HR-CRD-009**: Each SPK covers explicit units. Clinical work in another unit requires an SPK that covers it.
+- **HR-CRD-009**: Each SPK covers explicit units. Clinical work in another unit requires an SPK that covers it. Under Indonesian regulation each facility credentials its own staff, so a practitioner working in several facilities of a group holds one SPK per facility. `HR-CRD-002` is checked for every facility an SPK covers.
 - **HR-CRD-010**: Credentialing decisions are never deleted. Every status change records the user, date and reason (section 15).
 - **HR-CRD-011**: A contracted practitioner (`mitra`) follows the same credentialing rules as an employee.
 
@@ -540,7 +542,7 @@ draft → submitted → approved → published → closed
 
 #### 8.4.1 Prepare and publish a roster
 
-1. At least `ROSTER_PUBLISH_LEAD_DAYS` before the period starts, the Head of Unit creates the draft. The System may pre-fill it from the previous period or from a rotation pattern.
+1. At least `ROSTER_PUBLISH_LEAD_DAYS` before the period starts, the Head of Unit creates the draft. The System may pre-fill it from the previous period or from a rotation pattern, or the Head of Unit imports assignments from a CSV file (checked as a whole and applied only when confirmed; draft rosters only). Assignments can also be entered one at a time.
 2. The Head of Unit assigns staff. The System validates each assignment against 8.5 as it is entered and shows violations immediately.
 3. The Head of Unit submits the roster, or publishes it when approval is not required. The System re-validates the whole roster.
 4. The approver (HR Manager or the head of the parent unit, per configuration) approves or returns it.
@@ -705,6 +707,9 @@ Values are owned by HR Manager unless stated otherwise, stored as configuration,
 | `MAX_OVERTIME_HOURS_DAY` | 4 *(verify)* | HR-ROS-013 |
 | `MAX_OVERTIME_HOURS_WEEK` | 18 *(verify)* | HR-ROS-013 |
 | `MAX_CONSECUTIVE_NIGHTS` | 3 | HR-ROS-015 |
+| `CREDENTIALING_SCOPE` | `facility` (each facility's committee credentials; `group` for central credentialing) | 7, HR-CRD-009 |
+| `IMPORT_MAX_ROWS` | 5,000 | 8.4.1 |
+| `IMPORT_MAX_ERRORS` | 500 | 8.4.1 |
 
 ---
 
@@ -796,4 +801,4 @@ Implementation: change history is not stored as `updated_by` fields in records; 
 | Q9 | Which notification channels are allowed (email, WhatsApp, SMS), given that notifications must not contain sensitive data? | 11 |
 | Q10 | When HRM is unavailable, how do clinical modules allow emergency care (break-glass procedure)? | HR-INT-002 |
 | Q11 | What is the retention period for employee records after separation? | HR-SEC-003 |
-| Q12 | Are contracted practitioners (`mitra`) rostered and paid through HRM, or only credentialed? | 5.1, 8, 9.7 |
+| Q12 | Are contracted practitioners (`mitra`) paid through HRM? (Rostered: yes, decided 2026-11-07.) | 9.7 |

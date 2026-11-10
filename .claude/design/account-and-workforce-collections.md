@@ -1,6 +1,6 @@
 # Account and Workforce Collection Design
 
-Status: **Approved** (2026-11-06). Change history of these collections: `data-change-history.md`. Business source: `../business/administrative-operational-system/human-resource-management.md` (rules `HR-*`). Technical rules: `../rules/back-end/database.md`, `../rules/back-end/logging.md`, `../rules/back-end/stack.md`.
+Status: **Approved** (2026-11-06). Refinements to section 4 and the detailed licence, credentialing and rostering collections: `human-resource-collections.md` (approved 2026-11-07). Change history of these collections: `data-change-history.md`. Business source: `../business/administrative-operational-system/human-resource-management.md` (rules `HR-*`). Technical rules: `../rules/back-end/database.md`, `../rules/back-end/logging.md`, `../rules/back-end/stack.md`.
 
 ## 1. Decisions in one page
 
