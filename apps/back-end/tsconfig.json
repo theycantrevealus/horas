@@ -22,7 +22,8 @@
       "@utility/*": ["./apps/utility/*"],
       "@configuration/*": ["./apps/configuration/*"],
       "@repository/*": ["./apps/repository/*"],
-      "@identity/*": ["./apps/identity/*"]
+      "@identity/*": ["./apps/identity/*"],
+      "@workforce/*": ["./apps/workforce/*"]
     }
   },
   "include": ["apps/**/*.ts"],
