@@ -159,6 +159,16 @@ describe('TokenService', () => {
     })
   })
 
+  it('verifies a token for an account with no linked employee', async () => {
+    const claimsWithoutEmployee = { ...CLAIMS, employeeId: null }
+
+    const { token } = await tokens.signAccessToken(claimsWithoutEmployee, NOW)
+
+    await expect(tokens.verifyAccessToken(token)).resolves.toEqual(
+      claimsWithoutEmployee,
+    )
+  })
+
   it('rejects an expired access token with token_expired', async () => {
     const expired = await signRaw(claims(), { expiresAt: NOW_SECONDS - 1 })
 
