@@ -5,7 +5,7 @@ import {
   runWithRequestContext,
 } from '@utility/logger/context'
 import { OrganizationService } from './organization.service'
-import { InMemoryOrganizations } from '../testing/in-memory'
+import { InMemoryFacilities, InMemoryOrganizations } from '../testing/in-memory'
 import {
   ConflictError,
   InvalidRequestError,
@@ -20,6 +20,7 @@ describe('OrganizationService', () => {
   const error = vi.fn()
   const debug = vi.fn()
   let repository: InMemoryOrganizations
+  let facilities: InMemoryFacilities
   let service: OrganizationService
 
   const input = {
@@ -49,7 +50,8 @@ describe('OrganizationService', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     repository = new InMemoryOrganizations()
-    service = new OrganizationService(repository, {
+    facilities = new InMemoryFacilities()
+    service = new OrganizationService(repository, facilities, {
       log,
       warn,
       error,
@@ -283,6 +285,99 @@ describe('OrganizationService', () => {
     )
 
     expect(seen).toEqual(['Merged into group', undefined])
+  })
+
+  describe('deactivating an organization (HR plan F9)', () => {
+    /**
+     * Adds a facility to an organization.
+     *
+     * @param organizationId - Organization that runs it.
+     * @param code - Facility code.
+     * @param status - Facility status.
+     * @returns The facility.
+     */
+    function addFacility(
+      organizationId: string,
+      code: string,
+      status: 'active' | 'inactive' = 'active',
+    ) {
+      return asAdmin(() =>
+        facilities.create({
+          tenant_id: tenantId,
+          organization_id: organizationId,
+          code,
+          name: [{ locale: 'en', text: code }],
+          address: null,
+          timezone: 'Asia/Jakarta',
+          holiday_calendar_codes: [],
+          external_ids: [],
+          status,
+        }),
+      )
+    }
+
+    it('is refused while the organization has an active facility', async () => {
+      const created = await asAdmin(() => service.create(tenantId, input))
+      await addFacility(created.id, 'site-one')
+
+      await expect(
+        asAdmin(() =>
+          service.update(tenantId, created.id, { status: 'inactive' }),
+        ),
+      ).rejects.toMatchObject({ code: 'organization_in_use' })
+      expect((await service.get(tenantId, created.id)).status).toBe('active')
+    })
+
+    it('is allowed when every facility is inactive, or when the organization has none', async () => {
+      const withInactive = await asAdmin(() => service.create(tenantId, input))
+      await addFacility(withInactive.id, 'site-off', 'inactive')
+      const empty = await asAdmin(() =>
+        service.create(tenantId, { ...input, code: 'empty-org' }),
+      )
+
+      await expect(
+        asAdmin(() =>
+          service.update(tenantId, withInactive.id, { status: 'inactive' }),
+        ),
+      ).resolves.toMatchObject({ status: 'inactive' })
+      await expect(
+        asAdmin(() =>
+          service.update(tenantId, empty.id, { status: 'inactive' }),
+        ),
+      ).resolves.toMatchObject({ status: 'inactive' })
+    })
+
+    it('ignores facilities of other organizations and does not block other changes', async () => {
+      const first = await asAdmin(() => service.create(tenantId, input))
+      const second = await asAdmin(() =>
+        service.create(tenantId, { ...input, code: 'second-org' }),
+      )
+      await addFacility(second.id, 'site-two')
+
+      await expect(
+        asAdmin(() =>
+          service.update(tenantId, first.id, { status: 'inactive' }),
+        ),
+      ).resolves.toMatchObject({ status: 'inactive' })
+      await expect(
+        asAdmin(() =>
+          service.update(tenantId, second.id, { legalName: 'Renamed' }),
+        ),
+      ).resolves.toMatchObject({ legal_name: 'Renamed' })
+    })
+
+    it('does not block activating an organization', async () => {
+      const created = await asAdmin(() => service.create(tenantId, input))
+      await asAdmin(() =>
+        service.update(tenantId, created.id, { status: 'inactive' }),
+      )
+
+      await expect(
+        asAdmin(() =>
+          service.update(tenantId, created.id, { status: 'active' }),
+        ),
+      ).resolves.toMatchObject({ status: 'active' })
+    })
   })
 
   it('logs a business rejection as warn with its code and no values', async () => {

@@ -14,6 +14,8 @@ export const PERMISSIONS = {
   ROLE_BINDING_MANAGE: 'identity.role-binding:manage',
   WORKFORCE_ORGANIZATION_READ: 'workforce.organization:read',
   WORKFORCE_ORGANIZATION_WRITE: 'workforce.organization:write',
+  WORKFORCE_FACILITY_READ: 'workforce.facility:read',
+  WORKFORCE_FACILITY_WRITE: 'workforce.facility:write',
   LOV_READ: 'reference.lov:read',
   LOV_WRITE: 'reference.lov:write',
 } as const
