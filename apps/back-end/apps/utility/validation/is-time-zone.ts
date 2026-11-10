@@ -1,21 +1,34 @@
 import { registerDecorator, type ValidationOptions } from 'class-validator'
 
 /**
+ * Returns the canonical IANA name of a time zone, such as `Asia/Jakarta` for `asia/jakarta`.
+ * Offsets (`+07:00`, `UTC+7`) are not IANA names and are refused.
+ *
+ * @param value - Value to check.
+ * @returns The canonical name, or `null` when the runtime does not know the zone.
+ */
+export function canonicalTimeZone(value: unknown): string | null {
+  if (typeof value !== 'string' || !/^[A-Za-z]/.test(value)) {
+    return null
+  }
+  try {
+    return (
+      new Intl.DateTimeFormat('en', { timeZone: value }).resolvedOptions()
+        .timeZone || null
+    )
+  } catch {
+    return null
+  }
+}
+
+/**
  * Checks whether a value is an IANA time zone name, such as `Asia/Jakarta`.
  *
  * @param value - Value to check.
  * @returns `true` when the runtime knows the zone.
  */
-function isTimeZone(value: unknown): boolean {
-  if (typeof value !== 'string' || value.length === 0) {
-    return false
-  }
-  try {
-    new Intl.DateTimeFormat('en', { timeZone: value })
-    return true
-  } catch {
-    return false
-  }
+export function isTimeZone(value: unknown): boolean {
+  return canonicalTimeZone(value) !== null
 }
 
 /**

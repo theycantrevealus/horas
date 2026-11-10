@@ -7,11 +7,14 @@ import { type Page } from '@utility/database/interface'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
 import { isCountryCode, isCurrencyCode } from '@utility/validation/iso-codes'
+import { type FacilityRepository } from '@repository/interface/facility'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type ExternalId } from '@repository/model/common/external-id'
 import { type Organization } from '@repository/model/organization'
-import { REPOSITORY_ORGANIZATION } from '@repository/token'
+import { REPOSITORY_FACILITY, REPOSITORY_ORGANIZATION } from '@repository/token'
 import { observe } from '../observe'
+import { CODE_MESSAGE, CODE_PATTERN } from './codes'
+import { normalizeExternalIds } from './external-ids'
 import {
   ConflictError,
   InvalidRequestError,
@@ -19,16 +22,6 @@ import {
 } from '../workforce.error'
 
 const NAME = 'OrganizationService'
-
-/**
- * Format of an organization code: lower case, so uniqueness needs no case rules (HR plan O4).
- */
-const CODE_PATTERN = /^[a-z0-9][a-z0-9._-]{1,31}$/
-
-/**
- * Most company identifiers one organization can hold (HR plan O6).
- */
-const MAX_IDENTIFIERS = 20
 
 /**
  * Filters and paging of the organization list.
@@ -86,11 +79,14 @@ export interface UpdateOrganizationInput {
 export class OrganizationService {
   /**
    * @param organizations - Organization repository.
+   * @param facilities - Facility repository, to refuse deactivating an organization in use.
    * @param logger - Logger of this service.
    */
   constructor(
     @Inject(REPOSITORY_ORGANIZATION)
     private readonly organizations: OrganizationRepository,
+    @Inject(REPOSITORY_FACILITY)
+    private readonly facilities: FacilityRepository,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -148,10 +144,7 @@ export class OrganizationService {
       `${NAME}.create`,
       async () => {
         if (!CODE_PATTERN.test(input.code)) {
-          throw new InvalidRequestError(
-            'invalid_code',
-            'The code must have 2 to 32 lower-case letters, digits, dots, hyphens or underscores.',
-          )
+          throw new InvalidRequestError('invalid_code', CODE_MESSAGE)
         }
         if (!isCountryCode(input.country)) {
           throw new InvalidRequestError(
@@ -191,7 +184,8 @@ export class OrganizationService {
    * @returns The updated organization.
    * @throws InvalidRequestError `empty_update`, `invalid_currency` or `invalid_identifiers`.
    * @throws NotFoundError `organization_not_found`.
-   * @throws ConflictError `stale_version` when `version` is given and the record changed since.
+   * @throws ConflictError `stale_version` when `version` is given and the record changed since;
+   * `organization_in_use` when it is set inactive while it has active facilities (HR plan F9).
    */
   update(
     tenantId: string,
@@ -229,6 +223,21 @@ export class OrganizationService {
           )
         }
         const organization = await this.load(tenantId, id)
+        if (
+          input.status === 'inactive' &&
+          organization.status !== 'inactive' &&
+          (
+            await this.facilities.findActiveByOrganization(
+              tenantId,
+              organization.id,
+            )
+          ).length > 0
+        ) {
+          throw new ConflictError(
+            'organization_in_use',
+            'The organization still has active facilities. Set them inactive first.',
+          )
+        }
         const write = () =>
           this.organizations.update(organization.id, changes, {
             expectedVersion: input.version,
@@ -285,23 +294,15 @@ export class OrganizationService {
   }
 
   /**
-   * Checks and cleans the company identifiers: at most 20, none empty, no repeated system.
+   * Checks and cleans the company identifiers (HR plan O6).
    *
    * @param identifiers - Identifiers as sent.
    * @returns The identifiers with trimmed text.
    * @throws InvalidRequestError `invalid_identifiers`.
    */
   private checkIdentifiers(identifiers: ExternalId[]): ExternalId[] {
-    const cleaned = identifiers.map(({ system, value }) => ({
-      system: system.trim(),
-      value: value.trim(),
-    }))
-    const systems = new Set(cleaned.map(({ system }) => system))
-    if (
-      cleaned.length > MAX_IDENTIFIERS ||
-      cleaned.some(({ system, value }) => !system || !value) ||
-      systems.size !== cleaned.length
-    ) {
+    const cleaned = normalizeExternalIds(identifiers)
+    if (!cleaned) {
       throw new InvalidRequestError(
         'invalid_identifiers',
         'Identifiers need a system and a value each, at most 20, with no repeated system.',

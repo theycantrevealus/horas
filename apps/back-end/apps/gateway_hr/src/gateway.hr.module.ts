@@ -17,6 +17,7 @@ import { PermissionsGuard } from '@identity/guard/permissions.guard'
 import { IdentityExceptionFilter } from '@identity/identity.filter'
 import { IdentityModule } from '@identity/identity.module'
 import { WorkforceExceptionFilter } from '@workforce/workforce.filter'
+import { FacilityManagementModule } from './facility/facility-management.module'
 import { GatewayHrController } from './gateway.hr.controller'
 import { OrganizationManagementModule } from './organization/organization-management.module'
 
@@ -49,6 +50,7 @@ import { OrganizationManagementModule } from './organization/organization-manage
     MongoMainConnectionModule,
     IdentityModule,
     OrganizationManagementModule,
+    FacilityManagementModule,
   ],
   controllers: [GatewayHrController],
   providers: [

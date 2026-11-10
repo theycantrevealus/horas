@@ -1,242 +1,17 @@
-import { Global, Logger, Module, VersioningType } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
-import { getModelToken } from '@nestjs/mongoose'
-import {
-  FastifyAdapter,
-  type NestFastifyApplication,
-} from '@nestjs/platform-fastify'
-import { Test } from '@nestjs/testing'
+import { Logger } from '@nestjs/common'
 import { Types } from 'mongoose'
-import { AuthConfig } from '@configuration/auth'
-import { ChangeLogConfig } from '@configuration/change-log'
-import { LoggerConfig } from '@configuration/logger'
-import { MONGO_MAIN_CONNECTION } from '@utility/database/constant'
-import { TRANSACTION_MANAGER } from '@utility/database/transaction'
-import { RepositoryExceptionFilter } from '@utility/filter/repository'
-import { systemActor } from '@utility/history/actor'
-import { CHANGE_OUTBOX } from '@utility/history/outbox'
-import { runWithRequestContext } from '@utility/logger/context'
-import { RequestLoggingInterceptor } from '@utility/logger/interceptor'
-import { LoggerModule } from '@utility/logger/module'
-import {
-  REPOSITORY_ACCOUNT,
-  REPOSITORY_ACCOUNT_CREDENTIAL,
-  REPOSITORY_ACCOUNT_ROLE_BINDING,
-  REPOSITORY_ACCOUNT_SESSION,
-  REPOSITORY_ORGANIZATION,
-  REPOSITORY_ROLE,
-  REPOSITORY_SECURITY_EVENT,
-} from '@repository/token'
-import { AccountEntity } from '@repository/mongo/schema/account'
-import { AccountCredentialEntity } from '@repository/mongo/schema/account-credential'
-import { AccountRoleBindingEntity } from '@repository/mongo/schema/account-role-binding'
-import { AccountSessionEntity } from '@repository/mongo/schema/account-session'
-import { OrganizationEntity } from '@repository/mongo/schema/organization'
-import { RoleEntity } from '@repository/mongo/schema/role'
-import { SecurityEventEntity } from '@repository/mongo/schema/security-event'
-import { AuthenticationService } from '@identity/authentication/authentication.service'
-import { PasswordHasher } from '@identity/authentication/password-hasher'
-import { AuthenticationGuard } from '@identity/guard/authentication.guard'
-import { PermissionsGuard } from '@identity/guard/permissions.guard'
-import { IdentityExceptionFilter } from '@identity/identity.filter'
-import { IdentityModule } from '@identity/identity.module'
 import { PERMISSIONS } from '@identity/permission'
-import {
-  InMemoryAccounts,
-  InMemoryBindings,
-  InMemoryCredentials,
-  InMemoryRoles,
-  InMemorySecurityEvents,
-  InMemorySessions,
-} from '@identity/testing/in-memory'
-import { InMemoryOrganizations } from '@workforce/testing/in-memory'
-import { WorkforceExceptionFilter } from '@workforce/workforce.filter'
-import { GatewayHrController } from '../gateway.hr.controller'
+import { createHrGateway, type HrGateway } from '../testing/hr-gateway'
+import { createInMemoryWorkforce } from '../testing/in-memory-workforce'
 import { OrganizationManagementModule } from './organization-management.module'
 
-/**
- * Stand-in for the global connection module: transactions, change outbox and configuration.
- */
-@Global()
-@Module({
-  providers: [
-    {
-      provide: TRANSACTION_MANAGER,
-      useValue: { run: (work: () => Promise<unknown>) => work() },
-    },
-    { provide: CHANGE_OUTBOX, useValue: { append: async () => undefined } },
-    { provide: ChangeLogConfig.KEY, useValue: { recordMaxBytes: 200_000 } },
-  ],
-  exports: [TRANSACTION_MANAGER, CHANGE_OUTBOX, ChangeLogConfig.KEY],
-})
-class FakeConnectionModule {}
-
-/**
- * The HR gateway without Mongo: same filters, guards and interceptor as `GatewayHrModule`.
- */
-@Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      ignoreEnvFile: true,
-      load: [AuthConfig, LoggerConfig, ChangeLogConfig],
-    }),
-    FakeConnectionModule,
-    LoggerModule,
-    IdentityModule,
-    OrganizationManagementModule,
-  ],
-  controllers: [GatewayHrController],
-  providers: [
-    { provide: APP_FILTER, useClass: RepositoryExceptionFilter },
-    { provide: APP_FILTER, useClass: IdentityExceptionFilter },
-    { provide: APP_FILTER, useClass: WorkforceExceptionFilter },
-    { provide: APP_GUARD, useClass: AuthenticationGuard },
-    { provide: APP_GUARD, useClass: PermissionsGuard },
-    { provide: APP_INTERCEPTOR, useClass: RequestLoggingInterceptor },
-  ],
-})
-class TestRootModule {}
-
-const PASSWORD = 'Correct-Horse-Battery-9'
-
-interface Reply {
-  status: number
-  body: Record<string, any> | null
-}
-
 describe('organization endpoints (in-memory repositories)', () => {
-  const accounts = new InMemoryAccounts()
-  const credentials = new InMemoryCredentials()
-  const sessions = new InMemorySessions()
-  const events = new InMemorySecurityEvents()
-  const roles = new InMemoryRoles()
-  const bindings = new InMemoryBindings()
-  const organizations = new InMemoryOrganizations()
-  const tenantId = new Types.ObjectId().toHexString()
-  const otherTenantId = new Types.ObjectId().toHexString()
-  let app: NestFastifyApplication
-  let hasher: PasswordHasher
+  const workforce = createInMemoryWorkforce()
+  let gateway: HrGateway
+  let call: HrGateway['call']
   let writerToken: string
   let readerToken: string
   let otherTenantToken: string
-
-  /**
-   * Sends a request to the application.
-   *
-   * @param method - HTTP method.
-   * @param url - Path.
-   * @param token - Bearer token, when signed in.
-   * @param payload - JSON body.
-   * @returns The parsed response.
-   */
-  async function call(
-    method: 'GET' | 'POST' | 'PATCH',
-    url: string,
-    token?: string,
-    payload?: object,
-  ): Promise<Reply> {
-    const response = await app.inject({
-      method,
-      url,
-      headers: token ? { authorization: `Bearer ${token}` } : {},
-      payload,
-    })
-    return {
-      status: response.statusCode,
-      body: String(response.headers['content-type']).includes('json')
-        ? JSON.parse(response.body)
-        : null,
-    }
-  }
-
-  /**
-   * Seeds an active account with a role holding the given permissions, and signs it in.
-   *
-   * @param tenant - Tenant of the account.
-   * @param username - Login name.
-   * @param permissions - Permissions of its role.
-   * @returns The access token.
-   */
-  async function seedAndLogin(
-    tenant: string,
-    username: string,
-    permissions: readonly string[],
-  ): Promise<string> {
-    const now = new Date()
-    const role = await roles.create({
-      tenant_id: tenant,
-      code: `role-${username}`,
-      name: [{ locale: 'en', text: username }],
-      description: [],
-      permissions: [...permissions],
-      allowed_scopes: ['tenant'],
-      assignable_by: [],
-      is_system: true,
-      status: 'active',
-    })
-    const account = await accounts.create({
-      tenant_id: tenant,
-      account_type: 'workforce',
-      employee_id: new Types.ObjectId().toHexString(),
-      sponsor_account_id: null,
-      username,
-      login_identifiers: [
-        {
-          type: 'username',
-          value: username,
-          normalized: username,
-          is_primary: true,
-          verified_at: null,
-        },
-      ],
-      profile: { display_name: username },
-      profile_source: 'hr',
-      preferences: { locale: 'en', timezone: null, default_facility_id: null },
-      status: 'active',
-      status_changed_at: now,
-      is_open: true,
-      holds: [],
-      validity: { not_before: null, expires_at: null },
-      mfa_required: false,
-      authz_version: 1,
-      last_login_at: null,
-      request_id: null,
-      closed: null,
-    })
-    await credentials.create({
-      tenant_id: tenant,
-      account_id: account.id,
-      password_hash: await hasher.hash(PASSWORD),
-      password_history: [],
-      password_changed_at: now,
-      must_change: false,
-      failed_attempts: 0,
-      last_failed_at: null,
-      locked_until: null,
-    })
-    await bindings.create({
-      tenant_id: tenant,
-      account_id: account.id,
-      role_id: role.id,
-      scope: { kind: 'tenant', include_descendants: false },
-      source: 'manual',
-      source_ref: null,
-      period: { start: now, end: null },
-      granted_by: systemActor('seed'),
-      approved_by: null,
-      reason: 'seed',
-      status: 'active',
-    })
-    const pair = await app.get(AuthenticationService).login({
-      tenantId: tenant,
-      identifier: username,
-      password: PASSWORD,
-      client: { ip: '127.0.0.1', userAgent: 'vitest', app: 'test' },
-    })
-    return pair.accessToken
-  }
 
   /**
    * Creates an organization through the API as the writer.
@@ -258,72 +33,27 @@ describe('organization endpoints (in-memory repositories)', () => {
   }
 
   beforeAll(async () => {
-    process.env.AUTH_JWT_SECRET =
-      'test-secret-that-is-long-enough-for-hs256-0123456789'
-    process.env.LOG_LEVEL = 'error'
-    process.env.LOG_FORMAT = 'json'
-    const builder = Test.createTestingModule({ imports: [TestRootModule] })
-    for (const entity of [
-      AccountEntity,
-      AccountCredentialEntity,
-      AccountSessionEntity,
-      SecurityEventEntity,
-      RoleEntity,
-      AccountRoleBindingEntity,
-      OrganizationEntity,
-    ]) {
-      builder
-        .overrideProvider(getModelToken(entity.name, MONGO_MAIN_CONNECTION))
-        .useValue({})
-    }
-    const moduleRef = await builder
-      .overrideProvider(REPOSITORY_ACCOUNT)
-      .useValue(accounts)
-      .overrideProvider(REPOSITORY_ACCOUNT_CREDENTIAL)
-      .useValue(credentials)
-      .overrideProvider(REPOSITORY_ACCOUNT_SESSION)
-      .useValue(sessions)
-      .overrideProvider(REPOSITORY_SECURITY_EVENT)
-      .useValue(events)
-      .overrideProvider(REPOSITORY_ROLE)
-      .useValue(roles)
-      .overrideProvider(REPOSITORY_ACCOUNT_ROLE_BINDING)
-      .useValue(bindings)
-      .overrideProvider(REPOSITORY_ORGANIZATION)
-      .useValue(organizations)
-      .compile()
-    app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter(),
-    )
-    app.useLogger(false)
-    app.enableVersioning({ type: VersioningType.URI })
-    // Same pipe as main.ts.
-    const { ValidationPipe } = await import('@nestjs/common')
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
-    await app.init()
-    await app.getHttpAdapter().getInstance().ready()
-    hasher = app.get(PasswordHasher)
-
-    await runWithRequestContext(
-      { correlationId: 'seed', actor: systemActor('seed') },
-      async () => {
-        writerToken = await seedAndLogin(tenantId, 'writer', [
-          PERMISSIONS.WORKFORCE_ORGANIZATION_READ,
-          PERMISSIONS.WORKFORCE_ORGANIZATION_WRITE,
-        ])
-        readerToken = await seedAndLogin(tenantId, 'reader', [
-          PERMISSIONS.WORKFORCE_ORGANIZATION_READ,
-        ])
-        otherTenantToken = await seedAndLogin(otherTenantId, 'other-writer', [
-          PERMISSIONS.WORKFORCE_ORGANIZATION_READ,
-          PERMISSIONS.WORKFORCE_ORGANIZATION_WRITE,
-        ])
-      },
-    )
+    gateway = await createHrGateway({
+      modules: [OrganizationManagementModule],
+      ...workforce.options,
+    })
+    call = gateway.call
+    const { tenantId, otherTenantId, seedAndLogin } = gateway
+    writerToken = await seedAndLogin(tenantId, 'writer', [
+      PERMISSIONS.WORKFORCE_ORGANIZATION_READ,
+      PERMISSIONS.WORKFORCE_ORGANIZATION_WRITE,
+    ])
+    readerToken = await seedAndLogin(tenantId, 'reader', [
+      PERMISSIONS.WORKFORCE_ORGANIZATION_READ,
+    ])
+    otherTenantToken = await seedAndLogin(otherTenantId, 'other-writer', [
+      PERMISSIONS.WORKFORCE_ORGANIZATION_READ,
+      PERMISSIONS.WORKFORCE_ORGANIZATION_WRITE,
+    ])
   })
 
   afterAll(async () => {
-    await app.close()
+    await gateway.close()
   })
 
   it('answers the health check without a token', async () => {
