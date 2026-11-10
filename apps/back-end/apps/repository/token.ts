@@ -37,3 +37,8 @@ export const REPOSITORY_ROLE = Symbol('REPOSITORY_ROLE')
 export const REPOSITORY_ACCOUNT_ROLE_BINDING = Symbol(
   'REPOSITORY_ACCOUNT_ROLE_BINDING',
 )
+
+/**
+ * Injection token for the organization repository (HR legal employers).
+ */
+export const REPOSITORY_ORGANIZATION = Symbol('REPOSITORY_ORGANIZATION')

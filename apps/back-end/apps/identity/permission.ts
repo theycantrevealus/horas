@@ -12,6 +12,8 @@ export const PERMISSIONS = {
   ROLE_READ: 'identity.role:read',
   ROLE_MANAGE: 'identity.role:manage',
   ROLE_BINDING_MANAGE: 'identity.role-binding:manage',
+  WORKFORCE_ORGANIZATION_READ: 'workforce.organization:read',
+  WORKFORCE_ORGANIZATION_WRITE: 'workforce.organization:write',
   LOV_READ: 'reference.lov:read',
   LOV_WRITE: 'reference.lov:write',
 } as const

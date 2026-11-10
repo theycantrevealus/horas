@@ -19,6 +19,15 @@
         "tsConfigPath": "apps/gateway_back_office/tsconfig.app.json"
       }
     },
+    "gateway_hr": {
+      "type": "application",
+      "root": "apps/gateway_hr",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway_hr/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway_hr/tsconfig.app.json"
+      }
+    },
     "worker": {
       "type": "application",
       "root": "apps/worker",
