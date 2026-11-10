@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common'
 import { LoggerModule } from '@utility/logger/module'
+import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
+import { CodeConceptService } from './concept/code-concept.service'
 import { FacilityService } from './structure/facility.service'
 import { OrganizationService } from './structure/organization.service'
 
@@ -14,8 +16,9 @@ import { OrganizationService } from './structure/organization.service'
     LoggerModule,
     OrganizationRepositoryModule,
     FacilityRepositoryModule,
+    CodeConceptRepositoryModule,
   ],
-  providers: [OrganizationService, FacilityService],
-  exports: [OrganizationService, FacilityService],
+  providers: [OrganizationService, FacilityService, CodeConceptService],
+  exports: [OrganizationService, FacilityService, CodeConceptService],
 })
 export class WorkforceModule {}

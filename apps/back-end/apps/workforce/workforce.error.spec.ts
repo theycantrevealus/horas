@@ -139,6 +139,26 @@ describe('observe', () => {
     )
   })
 
+  it('adds the summary of the result to the success entry', async () => {
+    await observe(
+      logger,
+      'code_concept_import',
+      'CodeConceptService.import',
+      async () => ({ created: 3, skipped: 1 }),
+      'log',
+      ({ created, skipped }) => ({ created, skipped }),
+    )
+
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'code_concept_import',
+        outcome: 'success',
+        created: 3,
+        skipped: 1,
+      }),
+    )
+  })
+
   it('logs a business rejection as warn with its code and rethrows it', async () => {
     const rejection = new ConflictError('organization_exists', 'm')
 

@@ -19,6 +19,8 @@ export type SuccessLevel = 'log' | 'debug'
  * @param operation - Operation as `Class.method`.
  * @param work - The operation.
  * @param successLevel - Level for the success entry.
+ * @param summarize - Turns the result into extra fields of the success entry, for example counts. It
+ * must return numbers and fixed text only, never record values.
  * @returns What `work` returns.
  */
 export async function observe<T>(
@@ -27,11 +29,13 @@ export async function observe<T>(
   operation: string,
   work: () => Promise<T>,
   successLevel: SuccessLevel = 'log',
+  summarize?: (result: T) => Record<string, number | string>,
 ): Promise<T> {
   const startedAt = performance.now()
   try {
     const result = await work()
     logger[successLevel]({
+      ...(summarize ? summarize(result) : {}),
       event,
       operation,
       outcome: 'success',
