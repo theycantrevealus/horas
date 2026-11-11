@@ -1,12 +1,14 @@
 import { RepositoryConflictError } from '@utility/database/error'
-import { type NewEntity } from '@utility/database/interface'
+import { type NewEntity, type UpdateOptions } from '@utility/database/interface'
 import { InMemoryRepository } from '@utility/testing/in-memory-repository'
 import { type CodeConceptRepository } from '@repository/interface/code-concept'
 import { type FacilityRepository } from '@repository/interface/facility'
+import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
 import { type Facility } from '@repository/model/facility'
 import { type Organization } from '@repository/model/organization'
+import { type OrganizationUnit } from '@repository/model/organization-unit'
 
 /**
  * In-memory organization repository for tests. Follows the Mongo unique index on tenant and code.
@@ -231,5 +233,226 @@ export class InMemoryCodeConcepts
       (item) => !item.deleted_at && match(item),
     )
     return found ? structuredClone(found) : null
+  }
+}
+
+/**
+ * In-memory organization unit repository for tests. Follows the Mongo unique index on tenant,
+ * facility and code, and the rules of `moveSubtree`.
+ */
+export class InMemoryOrganizationUnits
+  extends InMemoryRepository<OrganizationUnit>
+  implements OrganizationUnitRepository
+{
+  /**
+   * Creates a unit, refusing a second one with the same tenant, facility and code.
+   *
+   * @param entity - Unit data.
+   * @param id - Optional identifier.
+   * @returns The stored unit.
+   */
+  override async create(
+    entity: NewEntity<OrganizationUnit>,
+    id?: string,
+  ): Promise<OrganizationUnit> {
+    const duplicate = [...this.items.values()].some(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.facility_id === entity.facility_id &&
+        item.code === entity.code,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate code', {
+        operation: 'OrganizationUnitRepository.create',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds a unit by tenant, facility and code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - Facility of the unit.
+   * @param code - Unit code.
+   * @returns The unit, or `null`.
+   */
+  async findByCode(
+    tenantId: string,
+    facilityId: string,
+    code: string,
+  ): Promise<OrganizationUnit | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.facility_id === facilityId &&
+        item.code === code &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the direct children of a unit, ordered by code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param parentId - Parent unit.
+   * @returns The children.
+   */
+  async findChildren(
+    tenantId: string,
+    parentId: string,
+  ): Promise<OrganizationUnit[]> {
+    return this.sorted(
+      (item) => item.tenant_id === tenantId && item.parent_id === parentId,
+    )
+  }
+
+  /**
+   * Finds every unit below a unit, ordered by code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - Unit whose subtree is read.
+   * @returns The descendants.
+   */
+  async findDescendants(
+    tenantId: string,
+    unitId: string,
+  ): Promise<OrganizationUnit[]> {
+    return this.sorted(
+      (item) =>
+        item.tenant_id === tenantId && item.ancestor_ids.includes(unitId),
+    )
+  }
+
+  /**
+   * Finds the units of a facility, ordered by code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - Facility of the units.
+   * @param limit - Most units to return.
+   * @returns The units.
+   */
+  async findByFacility(
+    tenantId: string,
+    facilityId: string,
+    limit?: number,
+  ): Promise<OrganizationUnit[]> {
+    return this.sorted(
+      (item) => item.tenant_id === tenantId && item.facility_id === facilityId,
+      limit,
+    )
+  }
+
+  /**
+   * Finds the active units of a facility, ordered by code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - Facility of the units.
+   * @param limit - Most units to return.
+   * @returns The active units.
+   */
+  async findActiveByFacility(
+    tenantId: string,
+    facilityId: string,
+    limit?: number,
+  ): Promise<OrganizationUnit[]> {
+    return this.sorted(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.facility_id === facilityId &&
+        item.status === 'active',
+      limit,
+    )
+  }
+
+  /**
+   * Moves a unit with its subtree, with the same rules as the Mongo implementation. Every unit
+   * is checked before any is written, so a rejected move changes nothing.
+   *
+   * @param id - Unit to move.
+   * @param newParentId - New parent, or `null`.
+   * @param options - Optional concurrency check.
+   * @returns The moved unit.
+   */
+  async moveSubtree(
+    id: string,
+    newParentId: string | null,
+    options?: UpdateOptions,
+  ): Promise<OrganizationUnit> {
+    const operation = 'OrganizationUnitRepository.moveSubtree'
+    const unit = this.items.get(id)
+    if (!unit || unit.deleted_at) {
+      throw new Error(`not found: ${id}`)
+    }
+    const changed = () =>
+      new RepositoryConflictError('the organization chart changed', {
+        operation,
+      })
+    if (
+      options?.expectedVersion !== undefined &&
+      options.expectedVersion !== unit.version
+    ) {
+      throw changed()
+    }
+    let ancestors: string[] = []
+    if (newParentId !== null) {
+      const parent = this.items.get(newParentId)
+      if (
+        !parent ||
+        parent.deleted_at ||
+        parent.tenant_id !== unit.tenant_id ||
+        parent.facility_id !== unit.facility_id ||
+        parent.status !== 'active' ||
+        parent.id === unit.id ||
+        parent.ancestor_ids.includes(unit.id)
+      ) {
+        throw changed()
+      }
+      ancestors = [...parent.ancestor_ids, parent.id]
+    }
+    const now = new Date()
+    const descendants = [...this.items.values()].filter(
+      (item) =>
+        item.tenant_id === unit.tenant_id &&
+        !item.deleted_at &&
+        item.ancestor_ids.includes(unit.id),
+    )
+    for (const descendant of descendants) {
+      const position = descendant.ancestor_ids.indexOf(unit.id)
+      this.items.set(descendant.id, {
+        ...descendant,
+        ancestor_ids: [
+          ...ancestors,
+          ...descendant.ancestor_ids.slice(position),
+        ],
+        version: descendant.version + 1,
+        updated_at: now,
+      })
+    }
+    const moved = {
+      ...unit,
+      parent_id: newParentId,
+      ancestor_ids: ancestors,
+      version: unit.version + 1,
+      updated_at: now,
+    }
+    this.items.set(id, moved)
+    return structuredClone(moved)
+  }
+
+  /**
+   * Lists the matching, not soft-deleted units ordered by code.
+   *
+   * @param match - Test for a unit.
+   * @param limit - Most units to return.
+   * @returns Copies of the units.
+   */
+  private sorted(
+    match: (item: OrganizationUnit) => boolean,
+    limit?: number,
+  ): OrganizationUnit[] {
+    return this.filter((item) => !item.deleted_at && match(item))
+      .sort((left, right) => left.code.localeCompare(right.code))
+      .slice(0, limit)
   }
 }

@@ -16,6 +16,8 @@ export const PERMISSIONS = {
   WORKFORCE_ORGANIZATION_WRITE: 'workforce.organization:write',
   WORKFORCE_FACILITY_READ: 'workforce.facility:read',
   WORKFORCE_FACILITY_WRITE: 'workforce.facility:write',
+  WORKFORCE_UNIT_READ: 'workforce.unit:read',
+  WORKFORCE_UNIT_WRITE: 'workforce.unit:write',
   WORKFORCE_CODE_CONCEPT_READ: 'workforce.code-concept:read',
   WORKFORCE_CODE_CONCEPT_MANAGE: 'workforce.code-concept:manage',
   LOV_READ: 'reference.lov:read',

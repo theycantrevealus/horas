@@ -9,11 +9,16 @@ import { AppLogger } from '@utility/logger/service'
 import { canonicalTimeZone } from '@utility/validation/is-time-zone'
 import { type FacilityRepository } from '@repository/interface/facility'
 import { type OrganizationRepository } from '@repository/interface/organization'
+import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type Address } from '@repository/model/common/address'
 import { type ExternalId } from '@repository/model/common/external-id'
 import { type LocalizedText } from '@repository/model/common/localized-text'
 import { type Facility } from '@repository/model/facility'
-import { REPOSITORY_FACILITY, REPOSITORY_ORGANIZATION } from '@repository/token'
+import {
+  REPOSITORY_FACILITY,
+  REPOSITORY_ORGANIZATION,
+  REPOSITORY_ORGANIZATION_UNIT,
+} from '@repository/token'
 import { observe } from '../observe'
 import {
   ConflictError,
@@ -98,6 +103,7 @@ export class FacilityService {
   /**
    * @param facilities - Facility repository.
    * @param organizations - Organization repository, to check the employer of a new facility.
+   * @param units - Organization unit repository, to refuse deactivating a facility that has active units.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -105,6 +111,8 @@ export class FacilityService {
     private readonly facilities: FacilityRepository,
     @Inject(REPOSITORY_ORGANIZATION)
     private readonly organizations: OrganizationRepository,
+    @Inject(REPOSITORY_ORGANIZATION_UNIT)
+    private readonly units: OrganizationUnitRepository,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -210,7 +218,8 @@ export class FacilityService {
    * @throws InvalidRequestError `empty_update`, `invalid_name`, `invalid_address`,
    * `invalid_holiday_calendars` or `invalid_external_ids`.
    * @throws NotFoundError `facility_not_found`.
-   * @throws ConflictError `stale_version` when `version` is given and the record changed since.
+   * @throws ConflictError `stale_version` when `version` is given and the record changed since;
+   * `facility_in_use` when it is set inactive while it has active units (HR plan U11).
    */
   update(
     tenantId: string,
@@ -256,6 +265,17 @@ export class FacilityService {
           )
         }
         const facility = await this.load(tenantId, id)
+        if (
+          input.status === 'inactive' &&
+          facility.status !== 'inactive' &&
+          (await this.units.findActiveByFacility(tenantId, facility.id, 1))
+            .length > 0
+        ) {
+          throw new ConflictError(
+            'facility_in_use',
+            'The facility still has active units. Close them first.',
+          )
+        }
         const write = () =>
           this.facilities.update(facility.id, changes, {
             expectedVersion: input.version,

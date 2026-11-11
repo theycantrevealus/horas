@@ -4,7 +4,11 @@ import {
   runWithRequestContext,
 } from '@utility/logger/context'
 import { type AppLogger } from '@utility/logger/service'
-import { InMemoryFacilities, InMemoryOrganizations } from '../testing/in-memory'
+import {
+  InMemoryFacilities,
+  InMemoryOrganizations,
+  InMemoryOrganizationUnits,
+} from '../testing/in-memory'
 import { NotFoundError } from '../workforce.error'
 import { FacilityService } from './facility.service'
 
@@ -17,6 +21,7 @@ describe('FacilityService', () => {
   const debug = vi.fn()
   let facilities: InMemoryFacilities
   let organizations: InMemoryOrganizations
+  let units: InMemoryOrganizationUnits
   let service: FacilityService
   let organizationId: string
 
@@ -73,7 +78,8 @@ describe('FacilityService', () => {
     vi.resetAllMocks()
     facilities = new InMemoryFacilities()
     organizations = new InMemoryOrganizations()
-    service = new FacilityService(facilities, organizations, {
+    units = new InMemoryOrganizationUnits()
+    service = new FacilityService(facilities, organizations, units, {
       log,
       warn,
       error,
@@ -477,6 +483,68 @@ describe('FacilityService', () => {
     )
 
     expect(seen).toEqual(['Site closed', undefined])
+  })
+
+  it('refuses to set a facility inactive while it has an active unit, and allows it after the unit is closed (HR plan U11)', async () => {
+    const created = await asAdmin(() => service.create(tenantId, input()))
+    const unit = await asAdmin(() =>
+      units.create({
+        tenant_id: tenantId,
+        organization_id: organizationId,
+        facility_id: created.id,
+        code: 'ward-a',
+        name: [{ locale: 'en', text: 'Ward A' }],
+        type: { system: 'id.unit-type', code: 'ward' },
+        parent_id: null,
+        ancestor_ids: [],
+        is_clinical: true,
+        external_ids: [],
+        period: { start: '2026-01-01', end: null },
+        status: 'active',
+      }),
+    )
+
+    await expect(
+      asAdmin(() =>
+        service.update(tenantId, created.id, { status: 'inactive' }),
+      ),
+    ).rejects.toMatchObject({ code: 'facility_in_use' })
+    expect((await facilities.findOne(created.id))?.status).toBe('active')
+
+    await asAdmin(() => units.update(unit.id, { status: 'closed' }))
+    const inactive = await asAdmin(() =>
+      service.update(tenantId, created.id, { status: 'inactive' }),
+    )
+    expect(inactive.status).toBe('inactive')
+  })
+
+  it('ignores the active units of another facility when deactivating', async () => {
+    const first = await asAdmin(() => service.create(tenantId, input()))
+    const second = await asAdmin(() =>
+      service.create(tenantId, { ...input(), code: 'rs-lain' }),
+    )
+    await asAdmin(() =>
+      units.create({
+        tenant_id: tenantId,
+        organization_id: organizationId,
+        facility_id: second.id,
+        code: 'ward-a',
+        name: [{ locale: 'en', text: 'Ward A' }],
+        type: { system: 'id.unit-type', code: 'ward' },
+        parent_id: null,
+        ancestor_ids: [],
+        is_clinical: true,
+        external_ids: [],
+        period: null,
+        status: 'active',
+      }),
+    )
+
+    const inactive = await asAdmin(() =>
+      service.update(tenantId, first.id, { status: 'inactive' }),
+    )
+
+    expect(inactive.status).toBe('inactive')
   })
 
   it('logs a business rejection as warn with its code and no values', async () => {
