@@ -3,12 +3,14 @@ import { type NewEntity, type UpdateOptions } from '@utility/database/interface'
 import { InMemoryRepository } from '@utility/testing/in-memory-repository'
 import { type CodeConceptRepository } from '@repository/interface/code-concept'
 import { type FacilityRepository } from '@repository/interface/facility'
+import { type PositionRepository } from '@repository/interface/position'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
 import { type Facility } from '@repository/model/facility'
 import { type Organization } from '@repository/model/organization'
 import { type OrganizationUnit } from '@repository/model/organization-unit'
+import { type Position } from '@repository/model/position'
 
 /**
  * In-memory organization repository for tests. Follows the Mongo unique index on tenant and code.
@@ -454,5 +456,118 @@ export class InMemoryOrganizationUnits
     return this.filter((item) => !item.deleted_at && match(item))
       .sort((left, right) => left.code.localeCompare(right.code))
       .slice(0, limit)
+  }
+}
+
+/**
+ * In-memory position repository for tests. Follows the Mongo unique index on tenant, unit and
+ * code, and the partial unique index of one active head position per unit.
+ */
+export class InMemoryPositions
+  extends InMemoryRepository<Position>
+  implements PositionRepository
+{
+  /**
+   * Creates a position, refusing a second one with the same tenant, unit and code, or a second
+   * active head position in a unit.
+   *
+   * @param entity - Position data.
+   * @param id - Optional identifier.
+   * @returns The stored position.
+   */
+  override async create(
+    entity: NewEntity<Position>,
+    id?: string,
+  ): Promise<Position> {
+    const items = [...this.items.values()]
+    const duplicate = items.some(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.unit_id === entity.unit_id &&
+        item.code === entity.code,
+    )
+    const secondHead =
+      entity.is_head_of_unit &&
+      entity.status === 'active' &&
+      items.some(
+        (item) =>
+          item.tenant_id === entity.tenant_id &&
+          item.unit_id === entity.unit_id &&
+          item.is_head_of_unit &&
+          item.status === 'active',
+      )
+    if (duplicate || secondHead) {
+      throw new RepositoryConflictError('duplicate position', {
+        operation: 'PositionRepository.create',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds a position by tenant, unit and code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - Unit of the position.
+   * @param code - Position code.
+   * @returns The position, or `null`.
+   */
+  async findByCode(
+    tenantId: string,
+    unitId: string,
+    code: string,
+  ): Promise<Position | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        item.code === code &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the active positions of a unit, ordered by code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - Unit of the positions.
+   * @param limit - Most positions to return.
+   * @returns The active positions.
+   */
+  async findActiveByUnit(
+    tenantId: string,
+    unitId: string,
+    limit?: number,
+  ): Promise<Position[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    )
+      .sort((left, right) => left.code.localeCompare(right.code))
+      .slice(0, limit)
+  }
+
+  /**
+   * Finds the active head position of a unit.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - Unit of the position.
+   * @returns The head position, or `null`.
+   */
+  async findActiveHead(
+    tenantId: string,
+    unitId: string,
+  ): Promise<Position | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        item.is_head_of_unit &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    )
   }
 }

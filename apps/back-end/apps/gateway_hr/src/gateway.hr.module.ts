@@ -22,6 +22,7 @@ import { FacilityManagementModule } from './facility/facility-management.module'
 import { UnitManagementModule } from './unit/unit-management.module'
 import { GatewayHrController } from './gateway.hr.controller'
 import { OrganizationManagementModule } from './organization/organization-management.module'
+import { PositionManagementModule } from './position/position-management.module'
 
 /**
  * Root module of the HR gateway. Sign-in is shared with the back-office gateway: the same
@@ -54,6 +55,7 @@ import { OrganizationManagementModule } from './organization/organization-manage
     OrganizationManagementModule,
     FacilityManagementModule,
     UnitManagementModule,
+    PositionManagementModule,
     CodeConceptManagementModule,
   ],
   controllers: [GatewayHrController],

@@ -3,16 +3,19 @@ import {
   REPOSITORY_FACILITY,
   REPOSITORY_ORGANIZATION,
   REPOSITORY_ORGANIZATION_UNIT,
+  REPOSITORY_POSITION,
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { FacilityEntity } from '@repository/mongo/schema/facility'
 import { OrganizationEntity } from '@repository/mongo/schema/organization'
 import { OrganizationUnitEntity } from '@repository/mongo/schema/organization-unit'
+import { PositionEntity } from '@repository/mongo/schema/position'
 import {
   InMemoryCodeConcepts,
   InMemoryFacilities,
   InMemoryOrganizations,
   InMemoryOrganizationUnits,
+  InMemoryPositions,
 } from '@workforce/testing/in-memory'
 import { type HrGatewayOptions } from './hr-gateway'
 
@@ -25,6 +28,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property facilities - Facility repository.
  * @property codeConcepts - Code concept repository.
  * @property units - Organization unit repository.
+ * @property positions - Position repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -32,6 +36,7 @@ export interface InMemoryWorkforce {
   facilities: InMemoryFacilities
   codeConcepts: InMemoryCodeConcepts
   units: InMemoryOrganizationUnits
+  positions: InMemoryPositions
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -45,23 +50,27 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const facilities = new InMemoryFacilities()
   const codeConcepts = new InMemoryCodeConcepts()
   const units = new InMemoryOrganizationUnits()
+  const positions = new InMemoryPositions()
   return {
     organizations,
     facilities,
     codeConcepts,
     units,
+    positions,
     options: {
       entities: [
         OrganizationEntity,
         FacilityEntity,
         CodeConceptEntity,
         OrganizationUnitEntity,
+        PositionEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
         [REPOSITORY_FACILITY, facilities],
         [REPOSITORY_CODE_CONCEPT, codeConcepts],
         [REPOSITORY_ORGANIZATION_UNIT, units],
+        [REPOSITORY_POSITION, positions],
       ],
     },
   }

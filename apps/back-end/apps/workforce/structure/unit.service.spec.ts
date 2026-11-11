@@ -6,6 +6,7 @@ import {
   InMemoryCodeConcepts,
   InMemoryFacilities,
   InMemoryOrganizationUnits,
+  InMemoryPositions,
 } from '../testing/in-memory'
 import { MAX_TREE_UNITS, UnitService } from './unit.service'
 
@@ -18,6 +19,7 @@ describe('UnitService', () => {
   const error = vi.fn()
   const debug = vi.fn()
   let units: InMemoryOrganizationUnits
+  let positions: InMemoryPositions
   let facilities: InMemoryFacilities
   let concepts: InMemoryCodeConcepts
   let service: UnitService
@@ -116,12 +118,14 @@ describe('UnitService', () => {
   beforeEach(async () => {
     vi.resetAllMocks()
     units = new InMemoryOrganizationUnits()
+    positions = new InMemoryPositions()
     facilities = new InMemoryFacilities()
     concepts = new InMemoryCodeConcepts()
     const logger = { log, warn, error, debug } as unknown as AppLogger
     service = new UnitService(
       units,
       facilities,
+      positions,
       new CodeConceptService(concepts, logger),
       logger,
     )
@@ -684,6 +688,36 @@ describe('UnitService', () => {
 
       await asAdmin(() => service.close(tenantId, dept.id, {}))
       const closed = await asAdmin(() => service.close(tenantId, dir.id, {}))
+      expect(closed.status).toBe('closed')
+    })
+
+    it('refuses while an active position exists (409 unit_in_use) and allows it when the positions are closed (HR plan P10)', async () => {
+      const created = await addUnit('dept')
+      const position = await asAdmin(() =>
+        positions.create({
+          tenant_id: tenantId,
+          unit_id: created.id,
+          code: 'perawat',
+          title: [{ locale: 'en', text: 'Nurse' }],
+          kind: 'functional',
+          is_head_of_unit: false,
+          allowed_professions: [],
+          grade: null,
+          budgeted_headcount: 1,
+          job_description: null,
+          period: null,
+          status: 'active',
+        }),
+      )
+
+      await expect(
+        asAdmin(() => service.close(tenantId, created.id, {})),
+      ).rejects.toMatchObject({ kind: 'conflict', code: 'unit_in_use' })
+
+      await asAdmin(() => positions.update(position.id, { status: 'closed' }))
+      const closed = await asAdmin(() =>
+        service.close(tenantId, created.id, {}),
+      )
       expect(closed.status).toBe('closed')
     })
 
