@@ -1,6 +1,6 @@
 # gateway_hr 1.3: Code concepts
 
-Status: **Decisions C1 to C11 confirmed as proposed** (2026-11-10). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 3). Endpoints: `../hr-endpoints.md` 1.3. Collection: `../account-and-workforce-collections.md` 3.4 and 2.4, `../human-resource-collections.md` 3.1. Model: `apps/back-end/apps/repository/model/code-concept.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 and 1.2.
+Status: **Built** (2026-11-11, PR #14 merged). Decisions C1 to C11 confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 3). Endpoints: `../hr-endpoints.md` 1.3. Collection: `../account-and-workforce-collections.md` 3.4 and 2.4, `../human-resource-collections.md` 3.1. Model: `apps/back-end/apps/repository/model/code-concept.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 and 1.2.
 
 A code concept is one code of a code system that business rules depend on: a workforce category, an employment type, a licence type, a unit type. Records store a `Coding` (`{ system, code }`) instead of a fixed list in the code, so another country configures its own codes. The system name carries the jurisdiction (`id.license-type`, `us.license-type`). This group has no later group to wait for: units (1.4), employees (2.1), contracts, licences and committees all validate their codes against it.
 
