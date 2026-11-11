@@ -11,9 +11,9 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/workforce.filter.ts` | `WorkforceExceptionFilter`: 404, 409, 422, 403. A 404 on `GET` or `HEAD` is answered but not logged. |
 | `apps/workforce/observe.ts` | `observe(logger, event, operation, work)`: one structured log entry per write. |
 | `apps/workforce/<area>/` | Services and their specs, one folder per HR area (`structure/`, later `employee/`, `license/`, ...). |
-| `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. |
+| `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. `structure/unit-tree.ts` builds the organization chart from a flat list. |
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
-| `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
+| `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
 | `apps/workforce/testing/in-memory.ts` | In-memory repositories for service and gateway tests. |
 | `apps/gateway_hr/src/<area>/` | `<area>-management.module.ts`, controllers, DTOs and the gateway test. No business rules. |
 | `apps/gateway_hr/src/testing/` | `hr-gateway.ts` (`createHrGateway`: boots the gateway in memory, signs accounts in, sends requests) and `in-memory-workforce.ts` (`createInMemoryWorkforce`: in-memory repositories of every collection `WorkforceModule` uses). |
@@ -53,6 +53,8 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.organization:write` | `POST /v1/organizations`, `PATCH /v1/organizations/:id` |
 | `workforce.facility:read` | `GET /v1/facilities`, `GET /v1/facilities/:id` |
 | `workforce.facility:write` | `POST /v1/facilities`, `PATCH /v1/facilities/:id` |
+| `workforce.unit:read` | `GET /v1/units`, `GET /v1/units/tree`, `GET /v1/units/:id` |
+| `workforce.unit:write` | `POST /v1/units`, `PATCH /v1/units/:id`, `POST /v1/units/:id/move`, `POST /v1/units/:id/close` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
 | `workforce.code-concept:manage` | `POST /v1/code-concepts`, `PATCH /v1/code-concepts/:id`, `POST /v1/code-concepts/import` |
 

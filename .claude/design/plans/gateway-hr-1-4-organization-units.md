@@ -1,6 +1,6 @@
 # gateway_hr 1.4: Organization units
 
-Status: **In discussion** (2026-11-11). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 4). Endpoints: `../hr-endpoints.md` 1.4. Collection: `../account-and-workforce-collections.md` 4.4 and HR specification 5.3 and 9.2. Model: `apps/back-end/apps/repository/model/organization-unit.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 to 1.3.
+Status: **Built** (2026-11-11, PR #17 merged). Decisions U1 to U13 confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 4). Endpoints: `../hr-endpoints.md` 1.4. Collection: `../account-and-workforce-collections.md` 4.4 and HR specification 5.3 and 9.2. Model: `apps/back-end/apps/repository/model/organization-unit.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 to 1.3.
 
 An organization unit is a node of the hospital's organization chart: a directorate, department, installation, ward or polyclinic. A unit belongs to one facility and has at most one parent. Positions (1.5), assignments (2.4), rosters and practice schedules all hang on units, and the unit's `ancestor_ids` lets "everything under directorate X" be one indexed query.
 
@@ -49,7 +49,7 @@ apps/back-end/apps/
 │   │                                    findDescendants(tenantId, unitId)       (ancestor_ids contains it)
 │   │                                    findByFacility(tenantId, facilityId)    (all statuses, ordered by code)
 │   │                                    findActiveByFacility(tenantId, facilityId)
-│   │                                    moveSubtree(unit, newParentId, newAncestorIds)   (a write)
+│   │                                    moveSubtree(id, newParentId, options)           (a write; reads the new parent and works out the ancestors inside the transaction)
 │   └── mongo/
 │       ├── schema/organization-unit.ts  collection `organization_units`; unique {tenant_id, facility_id, code};
 │       │                                index {tenant_id, ancestor_ids}; index {tenant_id, facility_id, parent_id, status}
@@ -78,7 +78,7 @@ apps/back-end/apps/
 Tests come first in each task.
 
 1. **Local date in a zone.** `todayInZone(timeZone, now)`. *Tests:* a fixed instant gives different dates in `Pacific/Kiritimati` (+14) and `Pacific/Pago_Pago` (-11); `Asia/Jakarta` crosses midnight at 17:00 UTC.
-2. **Repository.** Token, interface, schema, Mongo implementation, module. *Tests (fake model):* create records one change entry; duplicate code is a conflict; `findDescendants` filters on `ancestor_ids`; `moveSubtree` updates the unit and each descendant one by one, recording one change entry for each, inside one transaction; a rejected expected version aborts without partial writes; update ignores code, facility and parent.
+2. **Repository.** (Built as `moveSubtree(id, newParentId, options)`: the ancestors are computed inside the transaction, so a stale check cannot write a loop.) Token, interface, schema, Mongo implementation, module. *Tests (fake model):* create records one change entry; duplicate code is a conflict; `findDescendants` filters on `ancestor_ids`; `moveSubtree` updates the unit and each descendant one by one, recording one change entry for each, inside one transaction; a rejected expected version aborts without partial writes; update ignores code, facility and parent.
 3. **Unit service and the facility rule.** *Tests (in-memory):* every rule U1 to U13, plus tenant isolation, stale version, reads write no log, writes log no values; the facility cannot be deactivated while it has an active unit and can afterwards; the tree is nested and ordered, honours `rootId` and `includeClosed`, and refuses more than 2,000 units; moving a subtree rewrites every descendant's `ancestor_ids`; the 10-level limit is checked on create and on move; a move into the unit's own subtree is refused; close refuses active children.
 4. **Endpoints.** Controller, DTOs, module, permissions, wiring. *Gateway tests:* 401 and 403; create, read, list, edit, move, close; 404 for malformed, missing and foreign ids; 422 for a foreign facility and parent without leaking; 409 duplicate code, stale version, close with active children, deactivating a facility with an active unit; type validation against code concepts (unknown, retired and wrong-system types); `isClinical` default from the concept; list requires `facilityId`; list limits; tree shape; reads write only the access log; writes log no values.
 5. **Checks.** `tsc` for all apps and specs, `oxlint`, full `vitest`, `nest build gateway_hr`.
