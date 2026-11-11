@@ -47,3 +47,8 @@ export const REPOSITORY_ORGANIZATION = Symbol('REPOSITORY_ORGANIZATION')
  * Injection token for the facility repository (HR hospital and clinic sites).
  */
 export const REPOSITORY_FACILITY = Symbol('REPOSITORY_FACILITY')
+
+/**
+ * Injection token for the code concept repository (HR code systems).
+ */
+export const REPOSITORY_CODE_CONCEPT = Symbol('REPOSITORY_CODE_CONCEPT')

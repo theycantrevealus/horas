@@ -1,7 +1,13 @@
-import { REPOSITORY_FACILITY, REPOSITORY_ORGANIZATION } from '@repository/token'
+import {
+  REPOSITORY_CODE_CONCEPT,
+  REPOSITORY_FACILITY,
+  REPOSITORY_ORGANIZATION,
+} from '@repository/token'
+import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { FacilityEntity } from '@repository/mongo/schema/facility'
 import { OrganizationEntity } from '@repository/mongo/schema/organization'
 import {
+  InMemoryCodeConcepts,
   InMemoryFacilities,
   InMemoryOrganizations,
 } from '@workforce/testing/in-memory'
@@ -14,11 +20,13 @@ import { type HrGatewayOptions } from './hr-gateway'
  *
  * @property organizations - Organization repository.
  * @property facilities - Facility repository.
+ * @property codeConcepts - Code concept repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
   organizations: InMemoryOrganizations
   facilities: InMemoryFacilities
+  codeConcepts: InMemoryCodeConcepts
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -30,14 +38,17 @@ export interface InMemoryWorkforce {
 export function createInMemoryWorkforce(): InMemoryWorkforce {
   const organizations = new InMemoryOrganizations()
   const facilities = new InMemoryFacilities()
+  const codeConcepts = new InMemoryCodeConcepts()
   return {
     organizations,
     facilities,
+    codeConcepts,
     options: {
-      entities: [OrganizationEntity, FacilityEntity],
+      entities: [OrganizationEntity, FacilityEntity, CodeConceptEntity],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
         [REPOSITORY_FACILITY, facilities],
+        [REPOSITORY_CODE_CONCEPT, codeConcepts],
       ],
     },
   }
