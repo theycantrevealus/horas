@@ -2,6 +2,7 @@ import {
   compareLocalDates,
   isLocalDate,
   isValidPeriod,
+  todayInZone,
   todayUtc,
 } from './local-date'
 
@@ -66,5 +67,28 @@ describe('todayUtc', () => {
   it('returns the UTC calendar date', () => {
     expect(todayUtc(new Date('2026-11-10T23:30:00Z'))).toBe('2026-11-10')
     expect(todayUtc(new Date('2026-11-11T00:30:00Z'))).toBe('2026-11-11')
+  })
+})
+
+describe('todayInZone', () => {
+  const instant = new Date('2026-03-10T12:00:00Z')
+
+  it('reads the same instant as different dates in different zones', () => {
+    expect(todayInZone('Pacific/Kiritimati', instant)).toBe('2026-03-11')
+    expect(todayInZone('Pacific/Pago_Pago', instant)).toBe('2026-03-10')
+    expect(todayInZone('UTC', instant)).toBe('2026-03-10')
+  })
+
+  it('crosses midnight in Jakarta at 17:00 UTC', () => {
+    expect(todayInZone('Asia/Jakarta', new Date('2026-03-10T16:59:59Z'))).toBe(
+      '2026-03-10',
+    )
+    expect(todayInZone('Asia/Jakarta', new Date('2026-03-10T17:00:00Z'))).toBe(
+      '2026-03-11',
+    )
+  })
+
+  it('rejects a name that is not a time zone', () => {
+    expect(() => todayInZone('Mars/Base', instant)).toThrow(RangeError)
   })
 })

@@ -49,6 +49,13 @@ export const REPOSITORY_ORGANIZATION = Symbol('REPOSITORY_ORGANIZATION')
 export const REPOSITORY_FACILITY = Symbol('REPOSITORY_FACILITY')
 
 /**
+ * Injection token for the organization unit repository (HR organization chart).
+ */
+export const REPOSITORY_ORGANIZATION_UNIT = Symbol(
+  'REPOSITORY_ORGANIZATION_UNIT',
+)
+
+/**
  * Injection token for the code concept repository (HR code systems).
  */
 export const REPOSITORY_CODE_CONCEPT = Symbol('REPOSITORY_CODE_CONCEPT')
