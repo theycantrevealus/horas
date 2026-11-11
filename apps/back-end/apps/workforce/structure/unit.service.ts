@@ -13,6 +13,7 @@ import {
 } from '@utility/validation/local-date'
 import { type FacilityRepository } from '@repository/interface/facility'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
+import { type PositionRepository } from '@repository/interface/position'
 import { type Coding } from '@repository/model/common/coding'
 import { type ExternalId } from '@repository/model/common/external-id'
 import { type LocalizedText } from '@repository/model/common/localized-text'
@@ -21,6 +22,7 @@ import { type OrganizationUnit } from '@repository/model/organization-unit'
 import {
   REPOSITORY_FACILITY,
   REPOSITORY_ORGANIZATION_UNIT,
+  REPOSITORY_POSITION,
 } from '@repository/token'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { observe } from '../observe'
@@ -158,6 +160,7 @@ export class UnitService {
   /**
    * @param units - Organization unit repository.
    * @param facilities - Facility repository, for the facility of a unit and its time zone.
+   * @param positions - Position repository, to refuse closing a unit that has active positions.
    * @param concepts - Code concepts, to check unit types.
    * @param logger - Logger of this service.
    */
@@ -166,6 +169,8 @@ export class UnitService {
     private readonly units: OrganizationUnitRepository,
     @Inject(REPOSITORY_FACILITY)
     private readonly facilities: FacilityRepository,
+    @Inject(REPOSITORY_POSITION)
+    private readonly positions: PositionRepository,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
@@ -430,7 +435,7 @@ export class UnitService {
    * @returns The closed unit.
    * @throws InvalidRequestError `unit_closed` or `invalid_end_date`.
    * @throws NotFoundError `unit_not_found`.
-   * @throws ConflictError `unit_in_use` when it has active child units; `stale_version`.
+   * @throws ConflictError `unit_in_use` when it has active child units or active positions; `stale_version`.
    */
   close(
     tenantId: string,
@@ -458,6 +463,14 @@ export class UnitService {
         throw new ConflictError(
           'unit_in_use',
           'The unit still has active units below it. Close or move them first.',
+        )
+      }
+      if (
+        (await this.positions.findActiveByUnit(tenantId, unit.id, 1)).length > 0
+      ) {
+        throw new ConflictError(
+          'unit_in_use',
+          'The unit still has active positions. Close them first.',
         )
       }
       return this.write(unit.id, input.reason, () =>

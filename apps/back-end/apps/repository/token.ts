@@ -59,3 +59,8 @@ export const REPOSITORY_ORGANIZATION_UNIT = Symbol(
  * Injection token for the code concept repository (HR code systems).
  */
 export const REPOSITORY_CODE_CONCEPT = Symbol('REPOSITORY_CODE_CONCEPT')
+
+/**
+ * Injection token for the position repository (HR jobs in organization units).
+ */
+export const REPOSITORY_POSITION = Symbol('REPOSITORY_POSITION')
