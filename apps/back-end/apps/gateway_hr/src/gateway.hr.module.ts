@@ -4,7 +4,8 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ApplicationConfig } from '@configuration/application'
 import { AuthConfig } from '@configuration/auth'
 import { ChangeLogConfig } from '@configuration/change-log'
-import { ConfigSchema } from '@configuration/index'
+import { EncryptedConfigSchema } from '@configuration/index'
+import { EncryptionConfig } from '@configuration/encryption'
 import { LoggerConfig } from '@configuration/logger'
 import { MongoConfig } from '@configuration/mongo'
 import { MongoMainConnectionModule } from '@utility/database/mongo'
@@ -24,6 +25,7 @@ import { UnitManagementModule } from './unit/unit-management.module'
 import { GatewayHrController } from './gateway.hr.controller'
 import { OrganizationManagementModule } from './organization/organization-management.module'
 import { ParameterManagementModule } from './parameter/parameter-management.module'
+import { PrivateProfileManagementModule } from './private-profile/private-profile-management.module'
 import { PositionManagementModule } from './position/position-management.module'
 
 /**
@@ -41,6 +43,7 @@ import { PositionManagementModule } from './position/position-management.module'
         `${environmentIdentifier}/logger.env`,
         `${environmentIdentifier}/change-log.env`,
         `${environmentIdentifier}/auth.env`,
+        `${environmentIdentifier}/encryption.env`,
       ],
       load: [
         ApplicationConfig,
@@ -48,8 +51,9 @@ import { PositionManagementModule } from './position/position-management.module'
         LoggerConfig,
         ChangeLogConfig,
         AuthConfig,
+        EncryptionConfig,
       ],
-      validationSchema: ConfigSchema,
+      validationSchema: EncryptedConfigSchema,
     }),
     LoggerModule,
     MongoMainConnectionModule,
@@ -60,6 +64,7 @@ import { PositionManagementModule } from './position/position-management.module'
     PositionManagementModule,
     ParameterManagementModule,
     EmployeeManagementModule,
+    PrivateProfileManagementModule,
     CodeConceptManagementModule,
   ],
   controllers: [GatewayHrController],

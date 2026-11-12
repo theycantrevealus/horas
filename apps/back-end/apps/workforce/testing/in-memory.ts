@@ -1,4 +1,8 @@
-import { RepositoryConflictError } from '@utility/database/error'
+import {
+  RepositoryConflictError,
+  RepositoryError,
+} from '@utility/database/error'
+import { type FieldCipher, mask } from '@utility/encryption/field-cipher'
 import {
   type NewEntity,
   type Page,
@@ -15,11 +19,19 @@ import {
   type HrParameterPageOptions,
   type HrParameterRepository,
 } from '@repository/interface/hr-parameter'
+import {
+  type EmployeePrivateProfileRepository,
+  type ProfileFields,
+  type RevealedIdentifier,
+} from '@repository/interface/employee-private-profile'
 import { type PositionRepository } from '@repository/interface/position'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
+import { type BankAccountInput } from '@repository/model/common/bank-account'
+import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
 import { type Employee } from '@repository/model/employee'
+import { type EmployeePrivateProfile } from '@repository/model/employee-private-profile'
 import { type Facility } from '@repository/model/facility'
 import {
   type HrParameter,
@@ -849,6 +861,383 @@ export class InMemoryEmployees
       rows: limit,
       totalPages: Math.ceil(rows.length / limit),
       currentPage: Math.floor(offset / limit) + 1,
+    }
+  }
+}
+
+/**
+ * The secret parts of a stored profile, kept apart from the model the way the Mongo implementation
+ * stores them: only ciphertext.
+ */
+export interface StoredSecrets {
+  birthDate: string | null
+  identifiers: Map<string, string>
+  bankAccounts: string[]
+}
+
+/**
+ * In-memory employee private profile repository for tests. It encrypts, hashes and masks with a
+ * real cipher, like the Mongo implementation, so tests exercise the actual secret handling: the
+ * models it keeps hold masked values only, and the plain ones exist only as ciphertext.
+ */
+export class InMemoryEmployeePrivateProfiles
+  extends InMemoryRepository<EmployeePrivateProfile>
+  implements EmployeePrivateProfileRepository
+{
+  private readonly secrets = new Map<string, StoredSecrets>()
+
+  /**
+   * @param cipher - Cipher that encrypts and hashes the secret fields.
+   */
+  constructor(private readonly cipher: FieldCipher) {
+    super()
+  }
+
+  /**
+   * Refuses every generic write: the profile has its own writes.
+   *
+   * @throws Error always.
+   */
+  override async create(): Promise<EmployeePrivateProfile> {
+    throw new Error('EmployeePrivateProfileRepository.create is not supported')
+  }
+
+  /**
+   * Refuses every generic update.
+   *
+   * @throws Error always.
+   */
+  override async update(): Promise<EmployeePrivateProfile> {
+    throw new Error('EmployeePrivateProfileRepository.update is not supported')
+  }
+
+  /**
+   * Refuses every delete.
+   *
+   * @throws Error always.
+   */
+  override async delete(): Promise<void> {
+    throw new Error('EmployeePrivateProfileRepository.delete is not supported')
+  }
+
+  /**
+   * Refuses every soft delete.
+   *
+   * @throws Error always.
+   */
+  override async deleteSoft(): Promise<void> {
+    throw new Error(
+      'EmployeePrivateProfileRepository.deleteSoft is not supported',
+    )
+  }
+
+  /**
+   * Returns the ciphertext of everything secret and the stored models, for tests that check what is
+   * stored.
+   *
+   * @returns The stored secrets and models of every profile.
+   */
+  storedData(): { secrets: StoredSecrets[]; models: EmployeePrivateProfile[] } {
+    return {
+      secrets: [...this.secrets.values()],
+      models: [...this.items.values()],
+    }
+  }
+
+  /**
+   * Finds the profile of an employee, masked, with the birth date decrypted.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - Employee the profile belongs to.
+   * @returns The profile, or `null`.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<EmployeePrivateProfile | null> {
+    const profile = this.find(
+      (item) => item.tenant_id === tenantId && item.employee_id === employeeId,
+    )
+    return profile ? this.withBirthDate(profile) : null
+  }
+
+  /**
+   * Finds one identifier of an employee in full.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - Employee the profile belongs to.
+   * @param system - Identifier system.
+   * @returns The plain value and its profile, or `null`.
+   */
+  async findIdentifierValue(
+    tenantId: string,
+    employeeId: string,
+    system: string,
+  ): Promise<RevealedIdentifier | null> {
+    const profile = this.find(
+      (item) => item.tenant_id === tenantId && item.employee_id === employeeId,
+    )
+    const sealed = profile
+      ? this.secrets.get(profile.id)?.identifiers.get(system)
+      : undefined
+    return profile && sealed
+      ? {
+          profile_id: profile.id,
+          value: this.cipher.decrypt(tenantId, 'identifier_value', sealed),
+        }
+      : null
+  }
+
+  /**
+   * Finds the employee that holds an identifier, by its hash.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param system - Identifier system.
+   * @param value - Normalized plain value.
+   * @returns The identifier of the employee, or `null`.
+   */
+  async findEmployeeIdByIdentifier(
+    tenantId: string,
+    system: string,
+    value: string,
+  ): Promise<string | null> {
+    const hash = this.cipher.hash(tenantId, value)
+    return (
+      this.find(
+        (item) =>
+          item.tenant_id === tenantId &&
+          item.identifiers.some(
+            (held) => held.system === system && held.value_hash === hash,
+          ),
+      )?.employee_id ?? null
+    )
+  }
+
+  /**
+   * Replaces the profile fields.
+   *
+   * @param tenantId - Tenant of the employee.
+   * @param employeeId - Employee the profile belongs to.
+   * @param fields - The new fields.
+   * @param options - Optional concurrency check.
+   * @returns The profile after the write.
+   */
+  saveProfile(
+    tenantId: string,
+    employeeId: string,
+    fields: ProfileFields,
+    options?: UpdateOptions,
+  ): Promise<EmployeePrivateProfile> {
+    const { birth_date: birthDate, ...plain } = fields
+    return this.write(tenantId, employeeId, plain, options, (secrets) => {
+      secrets.birthDate =
+        birthDate === null
+          ? null
+          : this.cipher.encrypt(tenantId, 'birth_date', birthDate)
+    })
+  }
+
+  /**
+   * Replaces the identifiers.
+   *
+   * @param tenantId - Tenant of the employee.
+   * @param employeeId - Employee the profile belongs to.
+   * @param identifiers - The new identifiers, with normalized plain values.
+   * @param options - Optional concurrency check.
+   * @returns The profile after the write.
+   */
+  replaceIdentifiers(
+    tenantId: string,
+    employeeId: string,
+    identifiers: PersonIdentifierInput[],
+    options?: UpdateOptions,
+  ): Promise<EmployeePrivateProfile> {
+    const hashes = identifiers.map((item) => ({
+      system: item.system,
+      hash: this.cipher.hash(tenantId, item.value),
+    }))
+    const taken = [...this.items.values()].some(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id !== employeeId &&
+        item.identifiers.some((held) =>
+          hashes.some(
+            ({ system, hash }) =>
+              system === held.system && hash === held.value_hash,
+          ),
+        ),
+    )
+    if (taken) {
+      return Promise.reject(
+        new RepositoryConflictError('duplicate identifier', {
+          operation: 'EmployeePrivateProfileRepository.replaceIdentifiers',
+        }),
+      )
+    }
+    return this.write(
+      tenantId,
+      employeeId,
+      {
+        identifiers: identifiers.map((item, index) => ({
+          type: item.type,
+          system: item.system,
+          issuing_country: item.issuing_country,
+          value_masked: mask(item.value),
+          value_hash: hashes[index].hash,
+          period: item.period,
+          verified_at: null,
+        })),
+      },
+      options,
+      (secrets) => {
+        secrets.identifiers = new Map(
+          identifiers.map((item) => [
+            item.system,
+            this.cipher.encrypt(tenantId, 'identifier_value', item.value),
+          ]),
+        )
+      },
+    )
+  }
+
+  /**
+   * Replaces the bank accounts.
+   *
+   * @param tenantId - Tenant of the employee.
+   * @param employeeId - Employee the profile belongs to.
+   * @param accounts - The new accounts, with normalized plain numbers.
+   * @param options - Optional concurrency check.
+   * @returns The profile after the write.
+   */
+  replaceBankAccounts(
+    tenantId: string,
+    employeeId: string,
+    accounts: BankAccountInput[],
+    options?: UpdateOptions,
+  ): Promise<EmployeePrivateProfile> {
+    return this.write(
+      tenantId,
+      employeeId,
+      {
+        bank_accounts: accounts.map((item) => ({
+          bank: item.bank,
+          account_name: item.account_name,
+          account_number_masked: mask(item.account_number),
+          swift_bic: item.swift_bic,
+          currency: item.currency,
+          is_primary: item.is_primary,
+        })),
+      },
+      options,
+      (secrets) => {
+        secrets.bankAccounts = accounts.map((item) =>
+          this.cipher.encrypt(
+            tenantId,
+            'bank_account_number',
+            item.account_number,
+          ),
+        )
+      },
+    )
+  }
+
+  /**
+   * Creates the profile or changes some of its fields, with the same version rules as the Mongo
+   * implementation.
+   *
+   * @param tenantId - Tenant of the employee.
+   * @param employeeId - Employee the profile belongs to.
+   * @param changes - Model fields to set.
+   * @param options - Optional concurrency check.
+   * @param seal - Stores the secret parts of the write.
+   * @returns The profile after the write.
+   */
+  private async write(
+    tenantId: string,
+    employeeId: string,
+    changes: Partial<EmployeePrivateProfile>,
+    options: UpdateOptions | undefined,
+    seal: (secrets: StoredSecrets) => void,
+  ): Promise<EmployeePrivateProfile> {
+    const expected = options?.expectedVersion
+    const current = [...this.items.values()].find(
+      (item) => item.tenant_id === tenantId && item.employee_id === employeeId,
+    )
+    if (
+      (!current && expected !== undefined) ||
+      (current && expected !== undefined && current.version !== expected)
+    ) {
+      throw new RepositoryConflictError('the profile changed', {
+        operation: 'EmployeePrivateProfileRepository.write',
+      })
+    }
+    let id: string
+    if (current) {
+      id = current.id
+      this.items.set(id, {
+        ...current,
+        ...changes,
+        version: current.version + 1,
+        updated_at: new Date(),
+      })
+    } else {
+      const created = await InMemoryRepository.prototype.create.call(this, {
+        tenant_id: tenantId,
+        employee_id: employeeId,
+        birth_date: null,
+        birth_place: null,
+        nationalities: [],
+        identifiers: [],
+        personal_contacts: [],
+        addresses: [],
+        marital_status: null,
+        religion: null,
+        family_members: [],
+        emergency_contacts: [],
+        bank_accounts: [],
+        tax_profile: [],
+        ...changes,
+      })
+      id = created.id
+      this.secrets.set(id, {
+        birthDate: null,
+        identifiers: new Map(),
+        bankAccounts: [],
+      })
+    }
+    seal(this.secrets.get(id) as StoredSecrets)
+    return this.withBirthDate(
+      structuredClone(this.items.get(id) as EmployeePrivateProfile),
+    )
+  }
+
+  /**
+   * Fills the decrypted birth date of a stored profile.
+   *
+   * @param profile - Profile with a `null` birth date, as stored.
+   * @returns The profile with its birth date.
+   * @throws RepositoryError when the birth date cannot be decrypted.
+   */
+  private withBirthDate(
+    profile: EmployeePrivateProfile,
+  ): EmployeePrivateProfile {
+    const sealed = this.secrets.get(profile.id)?.birthDate
+    if (!sealed) {
+      return profile
+    }
+    try {
+      return {
+        ...profile,
+        birth_date: this.cipher.decrypt(
+          profile.tenant_id,
+          'birth_date',
+          sealed,
+        ),
+      }
+    } catch {
+      throw new RepositoryError('a stored value could not be decrypted', {
+        operation: 'EmployeePrivateProfileRepository.findByEmployee',
+      })
     }
   }
 }

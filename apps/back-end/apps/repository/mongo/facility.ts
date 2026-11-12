@@ -23,7 +23,9 @@ import { FacilityEntity } from './schema/facility'
  * @param record - Stored address, or `null`.
  * @returns The address, or `null`.
  */
-function toAddress(record: AddressEntity | null | undefined): Address | null {
+export function toAddress(
+  record: AddressEntity | null | undefined,
+): Address | null {
   if (!record) {
     return null
   }

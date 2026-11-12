@@ -34,7 +34,7 @@ import { EmployeeEntity } from './schema/employee'
  * @param record - Stored coding.
  * @returns The coding.
  */
-function toCoding(record: CodingEntity): Coding {
+export function toCoding(record: CodingEntity): Coding {
   return {
     system: record.system,
     code: record.code,
@@ -48,7 +48,7 @@ function toCoding(record: CodingEntity): Coding {
  * @param record - Stored name.
  * @returns The name.
  */
-function toName(record: HumanNameEntity): HumanName {
+export function toName(record: HumanNameEntity): HumanName {
   return {
     use: record.use,
     text: record.text,
@@ -66,7 +66,7 @@ function toName(record: HumanNameEntity): HumanName {
  * @param record - Stored contact.
  * @returns The contact.
  */
-function toContact(record: ContactPointEntity): ContactPoint {
+export function toContact(record: ContactPointEntity): ContactPoint {
   return {
     system: record.system,
     value: record.value,
