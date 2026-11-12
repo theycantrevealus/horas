@@ -15,6 +15,8 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
 | `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
 | `apps/workforce/employee/` | `EmployeeService` (search, get, own record, register, update, status change), the name and work-contact checks (`names.ts`, `contacts.ts`) and the status transition table (`status.ts`). |
+| `apps/workforce/private-profile/` | `PrivateProfileService` (confidential profile: save, replace identifiers and bank accounts, reveal, own profile), the identifier formats (`identifier-formats.ts`) and the bank account checks (`bank-accounts.ts`). Secrets are encrypted, hashed and masked in the repository, never here. |
+| `apps/utility/encryption/` | `FieldCipher` port (`FIELD_CIPHER`), `AesGcmFieldCipher` (AES-256-GCM, per-tenant keys derived from `encryption.env`), `EncryptionModule` and `mask()`. Only repository implementations use it. |
 | `apps/workforce/parameter/` | `ParameterService` (list, catalog, set, effective, `resolve`), the parameter catalog in code (`catalog.ts`: keys, types, defaults, allowed scopes) and the value checks (`value-types.ts`). Rules that need a parameter call `resolve`, never the collection. |
 | `apps/workforce/testing/in-memory.ts` | In-memory repositories for service and gateway tests. |
 | `apps/gateway_hr/src/<area>/` | `<area>-management.module.ts`, controllers, DTOs and the gateway test. No business rules. |
@@ -61,6 +63,10 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.employee:write` | `POST /v1/employees`, `PATCH /v1/employees/:id` |
 | `workforce.employee:status` | `POST /v1/employees/:id/status` |
 | none (sign-in only) | `GET /v1/employees/me` |
+| `workforce.private-profile:read` | `GET /v1/employees/:id/private-profile` |
+| `workforce.private-profile:write` | `PUT /v1/employees/:id/private-profile`, `PUT .../identifiers`, `PUT .../bank-accounts` |
+| `workforce.private-profile:reveal` | `GET /v1/employees/:id/private-profile/identifiers/:system` |
+| none (sign-in only) | `GET /v1/employees/me/private-profile` |
 | `workforce.position:read` | `GET /v1/positions`, `GET /v1/positions/:id` |
 | `workforce.position:write` | `POST /v1/positions`, `PATCH /v1/positions/:id`, `POST /v1/positions/:id/close` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
@@ -88,6 +94,8 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `pnpm type-check` | Checks `gateway_back_office`, `gateway_hr` and `worker`. |
 
 From the repository root, `pnpm dev:hr` starts it. The application needs the same environment files as `gateway_back_office` (`application`, `mongo`, `logger`, `change-log`, `auth`) and a MongoDB replica set.
+
+`gateway_hr` also needs `encryption.env` (`ENCRYPTION_MASTER_KEY`, `ENCRYPTION_HASH_KEY`: base64, 32 bytes each, `openssl rand -base64 32`). Never commit it; back both keys up, because losing the master key makes stored profiles unreadable and changing the hash key breaks identifier uniqueness checks.
 
 No first administrator exists (`authentication.md` 5). To call HR endpoints by hand, insert an account, a role holding the HR permissions and a tenant binding with `mongosh`, then sign in on `gateway_back_office`.
 
