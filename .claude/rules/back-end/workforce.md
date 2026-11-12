@@ -55,6 +55,8 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.facility:write` | `POST /v1/facilities`, `PATCH /v1/facilities/:id` |
 | `workforce.unit:read` | `GET /v1/units`, `GET /v1/units/tree`, `GET /v1/units/:id` |
 | `workforce.unit:write` | `POST /v1/units`, `PATCH /v1/units/:id`, `POST /v1/units/:id/move`, `POST /v1/units/:id/close` |
+| `workforce.position:read` | `GET /v1/positions`, `GET /v1/positions/:id` |
+| `workforce.position:write` | `POST /v1/positions`, `PATCH /v1/positions/:id`, `POST /v1/positions/:id/close` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
 | `workforce.code-concept:manage` | `POST /v1/code-concepts`, `PATCH /v1/code-concepts/:id`, `POST /v1/code-concepts/import` |
 

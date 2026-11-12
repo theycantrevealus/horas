@@ -1,6 +1,6 @@
 # gateway_hr 1.5: Positions
 
-Status: **In discussion** (2026-11-11). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 5). Endpoints: `../hr-endpoints.md` 1.5. Collection: `../account-and-workforce-collections.md` 4.5 and HR specification 5.3 and 9.2. Model: `apps/back-end/apps/repository/model/position.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 to 1.4, especially units (1.4).
+Status: **Built** (2026-11-12, PR #19 merged). Decisions P1 to P13 confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 5). Endpoints: `../hr-endpoints.md` 1.5. Collection: `../account-and-workforce-collections.md` 4.5 and HR specification 5.3 and 9.2. Model: `apps/back-end/apps/repository/model/position.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 to 1.4, especially units (1.4).
 
 A position is a job in a unit: Head of Ward, Staff Nurse, Registered Nurse (ICU), Clinical Pharmacist. It says which professions may fill it and how many people it is budgeted for. Assignments (2.4) connect an employee to a position, and the unit's head is the holder of its head position. Positions are the budget side of the organization chart; people come later.
 
