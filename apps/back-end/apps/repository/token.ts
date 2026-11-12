@@ -81,3 +81,10 @@ export const REPOSITORY_EMPLOYEE = Symbol('REPOSITORY_EMPLOYEE')
 export const REPOSITORY_EMPLOYEE_PRIVATE_PROFILE = Symbol(
   'REPOSITORY_EMPLOYEE_PRIVATE_PROFILE',
 )
+
+/**
+ * Injection token for the employment contract repository (HR contracts of employees).
+ */
+export const REPOSITORY_EMPLOYMENT_CONTRACT = Symbol(
+  'REPOSITORY_EMPLOYMENT_CONTRACT',
+)

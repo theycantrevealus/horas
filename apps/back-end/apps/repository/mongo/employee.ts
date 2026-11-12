@@ -119,6 +119,7 @@ export class EmployeeRepositoryMongo
         'clinical_level',
         'employment_status',
         'employment_status_since',
+        'current_employment',
         'original_hire_date',
         'separation_date',
         'practitioner_ids',

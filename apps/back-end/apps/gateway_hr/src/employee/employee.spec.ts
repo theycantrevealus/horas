@@ -84,6 +84,23 @@ describe('employee endpoints (in-memory repositories)', () => {
   }
 
   /**
+   * Gives an employee an active contract summary, so the status can leave onboarding (HR plan 2.3,
+   * T15). The contract endpoints are tested in their own spec.
+   *
+   * @param id - Employee identifier.
+   */
+  async function giveContract(id: string) {
+    await workforce.employees.update(id, {
+      current_employment: {
+        contract_id: new Types.ObjectId().toHexString(),
+        organization_id: new Types.ObjectId().toHexString(),
+        employment_type: { system: 'id.employment-type', code: 'pkwtt' },
+        start_date: '2026-01-01',
+      },
+    })
+  }
+
+  /**
    * Captures every entry the application writes through Nest's logger.
    *
    * @returns The entries and a function that restores the logger.
@@ -142,6 +159,10 @@ describe('employee endpoints (in-memory repositories)', () => {
     })
     await addConcept('id.specialty', 'penyakit_dalam')
     await addConcept('id.specialty', 'lama', {}, 'retired')
+    await addConcept('id.employment-type', 'pkwtt', {
+      allows_probation: true,
+      requires_end_date: false,
+    })
   })
 
   afterAll(async () => {
@@ -500,6 +521,7 @@ describe('employee endpoints (in-memory repositories)', () => {
       profession: { code: 'akuntan' },
     })
 
+    await giveContract(created.id)
     await call('POST', `/v1/employees/${created.id}/status`, statusToken, {
       status: 'active',
     })
@@ -537,6 +559,7 @@ describe('employee endpoints (in-memory repositories)', () => {
 
   it('changes the status along the allowed transitions and keeps separated final', async () => {
     const created = await create()
+    await giveContract(created.id)
     const change = (status: string, extra: object = {}) =>
       call('POST', `/v1/employees/${created.id}/status`, statusToken, {
         status,
@@ -584,6 +607,7 @@ describe('employee endpoints (in-memory repositories)', () => {
 
   it('answers 422 for a status date before the current status or after tomorrow, and 409 for a stale version', async () => {
     const created = await create({ hireDate: '2026-01-05' })
+    await giveContract(created.id)
     const change = (extra: object) =>
       call('POST', `/v1/employees/${created.id}/status`, statusToken, {
         status: 'active',
@@ -616,6 +640,7 @@ describe('employee endpoints (in-memory repositories)', () => {
       },
       profession: null,
     })
+    await giveContract(a.id)
     await call('POST', `/v1/employees/${a.id}/status`, statusToken, {
       status: 'active',
     })

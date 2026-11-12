@@ -119,6 +119,27 @@ describe('EmployeeService', () => {
   }
 
   /**
+   * Gives an employee an active contract summary when it has none, so the status can leave
+   * onboarding (HR plan 2.3, T15).
+   *
+   * @param id - Employee identifier.
+   * @param code - Employment type code of the contract.
+   */
+  async function giveContract(id: string, code = 'pkwtt') {
+    const employee = await employees.findOne(id)
+    if (employee && !employee.current_employment) {
+      await employees.update(id, {
+        current_employment: {
+          contract_id: new Types.ObjectId().toHexString(),
+          organization_id: new Types.ObjectId().toHexString(),
+          employment_type: { system: 'id.employment-type', code },
+          start_date: '2026-01-01',
+        },
+      })
+    }
+  }
+
+  /**
    * Changes an employee through the service.
    *
    * @param id - Employee identifier.
@@ -174,6 +195,14 @@ describe('EmployeeService', () => {
     await addConcept('id.specialty', 'bedah')
     await addConcept('id.specialty', 'lama', {}, 'retired')
     await addConcept('id.clinical-level', 'pk_3')
+    await addConcept('id.employment-type', 'pkwtt', {
+      allows_probation: true,
+      requires_end_date: false,
+    })
+    await addConcept('id.employment-type', 'pkwt', {
+      allows_probation: false,
+      requires_end_date: true,
+    })
   })
 
   afterEach(() => {
@@ -624,6 +653,7 @@ describe('EmployeeService', () => {
 
     it('refuses to change the category or hire date after onboarding', async () => {
       const created = await register()
+      await giveContract(created.id)
       await asAdmin(() =>
         service.changeStatus(tenantId, created.id, { status: 'active' }),
       )
@@ -778,11 +808,12 @@ describe('EmployeeService', () => {
      * @param extra - Date, reason and version.
      * @returns The updated employee.
      */
-    function change(
+    async function change(
       id: string,
       status: Parameters<EmployeeService['changeStatus']>[2]['status'],
       extra: object = {},
     ) {
+      await giveContract(id)
       return asAdmin(() =>
         service.changeStatus(tenantId, id, { status, ...extra }),
       )
@@ -858,6 +889,66 @@ describe('EmployeeService', () => {
       },
     )
 
+    it('needs an active contract to leave onboarding for probation or active (HR plan 2.3, T15), but not to separate', async () => {
+      const created = await register()
+
+      for (const status of ['probation', 'active'] as const) {
+        await expect(
+          asAdmin(() => service.changeStatus(tenantId, created.id, { status })),
+        ).rejects.toMatchObject({ kind: 'invalid', code: 'contract_required' })
+      }
+      expect(
+        (
+          await asAdmin(() =>
+            service.changeStatus(tenantId, created.id, {
+              status: 'separated',
+              reason: 'Never started',
+            }),
+          )
+        ).employment_status,
+      ).toBe('separated')
+    })
+
+    it('allows probation only for a contract type that allows it, and active for any type', async () => {
+      const fixedTerm = await registerStaff('st-1')
+      await giveContract(fixedTerm.id, 'pkwt')
+      const permanent = await registerStaff('st-2')
+      await giveContract(permanent.id, 'pkwtt')
+
+      await expect(
+        asAdmin(() =>
+          service.changeStatus(tenantId, fixedTerm.id, { status: 'probation' }),
+        ),
+      ).rejects.toMatchObject({ code: 'probation_not_allowed' })
+      expect(
+        (
+          await asAdmin(() =>
+            service.changeStatus(tenantId, fixedTerm.id, { status: 'active' }),
+          )
+        ).employment_status,
+      ).toBe('active')
+      expect(
+        (
+          await asAdmin(() =>
+            service.changeStatus(tenantId, permanent.id, {
+              status: 'probation',
+            }),
+          )
+        ).employment_status,
+      ).toBe('probation')
+    })
+
+    it('does not ask for a contract on later changes', async () => {
+      const created = await register()
+      await change(created.id, 'active')
+      await employees.update(created.id, { current_employment: null })
+
+      expect(
+        (await change(created.id, 'suspended', { reason: 'Case 1' }))
+          .employment_status,
+      ).toBe('suspended')
+    })
+
     it('makes separated final', async () => {
       const created = await register()
       await change(created.id, 'separated', { reason: 'Resigned' })
@@ -912,6 +1003,7 @@ describe('EmployeeService', () => {
 
     it('writes the status, its date and the separation date in one update', async () => {
       const created = await register()
+      await giveContract(created.id)
       const spy = vi.spyOn(employees, 'update')
 
       await change(created.id, 'separated', {
