@@ -16,12 +16,14 @@ import { Test } from '@nestjs/testing'
 import { Types } from 'mongoose'
 import { AuthConfig } from '@configuration/auth'
 import { ChangeLogConfig } from '@configuration/change-log'
+import { EncryptionConfig } from '@configuration/encryption'
 import { LoggerConfig } from '@configuration/logger'
 import { MONGO_MAIN_CONNECTION } from '@utility/database/constant'
 import { TRANSACTION_MANAGER } from '@utility/database/transaction'
 import { RepositoryExceptionFilter } from '@utility/filter/repository'
 import { systemActor } from '@utility/history/actor'
 import { CHANGE_OUTBOX } from '@utility/history/outbox'
+import { type ChangeRecord } from '@utility/history/record'
 import { runWithRequestContext } from '@utility/logger/context'
 import { RequestLoggingInterceptor } from '@utility/logger/interceptor'
 import { LoggerModule } from '@utility/logger/module'
@@ -83,10 +85,12 @@ class FakeConnectionModule {}
  *
  * @property status - HTTP status.
  * @property body - Parsed JSON body, or `null` when the answer is not JSON.
+ * @property headers - Response headers, lower-cased.
  */
 export interface Reply {
   status: number
   body: Record<string, any> | null
+  headers: Record<string, string | string[] | number | undefined>
 }
 
 /**
@@ -110,12 +114,14 @@ export interface HrGatewayOptions {
  * @property otherTenantId - A second tenant, for isolation tests.
  * @property call - Sends a request and parses the answer.
  * @property seedAndLogin - Seeds an account with a role holding the permissions and signs it in.
+ * @property changeRecords - Every change record the application wrote to the outbox, in order.
  * @property close - Stops the application.
  */
 export interface HrGateway {
   app: NestFastifyApplication
   tenantId: string
   otherTenantId: string
+  changeRecords: ChangeRecord[]
   call: (
     method: 'GET' | 'POST' | 'PATCH' | 'PUT',
     url: string,
@@ -143,6 +149,12 @@ export async function createHrGateway(
 ): Promise<HrGateway> {
   process.env.AUTH_JWT_SECRET =
     'test-secret-that-is-long-enough-for-hs256-0123456789'
+  process.env.ENCRYPTION_MASTER_KEY = Buffer.alloc(32, 'master-a').toString(
+    'base64',
+  )
+  process.env.ENCRYPTION_HASH_KEY = Buffer.alloc(32, 'hash-a').toString(
+    'base64',
+  )
   process.env.LOG_LEVEL = 'error'
   process.env.LOG_FORMAT = 'json'
 
@@ -152,6 +164,7 @@ export async function createHrGateway(
   const events = new InMemorySecurityEvents()
   const roles = new InMemoryRoles()
   const bindings = new InMemoryBindings()
+  const changeRecords: ChangeRecord[] = []
   const tenantId = new Types.ObjectId().toHexString()
   const otherTenantId = new Types.ObjectId().toHexString()
 
@@ -160,7 +173,7 @@ export async function createHrGateway(
       ConfigModule.forRoot({
         isGlobal: true,
         ignoreEnvFile: true,
-        load: [AuthConfig, LoggerConfig, ChangeLogConfig],
+        load: [AuthConfig, LoggerConfig, ChangeLogConfig, EncryptionConfig],
       }),
       FakeConnectionModule,
       LoggerModule,
@@ -194,6 +207,12 @@ export async function createHrGateway(
       .useValue({})
   }
   const overrides: [symbol, unknown][] = [
+    [
+      CHANGE_OUTBOX,
+      {
+        append: async (record: ChangeRecord) => void changeRecords.push(record),
+      },
+    ],
     [REPOSITORY_ACCOUNT, accounts],
     [REPOSITORY_ACCOUNT_CREDENTIAL, credentials],
     [REPOSITORY_ACCOUNT_SESSION, sessions],
@@ -321,6 +340,7 @@ export async function createHrGateway(
     tenantId,
     otherTenantId,
     seedAndLogin,
+    changeRecords,
     close: () => app.close(),
     async call(method, url, token, payload) {
       const response = await app.inject({
@@ -334,6 +354,7 @@ export async function createHrGateway(
         body: String(response.headers['content-type']).includes('json')
           ? JSON.parse(response.body)
           : null,
+        headers: response.headers,
       }
     },
   }

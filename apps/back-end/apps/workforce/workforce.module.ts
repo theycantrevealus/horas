@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common'
+import { ChangeHistoryModule } from '@utility/history/module'
 import { LoggerModule } from '@utility/logger/module'
 import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
+import { EmployeePrivateProfileRepositoryModule } from '@repository/mongo/employee-private-profile.module'
 import { EmployeeRepositoryModule } from '@repository/mongo/employee.module'
 import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
 import { PositionRepositoryModule } from '@repository/mongo/position.module'
@@ -11,6 +13,7 @@ import { CodeConceptService } from './concept/code-concept.service'
 import { FacilityService } from './structure/facility.service'
 import { OrganizationService } from './structure/organization.service'
 import { EmployeeService } from './employee/employee.service'
+import { PrivateProfileService } from './private-profile/private-profile.service'
 import { ParameterService } from './parameter/parameter.service'
 import { PositionService } from './structure/position.service'
 import { UnitService } from './structure/unit.service'
@@ -22,6 +25,7 @@ import { UnitService } from './structure/unit.service'
 @Module({
   imports: [
     LoggerModule,
+    ChangeHistoryModule,
     OrganizationRepositoryModule,
     FacilityRepositoryModule,
     CodeConceptRepositoryModule,
@@ -29,6 +33,7 @@ import { UnitService } from './structure/unit.service'
     PositionRepositoryModule,
     HrParameterRepositoryModule,
     EmployeeRepositoryModule,
+    EmployeePrivateProfileRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -38,6 +43,7 @@ import { UnitService } from './structure/unit.service'
     PositionService,
     ParameterService,
     EmployeeService,
+    PrivateProfileService,
   ],
   exports: [
     OrganizationService,
@@ -47,6 +53,7 @@ import { UnitService } from './structure/unit.service'
     PositionService,
     ParameterService,
     EmployeeService,
+    PrivateProfileService,
   ],
 })
 export class WorkforceModule {}

@@ -74,3 +74,10 @@ export const REPOSITORY_HR_PARAMETER = Symbol('REPOSITORY_HR_PARAMETER')
  * Injection token for the employee repository (public and internal HR records of people).
  */
 export const REPOSITORY_EMPLOYEE = Symbol('REPOSITORY_EMPLOYEE')
+
+/**
+ * Injection token for the employee private profile repository (confidential personal data).
+ */
+export const REPOSITORY_EMPLOYEE_PRIVATE_PROFILE = Symbol(
+  'REPOSITORY_EMPLOYEE_PRIVATE_PROFILE',
+)

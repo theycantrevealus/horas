@@ -1,6 +1,7 @@
 import {
   REPOSITORY_CODE_CONCEPT,
   REPOSITORY_EMPLOYEE,
+  REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
   REPOSITORY_FACILITY,
   REPOSITORY_HR_PARAMETER,
   REPOSITORY_ORGANIZATION,
@@ -8,6 +9,7 @@ import {
   REPOSITORY_POSITION,
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
+import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
 import { FacilityEntity } from '@repository/mongo/schema/facility'
 import { HrParameterEntity } from '@repository/mongo/schema/hr-parameter'
@@ -16,6 +18,7 @@ import { OrganizationUnitEntity } from '@repository/mongo/schema/organization-un
 import { PositionEntity } from '@repository/mongo/schema/position'
 import {
   InMemoryCodeConcepts,
+  InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
   InMemoryFacilities,
   InMemoryHrParameters,
@@ -23,6 +26,7 @@ import {
   InMemoryOrganizationUnits,
   InMemoryPositions,
 } from '@workforce/testing/in-memory'
+import { createTestFieldCipher } from '@utility/testing/test-field-cipher'
 import { type HrGatewayOptions } from './hr-gateway'
 
 /**
@@ -37,6 +41,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property positions - Position repository.
  * @property parameters - HR parameter repository.
  * @property employees - Employee repository.
+ * @property privateProfiles - Employee private profile repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -47,6 +52,7 @@ export interface InMemoryWorkforce {
   positions: InMemoryPositions
   parameters: InMemoryHrParameters
   employees: InMemoryEmployees
+  privateProfiles: InMemoryEmployeePrivateProfiles
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -63,6 +69,9 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const positions = new InMemoryPositions()
   const parameters = new InMemoryHrParameters()
   const employees = new InMemoryEmployees()
+  const privateProfiles = new InMemoryEmployeePrivateProfiles(
+    createTestFieldCipher(),
+  )
   return {
     organizations,
     facilities,
@@ -71,6 +80,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     positions,
     parameters,
     employees,
+    privateProfiles,
     options: {
       entities: [
         OrganizationEntity,
@@ -80,6 +90,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         PositionEntity,
         HrParameterEntity,
         EmployeeEntity,
+        EmployeePrivateProfileEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -89,6 +100,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_POSITION, positions],
         [REPOSITORY_HR_PARAMETER, parameters],
         [REPOSITORY_EMPLOYEE, employees],
+        [REPOSITORY_EMPLOYEE_PRIVATE_PROFILE, privateProfiles],
       ],
     },
   }
