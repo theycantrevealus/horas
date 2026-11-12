@@ -1,5 +1,6 @@
 import { Types } from 'mongoose'
 import { runWithRequestContext } from '@utility/logger/context'
+import { InMemoryEventOutbox } from '@utility/testing/in-memory-event-outbox'
 import { type AppLogger } from '@utility/logger/service'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { InMemoryCodeConcepts, InMemoryEmployees } from '../testing/in-memory'
@@ -19,6 +20,9 @@ describe('EmployeeService', () => {
   let employees: InMemoryEmployees
   let concepts: InMemoryCodeConcepts
   let service: EmployeeService
+  let eventOutbox: InMemoryEventOutbox
+  let transactionDepth = 0
+  const depthAtAppend: number[] = []
 
   const doctor = { system: 'id.profession', code: 'dokter_spesialis' }
   const category = (code: string) => ({
@@ -158,9 +162,27 @@ describe('EmployeeService', () => {
     employees = new InMemoryEmployees()
     concepts = new InMemoryCodeConcepts()
     const logger = { log, warn, error, debug } as unknown as AppLogger
+    eventOutbox = new InMemoryEventOutbox()
+    depthAtAppend.length = 0
+    const append = eventOutbox.append.bind(eventOutbox)
+    eventOutbox.append = async (event) => {
+      depthAtAppend.push(transactionDepth)
+      return append(event)
+    }
     service = new EmployeeService(
       employees,
       new CodeConceptService(concepts, logger),
+      {
+        run: async (work: () => Promise<unknown>) => {
+          transactionDepth += 1
+          try {
+            return await work()
+          } finally {
+            transactionDepth -= 1
+          }
+        },
+      } as never,
+      eventOutbox,
       logger,
     )
     await addConcept('id.workforce-category', 'tenaga_medis', {
@@ -947,6 +969,61 @@ describe('EmployeeService', () => {
         (await change(created.id, 'suspended', { reason: 'Case 1' }))
           .employment_status,
       ).toBe('suspended')
+    })
+
+    it('writes one status_changed event per change, inside the transaction, with ids, codes and dates only (HR plan events H3)', async () => {
+      const created = await register({ hireDate: '2026-01-05' })
+
+      const active = await change(created.id, 'active', {
+        effectiveDate: '2026-02-01',
+      })
+      await change(created.id, 'suspended', {
+        reason: 'Alasan Rahasia',
+        effectiveDate: '2026-03-01',
+      })
+
+      expect(eventOutbox.events).toHaveLength(2)
+      expect(eventOutbox.events[0]).toMatchObject({
+        tenant_id: tenantId,
+        event_type: 'workforce.employee.status_changed',
+        aggregate: {
+          type: 'employee',
+          id: created.id,
+          version: active.version,
+        },
+        payload: {
+          employee_id: created.id,
+          from_status: 'onboarding',
+          to_status: 'active',
+          effective_date: '2026-02-01',
+        },
+        correlation_id: 'c1',
+      })
+      expect(eventOutbox.events[1].payload).toMatchObject({
+        from_status: 'active',
+        to_status: 'suspended',
+      })
+      expect(depthAtAppend.every((depth) => depth > 0)).toBe(true)
+      const text = JSON.stringify(eventOutbox.events)
+      for (const secret of ['Rahasia', 'RS-0001', 'Siti', 'dokter']) {
+        expect(text).not.toContain(secret)
+      }
+    })
+
+    it('writes no event for a refused change, an edit or a registration', async () => {
+      const created = await register()
+      await update(created.id, { preferredLanguage: 'en' })
+
+      await expect(
+        asAdmin(() =>
+          service.changeStatus(tenantId, created.id, { status: 'suspended' }),
+        ),
+      ).rejects.toBeDefined()
+      await expect(
+        change(created.id, 'probation', { version: 99 }),
+      ).rejects.toMatchObject({ code: 'stale_version' })
+
+      expect(eventOutbox.events).toEqual([])
     })
 
     it('makes separated final', async () => {

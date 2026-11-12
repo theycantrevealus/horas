@@ -22,8 +22,10 @@ import { MONGO_MAIN_CONNECTION } from '@utility/database/constant'
 import { TRANSACTION_MANAGER } from '@utility/database/transaction'
 import { RepositoryExceptionFilter } from '@utility/filter/repository'
 import { systemActor } from '@utility/history/actor'
+import { EVENT_OUTBOX } from '@utility/events/event'
 import { CHANGE_OUTBOX } from '@utility/history/outbox'
 import { type ChangeRecord } from '@utility/history/record'
+import { InMemoryEventOutbox } from '@utility/testing/in-memory-event-outbox'
 import { runWithRequestContext } from '@utility/logger/context'
 import { RequestLoggingInterceptor } from '@utility/logger/interceptor'
 import { LoggerModule } from '@utility/logger/module'
@@ -74,9 +76,15 @@ const PASSWORD = 'Correct-Horse-Battery-9'
       useValue: { run: (work: () => Promise<unknown>) => work() },
     },
     { provide: CHANGE_OUTBOX, useValue: { append: async () => undefined } },
+    { provide: EVENT_OUTBOX, useValue: { append: async () => undefined } },
     { provide: ChangeLogConfig.KEY, useValue: { recordMaxBytes: 200_000 } },
   ],
-  exports: [TRANSACTION_MANAGER, CHANGE_OUTBOX, ChangeLogConfig.KEY],
+  exports: [
+    TRANSACTION_MANAGER,
+    CHANGE_OUTBOX,
+    EVENT_OUTBOX,
+    ChangeLogConfig.KEY,
+  ],
 })
 class FakeConnectionModule {}
 
@@ -115,6 +123,7 @@ export interface HrGatewayOptions {
  * @property call - Sends a request and parses the answer.
  * @property seedAndLogin - Seeds an account with a role holding the permissions and signs it in.
  * @property changeRecords - Every change record the application wrote to the outbox, in order.
+ * @property eventOutbox - The event outbox; its `events` hold every event the application wrote.
  * @property close - Stops the application.
  */
 export interface HrGateway {
@@ -122,6 +131,7 @@ export interface HrGateway {
   tenantId: string
   otherTenantId: string
   changeRecords: ChangeRecord[]
+  eventOutbox: InMemoryEventOutbox
   call: (
     method: 'GET' | 'POST' | 'PATCH' | 'PUT',
     url: string,
@@ -165,6 +175,7 @@ export async function createHrGateway(
   const roles = new InMemoryRoles()
   const bindings = new InMemoryBindings()
   const changeRecords: ChangeRecord[] = []
+  const eventOutbox = new InMemoryEventOutbox()
   const tenantId = new Types.ObjectId().toHexString()
   const otherTenantId = new Types.ObjectId().toHexString()
 
@@ -207,6 +218,7 @@ export async function createHrGateway(
       .useValue({})
   }
   const overrides: [symbol, unknown][] = [
+    [EVENT_OUTBOX, eventOutbox],
     [
       CHANGE_OUTBOX,
       {
@@ -341,6 +353,7 @@ export async function createHrGateway(
     otherTenantId,
     seedAndLogin,
     changeRecords,
+    eventOutbox,
     close: () => app.close(),
     async call(method, url, token, payload) {
       const response = await app.inject({

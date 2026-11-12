@@ -7,8 +7,16 @@ import {
   type ChangeLogConfigType,
 } from '@configuration/change-log'
 import { MongoConfig } from '@configuration/mongo'
+import { EVENT_OUTBOX } from '@utility/events/event'
 import { CHANGE_OUTBOX } from '@utility/history/outbox'
 import { MONGO_MAIN_CONNECTION } from './constant'
+import {
+  EventOutboxEntity,
+  EventRelayStateEntity,
+  EventRelayStateSchema,
+  MongoEventOutbox,
+  createEventOutboxSchema,
+} from './mongo.event-outbox'
 import { TRANSACTION_MANAGER } from './transaction'
 import {
   ChangeOutboxEntity,
@@ -24,8 +32,9 @@ import {
 
 /**
  * Opens the main MongoDB connection from the typed `mongo` configuration and provides its
- * `TRANSACTION_MANAGER` and `CHANGE_OUTBOX`. The outbox belongs to the connection because a
- * change record must be written in the same transaction as the data it describes.
+ * `TRANSACTION_MANAGER`, `CHANGE_OUTBOX` and `EVENT_OUTBOX`. The outboxes belong to the connection
+ * because a change record or an event must be written in the same transaction as the data it
+ * describes.
  * Global, so feature modules can inject both. Import it once in each application's root module.
  */
 @Global()
@@ -63,6 +72,24 @@ import {
             createChangeOutboxSchema(changeLog.outboxKeepDays),
         },
         {
+          name: EventOutboxEntity.name,
+          /**
+           * Returns the event outbox schema.
+           *
+           * @returns The event outbox schema.
+           */
+          useFactory: () => createEventOutboxSchema(),
+        },
+        {
+          name: EventRelayStateEntity.name,
+          /**
+           * Returns the event relay-state schema.
+           *
+           * @returns The event relay-state schema.
+           */
+          useFactory: () => EventRelayStateSchema,
+        },
+        {
           name: ChangeRelayStateEntity.name,
           /**
            * Returns the relay-state schema.
@@ -77,6 +104,7 @@ import {
   ],
   providers: [
     { provide: CHANGE_OUTBOX, useClass: MongoChangeOutbox },
+    { provide: EVENT_OUTBOX, useClass: MongoEventOutbox },
     {
       provide: TRANSACTION_MANAGER,
       inject: [getConnectionToken(MONGO_MAIN_CONNECTION)],
@@ -90,6 +118,6 @@ import {
         new MongoTransactionManager(connection, MONGO_MAIN_CONNECTION),
     },
   ],
-  exports: [TRANSACTION_MANAGER, CHANGE_OUTBOX],
+  exports: [TRANSACTION_MANAGER, CHANGE_OUTBOX, EVENT_OUTBOX],
 })
 export class MongoMainConnectionModule {}
