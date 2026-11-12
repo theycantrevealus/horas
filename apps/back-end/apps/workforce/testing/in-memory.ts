@@ -1,13 +1,25 @@
 import { RepositoryConflictError } from '@utility/database/error'
-import { type NewEntity, type UpdateOptions } from '@utility/database/interface'
+import {
+  type NewEntity,
+  type Page,
+  type UpdateOptions,
+} from '@utility/database/interface'
 import { InMemoryRepository } from '@utility/testing/in-memory-repository'
 import { type CodeConceptRepository } from '@repository/interface/code-concept'
 import { type FacilityRepository } from '@repository/interface/facility'
+import {
+  type HrParameterPageOptions,
+  type HrParameterRepository,
+} from '@repository/interface/hr-parameter'
 import { type PositionRepository } from '@repository/interface/position'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
 import { type Facility } from '@repository/model/facility'
+import {
+  type HrParameter,
+  type HrParameterScope,
+} from '@repository/model/hr-parameter'
 import { type Organization } from '@repository/model/organization'
 import { type OrganizationUnit } from '@repository/model/organization-unit'
 import { type Position } from '@repository/model/position'
@@ -569,5 +581,141 @@ export class InMemoryPositions
         item.status === 'active' &&
         !item.deleted_at,
     )
+  }
+}
+
+/**
+ * In-memory HR parameter repository for tests. Follows the Mongo unique index on tenant, key,
+ * scope and date, and is append-only like the Mongo implementation.
+ */
+export class InMemoryHrParameters
+  extends InMemoryRepository<HrParameter>
+  implements HrParameterRepository
+{
+  /**
+   * Creates a value, refusing a second one for the same tenant, key, scope and date.
+   *
+   * @param entity - Parameter data.
+   * @param id - Optional identifier.
+   * @returns The stored value.
+   */
+  override async create(
+    entity: NewEntity<HrParameter>,
+    id?: string,
+  ): Promise<HrParameter> {
+    const duplicate = [...this.items.values()].some(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.key === entity.key &&
+        item.scope.kind === entity.scope.kind &&
+        item.scope.id === entity.scope.id &&
+        item.effective_from === entity.effective_from,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate parameter', {
+        operation: 'HrParameterRepository.create',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Refuses every update: values are append-only.
+   *
+   * @throws Error always.
+   */
+  override async update(): Promise<HrParameter> {
+    throw new Error('HrParameterRepository.update is not supported')
+  }
+
+  /**
+   * Refuses every delete: values are append-only.
+   *
+   * @throws Error always.
+   */
+  override async delete(): Promise<void> {
+    throw new Error('HrParameterRepository.delete is not supported')
+  }
+
+  /**
+   * Refuses every soft delete: values are append-only.
+   *
+   * @throws Error always.
+   */
+  override async deleteSoft(): Promise<void> {
+    throw new Error('HrParameterRepository.deleteSoft is not supported')
+  }
+
+  /**
+   * Finds every value set for a key.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param key - Parameter key.
+   * @returns The values.
+   */
+  async findByKey(tenantId: string, key: string): Promise<HrParameter[]> {
+    return this.filter(
+      (item) => item.tenant_id === tenantId && item.key === key,
+    )
+  }
+
+  /**
+   * Finds the value set for a key, scope and date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param key - Parameter key.
+   * @param scope - Level and identifier of the value.
+   * @param effectiveFrom - First day the value applies.
+   * @returns The value, or `null`.
+   */
+  async findOneAt(
+    tenantId: string,
+    key: string,
+    scope: HrParameterScope,
+    effectiveFrom: string,
+  ): Promise<HrParameter | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.key === key &&
+        item.scope.kind === scope.kind &&
+        item.scope.id === scope.id &&
+        item.effective_from === effectiveFrom,
+    )
+  }
+
+  /**
+   * Returns one page of values, ordered by key; with a key filter, newest date first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param options - Filters and paging.
+   * @returns The page.
+   */
+  async findPage(
+    tenantId: string,
+    options: HrParameterPageOptions,
+  ): Promise<Page<HrParameter>> {
+    const rows = this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        (options.key === undefined || item.key === options.key) &&
+        (options.scopeKind === undefined ||
+          item.scope.kind === options.scopeKind) &&
+        (options.scopeId === undefined || item.scope.id === options.scopeId),
+    ).sort(
+      (left, right) =>
+        (options.key === undefined ? left.key.localeCompare(right.key) : 0) ||
+        right.effective_from.localeCompare(left.effective_from),
+    )
+    const limit = options.limit ?? 10
+    const offset = options.offset ?? 0
+    return {
+      data: rows.slice(offset, offset + limit),
+      totalRecords: rows.length,
+      first: offset,
+      rows: limit,
+      totalPages: Math.ceil(rows.length / limit),
+      currentPage: Math.floor(offset / limit) + 1,
+    }
   }
 }

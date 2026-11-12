@@ -41,8 +41,9 @@ function isReadRequest(request: unknown): boolean {
 
 /**
  * Turns workforce business rejections into HTTP responses and logs them. A record that a read
- * request did not find is answered but not logged (`logging.md` 4.3); the access log still
- * records the status.
+ * request did not find, or a lookup the rules refuse as invalid, is answered but not logged
+ * (`logging.md` 4.3); the access log still records the status. Conflicts and permission
+ * rejections stay logged, whatever the method.
  */
 @Catch(WorkforceError)
 export class WorkforceExceptionFilter implements ExceptionFilter<WorkforceError> {
@@ -65,7 +66,8 @@ export class WorkforceExceptionFilter implements ExceptionFilter<WorkforceError>
     const status = STATUS_BY_KIND[error.kind]
     const http = host.switchToHttp()
     const request: unknown = http.getRequest()
-    if (!(error.kind === 'not_found' && isReadRequest(request))) {
+    const quietKind = error.kind === 'not_found' || error.kind === 'invalid'
+    if (!(quietKind && isReadRequest(request))) {
       runInRequestContextOf(request, () =>
         this.logger.warn({
           event: 'workforce_rejection',

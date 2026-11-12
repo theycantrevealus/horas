@@ -1,18 +1,21 @@
 import {
   REPOSITORY_CODE_CONCEPT,
   REPOSITORY_FACILITY,
+  REPOSITORY_HR_PARAMETER,
   REPOSITORY_ORGANIZATION,
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_POSITION,
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { FacilityEntity } from '@repository/mongo/schema/facility'
+import { HrParameterEntity } from '@repository/mongo/schema/hr-parameter'
 import { OrganizationEntity } from '@repository/mongo/schema/organization'
 import { OrganizationUnitEntity } from '@repository/mongo/schema/organization-unit'
 import { PositionEntity } from '@repository/mongo/schema/position'
 import {
   InMemoryCodeConcepts,
   InMemoryFacilities,
+  InMemoryHrParameters,
   InMemoryOrganizations,
   InMemoryOrganizationUnits,
   InMemoryPositions,
@@ -29,6 +32,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property codeConcepts - Code concept repository.
  * @property units - Organization unit repository.
  * @property positions - Position repository.
+ * @property parameters - HR parameter repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -37,6 +41,7 @@ export interface InMemoryWorkforce {
   codeConcepts: InMemoryCodeConcepts
   units: InMemoryOrganizationUnits
   positions: InMemoryPositions
+  parameters: InMemoryHrParameters
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -51,12 +56,14 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const codeConcepts = new InMemoryCodeConcepts()
   const units = new InMemoryOrganizationUnits()
   const positions = new InMemoryPositions()
+  const parameters = new InMemoryHrParameters()
   return {
     organizations,
     facilities,
     codeConcepts,
     units,
     positions,
+    parameters,
     options: {
       entities: [
         OrganizationEntity,
@@ -64,6 +71,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         CodeConceptEntity,
         OrganizationUnitEntity,
         PositionEntity,
+        HrParameterEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -71,6 +79,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_CODE_CONCEPT, codeConcepts],
         [REPOSITORY_ORGANIZATION_UNIT, units],
         [REPOSITORY_POSITION, positions],
+        [REPOSITORY_HR_PARAMETER, parameters],
       ],
     },
   }

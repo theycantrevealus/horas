@@ -3,11 +3,13 @@ import { LoggerModule } from '@utility/logger/module'
 import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
+import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
 import { PositionRepositoryModule } from '@repository/mongo/position.module'
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
 import { CodeConceptService } from './concept/code-concept.service'
 import { FacilityService } from './structure/facility.service'
 import { OrganizationService } from './structure/organization.service'
+import { ParameterService } from './parameter/parameter.service'
 import { PositionService } from './structure/position.service'
 import { UnitService } from './structure/unit.service'
 
@@ -23,6 +25,7 @@ import { UnitService } from './structure/unit.service'
     CodeConceptRepositoryModule,
     OrganizationUnitRepositoryModule,
     PositionRepositoryModule,
+    HrParameterRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -30,6 +33,7 @@ import { UnitService } from './structure/unit.service'
     CodeConceptService,
     UnitService,
     PositionService,
+    ParameterService,
   ],
   exports: [
     OrganizationService,
@@ -37,6 +41,7 @@ import { UnitService } from './structure/unit.service'
     CodeConceptService,
     UnitService,
     PositionService,
+    ParameterService,
   ],
 })
 export class WorkforceModule {}

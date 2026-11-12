@@ -22,6 +22,7 @@ import { FacilityManagementModule } from './facility/facility-management.module'
 import { UnitManagementModule } from './unit/unit-management.module'
 import { GatewayHrController } from './gateway.hr.controller'
 import { OrganizationManagementModule } from './organization/organization-management.module'
+import { ParameterManagementModule } from './parameter/parameter-management.module'
 import { PositionManagementModule } from './position/position-management.module'
 
 /**
@@ -56,6 +57,7 @@ import { PositionManagementModule } from './position/position-management.module'
     FacilityManagementModule,
     UnitManagementModule,
     PositionManagementModule,
+    ParameterManagementModule,
     CodeConceptManagementModule,
   ],
   controllers: [GatewayHrController],

@@ -64,3 +64,8 @@ export const REPOSITORY_CODE_CONCEPT = Symbol('REPOSITORY_CODE_CONCEPT')
  * Injection token for the position repository (HR jobs in organization units).
  */
 export const REPOSITORY_POSITION = Symbol('REPOSITORY_POSITION')
+
+/**
+ * Injection token for the HR parameter repository (scoped, dated HR settings).
+ */
+export const REPOSITORY_HR_PARAMETER = Symbol('REPOSITORY_HR_PARAMETER')
