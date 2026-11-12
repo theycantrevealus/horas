@@ -1,5 +1,6 @@
 import { Types } from 'mongoose'
 import { runWithRequestContext } from '@utility/logger/context'
+import { InMemoryEventOutbox } from '@utility/testing/in-memory-event-outbox'
 import { type AppLogger } from '@utility/logger/service'
 import { CodeConceptService } from '../concept/code-concept.service'
 import {
@@ -21,12 +22,23 @@ describe('ContractService', () => {
   const warn = vi.fn()
   const error = vi.fn()
   const debug = vi.fn()
-  const run = vi.fn((work: () => Promise<unknown>) => work())
+  const runWork = async (work: () => Promise<unknown>) => {
+    transactionDepth += 1
+    try {
+      return await work()
+    } finally {
+      transactionDepth -= 1
+    }
+  }
+  const run = vi.fn(runWork)
   let contracts: InMemoryEmploymentContracts
   let employees: InMemoryEmployees
   let organizations: InMemoryOrganizations
   let concepts: InMemoryCodeConcepts
   let service: ContractService
+  let eventOutbox: InMemoryEventOutbox
+  let transactionDepth = 0
+  const depthAtAppend: number[] = []
   let employeeId: string
   let organizationId: string
 
@@ -192,7 +204,8 @@ describe('ContractService', () => {
 
   beforeEach(async () => {
     vi.resetAllMocks()
-    run.mockImplementation((work: () => Promise<unknown>) => work())
+    run.mockImplementation(runWork)
+    depthAtAppend.length = 0
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date('2026-03-10T12:00:00Z'))
     contracts = new InMemoryEmploymentContracts()
@@ -200,12 +213,19 @@ describe('ContractService', () => {
     organizations = new InMemoryOrganizations()
     concepts = new InMemoryCodeConcepts()
     const logger = { log, warn, error, debug } as unknown as AppLogger
+    eventOutbox = new InMemoryEventOutbox()
+    const append = eventOutbox.append.bind(eventOutbox)
+    eventOutbox.append = async (event) => {
+      depthAtAppend.push(transactionDepth)
+      return append(event)
+    }
     service = new ContractService(
       contracts,
       employees,
       organizations,
       new CodeConceptService(concepts, logger),
       { run } as never,
+      eventOutbox,
       logger,
     )
     await addConcept('id.employment-type', 'pkwtt', {
@@ -756,7 +776,7 @@ describe('ContractService', () => {
     it('logs one entry without any value', async () => {
       const draft = await create({ contractNumber: 'secret-number' })
       vi.clearAllMocks()
-      run.mockImplementation((work: () => Promise<unknown>) => work())
+      run.mockImplementation(runWork)
 
       await asAdmin(() =>
         service.activate(tenantId, draft.id, { reason: 'Alasan Rahasia' }),
@@ -906,7 +926,7 @@ describe('ContractService', () => {
     it('answers 409 stale_version, not found for another tenant, and logs no value', async () => {
       const contract = await active()
       vi.clearAllMocks()
-      run.mockImplementation((work: () => Promise<unknown>) => work())
+      run.mockImplementation(runWork)
       const reason = { system: 'id.termination-reason', code: 'resigned' }
 
       await expect(
@@ -930,6 +950,81 @@ describe('ContractService', () => {
       expect(
         JSON.stringify([...log.mock.calls, ...warn.mock.calls]),
       ).not.toContain('Rahasia')
+    })
+  })
+
+  describe('events', () => {
+    it('writes one event per activation, end and termination, inside the transaction, with ids only', async () => {
+      const ending = await active({
+        employmentType: type('pkwt'),
+        period: { start: '2026-01-05', end: '2026-03-01' },
+      })
+      await asAdmin(() => service.end(tenantId, ending.id, {}))
+      const terminating = await active(
+        {},
+        (await addEmployee(tenantId, 'RS-2')).id,
+      )
+      await asAdmin(() =>
+        service.terminate(tenantId, terminating.id, {
+          date: '2026-03-10',
+          reason: { system: 'id.termination-reason', code: 'resigned' },
+          notes: 'Rahasia',
+        }),
+      )
+
+      expect(eventOutbox.events.map((event) => event.event_type)).toEqual([
+        'workforce.contract.activated',
+        'workforce.contract.ended',
+        'workforce.contract.activated',
+        'workforce.contract.terminated',
+      ])
+      expect(depthAtAppend.every((depth) => depth > 0)).toBe(true)
+      expect(eventOutbox.events[1]).toMatchObject({
+        tenant_id: tenantId,
+        aggregate: { type: 'employment_contract', id: ending.id },
+        payload: {
+          contract_id: ending.id,
+          employee_id: employeeId,
+          organization_id: organizationId,
+        },
+        correlation_id: 'c1',
+      })
+      const text = JSON.stringify(
+        eventOutbox.events.map((event) => event.payload),
+      )
+      expect(text).not.toContain('Rahasia')
+      expect(text).not.toContain('2026-03-10')
+      expect(text).not.toContain('PKWTT')
+    })
+
+    it('writes no event for a draft, a correction or a refused change', async () => {
+      const draft = await create()
+      await asAdmin(() => service.update(tenantId, draft.id, { fte: 0.5 }))
+      await expect(
+        asAdmin(() =>
+          service.activate(tenantId, draft.id, { version: draft.version + 9 }),
+        ),
+      ).rejects.toMatchObject({ code: 'stale_version' })
+      await expect(
+        asAdmin(() => service.end(tenantId, draft.id, {})),
+      ).rejects.toMatchObject({ code: 'contract_not_active' })
+
+      expect(eventOutbox.events).toEqual([])
+    })
+
+    it('does not announce a contract superseded by its renewal, only the activation', async () => {
+      const first = await active({ period: { start: '2026-01-05' } })
+      const renewal = await create({
+        previousContractId: first.id,
+        period: { start: '2026-03-01' },
+      })
+
+      await asAdmin(() => service.activate(tenantId, renewal.id, {}))
+
+      expect(eventOutbox.events.map((event) => event.aggregate.id)).toEqual([
+        first.id,
+        renewal.id,
+      ])
     })
   })
 

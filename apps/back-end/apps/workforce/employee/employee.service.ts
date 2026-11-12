@@ -4,6 +4,16 @@ import {
   RepositoryNotFoundError,
 } from '@utility/database/error'
 import { type Page } from '@utility/database/interface'
+import {
+  TRANSACTION_MANAGER,
+  type TransactionManager,
+} from '@utility/database/transaction'
+import {
+  EVENT_OUTBOX,
+  type EventOutbox,
+  type OutboxEvent,
+  newEvent,
+} from '@utility/events/event'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
 import {
@@ -22,6 +32,10 @@ import {
   type EmploymentStatus,
 } from '@repository/model/employee'
 import { REPOSITORY_EMPLOYEE } from '@repository/token'
+import {
+  type EmployeeStatusChangedPayload,
+  WORKFORCE_EVENTS,
+} from '@repository/model/workforce-event'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { observe } from '../observe'
 import {
@@ -217,12 +231,17 @@ export class EmployeeService {
   /**
    * @param employees - Employee repository.
    * @param concepts - Code concepts, to check categories, professions, specialties and levels.
+   * @param transactions - Transaction manager, so a status change and its event commit together.
+   * @param events - Event outbox, for the status change event.
    * @param logger - Logger of this service.
    */
   constructor(
     @Inject(REPOSITORY_EMPLOYEE)
     private readonly employees: EmployeeRepository,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
+    @Inject(TRANSACTION_MANAGER)
+    private readonly transactions: TransactionManager,
+    @Inject(EVENT_OUTBOX) private readonly events: EventOutbox,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -526,11 +545,35 @@ export class EmployeeService {
             'The effective date cannot be before the current status started or later than tomorrow.',
           )
         }
-        return this.write(employee.id, input.reason, input.version, {
-          employment_status: input.status,
-          employment_status_since: date,
-          ...(input.status === 'separated' ? { separation_date: date } : {}),
-        })
+        return this.write(
+          employee.id,
+          input.reason,
+          input.version,
+          {
+            employment_status: input.status,
+            employment_status_since: date,
+            ...(input.status === 'separated' ? { separation_date: date } : {}),
+          },
+          (updated) =>
+            newEvent({
+              tenantId,
+              type: WORKFORCE_EVENTS.EMPLOYEE_STATUS_CHANGED,
+              aggregate: {
+                type: 'employee',
+                id: updated.id,
+                version: updated.version,
+              },
+              payload: {
+                employee_id: updated.id,
+                from_status: employee.employment_status,
+                to_status: input.status,
+                effective_date: date,
+              } satisfies EmployeeStatusChangedPayload as unknown as Record<
+                string,
+                unknown
+              >,
+            }),
+        )
       },
     )
   }
@@ -586,6 +629,7 @@ export class EmployeeService {
    * @param reason - Optional reason for the change history.
    * @param version - Version the caller read.
    * @param changes - Fields to write.
+   * @param announce - Builds the event to write in the same transaction, from the updated employee.
    * @returns The updated employee.
    */
   private async write(
@@ -593,9 +637,18 @@ export class EmployeeService {
     reason: string | undefined,
     version: number | undefined,
     changes: Partial<Employee>,
+    announce?: (updated: Employee) => OutboxEvent,
   ): Promise<Employee> {
     const write = () =>
-      this.employees.update(id, changes, { expectedVersion: version })
+      this.transactions.run(async () => {
+        const updated = await this.employees.update(id, changes, {
+          expectedVersion: version,
+        })
+        if (announce) {
+          await this.events.append(announce(updated))
+        }
+        return updated
+      })
     try {
       return await (reason ? withChangeReason(reason, write) : write())
     } catch (error: unknown) {

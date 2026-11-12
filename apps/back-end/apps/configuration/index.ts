@@ -5,6 +5,7 @@ import { LoggerSchema } from './logger'
 import { ChangeLogSchema } from './change-log'
 import { AuthSchema } from './auth'
 import { EncryptionSchema } from './encryption'
+import { EventsSchema } from './events'
 
 export const ConfigSchema = Joi.object()
   .concat(ApplicationSchema)
@@ -12,6 +13,7 @@ export const ConfigSchema = Joi.object()
   .concat(LoggerSchema)
   .concat(ChangeLogSchema)
   .concat(AuthSchema)
+  .concat(EventsSchema)
 
 /**
  * Schema of applications that store encrypted fields (the HR gateway): the common settings plus the

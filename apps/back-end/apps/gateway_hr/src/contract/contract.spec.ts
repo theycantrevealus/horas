@@ -584,6 +584,35 @@ describe('contract endpoints (in-memory repositories)', () => {
     })
   })
 
+  it('writes a contract event for each activation, end and termination', async () => {
+    const before = gateway.eventOutbox.events.length
+    const ended = await active(await registerEmployee(), {
+      employmentType: { system: 'id.employment-type', code: 'pkwt' },
+      period: { start: '2026-01-05', end: day(1) },
+    })
+    await call('POST', `/v1/contracts/${ended.id}/end`, writerToken, {})
+    const terminated = await active(await registerEmployee())
+    await call(
+      'POST',
+      `/v1/contracts/${terminated.id}/terminate`,
+      terminatorToken,
+      {
+        date: day(),
+        reason: { system: 'id.termination-reason', code: 'resigned' },
+      },
+    )
+
+    const events = gateway.eventOutbox.events.slice(before)
+
+    expect(events.map((event) => event.event_type)).toEqual([
+      'workforce.contract.activated',
+      'workforce.contract.ended',
+      'workforce.contract.activated',
+      'workforce.contract.terminated',
+    ])
+    expect(events[1].payload).toMatchObject({ contract_id: ended.id })
+  })
+
   it('refuses probation on a type that does not allow it, but allows active', async () => {
     const employeeId = await registerEmployee()
     await active(employeeId, {

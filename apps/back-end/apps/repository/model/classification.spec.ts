@@ -2,9 +2,10 @@ import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
 /**
- * Model files that are not stored records, so they need no classification.
+ * Model files that are not stored records, so they need no classification: the timestamp base class
+ * and the event contract of the workforce context (events are not business data).
  */
-const NOT_RECORDS = new Set(['timestamp.ts'])
+const NOT_RECORDS = new Set(['timestamp.ts', 'workforce-event.ts'])
 
 describe('field classifications', () => {
   it('exist for every model, so no collection can skip the change history (database.md 6.1)', async () => {

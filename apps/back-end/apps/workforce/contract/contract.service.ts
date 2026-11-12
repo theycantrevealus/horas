@@ -7,6 +7,7 @@ import {
   TRANSACTION_MANAGER,
   type TransactionManager,
 } from '@utility/database/transaction'
+import { EVENT_OUTBOX, type EventOutbox, newEvent } from '@utility/events/event'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
 import { compareLocalDates, isLocalDate } from '@utility/validation/local-date'
@@ -16,6 +17,11 @@ import { type OrganizationRepository } from '@repository/interface/organization'
 import { type Coding } from '@repository/model/common/coding'
 import { type Employee } from '@repository/model/employee'
 import { type EmploymentContract } from '@repository/model/employment-contract'
+import {
+  type ContractEventPayload,
+  type WorkforceEventType,
+  WORKFORCE_EVENTS,
+} from '@repository/model/workforce-event'
 import {
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
@@ -148,7 +154,8 @@ export class ContractService {
    * @param employees - Employee repository, for the employee and the summary.
    * @param organizations - Organization repository, for the employer.
    * @param concepts - Code concepts, to check types, schemes and termination reasons.
-   * @param transactions - Transaction manager, so a contract and the summary change together.
+   * @param transactions - Transaction manager, so a contract, the summary and the event change together.
+   * @param events - Event outbox, for the contract events.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -161,6 +168,7 @@ export class ContractService {
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
+    @Inject(EVENT_OUTBOX) private readonly events: EventOutbox,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -459,6 +467,10 @@ export class ContractService {
                   start_date: activated.period.start,
                 },
               })
+              await this.announce(
+                WORKFORCE_EVENTS.CONTRACT_ACTIVATED,
+                activated,
+              )
               return activated
             }),
           )
@@ -504,9 +516,13 @@ export class ContractService {
           'The contract has no end date yet reached. End it on or after its end date, or terminate it.',
         )
       }
-      return this.close(contract, input.reason, input.version, {
-        status: 'ended',
-      })
+      return this.close(
+        contract,
+        input.reason,
+        input.version,
+        { status: 'ended' },
+        WORKFORCE_EVENTS.CONTRACT_ENDED,
+      )
     })
   }
 
@@ -552,14 +568,20 @@ export class ContractService {
           )
         }
         await this.concepts.assertActive(tenantId, input.reason)
-        return this.close(contract, undefined, input.version, {
-          status: 'terminated',
-          termination: {
-            date: input.date,
-            reason: { system: input.reason.system, code: input.reason.code },
-            notes,
+        return this.close(
+          contract,
+          undefined,
+          input.version,
+          {
+            status: 'terminated',
+            termination: {
+              date: input.date,
+              reason: { system: input.reason.system, code: input.reason.code },
+              notes,
+            },
           },
-        })
+          WORKFORCE_EVENTS.CONTRACT_TERMINATED,
+        )
       },
     )
   }
@@ -572,6 +594,7 @@ export class ContractService {
    * @param reason - Optional reason for the change history.
    * @param version - Version the caller read.
    * @param changes - Status and termination to write.
+   * @param type - Event to write in the same transaction.
    * @returns The updated contract.
    */
   private close(
@@ -579,6 +602,7 @@ export class ContractService {
     reason: string | undefined,
     version: number | undefined,
     changes: Partial<EmploymentContract>,
+    type: WorkforceEventType,
   ): Promise<EmploymentContract> {
     return this.write(reason, () =>
       this.transactions.run(async () => {
@@ -591,7 +615,37 @@ export class ContractService {
             current_employment: null,
           })
         }
+        await this.announce(type, closed)
         return closed
+      }),
+    )
+  }
+
+  /**
+   * Writes a contract event into the outbox. Call it inside the transaction of the change.
+   *
+   * @param type - Event name.
+   * @param contract - The contract after the change.
+   */
+  private async announce(
+    type: WorkforceEventType,
+    contract: EmploymentContract,
+  ): Promise<void> {
+    const payload: ContractEventPayload = {
+      contract_id: contract.id,
+      employee_id: contract.employee_id,
+      organization_id: contract.organization_id,
+    }
+    await this.events.append(
+      newEvent({
+        tenantId: contract.tenant_id,
+        type,
+        aggregate: {
+          type: 'employment_contract',
+          id: contract.id,
+          version: contract.version,
+        },
+        payload: { ...payload },
       }),
     )
   }

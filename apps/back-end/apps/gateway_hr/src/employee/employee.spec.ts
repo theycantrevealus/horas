@@ -605,6 +605,38 @@ describe('employee endpoints (in-memory repositories)', () => {
     expect(edit.body).toMatchObject({ code: 'employee_separated' })
   })
 
+  it('writes a status_changed event for each status change and none for a refused one', async () => {
+    const created = await create()
+    await giveContract(created.id)
+    const before = gateway.eventOutbox.events.length
+
+    const refused = await call(
+      'POST',
+      `/v1/employees/${created.id}/status`,
+      statusToken,
+      { status: 'suspended', reason: 'x' },
+    )
+    const changed = await call(
+      'POST',
+      `/v1/employees/${created.id}/status`,
+      statusToken,
+      { status: 'active' },
+    )
+
+    expect(refused.status).toBe(422)
+    expect(changed.status).toBe(201)
+    const events = gateway.eventOutbox.events.slice(before)
+    expect(events).toHaveLength(1)
+    expect(events[0]).toMatchObject({
+      event_type: 'workforce.employee.status_changed',
+      payload: {
+        employee_id: created.id,
+        from_status: 'onboarding',
+        to_status: 'active',
+      },
+    })
+  })
+
   it('answers 422 for a status date before the current status or after tomorrow, and 409 for a stale version', async () => {
     const created = await create({ hireDate: '2026-01-05' })
     await giveContract(created.id)
