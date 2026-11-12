@@ -14,6 +14,7 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. `structure/unit-tree.ts` builds the organization chart from a flat list. |
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
 | `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
+| `apps/workforce/contract/` | `ContractService` (list, get, create, correct a draft, activate, end, terminate) and the contract rules (`contract-rules.ts`). Activating, ending and terminating run in one transaction with the employee's `current_employment` summary. |
 | `apps/workforce/employee/` | `EmployeeService` (search, get, own record, register, update, status change), the name and work-contact checks (`names.ts`, `contacts.ts`) and the status transition table (`status.ts`). |
 | `apps/workforce/private-profile/` | `PrivateProfileService` (confidential profile: save, replace identifiers and bank accounts, reveal, own profile), the identifier formats (`identifier-formats.ts`) and the bank account checks (`bank-accounts.ts`). Secrets are encrypted, hashed and masked in the repository, never here. |
 | `apps/utility/encryption/` | `FieldCipher` port (`FIELD_CIPHER`), `AesGcmFieldCipher` (AES-256-GCM, per-tenant keys derived from `encryption.env`), `EncryptionModule` and `mask()`. Only repository implementations use it. |
@@ -67,6 +68,9 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.private-profile:write` | `PUT /v1/employees/:id/private-profile`, `PUT .../identifiers`, `PUT .../bank-accounts` |
 | `workforce.private-profile:reveal` | `GET /v1/employees/:id/private-profile/identifiers/:system` |
 | none (sign-in only) | `GET /v1/employees/me/private-profile` |
+| `workforce.contract:read` | `GET /v1/employees/:id/contracts`, `GET /v1/contracts/:id` |
+| `workforce.contract:write` | `POST /v1/contracts`, `PATCH /v1/contracts/:id` (drafts), `POST /v1/contracts/:id/activate`, `POST /v1/contracts/:id/end` |
+| `workforce.contract:terminate` | `POST /v1/contracts/:id/terminate` |
 | `workforce.position:read` | `GET /v1/positions`, `GET /v1/positions/:id` |
 | `workforce.position:write` | `POST /v1/positions`, `PATCH /v1/positions/:id`, `POST /v1/positions/:id/close` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
