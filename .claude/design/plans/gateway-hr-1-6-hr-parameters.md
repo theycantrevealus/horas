@@ -1,6 +1,6 @@
 # gateway_hr 1.6: HR parameters
 
-Status: **In discussion** (2026-11-12). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 6). Endpoints: `../hr-endpoints.md` 1.6. Collection: `../human-resource-collections.md` 6 and HR specification 10. Model: `apps/back-end/apps/repository/model/hr-parameter.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 to 1.5.
+Status: **Built** (2026-11-13, PR #21 merged). Decisions R1 to R11 confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 6). Endpoints: `../hr-endpoints.md` 1.6. Collection: `../human-resource-collections.md` 6 and HR specification 10. Model: `apps/back-end/apps/repository/model/hr-parameter.ts` (exists). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: groups 1.1 to 1.5.
 
 HR parameters are the numbers and switches the HR rules read: how many days before a licence expires to alert, the maximum weekly hours, the minimum rest between shifts. They change without code changes and must explain past decisions, so each value has a scope (the whole tenant, an organization, a facility or a unit) and a date from which it applies. A decision made last month, for example a roster check, can then be explained with the value that was in force that day.
 
