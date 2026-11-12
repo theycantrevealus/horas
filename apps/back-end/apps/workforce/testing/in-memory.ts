@@ -8,6 +8,10 @@ import { InMemoryRepository } from '@utility/testing/in-memory-repository'
 import { type CodeConceptRepository } from '@repository/interface/code-concept'
 import { type FacilityRepository } from '@repository/interface/facility'
 import {
+  type EmployeePageOptions,
+  type EmployeeRepository,
+} from '@repository/interface/employee'
+import {
   type HrParameterPageOptions,
   type HrParameterRepository,
 } from '@repository/interface/hr-parameter'
@@ -15,6 +19,7 @@ import { type PositionRepository } from '@repository/interface/position'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
+import { type Employee } from '@repository/model/employee'
 import { type Facility } from '@repository/model/facility'
 import {
   type HrParameter,
@@ -706,6 +711,134 @@ export class InMemoryHrParameters
       (left, right) =>
         (options.key === undefined ? left.key.localeCompare(right.key) : 0) ||
         right.effective_from.localeCompare(left.effective_from),
+    )
+    const limit = options.limit ?? 10
+    const offset = options.offset ?? 0
+    return {
+      data: rows.slice(offset, offset + limit),
+      totalRecords: rows.length,
+      first: offset,
+      rows: limit,
+      totalPages: Math.ceil(rows.length / limit),
+      currentPage: Math.floor(offset / limit) + 1,
+    }
+  }
+}
+
+/**
+ * In-memory employee repository for tests. Follows the Mongo unique indexes on tenant and number
+ * (soft-deleted employees count, so a number is never reused) and on tenant and practitioner id.
+ */
+export class InMemoryEmployees
+  extends InMemoryRepository<Employee>
+  implements EmployeeRepository
+{
+  /**
+   * Creates an employee, refusing a second one with the same tenant and number, or one that
+   * repeats a practitioner identifier of another employee of the tenant.
+   *
+   * @param entity - Employee data.
+   * @param id - Optional identifier.
+   * @returns The stored employee.
+   */
+  override async create(
+    entity: NewEntity<Employee>,
+    id?: string,
+  ): Promise<Employee> {
+    const sameTenant = [...this.items.values()].filter(
+      (item) => item.tenant_id === entity.tenant_id,
+    )
+    const duplicate = sameTenant.some(
+      (item) =>
+        item.employee_number === entity.employee_number ||
+        item.practitioner_ids.some((held) =>
+          entity.practitioner_ids.some(
+            (wanted) =>
+              wanted.system === held.system && wanted.value === held.value,
+          ),
+        ),
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate employee', {
+        operation: 'EmployeeRepository.create',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds an employee by tenant and number.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeNumber - Employee number.
+   * @returns The employee, or `null`.
+   */
+  async findByNumber(
+    tenantId: string,
+    employeeNumber: string,
+  ): Promise<Employee | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_number === employeeNumber &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the employee that holds a public registry number.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param system - Registry system.
+   * @param value - The number.
+   * @returns The employee, or `null`.
+   */
+  async findByPractitionerId(
+    tenantId: string,
+    system: string,
+    value: string,
+  ): Promise<Employee | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.practitioner_ids.some(
+          (held) => held.system === system && held.value === value,
+        ),
+    )
+  }
+
+  /**
+   * Returns one page of employees, ordered by employee number.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param options - Filters and paging.
+   * @returns The page.
+   */
+  async findPage(
+    tenantId: string,
+    options: EmployeePageOptions,
+  ): Promise<Page<Employee>> {
+    const rows = this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (options.name === undefined ||
+          item.display_name
+            .toLowerCase()
+            .includes(options.name.toLowerCase())) &&
+        (options.employeeNumber === undefined ||
+          item.employee_number.startsWith(options.employeeNumber)) &&
+        (options.status === undefined ||
+          item.employment_status === options.status) &&
+        (options.workforceCategoryCode === undefined ||
+          item.workforce_category.code === options.workforceCategoryCode) &&
+        (options.isClinical === undefined ||
+          item.is_clinical === options.isClinical) &&
+        (options.unitId === undefined ||
+          item.primary_assignment?.unit_id === options.unitId),
+    ).sort((left, right) =>
+      left.employee_number.localeCompare(right.employee_number),
     )
     const limit = options.limit ?? 10
     const offset = options.offset ?? 0

@@ -126,6 +126,7 @@ export interface HrGateway {
     tenant: string,
     username: string,
     permissions: readonly string[],
+    employeeId?: string | null,
   ) => Promise<string>
   close: () => Promise<void>
 }
@@ -222,12 +223,15 @@ export async function createHrGateway(
    * @param tenant - Tenant of the account.
    * @param username - Login name.
    * @param permissions - Permissions of its role.
+   * @param employeeId - Employee the account is linked to; a new identifier by default, `null`
+   * for an account without an employee.
    * @returns The access token.
    */
   async function seedAndLogin(
     tenant: string,
     username: string,
     permissions: readonly string[],
+    employeeId: string | null = new Types.ObjectId().toHexString(),
   ): Promise<string> {
     return runWithRequestContext(
       { correlationId: 'seed', actor: systemActor('seed') },
@@ -247,7 +251,7 @@ export async function createHrGateway(
         const account = await accounts.create({
           tenant_id: tenant,
           account_type: 'workforce',
-          employee_id: new Types.ObjectId().toHexString(),
+          employee_id: employeeId,
           sponsor_account_id: null,
           username,
           login_identifiers: [

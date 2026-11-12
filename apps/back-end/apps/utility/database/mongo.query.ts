@@ -42,7 +42,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * @param text - Text to search for literally.
  * @returns The escaped text.
  */
-function escapeRegExp(text: string): string {
+export function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
