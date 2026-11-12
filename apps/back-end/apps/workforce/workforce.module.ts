@@ -4,6 +4,7 @@ import { LoggerModule } from '@utility/logger/module'
 import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
+import { EmploymentContractRepositoryModule } from '@repository/mongo/employment-contract.module'
 import { EmployeePrivateProfileRepositoryModule } from '@repository/mongo/employee-private-profile.module'
 import { EmployeeRepositoryModule } from '@repository/mongo/employee.module'
 import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
@@ -12,6 +13,7 @@ import { OrganizationRepositoryModule } from '@repository/mongo/organization.mod
 import { CodeConceptService } from './concept/code-concept.service'
 import { FacilityService } from './structure/facility.service'
 import { OrganizationService } from './structure/organization.service'
+import { ContractService } from './contract/contract.service'
 import { EmployeeService } from './employee/employee.service'
 import { PrivateProfileService } from './private-profile/private-profile.service'
 import { ParameterService } from './parameter/parameter.service'
@@ -34,6 +36,7 @@ import { UnitService } from './structure/unit.service'
     HrParameterRepositoryModule,
     EmployeeRepositoryModule,
     EmployeePrivateProfileRepositoryModule,
+    EmploymentContractRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -44,6 +47,7 @@ import { UnitService } from './structure/unit.service'
     ParameterService,
     EmployeeService,
     PrivateProfileService,
+    ContractService,
   ],
   exports: [
     OrganizationService,
@@ -54,6 +58,7 @@ import { UnitService } from './structure/unit.service'
     ParameterService,
     EmployeeService,
     PrivateProfileService,
+    ContractService,
   ],
 })
 export class WorkforceModule {}

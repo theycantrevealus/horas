@@ -2,6 +2,7 @@ import {
   REPOSITORY_CODE_CONCEPT,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
+  REPOSITORY_EMPLOYMENT_CONTRACT,
   REPOSITORY_FACILITY,
   REPOSITORY_HR_PARAMETER,
   REPOSITORY_ORGANIZATION,
@@ -10,6 +11,7 @@ import {
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
+import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
 import { FacilityEntity } from '@repository/mongo/schema/facility'
 import { HrParameterEntity } from '@repository/mongo/schema/hr-parameter'
@@ -20,6 +22,7 @@ import {
   InMemoryCodeConcepts,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
+  InMemoryEmploymentContracts,
   InMemoryFacilities,
   InMemoryHrParameters,
   InMemoryOrganizations,
@@ -41,6 +44,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property positions - Position repository.
  * @property parameters - HR parameter repository.
  * @property employees - Employee repository.
+ * @property contracts - Employment contract repository.
  * @property privateProfiles - Employee private profile repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
@@ -52,6 +56,7 @@ export interface InMemoryWorkforce {
   positions: InMemoryPositions
   parameters: InMemoryHrParameters
   employees: InMemoryEmployees
+  contracts: InMemoryEmploymentContracts
   privateProfiles: InMemoryEmployeePrivateProfiles
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
@@ -69,6 +74,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const positions = new InMemoryPositions()
   const parameters = new InMemoryHrParameters()
   const employees = new InMemoryEmployees()
+  const contracts = new InMemoryEmploymentContracts()
   const privateProfiles = new InMemoryEmployeePrivateProfiles(
     createTestFieldCipher(),
   )
@@ -80,6 +86,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     positions,
     parameters,
     employees,
+    contracts,
     privateProfiles,
     options: {
       entities: [
@@ -90,6 +97,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         PositionEntity,
         HrParameterEntity,
         EmployeeEntity,
+        EmploymentContractEntity,
         EmployeePrivateProfileEntity,
       ],
       repositories: [
@@ -100,6 +108,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_POSITION, positions],
         [REPOSITORY_HR_PARAMETER, parameters],
         [REPOSITORY_EMPLOYEE, employees],
+        [REPOSITORY_EMPLOYMENT_CONTRACT, contracts],
         [REPOSITORY_EMPLOYEE_PRIVATE_PROFILE, privateProfiles],
       ],
     },

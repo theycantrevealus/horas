@@ -515,6 +515,7 @@ export class EmployeeService {
             'Give a reason for this status change.',
           )
         }
+        await this.assertContractAllows(tenantId, employee, input.status)
         const date = input.effectiveDate ?? todayUtc()
         if (
           compareLocalDates(date, employee.employment_status_since) < 0 ||
@@ -532,6 +533,49 @@ export class EmployeeService {
         })
       },
     )
+  }
+
+  /**
+   * Checks the contract rules of a status change (HR plan 2.3, T15): leaving `onboarding` for work
+   * needs an active contract, and `probation` needs a contract type that allows it. The licence
+   * checks of `HR-LIC-009` wait for the licence group.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param employee - The employee.
+   * @param to - The wanted status.
+   * @throws InvalidRequestError `contract_required` or `probation_not_allowed`.
+   */
+  private async assertContractAllows(
+    tenantId: string,
+    employee: Employee,
+    to: EmploymentStatus,
+  ): Promise<void> {
+    if (
+      employee.employment_status !== 'onboarding' ||
+      (to !== 'probation' && to !== 'active')
+    ) {
+      return
+    }
+    const contract = employee.current_employment
+    if (!contract) {
+      throw new InvalidRequestError(
+        'contract_required',
+        'The employee needs an active contract before leaving onboarding.',
+      )
+    }
+    if (to === 'probation') {
+      const type = await this.concepts.resolve(
+        tenantId,
+        contract.employment_type.system,
+        contract.employment_type.code,
+      )
+      if (type?.properties?.allows_probation !== true) {
+        throw new InvalidRequestError(
+          'probation_not_allowed',
+          'The employment type of the contract does not allow a probation period.',
+        )
+      }
+    }
   }
 
   /**

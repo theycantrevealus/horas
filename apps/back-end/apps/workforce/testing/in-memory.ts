@@ -4,6 +4,7 @@ import {
 } from '@utility/database/error'
 import { type FieldCipher, mask } from '@utility/encryption/field-cipher'
 import {
+  type EntityChanges,
   type NewEntity,
   type Page,
   type UpdateOptions,
@@ -11,6 +12,7 @@ import {
 import { InMemoryRepository } from '@utility/testing/in-memory-repository'
 import { type CodeConceptRepository } from '@repository/interface/code-concept'
 import { type FacilityRepository } from '@repository/interface/facility'
+import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type EmployeePageOptions,
   type EmployeeRepository,
@@ -31,6 +33,7 @@ import { type CodeConcept } from '@repository/model/code-concept'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
 import { type Employee } from '@repository/model/employee'
+import { type EmploymentContract } from '@repository/model/employment-contract'
 import { type EmployeePrivateProfile } from '@repository/model/employee-private-profile'
 import { type Facility } from '@repository/model/facility'
 import {
@@ -1237,6 +1240,173 @@ export class InMemoryEmployeePrivateProfiles
     } catch {
       throw new RepositoryError('a stored value could not be decrypted', {
         operation: 'EmployeePrivateProfileRepository.findByEmployee',
+      })
+    }
+  }
+}
+
+/**
+ * In-memory employment contract repository for tests. Follows the Mongo unique indexes on tenant,
+ * employer and number, and on tenant and employee for an active contract (when a write sets the
+ * status to `active`).
+ */
+export class InMemoryEmploymentContracts
+  extends InMemoryRepository<EmploymentContract>
+  implements EmploymentContractRepository
+{
+  /**
+   * Creates a contract, refusing a second one with the same tenant, employer and number, or a
+   * second active one for an employee.
+   *
+   * @param entity - Contract data.
+   * @param id - Optional identifier.
+   * @returns The stored contract.
+   */
+  override async create(
+    entity: NewEntity<EmploymentContract>,
+    id?: string,
+  ): Promise<EmploymentContract> {
+    this.assertUnique(entity)
+    return super.create(entity, id)
+  }
+
+  /**
+   * Updates a contract, refusing a change to `active` while the employee has another active one.
+   *
+   * @param id - Contract identifier.
+   * @param changes - Fields to change.
+   * @param options - Optional concurrency check.
+   * @returns The updated contract.
+   */
+  override async update(
+    id: string,
+    changes: EntityChanges<EmploymentContract>,
+    options?: UpdateOptions,
+  ): Promise<EmploymentContract> {
+    const current = this.items.get(id)
+    if (current && changes.status === 'active') {
+      this.assertUnique({ ...current, status: 'active' }, id)
+    }
+    return super.update(id, changes, options)
+  }
+
+  /**
+   * Finds a contract by tenant, employer and number.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param organizationId - Employer.
+   * @param contractNumber - Contract number.
+   * @returns The contract, or `null`.
+   */
+  async findByNumber(
+    tenantId: string,
+    organizationId: string,
+    contractNumber: string,
+  ): Promise<EmploymentContract | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.organization_id === organizationId &&
+        item.contract_number === contractNumber &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds every contract of an employee, newest start first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The contracts.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<EmploymentContract[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at,
+    ).sort((left, right) => right.period.start.localeCompare(left.period.start))
+  }
+
+  /**
+   * Finds the active contract of an employee.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The active contract, or `null`.
+   */
+  async findActiveByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<EmploymentContract | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the contract that renews another one.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param previousContractId - The contract that is renewed.
+   * @returns The renewal, or `null`.
+   */
+  async findRenewal(
+    tenantId: string,
+    previousContractId: string,
+  ): Promise<EmploymentContract | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.previous_contract_id === previousContractId &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Applies the unique indexes to a contract that is about to be stored.
+   *
+   * @param contract - The contract as it will be stored.
+   * @param ownId - Identifier of the contract itself, when it already exists.
+   * @throws RepositoryConflictError when an index would be broken.
+   */
+  private assertUnique(
+    contract: Pick<
+      EmploymentContract,
+      | 'tenant_id'
+      | 'organization_id'
+      | 'contract_number'
+      | 'employee_id'
+      | 'status'
+    >,
+    ownId?: string,
+  ): void {
+    const others = [...this.items.values()].filter(
+      (item) => item.tenant_id === contract.tenant_id && item.id !== ownId,
+    )
+    const duplicateNumber =
+      ownId === undefined &&
+      others.some(
+        (item) =>
+          item.organization_id === contract.organization_id &&
+          item.contract_number === contract.contract_number,
+      )
+    const secondActive =
+      contract.status === 'active' &&
+      others.some(
+        (item) =>
+          item.employee_id === contract.employee_id && item.status === 'active',
+      )
+    if (duplicateNumber || secondActive) {
+      throw new RepositoryConflictError('duplicate contract', {
+        operation: 'EmploymentContractRepository.write',
       })
     }
   }
