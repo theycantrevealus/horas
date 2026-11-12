@@ -4,7 +4,7 @@ Status: **Draft for discussion** (2026-11-10). Collections: `human-resource-coll
 
 We walk through the groups in order; each group is agreed before it is built.
 
-Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10) and **1.3 Code concepts** (PR #14) and **1.4 Organization units** (PR #17). Next: 1.5 Positions. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
+Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17) and **1.5 Positions** (PR #19). Next: 1.6 HR parameters. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
 
 ## 1. Organization structure and reference data
 
@@ -58,6 +58,7 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10) and **1
 | `GET /parameters` | List parameter values set for the tenant, facilities and units. |
 | `GET /parameters/effective` | Show the value in force for one parameter, place and date. |
 | `POST /parameters` | Set a parameter value from a date (for example `MAX_WEEKLY_HOURS` for one facility). |
+| `GET /parameters/catalog` | List the parameter keys with their type, default and allowed scopes. |
 
 ## 2. Employees
 
