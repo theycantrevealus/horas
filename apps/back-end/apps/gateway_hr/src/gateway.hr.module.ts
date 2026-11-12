@@ -18,6 +18,7 @@ import { IdentityExceptionFilter } from '@identity/identity.filter'
 import { IdentityModule } from '@identity/identity.module'
 import { WorkforceExceptionFilter } from '@workforce/workforce.filter'
 import { CodeConceptManagementModule } from './code-concept/code-concept-management.module'
+import { EmployeeManagementModule } from './employee/employee-management.module'
 import { FacilityManagementModule } from './facility/facility-management.module'
 import { UnitManagementModule } from './unit/unit-management.module'
 import { GatewayHrController } from './gateway.hr.controller'
@@ -58,6 +59,7 @@ import { PositionManagementModule } from './position/position-management.module'
     UnitManagementModule,
     PositionManagementModule,
     ParameterManagementModule,
+    EmployeeManagementModule,
     CodeConceptManagementModule,
   ],
   controllers: [GatewayHrController],

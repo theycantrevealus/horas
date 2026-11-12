@@ -69,3 +69,8 @@ export const REPOSITORY_POSITION = Symbol('REPOSITORY_POSITION')
  * Injection token for the HR parameter repository (scoped, dated HR settings).
  */
 export const REPOSITORY_HR_PARAMETER = Symbol('REPOSITORY_HR_PARAMETER')
+
+/**
+ * Injection token for the employee repository (public and internal HR records of people).
+ */
+export const REPOSITORY_EMPLOYEE = Symbol('REPOSITORY_EMPLOYEE')
