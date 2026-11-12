@@ -20,6 +20,8 @@ export const PERMISSIONS = {
   WORKFORCE_UNIT_WRITE: 'workforce.unit:write',
   WORKFORCE_POSITION_READ: 'workforce.position:read',
   WORKFORCE_POSITION_WRITE: 'workforce.position:write',
+  WORKFORCE_PARAMETER_READ: 'workforce.parameter:read',
+  WORKFORCE_PARAMETER_WRITE: 'workforce.parameter:write',
   WORKFORCE_CODE_CONCEPT_READ: 'workforce.code-concept:read',
   WORKFORCE_CODE_CONCEPT_MANAGE: 'workforce.code-concept:manage',
   LOV_READ: 'reference.lov:read',

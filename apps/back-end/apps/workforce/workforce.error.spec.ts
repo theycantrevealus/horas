@@ -82,6 +82,21 @@ describe('WorkforceExceptionFilter', () => {
     )
   })
 
+  it('does not log an invalid lookup on a read request, but still answers 422, and logs it on a write', () => {
+    filter.catch(new InvalidRequestError('invalid_place', 'm'), hostFor('GET'))
+
+    expect(warn).not.toHaveBeenCalled()
+    expect(reply).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ statusCode: 422, code: 'invalid_place' }),
+      422,
+    )
+
+    filter.catch(new InvalidRequestError('invalid_place', 'm'), hostFor('POST'))
+
+    expect(warn).toHaveBeenCalledTimes(1)
+  })
+
   it('logs a record that a write request did not find', () => {
     filter.catch(
       new NotFoundError('organization_not_found', 'm'),
