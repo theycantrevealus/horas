@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ChangeHistoryModule } from '@utility/history/module'
 import { LoggerModule } from '@utility/logger/module'
 import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
+import { CommitteeMembershipRepositoryModule } from '@repository/mongo/committee-membership.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
 import { EmploymentContractRepositoryModule } from '@repository/mongo/employment-contract.module'
@@ -12,6 +13,7 @@ import { PositionAssignmentRepositoryModule } from '@repository/mongo/position-a
 import { PositionRepositoryModule } from '@repository/mongo/position.module'
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
 import { AssignmentService } from './assignment/assignment.service'
+import { CommitteeMembershipService } from './committee/committee-membership.service'
 import { CodeConceptService } from './concept/code-concept.service'
 import { FacilityService } from './structure/facility.service'
 import { OrganizationService } from './structure/organization.service'
@@ -40,6 +42,7 @@ import { UnitService } from './structure/unit.service'
     EmployeePrivateProfileRepositoryModule,
     EmploymentContractRepositoryModule,
     PositionAssignmentRepositoryModule,
+    CommitteeMembershipRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -52,6 +55,7 @@ import { UnitService } from './structure/unit.service'
     PrivateProfileService,
     ContractService,
     AssignmentService,
+    CommitteeMembershipService,
   ],
   exports: [
     OrganizationService,
@@ -64,6 +68,7 @@ import { UnitService } from './structure/unit.service'
     PrivateProfileService,
     ContractService,
     AssignmentService,
+    CommitteeMembershipService,
   ],
 })
 export class WorkforceModule {}
