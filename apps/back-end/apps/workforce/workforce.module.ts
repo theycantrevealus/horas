@@ -8,8 +8,10 @@ import { EmploymentContractRepositoryModule } from '@repository/mongo/employment
 import { EmployeePrivateProfileRepositoryModule } from '@repository/mongo/employee-private-profile.module'
 import { EmployeeRepositoryModule } from '@repository/mongo/employee.module'
 import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
+import { PositionAssignmentRepositoryModule } from '@repository/mongo/position-assignment.module'
 import { PositionRepositoryModule } from '@repository/mongo/position.module'
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
+import { AssignmentService } from './assignment/assignment.service'
 import { CodeConceptService } from './concept/code-concept.service'
 import { FacilityService } from './structure/facility.service'
 import { OrganizationService } from './structure/organization.service'
@@ -37,6 +39,7 @@ import { UnitService } from './structure/unit.service'
     EmployeeRepositoryModule,
     EmployeePrivateProfileRepositoryModule,
     EmploymentContractRepositoryModule,
+    PositionAssignmentRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -48,6 +51,7 @@ import { UnitService } from './structure/unit.service'
     EmployeeService,
     PrivateProfileService,
     ContractService,
+    AssignmentService,
   ],
   exports: [
     OrganizationService,
@@ -59,6 +63,7 @@ import { UnitService } from './structure/unit.service'
     EmployeeService,
     PrivateProfileService,
     ContractService,
+    AssignmentService,
   ],
 })
 export class WorkforceModule {}

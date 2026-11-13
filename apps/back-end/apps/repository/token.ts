@@ -93,3 +93,10 @@ export const REPOSITORY_EMPLOYMENT_CONTRACT = Symbol(
  * Injection token for the processed event repository (events a consumer already handled).
  */
 export const REPOSITORY_PROCESSED_EVENT = Symbol('REPOSITORY_PROCESSED_EVENT')
+
+/**
+ * Injection token for the position assignment repository (who holds which position).
+ */
+export const REPOSITORY_POSITION_ASSIGNMENT = Symbol(
+  'REPOSITORY_POSITION_ASSIGNMENT',
+)

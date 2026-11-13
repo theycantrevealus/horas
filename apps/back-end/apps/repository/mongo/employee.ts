@@ -120,6 +120,7 @@ export class EmployeeRepositoryMongo
         'employment_status',
         'employment_status_since',
         'current_employment',
+        'primary_assignment',
         'original_hire_date',
         'separation_date',
         'practitioner_ids',

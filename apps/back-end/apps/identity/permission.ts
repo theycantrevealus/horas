@@ -29,6 +29,8 @@ export const PERMISSIONS = {
   WORKFORCE_CONTRACT_READ: 'workforce.contract:read',
   WORKFORCE_CONTRACT_WRITE: 'workforce.contract:write',
   WORKFORCE_CONTRACT_TERMINATE: 'workforce.contract:terminate',
+  WORKFORCE_ASSIGNMENT_READ: 'workforce.assignment:read',
+  WORKFORCE_ASSIGNMENT_WRITE: 'workforce.assignment:write',
   WORKFORCE_PARAMETER_READ: 'workforce.parameter:read',
   WORKFORCE_PARAMETER_WRITE: 'workforce.parameter:write',
   WORKFORCE_CODE_CONCEPT_READ: 'workforce.code-concept:read',

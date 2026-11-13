@@ -14,6 +14,10 @@ import { type CodeConceptRepository } from '@repository/interface/code-concept'
 import { type FacilityRepository } from '@repository/interface/facility'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
+  type PositionAssignmentRepository,
+  type UnitAssignmentQuery,
+} from '@repository/interface/position-assignment'
+import {
   type EmployeePageOptions,
   type EmployeeRepository,
 } from '@repository/interface/employee'
@@ -43,6 +47,7 @@ import {
 import { type Organization } from '@repository/model/organization'
 import { type OrganizationUnit } from '@repository/model/organization-unit'
 import { type Position } from '@repository/model/position'
+import { type PositionAssignment } from '@repository/model/position-assignment'
 
 /**
  * In-memory organization repository for tests. Follows the Mongo unique index on tenant and code.
@@ -1407,6 +1412,180 @@ export class InMemoryEmploymentContracts
     if (duplicateNumber || secondActive) {
       throw new RepositoryConflictError('duplicate contract', {
         operation: 'EmploymentContractRepository.write',
+      })
+    }
+  }
+}
+
+/**
+ * In-memory `PositionAssignmentRepository` for tests. It applies the unique indexes of the Mongo
+ * collection: one open primary assignment per employee, and one open holder per head-of-unit
+ * position.
+ */
+export class InMemoryPositionAssignments
+  extends InMemoryRepository<PositionAssignment>
+  implements PositionAssignmentRepository
+{
+  /**
+   * Creates an assignment, refusing a second open primary for an employee or a second open holder
+   * of a head position.
+   *
+   * @param entity - Assignment data.
+   * @param id - Optional identifier.
+   * @returns The stored assignment.
+   */
+  override async create(
+    entity: NewEntity<PositionAssignment>,
+    id?: string,
+  ): Promise<PositionAssignment> {
+    this.assertUnique(entity)
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds every assignment of an employee, newest start first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The assignments.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<PositionAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at,
+    ).sort((left, right) => right.period.start.localeCompare(left.period.start))
+  }
+
+  /**
+   * Finds the open assignments of an employee.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The open assignments.
+   */
+  async findOpenByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<PositionAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.is_open &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the open assignments of a position.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param positionId - The position.
+   * @returns The open assignments.
+   */
+  async findOpenByPosition(
+    tenantId: string,
+    positionId: string,
+  ): Promise<PositionAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.position_id === positionId &&
+        item.is_open &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the assignments of a unit, ordered by start date and then identifier.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @param query - Optional status filter and paging.
+   * @returns The assignments.
+   */
+  async findByUnit(
+    tenantId: string,
+    unitId: string,
+    query: UnitAssignmentQuery = {},
+  ): Promise<PositionAssignment[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        (!query.status || item.status === query.status) &&
+        !item.deleted_at,
+    )
+      .sort(
+        (left, right) =>
+          left.period.start.localeCompare(right.period.start) ||
+          left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Tells whether a unit has an open assignment.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @returns True when one exists.
+   */
+  async findAnyOpenInUnit(tenantId: string, unitId: string): Promise<boolean> {
+    return (
+      this.find(
+        (item) =>
+          item.tenant_id === tenantId &&
+          item.unit_id === unitId &&
+          item.is_open &&
+          !item.deleted_at,
+      ) !== null
+    )
+  }
+
+  /**
+   * Applies the unique indexes to an assignment that is about to be stored.
+   *
+   * @param assignment - The assignment as it will be stored.
+   * @throws RepositoryConflictError when an index would be broken.
+   */
+  private assertUnique(
+    assignment: Pick<
+      PositionAssignment,
+      | 'tenant_id'
+      | 'employee_id'
+      | 'unit_id'
+      | 'is_primary'
+      | 'is_head_of_unit'
+      | 'is_open'
+    >,
+  ): void {
+    if (!assignment.is_open) {
+      return
+    }
+    const others = [...this.items.values()].filter(
+      (item) => item.tenant_id === assignment.tenant_id && item.is_open,
+    )
+    const secondPrimary =
+      assignment.is_primary &&
+      others.some(
+        (item) =>
+          item.is_primary && item.employee_id === assignment.employee_id,
+      )
+    const secondHead =
+      assignment.is_head_of_unit &&
+      others.some(
+        (item) => item.is_head_of_unit && item.unit_id === assignment.unit_id,
+      )
+    if (secondPrimary || secondHead) {
+      throw new RepositoryConflictError('duplicate assignment', {
+        operation: 'PositionAssignmentRepository.write',
       })
     }
   }
