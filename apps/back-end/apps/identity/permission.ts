@@ -33,6 +33,8 @@ export const PERMISSIONS = {
   WORKFORCE_ASSIGNMENT_WRITE: 'workforce.assignment:write',
   WORKFORCE_COMMITTEE_MEMBERSHIP_READ: 'workforce.committee-membership:read',
   WORKFORCE_COMMITTEE_MEMBERSHIP_WRITE: 'workforce.committee-membership:write',
+  WORKFORCE_LICENSE_READ: 'workforce.license:read',
+  WORKFORCE_LICENSE_WRITE: 'workforce.license:write',
   WORKFORCE_PARAMETER_READ: 'workforce.parameter:read',
   WORKFORCE_PARAMETER_WRITE: 'workforce.parameter:write',
   WORKFORCE_CODE_CONCEPT_READ: 'workforce.code-concept:read',

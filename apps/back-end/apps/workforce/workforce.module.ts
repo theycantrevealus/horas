@@ -10,6 +10,7 @@ import { EmployeePrivateProfileRepositoryModule } from '@repository/mongo/employ
 import { EmployeeRepositoryModule } from '@repository/mongo/employee.module'
 import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
 import { PositionAssignmentRepositoryModule } from '@repository/mongo/position-assignment.module'
+import { ProfessionalLicenseRepositoryModule } from '@repository/mongo/professional-license.module'
 import { PositionRepositoryModule } from '@repository/mongo/position.module'
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
 import { AssignmentService } from './assignment/assignment.service'
@@ -20,6 +21,7 @@ import { OrganizationService } from './structure/organization.service'
 import { ContractService } from './contract/contract.service'
 import { EmployeeService } from './employee/employee.service'
 import { PrivateProfileService } from './private-profile/private-profile.service'
+import { LicenseService } from './license/license.service'
 import { ParameterService } from './parameter/parameter.service'
 import { PositionService } from './structure/position.service'
 import { UnitService } from './structure/unit.service'
@@ -43,6 +45,7 @@ import { UnitService } from './structure/unit.service'
     EmploymentContractRepositoryModule,
     PositionAssignmentRepositoryModule,
     CommitteeMembershipRepositoryModule,
+    ProfessionalLicenseRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -56,6 +59,7 @@ import { UnitService } from './structure/unit.service'
     ContractService,
     AssignmentService,
     CommitteeMembershipService,
+    LicenseService,
   ],
   exports: [
     OrganizationService,
@@ -69,6 +73,7 @@ import { UnitService } from './structure/unit.service'
     ContractService,
     AssignmentService,
     CommitteeMembershipService,
+    LicenseService,
   ],
 })
 export class WorkforceModule {}

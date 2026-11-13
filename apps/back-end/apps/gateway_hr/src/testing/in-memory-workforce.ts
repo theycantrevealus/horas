@@ -10,6 +10,7 @@ import {
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_POSITION,
   REPOSITORY_POSITION_ASSIGNMENT,
+  REPOSITORY_PROFESSIONAL_LICENSE,
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { CommitteeMembershipEntity } from '@repository/mongo/schema/committee-membership'
@@ -22,6 +23,7 @@ import { OrganizationEntity } from '@repository/mongo/schema/organization'
 import { OrganizationUnitEntity } from '@repository/mongo/schema/organization-unit'
 import { PositionEntity } from '@repository/mongo/schema/position'
 import { PositionAssignmentEntity } from '@repository/mongo/schema/position-assignment'
+import { ProfessionalLicenseEntity } from '@repository/mongo/schema/professional-license'
 import {
   InMemoryCodeConcepts,
   InMemoryCommitteeMemberships,
@@ -33,6 +35,7 @@ import {
   InMemoryOrganizations,
   InMemoryOrganizationUnits,
   InMemoryPositionAssignments,
+  InMemoryProfessionalLicenses,
   InMemoryPositions,
 } from '@workforce/testing/in-memory'
 import { createTestFieldCipher } from '@utility/testing/test-field-cipher'
@@ -54,6 +57,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property privateProfiles - Employee private profile repository.
  * @property assignments - Position assignment repository.
  * @property committeeMemberships - Committee membership repository.
+ * @property licenses - Professional license repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -68,6 +72,7 @@ export interface InMemoryWorkforce {
   privateProfiles: InMemoryEmployeePrivateProfiles
   assignments: InMemoryPositionAssignments
   committeeMemberships: InMemoryCommitteeMemberships
+  licenses: InMemoryProfessionalLicenses
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -90,6 +95,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   )
   const assignments = new InMemoryPositionAssignments()
   const committeeMemberships = new InMemoryCommitteeMemberships()
+  const licenses = new InMemoryProfessionalLicenses()
   return {
     organizations,
     facilities,
@@ -102,6 +108,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     privateProfiles,
     assignments,
     committeeMemberships,
+    licenses,
     options: {
       entities: [
         OrganizationEntity,
@@ -115,6 +122,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         EmployeePrivateProfileEntity,
         PositionAssignmentEntity,
         CommitteeMembershipEntity,
+        ProfessionalLicenseEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -128,6 +136,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_EMPLOYEE_PRIVATE_PROFILE, privateProfiles],
         [REPOSITORY_POSITION_ASSIGNMENT, assignments],
         [REPOSITORY_COMMITTEE_MEMBERSHIP, committeeMemberships],
+        [REPOSITORY_PROFESSIONAL_LICENSE, licenses],
       ],
     },
   }
