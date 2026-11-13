@@ -8,6 +8,7 @@ import {
   REPOSITORY_ORGANIZATION,
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_POSITION,
+  REPOSITORY_POSITION_ASSIGNMENT,
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
@@ -18,6 +19,7 @@ import { HrParameterEntity } from '@repository/mongo/schema/hr-parameter'
 import { OrganizationEntity } from '@repository/mongo/schema/organization'
 import { OrganizationUnitEntity } from '@repository/mongo/schema/organization-unit'
 import { PositionEntity } from '@repository/mongo/schema/position'
+import { PositionAssignmentEntity } from '@repository/mongo/schema/position-assignment'
 import {
   InMemoryCodeConcepts,
   InMemoryEmployeePrivateProfiles,
@@ -27,6 +29,7 @@ import {
   InMemoryHrParameters,
   InMemoryOrganizations,
   InMemoryOrganizationUnits,
+  InMemoryPositionAssignments,
   InMemoryPositions,
 } from '@workforce/testing/in-memory'
 import { createTestFieldCipher } from '@utility/testing/test-field-cipher'
@@ -46,6 +49,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property employees - Employee repository.
  * @property contracts - Employment contract repository.
  * @property privateProfiles - Employee private profile repository.
+ * @property assignments - Position assignment repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -58,6 +62,7 @@ export interface InMemoryWorkforce {
   employees: InMemoryEmployees
   contracts: InMemoryEmploymentContracts
   privateProfiles: InMemoryEmployeePrivateProfiles
+  assignments: InMemoryPositionAssignments
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -78,6 +83,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const privateProfiles = new InMemoryEmployeePrivateProfiles(
     createTestFieldCipher(),
   )
+  const assignments = new InMemoryPositionAssignments()
   return {
     organizations,
     facilities,
@@ -88,6 +94,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     employees,
     contracts,
     privateProfiles,
+    assignments,
     options: {
       entities: [
         OrganizationEntity,
@@ -99,6 +106,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         EmployeeEntity,
         EmploymentContractEntity,
         EmployeePrivateProfileEntity,
+        PositionAssignmentEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -110,6 +118,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_EMPLOYEE, employees],
         [REPOSITORY_EMPLOYMENT_CONTRACT, contracts],
         [REPOSITORY_EMPLOYEE_PRIVATE_PROFILE, privateProfiles],
+        [REPOSITORY_POSITION_ASSIGNMENT, assignments],
       ],
     },
   }
