@@ -40,11 +40,11 @@ Rules:
 ## 2. Connections
 
 - Each connection has a name constant in `apps/utility/database/constant.ts`. Use that constant everywhere: in `forRootAsync`, `forFeature` and `@InjectModel`. Never repeat the name as a string literal.
-- Each connection has one `@Global()` connection module in `apps/utility/database/<engine>.ts`. It opens the connection with the driver's `forRootAsync` and a `connectionName`, and provides and exports that connection's transaction manager and change outbox (`CHANGE_OUTBOX`). The outbox belongs to the connection because a change record must be written in the same transaction as its data.
+- Each connection has one `@Global()` connection module in `apps/utility/database/<engine>.ts`. It opens the connection with the driver's `forRootAsync` and a `connectionName`, and provides and exports that connection's transaction manager and change outbox (`CHANGE_OUTBOX`) and its event outbox (`EVENT_OUTBOX`). Each outbox belongs to the connection because a record must be written in the same transaction as its data.
 - Connection modules read settings from the typed config (`inject: [MongoConfig.KEY]` with `ConfigType<typeof MongoConfig>`), following `stack.md` section 3. Never read `process.env` there.
 - Mongo connection modules set `connectionFactory: enableTransactionContext`, so model calls join transactions automatically (section 7).
 - Import connection modules once, in the application's root module. Do not import them in feature modules or nest them inside `RepositoryModule`.
-- To add a database, add a new connection name, connection module, transaction token (`TRANSACTION_MANAGER_<NAME>`) and outbox token (`CHANGE_OUTBOX_<NAME>`, with a relay for it), plus a new config context (`stack.md` section 3.6). Do not reuse an existing connection's name.
+- To add a database, add a new connection name, connection module, transaction token (`TRANSACTION_MANAGER_<NAME>`) and outbox tokens (`CHANGE_OUTBOX_<NAME>` and `EVENT_OUTBOX_<NAME>`, each with a relay), plus a new config context (`stack.md` section 3.6). Do not reuse an existing connection's name.
 
 ## 3. Tokens
 
@@ -219,6 +219,14 @@ A module never writes another module's collections. When other modules must reac
 - Every event has a unique `event_id`. Consumers record handled ids and ignore duplicates, because delivery is at least once.
 - Use the outbox even when both modules share one connection, so the modules can move to separate databases without changing business code.
 - The account and workforce events are listed in `.claude/design/account-and-workforce-collections.md` section 6.
+
+Implementation (`apps/utility/events/`, `apps/utility/database/mongo.event-outbox.ts`):
+
+- Append with `EVENT_OUTBOX` (`@Inject(EVENT_OUTBOX)`) inside the `TransactionManager.run` that writes the data, and build the event with `newEvent()`, which takes the correlation id and time from the request context and creates the `event_id`. Collections: `outbox_events` and `event_relay_state` (the relay's lease). The outbox is not business data and is not recorded in the change history.
+- Event names are `workforce.<aggregate>.<what>`. Names and payload types are in `apps/repository/model/workforce-event.ts`, which every context may import. A consumer never imports another context's service.
+- A consumer implements `EventConsumer` and registers with `EventConsumerRegistry`. It writes its reaction and a `processed_events` record (`ProcessedEventRepository`, unique per consumer and `event_id`, TTL 30 days) in one `run`. `processed_events` is not recorded in the change history.
+- Published entries expire after 7 days (TTL index on the delivery time). Unpublished entries never expire.
+- Tests use `apps/utility/testing/in-memory-event-outbox.ts`; the gateway harness provides it so tests can assert the events.
 
 ## 8. Registering a repository
 

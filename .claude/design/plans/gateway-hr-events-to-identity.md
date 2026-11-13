@@ -1,6 +1,6 @@
 # HR events to identity
 
-Status: **In discussion** (2026-11-13). Not an endpoint group: it sits between `2.3 Employment contracts` and `2.4 Position assignments` in `2026-11-10-gateway-hr-plan.md` (row 9a). Design: `../account-and-workforce-collections.md` 6.1 to 6.4 and 6.6, `../data-change-history.md`, `../../rules/back-end/database.md` 7.1. Existing pattern to follow: the change outbox and its relay (`logging.md` 13, `apps/worker/src/change-relay/`).
+Status: **Done** (2026-11-13): B1 PR #29, B2 PR #30. The decisions below are as built. Not an endpoint group: it sits between `2.3 Employment contracts` and `2.4 Position assignments` in `2026-11-10-gateway-hr-plan.md` (row 9a). Design: `../account-and-workforce-collections.md` 6.1 to 6.4 and 6.6, `../data-change-history.md`, `../../rules/back-end/database.md` 7.1. Existing pattern to follow: the change outbox and its relay (`logging.md` 13, `apps/worker/src/change-relay/`).
 
 **This plan changes how accounts are disabled, so under `git-workflow.md` 5 it needs your explicit decision before any code.** It touches the identity module (holds and sessions) and adds a second outbox, a second relay and a new consumer.
 
@@ -93,10 +93,10 @@ Tests come first in each task.
 
 | PR | Kind | Content |
 |---|---|---|
-| A | Docs | Group 2.3 status updates and this plan (branch `docs/workforce-contracts`). |
-| B1 | Code | Event outbox, emitters, relay (branch `feat/worker-event-relay`). |
-| B2 | Code | Identity consumer, `processed_events`, hold reactions (branch `feat/identity-workforce-events`). |
-| C | Docs | After B2 merges: `authentication.md` (the account holds from HR events, what is still manual), `database.md` (event outbox), `workforce.md` (events, "not built yet"), `logging.md` (the relay's log events), and status updates. |
+| A | Docs | Group 2.3 status updates and this plan (PR #28). |
+| B1 | Code | Event outbox, emitters, relay (PR #29). |
+| B2 | Code | Identity consumer, `processed_events`, hold reactions (PR #30). |
+| C | Docs | Done (branch `docs/workforce-hr-events`): `authentication.md` (the account holds from HR events, what is still manual), `database.md` (event outbox), `workforce.md` (events, "not built yet"), `logging.md` (the relay's log events), and status updates. |
 
 ## 7. Review focus
 

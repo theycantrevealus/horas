@@ -323,3 +323,19 @@ At least one of stdout or file must be enabled; the schema rejects a configurati
 - Test the relay with a fake outbox (`apps/worker/src/change-relay/change-relay.service.spec.ts`): order, lease, failure, rejection, lag.
 - Repository tests against a real replica set (`MongoMemoryReplSet`) assert the outbox content: one record per committed write, none after rollback, one after a retried transaction.
 - Every model has a classification; `apps/repository/model/classification.spec.ts` fails otherwise.
+
+## 14. Event relay log entries
+
+The worker's `EventRelayService` (`apps/worker/src/event-relay/`) publishes the event outbox (`database.md` 7.1) the way `ChangeRelayService` publishes the change outbox, and writes only operational entries through `AppLogger`. Never the events or their payloads.
+
+| Entry | Level | When |
+|---|---|---|
+| `event: 'event_relay'` | `log` | One summary per pass that found events: `outcome` (`success` or `failure`), `count` (delivered), `durationMs`, and `error` (class name) and `retryable` on failure. Never one entry per event. A pass with no registered consumer writes one `debug` entry (`outcome: 'idle'`). |
+| `event: 'event_relay_mark_failed'` | `warn` | Counting a failed attempt on the event (`attempts`, `last_error`) itself failed. The event stays pending and is retried. |
+| `event: 'event_relay_lag'` | `warn` | The oldest pending event is older than `EVENT_RELAY_MAX_LAG_SECONDS`. Alert on it. |
+
+- Events leave in outbox order and a failing event stops the pass, so one event that cannot succeed blocks the ones behind it. The lag entry is the signal.
+- Each event is handled inside a request context with its own `correlation_id` and the system actor `event-relay` (the hold itself is placed by `workforce-events`), so the change record, the security audit entry and the log line of the reaction share the correlation id of the original HR request.
+- A consumer that reacts to an event writes one `event: 'account_lifecycle'` entry per reaction (identity: `AccountLifecycleService`) with the outcome and no values.
+- Configuration is the optional context `events.env` (`stack.md` 3.6): `EVENT_RELAY_INTERVAL_MS` (1000), `EVENT_RELAY_BATCH_SIZE` (100, 1 to 1000), `EVENT_RELAY_MAX_LAG_SECONDS` (300). Read it through `EventsConfig`. Only the worker loads it.
+- Tests: `event-relay.service.spec.ts` (fake outbox and consumers) and `event-relay.identity.spec.ts` (relay, consumer and in-memory identity together).

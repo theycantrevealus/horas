@@ -54,12 +54,30 @@ export class LovController {
 - Unknown identifier, wrong password and lockout answer with the same body and take the same time. Only after a correct password does the service say why an account cannot sign in (`account_unavailable`).
 - Never log or store attempted passwords or login names. `security_events` holds identifiers, reason codes, a hash of the user agent and the client address, and expires by TTL.
 
-## 5. Not built yet (decisions)
+## 5. Holds from HR events
+
+`WorkforceEventConsumer` (`apps/identity/events/`, in its own `IdentityEventsModule`, which imports only the account, session and `processed_events` repositories, so the worker needs no JWT secret) reacts to `workforce.employee.status_changed`. Plan: `.claude/design/plans/gateway-hr-events-to-identity.md` (H5 to H12).
+
+| New status | Reaction on the account linked to the employee |
+|---|---|
+| `suspended` | Place a `suspend` hold (reason `employment_suspended`, source `workforce`, `source_ref` the event id) and end every session. |
+| `probation`, `active` | Lift only holds of source `workforce` with the reason `employment_suspended`. Security holds, administrator holds and `employment_ended` holds stay. |
+| `separated` | Place a `disable` hold (reason `employment_ended`) and end every session. Nothing an event does lifts it. |
+
+- No account, or a closed account: the event is ignored. Contract events are recorded as handled and ignored (H7).
+- The hold, the session revocation and the `processed_events` record (consumer name, `event_id` unique, TTL 30 days) share one transaction, so a redelivery does nothing. Each change bumps `authz_version`, so the account's access token fails at its next request with `token_stale`.
+- The system actor is `workforce-events`. The request context carries the event's `correlation_id`. Each hold placed or lifted also writes a `security_events` entry (`account_hold_placed`, `account_hold_lifted`, reason code and event id, no values).
+- A separation takes effect as soon as the event is handled, not at the end of the effective date in the facility's zone (H6). Access is lost up to a day early, never late.
+- A hold of source `workforce` cannot be lifted through the administrator API; an `employment_ended` hold needs the account request, which is not built (section 6).
+- A payload that is not what the emitter writes raises `InvalidWorkforceEventError`. The relay stops at that event and retries (`logging.md` 14); it is never skipped.
+- **A worker that is down means holds are not applied.** Alert on `event_relay_lag` and keep at least one worker running.
+
+## 6. Not built yet (decisions)
 
 - **Multi-factor authentication.** Accounts with `mfa_required` cannot sign in (`mfa_unavailable`) instead of skipping the second factor.
 - **SSO / federated identities** and the identity-provider collections.
 - **Account requests and approval** (design 6.10). `POST /v1/accounts` creates accounts directly. It does not check that the employee exists in HRM (no `WORKFORCE_DIRECTORY` port yet), and a `disable` hold can only be lifted through that missing flow.
 - **Scoped permissions.** Only `tenant`-scope bindings grant permissions. Organization, facility and unit bindings grant nothing until a scope-aware check exists, so a unit-level role can never act tenant-wide.
-- **Two-person approval** of privileged roles (`approved_by`), role derivation from HR assignments, HR event consumers and the reconciliation job.
+- **Two-person approval** of privileged roles (`approved_by`), role derivation from HR assignments, the tenant policy `account_lifecycle_policy` and the nightly reconciliation job. HR status events are consumed (section 5); the rest of design 6.3 to 6.6 is not.
 - **Request throttling by address.** Only per-account lockout exists; add rate limiting at the gateway or proxy. Behind a proxy, configure Fastify `trustProxy` so the logged address is the client's.
 - **First administrator.** Nothing creates the first account, role and binding. Insert them with a seed script or `mongosh` for a new tenant.
