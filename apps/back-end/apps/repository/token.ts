@@ -100,3 +100,10 @@ export const REPOSITORY_PROCESSED_EVENT = Symbol('REPOSITORY_PROCESSED_EVENT')
 export const REPOSITORY_POSITION_ASSIGNMENT = Symbol(
   'REPOSITORY_POSITION_ASSIGNMENT',
 )
+
+/**
+ * Injection token for the committee membership repository (who sits on a facility's committees).
+ */
+export const REPOSITORY_COMMITTEE_MEMBERSHIP = Symbol(
+  'REPOSITORY_COMMITTEE_MEMBERSHIP',
+)

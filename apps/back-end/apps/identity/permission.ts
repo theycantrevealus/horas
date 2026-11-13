@@ -31,6 +31,8 @@ export const PERMISSIONS = {
   WORKFORCE_CONTRACT_TERMINATE: 'workforce.contract:terminate',
   WORKFORCE_ASSIGNMENT_READ: 'workforce.assignment:read',
   WORKFORCE_ASSIGNMENT_WRITE: 'workforce.assignment:write',
+  WORKFORCE_COMMITTEE_MEMBERSHIP_READ: 'workforce.committee-membership:read',
+  WORKFORCE_COMMITTEE_MEMBERSHIP_WRITE: 'workforce.committee-membership:write',
   WORKFORCE_PARAMETER_READ: 'workforce.parameter:read',
   WORKFORCE_PARAMETER_WRITE: 'workforce.parameter:write',
   WORKFORCE_CODE_CONCEPT_READ: 'workforce.code-concept:read',

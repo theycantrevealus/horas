@@ -12,6 +12,10 @@ import {
 import { InMemoryRepository } from '@utility/testing/in-memory-repository'
 import { type CodeConceptRepository } from '@repository/interface/code-concept'
 import { type FacilityRepository } from '@repository/interface/facility'
+import {
+  type CommitteeMembershipRepository,
+  type FacilityMembershipQuery,
+} from '@repository/interface/committee-membership'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type PositionAssignmentRepository,
@@ -34,6 +38,7 @@ import { type PositionRepository } from '@repository/interface/position'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
+import { type CommitteeMembership } from '@repository/model/committee-membership'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
 import { type Employee } from '@repository/model/employee'
@@ -1586,6 +1591,152 @@ export class InMemoryPositionAssignments
     if (secondPrimary || secondHead) {
       throw new RepositoryConflictError('duplicate assignment', {
         operation: 'PositionAssignmentRepository.write',
+      })
+    }
+  }
+}
+
+/**
+ * In-memory `CommitteeMembershipRepository` for tests. It applies the unique indexes of the Mongo
+ * collection: one active membership per person per committee of a facility, and one active chair
+ * and one active secretary per committee.
+ */
+export class InMemoryCommitteeMemberships
+  extends InMemoryRepository<CommitteeMembership>
+  implements CommitteeMembershipRepository
+{
+  /**
+   * Creates a membership, refusing a second active one for the same person and committee, or a
+   * second active chair or secretary.
+   *
+   * @param entity - Membership data.
+   * @param id - Optional identifier.
+   * @returns The stored membership.
+   */
+  override async create(
+    entity: NewEntity<CommitteeMembership>,
+    id?: string,
+  ): Promise<CommitteeMembership> {
+    this.assertUnique(entity)
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds the memberships of a facility's committees.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - The facility.
+   * @param query - Optional filters and paging.
+   * @returns The memberships, ordered by committee code, start date and identifier.
+   */
+  async findByFacility(
+    tenantId: string,
+    facilityId: string,
+    query: FacilityMembershipQuery = {},
+  ): Promise<CommitteeMembership[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.facility_id === facilityId &&
+        !item.deleted_at &&
+        (!query.committee || item.committee.code === query.committee) &&
+        (!query.role || item.role.code === query.role) &&
+        (!query.status || item.status === query.status),
+    )
+      .sort(
+        (left, right) =>
+          left.committee.code.localeCompare(right.committee.code) ||
+          left.period.start.localeCompare(right.period.start) ||
+          left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the active membership of an employee in one committee of a facility.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param facilityId - The facility.
+   * @param committeeCode - Committee code.
+   * @returns The active membership, or `null`.
+   */
+  async findActiveForEmployee(
+    tenantId: string,
+    employeeId: string,
+    facilityId: string,
+    committeeCode: string,
+  ): Promise<CommitteeMembership | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.facility_id === facilityId &&
+        item.committee.code === committeeCode &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the active membership with a given role in one committee of a facility.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - The facility.
+   * @param committeeCode - Committee code.
+   * @param roleCode - Role code.
+   * @returns The first active membership with that role, or `null`.
+   */
+  async findActiveByRole(
+    tenantId: string,
+    facilityId: string,
+    committeeCode: string,
+    roleCode: string,
+  ): Promise<CommitteeMembership | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.facility_id === facilityId &&
+        item.committee.code === committeeCode &&
+        item.role.code === roleCode &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Applies the unique indexes to a membership that is about to be stored.
+   *
+   * @param membership - The membership as it will be stored.
+   * @throws RepositoryConflictError when an index would be broken.
+   */
+  private assertUnique(
+    membership: Pick<
+      CommitteeMembership,
+      'tenant_id' | 'employee_id' | 'facility_id' | 'committee' | 'role' | 'status'
+    >,
+  ): void {
+    if (membership.status !== 'active') {
+      return
+    }
+    const others = [...this.items.values()].filter(
+      (item) =>
+        item.tenant_id === membership.tenant_id &&
+        item.facility_id === membership.facility_id &&
+        item.committee.code === membership.committee.code &&
+        item.status === 'active',
+    )
+    const secondRole = others.some(
+      (item) => item.employee_id === membership.employee_id,
+    )
+    const secondSingle =
+      (membership.role.code === 'chair' ||
+        membership.role.code === 'secretary') &&
+      others.some((item) => item.role.code === membership.role.code)
+    if (secondRole || secondSingle) {
+      throw new RepositoryConflictError('duplicate membership', {
+        operation: 'CommitteeMembershipRepository.write',
       })
     }
   }
