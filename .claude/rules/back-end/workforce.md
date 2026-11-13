@@ -78,6 +78,20 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
 | `workforce.code-concept:manage` | `POST /v1/code-concepts`, `PATCH /v1/code-concepts/:id`, `POST /v1/code-concepts/import` |
 
+## 4a. Events
+
+Workforce writes events to the event outbox in the same transaction as the data (`database.md` 7.1). Plan: `.claude/design/plans/gateway-hr-events-to-identity.md`.
+
+| Event | Emitted by | Payload |
+|---|---|---|
+| `workforce.employee.status_changed` | `EmployeeService.changeStatus` | `employee_id`, `from_status`, `to_status`, `effective_date` |
+| `workforce.contract.activated`, `.ended`, `.terminated` | `ContractService` | `contract_id`, `employee_id`, `organization_id` |
+
+- A refused change (invalid transition, stale version, failed activation) writes no event. Registering an employee emits nothing.
+- Payloads hold identifiers, codes and dates only, never a name, number, contact, reason or note.
+- Identity reacts to status changes with account holds (`authentication.md` 5). Contract events are published and ignored for now. Delivery is at least once, in order, by the worker's relay (`logging.md` 14); the worker must be running for holds to be applied.
+- A new HR event adds its name and payload to `workforce-event.ts`, an emit inside the writing transaction, and a test that it is written once, with the right correlation id and no personal values.
+
 ## 5. Adding an HR area
 
 1. Read the group in `hr-endpoints.md` and its plan in `.claude/design/plans/`; settle the open decisions with the user first.
@@ -106,5 +120,5 @@ No first administrator exists (`authentication.md` 5). To call HR endpoints by h
 ## 7. Not built yet
 
 - Every HR group after organizations (see `hr-endpoints.md` for the order), and the repositories for their collections.
-- HR events to the identity module, account requests, role derivation, expiry and eligibility jobs, notifications (the worker).
+- Account requests, role derivation, assignment and committee events, the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
 - Scoped permissions (unit and own-record access), field encryption of personal identifiers (arrives with the private profile), file uploads.
