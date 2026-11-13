@@ -88,3 +88,8 @@ export const REPOSITORY_EMPLOYEE_PRIVATE_PROFILE = Symbol(
 export const REPOSITORY_EMPLOYMENT_CONTRACT = Symbol(
   'REPOSITORY_EMPLOYMENT_CONTRACT',
 )
+
+/**
+ * Injection token for the processed event repository (events a consumer already handled).
+ */
+export const REPOSITORY_PROCESSED_EVENT = Symbol('REPOSITORY_PROCESSED_EVENT')

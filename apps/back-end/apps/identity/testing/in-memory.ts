@@ -3,13 +3,17 @@ import { type AccountRepository } from '@repository/interface/account'
 import { type AccountRoleBindingRepository } from '@repository/interface/account-role-binding'
 import { type AccountSessionRepository } from '@repository/interface/account-session'
 import { type RoleRepository } from '@repository/interface/role'
+import { type ProcessedEventRepository } from '@repository/interface/processed-event'
 import { type SecurityEventRepository } from '@repository/interface/security-event'
 import { type Account } from '@repository/model/account'
 import { type AccountCredential } from '@repository/model/account-credential'
 import { type AccountRoleBinding } from '@repository/model/account-role-binding'
 import { type AccountSession } from '@repository/model/account-session'
+import { type ProcessedEvent } from '@repository/model/processed-event'
 import { type Role } from '@repository/model/role'
 import { type SecurityEvent } from '@repository/model/security-event'
+import { RepositoryConflictError } from '@utility/database/error'
+import { type NewEntity } from '@utility/database/interface'
 import { InMemoryRepository } from '@utility/testing/in-memory-repository'
 
 /**
@@ -296,5 +300,63 @@ export class InMemoryBindings
         item.period.start <= at &&
         (item.period.end === null || item.period.end > at),
     )
+  }
+}
+
+/**
+ * In-memory processed event repository. Follows the Mongo unique index on consumer and event.
+ */
+export class InMemoryProcessedEvents
+  extends InMemoryRepository<ProcessedEvent>
+  implements ProcessedEventRepository
+{
+  /**
+   * Creates a record, refusing a second one for the same consumer and event.
+   *
+   * @param entity - Record data.
+   * @param id - Optional identifier.
+   * @returns The stored record.
+   */
+  override async create(
+    entity: NewEntity<ProcessedEvent>,
+    id?: string,
+  ): Promise<ProcessedEvent> {
+    if (
+      [...this.items.values()].some(
+        (item) =>
+          item.consumer === entity.consumer &&
+          item.event_id === entity.event_id,
+      )
+    ) {
+      throw new RepositoryConflictError('duplicate processed event', {
+        operation: 'ProcessedEventRepository.create',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds the record that a consumer handled an event.
+   *
+   * @param consumer - Name of the consumer.
+   * @param eventId - Identifier of the event.
+   * @returns The record, or `null`.
+   */
+  async findByEvent(
+    consumer: string,
+    eventId: string,
+  ): Promise<ProcessedEvent | null> {
+    return this.find(
+      (item) => item.consumer === consumer && item.event_id === eventId,
+    )
+  }
+
+  /**
+   * Counts the stored records, for tests.
+   *
+   * @returns The number of records.
+   */
+  size(): number {
+    return this.items.size
   }
 }
