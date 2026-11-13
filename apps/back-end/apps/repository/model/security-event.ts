@@ -15,6 +15,8 @@ export type SecurityEventType =
   | 'password_changed'
   | 'password_reset'
   | 'session_revoked'
+  | 'account_hold_placed'
+  | 'account_hold_lifted'
 
 /**
  * One authentication event. Append-only, with a retention period: the repository sets

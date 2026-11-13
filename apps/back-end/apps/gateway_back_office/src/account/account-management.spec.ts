@@ -716,6 +716,39 @@ describe('account management gateway (in-memory repositories)', () => {
     ).toBe(200)
   })
 
+  it('does not let an administrator lift the hold that an HR event placed', async () => {
+    const staff = await provision(adminToken, 'hr.held')
+    const account = (await accounts.findOne(staff.id))!
+    await accounts.update(staff.id, {
+      holds: [
+        {
+          kind: 'disable',
+          reason: 'employment_ended',
+          source: 'workforce',
+          source_ref: 'event-1',
+          placed_by: {
+            account_id: null,
+            display_name: 'workforce-events',
+            kind: 'system',
+          },
+          placed_at: new Date(),
+        },
+      ],
+      status: 'disabled',
+      authz_version: account.authz_version + 1,
+    })
+
+    const lifted = await call(
+      'DELETE',
+      `/v1/accounts/${staff.id}/holds`,
+      adminToken,
+    )
+
+    expect(lifted.status).toBe(404)
+    expect(lifted.body).toMatchObject({ code: 'hold_not_found' })
+    expect((await accounts.findOne(staff.id))?.status).toBe('disabled')
+  })
+
   it('does not let an administrator reach accounts of another tenant', async () => {
     const other = (await login(otherTenantId, 'other-admin', ADMIN_PASSWORD))
       .body?.accessToken
