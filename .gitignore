@@ -30,3 +30,9 @@ logs/
 .nvmrc
 *.env
 .vscode
+
+# Agent task state (per branch, local only; see .claude/rules/task-state.md)
+.claude/state/*
+!.claude/state/README.md
+!.claude/state/TEMPLATE.md
+!.claude/state/SERIES-TEMPLATE.md
