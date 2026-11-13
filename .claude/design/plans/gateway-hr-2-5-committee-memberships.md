@@ -1,6 +1,6 @@
 # gateway_hr 2.5: Committee memberships
 
-Status: **Confirmed** (2026-11-13). Decisions M1 to M15 confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 11). Endpoints: `../hr-endpoints.md` 2.5. Collection: `../account-and-workforce-collections.md` 4.7 and 10, `../human-resource-collections.md` 4.1 and section 2. Model: `apps/back-end/apps/repository/model/committee-membership.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: assignments (2.4, `gateway-hr-2-4-position-assignments.md`) for dates in the facility's zone, and facilities (1.2).
+Status: **Built** (2026-11-13, PR #35 merged). Decisions M1 to M15 confirmed as proposed, with the addition in section 9. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 11). Endpoints: `../hr-endpoints.md` 2.5. Collection: `../account-and-workforce-collections.md` 4.7 and 10, `../human-resource-collections.md` 4.1 and section 2. Model: `apps/back-end/apps/repository/model/committee-membership.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: assignments (2.4, `gateway-hr-2-4-position-assignments.md`) for dates in the facility's zone, and facilities (1.2).
 
 A committee membership says who sits on a facility's committee (Komite Medik, Komite Keperawatan, ...) and in which role: chair, secretary, member or mitra bestari. Committees are not positions in the organization chart. Identity will read memberships later to derive roles, and credentialing (group 4) will read them to find who may review an application. This group only records them.
 
@@ -83,3 +83,10 @@ Tests come first in each task.
 ## 8. Decisions that need your answer
 
 Confirmed as proposed: M4 (no future appointments), M5 (one role per person per committee), M6 (one chair and one secretary), M7 (employees only, no external assessors) and M9 (separation does not end memberships yet). The others are proposed as stated.
+
+## 9. As built (PR #35)
+
+- **End date in the past.** An appointment's `end`, when given, may not be before today in the facility's zone (422 `invalid_period`), so no membership is created already over. Not in the plan above (M3).
+- **Conflicts.** `membership_exists`, `chair_exists` and `secretary_exists` are decided by checks before the write; when two requests race, the unique index decides and the service repeats the checks to name the conflict.
+- **Reuse.** The decision-number check and `addDays` come from `workforce/assignment/assignment-rules.ts`; move them to a shared place when a third area needs them.
+- **Known gaps.** Separating an employee does not end their memberships (M9), no event is emitted (M12), and the Mongo indexes were tested only through the in-memory fake, not against a replica set.

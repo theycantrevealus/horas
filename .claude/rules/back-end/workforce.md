@@ -14,6 +14,8 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. `structure/unit-tree.ts` builds the organization chart from a flat list. |
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
 | `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
+| `apps/workforce/committee/` | `CommitteeMembershipService` (list, appoint, end) and the date checks (`committee-rules.ts`). Dates use the facility's time zone. |
+| `apps/workforce/assignment/` | `AssignmentService` (list by employee and by unit, create, end) and the assignment rules (`assignment-rules.ts`: period, FTE, decision number, overlap). Creating and ending run in one transaction with the employee's `primary_assignment` summary. Local dates use the facility's time zone, read through the position's unit. |
 | `apps/workforce/contract/` | `ContractService` (list, get, create, correct a draft, activate, end, terminate) and the contract rules (`contract-rules.ts`). Activating, ending and terminating run in one transaction with the employee's `current_employment` summary. |
 | `apps/workforce/employee/` | `EmployeeService` (search, get, own record, register, update, status change), the name and work-contact checks (`names.ts`, `contacts.ts`) and the status transition table (`status.ts`). |
 | `apps/workforce/private-profile/` | `PrivateProfileService` (confidential profile: save, replace identifiers and bank accounts, reveal, own profile), the identifier formats (`identifier-formats.ts`) and the bank account checks (`bank-accounts.ts`). Secrets are encrypted, hashed and masked in the repository, never here. |
@@ -73,10 +75,27 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.contract:terminate` | `POST /v1/contracts/:id/terminate` |
 | `workforce.position:read` | `GET /v1/positions`, `GET /v1/positions/:id` |
 | `workforce.position:write` | `POST /v1/positions`, `PATCH /v1/positions/:id`, `POST /v1/positions/:id/close` |
+| `workforce.assignment:read` | `GET /v1/employees/:id/assignments`, `GET /v1/units/:id/assignments` |
+| `workforce.assignment:write` | `POST /v1/assignments`, `POST /v1/assignments/:id/end` |
+| `workforce.committee-membership:read` | `GET /v1/committee-memberships` |
+| `workforce.committee-membership:write` | `POST /v1/committee-memberships`, `POST /v1/committee-memberships/:id/end` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
 | `workforce.parameter:write` | `POST /v1/parameters` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
 | `workforce.code-concept:manage` | `POST /v1/code-concepts`, `PATCH /v1/code-concepts/:id`, `POST /v1/code-concepts/import` |
+
+## 3a. Assignments
+
+- An employee has at most one open primary assignment and a head-of-unit position at most one open holder (partial unique indexes on `is_open`). Other checks (409 `fte_exceeded`, `headcount_exceeded`) read then write, so two simultaneous creates can both pass.
+- Overlapping open assignments under one contract must not exceed the contract's `fte`. Acting assignments do not count against a position's budgeted headcount.
+- An assignment lies inside its contract's period; acting and secondment need an end date. It is created `planned` when it starts after today in the facility's zone, otherwise `active`. Nothing activates a planned assignment yet.
+- Assignments are never edited or deleted: end one (`POST /assignments/:id/end`) and create another. A position with an open assignment cannot be closed (409 `position_in_use`).
+
+## 3b. Committee memberships
+
+- A person has at most one active membership in a committee of a facility (409 `membership_exists`); a committee of a facility has at most one active chair and one active secretary (409 `chair_exists`, `secretary_exists`). Partial unique indexes on `status: 'active'` back the checks.
+- The committee and the role are codes (`id.committee`, `id.committee-role`), checked with `assertActive`. The member must be an employee of the tenant who has not separated; the facility must be active.
+- An appointment starts no later than tomorrow in the facility's zone and its end, if given, is not in the past; a membership ends on a date from its start to tomorrow. Nothing is edited or deleted: end a membership and appoint again.
 
 ## 4a. Events
 
@@ -120,5 +139,5 @@ No first administrator exists (`authentication.md` 5). To call HR endpoints by h
 ## 7. Not built yet
 
 - Every HR group after organizations (see `hr-endpoints.md` for the order), and the repositories for their collections.
-- Account requests, role derivation, assignment and committee events, the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
+- Account requests, role derivation, assignment and committee events, activation of planned assignments and ending assignments when an employee separates (a worker job or an event consumer), the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
 - Scoped permissions (unit and own-record access), field encryption of personal identifiers (arrives with the private profile), file uploads.

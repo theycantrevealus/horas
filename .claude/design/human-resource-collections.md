@@ -44,7 +44,7 @@ Changes to `account-and-workforce-collections.md` section 4, found while plannin
 | `code_concepts` | `tenant_id` is `null` for platform-wide concepts. A tenant concept with the same `system` and `code` overrides the platform one. | One Indonesian or ISCO concept list shared by all tenants, with local additions. |
 | `employee_private_profiles` | `identifiers` hold only `value_masked`, `value_hash` and the encrypted value; writes take a separate input shape with the plain `value`. `birth_date` is stored encrypted. `family_members` carry no identifiers until payroll needs them. | Plain values never leave the repository except through one reveal method. |
 | `position_assignments` | Add `is_open: boolean` (true while `planned` or `active`). The "one primary per employee" and "one head per unit" unique indexes filter on `is_open: true`. | MongoDB partial indexes cannot use `$in` or `$ne`. |
-| `committee_memberships` | Implemented with credentialing (section 4), not with the core. | Only credentialing uses committees. |
+| `committee_memberships` | Built as group 2.5, before credentialing (section 4), which reuses it. | The walkthrough order keeps 2.5 ahead of licences; credentialing and role derivation read the collection. |
 
 ## 3. Professional licences (HR spec section 6)
 

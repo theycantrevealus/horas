@@ -1,6 +1,6 @@
 # gateway_hr 2.4: Position assignments
 
-Status: **Confirmed** (2026-11-13). Decisions A1 to A21 confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 10). Endpoints: `../hr-endpoints.md` 2.4. Collection: `../account-and-workforce-collections.md` 4.6 and 10, `../human-resource-collections.md` section 2 (`is_open`), HR specification 9.2. Model: `apps/back-end/apps/repository/model/position-assignment.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: positions (1.5), employees (2.1), contracts (2.3), events (`gateway-hr-events-to-identity.md`).
+Status: **Built** (2026-11-13, PR #31 merged). Decisions A1 to A21 confirmed as proposed, with the three differences in section 9. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 10). Endpoints: `../hr-endpoints.md` 2.4. Collection: `../account-and-workforce-collections.md` 4.6 and 10, `../human-resource-collections.md` section 2 (`is_open`), HR specification 9.2. Model: `apps/back-end/apps/repository/model/position-assignment.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: positions (1.5), employees (2.1), contracts (2.3), events (`gateway-hr-events-to-identity.md`).
 
 An assignment says which position a person holds, in which unit and facility, from when to when, and at what fraction of full time. It is the history of hires, transfers, promotions, acting appointments and secondments. It also finishes two things earlier groups left open: the employee's `primary_assignment` summary (always `null` so far) and the facility's time zone for local dates, which the HR events plan (H6) postponed until assignments exist.
 
@@ -35,7 +35,7 @@ No `GET /assignments/:id` and no `PATCH`: see A13 and A14. Permissions (new): `w
 | A14 | **No edit and no delete.** A wrong assignment is ended on its start date and a new one created, so the history stays complete. A correction endpoint can come with the roster group if needed. | As stated. |
 | A15 | **Activation of planned assignments.** Options: (a) none now; the assignment stays `planned` until the worker has a daily job (documented gap, like contracts T12), (b) a `POST /assignments/:id/activate` endpoint like `POST /contracts/:id/activate`, (c) activate lazily when the employee or unit is read. Proposed: (a), with the status computed from dates by the future job, and the summary (A10) set when it activates. | (a) |
 | A16 | **Reaction to other changes (not in this group).** Separating an employee does **not** end their assignments yet (the HR events plan ignores assignments); ending a position's unit does not either. Both need a decision: end all open assignments on the separation date in the same transaction, or consume the `status_changed` event inside workforce. Proposed: consume the event in a later group and keep assignments untouched here. Until then, an HR admin ends them by hand. | Later. |
-| A17 | **Positions and units.** Closing a position or a unit while it has an open assignment should be refused (409 `position_in_use`, `unit_in_use`). Today it is not. This group adds the check to `PositionService.close` and `OrganizationUnitService.close`. It changes two existing endpoints. | Add the checks. |
+| A17 | **Positions and units.** Closing a position or a unit while it has an open assignment should be refused. Built for positions only (409 `position_in_use`): a unit cannot close while it has active positions, and a position cannot close with open assignments, so a unit check would never fire (section 9). It changes two existing endpoints. | Add the checks. |
 | A18 | **Decision reference.** `decisionNumber` (SK number, up to 80 characters) is stored as `decision_ref.number` with no document yet (needs the file service, as T8). | As stated. |
 | A19 | **Events.** No event is emitted. The role-derivation and eligibility consumers that need `assignment.created` and `.ended` are not built (events plan H13), so adding the events now would publish to no consumer. They come with the group that reads them. | None now. |
 | A20 | **Parents and tenant.** All foreign ids follow `workforce.md` 3: a missing, malformed or other-tenant id in a path answers 404 (`employee_not_found`, `unit_not_found`, `assignment_not_found`); in a body it answers 422. | As stated. |
@@ -100,3 +100,11 @@ Tests come first in each task.
 ## 8. Decisions that need your answer
 
 A5 and A15 (planned activation), A8 (two steps or an atomic transfer), A12 (does acting count against headcount), A16 (separation does not end assignments yet), A17 (the two closing checks change existing endpoints) and A21 (the overlap race). The others are proposed as stated.
+
+## 9. As built (PR #31)
+
+- **A17.** Only `PositionService.close` got the check (409 `position_in_use`). `UnitService.close` is unchanged.
+- **Facility of a position.** Positions have no `facility_id`; the service reads it from the position's unit (`unit.facility_id`).
+- **Employee summary.** `primary_assignment` was added to the updatable fields of `EmployeeRepository`, so the assignment service can keep it in step. `PATCH /employees/:id` still cannot send it.
+- **Known gap (A21).** The FTE and headcount checks read then write. Two simultaneous creates can both pass; the primary and head indexes still hold.
+- **Still open.** Planned assignments are not activated until the worker has a daily job (A15). Separating an employee does not end their assignments (A16).
