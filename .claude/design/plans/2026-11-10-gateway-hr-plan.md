@@ -1,6 +1,6 @@
 # gateway_hr Plan
 
-Status: **In progress** (2026-11-10). Groups 1.1 to 1.3 built (PR #7, #10, #14). Replaces `2026-11-07-workforce-core-implementation.md`.
+Status: **In progress** (2026-11-10). Groups 1.1 to 2.4 and the HR events to identity are built (PR #7 to #31, see section 3). Replaces `2026-11-07-workforce-core-implementation.md`.
 
 **Goal:** a new NestJS application `gateway_hr`, built like `gateway_back_office`, that serves the HR endpoints of `../hr-endpoints.md` on top of the approved collections (`../human-resource-collections.md`, `../account-and-workforce-collections.md`).
 
@@ -42,7 +42,7 @@ Each HR area has a domain folder in `workforce/` (services and rules) and an HTT
 | 0 | Commit the models | Two PRs, documentation and code, never mixed (#5 models, #6 documents). | Done |
 | 1 | Shared foundations | Built inside the first code PR (group 1.1) and then group by group, never in advance: `@workforce` alias, workforce errors, filter and logging helper, shared in-memory test repository and commit scopes arrive with 1.1; field encryption arrives with 2.2 (private profile); local-date validation with the first group that stores dates. | Partly done in PR #7 (alias, errors, filter, logging helper, shared test repository, commit scopes) |
 | 2 | Application skeleton | `gateway_hr` project in `nest-cli.json`, `tsconfig`, `main.ts` (`NODE_PORT=3001`), root module, health endpoint, `package.json` scripts (build, dev, type-check). Built in the group 1.1 PR. | Done (PR #7) |
-| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 to 2.3 and the HR events to identity done, then 2.4 |
+| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 to 2.4 and the HR events to identity done, then 2.5 |
 | 4 | Docs and checks | `workforce.md` rule file, `authentication.md` update, lint, type-check, full test suite on Node 22, each time a group is finished. | `workforce.md` written (docs PR after 1.1); repeated per group |
 
 ## 3. Walkthrough order
@@ -61,7 +61,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 8 | 2.2 Private profile | 6 | Done (`gateway-hr-2-2-private-profile.md`) | Built, PR #25 |
 | 9 | 2.3 Employment contracts | 7 | Done (`gateway-hr-2-3-employment-contracts.md`) | Built, PR #27 |
 | 9a | HR events to identity (not an endpoint group) | 0 | Done (`gateway-hr-events-to-identity.md`) | Built, PR #29 and #30 |
-| 10 | 2.4 Position assignments | 4 | — | — |
+| 10 | 2.4 Position assignments | 4 | Done (`gateway-hr-2-4-position-assignments.md`, PR #33) | Built, PR #31 |
 | 11 | 2.5 Committee memberships | 3 | — | — |
 | 12 | 3.1 Licences | 7 | — | — |
 | 13 | 3.2 Professional credits | 6 | — | — |
@@ -90,11 +90,11 @@ Each is settled when we reach the group that first needs it. The proposed defaul
 | D2 | "Own record" and "units I head" access | "Own" through the account's `employee_id` now; Head of Unit access stays tenant-wide until scoped permissions exist. | 2.1 Employee records |
 | D3 | File uploads (licence scans, SPK letters) | Accept file references only; no file service yet. | 3.1 Licences |
 | D4 | CSV imports | `text/csv` request body with a size limit; parse with the `csv-parse` package. | 5.2 Holiday calendars |
-| D5 | Scheduled jobs and alerts | Out of scope: expiry jobs, eligibility re-checks and notifications go to the worker in a later task. | 3.1 Licences |
+| D5 | Scheduled jobs and alerts | The worker exists (change relay, event relay). Expiry jobs, eligibility re-checks, the daily activation of planned assignments and notifications are still out of scope and go to the worker in a later task. | 3.1 Licences |
 | D6 | Pull request size and kind | One branch and PR per group (or per two small groups), merged before the next starts. Documentation and code are always separate PRs; documentation about built behaviour is written after the code merged. | Step 0 |
 
 ## 5. Not in this plan
 
 - The outline HR sub-processes (recruitment, attendance, leave, training, performance, payroll, occupational health, discipline, separation details): their specification must be detailed first.
-- HR events to the identity module, account requests and role derivation.
+- Account requests and role derivation (the HR events to identity are built, see `gateway-hr-events-to-identity.md`).
 - Front-end screens.
