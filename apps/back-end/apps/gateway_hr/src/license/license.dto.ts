@@ -187,6 +187,70 @@ export class RegisterLicenseDto extends OwnLicenseDto {
 }
 
 /**
+ * Body of `POST /v1/licenses/:id/verify`.
+ *
+ * @property outcome - `match` or `mismatch`.
+ * @property method - How it was checked.
+ * @property notes - Verifier's notes.
+ * @property reason - Why it was rejected; required for a mismatch.
+ * @property version - Version the client read.
+ */
+export class VerifyLicenseDto {
+  @IsIn(['match', 'mismatch'])
+  outcome!: 'match' | 'mismatch'
+
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => CodingDto)
+  method!: CodingDto
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  notes?: string
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CodingDto)
+  reason?: CodingDto
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+}
+
+/**
+ * Body of `POST /v1/licenses/:id/revoke`.
+ *
+ * @property effectiveDate - Local date the revocation takes effect.
+ * @property reason - Reason code.
+ * @property notes - Free text.
+ * @property version - Version the client read.
+ */
+export class RevokeLicenseDto {
+  @IsLocalDate()
+  effectiveDate!: string
+
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => CodingDto)
+  reason!: CodingDto
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  notes?: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+}
+
+/**
  * Query of `GET /v1/licenses`.
  *
  * @property status - Only licences in this status.

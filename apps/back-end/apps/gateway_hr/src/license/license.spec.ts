@@ -15,6 +15,8 @@ describe('license endpoints (in-memory repositories)', () => {
   let writerToken: string
   let readerToken: string
   let selfToken: string
+  let verifierToken: string
+  let writerTokenWithVerify: string
   let noEmployeeToken: string
   let otherTenantToken: string
   let tenantId: string
@@ -125,6 +127,15 @@ describe('license endpoints (in-memory repositories)', () => {
     readerToken = await gateway.seedAndLogin(tenantId, 'reader', [
       PERMISSIONS.WORKFORCE_LICENSE_READ,
     ])
+    verifierToken = await gateway.seedAndLogin(tenantId, 'verifier', [
+      PERMISSIONS.WORKFORCE_LICENSE_READ,
+      PERMISSIONS.WORKFORCE_LICENSE_VERIFY,
+    ])
+    writerTokenWithVerify = await gateway.seedAndLogin(tenantId, 'writer-verify', [
+      PERMISSIONS.WORKFORCE_LICENSE_READ,
+      PERMISSIONS.WORKFORCE_LICENSE_WRITE,
+      PERMISSIONS.WORKFORCE_LICENSE_VERIFY,
+    ])
     selfToken = await gateway.seedAndLogin(tenantId, 'self', [], employeeId)
     noEmployeeToken = await gateway.seedAndLogin(tenantId, 'noemp', [], null)
     otherTenantToken = await gateway.seedAndLogin(otherTenantId, 'other', [
@@ -135,6 +146,9 @@ describe('license endpoints (in-memory repositories)', () => {
       ['id.license-type', 'str', { eligibility_role: 'registration', requires_expiry_date: false, location_specific: false, max_locations_parameter: null }],
       ['id.license-type', 'sip', { eligibility_role: 'practice_permit', requires_expiry_date: true, location_specific: true, max_locations_parameter: 'MAX_PRACTICE_LOCATIONS_MEDIS' }],
       ['id.profession', 'dokter', { workforce_category: 'tenaga_medis' }],
+      ['id.license-verification-method', 'manual_registry_check', {}],
+      ['id.license-status-reason', 'document_mismatch', {}],
+      ['id.license-status-reason', 'revoked_by_authority', {}],
     ] as [string, string, Record<string, unknown>][]) {
       await workforce.codeConcepts.create({
         system,
@@ -399,5 +413,225 @@ describe('license endpoints (in-memory repositories)', () => {
     } finally {
       restore()
     }
+  })
+
+  describe('verification and revocation', () => {
+    const method = {
+      system: 'id.license-verification-method',
+      code: 'manual_registry_check',
+    }
+    const mismatch = { system: 'id.license-status-reason', code: 'document_mismatch' }
+    const revoked = { system: 'id.license-status-reason', code: 'revoked_by_authority' }
+
+    /**
+     * Registers a licence as the writer and returns its id and version.
+     *
+     * @param override - Fields that replace the defaults.
+     * @returns The licence.
+     */
+    async function pending(override: object = {}): Promise<Record<string, any>> {
+      const reply = await register(override)
+      expect(reply.status).toBe(201)
+      return reply.body as Record<string, any>
+    }
+
+    it('refuses verify and revoke without a token (401) and without the verify permission (403)', async () => {
+      const id = new Types.ObjectId().toHexString()
+
+      for (const url of [`/v1/licenses/${id}/verify`, `/v1/licenses/${id}/revoke`]) {
+        expect((await call('POST', url, undefined, {})).status).toBe(401)
+        expect((await call('POST', url, writerToken, {})).status).toBe(403)
+        expect((await call('POST', url, readerToken, {})).status).toBe(403)
+      }
+    })
+
+    it('verifies a licence as another account, makes it valid and then revokes it', async () => {
+      const created = await pending()
+
+      const verified = await call('POST', `/v1/licenses/${created.id}/verify`, verifierToken, {
+        outcome: 'match',
+        method,
+        notes: 'Cocok dengan registri',
+        version: created.version,
+      })
+
+      expect(verified.status).toBe(201)
+      expect(verified.body).toMatchObject({
+        status: 'valid',
+        verification: { outcome: 'match', method: { code: 'manual_registry_check' } },
+      })
+      const revokedReply = await call(
+        'POST',
+        `/v1/licenses/${created.id}/revoke`,
+        verifierToken,
+        {
+          effectiveDate: new Date().toISOString().slice(0, 10),
+          reason: revoked,
+          notes: 'Dicabut',
+        },
+      )
+      expect(revokedReply.status).toBe(201)
+      expect(revokedReply.body).toMatchObject({
+        status: 'revoked',
+        revocation: { reason: { code: 'revoked_by_authority' } },
+      })
+    })
+
+    it('answers 403 when the verifier is the submitter', async () => {
+      counter += 1
+      const submitted = await call('POST', '/v1/licenses', writerTokenWithVerify, {
+        employeeId,
+        licenseType: str,
+        profession: dokter,
+        documentNumber: `STR-SELF-VERIFY-${counter}`,
+        issuingAuthority: { name: 'KKI' },
+        jurisdiction: { country: 'ID' },
+        issueDate: '2025-01-01',
+        document,
+      })
+      expect(submitted.status).toBe(201)
+      const created = submitted.body as Record<string, any>
+
+      const reply = await call('POST', `/v1/licenses/${created.id}/verify`, writerTokenWithVerify, {
+        outcome: 'match',
+        method,
+      })
+
+      expect(reply.status).toBe(403)
+      expect(reply.body).toMatchObject({ code: 'verifier_is_submitter' })
+    })
+
+    it('rejects a mismatch with a reason, and answers 422 without one', async () => {
+      const created = await pending()
+      const second = await pending()
+
+      const noReason = await call('POST', `/v1/licenses/${created.id}/verify`, verifierToken, {
+        outcome: 'mismatch',
+        method,
+      })
+      const rejected = await call('POST', `/v1/licenses/${second.id}/verify`, verifierToken, {
+        outcome: 'mismatch',
+        method,
+        reason: mismatch,
+      })
+
+      expect(noReason.status).toBe(422)
+      expect(noReason.body).toMatchObject({ code: 'reason_required' })
+      expect(rejected.body).toMatchObject({
+        status: 'rejected',
+        is_live: false,
+        rejection: { reason: { code: 'document_mismatch' } },
+      })
+    })
+
+    it('answers 409 for a second valid SIP of the same place and supersedes the old one on renewal', async () => {
+      const base = {
+        licenseType: sip,
+        issuingAuthority: { name: 'Dinas Kesehatan' },
+        issueDate: '2026-01-01',
+        expiryDate: '2031-01-01',
+        practiceLocation: { facilityId },
+      }
+      const first = await pending({ ...base, documentNumber: 'SIP-V-1' })
+      await call('POST', `/v1/licenses/${first.id}/verify`, verifierToken, {
+        outcome: 'match',
+        method,
+      })
+      const duplicate = await pending({ ...base, documentNumber: 'SIP-V-2' })
+      const renewal = await pending({
+        ...base,
+        documentNumber: 'SIP-V-3',
+        replacesLicenseId: first.id,
+      })
+
+      const second = await call('POST', `/v1/licenses/${duplicate.id}/verify`, verifierToken, {
+        outcome: 'match',
+        method,
+      })
+      const renewed = await call('POST', `/v1/licenses/${renewal.id}/verify`, verifierToken, {
+        outcome: 'match',
+        method,
+      })
+
+      expect(second.status).toBe(409)
+      expect(second.body).toMatchObject({ code: 'valid_license_exists' })
+      expect(renewed.status).toBe(201)
+      const old = await call('GET', `/v1/licenses/${first.id}`, readerToken)
+      expect(old.body).toMatchObject({
+        status: 'superseded',
+        superseded: { by_license_id: renewal.id },
+      })
+    })
+
+    it('answers 404, 422 and 400 for bad ids, states and bodies', async () => {
+      const created = await pending()
+      const unknown = new Types.ObjectId().toHexString()
+
+      for (const id of [unknown, 'bad']) {
+        expect(
+          (await call('POST', `/v1/licenses/${id}/verify`, verifierToken, { outcome: 'match', method })).body,
+        ).toMatchObject({ code: 'license_not_found' })
+      }
+      expect(
+        (
+          await call('POST', `/v1/licenses/${created.id}/revoke`, verifierToken, {
+            effectiveDate: '2026-03-01',
+            reason: revoked,
+          })
+        ).body,
+      ).toMatchObject({ code: 'license_not_valid' })
+      expect(
+        (await call('POST', `/v1/licenses/${created.id}/verify`, verifierToken, {})).status,
+      ).toBe(400)
+      expect(
+        (
+          await call('POST', `/v1/licenses/${created.id}/verify`, verifierToken, {
+            outcome: 'maybe',
+            method,
+          })
+        ).status,
+      ).toBe(400)
+      expect(
+        (
+          await call('POST', `/v1/licenses/${created.id}/revoke`, verifierToken, {
+            effectiveDate: 'not-a-date',
+            reason: revoked,
+          })
+        ).status,
+      ).toBe(400)
+    })
+
+    it("logs one entry per write, without the licence's values", async () => {
+      const created = await pending({ documentNumber: 'STR-LOG-V' })
+      const { written, restore } = captureLogs()
+      try {
+        await call('POST', `/v1/licenses/${created.id}/verify`, verifierToken, {
+          outcome: 'match',
+          method,
+          notes: 'Catatan Rahasia',
+        })
+        await call('POST', `/v1/licenses/${created.id}/revoke`, verifierToken, {
+          effectiveDate: new Date().toISOString().slice(0, 10),
+          reason: revoked,
+          notes: 'Alasan Rahasia',
+        })
+        await vi.waitFor(() =>
+          expect(
+            written.filter((entry) => entry.event === 'http_request'),
+          ).toHaveLength(2),
+        )
+
+        const entries = written.filter((entry) => entry.event !== 'http_request')
+        expect(entries.map((entry) => entry.event)).toEqual([
+          'license_verify',
+          'license_revoke',
+        ])
+        for (const text of ['STR-LOG-V', 'Catatan Rahasia', 'Alasan Rahasia']) {
+          expect(JSON.stringify(written)).not.toContain(text)
+        }
+      } finally {
+        restore()
+      }
+    })
   })
 })

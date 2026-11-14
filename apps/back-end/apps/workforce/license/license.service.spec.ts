@@ -18,6 +18,7 @@ describe('LicenseService', () => {
   const warn = vi.fn()
   const error = vi.fn()
   const debug = vi.fn()
+  const run = vi.fn(async (work: () => Promise<unknown>) => work())
   let licenses: InMemoryProfessionalLicenses
   let employees: InMemoryEmployees
   let facilities: InMemoryFacilities
@@ -49,6 +50,26 @@ describe('LicenseService', () => {
       work,
     )
   }
+
+  /**
+   * Runs `work` as a second HR Admin, who may verify what the first one submitted.
+   *
+   * @param work - Code to run.
+   * @returns What `work` returns.
+   */
+  function asVerifier<T>(work: () => Promise<T>): Promise<T> {
+    return runWithRequestContext(
+      {
+        correlationId: 'c2',
+        actor: { account_id: 'a2', display_name: 'Verifier', kind: 'account' },
+      },
+      work,
+    )
+  }
+
+  const method = { system: 'id.license-verification-method', code: 'manual_registry_check' }
+  const mismatchReason = { system: 'id.license-status-reason', code: 'document_mismatch' }
+  const revokeReason = { system: 'id.license-status-reason', code: 'revoked_by_authority' }
 
   /**
    * Adds a platform-wide code concept.
@@ -205,6 +226,7 @@ describe('LicenseService', () => {
 
   beforeEach(async () => {
     vi.resetAllMocks()
+    run.mockImplementation(async (work: () => Promise<unknown>) => work())
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date('2026-03-10T12:00:00Z'))
     licenses = new InMemoryProfessionalLicenses()
@@ -217,6 +239,7 @@ describe('LicenseService', () => {
       employees,
       facilities,
       new CodeConceptService(concepts, logger),
+      { run } as never,
       logger,
     )
     await addConcept('id.license-type', 'str', {
@@ -246,6 +269,9 @@ describe('LicenseService', () => {
     await addConcept('id.profession', 'perawat', { workforce_category: 'tenaga_keperawatan' })
     await addConcept('id.specialty', 'bedah')
     await addConcept('id.licensing-authority', 'kki')
+    await addConcept('id.license-verification-method', 'manual_registry_check')
+    await addConcept('id.license-status-reason', 'document_mismatch')
+    await addConcept('id.license-status-reason', 'revoked_by_authority')
     employeeId = (await addEmployee()).id
     facilityId = (await addFacility()).id
   })
@@ -590,6 +616,413 @@ describe('LicenseService', () => {
       expect(list.map((item) => item.id)).toEqual([soon.id, later.id])
       expect(list.map((item) => item.id)).not.toContain(pending.id)
       expect(await service.list(tenantId, { expiringWithinDays: 90, status: 'revoked' })).toEqual([])
+    })
+  })
+
+  describe('verify', () => {
+    it('makes a matching licence valid, records the verification and logs one entry without values', async () => {
+      const pending = await registerStr()
+      log.mockClear()
+
+      const verified = await asVerifier(() =>
+        service.verify(tenantId, pending.id, {
+          outcome: 'match',
+          method,
+          notes: ' Catatan Rahasia ',
+          version: pending.version,
+        }),
+      )
+
+      expect(verified).toMatchObject({
+        status: 'valid',
+        status_effective_date: '2026-03-10',
+        is_live: true,
+        verification: {
+          by: { account_id: 'a2' },
+          method: { code: 'manual_registry_check' },
+          outcome: 'match',
+          notes: 'Catatan Rahasia',
+        },
+      })
+      expect(log).toHaveBeenCalledTimes(1)
+      expect(log.mock.calls[0]?.[0]).toMatchObject({
+        event: 'license_verify',
+        outcome: 'success',
+      })
+      expect(JSON.stringify(log.mock.calls)).not.toContain('Catatan Rahasia')
+    })
+
+    it('refuses the person who submitted it, for HR and for self-service', async () => {
+      const byHr = await registerStr()
+      const own = await asAdmin(() =>
+        service.createOwn(tenantId, employeeId, {
+          licenseType: type('str'),
+          profession: profession(),
+          documentNumber: 'STR-OWN',
+          issuingAuthority: { name: 'KKI' },
+          jurisdiction: { country: 'ID' },
+          issueDate: '2025-01-01',
+          document,
+        }),
+      )
+
+      for (const license of [byHr, own]) {
+        expect(
+          await rejection(() =>
+            asAdmin(() =>
+              service.verify(tenantId, license.id, { outcome: 'match', method }),
+            ),
+          ),
+        ).toMatchObject({ code: 'verifier_is_submitter' })
+      }
+      expect((await licenses.findOne(byHr.id))?.status).toBe('pending_verification')
+    })
+
+    it('rejects a mismatch with its reason, keeps the record and lets a correction be registered', async () => {
+      const pending = await registerStr()
+
+      const rejected = await asVerifier(() =>
+        service.verify(tenantId, pending.id, {
+          outcome: 'mismatch',
+          method,
+          reason: mismatchReason,
+          notes: 'Nomor tidak ada di registri',
+        }),
+      )
+
+      expect(rejected).toMatchObject({
+        status: 'rejected',
+        is_live: false,
+        rejection: {
+          effective_date: '2026-03-10',
+          reason: { code: 'document_mismatch' },
+          notes: 'Nomor tidak ada di registri',
+        },
+        verification: { outcome: 'mismatch' },
+      })
+      expect(await registerStr()).toMatchObject({ status: 'pending_verification' })
+    })
+
+    it('needs a reason for a mismatch', async () => {
+      const pending = await registerStr()
+
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, pending.id, { outcome: 'mismatch', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'reason_required' })
+      expect((await licenses.findOne(pending.id))?.status).toBe('pending_verification')
+    })
+
+    it.each([
+      ['invalid_method', { method: { system: 'id.unit-type', code: 'x' } }],
+      ['unknown_code', { method: { system: 'id.license-verification-method', code: 'nonsense' } }],
+      ['invalid_reason', { outcome: 'mismatch' as const, reason: { system: 'id.unit-type', code: 'x' } }],
+      ['unknown_code', { outcome: 'mismatch' as const, reason: { system: 'id.license-status-reason', code: 'nonsense' } }],
+      ['invalid_notes', { notes: 'x'.repeat(501) }],
+    ])('rejects %s', async (code, override) => {
+      const pending = await registerStr()
+
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, pending.id, {
+              outcome: 'match',
+              method,
+              ...override,
+            }),
+          ),
+        ),
+      ).toMatchObject({ code })
+      expect((await licenses.findOne(pending.id))?.status).toBe('pending_verification')
+    })
+
+    it('refuses a licence that is not pending, and answers 404 for a missing, malformed or foreign one', async () => {
+      const pending = await registerStr()
+      await asVerifier(() =>
+        service.verify(tenantId, pending.id, { outcome: 'match', method }),
+      )
+
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, pending.id, { outcome: 'match', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'license_not_pending' })
+      for (const [tenant, id] of [
+        [tenantId, new Types.ObjectId().toHexString()],
+        [tenantId, 'bad'],
+        [otherTenantId, pending.id],
+      ]) {
+        expect(
+          await rejection(() =>
+            asVerifier(() =>
+              service.verify(tenant as string, id as string, { outcome: 'match', method }),
+            ),
+          ),
+        ).toMatchObject({ code: 'license_not_found' })
+      }
+    })
+
+    it('refuses a match when the profession or the specialty differs, or the employee has none', async () => {
+      const wrong = await registerStr({
+        licenseType: type('perawat-only'),
+        profession: profession('perawat'),
+        documentNumber: 'STR-PERAWAT',
+      })
+      const withSpecialty = await registerStr({
+        documentNumber: 'STR-BEDAH',
+        specialty: { system: 'id.specialty', code: 'bedah' },
+      })
+
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, wrong.id, { outcome: 'match', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'profession_mismatch' })
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, withSpecialty.id, { outcome: 'match', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'specialty_mismatch' })
+      await asAdmin(() =>
+        employees.update(employeeId, {
+          specialties: [{ coding: { system: 'id.specialty', code: 'bedah' }, is_primary: true }],
+        }),
+      )
+      expect(
+        await asVerifier(() =>
+          service.verify(tenantId, withSpecialty.id, { outcome: 'match', method }),
+        ),
+      ).toMatchObject({ status: 'valid' })
+      await asAdmin(() => employees.update(employeeId, { profession: null }))
+      const another = await registerStr({ documentNumber: 'STR-NOPROF' })
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, another.id, { outcome: 'match', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'profession_mismatch' })
+    })
+
+    it('refuses a match on an expired licence or one issued later than today, but a mismatch is still allowed', async () => {
+      const expired = await registerStr({
+        documentNumber: 'STR-OLD',
+        issueDate: '2020-01-01',
+        expiryDate: '2026-03-09',
+      })
+      const future = await registerStr({
+        documentNumber: 'STR-FUTURE',
+        issueDate: '2026-04-01',
+      })
+
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, expired.id, { outcome: 'match', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'license_expired' })
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, future.id, { outcome: 'match', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'issue_date_in_future' })
+      expect(
+        await asVerifier(() =>
+          service.verify(tenantId, expired.id, {
+            outcome: 'mismatch',
+            method,
+            reason: mismatchReason,
+          }),
+        ),
+      ).toMatchObject({ status: 'rejected' })
+    })
+
+    it('rejects a stale version and changes nothing', async () => {
+      const pending = await registerStr()
+
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, pending.id, {
+              outcome: 'match',
+              method,
+              version: pending.version + 5,
+            }),
+          ),
+        ),
+      ).toMatchObject({ code: 'stale_version' })
+      expect((await licenses.findOne(pending.id))?.status).toBe('pending_verification')
+    })
+
+    it('supersedes the replaced SIP in one transaction when its renewal is verified', async () => {
+      const old = await registerSip()
+      await asVerifier(() =>
+        service.verify(tenantId, old.id, { outcome: 'match', method }),
+      )
+      const renewal = await registerSip({
+        documentNumber: 'SIP-778',
+        issueDate: '2026-03-01',
+        expiryDate: '2031-03-01',
+        replacesLicenseId: old.id,
+      })
+
+      const verified = await asVerifier(() =>
+        service.verify(tenantId, renewal.id, { outcome: 'match', method }),
+      )
+
+      expect(verified.status).toBe('valid')
+      expect(await licenses.findOne(old.id)).toMatchObject({
+        status: 'superseded',
+        status_effective_date: '2026-03-01',
+        superseded: { by_license_id: renewal.id, effective_date: '2026-03-01' },
+      })
+    })
+
+    it('leaves the old SIP alone when it is no longer valid, and refuses a second valid SIP for the same place', async () => {
+      const first = await registerSip()
+      await asVerifier(() =>
+        service.verify(tenantId, first.id, { outcome: 'match', method }),
+      )
+      const second = await registerSip({ documentNumber: 'SIP-779' })
+
+      expect(
+        await rejection(() =>
+          asVerifier(() =>
+            service.verify(tenantId, second.id, { outcome: 'match', method }),
+          ),
+        ),
+      ).toMatchObject({ code: 'valid_license_exists' })
+      expect((await licenses.findOne(second.id))?.status).toBe('pending_verification')
+      expect((await licenses.findOne(first.id))?.status).toBe('valid')
+    })
+
+    it('updates the old SIP before the renewal, both inside one transaction', async () => {
+      const old = await registerSip()
+      await asVerifier(() =>
+        service.verify(tenantId, old.id, { outcome: 'match', method }),
+      )
+      const renewal = await registerSip({
+        documentNumber: 'SIP-780',
+        issueDate: '2026-03-01',
+        replacesLicenseId: old.id,
+      })
+      run.mockClear()
+      const order: string[] = []
+      const update = licenses.update.bind(licenses)
+      licenses.update = async (id, changes, options) => {
+        order.push(`${id}:${changes.status}`)
+        return update(id, changes, options)
+      }
+
+      await asVerifier(() =>
+        service.verify(tenantId, renewal.id, { outcome: 'match', method }),
+      )
+
+      expect(run).toHaveBeenCalledTimes(1)
+      expect(order).toEqual([`${old.id}:superseded`, `${renewal.id}:valid`])
+    })
+  })
+
+  describe('revoke', () => {
+    it('revokes a valid licence from the given date and logs one entry without values', async () => {
+      const pending = await registerStr()
+      await asVerifier(() =>
+        service.verify(tenantId, pending.id, { outcome: 'match', method }),
+      )
+      log.mockClear()
+
+      const revoked = await asVerifier(() =>
+        service.revoke(tenantId, pending.id, {
+          effectiveDate: '2026-03-11',
+          reason: revokeReason,
+          notes: 'Catatan Rahasia',
+        }),
+      )
+
+      expect(revoked).toMatchObject({
+        status: 'revoked',
+        status_effective_date: '2026-03-11',
+        revocation: {
+          effective_date: '2026-03-11',
+          reason: { code: 'revoked_by_authority' },
+          notes: 'Catatan Rahasia',
+        },
+      })
+      expect(log.mock.calls[0]?.[0]).toMatchObject({
+        event: 'license_revoke',
+        outcome: 'success',
+      })
+      expect(JSON.stringify(log.mock.calls)).not.toContain('Catatan Rahasia')
+    })
+
+    it('refuses a licence that is not valid, a bad date, a bad reason and a stale version', async () => {
+      const pending = await registerStr()
+      const valid = await registerStr({ documentNumber: 'STR-VALID' })
+      await asVerifier(() =>
+        service.verify(tenantId, valid.id, { outcome: 'match', method }),
+      )
+      const revoke = (id: string, override: object = {}) =>
+        asVerifier(() =>
+          service.revoke(tenantId, id, {
+            effectiveDate: '2026-03-10',
+            reason: revokeReason,
+            ...override,
+          }),
+        )
+
+      expect(await rejection(() => revoke(pending.id))).toMatchObject({
+        code: 'license_not_valid',
+      })
+      for (const effectiveDate of ['2024-12-31', '2026-03-12', '2026-02-30', 'tomorrow']) {
+        expect(
+          await rejection(() => revoke(valid.id, { effectiveDate })),
+        ).toMatchObject({ code: 'invalid_effective_date' })
+      }
+      expect(
+        await rejection(() =>
+          revoke(valid.id, { reason: { system: 'id.unit-type', code: 'x' } }),
+        ),
+      ).toMatchObject({ code: 'invalid_reason' })
+      expect(
+        await rejection(() => revoke(valid.id, { notes: 'x'.repeat(501) })),
+      ).toMatchObject({ code: 'invalid_notes' })
+      expect(
+        await rejection(() => revoke(valid.id, { version: valid.version + 9 })),
+      ).toMatchObject({ code: 'stale_version' })
+      expect((await licenses.findOne(valid.id))?.status).toBe('valid')
+    })
+
+    it('answers 404 for a missing, malformed or foreign licence', async () => {
+      const pending = await registerStr()
+
+      for (const [tenant, id] of [
+        [tenantId, new Types.ObjectId().toHexString()],
+        [tenantId, 'bad'],
+        [otherTenantId, pending.id],
+      ]) {
+        expect(
+          await rejection(() =>
+            asVerifier(() =>
+              service.revoke(tenant as string, id as string, {
+                effectiveDate: '2026-03-10',
+                reason: revokeReason,
+              }),
+            ),
+          ),
+        ).toMatchObject({ code: 'license_not_found' })
+      }
     })
   })
 })
