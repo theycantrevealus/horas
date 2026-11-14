@@ -16,6 +16,7 @@ import {
   type CpdRecordQuery,
   type CpdRecordRepository,
 } from '@repository/interface/cpd-record'
+import { type Coding } from '@repository/model/common/coding'
 import { CpdRecord } from '@repository/model/cpd-record'
 import { CpdRecordClassification } from '@repository/model/cpd-record.classification'
 import { LeanRecord, MongoRepositoryBase } from './base'
@@ -86,6 +87,49 @@ export class CpdRecordRepositoryMongo
         .sort({ activity_date: -1, _id: 1 })
         .skip(query.offset ?? 0)
         .limit(query.limit ?? DEFAULT_PAGE_SIZE)
+        .lean<LeanRecord<CpdRecordEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
+   * Finds the accepted records of an employee in one credit system inside a period.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param creditSystem - The credit system.
+   * @param from - First day of the period.
+   * @param to - Last day of the period.
+   * @returns The accepted records.
+   */
+  async findAcceptedInCycle(
+    tenantId: string,
+    employeeId: string,
+    creditSystem: Coding,
+    from: string,
+    to: string,
+  ): Promise<CpdRecord[]> {
+    const operation = 'CpdRecordRepository.findAcceptedInCycle'
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            employee_id: employeeId,
+            status: 'accepted',
+            'credit_system.system': creditSystem.system,
+            'credit_system.code': creditSystem.code,
+            activity_date: { $gte: from, $lte: to },
+            deleted_at: null,
+          }),
+        )
+        .sort({ activity_date: 1, _id: 1 })
         .lean<LeanRecord<CpdRecordEntity>[]>()
         .exec()
       return records.map((record) => this.toModel(record))

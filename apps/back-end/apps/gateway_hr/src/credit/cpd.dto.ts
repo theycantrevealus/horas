@@ -1,5 +1,6 @@
 import { Transform, Type } from 'class-transformer'
 import {
+  IsDateString,
   IsDefined,
   IsIn,
   IsInt,
@@ -144,6 +145,47 @@ export class ReviewCpdDto {
   @IsInt()
   @Min(0)
   version?: number
+}
+
+/**
+ * The counting cycle of a credit total.
+ *
+ * @property start - First day.
+ * @property end - Last day.
+ */
+export class CpdCycleDto {
+  @IsLocalDate()
+  start!: string
+
+  @IsLocalDate()
+  end!: string
+}
+
+/**
+ * Body of `PUT /v1/employees/:id/cpd-summaries/:system`.
+ *
+ * @property creditSystem - Credit system code; its code must equal the path.
+ * @property cycle - Counting period.
+ * @property totalPoints - Total read from the national platform.
+ * @property checkedAt - When it was read; defaults to now.
+ */
+export class SetCpdSummaryDto {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => CodingDto)
+  creditSystem!: CodingDto
+
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => CpdCycleDto)
+  cycle!: CpdCycleDto
+
+  @IsNumber()
+  totalPoints!: number
+
+  @IsOptional()
+  @IsDateString()
+  checkedAt?: string
 }
 
 /**

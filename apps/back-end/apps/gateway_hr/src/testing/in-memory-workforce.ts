@@ -2,6 +2,7 @@ import {
   REPOSITORY_CODE_CONCEPT,
   REPOSITORY_COMMITTEE_MEMBERSHIP,
   REPOSITORY_CPD_RECORD,
+  REPOSITORY_CPD_SUMMARY,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
@@ -16,6 +17,7 @@ import {
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { CommitteeMembershipEntity } from '@repository/mongo/schema/committee-membership'
 import { CpdRecordEntity } from '@repository/mongo/schema/cpd-record'
+import { CpdSummaryEntity } from '@repository/mongo/schema/cpd-summary'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
@@ -30,6 +32,7 @@ import {
   InMemoryCodeConcepts,
   InMemoryCommitteeMemberships,
   InMemoryCpdRecords,
+  InMemoryCpdSummaries,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
   InMemoryEmploymentContracts,
@@ -62,6 +65,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property committeeMemberships - Committee membership repository.
  * @property licenses - Professional license repository.
  * @property cpdRecords - CPD record repository.
+ * @property cpdSummaries - CPD summary repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -78,6 +82,7 @@ export interface InMemoryWorkforce {
   committeeMemberships: InMemoryCommitteeMemberships
   licenses: InMemoryProfessionalLicenses
   cpdRecords: InMemoryCpdRecords
+  cpdSummaries: InMemoryCpdSummaries
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -102,6 +107,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const committeeMemberships = new InMemoryCommitteeMemberships()
   const licenses = new InMemoryProfessionalLicenses()
   const cpdRecords = new InMemoryCpdRecords()
+  const cpdSummaries = new InMemoryCpdSummaries()
   return {
     organizations,
     facilities,
@@ -116,6 +122,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     committeeMemberships,
     licenses,
     cpdRecords,
+    cpdSummaries,
     options: {
       entities: [
         OrganizationEntity,
@@ -131,6 +138,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         CommitteeMembershipEntity,
         ProfessionalLicenseEntity,
         CpdRecordEntity,
+        CpdSummaryEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -146,6 +154,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_COMMITTEE_MEMBERSHIP, committeeMemberships],
         [REPOSITORY_PROFESSIONAL_LICENSE, licenses],
         [REPOSITORY_CPD_RECORD, cpdRecords],
+        [REPOSITORY_CPD_SUMMARY, cpdSummaries],
       ],
     },
   }

@@ -1,4 +1,5 @@
 import { type Repository } from '@utility/database/interface'
+import { type Coding } from '@repository/model/common/coding'
 import { type CpdRecord } from '@repository/model/cpd-record'
 
 /**
@@ -33,5 +34,24 @@ export interface CpdRecordRepository extends Repository<CpdRecord> {
     tenantId: string,
     employeeId: string,
     query?: CpdRecordQuery,
+  ): Promise<CpdRecord[]>
+
+  /**
+   * Finds the accepted records of an employee in one credit system whose activity date lies in a
+   * period, both ends included.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param creditSystem - The credit system.
+   * @param from - First day of the period.
+   * @param to - Last day of the period.
+   * @returns The accepted records, possibly none.
+   */
+  findAcceptedInCycle(
+    tenantId: string,
+    employeeId: string,
+    creditSystem: Coding,
+    from: string,
+    to: string,
   ): Promise<CpdRecord[]>
 }

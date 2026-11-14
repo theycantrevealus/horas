@@ -4,6 +4,7 @@ import { LoggerModule } from '@utility/logger/module'
 import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
 import { CommitteeMembershipRepositoryModule } from '@repository/mongo/committee-membership.module'
 import { CpdRecordRepositoryModule } from '@repository/mongo/cpd-record.module'
+import { CpdSummaryRepositoryModule } from '@repository/mongo/cpd-summary.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
 import { EmploymentContractRepositoryModule } from '@repository/mongo/employment-contract.module'
@@ -18,6 +19,7 @@ import { AssignmentService } from './assignment/assignment.service'
 import { CommitteeMembershipService } from './committee/committee-membership.service'
 import { CodeConceptService } from './concept/code-concept.service'
 import { CpdService } from './credit/cpd.service'
+import { CpdSummaryService } from './credit/cpd-summary.service'
 import { FacilityService } from './structure/facility.service'
 import { OrganizationService } from './structure/organization.service'
 import { ContractService } from './contract/contract.service'
@@ -49,6 +51,7 @@ import { UnitService } from './structure/unit.service'
     CommitteeMembershipRepositoryModule,
     ProfessionalLicenseRepositoryModule,
     CpdRecordRepositoryModule,
+    CpdSummaryRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -64,6 +67,7 @@ import { UnitService } from './structure/unit.service'
     CommitteeMembershipService,
     LicenseService,
     CpdService,
+    CpdSummaryService,
   ],
   exports: [
     OrganizationService,
@@ -79,6 +83,7 @@ import { UnitService } from './structure/unit.service'
     CommitteeMembershipService,
     LicenseService,
     CpdService,
+    CpdSummaryService,
   ],
 })
 export class WorkforceModule {}

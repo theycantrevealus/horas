@@ -20,6 +20,7 @@ import {
   type CpdRecordQuery,
   type CpdRecordRepository,
 } from '@repository/interface/cpd-record'
+import { type CpdSummaryRepository } from '@repository/interface/cpd-summary'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type LicenseQuery,
@@ -48,6 +49,7 @@ import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
 import { type CommitteeMembership } from '@repository/model/committee-membership'
 import { type CpdRecord } from '@repository/model/cpd-record'
+import { type CpdSummary } from '@repository/model/cpd-summary'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
 import { type Employee } from '@repository/model/employee'
@@ -1971,5 +1973,116 @@ export class InMemoryCpdRecords
           left.id.localeCompare(right.id),
       )
       .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the accepted records of an employee in one credit system inside a period.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param creditSystem - The credit system.
+   * @param from - First day of the period.
+   * @param to - Last day of the period.
+   * @returns The accepted records.
+   */
+  async findAcceptedInCycle(
+    tenantId: string,
+    employeeId: string,
+    creditSystem: { system: string; code: string },
+    from: string,
+    to: string,
+  ): Promise<CpdRecord[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.status === 'accepted' &&
+        item.credit_system.system === creditSystem.system &&
+        item.credit_system.code === creditSystem.code &&
+        item.activity_date >= from &&
+        item.activity_date <= to &&
+        !item.deleted_at,
+    )
+  }
+}
+
+/**
+ * In-memory `CpdSummaryRepository` for tests. It applies the unique index of the Mongo
+ * collection: one summary per tenant, employee and credit system.
+ */
+export class InMemoryCpdSummaries
+  extends InMemoryRepository<CpdSummary>
+  implements CpdSummaryRepository
+{
+  /**
+   * Creates a summary, refusing a second one for the same employee and credit system.
+   *
+   * @param entity - Summary data.
+   * @param id - Optional identifier.
+   * @returns The stored summary.
+   */
+  override async create(
+    entity: NewEntity<CpdSummary>,
+    id?: string,
+  ): Promise<CpdSummary> {
+    const duplicate = [...this.items.values()].some(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.employee_id === entity.employee_id &&
+        item.credit_system.system === entity.credit_system.system &&
+        item.credit_system.code === entity.credit_system.code,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate summary', {
+        operation: 'CpdSummaryRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds the summaries of an employee, ordered by credit system code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The summaries.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<CpdSummary[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at,
+    ).sort((left, right) =>
+      left.credit_system.code.localeCompare(right.credit_system.code),
+    )
+  }
+
+  /**
+   * Finds the summary of an employee in one credit system.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param creditSystem - Credit system code system.
+   * @param creditCode - Credit system code.
+   * @returns The summary, or `null`.
+   */
+  async findByEmployeeAndSystem(
+    tenantId: string,
+    employeeId: string,
+    creditSystem: string,
+    creditCode: string,
+  ): Promise<CpdSummary | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.credit_system.system === creditSystem &&
+        item.credit_system.code === creditCode &&
+        !item.deleted_at,
+    )
   }
 }
