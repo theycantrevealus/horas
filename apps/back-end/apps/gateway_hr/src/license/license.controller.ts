@@ -11,6 +11,8 @@ import {
   ListLicensesDto,
   OwnLicenseDto,
   RegisterLicenseDto,
+  RevokeLicenseDto,
+  VerifyLicenseDto,
 } from './license.dto'
 
 /**
@@ -98,6 +100,42 @@ export class LicenseController {
     @Body() body: RegisterLicenseDto,
   ): Promise<ProfessionalLicense> {
     return this.licenses.create(user.tenant_id, toInput(body, body.employeeId))
+  }
+
+  /**
+   * Handles `POST /v1/licenses/:id/verify`: records the primary-source verification.
+   *
+   * @param user - Signed-in user.
+   * @param id - Licence identifier.
+   * @param body - Outcome, method, notes and, for a mismatch, the reason.
+   * @returns The verified or rejected licence.
+   */
+  @Post(':id/verify')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_LICENSE_VERIFY)
+  verify(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: VerifyLicenseDto,
+  ): Promise<ProfessionalLicense> {
+    return this.licenses.verify(user.tenant_id, id, body)
+  }
+
+  /**
+   * Handles `POST /v1/licenses/:id/revoke`: records a revocation by the issuing authority.
+   *
+   * @param user - Signed-in user.
+   * @param id - Licence identifier.
+   * @param body - Effective date, reason and notes.
+   * @returns The revoked licence.
+   */
+  @Post(':id/revoke')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_LICENSE_VERIFY)
+  revoke(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: RevokeLicenseDto,
+  ): Promise<ProfessionalLicense> {
+    return this.licenses.revoke(user.tenant_id, id, body)
   }
 
   /**

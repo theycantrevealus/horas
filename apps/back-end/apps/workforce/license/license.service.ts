@@ -1,9 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { RepositoryConflictError } from '@utility/database/error'
+import {
+  RepositoryConflictError,
+  RepositoryNotFoundError,
+} from '@utility/database/error'
+import {
+  TRANSACTION_MANAGER,
+  type TransactionManager,
+} from '@utility/database/transaction'
 import { withChangeReason } from '@utility/history/reason'
 import { getRequestContext } from '@utility/logger/context'
 import { AppLogger } from '@utility/logger/service'
-import { todayUtc } from '@utility/validation/local-date'
+import {
+  compareLocalDates,
+  isLocalDate,
+  todayUtc,
+} from '@utility/validation/local-date'
 import { type EmployeeRepository } from '@repository/interface/employee'
 import { type FacilityRepository } from '@repository/interface/facility'
 import {
@@ -16,6 +27,7 @@ import { type Employee } from '@repository/model/employee'
 import {
   type EligibilityRole,
   type LicenseStatus,
+  type LicenseVerification,
   type PracticeLocation,
   type ProfessionalLicense,
 } from '@repository/model/professional-license'
@@ -46,6 +58,8 @@ const NAME = 'LicenseService'
  * Code system name suffixes, after an optional country prefix.
  */
 const SYSTEMS = {
+  method: /(^|\.)license-verification-method$/,
+  reason: /(^|\.)license-status-reason$/,
   type: /(^|\.)license-type$/,
   profession: /(^|\.)profession$/,
   specialty: /(^|\.)specialty$/,
@@ -114,7 +128,45 @@ export interface ListLicensesInput {
 }
 
 /**
- * Professional licences (STR, SIP and others): registration and reads (HR plan 3.1 B1). Never
+ * Longest note on a verification, rejection or revocation.
+ */
+const MAX_NOTES = 500
+
+/**
+ * Data of a verification.
+ *
+ * @property outcome - `match` when the document matched the original and the registry, otherwise `mismatch`.
+ * @property method - How it was checked, a code of a license-verification-method system.
+ * @property notes - Verifier's notes.
+ * @property reason - Why it was rejected; required for a mismatch.
+ * @property version - Version the caller read.
+ */
+export interface VerifyLicenseInput {
+  outcome: 'match' | 'mismatch'
+  method: Coding
+  notes?: string
+  reason?: Coding
+  version?: number
+}
+
+/**
+ * Data of a revocation.
+ *
+ * @property effectiveDate - Local date the revocation takes effect.
+ * @property reason - Reason code of a license-status-reason system.
+ * @property notes - Free text.
+ * @property version - Version the caller read.
+ */
+export interface RevokeLicenseInput {
+  effectiveDate: string
+  reason: Coding
+  notes?: string
+  version?: number
+}
+
+/**
+ * Professional licences (STR, SIP and others): registration, reads, verification and revocation
+ * (HR plan 3.1). Never
  * edits or deletes: a wrong licence is rejected and registered again (`HR-LIC-008`).
  */
 @Injectable()
@@ -124,6 +176,7 @@ export class LicenseService {
    * @param employees - Employee repository.
    * @param facilities - Facility repository, for a practice location in this tenant.
    * @param concepts - Code concepts, to check types, professions, specialties and authorities.
+   * @param transactions - Transaction manager, so a renewal and the licence it replaces change together.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -134,6 +187,8 @@ export class LicenseService {
     @Inject(REPOSITORY_FACILITY)
     private readonly facilities: FacilityRepository,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
+    @Inject(TRANSACTION_MANAGER)
+    private readonly transactions: TransactionManager,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -267,6 +322,359 @@ export class LicenseService {
         return this.register(tenantId, found, input, 'self_service')
       },
     )
+  }
+
+  /**
+   * Records the verification of a pending licence (HR plan 3.1 L9, L10 and L12). A match makes
+   * it `valid` and, for a renewal, supersedes the licence it replaces in the same transaction. A
+   * mismatch rejects it.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param id - Licence identifier.
+   * @param input - Outcome, method, notes, and the reason of a rejection.
+   * @returns The verified or rejected licence.
+   * @throws NotFoundError `license_not_found`.
+   * @throws ForbiddenError `verifier_is_submitter`.
+   * @throws InvalidRequestError `license_not_pending`, `invalid_method`, `invalid_reason`,
+   * `invalid_notes`, `reason_required`, `unknown_code`, `code_retired`, `code_not_in_period`,
+   * `employee_not_found`, `profession_mismatch`, `specialty_mismatch`, `license_expired` or
+   * `issue_date_in_future`.
+   * @throws ConflictError `valid_license_exists` or `stale_version`.
+   */
+  verify(
+    tenantId: string,
+    id: string,
+    input: VerifyLicenseInput,
+  ): Promise<ProfessionalLicense> {
+    return observe(
+      this.logger,
+      'license_verify',
+      `${NAME}.verify`,
+      async () => {
+        const license = await this.get(tenantId, id)
+        if (license.status !== 'pending_verification') {
+          throw new InvalidRequestError(
+            'license_not_pending',
+            'Only a licence that is pending verification can be verified.',
+          )
+        }
+        const actor = getRequestContext()?.actor
+        if (!actor) {
+          throw new ForbiddenError(
+            'actor_required',
+            'A signed-in actor is required.',
+          )
+        }
+        if (actor.account_id === license.submission.by.account_id) {
+          throw new ForbiddenError(
+            'verifier_is_submitter',
+            'A licence cannot be verified by the person who submitted it.',
+          )
+        }
+        const notes = this.cleanNotes(input.notes)
+        if (!SYSTEMS.method.test(input.method.system)) {
+          throw new InvalidRequestError(
+            'invalid_method',
+            'The method must come from a license-verification-method code system.',
+          )
+        }
+        await this.concepts.assertActive(tenantId, input.method)
+        const reason = await this.reasonOf(
+          tenantId,
+          input.reason,
+          input.outcome === 'mismatch',
+        )
+        this.assertVersion(license, input.version)
+        const today = todayUtc()
+        const verification: LicenseVerification = {
+          by: actor,
+          at: new Date(),
+          method: { system: input.method.system, code: input.method.code },
+          outcome: input.outcome,
+          notes,
+        }
+
+        if (input.outcome === 'mismatch') {
+          return this.write(license, () =>
+            this.licenses.update(
+              license.id,
+              {
+                status: 'rejected',
+                is_live: false,
+                status_effective_date: today,
+                verification,
+                rejection: {
+                  effective_date: today,
+                  reason: reason as Coding,
+                  notes,
+                },
+              },
+              { expectedVersion: input.version },
+            ),
+          )
+        }
+
+        await this.assertMatches(tenantId, license, today)
+        const old = license.replaces_license_id
+          ? await this.licenses.findOne(license.replaces_license_id)
+          : null
+        const replaced =
+          old &&
+          old.tenant_id === tenantId &&
+          old.employee_id === license.employee_id &&
+          old.status === 'valid'
+            ? old
+            : null
+        return this.write(license, () =>
+          this.transactions.run(async () => {
+            // The old licence leaves `valid` first, so the unique index on valid practice
+            // permits is never broken (design 3.3).
+            if (replaced) {
+              await this.licenses.update(replaced.id, {
+                status: 'superseded',
+                status_effective_date: license.issue_date,
+                superseded: {
+                  by_license_id: license.id,
+                  effective_date: license.issue_date,
+                },
+              })
+            }
+            return this.licenses.update(
+              license.id,
+              {
+                status: 'valid',
+                status_effective_date: today,
+                verification,
+              },
+              { expectedVersion: input.version },
+            )
+          }),
+        )
+      },
+    )
+  }
+
+  /**
+   * Records the revocation of a valid licence by its issuing authority (HR plan 3.1 L13).
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param id - Licence identifier.
+   * @param input - Effective date, reason, notes and optional version.
+   * @returns The revoked licence.
+   * @throws NotFoundError `license_not_found`.
+   * @throws InvalidRequestError `license_not_valid`, `invalid_effective_date`, `invalid_reason`,
+   * `invalid_notes`, `unknown_code`, `code_retired` or `code_not_in_period`.
+   * @throws ConflictError `stale_version`.
+   */
+  revoke(
+    tenantId: string,
+    id: string,
+    input: RevokeLicenseInput,
+  ): Promise<ProfessionalLicense> {
+    return observe(
+      this.logger,
+      'license_revoke',
+      `${NAME}.revoke`,
+      async () => {
+        const license = await this.get(tenantId, id)
+        if (license.status !== 'valid') {
+          throw new InvalidRequestError(
+            'license_not_valid',
+            'Only a valid licence can be revoked.',
+          )
+        }
+        if (
+          !isLocalDate(input.effectiveDate) ||
+          compareLocalDates(input.effectiveDate, license.issue_date) < 0 ||
+          compareLocalDates(input.effectiveDate, addDays(todayUtc(), 1)) > 0
+        ) {
+          throw new InvalidRequestError(
+            'invalid_effective_date',
+            'The date must be a real date, not before the issue date and not later than tomorrow.',
+          )
+        }
+        const notes = this.cleanNotes(input.notes)
+        const reason = await this.reasonOf(tenantId, input.reason, true)
+        this.assertVersion(license, input.version)
+        return this.write(license, () =>
+          this.licenses.update(
+            license.id,
+            {
+              status: 'revoked',
+              status_effective_date: input.effectiveDate,
+              revocation: {
+                effective_date: input.effectiveDate,
+                reason: reason as Coding,
+                notes,
+              },
+            },
+            { expectedVersion: input.version },
+          ),
+        )
+      },
+    )
+  }
+
+  /**
+   * Checks that a licence can be verified as matching: the holder exists and has the same
+   * profession and specialty, the licence has not expired and has started (HR plan 3.1 L9).
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param license - The licence.
+   * @param today - Today in UTC.
+   * @throws InvalidRequestError `employee_not_found`, `profession_mismatch`, `specialty_mismatch`,
+   * `license_expired` or `issue_date_in_future`.
+   */
+  private async assertMatches(
+    tenantId: string,
+    license: ProfessionalLicense,
+    today: string,
+  ): Promise<void> {
+    const employee = await this.employee(tenantId, license.employee_id)
+    if (
+      !employee.profession ||
+      employee.profession.system !== license.profession.system ||
+      employee.profession.code !== license.profession.code
+    ) {
+      throw new InvalidRequestError(
+        'profession_mismatch',
+        'The licence profession differs from the employee profession.',
+      )
+    }
+    if (license.specialty) {
+      const primary = employee.specialties.find((item) => item.is_primary)
+      if (
+        !primary ||
+        primary.coding.system !== license.specialty.system ||
+        primary.coding.code !== license.specialty.code
+      ) {
+        throw new InvalidRequestError(
+          'specialty_mismatch',
+          'The licence specialty differs from the employee primary specialty.',
+        )
+      }
+    }
+    if (
+      license.expiry_date !== null &&
+      compareLocalDates(license.expiry_date, today) < 0
+    ) {
+      throw new InvalidRequestError(
+        'license_expired',
+        'The licence has already expired.',
+      )
+    }
+    if (compareLocalDates(license.issue_date, today) > 0) {
+      throw new InvalidRequestError(
+        'issue_date_in_future',
+        'The licence is issued on a later date. Verify it on or after that date.',
+      )
+    }
+  }
+
+  /**
+   * Checks the reason of a rejection or revocation.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param reason - The reason as sent.
+   * @param required - Whether the reason must be given.
+   * @returns The cleaned reason, or `null` when none is needed and none was given.
+   * @throws InvalidRequestError `reason_required`, `invalid_reason`, `unknown_code`,
+   * `code_retired` or `code_not_in_period`.
+   */
+  private async reasonOf(
+    tenantId: string,
+    reason: Coding | undefined,
+    required: boolean,
+  ): Promise<Coding | null> {
+    if (!reason) {
+      if (required) {
+        throw new InvalidRequestError(
+          'reason_required',
+          'A reason is required.',
+        )
+      }
+      return null
+    }
+    if (!SYSTEMS.reason.test(reason.system)) {
+      throw new InvalidRequestError(
+        'invalid_reason',
+        'The reason must come from a license-status-reason code system.',
+      )
+    }
+    await this.concepts.assertActive(tenantId, reason)
+    return { system: reason.system, code: reason.code }
+  }
+
+  /**
+   * Cleans a free-text note: trimmed, at most 500 characters, `null` when empty.
+   *
+   * @param raw - Note as sent.
+   * @returns The cleaned note, or `null`.
+   * @throws InvalidRequestError `invalid_notes`.
+   */
+  private cleanNotes(raw: string | undefined): string | null {
+    const notes = (raw ?? '').trim()
+    if (notes.length > MAX_NOTES) {
+      throw new InvalidRequestError(
+        'invalid_notes',
+        'The notes can have at most 500 characters.',
+      )
+    }
+    return notes.length > 0 ? notes : null
+  }
+
+  /**
+   * Refuses a stale version before any write.
+   *
+   * @param license - The licence as read.
+   * @param version - Version the caller read.
+   * @throws ConflictError `stale_version`.
+   */
+  private assertVersion(
+    license: ProfessionalLicense,
+    version: number | undefined,
+  ): void {
+    if (version !== undefined && version !== license.version) {
+      throw this.stale()
+    }
+  }
+
+  /**
+   * Runs a repository write and turns repository rejections into workforce errors.
+   *
+   * @param license - The licence as read before the write.
+   * @param write - The repository call.
+   * @returns What the call returns.
+   * @throws ConflictError `valid_license_exists` when another valid permit holds the place, or
+   * `stale_version` when the licence changed meanwhile.
+   */
+  private async write(
+    license: ProfessionalLicense,
+    write: () => Promise<ProfessionalLicense>,
+  ): Promise<ProfessionalLicense> {
+    try {
+      return await write()
+    } catch (error: unknown) {
+      if (error instanceof RepositoryConflictError) {
+        // The optimistic lock and the unique index on valid permits both end here. A licence
+        // that changed since it was read is a stale version; otherwise a second permit won.
+        const fresh = await this.licenses.findOne(license.id)
+        if (fresh && fresh.version !== license.version) {
+          throw this.stale()
+        }
+        throw new ConflictError(
+          'valid_license_exists',
+          'The employee already has a valid practice permit for this profession and facility.',
+        )
+      }
+      if (error instanceof RepositoryNotFoundError) {
+        throw new NotFoundError(
+          'license_not_found',
+          'The license was not found.',
+        )
+      }
+      throw error
+    }
   }
 
   /**
@@ -604,6 +1012,16 @@ export class LicenseService {
         'The employee has separated.',
       )
     }
+  }
+
+  /**
+   * @returns The conflict for a stale version.
+   */
+  private stale(): ConflictError {
+    return new ConflictError(
+      'stale_version',
+      'The licence was changed by someone else. Reload it and try again.',
+    )
   }
 
   /**
