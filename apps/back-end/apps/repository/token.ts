@@ -119,3 +119,8 @@ export const REPOSITORY_PROFESSIONAL_LICENSE = Symbol(
  * Injection token for the CPD record repository (SKP, CME and CPD credit records).
  */
 export const REPOSITORY_CPD_RECORD = Symbol('REPOSITORY_CPD_RECORD')
+
+/**
+ * Injection token for the CPD summary repository (latest known credit totals).
+ */
+export const REPOSITORY_CPD_SUMMARY = Symbol('REPOSITORY_CPD_SUMMARY')

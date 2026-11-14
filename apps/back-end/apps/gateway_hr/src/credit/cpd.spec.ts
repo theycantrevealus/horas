@@ -379,4 +379,129 @@ describe('credit record endpoints (in-memory repositories)', () => {
       restore()
     }
   })
+
+  describe('credit totals', () => {
+    const cycle = { start: '2026-01-01', end: '2030-12-31' }
+
+    /**
+     * Sets a platform total through the API as the writer.
+     *
+     * @param id - Employee identifier.
+     * @param override - Fields that replace the defaults.
+     * @param system - The credit system code of the path.
+     * @returns The reply.
+     */
+    function setTotal(id: string, override: object = {}, system = 'skp') {
+      return call('PUT', `/v1/employees/${id}/cpd-summaries/${system}`, writerToken, {
+        creditSystem: skp,
+        cycle,
+        totalPoints: 42.5,
+        ...override,
+      })
+    }
+
+    it('refuses the total routes without a token (401) and without their permission (403)', async () => {
+      const id = new Types.ObjectId().toHexString()
+
+      expect((await call('GET', `/v1/employees/${id}/cpd-summaries`, undefined)).status).toBe(401)
+      expect((await call('PUT', `/v1/employees/${id}/cpd-summaries/skp`, undefined, {})).status).toBe(401)
+      expect((await call('GET', `/v1/employees/${id}/cpd-summaries`, selfToken)).status).toBe(403)
+      expect((await call('PUT', `/v1/employees/${id}/cpd-summaries/skp`, readerToken, {})).status).toBe(403)
+      expect((await call('PUT', `/v1/employees/${id}/cpd-summaries/skp`, reviewerToken, {})).status).toBe(403)
+    })
+
+    it('records a platform total, shows it with the accepted points, and replaces it with a new one', async () => {
+      const holder = await addEmployee()
+      await call('POST', '/v1/cpd-records', writerToken, {
+        employeeId: holder,
+        creditSystem: skp,
+        activity: { title: 'Seminar', category: learning },
+        activityDate: '2026-03-01',
+        points: 12.5,
+      })
+
+      const first = await setTotal(holder)
+      const second = await setTotal(holder, { totalPoints: 60, checkedAt: '2026-03-01T00:00:00Z' })
+      const list = await call('GET', `/v1/employees/${holder}/cpd-summaries`, readerToken)
+
+      expect([first.status, second.status]).toEqual([200, 200])
+      expect(first.body).toMatchObject({
+        employee_id: holder,
+        credit_system: { code: 'skp' },
+        profession: { code: 'dokter' },
+        cycle,
+        total_points: 42.5,
+        source: 'external_platform',
+        accepted_points: 12.5,
+      })
+      expect(first.body).not.toHaveProperty('_id')
+      expect((second.body as Record<string, any>).id).toBe((first.body as Record<string, any>).id)
+      expect(list.status).toBe(200)
+      expect(list.body).toHaveLength(1)
+      expect((list.body as Record<string, any>[])[0]).toMatchObject({
+        total_points: 60,
+        accepted_points: 12.5,
+      })
+    })
+
+    it('answers 404 for a missing, malformed or foreign employee', async () => {
+      const unknown = new Types.ObjectId().toHexString()
+      const foreignEmployee = await addEmployee(otherTenantId)
+
+      for (const id of [unknown, 'bad', foreignEmployee]) {
+        expect((await setTotal(id)).body).toMatchObject({ code: 'employee_not_found' })
+        expect(
+          (await call('GET', `/v1/employees/${id}/cpd-summaries`, readerToken)).body,
+        ).toMatchObject({ code: 'employee_not_found' })
+      }
+    })
+
+    it('answers 422 when the path differs from the body, and for a bad cycle or total', async () => {
+      const holder = await addEmployee()
+
+      expect((await setTotal(holder, {}, 'cme')).body).toMatchObject({
+        code: 'credit_system_mismatch',
+      })
+      expect(
+        (await setTotal(holder, { cycle: { start: '2030-01-01', end: '2026-01-01' } })).body,
+      ).toMatchObject({ code: 'invalid_cycle' })
+      expect((await setTotal(holder, { totalPoints: -5 })).body).toMatchObject({
+        code: 'invalid_total',
+      })
+      expect(
+        (await setTotal(holder, { checkedAt: '2999-01-01T00:00:00Z' })).body,
+      ).toMatchObject({ code: 'invalid_checked_at' })
+    })
+
+    it('answers 400 for a body of the wrong shape', async () => {
+      const holder = await addEmployee()
+
+      expect((await setTotal(holder, { totalPoints: 'many' })).status).toBe(400)
+      expect((await setTotal(holder, { cycle: { start: '2026-01-01' } })).status).toBe(400)
+      expect((await setTotal(holder, { checkedAt: 'yesterday' })).status).toBe(400)
+      expect(
+        (await call('PUT', `/v1/employees/${holder}/cpd-summaries/skp`, writerToken, {})).status,
+      ).toBe(400)
+    })
+
+    it('writes no log entry for the list, and one entry without values for the total', async () => {
+      const holder = await addEmployee()
+      const { written, restore } = captureLogs()
+      try {
+        await call('GET', `/v1/employees/${holder}/cpd-summaries`, readerToken)
+        await setTotal(holder, { totalPoints: 77.25 })
+        await vi.waitFor(() =>
+          expect(
+            written.filter((entry) => entry.event === 'http_request'),
+          ).toHaveLength(2),
+        )
+
+        const entries = written.filter((entry) => entry.event !== 'http_request')
+        expect(entries.map((entry) => entry.event)).toEqual(['cpd_summary_set'])
+        expect(JSON.stringify(written)).not.toContain('77.25')
+      } finally {
+        restore()
+      }
+    })
+  })
 })

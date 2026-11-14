@@ -256,6 +256,29 @@ describe('CpdRecordRepository on the shared Mongo base', () => {
     expect(model.find).toHaveBeenCalledTimes(1)
   })
 
+  it('finds the accepted records of a credit system inside a period, and answers an empty list for malformed ids', async () => {
+    await records.findAcceptedInCycle(
+      tenantId.toHexString(),
+      employeeId.toHexString(),
+      { system: 'id.credit-system', code: 'skp' },
+      '2026-01-01',
+      '2026-12-31',
+    )
+
+    expect(model.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'accepted',
+        'credit_system.code': 'skp',
+        activity_date: { $gte: '2026-01-01', $lte: '2026-12-31' },
+        deleted_at: null,
+      }),
+    )
+    expect(
+      await records.findAcceptedInCycle('x', 'y', { system: 's', code: 'c' }, 'a', 'b'),
+    ).toEqual([])
+    expect(model.find).toHaveBeenCalledTimes(1)
+  })
+
   it('updates only the status, never the points, the activity or the employee', async () => {
     await asAdmin(() =>
       records.update(recordId.toHexString(), {

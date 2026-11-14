@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common'
 import { type CpdRecord } from '@repository/model/cpd-record'
 import { type AuthenticatedUser } from '@identity/authenticated-user'
 import { CurrentUser, RequirePermissions } from '@identity/guard/decorators'
@@ -8,10 +16,15 @@ import {
   type RegisterCpdInput,
 } from '@workforce/credit/cpd.service'
 import {
+  CpdSummaryService,
+  type CpdSummaryView,
+} from '@workforce/credit/cpd-summary.service'
+import {
   ListCpdRecordsDto,
   OwnCpdRecordDto,
   RecordCpdDto,
   ReviewCpdDto,
+  SetCpdSummaryDto,
 } from './cpd.dto'
 
 /**
@@ -94,14 +107,61 @@ export class CpdRecordController {
 }
 
 /**
- * The credit records of one employee, and the signed-in employee's own submission.
+ * The credit records and totals of one employee, and the signed-in employee's own submission.
  */
 @Controller({ path: 'employees', version: '1' })
 export class EmployeeCpdController {
   /**
    * @param credits - Credit service.
+   * @param summaries - Credit total service.
    */
-  constructor(private readonly credits: CpdService) {}
+  constructor(
+    private readonly credits: CpdService,
+    private readonly summaries: CpdSummaryService,
+  ) {}
+
+  /**
+   * Handles `GET /v1/employees/:id/cpd-summaries`: lists the stored credit totals, each with the
+   * accepted points of its cycle.
+   *
+   * @param user - Signed-in user.
+   * @param id - Employee identifier.
+   * @returns The totals.
+   */
+  @Get(':id/cpd-summaries')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CPD_READ)
+  listSummaries(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<CpdSummaryView[]> {
+    return this.summaries.list(user.tenant_id, id)
+  }
+
+  /**
+   * Handles `PUT /v1/employees/:id/cpd-summaries/:system`: records the total read from a national
+   * platform.
+   *
+   * @param user - Signed-in user.
+   * @param id - Employee identifier.
+   * @param system - The credit system code.
+   * @param body - Credit system, cycle, total and optional read time.
+   * @returns The stored total.
+   */
+  @Put(':id/cpd-summaries/:system')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CPD_WRITE)
+  setSummary(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Param('system') system: string,
+    @Body() body: SetCpdSummaryDto,
+  ): Promise<CpdSummaryView> {
+    return this.summaries.set(user.tenant_id, id, system, {
+      creditSystem: body.creditSystem,
+      cycle: { start: body.cycle.start, end: body.cycle.end },
+      totalPoints: body.totalPoints,
+      checkedAt: body.checkedAt ? new Date(body.checkedAt) : undefined,
+    })
+  }
 
   /**
    * Handles `GET /v1/employees/:id/cpd-records`: lists the employee's credit records.
