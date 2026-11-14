@@ -185,6 +185,34 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
   ),
   concept('id.license-status-reason', 'other', 'Lainnya', 'Other'),
 
+  concept('id.credit-system', 'skp', 'Satuan Kredit Profesi (SKP)', 'Professional credit units (SKP)'),
+
+  concept(
+    'id.cpd-category',
+    'learning',
+    'Pembelajaran',
+    'Learning',
+  ),
+  concept('id.cpd-category', 'service', 'Pelayanan', 'Service'),
+  concept(
+    'id.cpd-category',
+    'community_service',
+    'Pengabdian masyarakat',
+    'Community service',
+  ),
+  concept(
+    'id.cpd-category',
+    'publication',
+    'Publikasi ilmiah',
+    'Scientific publication',
+  ),
+  concept(
+    'id.cpd-category',
+    'development',
+    'Pengembangan ilmu',
+    'Knowledge development',
+  ),
+
   concept('id.unit-type', 'directorate', 'Direktorat', 'Directorate', {
     clinical_default: false,
   }),

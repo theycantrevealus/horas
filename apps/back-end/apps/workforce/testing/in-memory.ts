@@ -16,6 +16,10 @@ import {
   type CommitteeMembershipRepository,
   type FacilityMembershipQuery,
 } from '@repository/interface/committee-membership'
+import {
+  type CpdRecordQuery,
+  type CpdRecordRepository,
+} from '@repository/interface/cpd-record'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type LicenseQuery,
@@ -43,6 +47,7 @@ import { type OrganizationUnitRepository } from '@repository/interface/organizat
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
 import { type CommitteeMembership } from '@repository/model/committee-membership'
+import { type CpdRecord } from '@repository/model/cpd-record'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
 import { type Employee } from '@repository/model/employee'
@@ -1927,5 +1932,44 @@ export class InMemoryProfessionalLicenses
         operation: 'ProfessionalLicenseRepository.write',
       })
     }
+  }
+}
+
+/**
+ * In-memory `CpdRecordRepository` for tests.
+ */
+export class InMemoryCpdRecords
+  extends InMemoryRepository<CpdRecord>
+  implements CpdRecordRepository
+{
+  /**
+   * Finds the credit records of an employee, newest activity date first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param query - Optional filters and paging.
+   * @returns The records.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+    query: CpdRecordQuery = {},
+  ): Promise<CpdRecord[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        (!query.creditSystem ||
+          item.credit_system.code === query.creditSystem) &&
+        (!query.status || item.status === query.status),
+    )
+      .sort(
+        (left, right) =>
+          right.activity_date.localeCompare(left.activity_date) ||
+          left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
   }
 }
