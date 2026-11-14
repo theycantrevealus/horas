@@ -88,6 +88,8 @@ describe('bundles', () => {
         'id.assignment-kind',
         'id.committee',
         'id.committee-role',
+        'id.cpd-category',
+        'id.credit-system',
         'id.employment-type',
         'id.license-status-reason',
         'id.license-type',

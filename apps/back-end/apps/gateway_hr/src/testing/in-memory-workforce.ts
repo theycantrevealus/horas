@@ -1,6 +1,7 @@
 import {
   REPOSITORY_CODE_CONCEPT,
   REPOSITORY_COMMITTEE_MEMBERSHIP,
+  REPOSITORY_CPD_RECORD,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
@@ -14,6 +15,7 @@ import {
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
 import { CommitteeMembershipEntity } from '@repository/mongo/schema/committee-membership'
+import { CpdRecordEntity } from '@repository/mongo/schema/cpd-record'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
@@ -27,6 +29,7 @@ import { ProfessionalLicenseEntity } from '@repository/mongo/schema/professional
 import {
   InMemoryCodeConcepts,
   InMemoryCommitteeMemberships,
+  InMemoryCpdRecords,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
   InMemoryEmploymentContracts,
@@ -58,6 +61,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property assignments - Position assignment repository.
  * @property committeeMemberships - Committee membership repository.
  * @property licenses - Professional license repository.
+ * @property cpdRecords - CPD record repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -73,6 +77,7 @@ export interface InMemoryWorkforce {
   assignments: InMemoryPositionAssignments
   committeeMemberships: InMemoryCommitteeMemberships
   licenses: InMemoryProfessionalLicenses
+  cpdRecords: InMemoryCpdRecords
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -96,6 +101,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const assignments = new InMemoryPositionAssignments()
   const committeeMemberships = new InMemoryCommitteeMemberships()
   const licenses = new InMemoryProfessionalLicenses()
+  const cpdRecords = new InMemoryCpdRecords()
   return {
     organizations,
     facilities,
@@ -109,6 +115,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     assignments,
     committeeMemberships,
     licenses,
+    cpdRecords,
     options: {
       entities: [
         OrganizationEntity,
@@ -123,6 +130,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         PositionAssignmentEntity,
         CommitteeMembershipEntity,
         ProfessionalLicenseEntity,
+        CpdRecordEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -137,6 +145,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_POSITION_ASSIGNMENT, assignments],
         [REPOSITORY_COMMITTEE_MEMBERSHIP, committeeMemberships],
         [REPOSITORY_PROFESSIONAL_LICENSE, licenses],
+        [REPOSITORY_CPD_RECORD, cpdRecords],
       ],
     },
   }
