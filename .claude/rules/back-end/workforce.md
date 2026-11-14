@@ -14,6 +14,7 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. `structure/unit-tree.ts` builds the organization chart from a flat list. |
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
 | `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
+| `apps/workforce/license/` | `LicenseService` (list, list by employee, get, register for HR and for the signed-in employee, verify, revoke) and the licence rules (`license-rules.ts`: document number, scan reference, dates). Verifying a renewal runs in one transaction with the licence it supersedes. Dates are UTC: a licence has no facility zone. |
 | `apps/workforce/committee/` | `CommitteeMembershipService` (list, appoint, end) and the date checks (`committee-rules.ts`). Dates use the facility's time zone. |
 | `apps/workforce/assignment/` | `AssignmentService` (list by employee and by unit, create, end) and the assignment rules (`assignment-rules.ts`: period, FTE, decision number, overlap). Creating and ending run in one transaction with the employee's `primary_assignment` summary. Local dates use the facility's time zone, read through the position's unit. |
 | `apps/workforce/contract/` | `ContractService` (list, get, create, correct a draft, activate, end, terminate) and the contract rules (`contract-rules.ts`). Activating, ending and terminating run in one transaction with the employee's `current_employment` summary. |
@@ -79,6 +80,10 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.assignment:write` | `POST /v1/assignments`, `POST /v1/assignments/:id/end` |
 | `workforce.committee-membership:read` | `GET /v1/committee-memberships` |
 | `workforce.committee-membership:write` | `POST /v1/committee-memberships`, `POST /v1/committee-memberships/:id/end` |
+| `workforce.license:read` | `GET /v1/licenses`, `GET /v1/licenses/:id`, `GET /v1/employees/:id/licenses` |
+| `workforce.license:write` | `POST /v1/licenses` |
+| `workforce.license:verify` | `POST /v1/licenses/:id/verify`, `POST /v1/licenses/:id/revoke` (HR Admin only) |
+| none (sign-in only) | `POST /v1/employees/me/licenses` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
 | `workforce.parameter:write` | `POST /v1/parameters` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
@@ -96,6 +101,14 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 - A person has at most one active membership in a committee of a facility (409 `membership_exists`); a committee of a facility has at most one active chair and one active secretary (409 `chair_exists`, `secretary_exists`). Partial unique indexes on `status: 'active'` back the checks.
 - The committee and the role are codes (`id.committee`, `id.committee-role`), checked with `assertActive`. The member must be an employee of the tenant who has not separated; the facility must be active.
 - An appointment starts no later than tomorrow in the facility's zone and its end, if given, is not in the past; a membership ends on a date from its start to tomorrow. Nothing is edited or deleted: end a membership and appoint again.
+
+## 3c. Licences
+
+- A licence starts `pending_verification`. Only a different account than the submitter may verify it (403 `verifier_is_submitter`), and only HR Admin holds `workforce.license:verify`.
+- The licence type (a code concept) decides what a licence needs: `requires_expiry_date` (expiry date), `location_specific` (a practice location) and `eligibility_role` (copied onto the licence). A document number is unique per type while the record is live (normalized: upper case, no spaces, dots or hyphens). The scan is a file reference only (`file_id`, content type, SHA-256); nothing checks that the file exists.
+- A match needs the licence's profession to equal the employee's and its specialty to be empty or equal the employee's primary specialty. An expired licence, or one issued later than today (UTC), cannot be verified. A mismatch rejects it with a reason; nothing is edited or deleted, a corrected licence is registered anew.
+- At most one valid practice permit per employee, profession and facility (409 `valid_license_exists`). A renewal names the valid licence it replaces; verifying it supersedes that one.
+- Nothing expires licences yet: a `valid` licence past its date stays `valid` until a worker job exists, so eligibility must read the date too.
 
 ## 4a. Events
 
@@ -139,5 +152,5 @@ No first administrator exists (`authentication.md` 5). To call HR endpoints by h
 ## 7. Not built yet
 
 - Every HR group after organizations (see `hr-endpoints.md` for the order), and the repositories for their collections.
-- Account requests, role derivation, assignment and committee events, activation of planned assignments and ending assignments when an employee separates (a worker job or an event consumer), the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
+- Account requests, role derivation, assignment, committee and licence events, daily expiry of licences, the practice-location limit (`HR-LIC-007`), the licence rule for leaving `onboarding` (`HR-LIC-009`), activation of planned assignments and ending assignments when an employee separates (a worker job or an event consumer), the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
 - Scoped permissions (unit and own-record access), field encryption of personal identifiers (arrives with the private profile), file uploads.
