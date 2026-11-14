@@ -39,6 +39,8 @@ export const PERMISSIONS = {
   WORKFORCE_CPD_READ: 'workforce.cpd:read',
   WORKFORCE_CPD_WRITE: 'workforce.cpd:write',
   WORKFORCE_CPD_REVIEW: 'workforce.cpd:review',
+  WORKFORCE_PRIVILEGE_READ: 'workforce.privilege:read',
+  WORKFORCE_PRIVILEGE_WRITE: 'workforce.privilege:write',
   WORKFORCE_PARAMETER_READ: 'workforce.parameter:read',
   WORKFORCE_PARAMETER_WRITE: 'workforce.parameter:write',
   WORKFORCE_CODE_CONCEPT_READ: 'workforce.code-concept:read',

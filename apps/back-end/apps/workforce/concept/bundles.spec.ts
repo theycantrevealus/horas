@@ -91,6 +91,7 @@ describe('bundles', () => {
         'id.cpd-category',
         'id.credit-system',
         'id.employment-type',
+        'id.evidence-type',
         'id.license-status-reason',
         'id.license-type',
         'id.license-verification-method',

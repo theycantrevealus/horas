@@ -213,6 +213,22 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
     'Knowledge development',
   ),
 
+  concept('id.evidence-type', 'certificate', 'Sertifikat', 'Certificate'),
+  concept('id.evidence-type', 'logbook', 'Logbook tindakan', 'Procedure logbook'),
+  concept(
+    'id.evidence-type',
+    'training_record',
+    'Catatan pelatihan',
+    'Training record',
+  ),
+  concept(
+    'id.evidence-type',
+    'recommendation_letter',
+    'Surat rekomendasi',
+    'Recommendation letter',
+  ),
+  concept('id.evidence-type', 'case_list', 'Daftar kasus', 'Case list'),
+
   concept('id.unit-type', 'directorate', 'Direktorat', 'Directorate', {
     clinical_default: false,
   }),
