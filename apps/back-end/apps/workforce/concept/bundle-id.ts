@@ -140,6 +140,51 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
     },
   ),
 
+  concept(
+    'id.license-verification-method',
+    'manual_registry_check',
+    'Pemeriksaan manual pada registri',
+    'Manual registry check',
+  ),
+  concept(
+    'id.license-verification-method',
+    'document_review',
+    'Pemeriksaan dokumen asli',
+    'Original document review',
+  ),
+
+  concept(
+    'id.license-status-reason',
+    'document_mismatch',
+    'Dokumen tidak sesuai dengan aslinya',
+    'Document does not match the original',
+  ),
+  concept(
+    'id.license-status-reason',
+    'registry_mismatch',
+    'Data tidak sesuai dengan registri',
+    'Data does not match the registry',
+  ),
+  concept(
+    'id.license-status-reason',
+    'wrong_profession',
+    'Profesi tidak sesuai',
+    'Profession does not match',
+  ),
+  concept(
+    'id.license-status-reason',
+    'revoked_by_authority',
+    'Dicabut oleh penerbit',
+    'Revoked by the issuing authority',
+  ),
+  concept(
+    'id.license-status-reason',
+    'suspended_by_authority',
+    'Dibekukan oleh penerbit',
+    'Suspended by the issuing authority',
+  ),
+  concept('id.license-status-reason', 'other', 'Lainnya', 'Other'),
+
   concept('id.unit-type', 'directorate', 'Direktorat', 'Directorate', {
     clinical_default: false,
   }),

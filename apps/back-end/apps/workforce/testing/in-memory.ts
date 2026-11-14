@@ -18,6 +18,10 @@ import {
 } from '@repository/interface/committee-membership'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
+  type LicenseQuery,
+  type ProfessionalLicenseRepository,
+} from '@repository/interface/professional-license'
+import {
   type PositionAssignmentRepository,
   type UnitAssignmentQuery,
 } from '@repository/interface/position-assignment'
@@ -52,6 +56,7 @@ import {
 import { type Organization } from '@repository/model/organization'
 import { type OrganizationUnit } from '@repository/model/organization-unit'
 import { type Position } from '@repository/model/position'
+import { type ProfessionalLicense } from '@repository/model/professional-license'
 import { type PositionAssignment } from '@repository/model/position-assignment'
 
 /**
@@ -1737,6 +1742,189 @@ export class InMemoryCommitteeMemberships
     if (secondRole || secondSingle) {
       throw new RepositoryConflictError('duplicate membership', {
         operation: 'CommitteeMembershipRepository.write',
+      })
+    }
+  }
+}
+
+/**
+ * In-memory `ProfessionalLicenseRepository` for tests. It applies the unique indexes of the Mongo
+ * collection: one live record per tenant, type and normalized number, and at most one valid
+ * practice permit per employee, profession and facility.
+ */
+export class InMemoryProfessionalLicenses
+  extends InMemoryRepository<ProfessionalLicense>
+  implements ProfessionalLicenseRepository
+{
+  /**
+   * Creates a licence, refusing a second live one with the same type and number.
+   *
+   * @param entity - Licence data.
+   * @param id - Optional identifier.
+   * @returns The stored licence.
+   */
+  override async create(
+    entity: NewEntity<ProfessionalLicense>,
+    id?: string,
+  ): Promise<ProfessionalLicense> {
+    this.assertUnique(entity)
+    return super.create(entity, id)
+  }
+
+  /**
+   * Updates a licence, refusing a change to `valid` while another valid practice permit exists
+   * for the same employee, profession and facility.
+   *
+   * @param id - Licence identifier.
+   * @param changes - Fields to change.
+   * @param options - Optional concurrency check.
+   * @returns The updated licence.
+   */
+  override async update(
+    id: string,
+    changes: EntityChanges<ProfessionalLicense>,
+    options?: UpdateOptions,
+  ): Promise<ProfessionalLicense> {
+    const current = this.items.get(id)
+    if (current && changes.status === 'valid') {
+      this.assertUnique({ ...current, status: 'valid' }, id)
+    }
+    return super.update(id, changes, options)
+  }
+
+  /**
+   * Finds every licence of an employee, newest issue date first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The licences.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<ProfessionalLicense[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at,
+    ).sort((left, right) => right.issue_date.localeCompare(left.issue_date))
+  }
+
+  /**
+   * Finds licences of the tenant with optional filters and paging.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The licences.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: LicenseQuery = {},
+  ): Promise<ProfessionalLicense[]> {
+    const offset = query.offset ?? 0
+    const expiry =
+      query.expiresFrom !== undefined || query.expiresTo !== undefined
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.status || item.status === query.status) &&
+        (!query.licenseType || item.license_type.code === query.licenseType) &&
+        (!query.facilityId ||
+          item.practice_location?.facility_id === query.facilityId) &&
+        (query.expiresFrom === undefined ||
+          (item.expiry_date !== null && item.expiry_date >= query.expiresFrom)) &&
+        (query.expiresTo === undefined ||
+          (item.expiry_date !== null && item.expiry_date <= query.expiresTo)),
+    )
+      .sort(
+        (left, right) =>
+          (expiry
+            ? (left.expiry_date ?? '').localeCompare(right.expiry_date ?? '')
+            : 0) || left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the live licence with a document number and type.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param typeSystem - Licence type system.
+   * @param typeCode - Licence type code.
+   * @param normalizedNumber - Normalized document number.
+   * @returns The licence, or `null`.
+   */
+  async findLiveByNumber(
+    tenantId: string,
+    typeSystem: string,
+    typeCode: string,
+    normalizedNumber: string,
+  ): Promise<ProfessionalLicense | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.license_type.system === typeSystem &&
+        item.license_type.code === typeCode &&
+        item.document_number_normalized === normalizedNumber &&
+        item.is_live &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Applies the unique indexes to a licence that is about to be stored.
+   *
+   * @param license - The licence as it will be stored.
+   * @param ownId - Identifier of the licence itself, when it already exists.
+   * @throws RepositoryConflictError when an index would be broken.
+   */
+  private assertUnique(
+    license: Pick<
+      ProfessionalLicense,
+      | 'tenant_id'
+      | 'employee_id'
+      | 'license_type'
+      | 'document_number_normalized'
+      | 'is_live'
+      | 'status'
+      | 'eligibility_role'
+      | 'profession'
+      | 'practice_location'
+    >,
+    ownId?: string,
+  ): void {
+    const others = [...this.items.values()].filter(
+      (item) => item.tenant_id === license.tenant_id && item.id !== ownId,
+    )
+    const duplicateNumber =
+      ownId === undefined &&
+      license.is_live &&
+      others.some(
+        (item) =>
+          item.is_live &&
+          item.license_type.system === license.license_type.system &&
+          item.license_type.code === license.license_type.code &&
+          item.document_number_normalized === license.document_number_normalized,
+      )
+    const facilityId = license.practice_location?.facility_id ?? null
+    const secondPermit =
+      license.status === 'valid' &&
+      license.eligibility_role === 'practice_permit' &&
+      facilityId !== null &&
+      others.some(
+        (item) =>
+          item.status === 'valid' &&
+          item.eligibility_role === 'practice_permit' &&
+          item.employee_id === license.employee_id &&
+          item.profession.system === license.profession.system &&
+          item.profession.code === license.profession.code &&
+          item.practice_location?.facility_id === facilityId,
+      )
+    if (duplicateNumber || secondPermit) {
+      throw new RepositoryConflictError('duplicate license', {
+        operation: 'ProfessionalLicenseRepository.write',
       })
     }
   }

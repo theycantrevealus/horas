@@ -107,3 +107,10 @@ export const REPOSITORY_POSITION_ASSIGNMENT = Symbol(
 export const REPOSITORY_COMMITTEE_MEMBERSHIP = Symbol(
   'REPOSITORY_COMMITTEE_MEMBERSHIP',
 )
+
+/**
+ * Injection token for the professional license repository (STR, SIP and other licences).
+ */
+export const REPOSITORY_PROFESSIONAL_LICENSE = Symbol(
+  'REPOSITORY_PROFESSIONAL_LICENSE',
+)
