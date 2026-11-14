@@ -14,6 +14,7 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. `structure/unit-tree.ts` builds the organization chart from a flat list. |
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
 | `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
+| `apps/workforce/credit/` | `CpdService` (list, record for HR and for the signed-in employee, review) and `CpdSummaryService` (list totals, set a platform total), with the credit rules (`cpd-rules.ts`: points, activity date, totals, cycle). |
 | `apps/workforce/license/` | `LicenseService` (list, list by employee, get, register for HR and for the signed-in employee, verify, revoke) and the licence rules (`license-rules.ts`: document number, scan reference, dates). Verifying a renewal runs in one transaction with the licence it supersedes. Dates are UTC: a licence has no facility zone. |
 | `apps/workforce/committee/` | `CommitteeMembershipService` (list, appoint, end) and the date checks (`committee-rules.ts`). Dates use the facility's time zone. |
 | `apps/workforce/assignment/` | `AssignmentService` (list by employee and by unit, create, end) and the assignment rules (`assignment-rules.ts`: period, FTE, decision number, overlap). Creating and ending run in one transaction with the employee's `primary_assignment` summary. Local dates use the facility's time zone, read through the position's unit. |
@@ -84,6 +85,10 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.license:write` | `POST /v1/licenses` |
 | `workforce.license:verify` | `POST /v1/licenses/:id/verify`, `POST /v1/licenses/:id/revoke` (HR Admin only) |
 | none (sign-in only) | `POST /v1/employees/me/licenses` |
+| `workforce.cpd:read` | `GET /v1/employees/:id/cpd-records`, `GET /v1/employees/:id/cpd-summaries` |
+| `workforce.cpd:write` | `POST /v1/cpd-records`, `PUT /v1/employees/:id/cpd-summaries/:system` |
+| `workforce.cpd:review` | `POST /v1/cpd-records/:id/review` |
+| none (sign-in only) | `POST /v1/employees/me/cpd-records` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
 | `workforce.parameter:write` | `POST /v1/parameters` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
@@ -109,6 +114,13 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 - A match needs the licence's profession to equal the employee's and its specialty to be empty or equal the employee's primary specialty. An expired licence, or one issued later than today (UTC), cannot be verified. A mismatch rejects it with a reason; nothing is edited or deleted, a corrected licence is registered anew.
 - At most one valid practice permit per employee, profession and facility (409 `valid_license_exists`). A renewal names the valid licence it replaces; verifying it supersedes that one.
 - Nothing expires licences yet: a `valid` licence past its date stays `valid` until a worker job exists, so eligibility must read the date too.
+
+## 3d. Professional credits
+
+- A credit record (SKP, CME, CPD) is `accepted` when HR records it and `submitted` when the employee submits it, which needs evidence. A submitted record is accepted or rejected, an accepted one may later be rejected, a rejected one is final. The reviewer is never the holder (403 `reviewer_is_holder`) and a rejection carries a reason in the change history; the model has no review fields. Nothing is edited or deleted.
+- The credit system and the activity category are codes (`id.credit-system`, `id.cpd-category`), checked with `assertActive`. Points are above 0, at most 500, with at most two decimals; the activity date runs from 1950 to tomorrow (UTC). Evidence is a file reference only.
+- A credit total is one per employee and credit system, read from a national platform: a new `PUT` replaces the old total and the old values stay in the change history. The path's credit system code must equal the body's. The list adds `accepted_points`, the accepted records of that system inside the total's cycle, computed on read.
+- The limits of 500 points per record and 10000 per total are guesses, not regulation. Credits do not affect licences, and the SIP-renewal shortfall alert (`HR-LIC-010`) is not built.
 
 ## 4a. Events
 
@@ -152,5 +164,5 @@ No first administrator exists (`authentication.md` 5). To call HR endpoints by h
 ## 7. Not built yet
 
 - Every HR group after organizations (see `hr-endpoints.md` for the order), and the repositories for their collections.
-- Account requests, role derivation, assignment, committee and licence events, daily expiry of licences, the practice-location limit (`HR-LIC-007`), the licence rule for leaving `onboarding` (`HR-LIC-009`), activation of planned assignments and ending assignments when an employee separates (a worker job or an event consumer), the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
+- Account requests, role derivation, assignment, committee and licence events, daily expiry of licences, the practice-location limit (`HR-LIC-007`), the SIP-renewal shortfall alert (`HR-LIC-010`), the licence rule for leaving `onboarding` (`HR-LIC-009`), activation of planned assignments and ending assignments when an employee separates (a worker job or an event consumer), the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
 - Scoped permissions (unit and own-record access), field encryption of personal identifiers (arrives with the private profile), file uploads.
