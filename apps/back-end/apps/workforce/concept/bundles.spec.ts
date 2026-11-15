@@ -85,6 +85,7 @@ describe('bundles', () => {
     it('covers every system the HR specification names', () => {
       const systems = new Set(concepts.map((concept) => concept.system))
       expect([...systems].sort()).toEqual([
+        'id.assessment-method',
         'id.assignment-kind',
         'id.clinical-level',
         'id.committee',

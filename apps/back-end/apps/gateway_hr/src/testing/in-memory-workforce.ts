@@ -4,6 +4,7 @@ import {
   REPOSITORY_CPD_RECORD,
   REPOSITORY_CPD_SUMMARY,
   REPOSITORY_CREDENTIAL_APPLICATION,
+  REPOSITORY_CREDENTIAL_ASSESSMENT,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
@@ -21,6 +22,7 @@ import { CommitteeMembershipEntity } from '@repository/mongo/schema/committee-me
 import { CpdRecordEntity } from '@repository/mongo/schema/cpd-record'
 import { CpdSummaryEntity } from '@repository/mongo/schema/cpd-summary'
 import { CredentialApplicationEntity } from '@repository/mongo/schema/credential-application'
+import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
@@ -38,6 +40,7 @@ import {
   InMemoryCpdRecords,
   InMemoryCpdSummaries,
   InMemoryCredentialApplications,
+  InMemoryCredentialAssessments,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
   InMemoryEmploymentContracts,
@@ -74,6 +77,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property cpdSummaries - CPD summary repository.
  * @property privileges - Privilege catalog repository.
  * @property applications - Credential application repository.
+ * @property assessments - Credential assessment repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -93,6 +97,7 @@ export interface InMemoryWorkforce {
   cpdSummaries: InMemoryCpdSummaries
   privileges: InMemoryPrivilegeCatalog
   applications: InMemoryCredentialApplications
+  assessments: InMemoryCredentialAssessments
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -120,6 +125,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const cpdSummaries = new InMemoryCpdSummaries()
   const privileges = new InMemoryPrivilegeCatalog()
   const applications = new InMemoryCredentialApplications()
+  const assessments = new InMemoryCredentialAssessments()
   return {
     organizations,
     facilities,
@@ -137,6 +143,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     cpdSummaries,
     privileges,
     applications,
+    assessments,
     options: {
       entities: [
         OrganizationEntity,
@@ -155,6 +162,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         CpdSummaryEntity,
         PrivilegeCatalogEntity,
         CredentialApplicationEntity,
+        CredentialAssessmentEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -173,6 +181,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_CPD_SUMMARY, cpdSummaries],
         [REPOSITORY_PRIVILEGE_CATALOG, privileges],
         [REPOSITORY_CREDENTIAL_APPLICATION, applications],
+        [REPOSITORY_CREDENTIAL_ASSESSMENT, assessments],
       ],
     },
   }

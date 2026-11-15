@@ -249,6 +249,16 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
     'Visiting specialist',
   ),
 
+  concept(
+    'id.assessment-method',
+    'document_review',
+    'Telaah dokumen',
+    'Document review',
+  ),
+  concept('id.assessment-method', 'interview', 'Wawancara', 'Interview'),
+  concept('id.assessment-method', 'observation', 'Observasi', 'Observation'),
+  concept('id.assessment-method', 'logbook', 'Logbook', 'Logbook'),
+
   concept('id.conflict-relationship', 'relative', 'Keluarga', 'Relative'),
   concept(
     'id.conflict-relationship',
