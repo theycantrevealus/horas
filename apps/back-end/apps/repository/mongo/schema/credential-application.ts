@@ -265,3 +265,5 @@ CredentialApplicationSchema.index({
   status: 1,
   status_since: 1,
 })
+// The open renewal of an SPK (HR plan 4.4 RN2).
+CredentialApplicationSchema.index({ tenant_id: 1, previous_appointment_id: 1 })

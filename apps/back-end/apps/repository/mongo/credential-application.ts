@@ -115,6 +115,39 @@ export class CredentialApplicationRepositoryMongo
   }
 
   /**
+   * Finds the open renewal application of an SPK.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param previousAppointmentId - The SPK being renewed or extended.
+   * @returns The open application, or `null`.
+   */
+  async findOpenRenewal(
+    tenantId: string,
+    previousAppointmentId: string,
+  ): Promise<CredentialApplication | null> {
+    const operation = 'CredentialApplicationRepository.findOpenRenewal'
+    if (!toObjectId(tenantId) || !toObjectId(previousAppointmentId)) {
+      return null
+    }
+    try {
+      const record = await this.model
+        .findOne(
+          this.toFilter({
+            tenant_id: tenantId,
+            deleted_at: null,
+            previous_appointment_id: previousAppointmentId,
+            status: { $nin: ['approved', 'rejected', 'withdrawn'] },
+          }),
+        )
+        .lean<LeanRecord<CredentialApplicationEntity>>()
+        .exec()
+      return record ? this.toModel(record) : null
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.
