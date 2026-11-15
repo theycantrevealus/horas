@@ -1,6 +1,6 @@
 # gateway_hr 4.4: Renewals (re-credentialing and privilege extension)
 
-Status: **Proposed** (2026-11-16). Decisions RN1 to RN16 are proposals for you to confirm or change (section 7). Follow-up of `gateway-hr-4-2-credential-applications.md` (AP3) and `gateway-hr-4-3-spk-and-granted-privileges.md` (SP3); part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 16a). Collections: `../human-resource-collections.md` 4.3 (`previous_appointment_id`), 4.5 (`superseded_by_id`, status `superseded`) and 4.6 (`privilege_grants`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 7.4.2 (re-credentialing), 7.4.3 (privilege extension) and 7.3 (SPK status `superseded`). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3, 3f and 3g.
+Status: **Confirmed** (2026-11-16). Decisions RN1 to RN16 and the split in two code PRs confirmed as proposed. Follow-up of `gateway-hr-4-2-credential-applications.md` (AP3) and `gateway-hr-4-3-spk-and-granted-privileges.md` (SP3); part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 16a). Collections: `../human-resource-collections.md` 4.3 (`previous_appointment_id`), 4.5 (`superseded_by_id`, status `superseded`) and 4.6 (`privilege_grants`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 7.4.2 (re-credentialing), 7.4.3 (privilege extension) and 7.3 (SPK status `superseded`). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3, 3f and 3g.
 
 Until now a practitioner holds one SPK from an `initial` application. 4.2 refuses the types `recredentialing` and `privilege_extension` (422 `type_not_supported`), and 4.3 refuses a second current regular SPK at a facility (409 `appointment_exists`). So a practitioner who gains a new competence, or whose SPK nears its end, cannot be served. This group closes that: it accepts the two types and, on approval, issues the new SPK, ends the old one as `superseded`, and carries the privileges over.
 
@@ -72,13 +72,13 @@ Tests come first in each task: repository (indexes, tenant isolation, no `_id`),
 
 Alerts `RECREDENTIAL_LEAD_DAYS` before an SPK ends, the OPPE, incident and complaint input of 7.4.2, the job that sets `expired`, notifications, and renewal of a temporary SPK (a temporary SPK is not renewed; a new application is made).
 
-## 7. Decisions that need your answer
+## 7. Decisions that needed your answer
 
-All of RN1 to RN16 are proposals. These four change the shape of the work most, so I would like an explicit answer:
+Confirmed as proposed: all of RN1 to RN16. These four changed the shape of the work most:
 
 - **RN2** (one open renewal per SPK; a suspended SPK cannot be renewed until the Director lifts the suspension).
 - **RN8 and RN9** (an extension carries the old grants over as new records and the old grants get a new final status `superseded`, so the directory shows each privilege once).
 - **RN7** (an extension keeps the old SPK's last valid day and refuses `validUntil`).
 - **RN11** (supervised grants of others are re-pointed to the new full grant, or flagged when there is none).
 
-The others are proposed as stated.
+The others are as stated.
