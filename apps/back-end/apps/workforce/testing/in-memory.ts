@@ -21,6 +21,10 @@ import {
   type CpdRecordRepository,
 } from '@repository/interface/cpd-record'
 import { type CpdSummaryRepository } from '@repository/interface/cpd-summary'
+import {
+  type ApplicationQuery,
+  type CredentialApplicationRepository,
+} from '@repository/interface/credential-application'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type LicenseQuery,
@@ -53,6 +57,7 @@ import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
 import { type CommitteeMembership } from '@repository/model/committee-membership'
 import { type CpdRecord } from '@repository/model/cpd-record'
+import { type CredentialApplication } from '@repository/model/credential-application'
 import { type CpdSummary } from '@repository/model/cpd-summary'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
@@ -2165,6 +2170,46 @@ export class InMemoryPrivilegeCatalog
           item.facility_ids.includes(query.facilityId)),
     )
       .sort((left, right) => left.code.localeCompare(right.code))
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+}
+
+/**
+ * In-memory `CredentialApplicationRepository` for tests.
+ */
+export class InMemoryCredentialApplications
+  extends InMemoryRepository<CredentialApplication>
+  implements CredentialApplicationRepository
+{
+  /**
+   * Finds applications, the oldest status first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The applications.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: ApplicationQuery = {},
+  ): Promise<CredentialApplication[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.status || item.status === query.status) &&
+        (!query.committee || item.committee.code === query.committee) &&
+        (!query.facilityId ||
+          item.credentialing_facility_id === query.facilityId) &&
+        (!query.employeeId || item.employee_id === query.employeeId) &&
+        (!query.statusBefore ||
+          item.status_since.getTime() <= query.statusBefore.getTime()),
+    )
+      .sort(
+        (left, right) =>
+          left.status_since.getTime() - right.status_since.getTime() ||
+          left.id.localeCompare(right.id),
+      )
       .slice(offset, offset + (query.limit ?? 10))
   }
 }

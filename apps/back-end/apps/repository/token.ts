@@ -131,3 +131,10 @@ export const REPOSITORY_CPD_SUMMARY = Symbol('REPOSITORY_CPD_SUMMARY')
 export const REPOSITORY_PRIVILEGE_CATALOG = Symbol(
   'REPOSITORY_PRIVILEGE_CATALOG',
 )
+
+/**
+ * Injection token for the credential application repository (requests for clinical privileges).
+ */
+export const REPOSITORY_CREDENTIAL_APPLICATION = Symbol(
+  'REPOSITORY_CREDENTIAL_APPLICATION',
+)
