@@ -145,6 +145,39 @@ export class PrivilegeGrantRepositoryMongo
   }
 
   /**
+   * Finds the grants that name a grant as their supervisor's grant.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param grantId - The supervisor's own grant.
+   * @returns The supervised grants.
+   */
+  async findBySupervisorGrant(
+    tenantId: string,
+    grantId: string,
+  ): Promise<PrivilegeGrant[]> {
+    const operation = 'PrivilegeGrantRepository.findBySupervisorGrant'
+    if (!toObjectId(tenantId) || !toObjectId(grantId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            deleted_at: null,
+            'supervisor.grant_id': grantId,
+          }),
+        )
+        .sort({ code: 1, _id: 1 })
+        .lean<LeanRecord<PrivilegeGrantEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds an active full grant of a privilege held by an employee in a facility.
    *
    * @param tenantId - Tenant to search in.

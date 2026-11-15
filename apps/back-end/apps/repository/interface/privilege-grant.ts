@@ -71,4 +71,17 @@ export interface PrivilegeGrantRepository extends Repository<PrivilegeGrant> {
    * @returns The grants, possibly none.
    */
   findByFilter(tenantId: string, query?: GrantQuery): Promise<PrivilegeGrant[]>
+
+  /**
+   * Finds the grants that name a grant as their supervisor's grant, for the supervisor flags of
+   * `HR-CRD-006`.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param grantId - The supervisor's own grant.
+   * @returns The supervised grants, possibly none.
+   */
+  findBySupervisorGrant(
+    tenantId: string,
+    grantId: string,
+  ): Promise<PrivilegeGrant[]>
 }
