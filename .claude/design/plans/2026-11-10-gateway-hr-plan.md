@@ -66,7 +66,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 12 | 3.1 Licences | 7 | Done (`gateway-hr-3-1-licences.md`, PR #37) | Built in two PRs, #38 and #39 |
 | 13 | 3.2 Professional credits | 6 | Done (`gateway-hr-3-2-professional-credits.md`, PR #41) | Built in two PRs, #42 and #43 |
 | 14 | 4.1 Privilege catalog | 5 | Done (`gateway-hr-4-1-privilege-catalog.md`, PR #45) | Built, PR #47 |
-| 15 | 4.2 Credential applications | 13 | Done (`gateway-hr-4-2-credential-applications.md`, PR #49) | Part 1 of 3 built, PR #51; part 2 of 3 in progress (branch `feat/workforce-application-review`) |
+| 15 | 4.2 Credential applications | 13 | Done (`gateway-hr-4-2-credential-applications.md`, PR #49) | Parts 1 and 2 of 3 built, PR #51 and #53; part 3 of 3 in progress (branch `feat/workforce-application-assessment`) |
 | 16 | 4.3 SPK and granted privileges | 10 | — | — |
 | 17 | 5.1 Shift definitions | 4 | — | — |
 | 18 | 5.2 Holiday calendars | 5 | — | — |
