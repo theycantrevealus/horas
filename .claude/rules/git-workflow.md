@@ -68,7 +68,7 @@ When a change touches several areas, use the area that owns the behaviour, or sp
 
 ### 2.3 Message format
 
-- **Subject:** imperative mood ("add", not "added"), lowercase after the colon, no trailing period, at most 72 characters.
+- **Subject:** imperative mood ("add", not "added"), lowercase after the colon, no trailing period. The whole header (`type(scope): subject`) is at most 100 characters (`header-max-length` in `commitlint.config.mjs`).
 - **Body** (optional but expected for non-trivial changes): a blank line after the subject, then why the change was made and what was decided. Wrap at 100 characters. Do not repeat the diff.
 - **Breaking change:** add `!` after the scope (`feat(gateway)!: ...`) and a `BREAKING CHANGE:` footer that says what consumers must change.
 - **Issue reference:** put it in the footer (`Refs #123`, `Closes #123`).
