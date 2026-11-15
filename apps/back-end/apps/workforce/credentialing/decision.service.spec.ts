@@ -316,6 +316,11 @@ describe('DecisionService', () => {
     throw new Error('Expected a rejection')
   }
 
+  const someone = () => new Types.ObjectId().toHexString()
+
+  const reject = (id: string, override: Partial<DecideInput> = {}, caller: string | null = directorId) =>
+    asDirector(() => service.decide(tenantId, caller, id, { outcome: 'rejected', reason: 'Belum memenuhi syarat', ...override }))
+
   const approve = (id: string, override: Partial<DecideInput> = {}, caller: string | null = directorId) =>
     asDirector(() =>
       service.decide(tenantId, caller, id, {
@@ -669,9 +674,6 @@ describe('DecisionService', () => {
   })
 
   describe('reject', () => {
-    const reject = (id: string, override: Partial<DecideInput> = {}, caller: string | null = directorId) =>
-      asDirector(() => service.decide(tenantId, caller, id, { outcome: 'rejected', reason: 'Belum memenuhi syarat', ...override }))
-
     it('rejects a recommended application with the reason, and writes no SPK and no grant', async () => {
       const application = await recommended()
 
@@ -709,6 +711,367 @@ describe('DecisionService', () => {
       for (const id of [new Types.ObjectId().toHexString(), 'bad', foreign.id]) {
         expect(await rejection(() => reject(id))).toMatchObject({ code: 'application_not_found' })
       }
+    })
+  })
+
+  describe('renewals (HR plan 4.4 RN6 to RN14)', () => {
+    let itemFour: string
+
+    /**
+     * Stores an SPK of the applicant that a renewal will replace.
+     *
+     * @param override - Fields that replace the defaults.
+     * @returns The appointment.
+     */
+    function addOld(
+      override: {
+        status?: 'active' | 'suspended' | 'revoked'
+        end?: string
+        employee?: string
+        facility?: string
+        units?: string[]
+        temporary?: boolean
+        number?: string
+        facilityIds?: string[]
+      } = {},
+    ) {
+      const status = override.status ?? 'active'
+      return asDirector(() =>
+        appointments.create({
+          tenant_id: tenantId,
+          appointment_number: override.number ?? `OLD/${new Types.ObjectId().toHexString().slice(-8).toUpperCase()}`,
+          employee_id: override.employee ?? applicantId,
+          credentialing_facility_id: override.facility ?? facilityId,
+          credentialing_scope: 'facility',
+          facility_ids: override.facilityIds ?? [override.facility ?? facilityId],
+          unit_ids: override.units ?? [oldUnit],
+          source_application_id: new Types.ObjectId().toHexString(),
+          valid_period: { start: '2025-03-01', end: override.end ?? '2028-02-29' },
+          is_temporary: override.temporary ?? false,
+          status,
+          is_current: status !== 'revoked',
+          issued: { by: { account_id: 'a9', display_name: 'Director', kind: 'account' }, director_employee_id: directorId, date: '2025-03-01' },
+          signed_document: null,
+          suspension: null,
+          revocation: null,
+          superseded_by_id: null,
+        }),
+      )
+    }
+
+    /**
+     * Stores a grant of an SPK.
+     *
+     * @param spk - The SPK.
+     * @param item - The privilege.
+     * @param override - Fields that replace the defaults.
+     * @returns The grant.
+     */
+    function addGrantOf(
+      spk: { id: string; employee_id: string; facility_ids: string[]; unit_ids: string[] },
+      item: string,
+      override: Partial<import('@repository/model/privilege-grant').PrivilegeGrant> = {},
+    ) {
+      return asDirector(() =>
+        grants.create({
+          tenant_id: tenantId,
+          appointment_id: spk.id,
+          employee_id: spk.employee_id,
+          facility_ids: spk.facility_ids,
+          unit_ids: spk.unit_ids,
+          catalog_item_id: item,
+          code: `C-${item.slice(-4)}`,
+          condition: 'full',
+          supervisor: null,
+          restriction_notes: null,
+          status: 'active',
+          status_change: null,
+          flag: null,
+          ...override,
+        }),
+      )
+    }
+
+    /**
+     * Stores a recommended renewal application.
+     *
+     * @param type - Renewal type.
+     * @param previous - The SPK being renewed.
+     * @param privileges - What the committee recommended.
+     * @param override - Other fields that replace the defaults.
+     * @returns The application.
+     */
+    function renewal(
+      type: 'recredentialing' | 'privilege_extension',
+      previous: string | null,
+      privileges: { item: string; condition: 'full' | 'supervised' | 'restricted' | null; supervisor?: string; notes?: string }[],
+      override: Partial<CredentialApplication> = {},
+    ) {
+      return asDirector(() =>
+        applications.create({
+          tenant_id: tenantId,
+          employee_id: applicantId,
+          credentialing_facility_id: facilityId,
+          credentialing_scope: 'facility',
+          type,
+          committee: { system: 'id.committee', code: 'komite_medik' },
+          status: 'recommended',
+          status_since: new Date('2026-03-01T00:00:00Z'),
+          requested_privileges: privileges.map((entry, index) => ({
+            catalog_item_id: entry.item,
+            code: `PD-${index + 1}`,
+            requested_condition: 'full' as const,
+            proposed_supervisor_employee_id: null,
+            notes: null,
+          })),
+          requested_unit_ids: [newUnit],
+          requested_facility_ids: [facilityId],
+          documents: [],
+          assessors: [],
+          recommendation: {
+            decided_at: new Date('2026-03-08T00:00:00Z'),
+            signed_by: { account_id: 'a2', display_name: 'Chair', kind: 'account' },
+            summary: 'Ringkasan Rahasia',
+            privileges: privileges.map((entry) => ({
+              catalog_item_id: entry.item,
+              outcome: entry.condition === null ? ('not_recommended' as const) : ('recommended' as const),
+              condition: entry.condition,
+              supervisor_employee_id: entry.supervisor ?? null,
+              restriction_notes: entry.notes ?? null,
+            })),
+          },
+          decision: null,
+          return_reason: null,
+          withdrawal_reason: null,
+          temporary: null,
+          previous_appointment_id: previous,
+          ...override,
+        }),
+      )
+    }
+
+    const oldUnit = new Types.ObjectId().toHexString()
+    const newUnit = new Types.ObjectId().toHexString()
+    const spkOf = async (id: string) => (await appointments.findOne(id)) as import('@repository/model/clinical-appointment').ClinicalAppointment
+    const grantOf = async (id: string) => (await grants.findOne(id)) as import('@repository/model/privilege-grant').PrivilegeGrant
+
+    beforeEach(async () => {
+      itemFour = await addItem()
+    })
+
+    it('re-credentialing: issues a new SPK from the issue date, supersedes the old SPK and its grants, and grants only what was recommended', async () => {
+      const old = await addOld()
+      const keptOld = await addGrantOf(old, itemOne)
+      const suspendedOld = await addGrantOf(old, itemThree, {
+        condition: 'restricted',
+        restriction_notes: 'Rawat jalan',
+        status: 'suspended',
+        status_change: { effective_date: '2026-02-01', reason: 'x', decision_ref: { number: 'SK/1', document: null } },
+      })
+      const revokedOld = await addGrantOf(old, itemFour, { status: 'revoked' })
+      const application = await renewal('recredentialing', old.id, [
+        { item: itemOne, condition: 'full' },
+        { item: itemTwo, condition: 'restricted', notes: 'Hanya rawat jalan' },
+      ])
+
+      const result = await approve(application.id)
+
+      expect(result.appointment).toMatchObject({
+        status: 'active',
+        is_current: true,
+        is_temporary: false,
+        valid_period: { start: '2026-03-10', end: '2029-03-09' },
+        unit_ids: [newUnit],
+        superseded_by_id: null,
+      })
+      expect(result.grants.map((grant) => grant.catalog_item_id).sort()).toEqual([itemOne, itemTwo].sort())
+      expect(await spkOf(old.id)).toMatchObject({ status: 'superseded', is_current: false, superseded_by_id: result.appointment?.id })
+      expect((await grantOf(keptOld.id)).status).toBe('superseded')
+      expect((await grantOf(suspendedOld.id)).status).toBe('superseded')
+      expect((await grantOf(revokedOld.id)).status).toBe('revoked')
+      expect(result.application).toMatchObject({ status: 'approved', decision: { appointment_id: result.appointment?.id } })
+      expect(JSON.stringify(log.mock.calls)).not.toContain('Ringkasan Rahasia')
+    })
+
+    it('re-credentialing may be approved after the old SPK ended, and takes the validity from the parameter and validUntil', async () => {
+      const old = await addOld({ end: '2026-03-01' })
+      const application = await renewal('recredentialing', old.id, [{ item: itemOne, condition: 'full' }])
+
+      const result = await approve(application.id, { validUntil: '2027-12-31' })
+
+      expect(result.appointment?.valid_period).toEqual({ start: '2026-03-10', end: '2027-12-31' })
+      expect((await spkOf(old.id)).status).toBe('superseded')
+    })
+
+    it('privilege extension: keeps the old last valid day, carries the active and suspended grants over and adds the new ones', async () => {
+      const old = await addOld()
+      const kept = await addGrantOf(old, itemOne)
+      const decision = { effective_date: '2026-02-01', reason: 'x', decision_ref: { number: 'SK/1', document: null } }
+      const suspended = await addGrantOf(old, itemThree, { condition: 'restricted', restriction_notes: 'Rawat jalan', status: 'suspended', status_change: decision })
+      const revoked = await addGrantOf(old, itemFour, { status: 'revoked' })
+      const application = await renewal('privilege_extension', old.id, [{ item: itemTwo, condition: 'restricted', notes: 'Hanya rawat jalan' }])
+
+      const result = await approve(application.id)
+
+      expect(result.appointment).toMatchObject({
+        valid_period: { start: '2026-03-10', end: '2028-02-29' },
+        unit_ids: [oldUnit, newUnit],
+        facility_ids: [facilityId],
+        is_temporary: false,
+      })
+      const byItem = new Map(result.grants.map((grant) => [grant.catalog_item_id, grant]))
+      expect([...byItem.keys()].sort()).toEqual([itemOne, itemTwo, itemThree].sort())
+      expect(byItem.get(itemOne)).toMatchObject({ appointment_id: result.appointment?.id, condition: 'full', status: 'active', unit_ids: [oldUnit, newUnit] })
+      expect(byItem.get(itemOne)?.id).not.toBe(kept.id)
+      expect(byItem.get(itemThree)).toMatchObject({ condition: 'restricted', restriction_notes: 'Rawat jalan', status: 'suspended', status_change: decision })
+      expect(byItem.get(itemTwo)).toMatchObject({ condition: 'restricted', status: 'active', status_change: null })
+      expect((await grantOf(kept.id)).status).toBe('superseded')
+      expect((await grantOf(suspended.id)).status).toBe('superseded')
+      expect((await grantOf(revoked.id)).status).toBe('revoked')
+      expect(await spkOf(old.id)).toMatchObject({ status: 'superseded', is_current: false, superseded_by_id: result.appointment?.id })
+    })
+
+    it('privilege extension: refuses validUntil, a lapsed old SPK, nothing recommended and a privilege already held', async () => {
+      const old = await addOld()
+      await addGrantOf(old, itemOne)
+      const extension = (privileges: Parameters<typeof renewal>[2]) => renewal('privilege_extension', old.id, privileges)
+
+      const withEnd = await extension([{ item: itemTwo, condition: 'full' }])
+      const empty = await extension([{ item: itemTwo, condition: null }])
+      const repeated = await extension([{ item: itemOne, condition: 'restricted', notes: 'x' }])
+      expect(await rejection(() => approve(withEnd.id, { validUntil: '2027-01-01' }))).toMatchObject({ kind: 'invalid', code: 'valid_until_not_allowed' })
+      expect(await rejection(() => approve(empty.id))).toMatchObject({ code: 'nothing_recommended' })
+      expect(await rejection(() => approve(repeated.id))).toMatchObject({ code: 'privilege_already_granted' })
+      expect((await spkOf(old.id)).status).toBe('active')
+    })
+
+    it('privilege extension: refuses an old SPK whose last valid day has passed, because the new one keeps that day', async () => {
+      const lapsed = await addOld({ end: '2026-03-09' })
+      const late = await renewal('privilege_extension', lapsed.id, [{ item: itemTwo, condition: 'full' }])
+      expect(await rejection(() => approve(late.id))).toMatchObject({ kind: 'invalid', code: 'appointment_lapsed' })
+      expect((await spkOf(lapsed.id)).status).toBe('active')
+    })
+
+    it('needs the SPK to be still active, the applicant\'s own and at the facility, and writes nothing otherwise', async () => {
+      const someoneElse = await addEmployee()
+      const cases: [string, string | null][] = [
+        [(await addOld({ status: 'suspended' })).id, 'previous_appointment_not_active'],
+        [(await addOld({ status: 'revoked' })).id, 'previous_appointment_not_active'],
+        [(await addOld({ employee: someoneElse })).id, 'previous_appointment_mismatch'],
+        [(await addOld({ facility: otherFacilityId })).id, 'previous_appointment_mismatch'],
+        [new Types.ObjectId().toHexString(), 'previous_appointment_not_found'],
+      ]
+      for (const [previous, code] of cases) {
+        const application = await renewal('recredentialing', previous, [{ item: itemOne, condition: 'full' }])
+        expect(await rejection(() => approve(application.id))).toMatchObject({ kind: 'invalid', code })
+        expect((await applications.findOne(application.id))?.status).toBe('recommended')
+      }
+      expect(await appointments.findByNumber(tenantId, 'SPK/001/RS/2026')).toBeNull()
+    })
+
+    it('does not touch the old SPK when a check fails or the letter number exists, and rejecting leaves it alone', async () => {
+      const old = await addOld()
+      await addGrantOf(old, itemOne)
+      const application = await renewal('recredentialing', old.id, [{ item: itemOne, condition: 'full' }])
+      await addOld({ employee: someone(), number: 'SPK/001/RS/2026' })
+      expect(await rejection(() => approve(application.id))).toMatchObject({ code: 'appointment_number_exists' })
+      expect((await spkOf(old.id)).status).toBe('active')
+
+      const rejected = await reject(application.id)
+      expect(rejected.application.status).toBe('rejected')
+      expect((await spkOf(old.id)).status).toBe('active')
+    })
+
+    it('does not need the current regular SPK check for a renewal, and a second approval of the same SPK fails', async () => {
+      const old = await addOld()
+      const first = await renewal('recredentialing', old.id, [{ item: itemOne, condition: 'full' }])
+      await approve(first.id)
+      const second = await renewal('recredentialing', old.id, [{ item: itemOne, condition: 'full' }])
+
+      expect(await rejection(() => approve(second.id, { appointmentNumber: 'SPK/002/RS/2026' }))).toMatchObject({ code: 'previous_appointment_not_active' })
+    })
+
+    it('follows a supervisor to the renewed SPK: supervised grants of others are re-pointed to the new full grant (re-credentialing)', async () => {
+      const old = await addOld()
+      const oldFull = await addGrantOf(old, itemOne)
+      const trainee = await addEmployee()
+      const traineeSpk = await addOld({ employee: trainee })
+      const dependent = await addGrantOf(traineeSpk, itemOne, {
+        condition: 'supervised',
+        supervisor: { employee_id: applicantId, grant_id: oldFull.id },
+      })
+      const gone = await addGrantOf(traineeSpk, itemTwo, {
+        condition: 'supervised',
+        status: 'revoked',
+        supervisor: { employee_id: applicantId, grant_id: oldFull.id },
+      })
+      const application = await renewal('recredentialing', old.id, [{ item: itemOne, condition: 'full' }])
+
+      const result = await approve(application.id)
+
+      const newFull = result.grants[0] as { id: string }
+      expect((await grantOf(dependent.id)).supervisor).toEqual({ employee_id: applicantId, grant_id: newFull.id })
+      expect((await grantOf(dependent.id)).flag).toBeNull()
+      expect((await grantOf(gone.id)).supervisor?.grant_id).toBe(oldFull.id)
+    })
+
+    it('flags the supervised grants of others when the renewed SPK has no full grant of the privilege any more', async () => {
+      const old = await addOld()
+      const oldFull = await addGrantOf(old, itemOne)
+      const traineeSpk = await addOld({ employee: await addEmployee() })
+      const dependent = await addGrantOf(traineeSpk, itemOne, {
+        condition: 'supervised',
+        supervisor: { employee_id: applicantId, grant_id: oldFull.id },
+      })
+      const dropped = await renewal('recredentialing', old.id, [{ item: itemTwo, condition: 'full' }])
+      await approve(dropped.id)
+      expect((await grantOf(dependent.id)).flag).toMatchObject({ reason: 'supervisor_lost_privilege', resolved_at: null })
+      expect((await grantOf(dependent.id)).supervisor?.grant_id).toBe(oldFull.id)
+    })
+
+    it('follows a supervisor to the carried-over grant (extension), and keeps the supervisor of a carried supervised grant', async () => {
+      const old = await addOld()
+      const oldFull = await addGrantOf(old, itemOne)
+      const trainee = await addEmployee()
+      const traineeSpk = await addOld({ employee: trainee })
+      const dependent = await addGrantOf(traineeSpk, itemOne, {
+        condition: 'supervised',
+        supervisor: { employee_id: applicantId, grant_id: oldFull.id },
+      })
+      const ownSupervisorGrant = new Types.ObjectId().toHexString()
+      const openFlag = { reason: 'supervisor_lost_privilege' as const, at: new Date('2026-03-05T00:00:00Z'), resolved_at: null }
+      await addGrantOf(old, itemThree, {
+        condition: 'supervised',
+        supervisor: { employee_id: supervisorId, grant_id: ownSupervisorGrant },
+        flag: openFlag,
+      })
+      const application = await renewal('privilege_extension', old.id, [{ item: itemTwo, condition: 'full' }])
+
+      const result = await approve(application.id)
+
+      const carriedFull = result.grants.find((grant) => grant.catalog_item_id === itemOne) as { id: string }
+      const carriedSupervised = result.grants.find((grant) => grant.catalog_item_id === itemThree)
+      expect((await grantOf(dependent.id)).supervisor?.grant_id).toBe(carriedFull.id)
+      expect(carriedSupervised).toMatchObject({ supervisor: { employee_id: supervisorId, grant_id: ownSupervisorGrant }, flag: openFlag })
+    })
+
+    it('still needs a supervisor with an active full grant for a new supervised grant (HR-CRD-006)', async () => {
+      const old = await addOld()
+      const application = await renewal('recredentialing', old.id, [{ item: itemTwo, condition: 'supervised', supervisor: supervisorId }])
+      expect(await rejection(() => approve(application.id))).toMatchObject({ code: 'supervisor_not_privileged' })
+      expect((await spkOf(old.id)).status).toBe('active')
+      await addSupervisorGrant()
+      expect((await approve(application.id)).grants[0]).toMatchObject({ condition: 'supervised', supervisor: { employee_id: supervisorId } })
+    })
+
+    it('checks the licences for every facility of the new SPK, the old facilities included for an extension', async () => {
+      const old = await addOld({ facilityIds: [facilityId, otherFacilityId] })
+      const extension = await renewal('privilege_extension', old.id, [{ item: itemTwo, condition: 'full' }])
+      expect(await rejection(() => approve(extension.id))).toMatchObject({ kind: 'invalid', code: 'license_not_valid' })
+      expect((await spkOf(old.id)).status).toBe('active')
+
+      const recredentialing = await renewal('recredentialing', old.id, [{ item: itemTwo, condition: 'full' }])
+      expect((await approve(recredentialing.id)).appointment?.facility_ids).toEqual([facilityId])
     })
   })
 

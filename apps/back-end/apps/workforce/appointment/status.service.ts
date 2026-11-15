@@ -23,6 +23,7 @@ import {
 } from '@repository/token'
 import { cleanReason } from '../credentialing/application-support'
 import { observe } from '../observe'
+import { flagDependents, resolveFlags } from './supervisor-links'
 import {
   ConflictError,
   InvalidRequestError,
@@ -110,7 +111,8 @@ export class StatusService {
           { status: 'suspended', suspension: decision },
           { expectedVersion: input.version },
         )
-        const flagged = await this.flagDependents(
+        const flagged = await flagDependents(
+          this.grants,
           tenantId,
           await this.fullActiveGrantIds(tenantId, appointment.id),
           now,
@@ -153,7 +155,8 @@ export class StatusService {
           { status: 'active', suspension: null },
           { expectedVersion: input.version },
         )
-        const resolved = await this.resolveFlags(
+        const resolved = await resolveFlags(
+          this.grants,
           tenantId,
           await this.fullActiveGrantIds(tenantId, appointment.id),
           now,
@@ -213,7 +216,10 @@ export class StatusService {
             lost.push(grant.id)
           }
         }
-        return { updated, flagged: await this.flagDependents(tenantId, lost, now) }
+        return {
+          updated,
+          flagged: await flagDependents(this.grants, tenantId, lost, now),
+        }
       },
     )
   }
@@ -251,7 +257,8 @@ export class StatusService {
           { status: 'suspended', status_change: decision },
           { expectedVersion: input.version },
         )
-        const flagged = await this.flagDependents(
+        const flagged = await flagDependents(
+          this.grants,
           tenantId,
           grant.condition === 'full' ? [grant.id] : [],
           now,
@@ -295,7 +302,8 @@ export class StatusService {
           { status: 'active', status_change: null },
           { expectedVersion: input.version },
         )
-        const resolved = await this.resolveFlags(
+        const resolved = await resolveFlags(
+          this.grants,
           tenantId,
           grant.condition === 'full' && appointment.status === 'active'
             ? [grant.id]
@@ -341,7 +349,8 @@ export class StatusService {
           { status: 'revoked', status_change: decision },
           { expectedVersion: input.version },
         )
-        const flagged = await this.flagDependents(
+        const flagged = await flagDependents(
+          this.grants,
           tenantId,
           grant.condition === 'full' ? [grant.id] : [],
           now,
@@ -596,75 +605,6 @@ export class StatusService {
     return (await this.grants.findByAppointment(tenantId, appointmentId))
       .filter((grant) => grant.condition === 'full' && grant.status === 'active')
       .map((grant) => grant.id)
-  }
-
-  /**
-   * Flags, with `supervisor_lost_privilege`, the supervised grants that name one of the given
-   * grants as their supervisor's grant (HR-CRD-006). A grant that is revoked or already has an
-   * open flag is left alone.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param lostGrantIds - The grants that stopped being active.
-   * @param now - The time of the decision.
-   * @returns The number of grants flagged.
-   */
-  private async flagDependents(
-    tenantId: string,
-    lostGrantIds: string[],
-    now: Date,
-  ): Promise<number> {
-    let flagged = 0
-    for (const lostId of lostGrantIds) {
-      for (const dependent of await this.grants.findBySupervisorGrant(
-        tenantId,
-        lostId,
-      )) {
-        if (
-          dependent.status !== 'revoked' &&
-          (dependent.flag === null || dependent.flag.resolved_at !== null)
-        ) {
-          await this.grants.update(dependent.id, {
-            flag: {
-              reason: 'supervisor_lost_privilege',
-              at: now,
-              resolved_at: null,
-            },
-          })
-          flagged += 1
-        }
-      }
-    }
-    return flagged
-  }
-
-  /**
-   * Resolves the open flags of the supervised grants that name one of the given grants.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param grantIds - The grants that are active again.
-   * @param now - The time of the decision.
-   * @returns The number of flags resolved.
-   */
-  private async resolveFlags(
-    tenantId: string,
-    grantIds: string[],
-    now: Date,
-  ): Promise<number> {
-    let resolved = 0
-    for (const grantId of grantIds) {
-      for (const dependent of await this.grants.findBySupervisorGrant(
-        tenantId,
-        grantId,
-      )) {
-        if (dependent.flag !== null && dependent.flag.resolved_at === null) {
-          await this.grants.update(dependent.id, {
-            flag: { ...dependent.flag, resolved_at: now },
-          })
-          resolved += 1
-        }
-      }
-    }
-    return resolved
   }
 
   /**

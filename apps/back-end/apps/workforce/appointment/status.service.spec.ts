@@ -367,6 +367,30 @@ describe('StatusService', () => {
     })
   })
 
+  describe('superseded records (HR plan 4.4 RN13)', () => {
+    it('cannot be suspended, lifted or revoked, and a superseded grant is never flagged', async () => {
+      const spk = await addAppointment()
+      const gone = await addGrant(spk, { status: 'superseded' as never })
+      for (const act of [
+        () => service.suspendGrant(tenantId, gone.id, input),
+        () => service.liftGrantSuspension(tenantId, gone.id, input),
+        () => service.revokeGrant(tenantId, gone.id, input),
+      ]) {
+        expect(await rejection(() => run(act))).toMatchObject({ code: 'invalid_transition' })
+      }
+      const { supervisorSpk, full, practitionerSpk } = await chain()
+      const old = await addGrant(practitionerSpk, {
+        condition: 'supervised',
+        status: 'superseded' as never,
+        supervisor: { employee_id: supervisorSpk.employee_id, grant_id: full.id },
+      })
+
+      await run(() => service.suspendGrant(tenantId, full.id, input))
+
+      expect((await grantOf(old.id)).flag).toBeNull()
+    })
+  })
+
   describe('suspending a grant', () => {
     it('suspends an active grant of a current SPK with the decision, and flags the grants it supervises', async () => {
       const { full, supervised } = await chain()
