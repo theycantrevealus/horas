@@ -16,7 +16,10 @@ import {
   AssessmentService,
   type AssessResult,
 } from '@workforce/credentialing/assessment.service'
+import { DecisionService } from '@workforce/credentialing/decision.service'
 import { ReviewService } from '@workforce/credentialing/review.service'
+import { type ClinicalAppointment } from '@repository/model/clinical-appointment'
+import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import {
   ApplicationService,
@@ -30,6 +33,7 @@ import {
   type ApplicationDocumentDto,
   CreateApplicationDto,
   DeclareConflictDto,
+  DecideDto,
   ListApplicationsDto,
   RecommendDto,
   type RequestedPrivilegeDto,
@@ -101,11 +105,13 @@ export class ApplicationController {
    * @param applications - Application service.
    * @param reviews - Committee review service, which also redacts what only the committee sees.
    * @param assessmentService - Assessment and recommendation service.
+   * @param decisions - The Director's decision service.
    */
   constructor(
     private readonly applications: ApplicationService,
     private readonly reviews: ReviewService,
     private readonly assessmentService: AssessmentService,
+    private readonly decisions: DecisionService,
   ) {}
 
   /**
@@ -434,5 +440,51 @@ export class ApplicationController {
         reason: body.reason,
       },
     )
+  }
+
+  /**
+   * Handles `POST /v1/credential-applications/:id/decision`: the Director approves, which issues
+   * the SPK and its grants, or rejects a recommended application.
+   *
+   * @param user - Signed-in user; their employee is recorded as the Director.
+   * @param id - Application identifier.
+   * @param body - The decision.
+   * @returns The decided application, the SPK and its grants.
+   */
+  @Post(':id/decision')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_DECIDE)
+  async decide(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: DecideDto,
+  ): Promise<{
+    application: ApplicationView
+    appointment: ClinicalAppointment | null
+    grants: PrivilegeGrant[]
+  }> {
+    const result = await this.decisions.decide(
+      user.tenant_id,
+      user.employee_id,
+      id,
+      {
+        outcome: body.outcome,
+        reason: body.reason,
+        appointmentNumber: body.appointmentNumber,
+        validUntil: body.validUntil,
+        signedDocument: body.signedDocument
+          ? {
+              file_id: body.signedDocument.fileId,
+              content_type: body.signedDocument.contentType,
+              sha256: body.signedDocument.sha256,
+            }
+          : body.signedDocument,
+        version: body.version,
+      },
+    )
+    return {
+      application: await this.show(user, result.application),
+      appointment: result.appointment,
+      grants: result.grants,
+    }
   }
 }

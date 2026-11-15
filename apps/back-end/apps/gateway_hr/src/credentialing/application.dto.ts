@@ -489,3 +489,45 @@ export class RecommendDto {
   @MaxLength(500)
   reason?: string
 }
+
+/**
+ * Body of `POST /v1/credential-applications/:id/decision`.
+ *
+ * @property outcome - `approved` or `rejected`.
+ * @property reason - Needed when rejected; the service allows 1 to 500 characters.
+ * @property appointmentNumber - The SPK letter number; needed when approved.
+ * @property validUntil - Last valid day, a date like 2029-03-09.
+ * @property signedDocument - Scan of the signed letter.
+ * @property version - Version the client read.
+ */
+export class DecideDto {
+  @IsString()
+  @MaxLength(32)
+  outcome!: 'approved' | 'rejected'
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  reason?: string
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  appointmentNumber?: string
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(32)
+  validUntil?: string
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DocumentRefDto)
+  signedDocument?: DocumentRefDto | null
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+}
