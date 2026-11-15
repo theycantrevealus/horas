@@ -24,6 +24,8 @@ import { AssignmentService } from './assignment/assignment.service'
 import { CommitteeMembershipService } from './committee/committee-membership.service'
 import { CodeConceptService } from './concept/code-concept.service'
 import { ApplicationService } from './credentialing/application.service'
+import { AppointmentService } from './appointment/appointment.service'
+import { GrantService } from './appointment/grant.service'
 import { AssessmentService } from './credentialing/assessment.service'
 import { DecisionService } from './credentialing/decision.service'
 import { ReviewService } from './credentialing/review.service'
@@ -88,6 +90,8 @@ import { UnitService } from './structure/unit.service'
     ReviewService,
     AssessmentService,
     DecisionService,
+    AppointmentService,
+    GrantService,
   ],
   exports: [
     OrganizationService,
@@ -109,6 +113,8 @@ import { UnitService } from './structure/unit.service'
     ReviewService,
     AssessmentService,
     DecisionService,
+    AppointmentService,
+    GrantService,
   ],
 })
 export class WorkforceModule {}
