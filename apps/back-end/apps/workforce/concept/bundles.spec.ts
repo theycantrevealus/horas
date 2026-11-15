@@ -86,6 +86,7 @@ describe('bundles', () => {
       const systems = new Set(concepts.map((concept) => concept.system))
       expect([...systems].sort()).toEqual([
         'id.assignment-kind',
+        'id.clinical-level',
         'id.committee',
         'id.committee-role',
         'id.cpd-category',
@@ -96,6 +97,7 @@ describe('bundles', () => {
         'id.license-type',
         'id.license-verification-method',
         'id.profession',
+        'id.temporary-urgency',
         'id.unit-type',
         'id.workforce-category',
       ])
