@@ -26,6 +26,7 @@ import { CodeConceptService } from './concept/code-concept.service'
 import { ApplicationService } from './credentialing/application.service'
 import { AppointmentService } from './appointment/appointment.service'
 import { GrantService } from './appointment/grant.service'
+import { StatusService } from './appointment/status.service'
 import { AssessmentService } from './credentialing/assessment.service'
 import { DecisionService } from './credentialing/decision.service'
 import { ReviewService } from './credentialing/review.service'
@@ -92,6 +93,7 @@ import { UnitService } from './structure/unit.service'
     DecisionService,
     AppointmentService,
     GrantService,
+    StatusService,
   ],
   exports: [
     OrganizationService,
@@ -115,6 +117,7 @@ import { UnitService } from './structure/unit.service'
     DecisionService,
     AppointmentService,
     GrantService,
+    StatusService,
   ],
 })
 export class WorkforceModule {}

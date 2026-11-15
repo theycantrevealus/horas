@@ -2589,4 +2589,26 @@ export class InMemoryPrivilegeGrants
       )
       .slice(offset, offset + (query.limit ?? 10))
   }
+
+  /**
+   * Finds the grants that name a grant as their supervisor's grant.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param grantId - The supervisor's own grant.
+   * @returns The supervised grants.
+   */
+  async findBySupervisorGrant(
+    tenantId: string,
+    grantId: string,
+  ): Promise<PrivilegeGrant[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.supervisor?.grant_id === grantId &&
+        !item.deleted_at,
+    ).sort(
+      (left, right) =>
+        left.code.localeCompare(right.code) || left.id.localeCompare(right.id),
+    )
+  }
 }
