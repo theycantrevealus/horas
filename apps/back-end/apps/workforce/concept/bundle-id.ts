@@ -249,6 +249,21 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
     'Visiting specialist',
   ),
 
+  concept('id.conflict-relationship', 'relative', 'Keluarga', 'Relative'),
+  concept(
+    'id.conflict-relationship',
+    'supervisor',
+    'Atasan atau bawahan langsung',
+    'Direct supervisor or subordinate',
+  ),
+  concept(
+    'id.conflict-relationship',
+    'business_interest',
+    'Kepentingan usaha',
+    'Business interest',
+  ),
+  concept('id.conflict-relationship', 'other', 'Lainnya', 'Other'),
+
   concept('id.unit-type', 'directorate', 'Direktorat', 'Directorate', {
     clinical_default: false,
   }),

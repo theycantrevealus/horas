@@ -89,6 +89,7 @@ describe('bundles', () => {
         'id.clinical-level',
         'id.committee',
         'id.committee-role',
+        'id.conflict-relationship',
         'id.cpd-category',
         'id.credit-system',
         'id.employment-type',
