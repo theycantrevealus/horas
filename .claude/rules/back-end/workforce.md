@@ -15,6 +15,7 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
 | `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
 | `apps/workforce/privilege/` | `PrivilegeService` (list, get, add, edit, retire the privilege catalog) and the catalog rules (`privilege-rules.ts`: code format, list limits, external code format). |
+| `apps/workforce/credentialing/` | `ApplicationService` (queue, get, create, edit, submit, withdraw), `ReviewService` (start review, return, appoint assessors, conflict declaration, and `present`, which redacts what only the committee may see) and `AssessmentService` (assess, read assessments, recommend), with the shared checks (`application-rules.ts`: limits, level rank, missing evidence) and the load, version, write, seat and redaction helpers (`application-support.ts`). |
 | `apps/workforce/credit/` | `CpdService` (list, record for HR and for the signed-in employee, review) and `CpdSummaryService` (list totals, set a platform total), with the credit rules (`cpd-rules.ts`: points, activity date, totals, cycle). |
 | `apps/workforce/license/` | `LicenseService` (list, list by employee, get, register for HR and for the signed-in employee, verify, revoke) and the licence rules (`license-rules.ts`: document number, scan reference, dates). Verifying a renewal runs in one transaction with the licence it supersedes. Dates are UTC: a licence has no facility zone. |
 | `apps/workforce/committee/` | `CommitteeMembershipService` (list, appoint, end) and the date checks (`committee-rules.ts`). Dates use the facility's time zone. |
@@ -92,6 +93,11 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | none (sign-in only) | `POST /v1/employees/me/cpd-records` |
 | `workforce.privilege:read` | `GET /v1/privileges`, `GET /v1/privileges/:id` |
 | `workforce.privilege:write` | `POST /v1/privileges`, `PATCH /v1/privileges/:id`, `POST /v1/privileges/:id/retire` |
+| `workforce.credential-application:read` | `GET /v1/credential-applications`, `GET /v1/credential-applications/:id` |
+| `workforce.credential-application:write` | `POST /v1/credential-applications`, `PATCH /v1/credential-applications/:id`, `POST .../:id/submit`, `POST .../:id/withdraw` |
+| `workforce.credential:review` and a seat in the applicant's committee | `POST .../:id/start-review`, `POST .../:id/return`, `POST .../:id/assessors`, `GET .../:id/assessments` |
+| `workforce.credential:review` and the chair's seat | `POST .../:id/recommendation` |
+| none (sign-in only, appointed assessor) | `POST .../:id/conflict-declaration`, `POST .../:id/assessments` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
 | `workforce.parameter:write` | `POST /v1/parameters` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
@@ -131,6 +137,18 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 - Every profession, specialty, level, committee and evidence type is a code checked with `assertActive`; external procedure codes are checked for format only; each facility must exist in the tenant and not be deleted.
 - Retiring is final: a retired item cannot be edited or reactivated (422 `privilege_retired`), and a privilege that is needed again is added with a new code. Existing grants keep pointing to a retired item. Nothing is deleted.
 - Read and write are tenant-wide permissions: any holder of `workforce.privilege:write` can edit any committee's items until scoped permissions exist.
+
+## 3f. Credential applications
+
+- An application is a request of a clinical employee for privileges, started by HR (`workforce.credential-application:write`; the applicant has no routes yet). Types `initial` and `temporary` only; the committee comes from the employee's workforce category and the scope from `CREDENTIALING_SCOPE`, both copied when the application is created. The applicant, facility, committee, scope and type never change.
+- Status flow: `draft` to `submitted`, `under_review`, `assessed`, `recommended`; `returned` goes back to `draft` when edited; `withdrawn` is possible until the application is assessed. Any other move answers 422 `invalid_transition`. `approved` and `rejected` arrive with group 4.3. Every change sets `status_since`; return and withdraw need a reason of 1 to 500 characters. Nothing is deleted.
+- **Committee routes** (start review, return, appoint assessors, read assessments) need `workforce.credential:review` and an active seat, in any role, in the applicant's committee at the credentialing facility (403 `not_committee_member`). The recommendation needs the chair (403 `not_committee_chair`). A missing, foreign or malformed application answers 404 before any seat check. Committee membership stands in for scoped permissions.
+- **Assessors** are employees of the tenant who have not separated, are not the applicant and hold an active `mitra_bestari` seat in that committee (422 `assessor_not_eligible`). Appointing needs `under_review`, takes 1 to 20 employees, is all or none and additive. A temporary application is not assessed (422 `assessment_not_required`).
+- **The assessor's routes are personal:** no permission, the caller's employee must be one of the application's assessors (403 `not_an_assessor`). A conflict declaration is made once, while `under_review`, and is final; a conflict needs a code of `id.conflict-relationship`. An assessment needs a declaration first, is refused after a conflict (403 `conflict_declared`), covers every requested privilege once, and is made once per assessor (409 `assessment_exists`). The findings and the move to `assessed` (every assessor without a conflict has assessed, at least `MIN_ASSESSORS` of them) share one transaction.
+- **Assessments are highly confidential.** Reading them records one access entry per assessment returned in the change log (`recordAccess`, after the read); if recording fails nothing is returned. A `mitra_bestari` seat sees only its own findings. Reads write no operational log entry.
+- **Redaction.** A caller without a seat in the applicant's committee gets applications without the assessors' conflict declarations and the recommendation summary (`GET :id`, the queue and the responses of update, submit and withdraw).
+- **Recommendation.** A decision for every requested privilege, never more permissive than requested (`full` above `supervised` and `restricted`; those two may swap); `supervised` needs a supervisor who is another employee of the tenant, `restricted` needs notes; a summary of 1 to 2000 characters. Everything not recommended is still a recommendation; the Director rejects it in 4.3.
+- No events and no notifications; service-level alerts (`CREDENTIAL_SLA_DAYS`) and the check that a supervisor's own grant is `full` wait for the worker and group 4.3. `MIN_ASSESSORS` is read at facility level, so its default applies until committee-scope parameters exist.
 
 ## 4a. Events
 
@@ -175,4 +193,5 @@ No first administrator exists (`authentication.md` 5). To call HR endpoints by h
 
 - Every HR group after organizations (see `hr-endpoints.md` for the order), and the repositories for their collections.
 - Account requests, role derivation, assignment, committee and licence events, daily expiry of licences, the practice-location limit (`HR-LIC-007`), the SIP-renewal shortfall alert (`HR-LIC-010`), the licence rule for leaving `onboarding` (`HR-LIC-009`), activation of planned assignments and ending assignments when an employee separates (a worker job or an event consumer), the tenant policy for account lifecycle, reconciliation, a tool to re-queue or skip a blocked event, expiry and eligibility jobs, notifications (the worker).
+- Credential applications (`3f`): applicant self-service routes, types that need an SPK (`recredentialing`, `privilege_extension`), the Director's decision and the SPK (group 4.3), service-level alerts and notifications.
 - Scoped permissions (unit and own-record access), field encryption of personal identifiers (arrives with the private profile), file uploads.
