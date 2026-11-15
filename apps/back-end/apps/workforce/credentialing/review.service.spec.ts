@@ -588,4 +588,51 @@ describe('ReviewService', () => {
       ).toMatchObject({ code: 'stale_version' })
     })
   })
+  describe('present', () => {
+    it('gives a committee member the whole application and anyone else one without declarations and the recommendation summary', async () => {
+      const assessorId = await addEmployee()
+      const application = await stored('recommended', {
+        assessors: [
+          assessor(assessorId, {
+            declared_at: new Date('2026-03-03T00:00:00Z'),
+            has_conflict: true,
+            relationship: { system: 'id.conflict-relationship', code: 'relative' },
+          }),
+        ],
+        recommendation: {
+          decided_at: new Date('2026-03-09T00:00:00Z'),
+          signed_by: { account_id: 'a1', display_name: 'Admin', kind: 'account' },
+          summary: 'Ringkasan Rahasia',
+          privileges: [],
+        },
+      })
+      const stranger = await addEmployee()
+
+      const [whole] = await service.present(tenantId, chairId, [application])
+      expect(whole).toEqual(application)
+
+      for (const caller of [stranger, null, applicantId]) {
+        const [shown] = await service.present(tenantId, caller, [application])
+        expect(JSON.stringify(shown)).not.toContain('Ringkasan Rahasia')
+        expect(JSON.stringify(shown)).not.toContain('conflict_declaration')
+        expect(shown).toMatchObject({
+          id: application.id,
+          status: 'recommended',
+          assessors: [{ employee_id: assessorId }],
+          recommendation: { privileges: [] },
+        })
+      }
+    })
+
+    it('looks up the seat once per committee and writes no log entry', async () => {
+      const first = await stored('submitted')
+      const second = await stored('submitted')
+      const spy = vi.spyOn(memberships, 'findActiveForEmployee')
+
+      await service.present(tenantId, chairId, [first, second])
+
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect([log, warn, error, debug].every((entry) => entry.mock.calls.length === 0)).toBe(true)
+    })
+  })
 })

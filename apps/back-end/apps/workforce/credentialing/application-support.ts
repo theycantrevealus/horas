@@ -3,8 +3,14 @@ import {
   RepositoryNotFoundError,
 } from '@utility/database/error'
 import { withChangeReason } from '@utility/history/reason'
+import { type CommitteeMembershipRepository } from '@repository/interface/committee-membership'
 import { type CredentialApplicationRepository } from '@repository/interface/credential-application'
-import { type CredentialApplication } from '@repository/model/credential-application'
+import { type CommitteeMembership } from '@repository/model/committee-membership'
+import {
+  type ApplicationAssessor,
+  type CommitteeRecommendation,
+  type CredentialApplication,
+} from '@repository/model/credential-application'
 import {
   ConflictError,
   InvalidRequestError,
@@ -124,4 +130,69 @@ export function cleanReason(raw: string): string {
     )
   }
   return reason
+}
+
+/**
+ * Finds the caller's active seat in the applicant's committee at the credentialing facility, in
+ * any role (HR plan 4.2 AP7).
+ *
+ * @param memberships - Committee membership repository.
+ * @param tenantId - Tenant of the caller.
+ * @param callerEmployeeId - The caller's employee, or `null`.
+ * @param application - The application.
+ * @returns The seat, or `null` when the caller has none.
+ */
+export async function findSeat(
+  memberships: CommitteeMembershipRepository,
+  tenantId: string,
+  callerEmployeeId: string | null,
+  application: CredentialApplication,
+): Promise<CommitteeMembership | null> {
+  if (callerEmployeeId === null) {
+    return null
+  }
+  return memberships.findActiveForEmployee(
+    tenantId,
+    callerEmployeeId,
+    application.credentialing_facility_id,
+    application.committee.code,
+  )
+}
+
+/**
+ * An application as shown to a caller who is not a committee member: the assessors' conflict
+ * declarations and the recommendation summary are left out (HR plan 4.2 AP13, HR spec 14).
+ */
+export type RedactedApplication = Omit<
+  CredentialApplication,
+  'assessors' | 'recommendation'
+> & {
+  assessors: Omit<ApplicationAssessor, 'conflict_declaration'>[]
+  recommendation: Omit<CommitteeRecommendation, 'summary'> | null
+}
+
+/**
+ * An application as returned to a caller: whole for a committee member, redacted for others.
+ */
+export type ApplicationView = CredentialApplication | RedactedApplication
+
+/**
+ * Removes what only the committee may see.
+ *
+ * @param application - The whole application.
+ * @returns The application without the declarations and the recommendation summary.
+ */
+export function redactApplication(
+  application: CredentialApplication,
+): RedactedApplication {
+  const { assessors, recommendation, ...rest } = application
+  return {
+    ...rest,
+    assessors: assessors.map(
+      ({ conflict_declaration: _declaration, ...assessor }) => assessor,
+    ),
+    recommendation: recommendation
+      ? (({ summary: _summary, ...shown }) => shown)(recommendation)
+      : null,
+  }
 }

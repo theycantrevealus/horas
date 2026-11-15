@@ -5,6 +5,7 @@ import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.modu
 import { CommitteeMembershipRepositoryModule } from '@repository/mongo/committee-membership.module'
 import { CpdRecordRepositoryModule } from '@repository/mongo/cpd-record.module'
 import { CredentialApplicationRepositoryModule } from '@repository/mongo/credential-application.module'
+import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credential-assessment.module'
 import { CpdSummaryRepositoryModule } from '@repository/mongo/cpd-summary.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
@@ -21,6 +22,7 @@ import { AssignmentService } from './assignment/assignment.service'
 import { CommitteeMembershipService } from './committee/committee-membership.service'
 import { CodeConceptService } from './concept/code-concept.service'
 import { ApplicationService } from './credentialing/application.service'
+import { AssessmentService } from './credentialing/assessment.service'
 import { ReviewService } from './credentialing/review.service'
 import { CpdService } from './credit/cpd.service'
 import { CpdSummaryService } from './credit/cpd-summary.service'
@@ -59,6 +61,7 @@ import { UnitService } from './structure/unit.service'
     CpdSummaryRepositoryModule,
     PrivilegeCatalogRepositoryModule,
     CredentialApplicationRepositoryModule,
+    CredentialAssessmentRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -78,6 +81,7 @@ import { UnitService } from './structure/unit.service'
     PrivilegeService,
     ApplicationService,
     ReviewService,
+    AssessmentService,
   ],
   exports: [
     OrganizationService,
@@ -97,6 +101,7 @@ import { UnitService } from './structure/unit.service'
     PrivilegeService,
     ApplicationService,
     ReviewService,
+    AssessmentService,
   ],
 })
 export class WorkforceModule {}
