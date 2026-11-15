@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { MONGO_MAIN_CONNECTION } from '@utility/database/constant'
+import {
+  DEFAULT_PAGE_SIZE,
+  MONGO_MAIN_CONNECTION,
+} from '@utility/database/constant'
 import { translateMongoError } from '@utility/database/mongo.error'
 import { toObjectId } from '@utility/database/mongo.query'
 import {
@@ -9,7 +12,10 @@ import {
   type TransactionManager,
 } from '@utility/database/transaction'
 import { CHANGE_RECORDER, type ChangeRecorder } from '@utility/history/recorder'
-import { type PrivilegeGrantRepository } from '@repository/interface/privilege-grant'
+import {
+  type GrantQuery,
+  type PrivilegeGrantRepository,
+} from '@repository/interface/privilege-grant'
 import { PrivilegeGrant } from '@repository/model/privilege-grant'
 import { PrivilegeGrantClassification } from '@repository/model/privilege-grant.classification'
 import { LeanRecord, MongoRepositoryBase } from './base'
@@ -71,6 +77,65 @@ export class PrivilegeGrantRepositoryMongo
           }),
         )
         .sort({ code: 1, _id: 1 })
+        .lean<LeanRecord<PrivilegeGrantEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
+   * Finds grants for the privilege directory, ordered by privilege code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The grants.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: GrantQuery = {},
+  ): Promise<PrivilegeGrant[]> {
+    const operation = 'PrivilegeGrantRepository.findByFilter'
+    const ids = [
+      query.catalogItemId,
+      query.employeeId,
+      query.appointmentId,
+      query.facilityId,
+      query.unitId,
+    ].filter((id): id is string => id !== undefined)
+    if (!toObjectId(tenantId) || ids.some((id) => !toObjectId(id))) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            deleted_at: null,
+            ...(query.catalogItemId ? { catalog_item_id: query.catalogItemId } : {}),
+            ...(query.employeeId ? { employee_id: query.employeeId } : {}),
+            ...(query.appointmentId ? { appointment_id: query.appointmentId } : {}),
+            ...(query.status ? { status: query.status } : {}),
+            ...(query.condition ? { condition: query.condition } : {}),
+            ...(query.facilityId ? { facility_ids: query.facilityId } : {}),
+            ...(query.unitId ? { unit_ids: query.unitId } : {}),
+            ...(query.flagged === true
+              ? { flag: { $ne: null }, 'flag.resolved_at': null }
+              : {}),
+            ...(query.flagged === false
+              ? {
+                  $or: [
+                    { flag: null },
+                    { 'flag.resolved_at': { $ne: null } },
+                  ],
+                }
+              : {}),
+          }),
+        )
+        .sort({ code: 1, _id: 1 })
+        .skip(query.offset ?? 0)
+        .limit(query.limit ?? DEFAULT_PAGE_SIZE)
         .lean<LeanRecord<PrivilegeGrantEntity>[]>()
         .exec()
       return records.map((record) => this.toModel(record))

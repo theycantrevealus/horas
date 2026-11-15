@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { MONGO_MAIN_CONNECTION } from '@utility/database/constant'
+import {
+  DEFAULT_PAGE_SIZE,
+  MONGO_MAIN_CONNECTION,
+} from '@utility/database/constant'
 import { translateMongoError } from '@utility/database/mongo.error'
 import { toObjectId } from '@utility/database/mongo.query'
 import {
@@ -9,7 +12,11 @@ import {
   type TransactionManager,
 } from '@utility/database/transaction'
 import { CHANGE_RECORDER, type ChangeRecorder } from '@utility/history/recorder'
-import { type ClinicalAppointmentRepository } from '@repository/interface/clinical-appointment'
+import {
+  type AppointmentPaging,
+  type AppointmentQuery,
+  type ClinicalAppointmentRepository,
+} from '@repository/interface/clinical-appointment'
 import { ClinicalAppointment } from '@repository/model/clinical-appointment'
 import { ClinicalAppointmentClassification } from '@repository/model/clinical-appointment.classification'
 import { LeanRecord, MongoRepositoryBase } from './base'
@@ -96,6 +103,100 @@ export class ClinicalAppointmentRepositoryMongo
         is_temporary: false,
       },
     )
+  }
+
+  /**
+   * Finds appointments, the soonest end of validity first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The appointments.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: AppointmentQuery = {},
+  ): Promise<ClinicalAppointment[]> {
+    const ids = [query.employeeId, query.facilityId, query.unitId].filter(
+      (id): id is string => id !== undefined,
+    )
+    return this.findMany(
+      'ClinicalAppointmentRepository.findByFilter',
+      tenantId,
+      ids,
+      {
+        ...(query.status ? { status: query.status } : {}),
+        ...(query.current === undefined ? {} : { is_current: query.current }),
+        ...(query.employeeId ? { employee_id: query.employeeId } : {}),
+        ...(query.facilityId ? { facility_ids: query.facilityId } : {}),
+        ...(query.unitId ? { unit_ids: query.unitId } : {}),
+        ...(query.endOnOrBefore
+          ? { 'valid_period.end': { $lte: query.endOnOrBefore } }
+          : {}),
+      },
+      { 'valid_period.end': 1, _id: 1 },
+      query,
+    )
+  }
+
+  /**
+   * Finds one practitioner's appointments, the newest start of validity first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The practitioner.
+   * @param paging - Optional paging.
+   * @returns The appointments.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+    paging: AppointmentPaging = {},
+  ): Promise<ClinicalAppointment[]> {
+    return this.findMany(
+      'ClinicalAppointmentRepository.findByEmployee',
+      tenantId,
+      [employeeId],
+      { employee_id: employeeId },
+      { 'valid_period.start': -1, _id: -1 },
+      paging,
+    )
+  }
+
+  /**
+   * Reads a page of appointments of a tenant. A malformed identifier matches nothing.
+   *
+   * @param operation - Operation name for errors.
+   * @param tenantId - Tenant to search in.
+   * @param ids - Identifiers that must be well formed.
+   * @param conditions - Field conditions.
+   * @param sort - Sort order.
+   * @param paging - Page size and offset.
+   * @returns The appointments.
+   */
+  private async findMany(
+    operation: string,
+    tenantId: string,
+    ids: string[],
+    conditions: Record<string, unknown>,
+    sort: Record<string, 1 | -1>,
+    paging: AppointmentPaging,
+  ): Promise<ClinicalAppointment[]> {
+    if (!toObjectId(tenantId) || ids.some((id) => !toObjectId(id))) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({ tenant_id: tenantId, deleted_at: null, ...conditions }),
+        )
+        .sort(sort)
+        .skip(paging.offset ?? 0)
+        .limit(paging.limit ?? DEFAULT_PAGE_SIZE)
+        .lean<LeanRecord<ClinicalAppointmentEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
   }
 
   /**

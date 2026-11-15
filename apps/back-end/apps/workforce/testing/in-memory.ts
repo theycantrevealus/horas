@@ -25,9 +25,16 @@ import {
   type ApplicationQuery,
   type CredentialApplicationRepository,
 } from '@repository/interface/credential-application'
-import { type ClinicalAppointmentRepository } from '@repository/interface/clinical-appointment'
+import {
+  type AppointmentPaging,
+  type AppointmentQuery,
+  type ClinicalAppointmentRepository,
+} from '@repository/interface/clinical-appointment'
 import { type CredentialAssessmentRepository } from '@repository/interface/credential-assessment'
-import { type PrivilegeGrantRepository } from '@repository/interface/privilege-grant'
+import {
+  type GrantQuery,
+  type PrivilegeGrantRepository,
+} from '@repository/interface/privilege-grant'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type LicenseQuery,
@@ -2406,6 +2413,65 @@ export class InMemoryClinicalAppointments
         !item.deleted_at,
     )
   }
+
+  /**
+   * Finds appointments, the soonest end of validity first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The appointments.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: AppointmentQuery = {},
+  ): Promise<ClinicalAppointment[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.status || item.status === query.status) &&
+        (query.current === undefined || item.is_current === query.current) &&
+        (!query.employeeId || item.employee_id === query.employeeId) &&
+        (!query.facilityId || item.facility_ids.includes(query.facilityId)) &&
+        (!query.unitId || item.unit_ids.includes(query.unitId)) &&
+        (!query.endOnOrBefore || item.valid_period.end <= query.endOnOrBefore),
+    )
+      .sort(
+        (left, right) =>
+          left.valid_period.end.localeCompare(right.valid_period.end) ||
+          left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds one practitioner's appointments, the newest start of validity first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The practitioner.
+   * @param paging - Optional paging.
+   * @returns The appointments.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+    paging: AppointmentPaging = {},
+  ): Promise<ClinicalAppointment[]> {
+    const offset = paging.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at,
+    )
+      .sort(
+        (left, right) =>
+          right.valid_period.start.localeCompare(left.valid_period.start) ||
+          right.id.localeCompare(left.id),
+      )
+      .slice(offset, offset + (paging.limit ?? 10))
+  }
 }
 
 /**
@@ -2488,5 +2554,39 @@ export class InMemoryPrivilegeGrants
         item.condition === 'full' &&
         !item.deleted_at,
     )
+  }
+
+  /**
+   * Finds grants for the privilege directory, ordered by privilege code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The grants.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: GrantQuery = {},
+  ): Promise<PrivilegeGrant[]> {
+    const offset = query.offset ?? 0
+    const open = (item: PrivilegeGrant): boolean =>
+      item.flag !== null && item.flag.resolved_at === null
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.catalogItemId || item.catalog_item_id === query.catalogItemId) &&
+        (!query.employeeId || item.employee_id === query.employeeId) &&
+        (!query.appointmentId || item.appointment_id === query.appointmentId) &&
+        (!query.status || item.status === query.status) &&
+        (!query.condition || item.condition === query.condition) &&
+        (!query.facilityId || item.facility_ids.includes(query.facilityId)) &&
+        (!query.unitId || item.unit_ids.includes(query.unitId)) &&
+        (query.flagged === undefined || open(item) === query.flagged),
+    )
+      .sort(
+        (left, right) =>
+          left.code.localeCompare(right.code) || left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
   }
 }
