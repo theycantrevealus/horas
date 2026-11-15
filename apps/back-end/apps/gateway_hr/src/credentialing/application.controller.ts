@@ -11,7 +11,13 @@ import { type CredentialApplication } from '@repository/model/credential-applica
 import { type AuthenticatedUser } from '@identity/authenticated-user'
 import { CurrentUser, RequirePermissions } from '@identity/guard/decorators'
 import { PERMISSIONS } from '@identity/permission'
+import { type ApplicationView } from '@workforce/credentialing/application-support'
+import {
+  AssessmentService,
+  type AssessResult,
+} from '@workforce/credentialing/assessment.service'
 import { ReviewService } from '@workforce/credentialing/review.service'
+import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import {
   ApplicationService,
   type ApplicationDocumentInput,
@@ -20,10 +26,12 @@ import {
 } from '@workforce/credentialing/application.service'
 import {
   AppointAssessorsDto,
+  AssessDto,
   type ApplicationDocumentDto,
   CreateApplicationDto,
   DeclareConflictDto,
   ListApplicationsDto,
+  RecommendDto,
   type RequestedPrivilegeDto,
   ReturnApplicationDto,
   StartReviewDto,
@@ -91,12 +99,34 @@ function toTemporary(
 export class ApplicationController {
   /**
    * @param applications - Application service.
-   * @param reviews - Committee review service.
+   * @param reviews - Committee review service, which also redacts what only the committee sees.
+   * @param assessmentService - Assessment and recommendation service.
    */
   constructor(
     private readonly applications: ApplicationService,
     private readonly reviews: ReviewService,
+    private readonly assessmentService: AssessmentService,
   ) {}
+
+  /**
+   * Shows one application to the caller: whole for a member of the applicant's committee,
+   * without declarations and the recommendation summary for anyone else.
+   *
+   * @param user - Signed-in user.
+   * @param application - The application.
+   * @returns The application as the caller may see it.
+   */
+  private async show(
+    user: AuthenticatedUser,
+    application: CredentialApplication,
+  ): Promise<ApplicationView> {
+    const [shown] = await this.reviews.present(
+      user.tenant_id,
+      user.employee_id,
+      [application],
+    )
+    return shown as ApplicationView
+  }
 
   /**
    * Handles `GET /v1/credential-applications`: the committee work queue.
@@ -107,11 +137,11 @@ export class ApplicationController {
    */
   @Get()
   @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_APPLICATION_READ)
-  list(
+  async list(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListApplicationsDto,
-  ): Promise<CredentialApplication[]> {
-    return this.applications.list(user.tenant_id, {
+  ): Promise<ApplicationView[]> {
+    const found = await this.applications.list(user.tenant_id, {
       status: query.status,
       committee: query.committee,
       facilityId: query.facilityId,
@@ -120,6 +150,7 @@ export class ApplicationController {
       limit: query.limit,
       offset: query.offset,
     })
+    return this.reviews.present(user.tenant_id, user.employee_id, found)
   }
 
   /**
@@ -156,11 +187,11 @@ export class ApplicationController {
    */
   @Get(':id')
   @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_APPLICATION_READ)
-  get(
+  async get(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
-  ): Promise<CredentialApplication> {
-    return this.applications.get(user.tenant_id, id)
+  ): Promise<ApplicationView> {
+    return this.show(user, await this.applications.get(user.tenant_id, id))
   }
 
   /**
@@ -173,19 +204,22 @@ export class ApplicationController {
    */
   @Patch(':id')
   @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_APPLICATION_WRITE)
-  update(
+  async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: UpdateApplicationDto,
-  ): Promise<CredentialApplication> {
-    return this.applications.update(user.tenant_id, id, {
-      requestedPrivileges: toPrivileges(body.requestedPrivileges),
-      requestedUnitIds: body.requestedUnitIds,
-      documents: toDocuments(body.documents),
-      temporary: toTemporary(body.temporary),
-      version: body.version,
-      reason: body.reason,
-    })
+  ): Promise<ApplicationView> {
+    return this.show(
+      user,
+      await this.applications.update(user.tenant_id, id, {
+        requestedPrivileges: toPrivileges(body.requestedPrivileges),
+        requestedUnitIds: body.requestedUnitIds,
+        documents: toDocuments(body.documents),
+        temporary: toTemporary(body.temporary),
+        version: body.version,
+        reason: body.reason,
+      }),
+    )
   }
 
   /**
@@ -198,12 +232,15 @@ export class ApplicationController {
    */
   @Post(':id/submit')
   @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_APPLICATION_WRITE)
-  submit(
+  async submit(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: SubmitApplicationDto,
-  ): Promise<CredentialApplication> {
-    return this.applications.submit(user.tenant_id, id, body)
+  ): Promise<ApplicationView> {
+    return this.show(
+      user,
+      await this.applications.submit(user.tenant_id, id, body),
+    )
   }
 
   /**
@@ -216,12 +253,15 @@ export class ApplicationController {
    */
   @Post(':id/withdraw')
   @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_APPLICATION_WRITE)
-  withdraw(
+  async withdraw(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: WithdrawApplicationDto,
-  ): Promise<CredentialApplication> {
-    return this.applications.withdraw(user.tenant_id, id, body)
+  ): Promise<ApplicationView> {
+    return this.show(
+      user,
+      await this.applications.withdraw(user.tenant_id, id, body),
+    )
   }
 
   /**
@@ -312,6 +352,87 @@ export class ApplicationController {
       user.employee_id,
       id,
       body,
+    )
+  }
+
+  /**
+   * Handles `POST /v1/credential-applications/:id/assessments`: an appointed assessor records
+   * the assessment of every requested privilege. Personal: sign-in only, the service checks
+   * that the caller is one of the application's assessors.
+   *
+   * @param user - Signed-in user.
+   * @param id - Application identifier.
+   * @param body - A finding for every requested privilege.
+   * @returns The stored findings and the status of the application.
+   */
+  @Post(':id/assessments')
+  assess(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: AssessDto,
+  ): Promise<AssessResult> {
+    return this.assessmentService.assess(user.tenant_id, user.employee_id, id, {
+      assessments: body.assessments.map((finding) => ({
+        catalogItemId: finding.catalogItemId,
+        methods: finding.methods,
+        outcome: finding.outcome,
+        recommendedCondition: finding.recommendedCondition ?? null,
+        reason: finding.reason,
+      })),
+      version: body.version,
+    })
+  }
+
+  /**
+   * Handles `GET /v1/credential-applications/:id/assessments`: the committee reads the
+   * assessments. Each assessment returned is recorded as an access in the change log. An
+   * assessor sees only their own.
+   *
+   * @param user - Signed-in user.
+   * @param id - Application identifier.
+   * @returns The assessments the caller may see.
+   */
+  @Get(':id/assessments')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_REVIEW)
+  listAssessments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<CredentialAssessment[]> {
+    return this.assessmentService.list(user.tenant_id, user.employee_id, id)
+  }
+
+  /**
+   * Handles `POST /v1/credential-applications/:id/recommendation`: the committee chair signs the
+   * recommendation to the Director.
+   *
+   * @param user - Signed-in user.
+   * @param id - Application identifier.
+   * @param body - The summary and a decision for every requested privilege.
+   * @returns The recommended application.
+   */
+  @Post(':id/recommendation')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_REVIEW)
+  recommend(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: RecommendDto,
+  ): Promise<CredentialApplication> {
+    return this.assessmentService.recommend(
+      user.tenant_id,
+      user.employee_id,
+      id,
+      {
+        summary: body.summary,
+        privileges: body.privileges.map((item) => ({
+          catalogItemId: item.catalogItemId,
+          outcome: item.outcome,
+          condition: item.condition ?? null,
+          supervisorEmployeeId: item.supervisorEmployeeId ?? null,
+          restrictionNotes: item.restrictionNotes ?? null,
+        })),
+        version: body.version,
+        reason: body.reason,
+      },
     )
   }
 }

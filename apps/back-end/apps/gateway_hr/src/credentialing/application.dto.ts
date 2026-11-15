@@ -371,3 +371,121 @@ export class DeclareConflictDto {
   @Min(0)
   version?: number
 }
+
+/**
+ * One assessor's finding on one requested privilege.
+ *
+ * @property catalogItemId - The privilege.
+ * @property methods - How it was assessed.
+ * @property outcome - Recommended or not.
+ * @property recommendedCondition - Needed when recommended.
+ * @property reason - The assessor's reasoning; the service allows 1 to 2000 characters.
+ */
+export class AssessmentFindingDto {
+  @IsMongoId()
+  catalogItemId!: string
+
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => CodingDto)
+  methods!: CodingDto[]
+
+  @IsString()
+  @MaxLength(64)
+  outcome!: 'recommended' | 'not_recommended'
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  recommendedCondition?: 'full' | 'supervised' | 'restricted' | null
+
+  @IsString()
+  @MaxLength(10000)
+  reason!: string
+}
+
+/**
+ * Body of `POST /v1/credential-applications/:id/assessments`.
+ *
+ * @property assessments - A finding for every requested privilege.
+ * @property version - Version the client read.
+ */
+export class AssessDto {
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ValidateNested({ each: true })
+  @Type(() => AssessmentFindingDto)
+  assessments!: AssessmentFindingDto[]
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+}
+
+/**
+ * The committee's decision on one privilege.
+ *
+ * @property catalogItemId - The privilege.
+ * @property outcome - Recommended or not.
+ * @property condition - Needed when recommended.
+ * @property supervisorEmployeeId - Needed for `supervised`.
+ * @property restrictionNotes - Needed for `restricted`.
+ */
+export class RecommendedPrivilegeDto {
+  @IsMongoId()
+  catalogItemId!: string
+
+  @IsString()
+  @MaxLength(64)
+  outcome!: 'recommended' | 'not_recommended'
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  condition?: 'full' | 'supervised' | 'restricted' | null
+
+  @IsOptional()
+  @IsMongoId()
+  supervisorEmployeeId?: string | null
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  restrictionNotes?: string | null
+}
+
+/**
+ * Body of `POST /v1/credential-applications/:id/recommendation`.
+ *
+ * @property summary - Summary of the assessment; the service allows 1 to 2000 characters.
+ * @property privileges - A decision for every requested privilege.
+ * @property version - Version the client read.
+ * @property reason - Why, kept in the change history.
+ */
+export class RecommendDto {
+  @IsString()
+  @MaxLength(10000)
+  summary!: string
+
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ValidateNested({ each: true })
+  @Type(() => RecommendedPrivilegeDto)
+  privileges!: RecommendedPrivilegeDto[]
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason?: string
+}
