@@ -1,6 +1,6 @@
 # gateway_hr 4.4: Renewals (re-credentialing and privilege extension)
 
-Status: **Confirmed** (2026-11-16). Decisions RN1 to RN16 and the split in two code PRs confirmed as proposed. Follow-up of `gateway-hr-4-2-credential-applications.md` (AP3) and `gateway-hr-4-3-spk-and-granted-privileges.md` (SP3); part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 16a). Collections: `../human-resource-collections.md` 4.3 (`previous_appointment_id`), 4.5 (`superseded_by_id`, status `superseded`) and 4.6 (`privilege_grants`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 7.4.2 (re-credentialing), 7.4.3 (privilege extension) and 7.3 (SPK status `superseded`). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3, 3f and 3g.
+Status: **Built** (2026-11-16, PR #68 and #70 merged). Decisions RN1 to RN16 and the split in two code PRs confirmed as proposed, with the notes in section 8. Follow-up of `gateway-hr-4-2-credential-applications.md` (AP3) and `gateway-hr-4-3-spk-and-granted-privileges.md` (SP3); part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 16a). Collections: `../human-resource-collections.md` 4.3 (`previous_appointment_id`), 4.5 (`superseded_by_id`, status `superseded`) and 4.6 (`privilege_grants`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 7.4.2 (re-credentialing), 7.4.3 (privilege extension) and 7.3 (SPK status `superseded`). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3, 3f and 3g.
 
 Until now a practitioner holds one SPK from an `initial` application. 4.2 refuses the types `recredentialing` and `privilege_extension` (422 `type_not_supported`), and 4.3 refuses a second current regular SPK at a facility (409 `appointment_exists`). So a practitioner who gains a new competence, or whose SPK nears its end, cannot be served. This group closes that: it accepts the two types and, on approval, issues the new SPK, ends the old one as `superseded`, and carries the privileges over.
 
@@ -82,3 +82,12 @@ Confirmed as proposed: all of RN1 to RN16. These four changed the shape of the w
 - **RN11** (supervised grants of others are re-pointed to the new full grant, or flagged when there is none).
 
 The others are as stated.
+
+## 8. Notes from the build
+
+What the code does where the plan left room, or where it differs:
+
+- **Part 1 (PR #68).** The shape checks (`previous_appointment_required`, `previous_appointment_not_allowed`) run before the applicant is loaded; the SPK checks and the held-privilege check run after the content checks. `previous_appointment_not_regular` answers at creation, while at approval a temporary or non-active old SPK answers `previous_appointment_not_active`. The open-renewal check ignores the application being edited. A foreign, missing or malformed SPK identifier gives 422 `previous_appointment_not_found`, and a malformed one in the request body gives 400.
+- **Part 2 (PR #70).** The old SPK is updated twice in the transaction: first to `superseded` and not current (with the version check, so a stale SPK answers 409 `previous_appointment_changed`), then `superseded_by_id` once the new SPK exists, because the identifier is not known earlier. A carried grant copies the old record's condition, supervisor, notes, status, decision and flag. A recommended privilege that an extension already holds answers 422 `privilege_already_granted` again at approval, in case the SPK changed since creation. The supervisor re-pointing and the supervisor flag helpers live in `workforce/appointment/supervisor-links.ts` and are shared with the status service; a superseded or revoked supervised grant is never re-pointed or flagged. `supervisor` is the only extra updatable field of a grant.
+- **Directory.** `GET /v1/privilege-grants` accepts `status=superseded`; the default stays `active`.
+- **Not built.** The alerts `RECREDENTIAL_LEAD_DAYS`, the OPPE and incident input of 7.4.2, the expiry job, notifications and renewal of a temporary SPK.
