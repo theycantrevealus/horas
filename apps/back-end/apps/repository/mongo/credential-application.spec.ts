@@ -321,6 +321,24 @@ describe('CredentialApplicationRepository on the shared Mongo base', () => {
     expect(model.find).toHaveBeenCalledTimes(1)
   })
 
+  it('finds the open renewal of an SPK, and answers null for malformed ids', async () => {
+    const tenant = tenantId.toHexString()
+    const previous = new Types.ObjectId().toHexString()
+    expect(await applications.findOpenRenewal(tenant, previous)).toMatchObject({ id: applicationId.toHexString() })
+    expect(model.findOne).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tenant_id: tenant,
+        previous_appointment_id: previous,
+        status: { $nin: ['approved', 'rejected', 'withdrawn'] },
+        deleted_at: null,
+      }),
+    )
+    model.findOne.mockClear()
+    expect(await applications.findOpenRenewal('x', previous)).toBeNull()
+    expect(await applications.findOpenRenewal(tenant, 'bad')).toBeNull()
+    expect(model.findOne).not.toHaveBeenCalled()
+  })
+
   it('updates the process fields, never the applicant, the facility, the committee, the scope or the type', async () => {
     await asAdmin(() =>
       applications.update(applicationId.toHexString(), {

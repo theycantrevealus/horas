@@ -276,6 +276,71 @@ describe('credential application endpoints (in-memory repositories)', () => {
     expect(again.body).toMatchObject({ code: 'invalid_transition' })
   })
 
+  it('starts a re-credentialing and a privilege extension of the applicant\'s SPK, and refuses the rules of a renewal', async () => {
+    const newSpk = (employee: string, number: string) =>
+      workforce.appointments.create({
+      tenant_id: tenantId,
+      appointment_number: number,
+      employee_id: employee,
+      credentialing_facility_id: facilityId,
+      credentialing_scope: 'facility',
+      facility_ids: [facilityId],
+      unit_ids: [unitId],
+      source_application_id: new Types.ObjectId().toHexString(),
+      valid_period: { start: '2026-01-01', end: '2028-12-31' },
+      is_temporary: false,
+      status: 'active',
+      is_current: true,
+      issued: { by: { account_id: 'a1', display_name: 'Director', kind: 'account' }, director_employee_id: employeeId, date: '2026-01-01' },
+      signed_document: null,
+      suspension: null,
+      revocation: null,
+      superseded_by_id: null,
+    })
+    const spk = await newSpk(employeeId, 'SPK/RENEW/1')
+    const held = await addItem()
+    await workforce.grants.create({
+      tenant_id: tenantId,
+      appointment_id: spk.id,
+      employee_id: employeeId,
+      facility_ids: [facilityId],
+      unit_ids: [unitId],
+      catalog_item_id: held,
+      code: 'PD-HELD',
+      condition: 'full',
+      supervisor: null,
+      restriction_notes: null,
+      status: 'active',
+      status_change: null,
+      flag: null,
+    })
+
+    const recredentialing = await start({ type: 'recredentialing', previousAppointmentId: spk.id })
+    expect(recredentialing.status).toBe(201)
+    expect(recredentialing.body).toMatchObject({ type: 'recredentialing', status: 'draft', previous_appointment_id: spk.id })
+    const read = await call('GET', `/v1/credential-applications/${(recredentialing.body as { id: string }).id}`, readerToken)
+    expect(read.body).toMatchObject({ previous_appointment_id: spk.id })
+    const edited = await call('PATCH', `/v1/credential-applications/${(recredentialing.body as { id: string }).id}`, writerToken, { requestedUnitIds: [unitId] })
+    expect(edited.body).toMatchObject({ type: 'recredentialing', previous_appointment_id: spk.id })
+
+    const again = await start({ type: 'privilege_extension', previousAppointmentId: spk.id, requestedPrivileges: [{ catalogItemId: await addItem(), requestedCondition: 'full' }] })
+    expect(again.status).toBe(409)
+    expect(again.body).toMatchObject({ code: 'renewal_exists' })
+
+    await workforce.applications.update((recredentialing.body as { id: string }).id, { status: 'withdrawn' })
+    const repeated = await start({ type: 'privilege_extension', previousAppointmentId: spk.id, requestedPrivileges: [{ catalogItemId: held, requestedCondition: 'full' }] })
+    expect(repeated.status).toBe(422)
+    expect(repeated.body).toMatchObject({ code: 'privilege_already_granted' })
+    expect((await start({ type: 'privilege_extension', previousAppointmentId: spk.id, requestedPrivileges: [{ catalogItemId: await addItem(), requestedCondition: 'full' }] })).status).toBe(201)
+
+    expect((await start({ previousAppointmentId: spk.id })).body).toMatchObject({ code: 'previous_appointment_not_allowed' })
+    expect((await start({ type: 'recredentialing', previousAppointmentId: new Types.ObjectId().toHexString() })).body).toMatchObject({ code: 'previous_appointment_not_found' })
+    expect((await start({ type: 'recredentialing', previousAppointmentId: 'bad' })).status).toBe(400)
+    const other = await addEmployee()
+    const strangers = await newSpk(other, 'SPK/RENEW/2')
+    expect((await start({ type: 'recredentialing', previousAppointmentId: strangers.id })).body).toMatchObject({ code: 'previous_appointment_mismatch' })
+  })
+
   it('answers 404 for a missing, malformed or foreign id', async () => {
     const created = (await start()).body as Record<string, any>
     const unknown = new Types.ObjectId().toHexString()
@@ -297,7 +362,7 @@ describe('credential application endpoints (in-memory repositories)', () => {
     const needsProof = await addItem(true)
     const created = (await start()).body as Record<string, any>
 
-    expect((await start({ type: 'recredentialing' })).body).toMatchObject({ code: 'type_not_supported' })
+    expect((await start({ type: 'recredentialing' })).body).toMatchObject({ code: 'previous_appointment_required' })
     expect((await start({ requestedUnitIds: [otherUnitId] })).body).toMatchObject({ code: 'unit_outside_facility' })
     expect(
       (await start({ requestedPrivileges: [{ catalogItemId: needsProof, requestedCondition: 'supervised' }] })).body,

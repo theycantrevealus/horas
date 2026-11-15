@@ -5,12 +5,14 @@ import { type CredentialApplication } from '@repository/model/credential-applica
 import { CodeConceptService } from '../concept/code-concept.service'
 import { type ParameterService } from '../parameter/parameter.service'
 import {
+  InMemoryClinicalAppointments,
   InMemoryCodeConcepts,
   InMemoryCredentialApplications,
   InMemoryEmployees,
   InMemoryFacilities,
   InMemoryOrganizationUnits,
   InMemoryPrivilegeCatalog,
+  InMemoryPrivilegeGrants,
   InMemoryProfessionalLicenses,
 } from '../testing/in-memory'
 import {
@@ -40,6 +42,8 @@ describe('ApplicationService', () => {
   let units: InMemoryOrganizationUnits
   let catalog: InMemoryPrivilegeCatalog
   let licenses: InMemoryProfessionalLicenses
+  let appointments: InMemoryClinicalAppointments
+  let grants: InMemoryPrivilegeGrants
   let concepts: InMemoryCodeConcepts
   let service: ApplicationService
   let facilityId: string
@@ -342,6 +346,8 @@ describe('ApplicationService', () => {
     units = new InMemoryOrganizationUnits()
     catalog = new InMemoryPrivilegeCatalog()
     licenses = new InMemoryProfessionalLicenses()
+    appointments = new InMemoryClinicalAppointments()
+    grants = new InMemoryPrivilegeGrants()
     concepts = new InMemoryCodeConcepts()
     const logger = { log, warn, error, debug } as unknown as AppLogger
     service = new ApplicationService(
@@ -351,6 +357,8 @@ describe('ApplicationService', () => {
       units,
       catalog,
       licenses,
+      appointments,
+      grants,
       new CodeConceptService(concepts, logger),
       { resolve } as unknown as ParameterService,
       logger,
@@ -404,10 +412,8 @@ describe('ApplicationService', () => {
       expect(JSON.stringify(log.mock.calls)).not.toContain('Alasan Rahasia')
     })
 
-    it('refuses types that need the SPK', async () => {
-      for (const type of ['recredentialing', 'privilege_extension'] as const) {
-        expect(await rejection(() => create({ type }))).toMatchObject({ code: 'type_not_supported' })
-      }
+    it('refuses a type it does not know', async () => {
+      expect(await rejection(() => create({ type: 'weird' as never }))).toMatchObject({ code: 'type_not_supported' })
     })
 
     it('rejects a missing, foreign, separated or non-clinical applicant', async () => {
@@ -602,6 +608,186 @@ describe('ApplicationService', () => {
         type: 'temporary',
         temporary: { requested_days: 30, urgency: { code: 'disaster' } },
       })
+    })
+  })
+
+  describe('renewals (HR plan 4.4 RN2 to RN5)', () => {
+    /**
+     * Stores an SPK of the applicant at the credentialing facility.
+     *
+     * @param override - Fields that replace the defaults.
+     * @returns The appointment.
+     */
+    function addSpk(
+      override: {
+        employee?: string
+        facility?: string
+        status?: 'active' | 'suspended' | 'revoked' | 'expired' | 'superseded'
+        temporary?: boolean
+        tenant?: string
+      } = {},
+    ) {
+      const status = override.status ?? 'active'
+      return asAdmin(() =>
+        appointments.create({
+          tenant_id: override.tenant ?? tenantId,
+          appointment_number: `SPK/${new Types.ObjectId().toHexString().slice(-8).toUpperCase()}`,
+          employee_id: override.employee ?? employeeId,
+          credentialing_facility_id: override.facility ?? facilityId,
+          credentialing_scope: 'facility',
+          facility_ids: [override.facility ?? facilityId],
+          unit_ids: [unitId],
+          source_application_id: new Types.ObjectId().toHexString(),
+          valid_period: { start: '2026-01-01', end: '2028-12-31' },
+          is_temporary: override.temporary ?? false,
+          status,
+          is_current: status === 'active' || status === 'suspended',
+          issued: { by: { account_id: 'a1', display_name: 'Admin', kind: 'account' }, director_employee_id: employeeId, date: '2026-01-01' },
+          signed_document: null,
+          suspension: null,
+          revocation: null,
+          superseded_by_id: null,
+        }),
+      )
+    }
+
+    /**
+     * Stores a grant of an SPK.
+     *
+     * @param spk - The SPK.
+     * @param item - The privilege.
+     * @param status - Status of the grant.
+     */
+    function addHeld(
+      spk: { id: string },
+      item: string,
+      status: 'active' | 'suspended' | 'revoked' | 'superseded' = 'active',
+    ) {
+      return asAdmin(() =>
+        grants.create({
+          tenant_id: tenantId,
+          appointment_id: spk.id,
+          employee_id: employeeId,
+          facility_ids: [facilityId],
+          unit_ids: [unitId],
+          catalog_item_id: item,
+          code: 'PD-1',
+          condition: 'full',
+          supervisor: null,
+          restriction_notes: null,
+          status: status as never,
+          status_change: null,
+          flag: null,
+        }),
+      )
+    }
+
+    it('starts a re-credentialing and a privilege extension of the applicant\'s active regular SPK, storing the SPK', async () => {
+      const spk = await addSpk()
+      const second = await addItem()
+
+      const recredentialing = await create({ type: 'recredentialing', previousAppointmentId: spk.id })
+      expect(recredentialing).toMatchObject({ type: 'recredentialing', status: 'draft', previous_appointment_id: spk.id, temporary: null })
+      expect((await applications.findOne(recredentialing.id))?.previous_appointment_id).toBe(spk.id)
+      await asAdmin(() => applications.update(recredentialing.id, { status: 'withdrawn' }))
+
+      const extension = await create({
+        type: 'privilege_extension',
+        previousAppointmentId: spk.id,
+        requestedPrivileges: [{ catalogItemId: second.id, requestedCondition: 'full' }],
+      })
+      expect(extension).toMatchObject({ type: 'privilege_extension', previous_appointment_id: spk.id })
+      expect(log.mock.calls.at(-1)?.[0]).toMatchObject({ event: 'application_create', outcome: 'success' })
+      expect(JSON.stringify(log.mock.calls)).not.toContain(spk.id)
+    })
+
+    it('needs the SPK for a renewal and refuses it for an initial or a temporary application', async () => {
+      const spk = await addSpk()
+      for (const type of ['recredentialing', 'privilege_extension'] as const) {
+        expect(await rejection(() => create({ type }))).toMatchObject({ kind: 'invalid', code: 'previous_appointment_required' })
+        expect(await rejection(() => create({ type, previousAppointmentId: null }))).toMatchObject({ code: 'previous_appointment_required' })
+      }
+      expect(await rejection(() => create({ previousAppointmentId: spk.id }))).toMatchObject({ code: 'previous_appointment_not_allowed' })
+      expect(
+        await rejection(() =>
+          create({ type: 'temporary', previousAppointmentId: spk.id, temporary: { requestedDays: 10, urgency: { system: 'id.temporary-urgency', code: 'disaster' } } }),
+        ),
+      ).toMatchObject({ code: 'previous_appointment_not_allowed' })
+    })
+
+    it('answers 422 for an SPK that is missing, malformed or of another tenant, so nothing leaks', async () => {
+      const foreign = await addSpk({ tenant: otherTenantId })
+      for (const id of [new Types.ObjectId().toHexString(), 'bad', foreign.id]) {
+        expect(await rejection(() => create({ type: 'recredentialing', previousAppointmentId: id }))).toMatchObject({ code: 'previous_appointment_not_found' })
+      }
+    })
+
+    it('needs an SPK of the applicant at the credentialing facility, regular and active', async () => {
+      const someoneElse = await addEmployee()
+      const call = (previousAppointmentId: string) => rejection(() => create({ type: 'recredentialing', previousAppointmentId }))
+
+      expect(await call((await addSpk({ employee: someoneElse.id })).id)).toMatchObject({ code: 'previous_appointment_mismatch' })
+      expect(await call((await addSpk({ facility: otherFacilityId })).id)).toMatchObject({ code: 'previous_appointment_mismatch' })
+      expect(await call((await addSpk({ temporary: true })).id)).toMatchObject({ code: 'previous_appointment_not_regular' })
+      for (const status of ['suspended', 'revoked', 'expired', 'superseded'] as const) {
+        expect(await call((await addSpk({ status })).id)).toMatchObject({ code: 'previous_appointment_not_active' })
+      }
+    })
+
+    it('allows one open renewal per SPK: a second answers 409, a finished one does not block', async () => {
+      const spk = await addSpk()
+      const first = await create({ type: 'recredentialing', previousAppointmentId: spk.id })
+
+      for (const type of ['recredentialing', 'privilege_extension'] as const) {
+        expect(await rejection(() => create({ type, previousAppointmentId: spk.id }))).toMatchObject({ kind: 'conflict', code: 'renewal_exists' })
+      }
+      for (const status of ['approved', 'rejected', 'withdrawn'] as const) {
+        await asAdmin(() => applications.update(first.id, { status }))
+        const next = await create({ type: 'recredentialing', previousAppointmentId: spk.id })
+        await asAdmin(() => applications.update(next.id, { status: 'withdrawn' }))
+        await asAdmin(() => applications.update(first.id, { status: 'draft' }))
+      }
+    })
+
+    it('refuses an extension for a privilege the SPK holds as active or suspended, and allows it for the others and for a re-credentialing', async () => {
+      const spk = await addSpk()
+      const item = await addItem()
+      const request = [{ catalogItemId: item.id, requestedCondition: 'full' as const }]
+      const extension = () => create({ type: 'privilege_extension', previousAppointmentId: spk.id, requestedPrivileges: request })
+      const held = await addHeld(spk, item.id, 'active')
+      for (const status of ['active', 'suspended'] as const) {
+        await asAdmin(() => grants.update(held.id, { status }))
+        expect(await rejection(extension)).toMatchObject({ kind: 'invalid', code: 'privilege_already_granted' })
+      }
+      await asAdmin(() => grants.update(held.id, { status: 'revoked' }))
+      expect((await extension()).previous_appointment_id).toBe(spk.id)
+    })
+
+    it('lets a re-credentialing request a privilege already held, and one SPK\'s grants never block another', async () => {
+      const spk = await addSpk()
+      const item = await addItem()
+      await addHeld(spk, item.id)
+      const created = await create({
+        type: 'recredentialing',
+        previousAppointmentId: spk.id,
+        requestedPrivileges: [{ catalogItemId: item.id, requestedCondition: 'full' }],
+      })
+      expect(created.type).toBe('recredentialing')
+    })
+
+    it('keeps the SPK and the type on edit, rechecks the SPK and the held privileges, and does not clash with itself', async () => {
+      const spk = await addSpk()
+      const second = await addItem()
+      const created = await create({ type: 'privilege_extension', previousAppointmentId: spk.id, requestedPrivileges: [{ catalogItemId: second.id, requestedCondition: 'full' }] })
+
+      const edited = await asAdmin(() => service.update(tenantId, created.id, { requestedUnitIds: [unitId] }))
+      expect(edited).toMatchObject({ type: 'privilege_extension', previous_appointment_id: spk.id })
+
+      const held = await addHeld(spk, second.id)
+      expect(await rejection(() => asAdmin(() => service.update(tenantId, created.id, { requestedUnitIds: [unitId] })))).toMatchObject({ code: 'privilege_already_granted' })
+      await asAdmin(() => grants.update(held.id, { status: 'revoked' }))
+      await asAdmin(() => appointments.update(spk.id, { status: 'suspended' }))
+      expect(await rejection(() => asAdmin(() => service.update(tenantId, created.id, { requestedUnitIds: [unitId] })))).toMatchObject({ code: 'previous_appointment_not_active' })
     })
   })
 

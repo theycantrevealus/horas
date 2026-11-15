@@ -41,4 +41,17 @@ export interface CredentialApplicationRepository extends Repository<CredentialAp
     tenantId: string,
     query?: ApplicationQuery,
   ): Promise<CredentialApplication[]>
+
+  /**
+   * Finds the open renewal application of an SPK: one with that `previous_appointment_id` that is
+   * not yet `approved`, `rejected` or `withdrawn` (HR plan 4.4 RN2).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param previousAppointmentId - The SPK being renewed or extended.
+   * @returns The open application, or `null` when there is none.
+   */
+  findOpenRenewal(
+    tenantId: string,
+    previousAppointmentId: string,
+  ): Promise<CredentialApplication | null>
 }

@@ -12,10 +12,22 @@ export const LIMITS = {
 } as const
 
 /**
- * Application types this group accepts. Re-credentialing and privilege extension need the SPK
- * being renewed, which exists after group 4.3 (HR plan 4.2 AP3).
+ * Application types the service accepts (HR plan 4.2 AP3 and 4.4 RN2).
  */
-export const SUPPORTED_TYPES: readonly string[] = ['initial', 'temporary']
+export const SUPPORTED_TYPES: readonly string[] = [
+  'initial',
+  'temporary',
+  'recredentialing',
+  'privilege_extension',
+]
+
+/**
+ * Types that renew or extend an existing SPK and name it in `previous_appointment_id`.
+ */
+export const RENEWAL_TYPES: readonly string[] = [
+  'recredentialing',
+  'privilege_extension',
+]
 
 /**
  * Reads the numeric rank of a clinical level from the properties of its code concept.

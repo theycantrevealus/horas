@@ -2195,6 +2195,26 @@ export class InMemoryCredentialApplications
   implements CredentialApplicationRepository
 {
   /**
+   * Finds the open renewal application of an SPK.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param previousAppointmentId - The SPK being renewed or extended.
+   * @returns The open application, or `null`.
+   */
+  async findOpenRenewal(
+    tenantId: string,
+    previousAppointmentId: string,
+  ): Promise<CredentialApplication | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.previous_appointment_id === previousAppointmentId &&
+        !['approved', 'rejected', 'withdrawn'].includes(item.status) &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
    * Finds applications, the oldest status first.
    *
    * @param tenantId - Tenant to search in.
