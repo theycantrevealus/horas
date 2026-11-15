@@ -117,7 +117,7 @@ describe('clinical appointment and privilege directory endpoints (in-memory repo
     override: {
       code?: string
       item?: string
-      status?: 'active' | 'suspended' | 'revoked'
+      status?: 'active' | 'suspended' | 'revoked' | 'superseded'
       condition?: 'full' | 'supervised' | 'restricted'
       flagged?: boolean
     } = {},
@@ -287,6 +287,10 @@ describe('clinical appointment and privilege directory endpoints (in-memory repo
     expect(await ids('')).toEqual([active, flagged])
     expect(await ids('&status=suspended')).toEqual([suspended])
     expect(await ids('&status=all')).toEqual([active, suspended, flagged])
+    const replaced = await addGrant(appointment, person, { code: 'PD-D', item: new Types.ObjectId().toHexString(), status: 'superseded' })
+    expect(await ids('&status=superseded')).toEqual([replaced])
+    expect(await ids('&status=all')).toEqual([active, suspended, flagged, replaced])
+    expect(await ids('')).toEqual([active, flagged])
     expect(await ids('&flagged=true')).toEqual([flagged])
     expect(await ids('&flagged=false')).toEqual([active])
     expect(await ids(`&catalogItemId=${itemTwo}`)).toEqual([active])

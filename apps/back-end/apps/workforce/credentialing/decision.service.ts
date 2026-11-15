@@ -33,6 +33,7 @@ import {
   REPOSITORY_PRIVILEGE_GRANT,
   REPOSITORY_PROFESSIONAL_LICENSE,
 } from '@repository/token'
+import { repointDependents } from '../appointment/supervisor-links'
 import { isValidDocumentRef } from '../license/license-rules'
 import { observe } from '../observe'
 import { ParameterService } from '../parameter/parameter.service'
@@ -303,10 +304,47 @@ export class DecisionService {
         )
       }
     }
+    const previous =
+      application.previous_appointment_id === null
+        ? null
+        : await this.previousOf(tenantId, application, issueDate)
+    const extension = application.type === 'privilege_extension'
+    const oldGrants = previous
+      ? await this.grants.findByAppointment(tenantId, previous.id)
+      : []
+    const carried = extension
+      ? oldGrants.filter(
+          (grant) => grant.status === 'active' || grant.status === 'suspended',
+        )
+      : []
+    if (
+      recommended.some((item) =>
+        carried.some((grant) => grant.catalog_item_id === item.catalog_item_id),
+      )
+    ) {
+      throw new InvalidRequestError(
+        'privilege_already_granted',
+        'An extension grants only privileges the SPK does not hold.',
+      )
+    }
+    const unitIds =
+      extension && previous
+        ? [...new Set([...previous.unit_ids, ...application.requested_unit_ids])]
+        : application.requested_unit_ids
+    const facilityIds =
+      extension && previous
+        ? [
+            ...new Set([
+              ...previous.facility_ids,
+              ...application.requested_facility_ids,
+            ]),
+          ]
+        : application.requested_facility_ids
     await this.assertLicenses(
       tenantId,
-      application,
+      application.employee_id,
       issueDate,
+      facilityIds,
     )
     const supervisors = new Map<string, string>()
     for (const item of recommended) {
@@ -317,7 +355,13 @@ export class DecisionService {
         )
       }
     }
-    const end = await this.validEnd(tenantId, application, issueDate, input)
+    const end = await this.validEnd(
+      tenantId,
+      application,
+      issueDate,
+      input,
+      previous,
+    )
     if (await this.appointments.findByNumber(tenantId, number)) {
       throw new ConflictError(
         'appointment_number_exists',
@@ -326,6 +370,7 @@ export class DecisionService {
     }
     if (
       application.type !== 'temporary' &&
+      previous === null &&
       (await this.appointments.findCurrentRegular(
         tenantId,
         application.employee_id,
@@ -338,6 +383,24 @@ export class DecisionService {
     const actor = this.actor()
     const now = new Date()
     return this.transactions.run(async () => {
+      if (previous) {
+        // The old SPK stops being current first, which frees the one-current-SPK index.
+        try {
+          await this.appointments.update(
+            previous.id,
+            { status: 'superseded', is_current: false },
+            { expectedVersion: previous.version },
+          )
+        } catch (thrown: unknown) {
+          if (thrown instanceof RepositoryConflictError) {
+            throw new ConflictError(
+              'previous_appointment_changed',
+              'The SPK being renewed was changed by someone else.',
+            )
+          }
+          throw thrown
+        }
+      }
       let appointment: ClinicalAppointment
       try {
         appointment = await this.appointments.create({
@@ -346,8 +409,8 @@ export class DecisionService {
           employee_id: application.employee_id,
           credentialing_facility_id: application.credentialing_facility_id,
           credentialing_scope: application.credentialing_scope,
-          facility_ids: application.requested_facility_ids,
-          unit_ids: application.requested_unit_ids,
+          facility_ids: facilityIds,
+          unit_ids: unitIds,
           source_application_id: application.id,
           valid_period: { start: issueDate, end },
           is_temporary: application.type === 'temporary',
@@ -370,6 +433,25 @@ export class DecisionService {
         throw thrown
       }
       const created: PrivilegeGrant[] = []
+      for (const grant of carried) {
+        created.push(
+          await this.grants.create({
+            tenant_id: tenantId,
+            appointment_id: appointment.id,
+            employee_id: appointment.employee_id,
+            facility_ids: appointment.facility_ids,
+            unit_ids: appointment.unit_ids,
+            catalog_item_id: grant.catalog_item_id,
+            code: grant.code,
+            condition: grant.condition,
+            supervisor: grant.supervisor,
+            restriction_notes: grant.restriction_notes,
+            status: grant.status,
+            status_change: grant.status_change,
+            flag: grant.flag,
+          }),
+        )
+      }
       for (const item of recommended) {
         created.push(
           await this.grants.create(
@@ -382,6 +464,29 @@ export class DecisionService {
             ),
           ),
         )
+      }
+      if (previous) {
+        await this.appointments.update(previous.id, {
+          superseded_by_id: appointment.id,
+        })
+        const replacements = new Map<string, string | null>()
+        for (const grant of oldGrants) {
+          if (grant.status !== 'active' && grant.status !== 'suspended') {
+            continue
+          }
+          await this.grants.update(grant.id, { status: 'superseded' })
+          if (grant.condition === 'full') {
+            replacements.set(
+              grant.id,
+              created.find(
+                (next) =>
+                  next.catalog_item_id === grant.catalog_item_id &&
+                  next.condition === 'full',
+              )?.id ?? null,
+            )
+          }
+        }
+        await repointDependents(this.grants, tenantId, replacements, now)
       }
       const updated = await writeApplication(note ?? undefined, () =>
         this.applications.update(
@@ -402,6 +507,59 @@ export class DecisionService {
       )
       return { application: updated, appointment, grants: created }
     })
+  }
+
+  /**
+   * Loads the SPK a renewal replaces and checks that it can still be renewed (HR plan 4.4 RN6):
+   * it is the applicant's own regular SPK at the credentialing facility and still `active`, and
+   * for an extension its last valid day is not before the issue date.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param application - The renewal application.
+   * @param issueDate - The issue date.
+   * @returns The old SPK.
+   * @throws InvalidRequestError `previous_appointment_not_found`, `previous_appointment_mismatch`,
+   * `previous_appointment_not_active` or `appointment_lapsed`.
+   */
+  private async previousOf(
+    tenantId: string,
+    application: CredentialApplication,
+    issueDate: string,
+  ): Promise<ClinicalAppointment> {
+    const previous = await this.appointments.findOne(
+      application.previous_appointment_id as string,
+    )
+    if (!previous || previous.tenant_id !== tenantId || previous.deleted_at) {
+      throw new InvalidRequestError(
+        'previous_appointment_not_found',
+        'The SPK to renew was not found.',
+      )
+    }
+    if (
+      previous.employee_id !== application.employee_id ||
+      previous.credentialing_facility_id !== application.credentialing_facility_id
+    ) {
+      throw new InvalidRequestError(
+        'previous_appointment_mismatch',
+        'The SPK must be the applicant\'s own SPK at the credentialing facility.',
+      )
+    }
+    if (previous.is_temporary || previous.status !== 'active') {
+      throw new InvalidRequestError(
+        'previous_appointment_not_active',
+        'Only an active regular SPK can be renewed.',
+      )
+    }
+    if (
+      application.type === 'privilege_extension' &&
+      previous.valid_period.end < issueDate
+    ) {
+      throw new InvalidRequestError(
+        'appointment_lapsed',
+        'An extension keeps the last valid day of the SPK, which has passed.',
+      )
+    }
+    return previous
   }
 
   /**
@@ -475,22 +633,24 @@ export class DecisionService {
    * on the issue date.
    *
    * @param tenantId - Tenant of the caller.
-   * @param application - The application.
+   * @param employeeId - The applicant.
    * @param issueDate - The issue date.
+   * @param facilityIds - Facilities of the SPK.
    * @throws InvalidRequestError `license_not_valid`.
    */
   private async assertLicenses(
     tenantId: string,
-    application: CredentialApplication,
+    employeeId: string,
     issueDate: string,
+    facilityIds: string[],
   ): Promise<void> {
     const valid = (
-      await this.licenses.findByEmployee(tenantId, application.employee_id)
+      await this.licenses.findByEmployee(tenantId, employeeId)
     ).filter((license) => isLicenseValidOn(license, issueDate))
     const registration = valid.some(
       (license) => license.eligibility_role === 'registration',
     )
-    const permits = application.requested_facility_ids.every((facilityId) =>
+    const permits = facilityIds.every((facilityId) =>
       valid.some(
         (license) =>
           license.eligibility_role === 'practice_permit' &&
@@ -547,15 +707,26 @@ export class DecisionService {
    * @param application - The application.
    * @param issueDate - The issue date.
    * @param input - The decision, with the optional `validUntil`.
+   * @param previous - The SPK being renewed, or `null`.
    * @returns The last valid day.
-   * @throws InvalidRequestError `invalid_validity`.
+   * @throws InvalidRequestError `invalid_validity` or `valid_until_not_allowed`.
    */
   private async validEnd(
     tenantId: string,
     application: CredentialApplication,
     issueDate: string,
     input: DecideInput,
+    previous: ClinicalAppointment | null,
   ): Promise<string> {
+    if (application.type === 'privilege_extension' && previous) {
+      if (input.validUntil !== undefined) {
+        throw new InvalidRequestError(
+          'valid_until_not_allowed',
+          'An extension keeps the last valid day of the SPK it extends.',
+        )
+      }
+      return previous.valid_period.end
+    }
     const span =
       application.type === 'temporary'
         ? { days: application.temporary?.requested_days ?? 1 }

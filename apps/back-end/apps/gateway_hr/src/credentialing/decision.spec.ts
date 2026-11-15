@@ -305,6 +305,85 @@ describe('credential application decision endpoint (in-memory repositories)', ()
     expect((await workforce.applications.findOne(id))?.status).toBe('approved')
   })
 
+  it('approves a privilege extension: the new SPK keeps the old last valid day, carries the grants over, and the old SPK is superseded', async () => {
+    const applicant = await addEmployee()
+    await addLicenses(applicant)
+    const unit = new Types.ObjectId().toHexString()
+    const old = await workforce.appointments.create({
+      tenant_id: tenantId,
+      appointment_number: 'OLD/EXT/1',
+      employee_id: applicant,
+      credentialing_facility_id: facilityId,
+      credentialing_scope: 'facility',
+      facility_ids: [facilityId],
+      unit_ids: [unit],
+      source_application_id: new Types.ObjectId().toHexString(),
+      valid_period: { start: '2025-03-01', end: '2099-02-28' },
+      is_temporary: false,
+      status: 'active',
+      is_current: true,
+      issued: { by: { account_id: 'a9', display_name: 'Director', kind: 'account' }, director_employee_id: directorId, date: '2025-03-01' },
+      signed_document: null,
+      suspension: null,
+      revocation: null,
+      superseded_by_id: null,
+    })
+    const heldGrant = await workforce.grants.create({
+      tenant_id: tenantId,
+      appointment_id: old.id,
+      employee_id: applicant,
+      facility_ids: [facilityId],
+      unit_ids: [unit],
+      catalog_item_id: itemOne,
+      code: 'PD-1',
+      condition: 'full',
+      supervisor: null,
+      restriction_notes: null,
+      status: 'active',
+      status_change: null,
+      flag: null,
+    })
+    const application = await workforce.applications.create({
+      tenant_id: tenantId,
+      employee_id: applicant,
+      credentialing_facility_id: facilityId,
+      credentialing_scope: 'facility',
+      type: 'privilege_extension',
+      committee: { system: 'id.committee', code: 'komite_medik' },
+      status: 'recommended',
+      status_since: new Date('2026-03-01T00:00:00Z'),
+      requested_privileges: [{ catalog_item_id: itemTwo, code: 'PD-2', requested_condition: 'full', proposed_supervisor_employee_id: null, notes: null }],
+      requested_unit_ids: [unit],
+      requested_facility_ids: [facilityId],
+      documents: [],
+      assessors: [],
+      recommendation: {
+        decided_at: new Date('2026-03-08T00:00:00Z'),
+        signed_by: { account_id: 'a2', display_name: 'Chair', kind: 'account' },
+        summary: 'Ringkasan Rahasia',
+        privileges: [{ catalog_item_id: itemTwo, outcome: 'recommended', condition: 'full', supervisor_employee_id: null, restriction_notes: null }],
+      },
+      decision: null,
+      return_reason: null,
+      withdrawal_reason: null,
+      temporary: null,
+      previous_appointment_id: old.id,
+    })
+
+    const withEnd = await decide(application.id, approval({ validUntil: '2030-01-01' }))
+    expect(withEnd.status).toBe(422)
+    expect(withEnd.body).toMatchObject({ code: 'valid_until_not_allowed' })
+    const reply = await decide(application.id, approval())
+
+    expect(reply.status).toBe(201)
+    const body = reply.body as Record<string, any>
+    expect(body.appointment).toMatchObject({ valid_period: { end: '2099-02-28' }, is_current: true, status: 'active' })
+    expect((body.grants as { catalog_item_id: string }[]).map((grant) => grant.catalog_item_id).sort()).toEqual([itemOne, itemTwo].sort())
+    expect(await workforce.appointments.findOne(old.id)).toMatchObject({ status: 'superseded', is_current: false, superseded_by_id: body.appointment.id })
+    expect((await workforce.grants.findOne(heldGrant.id))?.status).toBe('superseded')
+    expect(JSON.stringify(body)).not.toContain('Ringkasan Rahasia')
+  })
+
   it('rejects a recommended application with a reason and writes no SPK', async () => {
     const id = await recommended()
 

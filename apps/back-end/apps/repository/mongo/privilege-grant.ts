@@ -23,7 +23,8 @@ import { PrivilegeGrantEntity } from './schema/privilege-grant'
 
 /**
  * Mongo implementation of `PrivilegeGrantRepository`. Grants are never deleted. Only the status,
- * the latest status change and the flag change after the grant is issued.
+ * the latest status change and the flag change after the grant is issued, and the supervisor, which
+ * is re-pointed to the supervisor's new grant when the supervisor's SPK is renewed (HR plan 4.4 RN11).
  */
 @Injectable()
 export class PrivilegeGrantRepositoryMongo
@@ -48,7 +49,7 @@ export class PrivilegeGrantRepositoryMongo
       allowUpdate: true,
       allowDelete: false,
       allowSoftDelete: false,
-      updatableFields: ['status', 'status_change', 'flag'],
+      updatableFields: ['status', 'status_change', 'flag', 'supervisor'],
     })
   }
 
