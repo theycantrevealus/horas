@@ -176,7 +176,7 @@ Plan: `plans/gateway-hr-4-3-spk-and-granted-privileges.md` (built; decision SP10
 | `POST /privilege-grants/:id/revoke` | Revoke one granted privilege. |
 
 ### 4.4 Renewals
-No new routes. Plan: `plans/gateway-hr-4-4-renewals.md` (proposed). It changes two routes of 4.2 and 4.3:
+No new routes. Plan: `plans/gateway-hr-4-4-renewals.md` (confirmed). It changes two routes of 4.2 and 4.3:
 
 | Endpoint | Change |
 |---|---|
