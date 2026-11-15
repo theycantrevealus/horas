@@ -25,6 +25,7 @@ import {
   type ApplicationQuery,
   type CredentialApplicationRepository,
 } from '@repository/interface/credential-application'
+import { type CredentialAssessmentRepository } from '@repository/interface/credential-assessment'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type LicenseQuery,
@@ -58,6 +59,7 @@ import { type CodeConcept } from '@repository/model/code-concept'
 import { type CommitteeMembership } from '@repository/model/committee-membership'
 import { type CpdRecord } from '@repository/model/cpd-record'
 import { type CredentialApplication } from '@repository/model/credential-application'
+import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import { type CpdSummary } from '@repository/model/cpd-summary'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
@@ -2211,5 +2213,110 @@ export class InMemoryCredentialApplications
           left.id.localeCompare(right.id),
       )
       .slice(offset, offset + (query.limit ?? 10))
+  }
+}
+
+/**
+ * In-memory `CredentialAssessmentRepository` for tests. It applies the unique index of the Mongo
+ * collection: one assessment per assessor and privilege of an application. Assessments are never
+ * updated, so `update` is refused like the Mongo repository does.
+ */
+export class InMemoryCredentialAssessments
+  extends InMemoryRepository<CredentialAssessment>
+  implements CredentialAssessmentRepository
+{
+  /**
+   * Creates an assessment, refusing a second one for the same assessor and privilege.
+   *
+   * @param entity - Assessment data.
+   * @param id - Optional identifier.
+   * @returns The stored assessment.
+   */
+  override async create(
+    entity: NewEntity<CredentialAssessment>,
+    id?: string,
+  ): Promise<CredentialAssessment> {
+    const duplicate = this.find(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.application_id === entity.application_id &&
+        item.assessor_employee_id === entity.assessor_employee_id &&
+        item.catalog_item_id === entity.catalog_item_id,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate assessment', {
+        operation: 'CredentialAssessmentRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds every assessment of an application, oldest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param applicationId - The application.
+   * @returns The assessments.
+   */
+  async findByApplication(
+    tenantId: string,
+    applicationId: string,
+  ): Promise<CredentialAssessment[]> {
+    return this.ordered(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.application_id === applicationId &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the assessments one assessor made of an application.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param applicationId - The application.
+   * @param assessorEmployeeId - The assessor.
+   * @returns The assessments.
+   */
+  async findByAssessor(
+    tenantId: string,
+    applicationId: string,
+    assessorEmployeeId: string,
+  ): Promise<CredentialAssessment[]> {
+    return this.ordered(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.application_id === applicationId &&
+        item.assessor_employee_id === assessorEmployeeId &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Refuses every update: assessments are never edited.
+   *
+   * @returns Never.
+   * @throws RepositoryError always.
+   */
+  override async update(): Promise<CredentialAssessment> {
+    throw new RepositoryError('update is not supported', {
+      operation: 'CredentialAssessmentRepository.update',
+    })
+  }
+
+  /**
+   * Filters and orders by the time of the assessment, then by identifier.
+   *
+   * @param predicate - Which assessments to keep.
+   * @returns The assessments, oldest first.
+   */
+  private ordered(
+    predicate: (item: CredentialAssessment) => boolean,
+  ): CredentialAssessment[] {
+    return this.filter(predicate).sort(
+      (left, right) =>
+        left.assessed_at.getTime() - right.assessed_at.getTime() ||
+        left.id.localeCompare(right.id),
+    )
   }
 }

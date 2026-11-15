@@ -138,3 +138,11 @@ export const REPOSITORY_PRIVILEGE_CATALOG = Symbol(
 export const REPOSITORY_CREDENTIAL_APPLICATION = Symbol(
   'REPOSITORY_CREDENTIAL_APPLICATION',
 )
+
+/**
+ * Injection token for the credential assessment repository (assessors' findings on one
+ * requested privilege).
+ */
+export const REPOSITORY_CREDENTIAL_ASSESSMENT = Symbol(
+  'REPOSITORY_CREDENTIAL_ASSESSMENT',
+)

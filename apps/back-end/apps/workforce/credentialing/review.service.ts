@@ -22,10 +22,13 @@ import {
   InvalidRequestError,
 } from '../workforce.error'
 import {
+  type ApplicationView,
   assertApplicationVersion,
   cleanReason,
+  findSeat,
   invalidTransition,
   loadApplication,
+  redactApplication,
   writeApplication,
 } from './application-support'
 
@@ -384,6 +387,43 @@ export class ReviewService {
   }
 
   /**
+   * Prepares applications for a caller: a member of the applicant's committee gets them whole,
+   * anyone else gets them without the assessors' conflict declarations and the recommendation
+   * summary (HR plan 4.2 AP13). Writes no log entry (a read).
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param callerEmployeeId - The caller's employee, or `null`.
+   * @param applications - The applications to show.
+   * @returns The applications, whole or redacted one by one.
+   */
+  async present(
+    tenantId: string,
+    callerEmployeeId: string | null,
+    applications: CredentialApplication[],
+  ): Promise<ApplicationView[]> {
+    const member = new Map<string, boolean>()
+    const shown: ApplicationView[] = []
+    for (const application of applications) {
+      const key = `${application.credentialing_facility_id}|${application.committee.code}`
+      if (!member.has(key)) {
+        member.set(
+          key,
+          (await findSeat(
+            this.memberships,
+            tenantId,
+            callerEmployeeId,
+            application,
+          )) !== null,
+        )
+      }
+      shown.push(
+        member.get(key) ? application : redactApplication(application),
+      )
+    }
+    return shown
+  }
+
+  /**
    * Loads an application and checks that the caller sits on the applicant's committee at the
    * credentialing facility, in any role (AP7). A missing application answers first, so the
    * answer does not depend on the caller's seat.
@@ -401,15 +441,12 @@ export class ReviewService {
     id: string,
   ): Promise<CredentialApplication> {
     const application = await loadApplication(this.applications, tenantId, id)
-    const seat =
-      callerEmployeeId === null
-        ? null
-        : await this.memberships.findActiveForEmployee(
-            tenantId,
-            callerEmployeeId,
-            application.credentialing_facility_id,
-            application.committee.code,
-          )
+    const seat = await findSeat(
+      this.memberships,
+      tenantId,
+      callerEmployeeId,
+      application,
+    )
     if (!seat) {
       throw new ForbiddenError(
         'not_committee_member',
