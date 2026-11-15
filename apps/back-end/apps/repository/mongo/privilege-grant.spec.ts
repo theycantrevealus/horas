@@ -297,6 +297,22 @@ describe('PrivilegeGrantRepository on the shared Mongo base', () => {
     expect(plain).not.toHaveProperty('$or')
   })
 
+  it('finds the grants that name a grant as their supervisor\'s grant, and answers an empty list for malformed ids', async () => {
+    const tenant = tenantId.toHexString()
+    expect(await grants.findBySupervisorGrant(tenant, supervisorGrantId.toHexString())).toHaveLength(1)
+    expect(model.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenant_id: tenant,
+        'supervisor.grant_id': supervisorGrantId.toHexString(),
+        deleted_at: null,
+      }),
+    )
+    model.find.mockClear()
+    expect(await grants.findBySupervisorGrant('x', supervisorGrantId.toHexString())).toEqual([])
+    expect(await grants.findBySupervisorGrant(tenant, 'bad')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('stamps a created grant with the actor and records one change entry', async () => {
     await asAdmin(() => grants.create(input))
 
