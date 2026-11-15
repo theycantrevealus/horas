@@ -146,6 +146,8 @@ export class ApplicationPartsDto {
  * @property employeeId - The applicant.
  * @property credentialingFacilityId - Facility whose committee credentials the applicant.
  * @property type - Application type.
+ * @property previousAppointmentId - The applicant's current SPK being renewed or extended; needed
+ * for `recredentialing` and `privilege_extension`, refused for the other types.
  */
 export class CreateApplicationDto extends ApplicationPartsDto {
   @IsMongoId()
@@ -156,6 +158,10 @@ export class CreateApplicationDto extends ApplicationPartsDto {
 
   @IsIn(['initial', 'recredentialing', 'privilege_extension', 'temporary'])
   type!: 'initial' | 'recredentialing' | 'privilege_extension' | 'temporary'
+
+  @IsOptional()
+  @IsMongoId()
+  previousAppointmentId?: string | null
 }
 
 /**

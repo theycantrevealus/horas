@@ -176,6 +176,7 @@ export class ApplicationController {
       employeeId: body.employeeId,
       credentialingFacilityId: body.credentialingFacilityId,
       type: body.type,
+      previousAppointmentId: body.previousAppointmentId,
       requestedPrivileges: toPrivileges(body.requestedPrivileges) ?? [],
       requestedUnitIds: body.requestedUnitIds ?? [],
       documents: toDocuments(body.documents),
