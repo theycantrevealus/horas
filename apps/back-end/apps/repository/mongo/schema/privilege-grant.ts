@@ -2,7 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 import { type PrivilegeCondition } from '@repository/model/common/credentialing'
 import { type StatusDecision } from '@repository/model/common/decision'
-import { type GrantFlag } from '@repository/model/privilege-grant'
+import {
+  type GrantFlag,
+  type PrivilegeGrantStatus,
+} from '@repository/model/privilege-grant'
 import { type ActorRef } from '@utility/history/actor'
 import { ActorRefSchema } from './common/actor-ref'
 
@@ -101,10 +104,10 @@ export class PrivilegeGrantEntity {
 
   @Prop({
     type: SchemaTypes.String,
-    enum: ['active', 'suspended', 'revoked'],
+    enum: ['active', 'suspended', 'revoked', 'superseded'],
     required: true,
   })
-  status!: 'active' | 'suspended' | 'revoked'
+  status!: PrivilegeGrantStatus
 
   @Prop({ type: SchemaTypes.Mixed, default: null })
   status_change!: StatusDecision | null

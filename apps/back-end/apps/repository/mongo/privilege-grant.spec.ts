@@ -332,7 +332,7 @@ describe('PrivilegeGrantRepository on the shared Mongo base', () => {
     await expect(asAdmin(() => grants.create(input))).rejects.toBeInstanceOf(RepositoryConflictError)
   })
 
-  it('updates only the status, the status change and the flag', async () => {
+  it('updates only the status, the status change, the flag and the supervisor, never the privilege or the condition', async () => {
     await asAdmin(() =>
       grants.update(grantId.toHexString(), {
         status: 'revoked',
@@ -340,13 +340,15 @@ describe('PrivilegeGrantRepository on the shared Mongo base', () => {
         flag: null,
         condition: 'full',
         catalog_item_id: new Types.ObjectId().toHexString(),
-        supervisor: null,
+        supervisor: { employee_id: supervisorId.toHexString(), grant_id: new Types.ObjectId().toHexString() },
+        appointment_id: new Types.ObjectId().toHexString(),
+        code: 'OTHER',
       }),
     )
 
     const update = model.findOneAndUpdate.mock.calls[0]?.[1] as { $set: Record<string, unknown> }
-    expect(Object.keys(update.$set)).toEqual(expect.arrayContaining(['status', 'status_change', 'flag']))
-    for (const forbidden of ['condition', 'catalog_item_id', 'supervisor']) {
+    expect(Object.keys(update.$set)).toEqual(expect.arrayContaining(['status', 'status_change', 'flag', 'supervisor']))
+    for (const forbidden of ['condition', 'catalog_item_id', 'appointment_id', 'code']) {
       expect(update.$set).not.toHaveProperty(forbidden)
     }
   })

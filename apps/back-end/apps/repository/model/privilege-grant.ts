@@ -5,6 +5,13 @@ import { type PrivilegeCondition } from './common/credentialing'
 import { Timestamp } from './timestamp'
 
 /**
+ * Grant status. `superseded` is final: the grant was replaced by a grant of a renewed SPK
+ * (`human-resource-collections.md` 4.6, HR plan 4.4 RN9).
+ */
+export type PrivilegeGrantStatus =
+  'active' | 'suspended' | 'revoked' | 'superseded'
+
+/**
  * Supervisor of a supervised privilege.
  *
  * @property employee_id - The supervisor.
@@ -62,7 +69,7 @@ export class PrivilegeGrant extends Timestamp implements Entity {
   condition!: PrivilegeCondition
   supervisor!: GrantSupervisor | null
   restriction_notes!: string | null
-  status!: 'active' | 'suspended' | 'revoked'
+  status!: PrivilegeGrantStatus
   status_change!: StatusDecision | null
   flag!: GrantFlag | null
   created_by!: ActorRef
