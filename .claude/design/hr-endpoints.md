@@ -160,6 +160,8 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /credential-applications/:id/recommendation` | Committee signs its recommendation to the Director. |
 
 ### 4.3 SPK and granted privileges
+
+Plan: `plans/gateway-hr-4-3-spk-and-granted-privileges.md` (proposed; decision SP10 adds a `lift-suspension` route for grants).
 | Endpoint | Purpose |
 |---|---|
 | `POST /credential-applications/:id/decision` | Director approves (creates the SPK) or rejects. Moved here from 4.2 (`plans/gateway-hr-4-2-credential-applications.md` AP2). |
