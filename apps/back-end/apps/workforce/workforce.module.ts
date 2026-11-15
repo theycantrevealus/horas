@@ -21,6 +21,7 @@ import { AssignmentService } from './assignment/assignment.service'
 import { CommitteeMembershipService } from './committee/committee-membership.service'
 import { CodeConceptService } from './concept/code-concept.service'
 import { ApplicationService } from './credentialing/application.service'
+import { ReviewService } from './credentialing/review.service'
 import { CpdService } from './credit/cpd.service'
 import { CpdSummaryService } from './credit/cpd-summary.service'
 import { FacilityService } from './structure/facility.service'
@@ -76,6 +77,7 @@ import { UnitService } from './structure/unit.service'
     CpdSummaryService,
     PrivilegeService,
     ApplicationService,
+    ReviewService,
   ],
   exports: [
     OrganizationService,
@@ -94,6 +96,7 @@ import { UnitService } from './structure/unit.service'
     CpdSummaryService,
     PrivilegeService,
     ApplicationService,
+    ReviewService,
   ],
 })
 export class WorkforceModule {}

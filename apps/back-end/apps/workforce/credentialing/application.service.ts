@@ -1,8 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common'
-import {
-  RepositoryConflictError,
-  RepositoryNotFoundError,
-} from '@utility/database/error'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
 import { type EmployeeRepository } from '@repository/interface/employee'
@@ -39,11 +35,14 @@ import { CodeConceptService } from '../concept/code-concept.service'
 import { isValidDocumentRef } from '../license/license-rules'
 import { observe } from '../observe'
 import { ParameterService } from '../parameter/parameter.service'
+import { InvalidRequestError } from '../workforce.error'
 import {
-  ConflictError,
-  InvalidRequestError,
-  NotFoundError,
-} from '../workforce.error'
+  assertApplicationVersion,
+  cleanReason,
+  invalidTransition,
+  loadApplication,
+  writeApplication,
+} from './application-support'
 import {
   hasRepeats,
   levelRank,
@@ -507,7 +506,7 @@ export class ApplicationService {
             'An application can be withdrawn only before it is assessed.',
           )
         }
-        const reason = this.reasonOf(input.reason)
+        const reason = cleanReason(input.reason)
         this.assertVersion(application, input.version)
         return this.write(application, reason, () =>
           this.applications.update(
@@ -1041,27 +1040,6 @@ export class ApplicationService {
   }
 
   /**
-   * Cleans a reason: 1 to 500 characters.
-   *
-   * @param raw - Reason as sent.
-   * @returns The cleaned reason.
-   * @throws InvalidRequestError `reason_required` or `invalid_reason`.
-   */
-  private reasonOf(raw: string): string {
-    const reason = (raw ?? '').trim()
-    if (reason.length === 0) {
-      throw new InvalidRequestError('reason_required', 'A reason is required.')
-    }
-    if (reason.length > LIMITS.reason) {
-      throw new InvalidRequestError(
-        'invalid_reason',
-        'The reason can have at most 500 characters.',
-      )
-    }
-    return reason
-  }
-
-  /**
    * Loads an application of the caller's tenant.
    *
    * @param tenantId - Tenant of the caller.
@@ -1069,22 +1047,8 @@ export class ApplicationService {
    * @returns The application.
    * @throws NotFoundError `application_not_found`.
    */
-  private async load(
-    tenantId: string,
-    id: string,
-  ): Promise<CredentialApplication> {
-    const application = await this.applications.findOne(id)
-    if (
-      !application ||
-      application.tenant_id !== tenantId ||
-      application.deleted_at
-    ) {
-      throw new NotFoundError(
-        'application_not_found',
-        'The application was not found.',
-      )
-    }
-    return application
+  private load(tenantId: string, id: string): Promise<CredentialApplication> {
+    return loadApplication(this.applications, tenantId, id)
   }
 
   /**
@@ -1098,39 +1062,24 @@ export class ApplicationService {
     application: CredentialApplication,
     version: number | undefined,
   ): void {
-    if (version !== undefined && version !== application.version) {
-      throw this.stale()
-    }
+    assertApplicationVersion(application, version)
   }
 
   /**
    * Runs a repository write, with the change reason when given, and turns repository rejections
    * into workforce errors.
    *
-   * @param application - The application as read before the write.
+   * @param _application - The application as read before the write.
    * @param reason - Optional reason for the change history.
    * @param write - The repository call.
    * @returns What the call returns.
    */
-  private async write(
-    application: CredentialApplication,
+  private write(
+    _application: CredentialApplication,
     reason: string | undefined,
     write: () => Promise<CredentialApplication>,
   ): Promise<CredentialApplication> {
-    try {
-      return await (reason ? withChangeReason(reason, write) : write())
-    } catch (error: unknown) {
-      if (error instanceof RepositoryConflictError) {
-        throw this.stale()
-      }
-      if (error instanceof RepositoryNotFoundError) {
-        throw new NotFoundError(
-          'application_not_found',
-          'The application was not found.',
-        )
-      }
-      throw error
-    }
+    return writeApplication(reason, write)
   }
 
   /**
@@ -1138,16 +1087,6 @@ export class ApplicationService {
    * @returns The error for a move outside the status table.
    */
   private invalidTransition(message: string): InvalidRequestError {
-    return new InvalidRequestError('invalid_transition', message)
-  }
-
-  /**
-   * @returns The conflict for a stale version.
-   */
-  private stale(): ConflictError {
-    return new ConflictError(
-      'stale_version',
-      'The application was changed by someone else. Reload it and try again.',
-    )
+    return invalidTransition(message)
   }
 }
