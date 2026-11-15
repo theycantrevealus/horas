@@ -1,6 +1,6 @@
 # gateway_hr 4.3: SPK and granted privileges
 
-Status: **Proposed** (2026-11-16). Decisions SP1 to SP18 are proposals for you to confirm or change (section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 16). Endpoints: `../hr-endpoints.md` 4.3. Collections: `../human-resource-collections.md` 4.5 (`clinical_appointments`), 4.6 (`privilege_grants`) and 4.7 (credentialing scope, decisions C3 and C7). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 7.3 to 7.6 (`HR-CRD-001` to `HR-CRD-011`). Models: `apps/back-end/apps/repository/model/clinical-appointment.ts` and `privilege-grant.ts` (exist, with their classifications). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3 and 3f. Built references: credential applications (4.2: the recommendation this group acts on), licences (3.1: HR-CRD-002), privilege catalog (4.1), parameters (1.6: `SPK_VALIDITY_YEARS`, `TEMPORARY_PRIVILEGE_MAX_DAYS`).
+Status: **Confirmed** (2026-11-16). Decisions SP1 to SP18 and the split in three code PRs confirmed as proposed, including SP10 (the grant `lift-suspension` route, 11 endpoints). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 16). Endpoints: `../hr-endpoints.md` 4.3. Collections: `../human-resource-collections.md` 4.5 (`clinical_appointments`), 4.6 (`privilege_grants`) and 4.7 (credentialing scope, decisions C3 and C7). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 7.3 to 7.6 (`HR-CRD-001` to `HR-CRD-011`). Models: `apps/back-end/apps/repository/model/clinical-appointment.ts` and `privilege-grant.ts` (exist, with their classifications). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3 and 3f. Built references: credential applications (4.2: the recommendation this group acts on), licences (3.1: HR-CRD-002), privilege catalog (4.1), parameters (1.6: `SPK_VALIDITY_YEARS`, `TEMPORARY_PRIVILEGE_MAX_DAYS`).
 
 The Director's decision turns a recommended application into an SPK (Surat Penugasan Klinis) with its privilege grants (the lines of the RKK), or rejects it. After that the Director can suspend, lift the suspension of, or revoke a whole SPK, or one granted privilege. This group builds the decision, the reads and these status changes. Using the grants to decide who may work where (clinical eligibility, group 6) is not part of it.
 
@@ -92,9 +92,9 @@ Tests come first in each task: repository (indexes, tenant isolation, no `_id`, 
 5. Only holders of `workforce.credential:decide` decide, and never for their own application.
 6. Logs carry no reasons or decision contents; the change log masks the confidential reasons.
 
-## 7. Decisions that need your answer
+## 7. Decisions that needed your answer
 
-All of SP1 to SP18 are proposals. These five change the shape of the work most, so I would like an explicit answer:
+Confirmed as proposed: all of SP1 to SP18. These five changed the shape of the work most:
 
 - **SP1** (one permission for the Director's decisions, the decider's own employee is recorded; delegation is whoever holds the permission).
 - **SP3** (renewal types and supersession become a follow-up group 4.4, not part of 4.3).
@@ -102,4 +102,4 @@ All of SP1 to SP18 are proposals. These five change the shape of the work most, 
 - **SP10** (add `lift-suspension` for grants, making it 11 endpoints).
 - **SP11** (supervisor flags are set and resolved automatically; no resolve route, no alert yet).
 
-The others are proposed as stated.
+The others are as stated.
