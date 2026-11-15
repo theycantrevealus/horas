@@ -44,6 +44,10 @@ import {
   type RevealedIdentifier,
 } from '@repository/interface/employee-private-profile'
 import { type PositionRepository } from '@repository/interface/position'
+import {
+  type PrivilegeCatalogRepository,
+  type PrivilegeQuery,
+} from '@repository/interface/privilege-catalog'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
@@ -63,6 +67,7 @@ import {
 import { type Organization } from '@repository/model/organization'
 import { type OrganizationUnit } from '@repository/model/organization-unit'
 import { type Position } from '@repository/model/position'
+import { type PrivilegeCatalogItem } from '@repository/model/privilege-catalog-item'
 import { type ProfessionalLicense } from '@repository/model/professional-license'
 import { type PositionAssignment } from '@repository/model/position-assignment'
 
@@ -2084,5 +2089,82 @@ export class InMemoryCpdSummaries
         item.credit_system.code === creditCode &&
         !item.deleted_at,
     )
+  }
+}
+
+/**
+ * In-memory `PrivilegeCatalogRepository` for tests. It applies the unique index of the Mongo
+ * collection: one item per tenant and code.
+ */
+export class InMemoryPrivilegeCatalog
+  extends InMemoryRepository<PrivilegeCatalogItem>
+  implements PrivilegeCatalogRepository
+{
+  /**
+   * Creates an item, refusing a second one with the same tenant and code.
+   *
+   * @param entity - Item data.
+   * @param id - Optional identifier.
+   * @returns The stored item.
+   */
+  override async create(
+    entity: NewEntity<PrivilegeCatalogItem>,
+    id?: string,
+  ): Promise<PrivilegeCatalogItem> {
+    const duplicate = [...this.items.values()].some(
+      (item) =>
+        item.tenant_id === entity.tenant_id && item.code === entity.code,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate privilege', {
+        operation: 'PrivilegeCatalogRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds an item by its code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param code - Catalog code.
+   * @returns The item, or `null`.
+   */
+  async findByCode(
+    tenantId: string,
+    code: string,
+  ): Promise<PrivilegeCatalogItem | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId && item.code === code && !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds catalog items ordered by code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The items.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: PrivilegeQuery = {},
+  ): Promise<PrivilegeCatalogItem[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.committee || item.committee.code === query.committee) &&
+        (!query.profession ||
+          item.professions.some((coding) => coding.code === query.profession)) &&
+        (!query.status || item.status === query.status) &&
+        (!query.facilityId ||
+          item.facility_ids.length === 0 ||
+          item.facility_ids.includes(query.facilityId)),
+    )
+      .sort((left, right) => left.code.localeCompare(right.code))
+      .slice(offset, offset + (query.limit ?? 10))
   }
 }

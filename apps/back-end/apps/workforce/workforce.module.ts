@@ -12,6 +12,7 @@ import { EmployeePrivateProfileRepositoryModule } from '@repository/mongo/employ
 import { EmployeeRepositoryModule } from '@repository/mongo/employee.module'
 import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
 import { PositionAssignmentRepositoryModule } from '@repository/mongo/position-assignment.module'
+import { PrivilegeCatalogRepositoryModule } from '@repository/mongo/privilege-catalog.module'
 import { ProfessionalLicenseRepositoryModule } from '@repository/mongo/professional-license.module'
 import { PositionRepositoryModule } from '@repository/mongo/position.module'
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
@@ -26,6 +27,7 @@ import { ContractService } from './contract/contract.service'
 import { EmployeeService } from './employee/employee.service'
 import { PrivateProfileService } from './private-profile/private-profile.service'
 import { LicenseService } from './license/license.service'
+import { PrivilegeService } from './privilege/privilege.service'
 import { ParameterService } from './parameter/parameter.service'
 import { PositionService } from './structure/position.service'
 import { UnitService } from './structure/unit.service'
@@ -52,6 +54,7 @@ import { UnitService } from './structure/unit.service'
     ProfessionalLicenseRepositoryModule,
     CpdRecordRepositoryModule,
     CpdSummaryRepositoryModule,
+    PrivilegeCatalogRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -68,6 +71,7 @@ import { UnitService } from './structure/unit.service'
     LicenseService,
     CpdService,
     CpdSummaryService,
+    PrivilegeService,
   ],
   exports: [
     OrganizationService,
@@ -84,6 +88,7 @@ import { UnitService } from './structure/unit.service'
     LicenseService,
     CpdService,
     CpdSummaryService,
+    PrivilegeService,
   ],
 })
 export class WorkforceModule {}

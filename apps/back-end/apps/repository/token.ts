@@ -124,3 +124,10 @@ export const REPOSITORY_CPD_RECORD = Symbol('REPOSITORY_CPD_RECORD')
  * Injection token for the CPD summary repository (latest known credit totals).
  */
 export const REPOSITORY_CPD_SUMMARY = Symbol('REPOSITORY_CPD_SUMMARY')
+
+/**
+ * Injection token for the privilege catalog repository (the clinical privileges that can be requested).
+ */
+export const REPOSITORY_PRIVILEGE_CATALOG = Symbol(
+  'REPOSITORY_PRIVILEGE_CATALOG',
+)
