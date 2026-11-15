@@ -2,6 +2,7 @@ import { Transform, Type } from 'class-transformer'
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsDefined,
   IsIn,
   IsInt,
@@ -278,4 +279,95 @@ export class ListApplicationsDto {
   @IsInt()
   @Min(0)
   offset?: number
+}
+
+/**
+ * Body of `POST /v1/credential-applications/:id/start-review`.
+ *
+ * @property version - Version the client read.
+ * @property reason - Why, kept in the change history.
+ */
+export class StartReviewDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason?: string
+}
+
+/**
+ * Body of `POST /v1/credential-applications/:id/return`.
+ *
+ * @property reason - Why it is sent back.
+ * @property version - Version the client read.
+ */
+export class ReturnApplicationDto {
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason!: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+}
+
+/**
+ * Body of `POST /v1/credential-applications/:id/assessors`.
+ *
+ * @property assessorEmployeeIds - The employees to appoint; the service allows 1 to 20.
+ * @property version - Version the client read.
+ * @property reason - Why, kept in the change history.
+ */
+export class AppointAssessorsDto {
+  @IsArray()
+  @ArrayMaxSize(100)
+  @IsMongoId({ each: true })
+  assessorEmployeeIds!: string[]
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason?: string
+}
+
+/**
+ * Body of `POST /v1/credential-applications/:id/conflict-declaration`.
+ *
+ * @property hasConflict - Whether the assessor has a conflict of interest.
+ * @property relationship - Kind of relationship; needed exactly when there is a conflict.
+ * @property version - Version the client read.
+ */
+export class DeclareConflictDto {
+  @IsBoolean()
+  hasConflict!: boolean
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CodingDto)
+  relationship?: CodingDto | null
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
 }

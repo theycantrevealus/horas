@@ -11,6 +11,7 @@ import { type CredentialApplication } from '@repository/model/credential-applica
 import { type AuthenticatedUser } from '@identity/authenticated-user'
 import { CurrentUser, RequirePermissions } from '@identity/guard/decorators'
 import { PERMISSIONS } from '@identity/permission'
+import { ReviewService } from '@workforce/credentialing/review.service'
 import {
   ApplicationService,
   type ApplicationDocumentInput,
@@ -18,10 +19,14 @@ import {
   type TemporaryInput,
 } from '@workforce/credentialing/application.service'
 import {
+  AppointAssessorsDto,
   type ApplicationDocumentDto,
   CreateApplicationDto,
+  DeclareConflictDto,
   ListApplicationsDto,
   type RequestedPrivilegeDto,
+  ReturnApplicationDto,
+  StartReviewDto,
   SubmitApplicationDto,
   UpdateApplicationDto,
   WithdrawApplicationDto,
@@ -86,8 +91,12 @@ function toTemporary(
 export class ApplicationController {
   /**
    * @param applications - Application service.
+   * @param reviews - Committee review service.
    */
-  constructor(private readonly applications: ApplicationService) {}
+  constructor(
+    private readonly applications: ApplicationService,
+    private readonly reviews: ReviewService,
+  ) {}
 
   /**
    * Handles `GET /v1/credential-applications`: the committee work queue.
@@ -213,5 +222,96 @@ export class ApplicationController {
     @Body() body: WithdrawApplicationDto,
   ): Promise<CredentialApplication> {
     return this.applications.withdraw(user.tenant_id, id, body)
+  }
+
+  /**
+   * Handles `POST /v1/credential-applications/:id/start-review`: the committee starts checking
+   * completeness. Needs a seat in the applicant's committee.
+   *
+   * @param user - Signed-in user.
+   * @param id - Application identifier.
+   * @param body - Optional version and reason.
+   * @returns The application under review.
+   */
+  @Post(':id/start-review')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_REVIEW)
+  startReview(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: StartReviewDto,
+  ): Promise<CredentialApplication> {
+    return this.reviews.startReview(user.tenant_id, user.employee_id, id, body)
+  }
+
+  /**
+   * Handles `POST /v1/credential-applications/:id/return`: the committee sends the application
+   * back for missing documents. Needs a seat in the applicant's committee.
+   *
+   * @param user - Signed-in user.
+   * @param id - Application identifier.
+   * @param body - Reason and optional version.
+   * @returns The returned application.
+   */
+  @Post(':id/return')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_REVIEW)
+  returnApplication(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: ReturnApplicationDto,
+  ): Promise<CredentialApplication> {
+    return this.reviews.returnApplication(
+      user.tenant_id,
+      user.employee_id,
+      id,
+      body,
+    )
+  }
+
+  /**
+   * Handles `POST /v1/credential-applications/:id/assessors`: the committee appoints assessors.
+   * Needs a seat in the applicant's committee.
+   *
+   * @param user - Signed-in user.
+   * @param id - Application identifier.
+   * @param body - The employees to appoint.
+   * @returns The application with its assessors.
+   */
+  @Post(':id/assessors')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_CREDENTIAL_REVIEW)
+  appointAssessors(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: AppointAssessorsDto,
+  ): Promise<CredentialApplication> {
+    return this.reviews.appointAssessors(
+      user.tenant_id,
+      user.employee_id,
+      id,
+      body,
+    )
+  }
+
+  /**
+   * Handles `POST /v1/credential-applications/:id/conflict-declaration`: an appointed assessor
+   * declares a conflict of interest, or none. Personal: sign-in only, the service checks that the
+   * caller is one of the application's assessors.
+   *
+   * @param user - Signed-in user.
+   * @param id - Application identifier.
+   * @param body - The declaration.
+   * @returns The application with the declaration.
+   */
+  @Post(':id/conflict-declaration')
+  declareConflict(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: DeclareConflictDto,
+  ): Promise<CredentialApplication> {
+    return this.reviews.declareConflict(
+      user.tenant_id,
+      user.employee_id,
+      id,
+      body,
+    )
   }
 }
