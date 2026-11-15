@@ -14,6 +14,7 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/structure/{codes,external-ids,localized-texts,address}.ts` | Shared checks for HR data (code format, identifiers given by other systems, texts per language, postal address). Each returns the cleaned value or `null`; the service picks the error code. Reuse them instead of writing new ones. `structure/unit-tree.ts` builds the organization chart from a flat list. |
 | `apps/workforce/concept/` | `CodeConceptService` (list, create, update, import, `assertActive`, `resolve`), the required properties of known code systems (`system-rules.ts`) and the import bundles (`bundles.ts`, `bundle-id.ts`). |
 | `apps/utility/validation/local-date.ts` | `isLocalDate`, `isValidPeriod`, `todayUtc`, `todayInZone(timeZone)` (today in a facility's zone), `@IsLocalDate()`. Calendar dates are `YYYY-MM-DD` strings (`database.md` 4.4). |
+| `apps/workforce/privilege/` | `PrivilegeService` (list, get, add, edit, retire the privilege catalog) and the catalog rules (`privilege-rules.ts`: code format, list limits, external code format). |
 | `apps/workforce/credit/` | `CpdService` (list, record for HR and for the signed-in employee, review) and `CpdSummaryService` (list totals, set a platform total), with the credit rules (`cpd-rules.ts`: points, activity date, totals, cycle). |
 | `apps/workforce/license/` | `LicenseService` (list, list by employee, get, register for HR and for the signed-in employee, verify, revoke) and the licence rules (`license-rules.ts`: document number, scan reference, dates). Verifying a renewal runs in one transaction with the licence it supersedes. Dates are UTC: a licence has no facility zone. |
 | `apps/workforce/committee/` | `CommitteeMembershipService` (list, appoint, end) and the date checks (`committee-rules.ts`). Dates use the facility's time zone. |
@@ -89,6 +90,8 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.cpd:write` | `POST /v1/cpd-records`, `PUT /v1/employees/:id/cpd-summaries/:system` |
 | `workforce.cpd:review` | `POST /v1/cpd-records/:id/review` |
 | none (sign-in only) | `POST /v1/employees/me/cpd-records` |
+| `workforce.privilege:read` | `GET /v1/privileges`, `GET /v1/privileges/:id` |
+| `workforce.privilege:write` | `POST /v1/privileges`, `PATCH /v1/privileges/:id`, `POST /v1/privileges/:id/retire` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
 | `workforce.parameter:write` | `POST /v1/parameters` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
@@ -121,6 +124,13 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 - The credit system and the activity category are codes (`id.credit-system`, `id.cpd-category`), checked with `assertActive`. Points are above 0, at most 500, with at most two decimals; the activity date runs from 1950 to tomorrow (UTC). Evidence is a file reference only.
 - A credit total is one per employee and credit system, read from a national platform: a new `PUT` replaces the old total and the old values stay in the change history. The path's credit system code must equal the body's. The list adds `accepted_points`, the accepted records of that system inside the total's cycle, computed on read.
 - The limits of 500 points per record and 10000 per total are guesses, not regulation. Credits do not affect licences, and the SIP-renewal shortfall alert (`HR-LIC-010`) is not built.
+
+## 3e. Privilege catalog
+
+- A catalog item has an upper-case code, unique per tenant and fixed (409 `privilege_exists`), and an owning committee that is fixed too. At least one profession may request it; specialties are optional (empty means any), as are the career level, the required evidence (at most one per evidence type), the external procedure codes and the facilities (empty means every facility of the tenant).
+- Every profession, specialty, level, committee and evidence type is a code checked with `assertActive`; external procedure codes are checked for format only; each facility must exist in the tenant and not be deleted.
+- Retiring is final: a retired item cannot be edited or reactivated (422 `privilege_retired`), and a privilege that is needed again is added with a new code. Existing grants keep pointing to a retired item. Nothing is deleted.
+- Read and write are tenant-wide permissions: any holder of `workforce.privilege:write` can edit any committee's items until scoped permissions exist.
 
 ## 4a. Events
 
