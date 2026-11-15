@@ -158,11 +158,11 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /credential-applications/:id/assessments` | Assessor records their assessment of each privilege. |
 | `GET /credential-applications/:id/assessments` | Committee reads the assessments (recorded as an access). |
 | `POST /credential-applications/:id/recommendation` | Committee signs its recommendation to the Director. |
-| `POST /credential-applications/:id/decision` | Director approves (creates the SPK) or rejects. |
 
 ### 4.3 SPK and granted privileges
 | Endpoint | Purpose |
 |---|---|
+| `POST /credential-applications/:id/decision` | Director approves (creates the SPK) or rejects. Moved here from 4.2 (`plans/gateway-hr-4-2-credential-applications.md` AP2). |
 | `GET /clinical-appointments` | List SPKs by status or expiring soon. |
 | `GET /employees/:id/clinical-appointments` | List one practitioner's SPKs. |
 | `GET /clinical-appointments/:id` | View an SPK with its granted privileges (RKK). |
