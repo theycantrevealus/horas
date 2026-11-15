@@ -42,7 +42,7 @@ Each HR area has a domain folder in `workforce/` (services and rules) and an HTT
 | 0 | Commit the models | Two PRs, documentation and code, never mixed (#5 models, #6 documents). | Done |
 | 1 | Shared foundations | Built inside the first code PR (group 1.1) and then group by group, never in advance: `@workforce` alias, workforce errors, filter and logging helper, shared in-memory test repository and commit scopes arrive with 1.1; field encryption arrives with 2.2 (private profile); local-date validation with the first group that stores dates. | Partly done in PR #7 (alias, errors, filter, logging helper, shared test repository, commit scopes) |
 | 2 | Application skeleton | `gateway_hr` project in `nest-cli.json`, `tsconfig`, `main.ts` (`NODE_PORT=3001`), root module, health endpoint, `package.json` scripts (build, dev, type-check). Built in the group 1.1 PR. | Done (PR #7) |
-| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 to 4.1 and the HR events to identity done, then 4.2 |
+| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 to 4.1 and the HR events to identity done, 4.2 being built |
 | 4 | Docs and checks | `workforce.md` rule file, `authentication.md` update, lint, type-check, full test suite on Node 22, each time a group is finished. | `workforce.md` written (docs PR after 1.1); repeated per group |
 
 ## 3. Walkthrough order
@@ -66,7 +66,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 12 | 3.1 Licences | 7 | Done (`gateway-hr-3-1-licences.md`, PR #37) | Built in two PRs, #38 and #39 |
 | 13 | 3.2 Professional credits | 6 | Done (`gateway-hr-3-2-professional-credits.md`, PR #41) | Built in two PRs, #42 and #43 |
 | 14 | 4.1 Privilege catalog | 5 | Done (`gateway-hr-4-1-privilege-catalog.md`, PR #45) | Built, PR #47 |
-| 15 | 4.2 Credential applications | 13 | Done (`gateway-hr-4-2-credential-applications.md`) | Planned: three code PRs |
+| 15 | 4.2 Credential applications | 13 | Done (`gateway-hr-4-2-credential-applications.md`, PR #49) | In progress: part 1 of 3 (branch `feat/workforce-applications`) |
 | 16 | 4.3 SPK and granted privileges | 10 | — | — |
 | 17 | 5.1 Shift definitions | 4 | — | — |
 | 18 | 5.2 Holiday calendars | 5 | — | — |
