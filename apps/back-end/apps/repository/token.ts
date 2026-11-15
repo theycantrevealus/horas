@@ -146,3 +146,15 @@ export const REPOSITORY_CREDENTIAL_APPLICATION = Symbol(
 export const REPOSITORY_CREDENTIAL_ASSESSMENT = Symbol(
   'REPOSITORY_CREDENTIAL_ASSESSMENT',
 )
+
+/**
+ * Injection token for the clinical appointment repository (SPK, the Director's letter).
+ */
+export const REPOSITORY_CLINICAL_APPOINTMENT = Symbol(
+  'REPOSITORY_CLINICAL_APPOINTMENT',
+)
+
+/**
+ * Injection token for the privilege grant repository (lines of the RKK attached to an SPK).
+ */
+export const REPOSITORY_PRIVILEGE_GRANT = Symbol('REPOSITORY_PRIVILEGE_GRANT')

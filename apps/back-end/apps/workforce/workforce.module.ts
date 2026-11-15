@@ -4,8 +4,10 @@ import { LoggerModule } from '@utility/logger/module'
 import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
 import { CommitteeMembershipRepositoryModule } from '@repository/mongo/committee-membership.module'
 import { CpdRecordRepositoryModule } from '@repository/mongo/cpd-record.module'
+import { ClinicalAppointmentRepositoryModule } from '@repository/mongo/clinical-appointment.module'
 import { CredentialApplicationRepositoryModule } from '@repository/mongo/credential-application.module'
 import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credential-assessment.module'
+import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { CpdSummaryRepositoryModule } from '@repository/mongo/cpd-summary.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
@@ -23,6 +25,7 @@ import { CommitteeMembershipService } from './committee/committee-membership.ser
 import { CodeConceptService } from './concept/code-concept.service'
 import { ApplicationService } from './credentialing/application.service'
 import { AssessmentService } from './credentialing/assessment.service'
+import { DecisionService } from './credentialing/decision.service'
 import { ReviewService } from './credentialing/review.service'
 import { CpdService } from './credit/cpd.service'
 import { CpdSummaryService } from './credit/cpd-summary.service'
@@ -62,6 +65,8 @@ import { UnitService } from './structure/unit.service'
     PrivilegeCatalogRepositoryModule,
     CredentialApplicationRepositoryModule,
     CredentialAssessmentRepositoryModule,
+    ClinicalAppointmentRepositoryModule,
+    PrivilegeGrantRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -82,6 +87,7 @@ import { UnitService } from './structure/unit.service'
     ApplicationService,
     ReviewService,
     AssessmentService,
+    DecisionService,
   ],
   exports: [
     OrganizationService,
@@ -102,6 +108,7 @@ import { UnitService } from './structure/unit.service'
     ApplicationService,
     ReviewService,
     AssessmentService,
+    DecisionService,
   ],
 })
 export class WorkforceModule {}

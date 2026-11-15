@@ -25,7 +25,9 @@ import {
   type ApplicationQuery,
   type CredentialApplicationRepository,
 } from '@repository/interface/credential-application'
+import { type ClinicalAppointmentRepository } from '@repository/interface/clinical-appointment'
 import { type CredentialAssessmentRepository } from '@repository/interface/credential-assessment'
+import { type PrivilegeGrantRepository } from '@repository/interface/privilege-grant'
 import { type EmploymentContractRepository } from '@repository/interface/employment-contract'
 import {
   type LicenseQuery,
@@ -59,7 +61,9 @@ import { type CodeConcept } from '@repository/model/code-concept'
 import { type CommitteeMembership } from '@repository/model/committee-membership'
 import { type CpdRecord } from '@repository/model/cpd-record'
 import { type CredentialApplication } from '@repository/model/credential-application'
+import { type ClinicalAppointment } from '@repository/model/clinical-appointment'
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
+import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CpdSummary } from '@repository/model/cpd-summary'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
@@ -2317,6 +2321,172 @@ export class InMemoryCredentialAssessments
       (left, right) =>
         left.assessed_at.getTime() - right.assessed_at.getTime() ||
         left.id.localeCompare(right.id),
+    )
+  }
+}
+
+/**
+ * In-memory `ClinicalAppointmentRepository` for tests. It applies the unique indexes of the Mongo
+ * collection: one letter number per tenant, and one current regular appointment per employee and
+ * credentialing facility.
+ */
+export class InMemoryClinicalAppointments
+  extends InMemoryRepository<ClinicalAppointment>
+  implements ClinicalAppointmentRepository
+{
+  /**
+   * Creates an appointment, refusing a duplicate number or a second current regular one.
+   *
+   * @param entity - Appointment data.
+   * @param id - Optional identifier.
+   * @returns The stored appointment.
+   */
+  override async create(
+    entity: NewEntity<ClinicalAppointment>,
+    id?: string,
+  ): Promise<ClinicalAppointment> {
+    const duplicate = this.find(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        (item.appointment_number === entity.appointment_number ||
+          (entity.is_current &&
+            !entity.is_temporary &&
+            item.is_current &&
+            !item.is_temporary &&
+            item.employee_id === entity.employee_id &&
+            item.credentialing_facility_id === entity.credentialing_facility_id)),
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate appointment', {
+        operation: 'ClinicalAppointmentRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds an appointment by its letter number.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param appointmentNumber - The SPK letter number.
+   * @returns The appointment, or `null`.
+   */
+  async findByNumber(
+    tenantId: string,
+    appointmentNumber: string,
+  ): Promise<ClinicalAppointment | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.appointment_number === appointmentNumber &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the current regular appointment of an employee at a credentialing facility.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The practitioner.
+   * @param facilityId - The credentialing facility.
+   * @returns The appointment, or `null`.
+   */
+  async findCurrentRegular(
+    tenantId: string,
+    employeeId: string,
+    facilityId: string,
+  ): Promise<ClinicalAppointment | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.credentialing_facility_id === facilityId &&
+        item.is_current &&
+        !item.is_temporary &&
+        !item.deleted_at,
+    )
+  }
+}
+
+/**
+ * In-memory `PrivilegeGrantRepository` for tests. It applies the unique index of the Mongo
+ * collection: one grant of a privilege per appointment.
+ */
+export class InMemoryPrivilegeGrants
+  extends InMemoryRepository<PrivilegeGrant>
+  implements PrivilegeGrantRepository
+{
+  /**
+   * Creates a grant, refusing a second grant of the same privilege in the same appointment.
+   *
+   * @param entity - Grant data.
+   * @param id - Optional identifier.
+   * @returns The stored grant.
+   */
+  override async create(
+    entity: NewEntity<PrivilegeGrant>,
+    id?: string,
+  ): Promise<PrivilegeGrant> {
+    const duplicate = this.find(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.appointment_id === entity.appointment_id &&
+        item.catalog_item_id === entity.catalog_item_id,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate grant', {
+        operation: 'PrivilegeGrantRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds the grants of an appointment, ordered by privilege code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param appointmentId - The SPK.
+   * @returns The grants.
+   */
+  async findByAppointment(
+    tenantId: string,
+    appointmentId: string,
+  ): Promise<PrivilegeGrant[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.appointment_id === appointmentId &&
+        !item.deleted_at,
+    ).sort(
+      (left, right) =>
+        left.code.localeCompare(right.code) || left.id.localeCompare(right.id),
+    )
+  }
+
+  /**
+   * Finds an active full grant of a privilege held by an employee in a facility.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param catalogItemId - The privilege.
+   * @param employeeId - The would-be supervisor.
+   * @param facilityId - A facility the grant must cover.
+   * @returns The grant, or `null`.
+   */
+  async findActiveFullGrant(
+    tenantId: string,
+    catalogItemId: string,
+    employeeId: string,
+    facilityId: string,
+  ): Promise<PrivilegeGrant | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.catalog_item_id === catalogItemId &&
+        item.employee_id === employeeId &&
+        item.facility_ids.includes(facilityId) &&
+        item.status === 'active' &&
+        item.condition === 'full' &&
+        !item.deleted_at,
     )
   }
 }

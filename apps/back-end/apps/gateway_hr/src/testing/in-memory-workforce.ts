@@ -4,7 +4,9 @@ import {
   REPOSITORY_CPD_RECORD,
   REPOSITORY_CPD_SUMMARY,
   REPOSITORY_CREDENTIAL_APPLICATION,
+  REPOSITORY_CLINICAL_APPOINTMENT,
   REPOSITORY_CREDENTIAL_ASSESSMENT,
+  REPOSITORY_PRIVILEGE_GRANT,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
@@ -22,7 +24,9 @@ import { CommitteeMembershipEntity } from '@repository/mongo/schema/committee-me
 import { CpdRecordEntity } from '@repository/mongo/schema/cpd-record'
 import { CpdSummaryEntity } from '@repository/mongo/schema/cpd-summary'
 import { CredentialApplicationEntity } from '@repository/mongo/schema/credential-application'
+import { ClinicalAppointmentEntity } from '@repository/mongo/schema/clinical-appointment'
 import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
+import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
@@ -40,7 +44,9 @@ import {
   InMemoryCpdRecords,
   InMemoryCpdSummaries,
   InMemoryCredentialApplications,
+  InMemoryClinicalAppointments,
   InMemoryCredentialAssessments,
+  InMemoryPrivilegeGrants,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
   InMemoryEmploymentContracts,
@@ -78,6 +84,8 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property privileges - Privilege catalog repository.
  * @property applications - Credential application repository.
  * @property assessments - Credential assessment repository.
+ * @property appointments - Clinical appointment (SPK) repository.
+ * @property grants - Privilege grant repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -98,6 +106,8 @@ export interface InMemoryWorkforce {
   privileges: InMemoryPrivilegeCatalog
   applications: InMemoryCredentialApplications
   assessments: InMemoryCredentialAssessments
+  appointments: InMemoryClinicalAppointments
+  grants: InMemoryPrivilegeGrants
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -126,6 +136,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const privileges = new InMemoryPrivilegeCatalog()
   const applications = new InMemoryCredentialApplications()
   const assessments = new InMemoryCredentialAssessments()
+  const appointments = new InMemoryClinicalAppointments()
+  const grants = new InMemoryPrivilegeGrants()
   return {
     organizations,
     facilities,
@@ -144,6 +156,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     privileges,
     applications,
     assessments,
+    appointments,
+    grants,
     options: {
       entities: [
         OrganizationEntity,
@@ -163,6 +177,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         PrivilegeCatalogEntity,
         CredentialApplicationEntity,
         CredentialAssessmentEntity,
+        ClinicalAppointmentEntity,
+        PrivilegeGrantEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -182,6 +198,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_PRIVILEGE_CATALOG, privileges],
         [REPOSITORY_CREDENTIAL_APPLICATION, applications],
         [REPOSITORY_CREDENTIAL_ASSESSMENT, assessments],
+        [REPOSITORY_CLINICAL_APPOINTMENT, appointments],
+        [REPOSITORY_PRIVILEGE_GRANT, grants],
       ],
     },
   }
