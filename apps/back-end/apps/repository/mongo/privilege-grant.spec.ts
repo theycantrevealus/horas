@@ -244,6 +244,59 @@ describe('PrivilegeGrantRepository on the shared Mongo base', () => {
     expect(model.findOne).not.toHaveBeenCalled()
   })
 
+  it('lists the privilege directory with its filters, and answers an empty list for malformed ids', async () => {
+    const tenant = tenantId.toHexString()
+    await grants.findByFilter(tenant, {
+      catalogItemId: itemId.toHexString(),
+      employeeId: employeeId.toHexString(),
+      appointmentId: appointmentId.toHexString(),
+      status: 'active',
+      condition: 'supervised',
+      facilityId: facilityId.toHexString(),
+      unitId: unitId.toHexString(),
+      limit: 5,
+      offset: 5,
+    })
+
+    expect(model.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenant_id: tenant,
+        catalog_item_id: itemId.toHexString(),
+        employee_id: employeeId.toHexString(),
+        appointment_id: appointmentId.toHexString(),
+        status: 'active',
+        condition: 'supervised',
+        facility_ids: facilityId.toHexString(),
+        unit_ids: unitId.toHexString(),
+        deleted_at: null,
+      }),
+    )
+    model.find.mockClear()
+    for (const bad of [{ catalogItemId: 'bad' }, { employeeId: 'bad' }, { appointmentId: 'bad' }, { facilityId: 'bad' }, { unitId: 'bad' }]) {
+      expect(await grants.findByFilter(tenant, bad)).toEqual([])
+    }
+    expect(await grants.findByFilter('x')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
+  it('filters on an open flag: with it, and without it', async () => {
+    const tenant = tenantId.toHexString()
+    await grants.findByFilter(tenant, { flagged: true })
+    expect(model.find).toHaveBeenLastCalledWith(
+      expect.objectContaining({ flag: { $ne: null }, 'flag.resolved_at': null }),
+    )
+    await grants.findByFilter(tenant, { flagged: false })
+    expect(model.find).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        $or: [{ flag: null }, { 'flag.resolved_at': { $ne: null } }],
+      }),
+    )
+    await grants.findByFilter(tenant)
+    const plain = model.find.mock.calls.at(-1)?.[0] as Record<string, unknown>
+    expect(plain).not.toHaveProperty('flag')
+    expect(plain).not.toHaveProperty('$or')
+  })
+
   it('stamps a created grant with the actor and records one change entry', async () => {
     await asAdmin(() => grants.create(input))
 

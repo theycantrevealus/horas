@@ -236,6 +236,52 @@ describe('ClinicalAppointmentRepository on the shared Mongo base', () => {
     expect(model.findOne).not.toHaveBeenCalled()
   })
 
+  it('lists appointments with its filters, and answers an empty list for malformed ids', async () => {
+    const tenant = tenantId.toHexString()
+    await appointments.findByFilter(tenant, {
+      status: 'active',
+      current: true,
+      employeeId: employeeId.toHexString(),
+      facilityId: facilityId.toHexString(),
+      unitId: unitId.toHexString(),
+      endOnOrBefore: '2026-06-30',
+      limit: 5,
+      offset: 5,
+    })
+
+    expect(model.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenant_id: tenant,
+        status: 'active',
+        is_current: true,
+        employee_id: employeeId.toHexString(),
+        facility_ids: facilityId.toHexString(),
+        unit_ids: unitId.toHexString(),
+        'valid_period.end': { $lte: '2026-06-30' },
+        deleted_at: null,
+      }),
+    )
+    model.find.mockClear()
+    expect(await appointments.findByFilter('x')).toEqual([])
+    expect(await appointments.findByFilter(tenant, { employeeId: 'bad' })).toEqual([])
+    expect(await appointments.findByFilter(tenant, { facilityId: 'bad' })).toEqual([])
+    expect(await appointments.findByFilter(tenant, { unitId: 'bad' })).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+    expect(await appointments.findByFilter(tenant)).toHaveLength(1)
+  })
+
+  it('lists one practitioner\'s appointments, and answers an empty list for malformed ids', async () => {
+    const tenant = tenantId.toHexString()
+    expect(await appointments.findByEmployee(tenant, employeeId.toHexString(), { limit: 3 })).toHaveLength(1)
+    expect(model.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenant_id: tenant, employee_id: employeeId.toHexString(), deleted_at: null }),
+    )
+    model.find.mockClear()
+    expect(await appointments.findByEmployee(tenant, 'bad')).toEqual([])
+    expect(await appointments.findByEmployee('x', employeeId.toHexString())).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('stamps a created appointment with the actor and records one change entry', async () => {
     await asAdmin(() => appointments.create(input))
 
