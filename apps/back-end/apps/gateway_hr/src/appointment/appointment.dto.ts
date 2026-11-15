@@ -102,8 +102,8 @@ export class ListGrantsDto extends PagingDto {
   employeeId?: string
 
   @IsOptional()
-  @IsIn(['active', 'suspended', 'revoked', 'all'])
-  status?: 'active' | 'suspended' | 'revoked' | 'all'
+  @IsIn(['active', 'suspended', 'revoked', 'superseded', 'all'])
+  status?: 'active' | 'suspended' | 'revoked' | 'superseded' | 'all'
 
   @IsOptional()
   @IsIn(['full', 'supervised', 'restricted'])
