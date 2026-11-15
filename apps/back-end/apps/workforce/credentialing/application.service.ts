@@ -1,10 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
+import { type ClinicalAppointmentRepository } from '@repository/interface/clinical-appointment'
 import { type EmployeeRepository } from '@repository/interface/employee'
 import { type FacilityRepository } from '@repository/interface/facility'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type PrivilegeCatalogRepository } from '@repository/interface/privilege-catalog'
+import { type PrivilegeGrantRepository } from '@repository/interface/privilege-grant'
 import { type ProfessionalLicenseRepository } from '@repository/interface/professional-license'
 import {
   type ApplicationQuery,
@@ -24,18 +26,20 @@ import { type Employee } from '@repository/model/employee'
 import { type Facility } from '@repository/model/facility'
 import { type PrivilegeCatalogItem } from '@repository/model/privilege-catalog-item'
 import {
+  REPOSITORY_CLINICAL_APPOINTMENT,
   REPOSITORY_CREDENTIAL_APPLICATION,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_FACILITY,
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_PRIVILEGE_CATALOG,
+  REPOSITORY_PRIVILEGE_GRANT,
   REPOSITORY_PROFESSIONAL_LICENSE,
 } from '@repository/token'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { isValidDocumentRef } from '../license/license-rules'
 import { observe } from '../observe'
 import { ParameterService } from '../parameter/parameter.service'
-import { InvalidRequestError } from '../workforce.error'
+import { ConflictError, InvalidRequestError } from '../workforce.error'
 import {
   assertApplicationVersion,
   cleanReason,
@@ -48,6 +52,7 @@ import {
   levelRank,
   LIMITS,
   missingEvidence,
+  RENEWAL_TYPES,
   SUPPORTED_TYPES,
 } from './application-rules'
 
@@ -105,7 +110,10 @@ export interface TemporaryInput {
  *
  * @property employeeId - The applicant.
  * @property credentialingFacilityId - Facility whose committee credentials the applicant.
- * @property type - `initial` or `temporary` (HR plan 4.2 AP3).
+ * @property type - `initial`, `temporary`, `recredentialing` or `privilege_extension` (HR plan 4.2
+ * AP3, 4.4 RN2).
+ * @property previousAppointmentId - The applicant's current SPK being renewed or extended; needed
+ * for a renewal type and refused for the others.
  * @property requestedPrivileges - What is asked for.
  * @property requestedUnitIds - Units the privileges are asked for.
  * @property documents - Attached documents.
@@ -116,6 +124,7 @@ export interface CreateApplicationInput {
   employeeId: string
   credentialingFacilityId: string
   type: CredentialApplicationType
+  previousAppointmentId?: string | null
   requestedPrivileges: RequestedPrivilegeInput[]
   requestedUnitIds: string[]
   documents?: ApplicationDocumentInput[]
@@ -188,6 +197,8 @@ export class ApplicationService {
    * @param units - Unit repository.
    * @param catalog - Privilege catalog repository.
    * @param licenses - Licence repository, for the temporary-privilege licence check.
+   * @param appointments - SPK repository, for the SPK a renewal names.
+   * @param grants - Grant repository, for the privileges an extension must not repeat.
    * @param concepts - Code concepts, for the committee, the evidence types and the level ranks.
    * @param parameters - HR parameters (`CREDENTIALING_SCOPE`, `TEMPORARY_PRIVILEGE_MAX_DAYS`).
    * @param logger - Logger of this service.
@@ -205,6 +216,10 @@ export class ApplicationService {
     private readonly catalog: PrivilegeCatalogRepository,
     @Inject(REPOSITORY_PROFESSIONAL_LICENSE)
     private readonly licenses: ProfessionalLicenseRepository,
+    @Inject(REPOSITORY_CLINICAL_APPOINTMENT)
+    private readonly appointments: ClinicalAppointmentRepository,
+    @Inject(REPOSITORY_PRIVILEGE_GRANT)
+    private readonly grants: PrivilegeGrantRepository,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
     @Inject(ParameterService) private readonly parameters: ParameterService,
     @Inject(AppLogger) private readonly logger: AppLogger,
@@ -266,9 +281,10 @@ export class ApplicationService {
         if (!SUPPORTED_TYPES.includes(input.type)) {
           throw new InvalidRequestError(
             'type_not_supported',
-            'Only initial and temporary applications are supported until the SPK exists.',
+            'The application type is not supported.',
           )
         }
+        const previousId = this.previousOf(input.type, input.previousAppointmentId)
         const employee = await this.applicant(tenantId, input.employeeId)
         const facility = await this.facility(tenantId, input.credentialingFacilityId)
         const committee = await this.committeeOf(tenantId, employee)
@@ -278,6 +294,16 @@ export class ApplicationService {
           requestedUnitIds: input.requestedUnitIds,
           documents: input.documents ?? [],
         })
+        if (previousId !== null) {
+          await this.checkRenewal(
+            tenantId,
+            employee,
+            facility,
+            input.type,
+            previousId,
+            content.requested_privileges,
+          )
+        }
         const temporary = await this.checkTemporary(
           tenantId,
           input.type,
@@ -311,7 +337,7 @@ export class ApplicationService {
             return_reason: null,
             withdrawal_reason: null,
             temporary,
-            previous_appointment_id: null,
+            previous_appointment_id: previousId,
           })
         return input.reason ? withChangeReason(input.reason, write) : write()
       },
@@ -390,6 +416,17 @@ export class ApplicationService {
               })),
           },
         )
+        if (application.previous_appointment_id !== null) {
+          await this.checkRenewal(
+            tenantId,
+            employee,
+            facility,
+            application.type,
+            application.previous_appointment_id,
+            content.requested_privileges,
+            application.id,
+          )
+        }
         const temporary =
           input.temporary === undefined
             ? application.temporary
@@ -521,6 +558,115 @@ export class ApplicationService {
         )
       },
     )
+  }
+
+  /**
+   * Checks that the SPK to renew is named exactly when the type needs one (HR plan 4.4 RN2).
+   *
+   * @param type - Application type.
+   * @param previousAppointmentId - The SPK as sent.
+   * @returns The SPK identifier for a renewal, otherwise `null`.
+   * @throws InvalidRequestError `previous_appointment_required` or `previous_appointment_not_allowed`.
+   */
+  private previousOf(
+    type: CredentialApplicationType,
+    previousAppointmentId: string | null | undefined,
+  ): string | null {
+    const previousId = previousAppointmentId ?? null
+    if (RENEWAL_TYPES.includes(type)) {
+      if (previousId === null) {
+        throw new InvalidRequestError(
+          'previous_appointment_required',
+          'A renewal names the SPK it renews.',
+        )
+      }
+      return previousId
+    }
+    if (previousId !== null) {
+      throw new InvalidRequestError(
+        'previous_appointment_not_allowed',
+        'Only a re-credentialing or a privilege extension names an SPK.',
+      )
+    }
+    return null
+  }
+
+  /**
+   * Checks the SPK a renewal names and the privileges an extension asks for (HR plan 4.4 RN2 to
+   * RN5): an active regular SPK of the applicant at the credentialing facility, with no other
+   * open renewal, and for an extension only privileges the SPK does not hold.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param employee - The applicant.
+   * @param facility - The credentialing facility.
+   * @param type - `recredentialing` or `privilege_extension`.
+   * @param previousId - The SPK being renewed.
+   * @param requested - The requested privileges as they will be stored.
+   * @param selfId - This application, when it is edited, so it does not clash with itself.
+   * @throws InvalidRequestError `previous_appointment_not_found`, `previous_appointment_mismatch`,
+   * `previous_appointment_not_regular`, `previous_appointment_not_active` or
+   * `privilege_already_granted`.
+   * @throws ConflictError `renewal_exists`.
+   */
+  private async checkRenewal(
+    tenantId: string,
+    employee: Employee,
+    facility: Facility,
+    type: CredentialApplicationType,
+    previousId: string,
+    requested: RequestedPrivilege[],
+    selfId?: string,
+  ): Promise<void> {
+    const spk = await this.appointments.findOne(previousId)
+    if (!spk || spk.tenant_id !== tenantId || spk.deleted_at) {
+      throw new InvalidRequestError(
+        'previous_appointment_not_found',
+        'The SPK to renew was not found.',
+      )
+    }
+    if (
+      spk.employee_id !== employee.id ||
+      spk.credentialing_facility_id !== facility.id
+    ) {
+      throw new InvalidRequestError(
+        'previous_appointment_mismatch',
+        'The SPK must be the applicant\'s own SPK at the credentialing facility.',
+      )
+    }
+    if (spk.is_temporary) {
+      throw new InvalidRequestError(
+        'previous_appointment_not_regular',
+        'A temporary SPK is not renewed.',
+      )
+    }
+    if (spk.status !== 'active') {
+      throw new InvalidRequestError(
+        'previous_appointment_not_active',
+        'Only an active SPK can be renewed; a suspension is lifted first.',
+      )
+    }
+    const open = await this.applications.findOpenRenewal(tenantId, spk.id)
+    if (open && open.id !== selfId) {
+      throw new ConflictError(
+        'renewal_exists',
+        'This SPK has an open renewal application already.',
+      )
+    }
+    if (type === 'privilege_extension') {
+      const held = new Set(
+        (await this.grants.findByAppointment(tenantId, spk.id))
+          .filter(
+            (grant) => grant.status === 'active' || grant.status === 'suspended',
+          )
+          .map((grant) => grant.catalog_item_id),
+      )
+      if (requested.some((item) => held.has(item.catalog_item_id))) {
+        throw new InvalidRequestError(
+          'privilege_already_granted',
+          'An extension asks only for privileges the SPK does not hold.',
+        )
+      }
+    }
   }
 
   /**
