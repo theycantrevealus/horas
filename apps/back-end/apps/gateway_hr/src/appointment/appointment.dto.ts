@@ -1,5 +1,15 @@
 import { Transform, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsMongoId, IsOptional, Max, Min } from 'class-validator'
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsMongoId,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator'
 
 /**
  * Turns the strings `true` and `false` of a query into booleans; other values pass through
@@ -111,4 +121,28 @@ export class ListGrantsDto extends PagingDto {
   @Transform(toBoolean)
   @IsBoolean()
   flagged?: boolean
+}
+
+/**
+ * Body of the Director's decisions on an SPK or a grant: suspend, lift a suspension, revoke.
+ *
+ * @property reason - Why; the service allows 1 to 500 characters.
+ * @property decisionNumber - The letter that records the decision; the service allows 1 to 64
+ * characters.
+ * @property version - Version the client read.
+ */
+export class StatusDecisionDto {
+  @IsString()
+  @MaxLength(5000)
+  reason!: string
+
+  @IsString()
+  @MaxLength(200)
+  decisionNumber!: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
 }
