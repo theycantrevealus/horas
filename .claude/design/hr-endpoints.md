@@ -197,7 +197,7 @@ Plan: `plans/gateway-hr-5-1-shift-definitions.md` (built, PR #74).
 
 ### 5.2 Holiday calendars
 
-Plan: `plans/gateway-hr-5-2-holiday-calendars.md` (proposed).
+Plan: `plans/gateway-hr-5-2-holiday-calendars.md` (confirmed).
 | Endpoint | Purpose |
 |---|---|
 | `GET /holiday-calendars` | View a calendar's holidays for a year. |
