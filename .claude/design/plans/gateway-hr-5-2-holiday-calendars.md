@@ -1,6 +1,6 @@
 # gateway_hr 5.2: Holiday calendars
 
-Status: **Confirmed** (2026-11-16). Decisions HC1 to HC16 and the split in two code PRs confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 18). Endpoints: `../hr-endpoints.md` 5.2. Collections: `../human-resource-collections.md` 5.2 (`holiday_calendars`) and 5.9 (`hr_imports`, holiday CSV rules). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (coverage day pattern "weekends and public holidays"). Models: `apps/back-end/apps/repository/model/holiday-calendar.ts` and `hr-import.ts` (both exist, with their classifications). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Master plan decisions: D3 (files are references only) and D4 (a `text/csv` request body with a size limit, parsed with `csv-parse`). Built references: shift definitions (5.1: a per-facility record with a retire flow), code concepts (1.3: bundles and an import-like flow), HR parameters (1.6: `IMPORT_MAX_ROWS`, `IMPORT_MAX_ERRORS`).
+Status: **Built** (2026-11-16, PR #78 and #80 merged). Decisions HC1 to HC16 and the split in two code PRs confirmed as proposed, with the notes in section 8. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 18). Endpoints: `../hr-endpoints.md` 5.2. Collections: `../human-resource-collections.md` 5.2 (`holiday_calendars`) and 5.9 (`hr_imports`, holiday CSV rules). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (coverage day pattern "weekends and public holidays"). Models: `apps/back-end/apps/repository/model/holiday-calendar.ts` and `hr-import.ts` (both exist, with their classifications). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Master plan decisions: D3 (files are references only) and D4 (a `text/csv` request body with a size limit, parsed with `csv-parse`). Built references: shift definitions (5.1: a per-facility record with a retire flow), code concepts (1.3: bundles and an import-like flow), HR parameters (1.6: `IMPORT_MAX_ROWS`, `IMPORT_MAX_ERRORS`).
 
 A holiday calendar lists the public holidays, collective leave days and local holidays of a country or province for one year (`id-national`, `id-jk`, or a hospital's own). Coverage requirements (5.3) use it for the day pattern "weekends and public holidays", and rosters (5.4) use it to find the days a unit needs holiday cover. HR loads a calendar from a CSV file, keeps it by hand, or both (decision C6). This group builds the calendars, the manual maintenance and the CSV import. Using the calendars is later.
 
@@ -92,3 +92,16 @@ Confirmed as proposed: all of HC1 to HC16 and the split in two code PRs. These f
 - **HC3** (tenant calendars only; platform calendars are not created or shown).
 
 The others are as stated.
+
+## 8. Build notes
+
+- Built in two code PRs as planned: #78 (calendars and manual holidays) and #80 (the CSV import).
+- **The `hr_imports` repository moved to the import PR** (#80). It has no user in the calendars PR.
+- **The options of the import travel in the query.** The body is the file, so `apply`, `checkId`, `version` and `reason` are query parameters (the plan listed only `apply` and `checkId`). `version` is optional and `reason` is kept in the change history when applying.
+- **Apply guards the calendar version itself.** The merge is recomputed on apply from the calendar as it is then, and the calendar write uses the version that was read, so a calendar that changed in between answers 409 `stale_version` (HC16 said only that a changed calendar is not refused for that alone; the merge is still recomputed).
+- **The apply and the check use one import record.** Applying updates the `validated` record of the check to `applied` and does not create a second one. A failure inside the transaction does not record a `failed` status.
+- **`csv-parse` 7.0.3** (no dependencies) was added with a lockfile diff of only that package. The reader is `apps/utility/validation/csv.ts`; the body parser for `text/csv` is `gateway_hr/src/holiday/csv-body.ts` (512 KB). Fastify already reads `text/plain` as a string, so that content type is accepted as CSV too; other unknown types answer 415.
+- **The `errors` field of `hr_imports`** keeps its design name although Mongoose reserves it; the schema silences the warning. The path was checked to round-trip on create and validation, but the repository tests use a mocked model, so it was not run against a real MongoDB.
+- The `IMPORT_MAX_ROWS` and `IMPORT_MAX_ERRORS` descriptions now say they apply to every file import.
+- Not built: platform calendars, a route to read or cancel an import, the roster import (5.9), and checking that a facility's `holiday_calendar_codes` name existing calendars (the facility checks the code format only).
+- The in-memory transaction fake cannot roll back, so tests check results, not a failure inside a transaction.
