@@ -71,7 +71,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 16a | 4.4 Renewals (follow-up of 4.2 and 4.3, no new routes) | 0 | Done (`gateway-hr-4-4-renewals.md`, PR #67) | Built in two PRs, #68 and #70 |
 | 17 | 5.1 Shift definitions | 4 | Done (`gateway-hr-5-1-shift-definitions.md`, PR #73) | Built, PR #74 |
 | 18 | 5.2 Holiday calendars | 5 | Done (`gateway-hr-5-2-holiday-calendars.md`, PR #77) | Built in two PRs, #78 and #80 |
-| 19 | 5.3 Coverage requirements | 4 | Proposed (`gateway-hr-5-3-coverage-requirements.md`) | — |
+| 19 | 5.3 Coverage requirements | 4 | Done (`gateway-hr-5-3-coverage-requirements.md`, PR #82) | In progress (branch `feat/workforce-coverage-requirements`) |
 | 20 | 5.4 Rosters | 10 | — | — |
 | 21 | 5.5 Roster assignments | 7 | — | — |
 | 22 | 5.6 Imports | 3 | — | — |

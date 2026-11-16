@@ -1,6 +1,6 @@
 # gateway_hr 5.3: Coverage requirements
 
-Status: **Proposed** (2026-11-16). Decisions CR1 to CR16 are proposals for you to confirm or change (section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 19). Endpoints: `../hr-endpoints.md` 5.3. Collection: `../human-resource-collections.md` 5.3 (`coverage_requirements`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Coverage Requirement), `HR-ROS-020` to `HR-ROS-022` (the checks that read these records) and the role matrix row "Shift definitions and coverage requirements". Model: `apps/back-end/apps/repository/model/coverage-requirement.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: shift definitions (5.1: a record under a facility and its units, retiring is final, and its not-built note `shift_in_use`), privilege catalog (4.1: codings checked with `assertActive`, `minClinicalLevel`), positions (1.5: a record under a unit), holiday calendars (5.2).
+Status: **Confirmed** (2026-11-16). Decisions CR1 to CR16 and the single code PR confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 19). Endpoints: `../hr-endpoints.md` 5.3. Collection: `../human-resource-collections.md` 5.3 (`coverage_requirements`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Coverage Requirement), `HR-ROS-020` to `HR-ROS-022` (the checks that read these records) and the role matrix row "Shift definitions and coverage requirements". Model: `apps/back-end/apps/repository/model/coverage-requirement.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: shift definitions (5.1: a record under a facility and its units, retiring is final, and its not-built note `shift_in_use`), privilege catalog (4.1: codings checked with `assertActive`, `minClinicalLevel`), positions (1.5: a record under a unit), holiday calendars (5.2).
 
 A coverage requirement is the minimum staffing of one unit for one shift: "ICU, shift M, every day: at least 3 nurses of level PK2 or higher, one of them team leader". Rosters (group 5.4) count the people assigned to each shift of each day and report a gap when a requirement is not met (`HR-ROS-020`); a gap blocks submitting the roster unless the approver records an override (`HR-ROS-021`). This group only defines and maintains the requirements; checking rosters against them is 5.4.
 
@@ -75,13 +75,13 @@ Tests come first: repository (indexes, tenant isolation, no `_id`, one change re
 4. A shift with an active requirement cannot be retired.
 5. Logs carry no codes, counts or dates, and responses carry no `_id`.
 
-## 7. Decisions that need your answer
+## 7. Decisions that needed your answer
 
-All of CR1 to CR16 are proposals. These four change the shape of the work most, so I would like an explicit answer:
+Confirmed as proposed: all of CR1 to CR16. These four changed the shape of the work most:
 
 - **CR8** (a requirement that has started can only be ended with `period.end`; a changed rule is a new requirement. The alternative is to let it be edited freely, which silently changes how past rosters are checked).
 - **CR9** (identical requirements with overlapping periods are refused; different criteria apply together).
 - **CR11** (retiring a shift is refused while an active requirement uses it, and it ships in this PR).
 - **CR1 and CR2** (the shift must belong to the unit's facility, be usable by the unit, and not be an `off` shift).
 
-Also open, not decided here: which weekdays "weekends" means in other countries (CR3: left to the roster check in 5.4). The others are proposed as stated.
+Open, not decided here: which weekdays "weekends" means in other countries (CR3: left to the roster check in 5.4). The others are as stated.
