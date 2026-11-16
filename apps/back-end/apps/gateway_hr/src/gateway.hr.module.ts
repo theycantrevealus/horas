@@ -21,6 +21,7 @@ import { WorkforceExceptionFilter } from '@workforce/workforce.filter'
 import { CodeConceptManagementModule } from './code-concept/code-concept-management.module'
 import { AssignmentManagementModule } from './assignment/assignment-management.module'
 import { AppointmentManagementModule } from './appointment/appointment-management.module'
+import { ShiftManagementModule } from './shift/shift-management.module'
 import { CommitteeMembershipManagementModule } from './committee-membership/committee-membership-management.module'
 import { CredentialingManagementModule } from './credentialing/credentialing-management.module'
 import { PrivilegeManagementModule } from './privilege/privilege-management.module'
@@ -80,6 +81,7 @@ import { PositionManagementModule } from './position/position-management.module'
     PrivilegeManagementModule,
     CredentialingManagementModule,
     AppointmentManagementModule,
+    ShiftManagementModule,
     PrivateProfileManagementModule,
     CodeConceptManagementModule,
   ],
