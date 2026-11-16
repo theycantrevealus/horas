@@ -3,10 +3,13 @@ import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type AuthenticatedUser } from '@identity/authenticated-user'
 import { CurrentUser, RequirePermissions } from '@identity/guard/decorators'
 import { PERMISSIONS } from '@identity/permission'
+import { HolidayImportService } from '@workforce/rostering/holiday-import.service'
 import { HolidayService } from '@workforce/rostering/holiday.service'
+import { type HrImport } from '@repository/model/hr-import'
 import {
   AddHolidayDto,
   CreateCalendarDto,
+  ImportHolidaysQueryDto,
   ListCalendarsDto,
   RemoveHolidayDto,
 } from './holiday.dto'
@@ -18,8 +21,12 @@ import {
 export class HolidayController {
   /**
    * @param holidays - Holiday service.
+   * @param holidayImports - Holiday import service.
    */
-  constructor(private readonly holidays: HolidayService) {}
+  constructor(
+    private readonly holidays: HolidayService,
+    private readonly holidayImports: HolidayImportService,
+  ) {}
 
   /**
    * Handles `GET /v1/holiday-calendars`: lists calendars with their holidays.
@@ -110,6 +117,33 @@ export class HolidayController {
       kind: body.kind,
       version: body.version,
       reason: body.reason,
+    })
+  }
+
+  /**
+   * Handles `POST /v1/holiday-calendars/:id/imports`: checks a CSV file (the request body, content
+   * type `text/csv`), or applies a file that was checked.
+   *
+   * @param user - Signed-in user.
+   * @param id - Calendar identifier.
+   * @param query - Whether to apply, the check, the version and the reason.
+   * @param body - The CSV text; anything else is refused by the service.
+   * @returns The import record, with its counts and row errors.
+   */
+  @Post(':id/imports')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_HOLIDAY_CALENDAR_WRITE)
+  importFile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Query() query: ImportHolidaysQueryDto,
+    @Body() body: unknown,
+  ): Promise<HrImport> {
+    return this.holidayImports.importFile(user.tenant_id, id, {
+      content: body,
+      apply: query.apply,
+      checkId: query.checkId,
+      version: query.version,
+      reason: query.reason,
     })
   }
 }
