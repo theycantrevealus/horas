@@ -1,6 +1,6 @@
 # gateway_hr 5.1: Shift definitions
 
-Status: **Proposed** (2026-11-16). Decisions SH1 to SH15 are proposals for you to confirm or change (section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 17). Endpoints: `../hr-endpoints.md` 5.1. Collection: `../human-resource-collections.md` 5.1 (`shift_definitions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Shift Definition), 8.5 (`HR-ROS-010` to `HR-ROS-015` use the shift data) and open question Q6 (on-call time). Model: `apps/back-end/apps/repository/model/shift-definition.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: privilege catalog (4.1: a code that is unique, fixed and never reused, retiring is final), positions (1.5: a record under a facility and its units), facilities and units (1.2, 1.4), shared checks (`structure/localized-texts.ts`, `structure/codes.ts`).
+Status: **Confirmed** (2026-11-16). Decisions SH1 to SH15 and the single code PR confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 17). Endpoints: `../hr-endpoints.md` 5.1. Collection: `../human-resource-collections.md` 5.1 (`shift_definitions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Shift Definition), 8.5 (`HR-ROS-010` to `HR-ROS-015` use the shift data) and open question Q6 (on-call time). Model: `apps/back-end/apps/repository/model/shift-definition.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: privilege catalog (4.1: a code that is unique, fixed and never reused, retiring is final), positions (1.5: a record under a facility and its units), facilities and units (1.2, 1.4), shared checks (`structure/localized-texts.ts`, `structure/codes.ts`).
 
 A shift definition is a shift a facility uses in its rosters: `P` (pagi), `S` (siang), `M` (malam), `L` (libur, a day off), `ND` (an office day with no shift). It carries the local start and end time, the paid minutes and whether it is a night shift. Rosters (group 5.4) assign employees to these shifts, and the working-time rules (`HR-ROS-011` to `HR-ROS-015`) read their times, paid minutes and night flag. This group only defines and maintains the shifts; assigning them is later.
 
@@ -73,13 +73,13 @@ Tests come first: repository (indexes, tenant isolation, no `_id`, one change re
 4. A retired shift cannot be changed or brought back.
 5. Logs and responses carry no names, codes or times in the logs, and responses carry no `_id`.
 
-## 7. Decisions that need your answer
+## 7. Decisions that needed your answer
 
-All of SH1 to SH15 are proposals. These four change the shape of the work most, so I would like an explicit answer:
+Confirmed as proposed: all of SH1 to SH15. These four changed the shape of the work most:
 
 - **SH2** (a 1 to 8 character code, unique per facility and never reused, retired shifts included).
 - **SH4** (the type is fixed after creation; `off` has no times and no paid minutes; equal start and end are refused).
 - **SH5** (paid minutes between 0 and the shift's length, more than 0 for a regular shift; on-call counting stays open as Q6).
 - **SH7** (a shift's units must be active units of the same facility; empty means every unit).
 
-The others are proposed as stated.
+The others are as stated.
