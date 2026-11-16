@@ -187,7 +187,7 @@ No new routes. Plan: `plans/gateway-hr-4-4-renewals.md` (built). It changes two 
 
 ### 5.1 Shift definitions
 
-Plan: `plans/gateway-hr-5-1-shift-definitions.md` (proposed).
+Plan: `plans/gateway-hr-5-1-shift-definitions.md` (confirmed).
 | Endpoint | Purpose |
 |---|---|
 | `GET /shift-definitions` | List a facility's shifts (P, S, M, L, ...). |
