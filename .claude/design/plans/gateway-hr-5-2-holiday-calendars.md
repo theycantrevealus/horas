@@ -1,6 +1,6 @@
 # gateway_hr 5.2: Holiday calendars
 
-Status: **Proposed** (2026-11-16). Decisions HC1 to HC16 are proposals for you to confirm or change (section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 18). Endpoints: `../hr-endpoints.md` 5.2. Collections: `../human-resource-collections.md` 5.2 (`holiday_calendars`) and 5.9 (`hr_imports`, holiday CSV rules). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (coverage day pattern "weekends and public holidays"). Models: `apps/back-end/apps/repository/model/holiday-calendar.ts` and `hr-import.ts` (both exist, with their classifications). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Master plan decisions: D3 (files are references only) and D4 (a `text/csv` request body with a size limit, parsed with `csv-parse`). Built references: shift definitions (5.1: a per-facility record with a retire flow), code concepts (1.3: bundles and an import-like flow), HR parameters (1.6: `IMPORT_MAX_ROWS`, `IMPORT_MAX_ERRORS`).
+Status: **Confirmed** (2026-11-16). Decisions HC1 to HC16 and the split in two code PRs confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 18). Endpoints: `../hr-endpoints.md` 5.2. Collections: `../human-resource-collections.md` 5.2 (`holiday_calendars`) and 5.9 (`hr_imports`, holiday CSV rules). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (coverage day pattern "weekends and public holidays"). Models: `apps/back-end/apps/repository/model/holiday-calendar.ts` and `hr-import.ts` (both exist, with their classifications). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Master plan decisions: D3 (files are references only) and D4 (a `text/csv` request body with a size limit, parsed with `csv-parse`). Built references: shift definitions (5.1: a per-facility record with a retire flow), code concepts (1.3: bundles and an import-like flow), HR parameters (1.6: `IMPORT_MAX_ROWS`, `IMPORT_MAX_ERRORS`).
 
 A holiday calendar lists the public holidays, collective leave days and local holidays of a country or province for one year (`id-national`, `id-jk`, or a hospital's own). Coverage requirements (5.3) use it for the day pattern "weekends and public holidays", and rosters (5.4) use it to find the days a unit needs holiday cover. HR loads a calendar from a CSV file, keeps it by hand, or both (decision C6). This group builds the calendars, the manual maintenance and the CSV import. Using the calendars is later.
 
@@ -82,13 +82,13 @@ Two code PRs keep each one reviewable (the import is the larger part). Tests com
 5. Logs carry no dates, names or cells; responses carry no `_id`; the body size limit holds.
 6. The calendar's change history records what an import changed.
 
-## 7. Decisions that need your answer
+## 7. Decisions that needed your answer
 
-All of HC1 to HC16 are proposals. These four change the shape of the work most:
+Confirmed as proposed: all of HC1 to HC16 and the split in two code PRs. These four changed the shape of the work most:
 
 - **HC11** (apply by sending the same file again with the check id, so no file or row text is stored; the alternative stores the parsed rows in the import record).
 - **HC6** (adding over a removed day brings it back as a manual entry, so a removal can be undone).
 - **HC12** (an import adds and updates imported days only and never removes, never touches manual days and never revives a removed imported day).
 - **HC3** (tenant calendars only; platform calendars are not created or shown).
 
-Also confirm the split into two code PRs (B1 calendars, B2 import). The others are proposed as stated.
+The others are as stated.
