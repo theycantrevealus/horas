@@ -217,6 +217,8 @@ Plan: `plans/gateway-hr-5-3-coverage-requirements.md` (built, PR #83).
 | `POST /coverage-requirements/:id/retire` | Stop checking a rule. |
 
 ### 5.4 Rosters
+
+Plan: `plans/gateway-hr-5-4-rosters.md` (proposed).
 | Endpoint | Purpose |
 |---|---|
 | `GET /rosters` | List rosters by unit and period. |
