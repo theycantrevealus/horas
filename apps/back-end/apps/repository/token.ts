@@ -158,3 +158,10 @@ export const REPOSITORY_CLINICAL_APPOINTMENT = Symbol(
  * Injection token for the privilege grant repository (lines of the RKK attached to an SPK).
  */
 export const REPOSITORY_PRIVILEGE_GRANT = Symbol('REPOSITORY_PRIVILEGE_GRANT')
+
+/**
+ * Injection token for the shift definition repository (the shifts a facility uses in rosters).
+ */
+export const REPOSITORY_SHIFT_DEFINITION = Symbol(
+  'REPOSITORY_SHIFT_DEFINITION',
+)

@@ -62,6 +62,10 @@ import {
   type PrivilegeCatalogRepository,
   type PrivilegeQuery,
 } from '@repository/interface/privilege-catalog'
+import {
+  type ShiftDefinitionRepository,
+  type ShiftQuery,
+} from '@repository/interface/shift-definition'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type OrganizationRepository } from '@repository/interface/organization'
 import { type CodeConcept } from '@repository/model/code-concept'
@@ -71,6 +75,7 @@ import { type CredentialApplication } from '@repository/model/credential-applica
 import { type ClinicalAppointment } from '@repository/model/clinical-appointment'
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
+import { type ShiftDefinition } from '@repository/model/shift-definition'
 import { type CpdSummary } from '@repository/model/cpd-summary'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
 import { type PersonIdentifierInput } from '@repository/model/common/person-identifier'
@@ -2630,5 +2635,92 @@ export class InMemoryPrivilegeGrants
       (left, right) =>
         left.code.localeCompare(right.code) || left.id.localeCompare(right.id),
     )
+  }
+}
+
+/**
+ * In-memory `ShiftDefinitionRepository` for tests. It applies the unique index of the Mongo
+ * collection: one code per facility, retired shifts included.
+ */
+export class InMemoryShiftDefinitions
+  extends InMemoryRepository<ShiftDefinition>
+  implements ShiftDefinitionRepository
+{
+  /**
+   * Creates a shift, refusing a second one with the same code in the facility.
+   *
+   * @param entity - Shift data.
+   * @param id - Optional identifier.
+   * @returns The stored shift.
+   */
+  override async create(
+    entity: NewEntity<ShiftDefinition>,
+    id?: string,
+  ): Promise<ShiftDefinition> {
+    const duplicate = this.find(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.facility_id === entity.facility_id &&
+        item.code === entity.code,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate shift code', {
+        operation: 'ShiftDefinitionRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds a shift by its code in a facility.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - The facility.
+   * @param code - Shift code.
+   * @returns The shift, or `null`.
+   */
+  async findByCode(
+    tenantId: string,
+    facilityId: string,
+    code: string,
+  ): Promise<ShiftDefinition | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.facility_id === facilityId &&
+        item.code === code &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds shifts, ordered by facility and code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The shifts.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: ShiftQuery = {},
+  ): Promise<ShiftDefinition[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.facilityId || item.facility_id === query.facilityId) &&
+        (!query.status || item.status === query.status) &&
+        (!query.type || item.type === query.type) &&
+        (!query.allowsUnitId ||
+          item.unit_ids.length === 0 ||
+          item.unit_ids.includes(query.allowsUnitId)),
+    )
+      .sort(
+        (left, right) =>
+          left.facility_id.localeCompare(right.facility_id) ||
+          left.code.localeCompare(right.code),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
   }
 }
