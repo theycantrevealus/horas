@@ -208,7 +208,7 @@ Plan: `plans/gateway-hr-5-2-holiday-calendars.md` (built, PR #78 and #80).
 
 ### 5.3 Coverage requirements
 
-Plan: `plans/gateway-hr-5-3-coverage-requirements.md` (proposed).
+Plan: `plans/gateway-hr-5-3-coverage-requirements.md` (confirmed).
 | Endpoint | Purpose |
 |---|---|
 | `GET /coverage-requirements` | List minimum staffing rules of a unit. |
