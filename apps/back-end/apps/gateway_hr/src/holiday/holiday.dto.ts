@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsMongoId,
   IsOptional,
   IsString,
   Max,
@@ -176,6 +177,39 @@ export class RemoveHolidayDto {
 
   @IsIn(KINDS)
   kind!: 'public' | 'collective_leave' | 'local'
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason?: string
+}
+
+/**
+ * Query of `POST /v1/holiday-calendars/:id/imports`. The body is the CSV file itself, so the
+ * options travel in the query.
+ *
+ * @property apply - False or missing checks the file; true applies a file that was checked.
+ * @property checkId - The `validated` import that checked this same file (needed to apply).
+ * @property version - Version of the calendar the client read (applying only).
+ * @property reason - Why, kept in the change history (applying only).
+ */
+export class ImportHolidaysQueryDto {
+  @IsOptional()
+  @Transform(toBoolean)
+  @IsBoolean()
+  apply?: boolean
+
+  @IsOptional()
+  @IsMongoId()
+  checkId?: string
 
   @IsOptional()
   @Type(() => Number)

@@ -192,14 +192,14 @@ export const PARAMETER_CATALOG: readonly ParameterDefinition[] = [
     type: { kind: 'integer', min: 1, max: 100000 },
     default: 5000,
     scopes: ['tenant'],
-    description: 'Most rows of one roster import (8.4.1).',
+    description: 'Most rows of one file import: a roster or a holiday calendar (8.4.1).',
   },
   {
     key: 'IMPORT_MAX_ERRORS',
     type: { kind: 'integer', min: 1, max: 10000 },
     default: 500,
     scopes: ['tenant'],
-    description: 'Most row errors reported by one roster import (8.4.1).',
+    description: 'Most row errors kept by one file import: a roster or a holiday calendar (8.4.1).',
   },
 ]
 

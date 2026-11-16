@@ -172,3 +172,8 @@ export const REPOSITORY_SHIFT_DEFINITION = Symbol(
 export const REPOSITORY_HOLIDAY_CALENDAR = Symbol(
   'REPOSITORY_HOLIDAY_CALENDAR',
 )
+
+/**
+ * Injection token for the HR import repository (file imports of rosters and holiday calendars).
+ */
+export const REPOSITORY_HR_IMPORT = Symbol('REPOSITORY_HR_IMPORT')
