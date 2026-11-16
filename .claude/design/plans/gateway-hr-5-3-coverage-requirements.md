@@ -1,6 +1,6 @@
 # gateway_hr 5.3: Coverage requirements
 
-Status: **Confirmed** (2026-11-16). Decisions CR1 to CR16 and the single code PR confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 19). Endpoints: `../hr-endpoints.md` 5.3. Collection: `../human-resource-collections.md` 5.3 (`coverage_requirements`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Coverage Requirement), `HR-ROS-020` to `HR-ROS-022` (the checks that read these records) and the role matrix row "Shift definitions and coverage requirements". Model: `apps/back-end/apps/repository/model/coverage-requirement.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: shift definitions (5.1: a record under a facility and its units, retiring is final, and its not-built note `shift_in_use`), privilege catalog (4.1: codings checked with `assertActive`, `minClinicalLevel`), positions (1.5: a record under a unit), holiday calendars (5.2).
+Status: **Built** (2026-11-16, PR #83 merged). Decisions CR1 to CR16 and the single code PR confirmed as proposed, with the notes in section 8. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 19). Endpoints: `../hr-endpoints.md` 5.3. Collection: `../human-resource-collections.md` 5.3 (`coverage_requirements`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Coverage Requirement), `HR-ROS-020` to `HR-ROS-022` (the checks that read these records) and the role matrix row "Shift definitions and coverage requirements". Model: `apps/back-end/apps/repository/model/coverage-requirement.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: shift definitions (5.1: a record under a facility and its units, retiring is final, and its not-built note `shift_in_use`), privilege catalog (4.1: codings checked with `assertActive`, `minClinicalLevel`), positions (1.5: a record under a unit), holiday calendars (5.2).
 
 A coverage requirement is the minimum staffing of one unit for one shift: "ICU, shift M, every day: at least 3 nurses of level PK2 or higher, one of them team leader". Rosters (group 5.4) count the people assigned to each shift of each day and report a gap when a requirement is not met (`HR-ROS-020`); a gap blocks submitting the roster unless the approver records an override (`HR-ROS-021`). This group only defines and maintains the requirements; checking rosters against them is 5.4.
 
@@ -85,3 +85,14 @@ Confirmed as proposed: all of CR1 to CR16. These four changed the shape of the w
 - **CR1 and CR2** (the shift must belong to the unit's facility, be usable by the unit, and not be an `off` shift).
 
 Open, not decided here: which weekdays "weekends" means in other countries (CR3: left to the roster check in 5.4). The others are as stated.
+
+## 8. Build notes
+
+- Built in one code PR (#83): repository, service, permissions, controller, the `shift_in_use` check and tests, as planned. `ShiftService` now takes the coverage repository.
+- **The gateway folder is `gateway_hr/src/coverage-requirement/`**, not `coverage/` as section 4 says: `.gitignore` ignores every folder named `coverage/`.
+- **`PATCH` takes `period: { end }`** (a date or `null`) for the end of the period; `period.start` is not accepted and the validation pipe drops it. A `period` without `end` answers 400.
+- **An unknown or retired staff code** answers the concept service's own codes (`unknown_code`, `code_retired`) instead of an `invalid_<criterion>` code; `invalid_category`, `invalid_profession`, `invalid_specialty` and `invalid_clinical_level` are for a code of the wrong system.
+- **"Today" in CR8** is read in the zone of the unit's facility, and in UTC when the unit or the facility cannot be read.
+- **`shift_in_use` (CR11)** counts active requirements only and whatever their period; open rosters are added by 5.4. The check reads then writes, like the duplicate check (CR9), so two simultaneous requests can both pass; there is no unique index.
+- Not built: scoped permissions (a Head of Unit limited to their own unit), roster checks against the requirements (5.4), the weekday definition of "weekends" for other countries (CR3), and closing a unit with active requirements is not blocked (CR12).
+- The in-memory transaction fake cannot roll back, so tests check results, not a failure inside a transaction.
