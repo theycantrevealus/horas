@@ -18,6 +18,7 @@ The workforce context (`apps/back-end/apps/workforce`, alias `@workforce/*`) hol
 | `apps/workforce/credentialing/` | `ApplicationService` (queue, get, create, edit, submit, withdraw), `ReviewService` (start review, return, appoint assessors, conflict declaration, and `present`, which redacts what only the committee may see), `AssessmentService` (assess, read assessments, recommend) and `DecisionService` (the Director's decision: approve with the SPK and its grants, or reject), with the shared checks (`application-rules.ts`: limits, level rank, missing evidence; `appointment-rules.ts`: letter number, date arithmetic, licence validity on a date) and the load, version, write, seat and redaction helpers (`application-support.ts`). |
 | `apps/workforce/appointment/` | `AppointmentService` (list SPKs, list one practitioner's SPKs, get one with its grants), `GrantService` (the privilege directory) and `StatusService` (suspend, lift the suspension of, and revoke an SPK or one grant, with the supervisor flags), with `supervisor-links.ts` (raise and resolve the flags, and re-point supervised grants to a renewed SPK's grant, shared with the decision of 3h). Every decision is dated in the credentialing facility's zone and runs in one transaction with the grants and flags it affects. |
 | `apps/workforce/credit/` | `CpdService` (list, record for HR and for the signed-in employee, review) and `CpdSummaryService` (list totals, set a platform total), with the credit rules (`cpd-rules.ts`: points, activity date, totals, cycle). |
+| `apps/workforce/rostering/` | `ShiftService` (list, define, edit, retire shift definitions) and the shift rules (`shift-rules.ts`: code format, local `HH:mm` times, shift length). Dates and times are local to the facility (`database.md` 4.4). |
 | `apps/workforce/license/` | `LicenseService` (list, list by employee, get, register for HR and for the signed-in employee, verify, revoke) and the licence rules (`license-rules.ts`: document number, scan reference, dates). Verifying a renewal runs in one transaction with the licence it supersedes. Dates are UTC: a licence has no facility zone. |
 | `apps/workforce/committee/` | `CommitteeMembershipService` (list, appoint, end) and the date checks (`committee-rules.ts`). Dates use the facility's time zone. |
 | `apps/workforce/assignment/` | `AssignmentService` (list by employee and by unit, create, end) and the assignment rules (`assignment-rules.ts`: period, FTE, decision number, overlap). Creating and ending run in one transaction with the employee's `primary_assignment` summary. Local dates use the facility's time zone, read through the position's unit. |
@@ -102,6 +103,8 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 | `workforce.credential:decide` | `POST /v1/credential-applications/:id/decision`, `POST /v1/clinical-appointments/:id/suspend`, `.../lift-suspension`, `.../revoke`, `POST /v1/privilege-grants/:id/suspend`, `.../lift-suspension`, `.../revoke` |
 | `workforce.clinical-appointment:read` | `GET /v1/clinical-appointments`, `GET /v1/clinical-appointments/:id`, `GET /v1/employees/:id/clinical-appointments` |
 | `workforce.privilege-grant:read` | `GET /v1/privilege-grants` |
+| `workforce.shift-definition:read` | `GET /v1/shift-definitions` |
+| `workforce.shift-definition:write` | `POST /v1/shift-definitions`, `PATCH /v1/shift-definitions/:id`, `POST /v1/shift-definitions/:id/retire` |
 | `workforce.parameter:read` | `GET /v1/parameters`, `GET /v1/parameters/catalog`, `GET /v1/parameters/effective` |
 | `workforce.parameter:write` | `POST /v1/parameters` |
 | `workforce.code-concept:read` | `GET /v1/code-concepts` |
@@ -179,6 +182,16 @@ Permissions are in `apps/identity/permission.ts` (`PERMISSIONS`). HR names follo
 - **Supervision links.** Supervised grants of other practitioners that name an old `full` grant are re-pointed to the new `full` grant of the same privilege (the supervisor of a grant is updatable for this use only), or get the open flag `supervisor_lost_privilege` when the new SPK has none. A carried supervised grant keeps its own supervisor and flag. A new supervised grant still needs the supervisor's active full grant (3g).
 - No new log events: `application_create`, `application_update` and `application_decide` carry no SPK identifier, number or reason. No events are emitted and no alerts are sent.
 
+## 3i. Shift definitions
+
+- A shift belongs to one active facility of the tenant (422 `facility_not_found`, `facility_inactive`) and the facility, the code and the type never change. The code is 1 to 8 upper-case letters or digits, unique per facility and never reused, retired shifts included (409 `shift_exists`). The name is texts per language.
+- The type is `regular`, `on_call_onsite`, `on_call_remote` or `off`. `off` has no times, no paid minutes and no night flag. The others need `startTime` and `endTime` as local `HH:mm`; an end earlier than the start means the next day, equal times are refused (422 `invalid_times`). Nothing is converted to an instant.
+- Paid minutes run from 0 to the length of the shift (422 `paid_exceeds_duration`); a `regular` shift needs more than 0 (422 `paid_required`). How on-call time counts toward weekly hours is open (Q6): the working-time rules will read the number HR enters. `isNight` is entered by HR and does not follow the times.
+- `unitIds` lists the units that may use the shift, empty meaning every unit of the facility. Each is an active unit of the shift's facility, without repeats, at most 100 (422 `unit_not_found`, `unit_closed`, `unit_outside_facility`, `duplicate_unit`, `invalid_units`). An edit rechecks the units only when `unitIds` is sent.
+- `PATCH` changes `name`, times, `paidMinutes`, `isNight` and `unitIds`, needs at least one field (422 `empty_update`) and rechecks times and paid minutes together. A retired shift cannot be edited, retired again or reactivated (422 `shift_retired`); retiring is final and a shift that is needed again gets a new code.
+- The list filters by `facilityId`, `status`, `type` and `unitId` (shifts that unit may use: the list is empty or holds it), ordered by facility then code. Reads write no log entry. Writes are logged as `shift_create`, `shift_update` and `shift_retire`, never a name, code or time. No events.
+- Not built: refusing to retire a shift an active coverage requirement or open roster uses (409 `shift_in_use`, groups 5.3 and 5.4), starter shifts per facility and sharing shifts across a facility group.
+
 ## 4a. Events
 
 Workforce writes events to the event outbox in the same transaction as the data (`database.md` 7.1). Plan: `.claude/design/plans/gateway-hr-events-to-identity.md`.
@@ -225,4 +238,5 @@ No first administrator exists (`authentication.md` 5). To call HR endpoints by h
 - Credential applications (`3f`): applicant self-service routes, service-level alerts and notifications.
 - SPKs and grants (`3g`): the job that sets `expired` and the alerts before an SPK ends, alerts and notifications for decisions and flags, dated decisions (future or backdated effective dates), resolving a flag by hand, the committee's recommendation to suspend as a record, a route for a practitioner to read their own SPK, and clinical eligibility that reads the grants (group 6).
 - Renewals (`3h`): the alerts `RECREDENTIAL_LEAD_DAYS` before an SPK ends, the performance evaluation (OPPE), incident and complaint input of the committee (group 9), and renewal of a temporary SPK (a new application is made instead).
+- Shift definitions (`3i`): `shift_in_use`, starter shifts, sharing across facilities and the on-call counting rule (Q6).
 - Scoped permissions (unit and own-record access), field encryption of personal identifiers (arrives with the private profile), file uploads.

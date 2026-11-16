@@ -1,6 +1,6 @@
 # gateway_hr 5.1: Shift definitions
 
-Status: **Confirmed** (2026-11-16). Decisions SH1 to SH15 and the single code PR confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 17). Endpoints: `../hr-endpoints.md` 5.1. Collection: `../human-resource-collections.md` 5.1 (`shift_definitions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Shift Definition), 8.5 (`HR-ROS-010` to `HR-ROS-015` use the shift data) and open question Q6 (on-call time). Model: `apps/back-end/apps/repository/model/shift-definition.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: privilege catalog (4.1: a code that is unique, fixed and never reused, retiring is final), positions (1.5: a record under a facility and its units), facilities and units (1.2, 1.4), shared checks (`structure/localized-texts.ts`, `structure/codes.ts`).
+Status: **Built** (2026-11-16, PR #74 merged). Decisions confirmed as proposed, with the note in section 8. Decisions SH1 to SH15 and the single code PR confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 17). Endpoints: `../hr-endpoints.md` 5.1. Collection: `../human-resource-collections.md` 5.1 (`shift_definitions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Shift Definition), 8.5 (`HR-ROS-010` to `HR-ROS-015` use the shift data) and open question Q6 (on-call time). Model: `apps/back-end/apps/repository/model/shift-definition.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: privilege catalog (4.1: a code that is unique, fixed and never reused, retiring is final), positions (1.5: a record under a facility and its units), facilities and units (1.2, 1.4), shared checks (`structure/localized-texts.ts`, `structure/codes.ts`).
 
 A shift definition is a shift a facility uses in its rosters: `P` (pagi), `S` (siang), `M` (malam), `L` (libur, a day off), `ND` (an office day with no shift). It carries the local start and end time, the paid minutes and whether it is a night shift. Rosters (group 5.4) assign employees to these shifts, and the working-time rules (`HR-ROS-011` to `HR-ROS-015`) read their times, paid minutes and night flag. This group only defines and maintains the shifts; assigning them is later.
 
@@ -83,3 +83,11 @@ Confirmed as proposed: all of SH1 to SH15. These four changed the shape of the w
 - **SH7** (a shift's units must be active units of the same facility; empty means every unit).
 
 The others are as stated.
+
+## 8. Build notes
+
+- Built in one code PR (#74): repository, service, permissions, controller and tests, as planned.
+- **Deviation from SH8.** An edit rechecks the units (active, same facility, no repeats) only when `unitIds` is sent. SH8 said the whole shift is checked again; a shift whose unit was closed later can therefore still have its times or name edited without touching the unit list. The times, paid minutes and night flag are always rechecked together.
+- The facility is checked (SH1) at creation only, so a shift of a facility set inactive later can still be edited or retired.
+- `shift_in_use` (SH9) is not built; groups 5.3 and 5.4 add it.
+- The in-memory transaction fake cannot roll back, so tests check results, not a failure inside a transaction.
