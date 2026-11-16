@@ -7,6 +7,7 @@ import {
   REPOSITORY_CLINICAL_APPOINTMENT,
   REPOSITORY_CREDENTIAL_ASSESSMENT,
   REPOSITORY_PRIVILEGE_GRANT,
+  REPOSITORY_HOLIDAY_CALENDAR,
   REPOSITORY_SHIFT_DEFINITION,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
@@ -28,6 +29,7 @@ import { CredentialApplicationEntity } from '@repository/mongo/schema/credential
 import { ClinicalAppointmentEntity } from '@repository/mongo/schema/clinical-appointment'
 import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
 import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
+import { HolidayCalendarEntity } from '@repository/mongo/schema/holiday-calendar'
 import { ShiftDefinitionEntity } from '@repository/mongo/schema/shift-definition'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
@@ -49,6 +51,7 @@ import {
   InMemoryClinicalAppointments,
   InMemoryCredentialAssessments,
   InMemoryPrivilegeGrants,
+  InMemoryHolidayCalendars,
   InMemoryShiftDefinitions,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
@@ -90,6 +93,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property appointments - Clinical appointment (SPK) repository.
  * @property grants - Privilege grant repository.
  * @property shifts - Shift definition repository.
+ * @property holidayCalendars - Holiday calendar repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -113,6 +117,7 @@ export interface InMemoryWorkforce {
   appointments: InMemoryClinicalAppointments
   grants: InMemoryPrivilegeGrants
   shifts: InMemoryShiftDefinitions
+  holidayCalendars: InMemoryHolidayCalendars
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -144,6 +149,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const appointments = new InMemoryClinicalAppointments()
   const grants = new InMemoryPrivilegeGrants()
   const shifts = new InMemoryShiftDefinitions()
+  const holidayCalendars = new InMemoryHolidayCalendars()
   return {
     organizations,
     facilities,
@@ -165,6 +171,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     appointments,
     grants,
     shifts,
+    holidayCalendars,
     options: {
       entities: [
         OrganizationEntity,
@@ -187,6 +194,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         ClinicalAppointmentEntity,
         PrivilegeGrantEntity,
         ShiftDefinitionEntity,
+        HolidayCalendarEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -209,6 +217,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_CLINICAL_APPOINTMENT, appointments],
         [REPOSITORY_PRIVILEGE_GRANT, grants],
         [REPOSITORY_SHIFT_DEFINITION, shifts],
+        [REPOSITORY_HOLIDAY_CALENDAR, holidayCalendars],
       ],
     },
   }

@@ -63,6 +63,10 @@ import {
   type PrivilegeQuery,
 } from '@repository/interface/privilege-catalog'
 import {
+  type HolidayCalendarQuery,
+  type HolidayCalendarRepository,
+} from '@repository/interface/holiday-calendar'
+import {
   type ShiftDefinitionRepository,
   type ShiftQuery,
 } from '@repository/interface/shift-definition'
@@ -75,6 +79,7 @@ import { type CredentialApplication } from '@repository/model/credential-applica
 import { type ClinicalAppointment } from '@repository/model/clinical-appointment'
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
+import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
 import { type CpdSummary } from '@repository/model/cpd-summary'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
@@ -2720,6 +2725,89 @@ export class InMemoryShiftDefinitions
         (left, right) =>
           left.facility_id.localeCompare(right.facility_id) ||
           left.code.localeCompare(right.code),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+}
+
+/**
+ * In-memory `HolidayCalendarRepository` for tests. It applies the unique index of the Mongo
+ * collection: one calendar per tenant, code and year.
+ */
+export class InMemoryHolidayCalendars
+  extends InMemoryRepository<HolidayCalendar>
+  implements HolidayCalendarRepository
+{
+  /**
+   * Creates a calendar, refusing a second one with the same code and year.
+   *
+   * @param entity - Calendar data.
+   * @param id - Optional identifier.
+   * @returns The stored calendar.
+   */
+  override async create(
+    entity: NewEntity<HolidayCalendar>,
+    id?: string,
+  ): Promise<HolidayCalendar> {
+    const duplicate = this.find(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.code === entity.code &&
+        item.year === entity.year,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate calendar', {
+        operation: 'HolidayCalendarRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds the calendar of a code in a year.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param code - Calendar code.
+   * @param year - Calendar year.
+   * @returns The calendar, or `null`.
+   */
+  async findByCodeAndYear(
+    tenantId: string,
+    code: string,
+    year: number,
+  ): Promise<HolidayCalendar | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.code === code &&
+        item.year === year &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the tenant's calendars, ordered by code and then year, latest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The calendars.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: HolidayCalendarQuery = {},
+  ): Promise<HolidayCalendar[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.code || item.code === query.code) &&
+        (query.year === undefined || item.year === query.year) &&
+        (!query.country || item.country === query.country),
+    )
+      .sort(
+        (left, right) =>
+          left.code.localeCompare(right.code) || right.year - left.year,
       )
       .slice(offset, offset + (query.limit ?? 10))
   }

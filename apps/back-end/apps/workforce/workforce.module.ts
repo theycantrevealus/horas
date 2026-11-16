@@ -8,6 +8,7 @@ import { ClinicalAppointmentRepositoryModule } from '@repository/mongo/clinical-
 import { CredentialApplicationRepositoryModule } from '@repository/mongo/credential-application.module'
 import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credential-assessment.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
+import { HolidayCalendarRepositoryModule } from '@repository/mongo/holiday-calendar.module'
 import { ShiftDefinitionRepositoryModule } from '@repository/mongo/shift-definition.module'
 import { CpdSummaryRepositoryModule } from '@repository/mongo/cpd-summary.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
@@ -28,6 +29,7 @@ import { ApplicationService } from './credentialing/application.service'
 import { AppointmentService } from './appointment/appointment.service'
 import { GrantService } from './appointment/grant.service'
 import { StatusService } from './appointment/status.service'
+import { HolidayService } from './rostering/holiday.service'
 import { ShiftService } from './rostering/shift.service'
 import { AssessmentService } from './credentialing/assessment.service'
 import { DecisionService } from './credentialing/decision.service'
@@ -73,6 +75,7 @@ import { UnitService } from './structure/unit.service'
     ClinicalAppointmentRepositoryModule,
     PrivilegeGrantRepositoryModule,
     ShiftDefinitionRepositoryModule,
+    HolidayCalendarRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -98,6 +101,7 @@ import { UnitService } from './structure/unit.service'
     GrantService,
     StatusService,
     ShiftService,
+    HolidayService,
   ],
   exports: [
     OrganizationService,
@@ -123,6 +127,7 @@ import { UnitService } from './structure/unit.service'
     GrantService,
     StatusService,
     ShiftService,
+    HolidayService,
   ],
 })
 export class WorkforceModule {}

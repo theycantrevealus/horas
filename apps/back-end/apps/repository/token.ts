@@ -165,3 +165,10 @@ export const REPOSITORY_PRIVILEGE_GRANT = Symbol('REPOSITORY_PRIVILEGE_GRANT')
 export const REPOSITORY_SHIFT_DEFINITION = Symbol(
   'REPOSITORY_SHIFT_DEFINITION',
 )
+
+/**
+ * Injection token for the holiday calendar repository (public holidays per calendar and year).
+ */
+export const REPOSITORY_HOLIDAY_CALENDAR = Symbol(
+  'REPOSITORY_HOLIDAY_CALENDAR',
+)
