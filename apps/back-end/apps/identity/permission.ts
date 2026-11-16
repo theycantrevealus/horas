@@ -47,6 +47,8 @@ export const PERMISSIONS = {
   WORKFORCE_CREDENTIAL_DECIDE: 'workforce.credential:decide',
   WORKFORCE_CLINICAL_APPOINTMENT_READ: 'workforce.clinical-appointment:read',
   WORKFORCE_PRIVILEGE_GRANT_READ: 'workforce.privilege-grant:read',
+  WORKFORCE_SHIFT_DEFINITION_READ: 'workforce.shift-definition:read',
+  WORKFORCE_SHIFT_DEFINITION_WRITE: 'workforce.shift-definition:write',
   WORKFORCE_PARAMETER_READ: 'workforce.parameter:read',
   WORKFORCE_PARAMETER_WRITE: 'workforce.parameter:write',
   WORKFORCE_CODE_CONCEPT_READ: 'workforce.code-concept:read',
