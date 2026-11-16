@@ -177,3 +177,10 @@ export const REPOSITORY_HOLIDAY_CALENDAR = Symbol(
  * Injection token for the HR import repository (file imports of rosters and holiday calendars).
  */
 export const REPOSITORY_HR_IMPORT = Symbol('REPOSITORY_HR_IMPORT')
+
+/**
+ * Injection token for the coverage requirement repository (minimum staffing per unit and shift).
+ */
+export const REPOSITORY_COVERAGE_REQUIREMENT = Symbol(
+  'REPOSITORY_COVERAGE_REQUIREMENT',
+)
