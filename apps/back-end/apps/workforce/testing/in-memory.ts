@@ -63,6 +63,10 @@ import {
   type PrivilegeQuery,
 } from '@repository/interface/privilege-catalog'
 import {
+  type HrImportQuery,
+  type HrImportRepository,
+} from '@repository/interface/hr-import'
+import {
   type HolidayCalendarQuery,
   type HolidayCalendarRepository,
 } from '@repository/interface/holiday-calendar'
@@ -80,6 +84,7 @@ import { type ClinicalAppointment } from '@repository/model/clinical-appointment
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
+import { type HrImport } from '@repository/model/hr-import'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
 import { type CpdSummary } from '@repository/model/cpd-summary'
 import { type BankAccountInput } from '@repository/model/common/bank-account'
@@ -2808,6 +2813,46 @@ export class InMemoryHolidayCalendars
       .sort(
         (left, right) =>
           left.code.localeCompare(right.code) || right.year - left.year,
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+}
+
+/**
+ * In-memory `HrImportRepository` for tests.
+ */
+export class InMemoryHrImports
+  extends InMemoryRepository<HrImport>
+  implements HrImportRepository
+{
+  /**
+   * Finds imports, latest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The imports.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: HrImportQuery = {},
+  ): Promise<HrImport[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.kind || item.kind === query.kind) &&
+        (!query.status || item.status === query.status) &&
+        (!query.sha256 || item.file.sha256 === query.sha256) &&
+        (query.calendarCode === undefined ||
+          ('calendar_code' in item.target &&
+            item.target.calendar_code === query.calendarCode)) &&
+        (query.year === undefined ||
+          ('year' in item.target && item.target.year === query.year)),
+    )
+      .sort(
+        (left, right) =>
+          (right.created_at?.getTime() ?? 0) - (left.created_at?.getTime() ?? 0),
       )
       .slice(offset, offset + (query.limit ?? 10))
   }
