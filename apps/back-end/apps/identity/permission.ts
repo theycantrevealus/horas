@@ -49,6 +49,8 @@ export const PERMISSIONS = {
   WORKFORCE_PRIVILEGE_GRANT_READ: 'workforce.privilege-grant:read',
   WORKFORCE_SHIFT_DEFINITION_READ: 'workforce.shift-definition:read',
   WORKFORCE_SHIFT_DEFINITION_WRITE: 'workforce.shift-definition:write',
+  WORKFORCE_COVERAGE_REQUIREMENT_READ: 'workforce.coverage-requirement:read',
+  WORKFORCE_COVERAGE_REQUIREMENT_WRITE: 'workforce.coverage-requirement:write',
   WORKFORCE_HOLIDAY_CALENDAR_READ: 'workforce.holiday-calendar:read',
   WORKFORCE_HOLIDAY_CALENDAR_WRITE: 'workforce.holiday-calendar:write',
   WORKFORCE_PARAMETER_READ: 'workforce.parameter:read',

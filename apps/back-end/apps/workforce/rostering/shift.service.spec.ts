@@ -3,6 +3,7 @@ import { runWithRequestContext } from '@utility/logger/context'
 import { type AppLogger } from '@utility/logger/service'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
 import {
+  InMemoryCoverageRequirements,
   InMemoryFacilities,
   InMemoryOrganizationUnits,
   InMemoryShiftDefinitions,
@@ -20,6 +21,7 @@ describe('ShiftService', () => {
   let shifts: InMemoryShiftDefinitions
   let facilities: InMemoryFacilities
   let units: InMemoryOrganizationUnits
+  let coverage: InMemoryCoverageRequirements
   let service: ShiftService
   let facilityId: string
   let otherFacilityId: string
@@ -143,7 +145,8 @@ describe('ShiftService', () => {
     facilities = new InMemoryFacilities()
     units = new InMemoryOrganizationUnits()
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new ShiftService(shifts, facilities, units, logger)
+    coverage = new InMemoryCoverageRequirements()
+    service = new ShiftService(shifts, facilities, units, coverage, logger)
     facilityId = await addFacility()
     otherFacilityId = await addFacility()
     unitId = await addUnit(facilityId)
@@ -366,6 +369,55 @@ describe('ShiftService', () => {
         expect(await rejection(() => asAdmin(() => service.retire(tenantId, id, {})))).toMatchObject({ code: 'shift_not_found' })
       }
       expect((await shifts.findOne(created.id))?.status).toBe('active')
+    })
+  })
+
+  describe('retire and coverage requirements', () => {
+    /**
+     * Stores a coverage requirement that uses a shift.
+     *
+     * @param shiftId - The shift.
+     * @param override - Tenant and status.
+     * @returns The requirement.
+     */
+    function addRequirement(shiftId: string, override: { tenant?: string; status?: 'active' | 'retired' } = {}) {
+      return asAdmin(() =>
+        coverage.create({
+          tenant_id: override.tenant ?? tenantId,
+          unit_id: unitId,
+          shift_definition_id: shiftId,
+          day_pattern: 'all',
+          match: { workforce_category: null, profession: null, specialty: null, min_clinical_level: null },
+          min_count: 1,
+          team_leader_required: false,
+          period: { start: '2027-01-01', end: null },
+          status: override.status ?? 'active',
+        }),
+      )
+    }
+
+    it('refuses to retire a shift an active requirement uses, whatever its period, and changes nothing', async () => {
+      const created = await create()
+      await addRequirement(created.id)
+
+      const refused = await rejection(() => asAdmin(() => service.retire(tenantId, created.id, {})))
+
+      expect(refused).toMatchObject({ kind: 'conflict', code: 'shift_in_use' })
+      expect((await shifts.findOne(created.id))?.status).toBe('active')
+      expect(warn.mock.calls.at(-1)?.[0]).toMatchObject({ event: 'shift_retire', outcome: 'failure', code: 'shift_in_use' })
+    })
+
+    it('retires a shift once its requirements are retired, and ignores other shifts and other tenants', async () => {
+      const used = await create({ code: 'A' })
+      const other = await create({ code: 'B' })
+      await addRequirement(used.id, { status: 'retired' })
+      await addRequirement(other.id)
+      await addRequirement(used.id, { tenant: otherTenantId })
+
+      const retired = await asAdmin(() => service.retire(tenantId, used.id, {}))
+
+      expect(retired.status).toBe('retired')
+      expect(await rejection(() => asAdmin(() => service.retire(tenantId, other.id, {})))).toMatchObject({ code: 'shift_in_use' })
     })
   })
 
