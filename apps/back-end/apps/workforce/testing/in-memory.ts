@@ -67,6 +67,10 @@ import {
   type HrImportRepository,
 } from '@repository/interface/hr-import'
 import {
+  type CoverageQuery,
+  type CoverageRequirementRepository,
+} from '@repository/interface/coverage-requirement'
+import {
   type HolidayCalendarQuery,
   type HolidayCalendarRepository,
 } from '@repository/interface/holiday-calendar'
@@ -83,6 +87,7 @@ import { type CredentialApplication } from '@repository/model/credential-applica
 import { type ClinicalAppointment } from '@repository/model/clinical-appointment'
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
+import { type CoverageRequirement } from '@repository/model/coverage-requirement'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type HrImport } from '@repository/model/hr-import'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
@@ -2855,5 +2860,92 @@ export class InMemoryHrImports
           (right.created_at?.getTime() ?? 0) - (left.created_at?.getTime() ?? 0),
       )
       .slice(offset, offset + (query.limit ?? 10))
+  }
+}
+
+/**
+ * In-memory `CoverageRequirementRepository` for tests. The Mongo collection has no unique index,
+ * so neither has this fake (the duplicate rule is the service's, HR plan 5.3 CR9).
+ */
+export class InMemoryCoverageRequirements
+  extends InMemoryRepository<CoverageRequirement>
+  implements CoverageRequirementRepository
+{
+  /**
+   * Finds requirements, ordered by unit, shift and period start.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The requirements.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: CoverageQuery = {},
+  ): Promise<CoverageRequirement[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.unitId || item.unit_id === query.unitId) &&
+        (!query.shiftId || item.shift_definition_id === query.shiftId) &&
+        (!query.status || item.status === query.status) &&
+        (!query.dayPattern || item.day_pattern === query.dayPattern) &&
+        (!query.onDate ||
+          (item.period.start <= query.onDate &&
+            (item.period.end === null || item.period.end >= query.onDate))),
+    )
+      .sort(
+        (left, right) =>
+          left.unit_id.localeCompare(right.unit_id) ||
+          left.shift_definition_id.localeCompare(right.shift_definition_id) ||
+          left.period.start.localeCompare(right.period.start),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the active requirements that use a shift.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param shiftId - The shift.
+   * @param limit - Most requirements to return.
+   * @returns The requirements.
+   */
+  async findActiveByShift(
+    tenantId: string,
+    shiftId: string,
+    limit: number,
+  ): Promise<CoverageRequirement[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.shift_definition_id === shiftId &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    ).slice(0, limit)
+  }
+
+  /**
+   * Finds every active requirement of a unit and shift.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @param shiftId - The shift.
+   * @returns The requirements.
+   */
+  async findActiveByUnitAndShift(
+    tenantId: string,
+    unitId: string,
+    shiftId: string,
+  ): Promise<CoverageRequirement[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        item.shift_definition_id === shiftId &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    )
   }
 }

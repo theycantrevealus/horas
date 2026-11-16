@@ -5,6 +5,7 @@ import {
 } from '@utility/database/error'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
+import { type CoverageRequirementRepository } from '@repository/interface/coverage-requirement'
 import { type FacilityRepository } from '@repository/interface/facility'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import {
@@ -17,6 +18,7 @@ import {
   type ShiftType,
 } from '@repository/model/shift-definition'
 import {
+  REPOSITORY_COVERAGE_REQUIREMENT,
   REPOSITORY_FACILITY,
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_SHIFT_DEFINITION,
@@ -142,6 +144,7 @@ export class ShiftService {
    * @param shifts - Shift definition repository.
    * @param facilities - Facility repository.
    * @param units - Organization unit repository.
+   * @param coverage - Coverage requirement repository, to refuse retiring a shift in use.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -151,6 +154,8 @@ export class ShiftService {
     private readonly facilities: FacilityRepository,
     @Inject(REPOSITORY_ORGANIZATION_UNIT)
     private readonly units: OrganizationUnitRepository,
+    @Inject(REPOSITORY_COVERAGE_REQUIREMENT)
+    private readonly coverage: CoverageRequirementRepository,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -308,7 +313,7 @@ export class ShiftService {
    * @returns The retired shift.
    * @throws NotFoundError `shift_not_found`.
    * @throws InvalidRequestError `shift_retired`.
-   * @throws ConflictError `stale_version`.
+   * @throws ConflictError `shift_in_use` or `stale_version`.
    */
   retire(
     tenantId: string,
@@ -321,6 +326,17 @@ export class ShiftService {
       `${NAME}.retire`,
       async () => {
         const shift = await this.loadActive(tenantId, id)
+        const inUse = await this.coverage.findActiveByShift(
+          tenantId,
+          shift.id,
+          1,
+        )
+        if (inUse.length > 0) {
+          throw new ConflictError(
+            'shift_in_use',
+            'An active coverage requirement uses this shift. Retire the requirement first.',
+          )
+        }
         this.assertVersion(shift, input.version)
         return this.write(input.reason, () =>
           this.shifts.update(

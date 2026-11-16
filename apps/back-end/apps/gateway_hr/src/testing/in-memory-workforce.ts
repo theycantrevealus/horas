@@ -7,6 +7,7 @@ import {
   REPOSITORY_CLINICAL_APPOINTMENT,
   REPOSITORY_CREDENTIAL_ASSESSMENT,
   REPOSITORY_PRIVILEGE_GRANT,
+  REPOSITORY_COVERAGE_REQUIREMENT,
   REPOSITORY_HOLIDAY_CALENDAR,
   REPOSITORY_HR_IMPORT,
   REPOSITORY_SHIFT_DEFINITION,
@@ -30,6 +31,7 @@ import { CredentialApplicationEntity } from '@repository/mongo/schema/credential
 import { ClinicalAppointmentEntity } from '@repository/mongo/schema/clinical-appointment'
 import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
 import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
+import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-requirement'
 import { HrImportEntity } from '@repository/mongo/schema/hr-import'
 import { HolidayCalendarEntity } from '@repository/mongo/schema/holiday-calendar'
 import { ShiftDefinitionEntity } from '@repository/mongo/schema/shift-definition'
@@ -53,6 +55,7 @@ import {
   InMemoryClinicalAppointments,
   InMemoryCredentialAssessments,
   InMemoryPrivilegeGrants,
+  InMemoryCoverageRequirements,
   InMemoryHolidayCalendars,
   InMemoryHrImports,
   InMemoryShiftDefinitions,
@@ -98,6 +101,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property shifts - Shift definition repository.
  * @property holidayCalendars - Holiday calendar repository.
  * @property hrImports - HR import repository.
+ * @property coverage - Coverage requirement repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -123,6 +127,7 @@ export interface InMemoryWorkforce {
   shifts: InMemoryShiftDefinitions
   holidayCalendars: InMemoryHolidayCalendars
   hrImports: InMemoryHrImports
+  coverage: InMemoryCoverageRequirements
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -156,6 +161,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const shifts = new InMemoryShiftDefinitions()
   const holidayCalendars = new InMemoryHolidayCalendars()
   const hrImports = new InMemoryHrImports()
+  const coverage = new InMemoryCoverageRequirements()
   return {
     organizations,
     facilities,
@@ -179,6 +185,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     shifts,
     holidayCalendars,
     hrImports,
+    coverage,
     options: {
       entities: [
         OrganizationEntity,
@@ -203,6 +210,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         ShiftDefinitionEntity,
         HolidayCalendarEntity,
         HrImportEntity,
+        CoverageRequirementEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -227,6 +235,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_SHIFT_DEFINITION, shifts],
         [REPOSITORY_HOLIDAY_CALENDAR, holidayCalendars],
         [REPOSITORY_HR_IMPORT, hrImports],
+        [REPOSITORY_COVERAGE_REQUIREMENT, coverage],
       ],
     },
   }
