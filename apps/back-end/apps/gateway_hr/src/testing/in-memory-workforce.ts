@@ -7,6 +7,7 @@ import {
   REPOSITORY_CLINICAL_APPOINTMENT,
   REPOSITORY_CREDENTIAL_ASSESSMENT,
   REPOSITORY_PRIVILEGE_GRANT,
+  REPOSITORY_SHIFT_DEFINITION,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
@@ -27,6 +28,7 @@ import { CredentialApplicationEntity } from '@repository/mongo/schema/credential
 import { ClinicalAppointmentEntity } from '@repository/mongo/schema/clinical-appointment'
 import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
 import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
+import { ShiftDefinitionEntity } from '@repository/mongo/schema/shift-definition'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
@@ -47,6 +49,7 @@ import {
   InMemoryClinicalAppointments,
   InMemoryCredentialAssessments,
   InMemoryPrivilegeGrants,
+  InMemoryShiftDefinitions,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
   InMemoryEmploymentContracts,
@@ -86,6 +89,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property assessments - Credential assessment repository.
  * @property appointments - Clinical appointment (SPK) repository.
  * @property grants - Privilege grant repository.
+ * @property shifts - Shift definition repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -108,6 +112,7 @@ export interface InMemoryWorkforce {
   assessments: InMemoryCredentialAssessments
   appointments: InMemoryClinicalAppointments
   grants: InMemoryPrivilegeGrants
+  shifts: InMemoryShiftDefinitions
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -138,6 +143,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const assessments = new InMemoryCredentialAssessments()
   const appointments = new InMemoryClinicalAppointments()
   const grants = new InMemoryPrivilegeGrants()
+  const shifts = new InMemoryShiftDefinitions()
   return {
     organizations,
     facilities,
@@ -158,6 +164,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     assessments,
     appointments,
     grants,
+    shifts,
     options: {
       entities: [
         OrganizationEntity,
@@ -179,6 +186,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         CredentialAssessmentEntity,
         ClinicalAppointmentEntity,
         PrivilegeGrantEntity,
+        ShiftDefinitionEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -200,6 +208,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_CREDENTIAL_ASSESSMENT, assessments],
         [REPOSITORY_CLINICAL_APPOINTMENT, appointments],
         [REPOSITORY_PRIVILEGE_GRANT, grants],
+        [REPOSITORY_SHIFT_DEFINITION, shifts],
       ],
     },
   }
