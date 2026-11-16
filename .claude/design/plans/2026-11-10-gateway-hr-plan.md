@@ -70,7 +70,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 16 | 4.3 SPK and granted privileges | 11 | Done (`gateway-hr-4-3-spk-and-granted-privileges.md`, PR #59) | Built in three PRs, #60, #62 and #64 |
 | 16a | 4.4 Renewals (follow-up of 4.2 and 4.3, no new routes) | 0 | Done (`gateway-hr-4-4-renewals.md`, PR #67) | Built in two PRs, #68 and #70 |
 | 17 | 5.1 Shift definitions | 4 | Done (`gateway-hr-5-1-shift-definitions.md`, PR #73) | Built, PR #74 |
-| 18 | 5.2 Holiday calendars | 5 | — | — |
+| 18 | 5.2 Holiday calendars | 5 | Proposed (`gateway-hr-5-2-holiday-calendars.md`) | — |
 | 19 | 5.3 Coverage requirements | 4 | — | — |
 | 20 | 5.4 Rosters | 10 | — | — |
 | 21 | 5.5 Roster assignments | 7 | — | — |

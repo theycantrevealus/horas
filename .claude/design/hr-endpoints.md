@@ -196,6 +196,8 @@ Plan: `plans/gateway-hr-5-1-shift-definitions.md` (built, PR #74).
 | `POST /shift-definitions/:id/retire` | Stop a shift from being assigned. |
 
 ### 5.2 Holiday calendars
+
+Plan: `plans/gateway-hr-5-2-holiday-calendars.md` (proposed).
 | Endpoint | Purpose |
 |---|---|
 | `GET /holiday-calendars` | View a calendar's holidays for a year. |
