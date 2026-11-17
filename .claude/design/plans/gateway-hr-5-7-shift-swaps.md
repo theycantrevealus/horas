@@ -1,6 +1,6 @@
 # gateway_hr 5.7: Shift swaps
 
-Status: **Proposed** (2026-11-18), waiting for your answers on the decisions marked "Needs your answer". Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 23). Endpoints: `../hr-endpoints.md` 5.7. Collection: `../human-resource-collections.md` 5.8 (`shift_swap_requests`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.4.2 (the workflow), 8.5 (every rule applies to the assignments a swap creates), the permission matrix in section 4 ("Shift swap request": Employee creates their own, Head of Unit approves for the unit) and the alert table (section 8.6, not built). Model and classification: `apps/back-end/apps/repository/model/shift-swap-request*.ts` (exist; no token, interface, schema or repository yet). Built references: roster assignments (5.5: `RosterAssignmentService`, the shared `assignment-checks.ts`, `commit` of a change to a published roster with the roster revision), rosters (5.4), the self-service routes of 5.5 (`GET /employees/me/roster`) and the import apply of 5.6 (check again at apply, one transaction).
+Status: **Confirmed** (2026-11-18). Decisions SW1 to SW19 and the two code PRs (B1, B2) confirmed as proposed, including the five that needed an answer (SW1, SW3, SW7, SW8, SW13). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 23). Endpoints: `../hr-endpoints.md` 5.7. Collection: `../human-resource-collections.md` 5.8 (`shift_swap_requests`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.4.2 (the workflow), 8.5 (every rule applies to the assignments a swap creates), the permission matrix in section 4 ("Shift swap request": Employee creates their own, Head of Unit approves for the unit) and the alert table (section 8.6, not built). Model and classification: `apps/back-end/apps/repository/model/shift-swap-request*.ts` (exist; no token, interface, schema or repository yet). Built references: roster assignments (5.5: `RosterAssignmentService`, the shared `assignment-checks.ts`, `commit` of a change to a published roster with the roster revision), rosters (5.4), the self-service routes of 5.5 (`GET /employees/me/roster`) and the import apply of 5.6 (check again at apply, one transaction).
 
 A swap request lets an employee ask to trade a shift of a published roster with a colleague, or to hand it over. The colleague accepts, the system checks that both resulting schedules still follow every rule of HR spec 8.5, and the Head of Unit approves or rejects. On approval the original assignments are cancelled, new ones are created with the source `swap`, and the roster's revision goes up in the same transaction.
 
@@ -99,7 +99,9 @@ Tests come first: the rules of SW4 to SW8 case by case (including a trade, a han
 4. Logs carry the error class and code only: no employees, dates, shifts or reasons.
 5. Every new assignment has the source `swap` with the request id and one change record.
 
-## 7. Decisions that need your answer
+## 7. Decisions that needed your answer
+
+Confirmed as proposed. These five changed the shape of the work most:
 
 - **SW1** (seven endpoints: a second read, `GET /employees/me/shift-swaps`, instead of a "my unit's" filter that needs scoped permissions).
 - **SW3** (every request names a counterpart; a hand-over to whoever volunteers is not built).
