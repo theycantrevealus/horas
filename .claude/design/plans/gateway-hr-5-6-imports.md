@@ -1,6 +1,6 @@
 # gateway_hr 5.6: Imports
 
-Status: **Confirmed** (2026-11-18). Decisions IM1 to IM20 and the two code PRs (B1, B2) confirmed as proposed, including the dropped generic apply. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 22). Endpoints: `../hr-endpoints.md` 5.6 (moved here from 5.5 by RA2). Collection: `../human-resource-collections.md` 5.9 (`hr_imports`) and its "Rules for the roster CSV". Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.4.1 (the import step), 8.5 (every rule applies to an imported assignment) and the parameters `IMPORT_MAX_ROWS` and `IMPORT_MAX_ERRORS`. Models: `apps/back-end/apps/repository/model/hr-import.ts` (built with 5.2). Built references: holiday calendars (5.2: the CSV reader, the check-then-apply flow, the `hr_imports` repository and the `text/csv` body parser), roster assignments (5.5: every rule an imported row must follow, `RosterAssignmentService`, `RosterValidationService`).
+Status: **Built** (PR #97 check, view and cancel; PR #99 apply). Confirmed 2026-11-18. Decisions IM1 to IM20 and the two code PRs (B1, B2) confirmed as proposed, including the dropped generic apply. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 22). Endpoints: `../hr-endpoints.md` 5.6 (moved here from 5.5 by RA2). Collection: `../human-resource-collections.md` 5.9 (`hr_imports`) and its "Rules for the roster CSV". Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.4.1 (the import step), 8.5 (every rule applies to an imported assignment) and the parameters `IMPORT_MAX_ROWS` and `IMPORT_MAX_ERRORS`. Models: `apps/back-end/apps/repository/model/hr-import.ts` (built with 5.2). Built references: holiday calendars (5.2: the CSV reader, the check-then-apply flow, the `hr_imports` repository and the `text/csv` body parser), roster assignments (5.5: every rule an imported row must follow, `RosterAssignmentService`, `RosterValidationService`).
 
 An import loads many assignments into a draft roster from a CSV file: one row per assignment (`employee_number`, `date`, `shift_code`, optionally `role`). The file is **checked first** as a whole, every rule of HR spec 8.5 is run on it, and nothing is written until the user applies it. A bad file changes nothing. 5.2 built the same flow for holiday calendars; this group builds it for rosters and the two reads every import needs (view and cancel).
 
@@ -103,3 +103,15 @@ Confirmed as proposed: all of IM1 to IM20 and the two code PRs. These four chang
 - **The two PRs** (B1 the check, view and cancel with the extracted shared checks; B2 the apply with `createMany`).
 
 Open, not decided here: whether a Head of Unit may import only into their own unit (needs scoped permissions) and whether a list of imports is wanted (IM20). The others are as stated.
+
+## 9. Build notes
+
+Built as planned (IM1 to IM20). Differences and details worth knowing:
+
+- The shared checks are in `workforce/rostering/assignment-checks.ts`, and the CSV body reader in `rostering/read-csv-body.ts` (used by the holiday and roster imports). View and cancel are in `workforce/import/hr-import.service.ts`.
+- `HrImportQuery` gained `rosterId`, so an apply finds an `applied` import of the same file and roster (IM12).
+- Apply refuses in this order: `check_required`, `check_not_valid`, `check_mismatch`, `import_already_applied`, `stale_version`, then re-checks the rows (`import_not_valid_anymore`). The `version` of the query is the roster's. A `reason` is kept on the import record's change; the assignments always carry the reason `roster_import`.
+- When apply finds the file invalid, the import record moves to `invalid` with the new counts and errors **outside** the write transaction, so the failure is kept; nothing else is written.
+- The apply answer is the import record. Its `coverageGaps` and `restDayGaps` are `null`; only a check previews them.
+- Cell errors added by the reader: `invalid_employee_number`, `duplicate_row` (an employee and date repeated in the file).
+- Tests: `createMany` is tested with a mocked Mongoose model and the in-memory fake cannot roll back, so an apply that fails in the middle of the write is not tested; atomicity relies on `TransactionManager`.
