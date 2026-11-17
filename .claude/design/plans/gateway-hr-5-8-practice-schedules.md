@@ -1,6 +1,6 @@
 # gateway_hr 5.8: Practice schedules
 
-Status: **Proposed** (2026-11-18), waiting for your answers on the decisions marked "Needs your answer". Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 24). Endpoints: `../hr-endpoints.md` 5.8. Collections: `../human-resource-collections.md` 5.6 (`practice_schedules`) and 5.7 (`practice_schedule_exceptions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 8.2 (Practice Schedule), 8.4.4 (maintenance), `HR-ROS-004` (only an eligible Tenaga Medis), `HR-ROS-030`/`031` (eligibility changes, not built here), the alert table 8.6 (not built) and the registration query of section 13. Models and classifications: `apps/back-end/apps/repository/model/practice-schedule*.ts` and `practice-schedule-exception*.ts` (exist; no token, interface, schema or repository yet). Built references: shift swaps (5.7: own-list and decide patterns), roster assignments (5.5: `assignment-checks.ts`, `EligibilityService.general`, local dates in the facility's zone), coverage requirements (5.3: edit rules, period) and the on-duty read (`DutyService`).
+Status: **Confirmed** (2026-11-18). Decisions PS1 to PS16 and the two code PRs (B1, B2) confirmed as proposed, including the five that needed an answer (PS2, PS3, PS5, PS8, PS11). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 24). Endpoints: `../hr-endpoints.md` 5.8. Collections: `../human-resource-collections.md` 5.6 (`practice_schedules`) and 5.7 (`practice_schedule_exceptions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 8.2 (Practice Schedule), 8.4.4 (maintenance), `HR-ROS-004` (only an eligible Tenaga Medis), `HR-ROS-030`/`031` (eligibility changes, not built here), the alert table 8.6 (not built) and the registration query of section 13. Models and classifications: `apps/back-end/apps/repository/model/practice-schedule*.ts` and `practice-schedule-exception*.ts` (exist; no token, interface, schema or repository yet). Built references: shift swaps (5.7: own-list and decide patterns), roster assignments (5.5: `assignment-checks.ts`, `EligibilityService.general`, local dates in the facility's zone), coverage requirements (5.3: edit rules, period) and the on-duty read (`DutyService`).
 
 A practice schedule is the recurring weekly outpatient session of a doctor in a polyclinic: one weekday, a local start and end, an optional quota and a validity period. Patient registration asks "which doctors practise in polyclinic C on date D, with what quota?". An exception cancels or moves one session on one date (leave, training, emergency). This is the last group of the rostering block.
 
@@ -79,7 +79,9 @@ Tests come first: the rules of PS3 to PS11 case by case (a doctor who is not a T
 4. Undoing an exception keeps the history and lets a new exception be made.
 5. Logs carry the error class and code only: no employees, dates, times or reasons.
 
-## 6. Decisions that need your answer
+## 6. Decisions that needed your answer
+
+Confirmed as proposed. These five changed the shape of the work most:
 
 - **PS2** (the read by date answers sessions with their state, the derived `eligible` flag and the doctor's public name and specialties).
 - **PS3** (a Tenaga Medis, eligible on the first session date from today or the start).
