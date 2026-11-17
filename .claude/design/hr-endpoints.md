@@ -282,6 +282,9 @@ Plan: `plans/gateway-hr-5-8-practice-schedules.md` (built, PR #108 and #109). Th
 | `POST /practice-schedule-exceptions/:id/cancel` | Undo an exception. |
 
 ## 6. Clinical eligibility
+
+Plan: `plans/gateway-hr-6-clinical-eligibility.md` (proposed). The one endpoint stays; it takes `unitId` (required), `date` and `privilegeId` as query and answers every condition checked.
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /employees/:id/eligibility` | Is this practitioner clinically eligible in a unit on a date, optionally for one privilege? Names the failing condition. |
