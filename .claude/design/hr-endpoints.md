@@ -246,6 +246,9 @@ Plan: `plans/gateway-hr-5-5-roster-assignments.md` (built, PR #91, #93 and #94).
 | `GET /employees/me/roster` | Self-service: my shifts for a date range. |
 
 ### 5.6 Imports (shared by rosters and holidays)
+
+Plan: `plans/gateway-hr-5-6-imports.md` (proposed). It proposes to drop `POST /hr-imports/:id/apply`: the roster import checks and applies on one route, like the holiday import (IM1).
+
 | Endpoint | Purpose |
 |---|---|
 | `POST /rosters/:id/imports` | Upload a roster CSV to check before applying (moved from 5.5, RA2). |
