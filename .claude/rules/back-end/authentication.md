@@ -32,6 +32,7 @@ export class LovController {
 
 - `@Public()`: open route (login, refresh, health). Use it sparingly.
 - `@RequirePermissions(...)`: tenant-wide permissions from the catalog. Without it, a signed-in caller is enough.
+- `@CurrentPermissions()`: the caller's permissions as a set, kept on the request by `PermissionsGuard` on routes with `@RequirePermissions(...)`. A handler uses it to offer an extra capability to a caller who holds one more permission (for example correcting the past of a roster) without a second route. It does not decide who may enter, and it is empty on a route without `@RequirePermissions(...)`.
 - `@CurrentUser()`: the `AuthenticatedUser` (`id`, `tenant_id`, `employee_id`, ...). Always pass `user.tenant_id` to services and refuse records of other tenants as "not found". Never take the tenant or `employee_id` from the request body.
 - `@AllowPasswordChange()`: reachable while the password must be changed (only change-password, logout and `me`).
 - New permission: add it to `PERMISSIONS` in `permission.ts`. Roles can only hold catalog permissions.

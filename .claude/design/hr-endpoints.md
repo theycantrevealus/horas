@@ -4,7 +4,7 @@ Status: **Draft for discussion** (2026-11-10). Collections: `human-resource-coll
 
 We walk through the groups in order; each group is agreed before it is built.
 
-Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). The HR events to identity are built too (PR #29 and #30, `plans/gateway-hr-events-to-identity.md`), **2.4 Position assignments** (PR #31) and **2.5 Committee memberships** (PR #35) and **3.1 Licences** (PR #38 and #39) and **3.2 Professional credits** (PR #42 and #43) and **4.1 Privilege catalog** (PR #47) and **4.2 Credential applications** (PR #51, #53 and #54) and **4.3 SPK and granted privileges** (PR #60, #62 and #64) and **4.4 Renewals**, a follow-up of 4.2 and 4.3 (PR #68 and #70) and **5.1 Shift definitions** (PR #74) and **5.2 Holiday calendars** (PR #78 and #80) and **5.3 Coverage requirements** (PR #83) and **5.4 Rosters** (PR #87). Next: 5.5 Roster assignments. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
+Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). The HR events to identity are built too (PR #29 and #30, `plans/gateway-hr-events-to-identity.md`), **2.4 Position assignments** (PR #31) and **2.5 Committee memberships** (PR #35) and **3.1 Licences** (PR #38 and #39) and **3.2 Professional credits** (PR #42 and #43) and **4.1 Privilege catalog** (PR #47) and **4.2 Credential applications** (PR #51, #53 and #54) and **4.3 SPK and granted privileges** (PR #60, #62 and #64) and **4.4 Renewals**, a follow-up of 4.2 and 4.3 (PR #68 and #70) and **5.1 Shift definitions** (PR #74) and **5.2 Holiday calendars** (PR #78 and #80) and **5.3 Coverage requirements** (PR #83) and **5.4 Rosters** (PR #87) and **5.5 Roster assignments** (PR #91, #93 and #94). Next: 5.6 Imports. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
 
 ## 1. Organization structure and reference data
 
@@ -232,7 +232,7 @@ Plan: `plans/gateway-hr-5-4-rosters.md` (built, PR #87). `validate` and `coverag
 
 ### 5.5 Roster assignments
 
-Plan: `plans/gateway-hr-5-5-roster-assignments.md` (confirmed). `POST /rosters/:id/imports` moves to 5.6 and `POST /roster-assignments/:id/resolve-flag` to the group that builds the checks that raise the flags (a worker job); the assignment list is new (RA1 to RA3).
+Plan: `plans/gateway-hr-5-5-roster-assignments.md` (built, PR #91, #93 and #94). `POST /rosters/:id/imports` moves to 5.6 and `POST /roster-assignments/:id/resolve-flag` to the group that builds the checks that raise the flags (a worker job); the assignment list is new (RA1 to RA3).
 
 | Endpoint | Purpose |
 |---|---|

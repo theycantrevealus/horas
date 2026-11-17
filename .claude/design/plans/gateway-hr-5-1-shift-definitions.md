@@ -89,5 +89,5 @@ The others are as stated.
 - Built in one code PR (#74): repository, service, permissions, controller and tests, as planned.
 - **Deviation from SH8.** An edit rechecks the units (active, same facility, no repeats) only when `unitIds` is sent. SH8 said the whole shift is checked again; a shift whose unit was closed later can therefore still have its times or name edited without touching the unit list. The times, paid minutes and night flag are always rechecked together.
 - The facility is checked (SH1) at creation only, so a shift of a facility set inactive later can still be edited or retired.
-- `shift_in_use` (SH9): the part for coverage requirements was built in 5.3 (PR #83); the part for open rosters is added by 5.5, which owns the assignments.
+- `shift_in_use` (SH9): the part for coverage requirements was built in 5.3 (PR #83); the part for open rosters was built in 5.5 (PR #91).
 - The in-memory transaction fake cannot roll back, so tests check results, not a failure inside a transaction.
