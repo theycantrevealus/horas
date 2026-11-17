@@ -461,6 +461,27 @@ describe('RosterValidationService', () => {
     })
   })
 
+  describe('report with assignments that are not stored yet', () => {
+    it('counts them for coverage and for the rules of their employee, without storing anything', async () => {
+      await addRequirement()
+      await assign(nurse, '2099-03-02')
+      const other = await addEmployee()
+      const stored = await assign(other, '2099-03-03')
+      const planned = { ...stored, id: 'import-0', employee_id: other.id, date: '2099-03-02' } as RosterAssignment
+
+      const withExtra = await service.report(tenantId, roster, [planned])
+      const without = await service.report(tenantId, roster)
+
+      expect(without.coverageGaps).toHaveLength(1)
+      expect(withExtra.coverageGaps).toEqual([])
+      expect(await assignments.findByRoster(tenantId, roster.id)).toHaveLength(2)
+
+      const clash = { ...planned, id: 'import-1', date: '2099-03-03', starts_at: stored.starts_at, ends_at: stored.ends_at } as RosterAssignment
+      const overlapping = await service.report(tenantId, roster, [clash])
+      expect(overlapping.violations.map((item) => item.code)).toContain('overlap')
+    })
+  })
+
   describe('validate', () => {
     it('stores the summary on the roster, answers the report, and logs one entry with counts only', async () => {
       await addRequirement()

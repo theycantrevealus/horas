@@ -22,6 +22,8 @@ import { CodeConceptManagementModule } from './code-concept/code-concept-managem
 import { AssignmentManagementModule } from './assignment/assignment-management.module'
 import { AppointmentManagementModule } from './appointment/appointment-management.module'
 import { CoverageManagementModule } from './coverage-requirement/coverage-management.module'
+import { HrImportManagementModule } from './hr-import/hr-import-management.module'
+import { RosterImportManagementModule } from './roster-import/roster-import-management.module'
 import { RosterAssignmentManagementModule } from './roster-assignment/roster-assignment-management.module'
 import { RosterManagementModule } from './roster/roster-management.module'
 import { HolidayManagementModule } from './holiday/holiday-management.module'
@@ -89,6 +91,8 @@ import { PositionManagementModule } from './position/position-management.module'
     HolidayManagementModule,
     RosterManagementModule,
     RosterAssignmentManagementModule,
+    RosterImportManagementModule,
+    HrImportManagementModule,
     CoverageManagementModule,
     PrivateProfileManagementModule,
     CodeConceptManagementModule,

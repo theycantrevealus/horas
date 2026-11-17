@@ -12,7 +12,6 @@ import { type ActorRef } from '@utility/history/actor'
 import { withChangeReason } from '@utility/history/reason'
 import { getRequestContext } from '@utility/logger/context'
 import { AppLogger } from '@utility/logger/service'
-import { CsvReadError, readCsv } from '@utility/validation/csv'
 import { type HolidayCalendarRepository } from '@repository/interface/holiday-calendar'
 import { type HrImportRepository } from '@repository/interface/hr-import'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
@@ -22,6 +21,7 @@ import {
   REPOSITORY_HR_IMPORT,
 } from '@repository/token'
 import { observe } from '../observe'
+import { readCsvBody } from './read-csv-body'
 import { ParameterService } from '../parameter/parameter.service'
 import {
   ConflictError,
@@ -38,16 +38,6 @@ import {
 import { HOLIDAY_LIMITS } from './holiday-rules'
 
 const NAME = 'HolidayImportService'
-
-/**
- * Messages for the files that cannot be read at all.
- */
-const READ_MESSAGES: Record<CsvReadError['code'], string> = {
-  empty_file: 'The file is empty.',
-  invalid_encoding: 'The file must be UTF-8 text.',
-  invalid_csv:
-    'The file is not a valid CSV: check the quotes and that every row has as many cells as the header.',
-}
 
 /**
  * Data of a holiday import.
@@ -162,12 +152,7 @@ export class HolidayImportService {
     calendar: HolidayCalendar,
     content: unknown,
   ): Promise<FileAnalysis> {
-    if (typeof content !== 'string') {
-      throw new InvalidRequestError(
-        'csv_required',
-        'Send the file as the request body with the content type text/csv.',
-      )
-    }
+    const table = readCsvBody(content)
     const maxRows = Number(
       (await this.parameters.resolve(tenantId, { key: 'IMPORT_MAX_ROWS' })).value,
     )
@@ -175,15 +160,6 @@ export class HolidayImportService {
       (await this.parameters.resolve(tenantId, { key: 'IMPORT_MAX_ERRORS' }))
         .value,
     )
-    let table: ReturnType<typeof readCsv>
-    try {
-      table = readCsv(content)
-    } catch (error: unknown) {
-      if (error instanceof CsvReadError) {
-        throw new InvalidRequestError(error.code, READ_MESSAGES[error.code])
-      }
-      throw error
-    }
     if (table.rows.length > maxRows) {
       throw new InvalidRequestError(
         'too_many_rows',
@@ -191,7 +167,7 @@ export class HolidayImportService {
       )
     }
     return {
-      sha256: createHash('sha256').update(content, 'utf8').digest('hex'),
+      sha256: createHash('sha256').update(content as string, 'utf8').digest('hex'),
       parsed: parseHolidayFile(table, calendar.year),
       maxErrors,
     }

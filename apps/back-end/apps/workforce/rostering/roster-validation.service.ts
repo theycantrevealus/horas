@@ -326,23 +326,33 @@ export class RosterValidationService {
   }
 
   /**
-   * Runs every rule on a roster without writing anything.
+   * Runs every rule on a roster without writing anything. Assignments that are not stored yet can
+   * be passed in `extra`: they are checked as if they were part of the roster, which is how an
+   * import previews the coverage and the rest days its file would leave (HR plan 5.6 IM6).
    *
    * @param tenantId - Tenant of the caller.
    * @param roster - The roster.
+   * @param extra - Planned assignments of the roster that are not stored yet.
    * @returns The violations, the coverage gaps and the counts.
    * @throws NotFoundError `roster_not_found`.
    */
-  async report(tenantId: string, roster: Roster): Promise<ValidationReport> {
+  async report(
+    tenantId: string,
+    roster: Roster,
+    extra: RosterAssignment[] = [],
+  ): Promise<ValidationReport> {
     const unit = await this.units.findOne(roster.unit_id)
     const facility = await this.facilities.findOne(roster.facility_id)
     if (!unit || unit.tenant_id !== tenantId || !facility) {
       throw this.notFound()
     }
-    const planned = await this.assignments.findByRoster(tenantId, roster.id, {
-      status: 'planned',
-      limit: MAX_ASSIGNMENTS,
-    })
+    const planned = [
+      ...(await this.assignments.findByRoster(tenantId, roster.id, {
+        status: 'planned',
+        limit: MAX_ASSIGNMENTS,
+      })),
+      ...extra,
+    ]
     const employees = new Map<string, Employee>()
     for (const employeeId of new Set(planned.map((item) => item.employee_id))) {
       const employee = await this.employees.findOne(employeeId)
@@ -369,14 +379,15 @@ export class RosterValidationService {
           violations.push(this.violation(code, assignment))
         }
       }
-      const all = (
-        await this.assignments.findPlannedByEmployeeBetween(
+      const all = [
+        ...(await this.assignments.findPlannedByEmployeeBetween(
           tenantId,
           employeeId,
           addDays(own[0]?.date ?? roster.period.start, -8),
           addDays(own.at(-1)?.date ?? roster.period.end, 8),
-        )
-      ).sort((left, right) => this.order(left, right))
+        )),
+        ...extra.filter((item) => item.employee_id === employeeId),
+      ].sort((left, right) => this.order(left, right))
       for (const assignment of own) {
         const position = all.findIndex((item) => item.id === assignment.id)
         const earlier = all.slice(0, position < 0 ? 0 : position)

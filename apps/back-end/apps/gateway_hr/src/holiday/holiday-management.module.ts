@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { WorkforceModule } from '@workforce/workforce.module'
-import { CsvBodyParser } from './csv-body'
+import { CsvBodyParser } from '../http/csv-body'
 import { HolidayController } from './holiday.controller'
 
 /**
