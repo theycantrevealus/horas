@@ -10,6 +10,7 @@ import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credenti
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { CoverageRequirementRepositoryModule } from '@repository/mongo/coverage-requirement.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
+import { PracticeScheduleRepositoryModule } from '@repository/mongo/practice-schedule.module'
 import { ShiftSwapRequestRepositoryModule } from '@repository/mongo/shift-swap-request.module'
 import { RosterRepositoryModule } from '@repository/mongo/roster.module'
 import { HolidayCalendarRepositoryModule } from '@repository/mongo/holiday-calendar.module'
@@ -39,6 +40,7 @@ import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
 import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
+import { PracticeScheduleService } from './rostering/practice-schedule.service'
 import { RosterImportService } from './rostering/roster-import.service'
 import { SwapService } from './rostering/swap.service'
 import { RosterValidationService } from './rostering/roster-validation.service'
@@ -96,6 +98,7 @@ import { UnitService } from './structure/unit.service'
     RosterRepositoryModule,
     RosterAssignmentRepositoryModule,
     ShiftSwapRequestRepositoryModule,
+    PracticeScheduleRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -129,6 +132,7 @@ import { UnitService } from './structure/unit.service'
     RosterValidationService,
     RosterImportService,
     SwapService,
+    PracticeScheduleService,
     HrImportService,
     DutyService,
     EligibilityService,
@@ -165,6 +169,7 @@ import { UnitService } from './structure/unit.service'
     RosterValidationService,
     RosterImportService,
     SwapService,
+    PracticeScheduleService,
     HrImportService,
     DutyService,
     EligibilityService,
