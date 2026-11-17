@@ -214,7 +214,7 @@ describe('SwapService', () => {
     const parameters = { resolve: async (_tenant: string, { key }: { key: string }) => ({ value: limits[key] }) } as unknown as ParameterService
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new SwapService(swaps, assignments, rosters, units, facilities, employees, eligibility, parameters, logger)
+    service = new SwapService(swaps, assignments, rosters, units, facilities, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, logger)
     facilityId = (
       await asUser(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -497,6 +497,151 @@ describe('SwapService', () => {
       expect(await service.listOwn(tenantId, siti.id, { status: 'approved' })).toEqual([])
       expect(() => service.listOwn(tenantId, null, {})).toThrow(expect.objectContaining({ code: 'employee_required' }))
       expect(log).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('approve and reject', () => {
+    /**
+     * Makes an accepted request of a trade between the two employees.
+     *
+     * @returns The request and both assignments.
+     */
+    async function accepted() {
+      const mine = await addAssignment(siti, '2099-03-10')
+      const theirs = await addAssignment(budi, '2099-03-11')
+      const swap = await ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id, counterpartAssignmentId: theirs.id })
+      const ready = await asUser(() => service.accept(tenantId, budi.id, swap.id, {}))
+      return { swap: ready, mine, theirs }
+    }
+
+    /**
+     * Approves as a Head of Unit with no linked employee.
+     *
+     * @param id - Request identifier.
+     * @param input - Version and reason.
+     * @returns The approved request.
+     */
+    function approve(id: string, input: { version?: number; reason?: string } = {}) {
+      return asUser(() => service.approve(tenantId, null, id, input))
+    }
+
+    it('approves a trade in one move: the old assignments are cancelled, the new ones exist with the source swap, the roster revision goes up', async () => {
+      const { swap, mine, theirs } = await accepted()
+      log.mockClear()
+
+      const approved = await approve(swap.id, { reason: 'Setuju' })
+
+      expect(approved).toMatchObject({ id: swap.id, status: 'approved', decision: { by: { account_id: 'u1' }, reason: 'Setuju' } })
+      expect(approved.decision?.at).toBeInstanceOf(Date)
+      expect(approved.resulting_assignment_ids).toHaveLength(2)
+      expect((await assignments.findOne(mine.id))?.status).toBe('cancelled')
+      expect((await assignments.findOne(theirs.id))?.status).toBe('cancelled')
+      expect(await assignments.findOne(mine.id)).toMatchObject({ revision: 2, change_reason: 'shift_swap' })
+      const [toBudi, toSiti] = await Promise.all(approved.resulting_assignment_ids.map((id) => assignments.findOne(id)))
+      expect(toBudi).toMatchObject({ employee_id: budi.id, date: '2099-03-10', status: 'planned', role: 'staff', source: { kind: 'swap', ref_id: swap.id }, revision: 2, change_reason: 'shift_swap', overtime: null, shift: mine.shift, starts_at: mine.starts_at, ends_at: mine.ends_at })
+      expect(toSiti).toMatchObject({ employee_id: siti.id, date: '2099-03-11', source: { kind: 'swap', ref_id: swap.id }, revision: 2 })
+      expect((await rosters.findOne(roster.id))?.revision).toBe(2)
+      expect(log).toHaveBeenCalledTimes(1)
+      expect(log.mock.calls[0]?.[0]).toMatchObject({ event: 'swap_approve', outcome: 'success' })
+      for (const text of ['Setuju', '2099-03-10', siti.id, budi.id]) {
+        expect(JSON.stringify([log.mock.calls, warn.mock.calls])).not.toContain(text)
+      }
+    })
+
+    it('approves a hand-over: the requester gives the shift up and the counterpart takes it', async () => {
+      const mine = await addAssignment(siti, '2099-03-10', { role: 'team_leader' })
+      const swap = await ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id })
+      await asUser(() => service.accept(tenantId, budi.id, swap.id, {}))
+
+      const approved = await approve(swap.id)
+
+      expect(approved.decision?.reason).toBeNull()
+      expect(approved.resulting_assignment_ids).toHaveLength(1)
+      expect((await assignments.findOne(mine.id))?.status).toBe('cancelled')
+      expect(await assignments.findOne(approved.resulting_assignment_ids[0] ?? '')).toMatchObject({ employee_id: budi.id, role: 'team_leader', date: '2099-03-10' })
+      expect(await assignments.findByRoster(tenantId, roster.id, { employeeId: siti.id, status: 'planned' })).toEqual([])
+    })
+
+    it('needs an accepted request, and refuses a final one', async () => {
+      const mine = await addAssignment(siti, '2099-03-10')
+      const swap = await ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id })
+      expect(await rejection(() => approve(swap.id))).toMatchObject({ code: 'invalid_transition' })
+      await asUser(() => service.accept(tenantId, budi.id, swap.id, {}))
+      await approve(swap.id)
+      expect(await rejection(() => approve(swap.id))).toMatchObject({ code: 'invalid_transition' })
+      expect(await rejection(() => asUser(() => service.reject(tenantId, null, swap.id, { reason: 'Tidak' })))).toMatchObject({ code: 'invalid_transition' })
+    })
+
+    it('is never decided by the requester or the counterpart, but may be by an account without an employee', async () => {
+      const { swap } = await accepted()
+      for (const party of [siti, budi]) {
+        expect(await rejection(() => asUser(() => service.approve(tenantId, party.id, swap.id, {})))).toMatchObject({ code: 'decider_is_party' })
+        expect(await rejection(() => asUser(() => service.reject(tenantId, party.id, swap.id, { reason: 'x' })))).toMatchObject({ code: 'decider_is_party' })
+      }
+      const head = await addEmployee('E010')
+      expect((await asUser(() => service.approve(tenantId, head.id, swap.id, {}))).status).toBe('approved')
+    })
+
+    it('answers a stale version, a bad reason, no actor, and not found for a missing, malformed or foreign request', async () => {
+      const { swap } = await accepted()
+      expect(await rejection(() => approve(swap.id, { version: swap.version + 5 }))).toMatchObject({ code: 'stale_version' })
+      expect(await rejection(() => approve(swap.id, { reason: 'x'.repeat(501) }))).toMatchObject({ code: 'invalid_reason' })
+      expect(await rejection(() => service.approve(tenantId, null, swap.id, {}))).toMatchObject({ code: 'actor_required' })
+      const foreign = await asUser(() => swaps.create(Object.assign({}, swap, { tenant_id: otherTenantId }) as never))
+      for (const id of [foreign.id, new Types.ObjectId().toHexString(), 'bad']) {
+        expect(await rejection(() => approve(id))).toMatchObject({ code: 'swap_not_found' })
+      }
+      expect((await swaps.findOne(swap.id))?.status).toBe('accepted_by_counterpart')
+    })
+
+    it('checks the result again, writes nothing when it no longer holds, and leaves the request for the Head to reject', async () => {
+      const { swap, mine } = await accepted()
+      await addAssignment(budi, '2099-03-10', { shift: { definition_id: new Types.ObjectId().toHexString(), code: 'S', type: 'regular', start_time: '14:00', end_time: '22:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-10T07:00:00Z'), ends_at: new Date('2099-03-10T15:00:00Z') })
+
+      expect(await rejection(() => approve(swap.id))).toMatchObject({ code: 'assignment_exists' })
+
+      expect((await swaps.findOne(swap.id))?.status).toBe('accepted_by_counterpart')
+      expect((await assignments.findOne(mine.id))?.status).toBe('planned')
+      expect((await rosters.findOne(roster.id))?.revision).toBe(1)
+      expect((await asUser(() => service.reject(tenantId, null, swap.id, { reason: 'Jadwal berubah' }))).status).toBe('rejected')
+    })
+
+    it('refuses when the roster changed after the request was read (stale roster)', async () => {
+      const { swap } = await accepted()
+      const original = rosters.update.bind(rosters)
+      vi.spyOn(rosters, 'update').mockImplementationOnce(async (id, changes) => {
+        await original(id, { validation: null })
+        return original(id, changes, { expectedVersion: 0 })
+      })
+
+      expect(await rejection(() => approve(swap.id))).toMatchObject({ code: 'stale_version' })
+    })
+
+    it('rejects an open request with a reason, before or after the counterpart accepted', async () => {
+      const a = await addAssignment(siti, '2099-03-10')
+      const first = await ask(siti, { assignmentId: a.id, counterpartEmployeeId: budi.id })
+      log.mockClear()
+
+      const rejected = await asUser(() => service.reject(tenantId, null, first.id, { reason: 'Kurang orang' }))
+
+      expect(rejected).toMatchObject({ status: 'rejected', decision: { by: { account_id: 'u1' }, reason: 'Kurang orang' } })
+      expect(log.mock.calls[0]?.[0]).toMatchObject({ event: 'swap_reject', outcome: 'success' })
+      expect(JSON.stringify(log.mock.calls)).not.toContain('Kurang orang')
+      const second = await ask(siti, { assignmentId: a.id, counterpartEmployeeId: budi.id })
+      await asUser(() => service.accept(tenantId, budi.id, second.id, {}))
+      expect((await asUser(() => service.reject(tenantId, null, second.id, { reason: 'Tidak' }))).status).toBe('rejected')
+      expect((await assignments.findOne(a.id))?.status).toBe('planned')
+    })
+
+    it('needs a reason of 1 to 500 characters to reject, and a stale version is refused', async () => {
+      const a = await addAssignment(siti, '2099-03-10')
+      const swap = await ask(siti, { assignmentId: a.id, counterpartEmployeeId: budi.id })
+      for (const [code, reason] of [['reason_required', undefined], ['reason_required', ''], ['invalid_reason', 'x'.repeat(501)]] as const) {
+        expect(await rejection(() => asUser(() => service.reject(tenantId, null, swap.id, { reason })))).toMatchObject({ code })
+      }
+      expect(await rejection(() => asUser(() => service.reject(tenantId, null, swap.id, { reason: 'Tidak', version: swap.version + 5 })))).toMatchObject({ code: 'stale_version' })
+      expect(await rejection(() => service.reject(tenantId, null, swap.id, { reason: 'Tidak' }))).toMatchObject({ code: 'actor_required' })
+      expect((await swaps.findOne(swap.id))?.status).toBe('requested')
     })
   })
 })

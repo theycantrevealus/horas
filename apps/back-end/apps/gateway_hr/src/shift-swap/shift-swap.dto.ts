@@ -118,3 +118,33 @@ export class SwapMoveDto {
   @Min(0)
   version?: number
 }
+
+/**
+ * Body of `POST /v1/shift-swaps/:id/approve`.
+ *
+ * @property version - Version of the request the client read.
+ * @property reason - Optional note of the Head of Unit, 1 to 500 characters.
+ */
+export class ApproveSwapDto extends SwapMoveDto {
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason?: string
+}
+
+/**
+ * Body of `POST /v1/shift-swaps/:id/reject`.
+ *
+ * @property version - Version of the request the client read.
+ * @property reason - Why, 1 to 500 characters.
+ */
+export class RejectSwapDto extends SwapMoveDto {
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason!: string
+}
+
