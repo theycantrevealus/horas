@@ -13,6 +13,7 @@ import {
   REPOSITORY_ROSTER_ASSIGNMENT,
   REPOSITORY_SHIFT_SWAP_REQUEST,
   REPOSITORY_PRACTICE_SCHEDULE,
+  REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION,
   REPOSITORY_HR_IMPORT,
   REPOSITORY_SHIFT_DEFINITION,
   REPOSITORY_EMPLOYEE,
@@ -38,6 +39,7 @@ import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
 import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-requirement'
 import { RosterAssignmentEntity } from '@repository/mongo/schema/roster-assignment'
 import { PracticeScheduleEntity } from '@repository/mongo/schema/practice-schedule'
+import { PracticeScheduleExceptionEntity } from '@repository/mongo/schema/practice-schedule-exception'
 import { ShiftSwapRequestEntity } from '@repository/mongo/schema/shift-swap-request'
 import { RosterEntity } from '@repository/mongo/schema/roster'
 import { HrImportEntity } from '@repository/mongo/schema/hr-import'
@@ -66,6 +68,7 @@ import {
   InMemoryCoverageRequirements,
   InMemoryHolidayCalendars,
   InMemoryRosterAssignments,
+  InMemoryPracticeScheduleExceptions,
   InMemoryPracticeSchedules,
   InMemoryShiftSwapRequests,
   InMemoryRosters,
@@ -118,6 +121,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property rosterAssignments - Roster assignment repository.
  * @property swaps - Shift swap request repository.
  * @property practiceSchedules - Practice schedule repository.
+ * @property practiceExceptions - Practice schedule exception repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -148,6 +152,7 @@ export interface InMemoryWorkforce {
   rosterAssignments: InMemoryRosterAssignments
   swaps: InMemoryShiftSwapRequests
   practiceSchedules: InMemoryPracticeSchedules
+  practiceExceptions: InMemoryPracticeScheduleExceptions
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -186,6 +191,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const rosterAssignments = new InMemoryRosterAssignments()
   const swaps = new InMemoryShiftSwapRequests()
   const practiceSchedules = new InMemoryPracticeSchedules()
+  const practiceExceptions = new InMemoryPracticeScheduleExceptions()
   return {
     organizations,
     facilities,
@@ -214,6 +220,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     rosterAssignments,
     swaps,
     practiceSchedules,
+    practiceExceptions,
     options: {
       entities: [
         OrganizationEntity,
@@ -243,6 +250,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         RosterAssignmentEntity,
         ShiftSwapRequestEntity,
         PracticeScheduleEntity,
+        PracticeScheduleExceptionEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -272,6 +280,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_ROSTER_ASSIGNMENT, rosterAssignments],
         [REPOSITORY_SHIFT_SWAP_REQUEST, swaps],
         [REPOSITORY_PRACTICE_SCHEDULE, practiceSchedules],
+        [REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION, practiceExceptions],
       ],
     },
   }

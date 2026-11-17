@@ -1,5 +1,6 @@
 import { Transform, Type } from 'class-transformer'
 import {
+  IsDefined,
   IsIn,
   IsInt,
   IsMongoId,
@@ -10,8 +11,10 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator'
 import { IsLocalDate } from '@utility/validation/local-date'
+import { CodingDto } from '../code-concept/code-concept.dto'
 
 /**
  * Trims a string value before validation; other values pass through unchanged.
@@ -195,3 +198,76 @@ export class EndPracticeScheduleDto {
   @MaxLength(500)
   reason?: string
 }
+
+/**
+ * The new time of a moved session.
+ *
+ * @property date - New date.
+ * @property startTime - New local start `HH:mm`.
+ * @property endTime - New local end `HH:mm`.
+ */
+export class MovedToDto {
+  @IsLocalDate()
+  date!: string
+
+  @Matches(TIME_SHAPE)
+  startTime!: string
+
+  @Matches(TIME_SHAPE)
+  endTime!: string
+}
+
+/**
+ * Body of `POST /v1/practice-schedules/:id/exceptions`.
+ *
+ * @property date - The date of the session.
+ * @property kind - `cancelled` or `moved`.
+ * @property reason - A code of `id.practice-exception-reason`.
+ * @property movedTo - Where the session goes; required for `moved`, refused for `cancelled`.
+ * @property version - Version of the schedule the client read.
+ */
+export class CreateExceptionDto {
+  @IsLocalDate()
+  date!: string
+
+  @IsIn(['cancelled', 'moved'])
+  kind!: 'cancelled' | 'moved'
+
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => CodingDto)
+  reason!: CodingDto
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MovedToDto)
+  movedTo?: MovedToDto
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+}
+
+/**
+ * Body of `POST /v1/practice-schedule-exceptions/:id/cancel`.
+ *
+ * @property version - Version of the exception the client read.
+ * @property reason - Why, kept in the change history.
+ */
+export class UndoExceptionDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  reason?: string
+}
+
