@@ -148,3 +148,34 @@ export class ReturnRosterDto {
   @MaxLength(1000)
   reason!: string
 }
+
+/**
+ * Body of `POST /v1/rosters/:id/coverage-overrides`; the service checks that the gap exists.
+ *
+ * @property date - The day of the gap.
+ * @property shiftId - The shift of the gap.
+ * @property requirementId - The requirement that is not met.
+ * @property reason - Why the gap is accepted; required.
+ * @property version - Version of the roster the client read.
+ */
+export class CoverageOverrideDto {
+  @IsLocalDate()
+  date!: string
+
+  @IsMongoId()
+  shiftId!: string
+
+  @IsMongoId()
+  requirementId!: string
+
+  @Transform(trim)
+  @IsString()
+  @MaxLength(1000)
+  reason!: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  version?: number
+}

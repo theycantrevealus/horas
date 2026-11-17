@@ -395,6 +395,134 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
     expect((await call('POST', `/v1/roster-assignments/${id}/cancel`, correctorToken, { reason: 'Salah isi' })).status).toBe(201)
   })
 
+  describe('who is on duty and my own roster', () => {
+    let publishedId: string
+    let meId: string
+    let meToken: string
+    let unlinkedToken: string
+
+    /**
+     * Stores a planned assignment in the published roster, starting at a UTC hour of a day.
+     *
+     * @param employeeId - The employee.
+     * @param date - The day.
+     * @param from - Start hour (UTC).
+     * @param to - End hour (UTC).
+     * @param role - Role in the shift.
+     * @returns The assignment identifier.
+     */
+    async function duty(employeeId: string, date: string, from: number, to: number, role: 'staff' | 'team_leader' = 'staff') {
+      const day = Date.parse(`${date}T00:00:00Z`)
+      return (
+        await workforce.rosterAssignments.create({
+          tenant_id: tenantId,
+          roster_id: publishedId,
+          unit_id: unitId,
+          facility_id: facilityId,
+          employee_id: employeeId,
+          date,
+          shift: { definition_id: morningId, code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false },
+          starts_at: new Date(day + from * 3_600_000),
+          ends_at: new Date(day + to * 3_600_000),
+          role,
+          status: 'planned',
+          source: { kind: 'roster', ref_id: publishedId },
+          change_reason: null,
+          revision: 1,
+          overtime: null,
+          flag: null,
+          is_flagged: false,
+        })
+      ).id
+    }
+
+    beforeAll(async () => {
+      publishedId = (
+        await workforce.rosters.create({
+          tenant_id: tenantId,
+          unit_id: unitId,
+          facility_id: facilityId,
+          period: { start: '2099-06-01', end: '2099-06-30' },
+          status: 'published',
+          revision: 1,
+          prepared_by: { account_id: 'head', display_name: 'Head', kind: 'account' },
+          submitted: null,
+          approved: null,
+          published: null,
+          closed: null,
+          return_reason: null,
+          coverage_overrides: [],
+          validation: null,
+        })
+      ).id
+      meId = await addEmployee()
+      meToken = await gateway.seedAndLogin(tenantId, 'me', [], meId)
+      unlinkedToken = await gateway.seedAndLogin(tenantId, 'unlinked', [], null)
+    })
+
+    it('answers who is on duty in a unit at a moment, with the role', async () => {
+      const first = await duty(meId, '2099-06-10', 8, 16)
+      const lead = await duty(await addEmployee(), '2099-06-10', 10, 18, 'team_leader')
+      await duty(await addEmployee(), '2099-06-10', 17, 23)
+
+      const reply = await call('GET', `/v1/units/${unitId}/on-duty?at=2099-06-10T12:00:00Z`, readerToken)
+
+      expect(reply.status).toBe(200)
+      expect((reply.body as any[]).map((item) => [item.id, item.role])).toEqual([[first, 'staff'], [lead, 'team_leader']])
+      expect((reply.body as any[])[0]).not.toHaveProperty('_id')
+      expect((await call('GET', `/v1/units/${unitId}/on-duty`, readerToken)).body).toEqual([])
+    })
+
+    it('refuses on-duty without a token or the read permission, and answers 404 for a missing, malformed or foreign unit', async () => {
+      expect((await call('GET', `/v1/units/${unitId}/on-duty`)).status).toBe(401)
+      expect((await call('GET', `/v1/units/${unitId}/on-duty`, unlinkedToken)).status).toBe(403)
+      for (const id of [new Types.ObjectId().toHexString(), 'bad']) {
+        expect((await call('GET', `/v1/units/${id}/on-duty`, readerToken)).body).toMatchObject({ code: 'unit_not_found' })
+      }
+      expect((await call('GET', `/v1/units/${unitId}/on-duty`, otherTenantToken)).status).toBe(404)
+      expect((await call('GET', `/v1/units/${unitId}/on-duty?at=soon`, readerToken)).status).toBe(400)
+    })
+
+    it('answers my own shifts between two dates, with no permission, and refuses an account without an employee', async () => {
+      const mine = await duty(meId, '2099-06-12', 8, 16)
+      await duty(await addEmployee(), '2099-06-12', 8, 16)
+
+      const reply = await call('GET', '/v1/employees/me/roster?from=2099-06-10&to=2099-06-15', meToken)
+
+      expect(reply.status).toBe(200)
+      expect((reply.body as any[]).map((item) => item.id)).toContain(mine)
+      expect((reply.body as any[]).every((item) => item.employee_id === meId)).toBe(true)
+      expect((await call('GET', '/v1/employees/me/roster?from=2099-06-10&to=2099-06-15')).status).toBe(401)
+      const unlinked = await call('GET', '/v1/employees/me/roster?from=2099-06-10&to=2099-06-15', unlinkedToken)
+      expect(unlinked.status).toBe(403)
+      expect(unlinked.body).toMatchObject({ code: 'employee_required' })
+    })
+
+    it('refuses a bad range for my roster', async () => {
+      for (const query of ['', 'from=2099-06-10', 'from=2099-02-30&to=2099-06-15', 'from=soon&to=2099-06-15']) {
+        expect((await call('GET', `/v1/employees/me/roster?${query}`, meToken)).status).toBe(400)
+      }
+      expect((await call('GET', '/v1/employees/me/roster?from=2099-06-15&to=2099-06-10', meToken)).body).toMatchObject({ code: 'invalid_range' })
+      expect((await call('GET', '/v1/employees/me/roster?from=2099-03-01&to=2099-05-03', meToken)).body).toMatchObject({ code: 'invalid_range' })
+    })
+
+    it('writes no log entry for either read, except the access log', async () => {
+      const { written, restore } = captureLogs()
+      try {
+        const replies = [
+          await call('GET', `/v1/units/${unitId}/on-duty`, readerToken),
+          await call('GET', '/v1/employees/me/roster?from=2099-06-10&to=2099-06-15', meToken),
+          await call('GET', '/v1/employees/me/roster?from=x&to=y', meToken),
+        ]
+        expect(replies.map((reply) => reply.status)).toEqual([200, 200, 400])
+        await vi.waitFor(() => expect(written.filter((entry) => entry.event === 'http_request')).toHaveLength(replies.length))
+        expect(written.filter((entry) => entry.event !== 'http_request')).toEqual([])
+      } finally {
+        restore()
+      }
+    })
+  })
+
   it('refuses to retire a shift an open roster uses, and allows it once the assignment is cancelled', async () => {
     const used = await addShift('USED')
     const employeeId = await addEmployee()

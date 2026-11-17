@@ -3,8 +3,13 @@ import { type Roster } from '@repository/model/roster'
 import { type AuthenticatedUser } from '@identity/authenticated-user'
 import { CurrentUser, RequirePermissions } from '@identity/guard/decorators'
 import { PERMISSIONS } from '@identity/permission'
+import {
+  RosterValidationService,
+  type ValidationAnswer,
+} from '@workforce/rostering/roster-validation.service'
 import { RosterService } from '@workforce/rostering/roster.service'
 import {
+  CoverageOverrideDto,
   CreateRosterDto,
   ListRostersDto,
   ReturnRosterDto,
@@ -18,8 +23,12 @@ import {
 export class RosterController {
   /**
    * @param rosters - Roster service.
+   * @param validation - Validation service.
    */
-  constructor(private readonly rosters: RosterService) {}
+  constructor(
+    private readonly rosters: RosterService,
+    private readonly validation: RosterValidationService,
+  ) {}
 
   /**
    * Handles `GET /v1/rosters`: lists rosters, latest period first.
@@ -170,5 +179,46 @@ export class RosterController {
     @Body() body: RosterMoveDto,
   ): Promise<Roster> {
     return this.rosters.close(user.tenant_id, id, body)
+  }
+
+  /**
+   * Handles `POST /v1/rosters/:id/validate`: checks every rule and the coverage of a roster and
+   * answers the violations and the gaps. Nothing is refused.
+   *
+   * @param user - Signed-in user.
+   * @param id - Roster identifier.
+   * @returns The report and when it ran.
+   */
+  @Post(':id/validate')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_ROSTER_VALIDATE)
+  validate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<ValidationAnswer> {
+    return this.validation.validate(user.tenant_id, id)
+  }
+
+  /**
+   * Handles `POST /v1/rosters/:id/coverage-overrides`: accepts a coverage gap with a reason.
+   *
+   * @param user - Signed-in user.
+   * @param id - Roster identifier.
+   * @param body - The gap and the reason.
+   * @returns The roster with the override.
+   */
+  @Post(':id/coverage-overrides')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_ROSTER_OVERRIDE)
+  addOverride(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: CoverageOverrideDto,
+  ): Promise<Roster> {
+    return this.validation.addOverride(user.tenant_id, id, {
+      date: body.date,
+      shiftId: body.shiftId,
+      requirementId: body.requirementId,
+      reason: body.reason,
+      version: body.version,
+    })
   }
 }
