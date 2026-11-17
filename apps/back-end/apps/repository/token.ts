@@ -196,3 +196,10 @@ export const REPOSITORY_ROSTER = Symbol('REPOSITORY_ROSTER')
 export const REPOSITORY_ROSTER_ASSIGNMENT = Symbol(
   'REPOSITORY_ROSTER_ASSIGNMENT',
 )
+
+/**
+ * Injection token for the shift swap request repository (a request to trade or hand over a shift).
+ */
+export const REPOSITORY_SHIFT_SWAP_REQUEST = Symbol(
+  'REPOSITORY_SHIFT_SWAP_REQUEST',
+)

@@ -10,6 +10,7 @@ import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credenti
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { CoverageRequirementRepositoryModule } from '@repository/mongo/coverage-requirement.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
+import { ShiftSwapRequestRepositoryModule } from '@repository/mongo/shift-swap-request.module'
 import { RosterRepositoryModule } from '@repository/mongo/roster.module'
 import { HolidayCalendarRepositoryModule } from '@repository/mongo/holiday-calendar.module'
 import { HrImportRepositoryModule } from '@repository/mongo/hr-import.module'
@@ -39,6 +40,7 @@ import { CoverageService } from './rostering/coverage.service'
 import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
 import { RosterImportService } from './rostering/roster-import.service'
+import { SwapService } from './rostering/swap.service'
 import { RosterValidationService } from './rostering/roster-validation.service'
 import { RosterService } from './rostering/roster.service'
 import { HolidayImportService } from './rostering/holiday-import.service'
@@ -93,6 +95,7 @@ import { UnitService } from './structure/unit.service'
     CoverageRequirementRepositoryModule,
     RosterRepositoryModule,
     RosterAssignmentRepositoryModule,
+    ShiftSwapRequestRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -125,6 +128,7 @@ import { UnitService } from './structure/unit.service'
     RosterAssignmentService,
     RosterValidationService,
     RosterImportService,
+    SwapService,
     HrImportService,
     DutyService,
     EligibilityService,
@@ -160,6 +164,7 @@ import { UnitService } from './structure/unit.service'
     RosterAssignmentService,
     RosterValidationService,
     RosterImportService,
+    SwapService,
     HrImportService,
     DutyService,
     EligibilityService,

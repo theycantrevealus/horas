@@ -24,6 +24,7 @@ import { AppointmentManagementModule } from './appointment/appointment-managemen
 import { CoverageManagementModule } from './coverage-requirement/coverage-management.module'
 import { HrImportManagementModule } from './hr-import/hr-import-management.module'
 import { RosterImportManagementModule } from './roster-import/roster-import-management.module'
+import { ShiftSwapManagementModule } from './shift-swap/shift-swap-management.module'
 import { RosterAssignmentManagementModule } from './roster-assignment/roster-assignment-management.module'
 import { RosterManagementModule } from './roster/roster-management.module'
 import { HolidayManagementModule } from './holiday/holiday-management.module'
@@ -92,6 +93,7 @@ import { PositionManagementModule } from './position/position-management.module'
     RosterManagementModule,
     RosterAssignmentManagementModule,
     RosterImportManagementModule,
+    ShiftSwapManagementModule,
     HrImportManagementModule,
     CoverageManagementModule,
     PrivateProfileManagementModule,
