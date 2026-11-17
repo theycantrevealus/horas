@@ -285,6 +285,27 @@ describe('RosterAssignmentRepository on the shared Mongo base', () => {
     expect(model.findOne).not.toHaveBeenCalled()
   })
 
+  it('finds who is on duty in a unit at an instant, without flagged assignments', async () => {
+    const tenant = tenantId.toHexString()
+    const at = new Date('2027-03-10T15:00:00Z')
+    await assignments.findOnDuty(tenant, unitId.toHexString(), at)
+    expect(model.find).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tenant_id: tenant,
+        unit_id: unitId.toHexString(),
+        status: 'planned',
+        is_flagged: false,
+        starts_at: { $lte: at },
+        ends_at: { $gt: at },
+        deleted_at: null,
+      }),
+    )
+    model.find.mockClear()
+    expect(await assignments.findOnDuty('x', unitId.toHexString(), at)).toEqual([])
+    expect(await assignments.findOnDuty(tenant, 'bad', at)).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('finds the planned assignments of a shift in some rosters, and nothing for none', async () => {
     const tenant = tenantId.toHexString()
     await assignments.findPlannedByShiftInRosters(tenant, shiftId.toHexString(), [rosterId.toHexString()], 1)

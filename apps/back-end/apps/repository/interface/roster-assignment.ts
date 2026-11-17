@@ -74,6 +74,21 @@ export interface RosterAssignmentRepository extends Repository<RosterAssignment>
   ): Promise<RosterAssignment | null>
 
   /**
+   * Finds the planned assignments of a unit that are on duty at an instant: they started at or
+   * before it, end after it, and carry no unresolved flag (`HR-ROS-031`).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @param at - The instant.
+   * @returns The assignments on duty, possibly none.
+   */
+  findOnDuty(
+    tenantId: string,
+    unitId: string,
+    at: Date,
+  ): Promise<RosterAssignment[]>
+
+  /**
    * Finds planned assignments of a shift in some rosters, to tell whether the shift is in use.
    *
    * @param tenantId - Tenant to search in.

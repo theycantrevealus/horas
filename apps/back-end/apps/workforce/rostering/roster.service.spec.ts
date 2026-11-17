@@ -9,6 +9,7 @@ import {
   InMemoryOrganizationUnits,
   InMemoryRosters,
 } from '../testing/in-memory'
+import { InvalidRequestError } from '../workforce.error'
 import { RosterService } from './roster.service'
 
 describe('RosterService', () => {
@@ -19,6 +20,7 @@ describe('RosterService', () => {
   const warn = vi.fn()
   const error = vi.fn()
   const debug = vi.fn()
+  const gate = vi.fn()
   let rosters: InMemoryRosters
   let units: InMemoryOrganizationUnits
   let facilities: InMemoryFacilities
@@ -163,7 +165,8 @@ describe('RosterService', () => {
       }),
     } as unknown as ParameterService
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new RosterService(rosters, units, facilities, parameters, logger)
+    gate.mockResolvedValue({ checked_at: new Date(), violations: 0, coverage_gaps: 0 })
+    service = new RosterService(rosters, units, facilities, parameters, { gate } as never, logger)
     facilityId = await addFacility()
     unitId = await addUnit(facilityId)
   })
@@ -337,6 +340,64 @@ describe('RosterService', () => {
       settings.approval = false
 
       expect(await rejection(() => asHead(() => service.publish(tenantId, draft.id, {})))).toMatchObject({ code: 'invalid_transition' })
+    })
+  })
+
+  describe('the validation gate', () => {
+    it('stores the validation summary of the gate when a roster is submitted', async () => {
+      const summary = { checked_at: new Date('2099-01-01T00:00:00Z'), violations: 0, coverage_gaps: 0 }
+      gate.mockResolvedValueOnce(summary)
+      const draft = await create()
+
+      const submitted = await asHead(() => service.submit(tenantId, draft.id, {}))
+
+      expect(submitted.validation).toEqual(summary)
+      expect(gate).toHaveBeenCalledTimes(1)
+      expect(gate.mock.calls[0]?.[0]).toBe(tenantId)
+    })
+
+    it('refuses to submit a roster the gate refuses, and writes nothing', async () => {
+      const draft = await create()
+      gate.mockRejectedValueOnce(new InvalidRequestError('roster_invalid', 'No.'))
+
+      expect(await rejection(() => asHead(() => service.submit(tenantId, draft.id, {})))).toMatchObject({ code: 'roster_invalid' })
+      gate.mockRejectedValueOnce(new InvalidRequestError('coverage_gaps', 'No.'))
+      expect(await rejection(() => asHead(() => service.submit(tenantId, draft.id, {})))).toMatchObject({ code: 'coverage_gaps' })
+
+      const stored = await rosters.findOne(draft.id)
+      expect(stored).toMatchObject({ status: 'draft', submitted: null, validation: null })
+      expect(warn.mock.calls.at(-1)?.[0]).toMatchObject({ event: 'roster_submit', outcome: 'failure', code: 'coverage_gaps' })
+    })
+
+    it('runs the gate when a draft is published without approval, and refuses the same way', async () => {
+      settings.approval = false
+      const draft = await create()
+      gate.mockRejectedValueOnce(new InvalidRequestError('roster_invalid', 'No.'))
+      expect(await rejection(() => asHead(() => service.publish(tenantId, draft.id, {})))).toMatchObject({ code: 'roster_invalid' })
+      expect((await rosters.findOne(draft.id))?.status).toBe('draft')
+
+      const published = await asHead(() => service.publish(tenantId, draft.id, {}))
+      expect(published.status).toBe('published')
+      expect(published.validation).toMatchObject({ violations: 0, coverage_gaps: 0 })
+    })
+
+    it('does not run the gate again when an approved roster is published, and keeps its validation', async () => {
+      const draft = await create()
+      await asHead(() => service.submit(tenantId, draft.id, {}))
+      await asBoss(() => service.approve(tenantId, draft.id, {}))
+      gate.mockClear()
+
+      const published = await asHead(() => service.publish(tenantId, draft.id, {}))
+
+      expect(gate).not.toHaveBeenCalled()
+      expect(published.validation).toMatchObject({ violations: 0, coverage_gaps: 0 })
+    })
+
+    it('does not run the gate for a refused move', async () => {
+      const draft = await create()
+      await rejection(() => asHead(() => service.publish(tenantId, draft.id, {})))
+      await rejection(() => asBoss(() => service.approve(tenantId, draft.id, {})))
+      expect(gate).not.toHaveBeenCalled()
     })
   })
 

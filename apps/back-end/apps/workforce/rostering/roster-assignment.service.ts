@@ -55,9 +55,9 @@ import {
 import {
   checkWorkingTime,
   type WorkingShift,
-  type WorkingTimeLimits,
   type WorkingTimeViolation,
 } from './working-time'
+import { readWorkingTimeLimits } from './working-time-limits'
 
 const NAME = 'RosterAssignmentService'
 
@@ -712,7 +712,11 @@ export class RosterAssignmentService {
     consent: boolean,
     ignoreId: string | undefined,
   ): Promise<number> {
-    const limits = await this.limits(tenantId, unitId)
+    const limits = await readWorkingTimeLimits(
+      this.parameters,
+      tenantId,
+      unitId,
+    )
     const others: WorkingShift[] = (
       await this.assignments.findPlannedByEmployeeBetween(
         tenantId,
@@ -746,27 +750,6 @@ export class RosterAssignmentService {
       throw new InvalidRequestError(first, WORKING_TIME_MESSAGES[first])
     }
     return result.overtimeMinutes
-  }
-
-  /**
-   * Reads the working-time parameters at a unit.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param unitId - The unit.
-   * @returns The limits.
-   */
-  private async limits(
-    tenantId: string,
-    unitId: string,
-  ): Promise<WorkingTimeLimits> {
-    const read = async (key: string): Promise<number> =>
-      Number((await this.parameters.resolve(tenantId, { key, unitId })).value)
-    return {
-      minRestHours: await read('MIN_REST_HOURS'),
-      maxWeeklyHours: await read('MAX_WEEKLY_HOURS'),
-      maxOvertimeHoursWeek: await read('MAX_OVERTIME_HOURS_WEEK'),
-      maxConsecutiveNights: await read('MAX_CONSECUTIVE_NIGHTS'),
-    }
   }
 
   /**

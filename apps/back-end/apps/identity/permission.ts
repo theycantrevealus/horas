@@ -53,6 +53,8 @@ export const PERMISSIONS = {
   WORKFORCE_COVERAGE_REQUIREMENT_WRITE: 'workforce.coverage-requirement:write',
   WORKFORCE_ROSTER_ASSIGNMENT_READ: 'workforce.roster-assignment:read',
   WORKFORCE_ROSTER_ASSIGNMENT_WRITE: 'workforce.roster-assignment:write',
+  WORKFORCE_ROSTER_VALIDATE: 'workforce.roster:validate',
+  WORKFORCE_ROSTER_OVERRIDE: 'workforce.roster:override',
   WORKFORCE_ROSTER_CORRECT_PAST: 'workforce.roster:correct-past',
   WORKFORCE_ROSTER_READ: 'workforce.roster:read',
   WORKFORCE_ROSTER_WRITE: 'workforce.roster:write',

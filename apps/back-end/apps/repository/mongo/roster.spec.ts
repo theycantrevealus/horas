@@ -309,6 +309,8 @@ describe('RosterRepository on the shared Mongo base', () => {
         published: { by: actor as never, at: new Date() },
         closed: null,
         return_reason: null,
+        coverage_overrides: [],
+        validation: { checked_at: new Date(), violations: 0, coverage_gaps: 0 },
         unit_id: new Types.ObjectId().toHexString(),
         facility_id: new Types.ObjectId().toHexString(),
         period: { start: '2028-01-01', end: '2028-01-31' },
@@ -318,7 +320,7 @@ describe('RosterRepository on the shared Mongo base', () => {
 
     const update = model.findOneAndUpdate.mock.calls[0]?.[1] as { $set: Record<string, unknown> }
     expect(Object.keys(update.$set)).toEqual(
-      expect.arrayContaining(['status', 'revision', 'submitted', 'approved', 'published', 'closed', 'return_reason']),
+      expect.arrayContaining(['status', 'revision', 'submitted', 'approved', 'published', 'closed', 'return_reason', 'coverage_overrides', 'validation']),
     )
     for (const forbidden of ['unit_id', 'facility_id', 'period', 'prepared_by']) {
       expect(update.$set).not.toHaveProperty(forbidden)

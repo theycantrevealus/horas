@@ -18,6 +18,8 @@ describe('roster endpoints (in-memory repositories)', () => {
   let readerToken: string
   let otherTenantToken: string
   let parameterToken: string
+  let validatorToken: string
+  let overrideToken: string
   let tenantId: string
   let otherTenantId: string
   let facilityId: string
@@ -107,6 +109,12 @@ describe('roster endpoints (in-memory repositories)', () => {
     readerToken = await gateway.seedAndLogin(tenantId, 'reader', [
       PERMISSIONS.WORKFORCE_ROSTER_READ,
     ])
+    validatorToken = await gateway.seedAndLogin(tenantId, 'validator', [
+      PERMISSIONS.WORKFORCE_ROSTER_VALIDATE,
+    ])
+    overrideToken = await gateway.seedAndLogin(tenantId, 'overrider', [
+      PERMISSIONS.WORKFORCE_ROSTER_OVERRIDE,
+    ])
     parameterToken = await gateway.seedAndLogin(tenantId, 'params', [
       PERMISSIONS.WORKFORCE_PARAMETER_WRITE,
     ])
@@ -137,7 +145,7 @@ describe('roster endpoints (in-memory repositories)', () => {
 
   it('refuses every route without a token (401), and the writes and approvals without their permission (403)', async () => {
     const id = new Types.ObjectId().toHexString()
-    const routes: ['GET' | 'POST', string, object | undefined, 'read' | 'write' | 'approve'][] = [
+    const routes: ['GET' | 'POST', string, object | undefined, 'read' | 'write' | 'approve' | 'validate' | 'override'][] = [
       ['GET', '/v1/rosters', undefined, 'read'],
       ['GET', `/v1/rosters/${id}`, undefined, 'read'],
       ['POST', '/v1/rosters', {}, 'write'],
@@ -146,6 +154,8 @@ describe('roster endpoints (in-memory repositories)', () => {
       ['POST', `/v1/rosters/${id}/return`, { reason: 'x' }, 'approve'],
       ['POST', `/v1/rosters/${id}/publish`, {}, 'write'],
       ['POST', `/v1/rosters/${id}/close`, {}, 'write'],
+      ['POST', `/v1/rosters/${id}/validate`, {}, 'validate'],
+      ['POST', `/v1/rosters/${id}/coverage-overrides`, {}, 'override'],
     ]
     for (const [method, url, payload] of routes) {
       expect((await call(method, url, undefined, payload)).status).toBe(401)
@@ -153,7 +163,7 @@ describe('roster endpoints (in-memory repositories)', () => {
     for (const [method, url, payload, kind] of routes.filter(([, , , kind]) => kind !== 'read')) {
       expect((await call(method, url, readerToken, payload)).status).toBe(403)
       // The head cannot approve, the approver cannot draft.
-      expect((await call(method, url, kind === 'approve' ? headToken : bossToken, payload)).status).toBe(403)
+      expect((await call(method, url, kind === 'approve' || kind === 'validate' || kind === 'override' ? headToken : bossToken, payload)).status).toBe(403)
     }
     expect((await call('GET', '/v1/rosters', readerToken)).status).toBe(200)
   })
@@ -294,6 +304,198 @@ describe('roster endpoints (in-memory repositories)', () => {
     for (const query of ['limit=0', 'limit=101', 'offset=-1', 'status=gone', 'unitId=bad', 'facilityId=bad', 'from=2099-02-30', 'to=soon']) {
       expect((await call('GET', `/v1/rosters?${query}`, readerToken)).status).toBe(400)
     }
+  })
+
+  describe('validation, overrides and the gate', () => {
+    let shiftId: string
+    let counter = 0
+
+    /**
+     * Stores a roster of a new unit, with a requirement for two employees on one shift on 2099-03-02,
+     * and returns what the tests need.
+     *
+     * @returns The roster, the unit and the requirement.
+     */
+    async function setup() {
+      counter += 1
+      const unit = await addUnit()
+      const roster = (await create(unit)).body as Record<string, any>
+      const requirement = await workforce.coverage.create({
+        tenant_id: tenantId,
+        unit_id: unit,
+        shift_definition_id: shiftId,
+        day_pattern: 'all',
+        match: { workforce_category: null, profession: null, specialty: null, min_clinical_level: null },
+        min_count: 2,
+        team_leader_required: false,
+        period: { start: '2099-03-02', end: '2099-03-02' },
+        status: 'active',
+      })
+      return { unit, roster, requirement, counter }
+    }
+
+    /**
+     * Stores an employee and a planned assignment of the shift on 2099-03-02.
+     *
+     * @param rosterId - The roster.
+     * @param unit - The unit.
+     * @param status - Employment status.
+     * @returns The employee identifier.
+     */
+    async function staff(rosterId: string, unit: string, status: 'active' | 'suspended' = 'active') {
+      const employee = await workforce.employees.create({
+        tenant_id: tenantId,
+        employee_number: `V${Math.random()}`,
+        name: { use: 'official', text: 'Siti', given: [], prefix: [], suffix: [] },
+        other_names: [],
+        display_name: 'Siti',
+        administrative_gender: null,
+        workforce_category: { system: 'id.workforce-category', code: 'tenaga_keperawatan' },
+        is_clinical: false,
+        profession: null,
+        specialties: [],
+        clinical_level: null,
+        employment_status: status,
+        employment_status_since: '2026-01-01',
+        current_employment: null,
+        primary_assignment: null,
+        original_hire_date: '2026-01-01',
+        separation_date: null,
+        practitioner_ids: [],
+        work_contacts: [],
+        photo: null,
+        preferred_language: null,
+      })
+      await workforce.rosterAssignments.create({
+        tenant_id: tenantId,
+        roster_id: rosterId,
+        unit_id: unit,
+        facility_id: facilityId,
+        employee_id: employee.id,
+        date: '2099-03-02',
+        shift: { definition_id: shiftId, code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false },
+        starts_at: new Date('2099-03-02T00:00:00Z'),
+        ends_at: new Date('2099-03-02T08:00:00Z'),
+        role: 'staff',
+        status: 'planned',
+        source: { kind: 'roster', ref_id: rosterId },
+        change_reason: null,
+        revision: 0,
+        overtime: null,
+        flag: null,
+        is_flagged: false,
+      })
+      return employee.id
+    }
+
+    beforeAll(async () => {
+      shiftId = (
+        await workforce.shifts.create({
+          tenant_id: tenantId,
+          facility_id: facilityId,
+          code: 'PGI',
+          name: [{ locale: 'en', text: 'Pagi' }],
+          type: 'regular',
+          start_time: '07:00',
+          end_time: '15:00',
+          paid_minutes: 480,
+          is_night: false,
+          unit_ids: [],
+          status: 'active',
+        })
+      ).id
+    })
+
+    it('validates a roster: lists the violations and the coverage gaps, and stores the summary', async () => {
+      const { unit, roster, requirement } = await setup()
+      const gone = await staff(roster.id, unit, 'suspended')
+
+      const answer = await call('POST', `/v1/rosters/${roster.id}/validate`, validatorToken)
+
+      expect(answer.status).toBe(201)
+      expect(answer.body).toMatchObject({
+        violations: [{ rule: 'HR-ROS-001', code: 'employee_not_assignable', employeeId: gone, date: '2099-03-02' }],
+        coverageGaps: [{ date: '2099-03-02', shiftId, requirementId: requirement.id, reason: 'min_count', required: 2, actual: 1, overridden: false }],
+        summary: { violations: 1, coverageGaps: 1, overridden: 0 },
+        checkedAt: expect.any(String),
+      })
+      const stored = (await call('GET', `/v1/rosters/${roster.id}`, readerToken)).body as Record<string, any>
+      expect(stored.validation).toMatchObject({ violations: 1, coverage_gaps: 1 })
+      expect(stored.status).toBe('draft')
+    })
+
+    it('blocks submit while a roster has a violation or an open gap, and lets it through once they are fixed or accepted', async () => {
+      const { unit, roster, requirement } = await setup()
+      await staff(roster.id, unit)
+      const gone = await staff(roster.id, unit, 'suspended')
+
+      const invalid = await call('POST', `/v1/rosters/${roster.id}/submit`, headToken, {})
+      expect(invalid.status).toBe(422)
+      expect(invalid.body).toMatchObject({ code: 'roster_invalid' })
+      const assignment = (await workforce.rosterAssignments.findByRoster(tenantId, roster.id, { employeeId: gone }))[0]
+      await workforce.rosterAssignments.update(assignment?.id ?? '', { status: 'cancelled' })
+      // One planned assignment is left, the requirement asks for two.
+      const gaps = await call('POST', `/v1/rosters/${roster.id}/submit`, headToken, {})
+      expect(gaps.status).toBe(422)
+      expect(gaps.body).toMatchObject({ code: 'coverage_gaps' })
+      expect(((await call('GET', `/v1/rosters/${roster.id}`, readerToken)).body as any).status).toBe('draft')
+
+      const accepted = await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, { date: '2099-03-02', shiftId, requirementId: requirement.id, reason: 'Kekurangan tenaga' })
+      expect(accepted.status).toBe(201)
+      expect(accepted.body).toMatchObject({ status: 'draft', coverage_overrides: [{ date: '2099-03-02', reason: 'Kekurangan tenaga' }] })
+      const submitted = await call('POST', `/v1/rosters/${roster.id}/submit`, headToken, {})
+      expect(submitted.status).toBe(201)
+      expect(submitted.body).toMatchObject({ status: 'submitted', validation: { violations: 0, coverage_gaps: 0 } })
+    })
+
+    it('answers 409 for an override that exists, 422 for a gap that is not there, a missing reason and a published roster', async () => {
+      const { unit, roster, requirement } = await setup()
+      await staff(roster.id, unit)
+      const body = { date: '2099-03-02', shiftId, requirementId: requirement.id, reason: 'Diterima' }
+
+      expect((await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, { ...body, date: '2099-03-03' })).body).toMatchObject({ code: 'no_such_gap' })
+      expect((await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, { ...body, reason: '  ' })).body).toMatchObject({ code: 'reason_required' })
+      expect((await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, body)).status).toBe(201)
+      const again = await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, body)
+      expect(again.status).toBe(409)
+      expect(again.body).toMatchObject({ code: 'override_exists' })
+      await workforce.rosters.update(roster.id, { status: 'published' })
+      expect((await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, body)).body).toMatchObject({ code: 'override_not_allowed' })
+    })
+
+    it('answers 404 for a missing, malformed or foreign roster, and 400 for a malformed override', async () => {
+      const { roster } = await setup()
+      const body = { date: '2099-03-02', shiftId, requirementId: new Types.ObjectId().toHexString(), reason: 'x' }
+
+      for (const id of [new Types.ObjectId().toHexString(), 'bad']) {
+        expect((await call('POST', `/v1/rosters/${id}/validate`, validatorToken)).body).toMatchObject({ code: 'roster_not_found' })
+        expect((await call('POST', `/v1/rosters/${id}/coverage-overrides`, overrideToken, body)).body).toMatchObject({ code: 'roster_not_found' })
+      }
+      const foreignValidator = await gateway.seedAndLogin(otherTenantId, 'foreign-validator', [PERMISSIONS.WORKFORCE_ROSTER_VALIDATE])
+      expect((await call('POST', `/v1/rosters/${roster.id}/validate`, foreignValidator)).status).toBe(404)
+      for (const bad of [{}, { ...body, date: '2099-02-30' }, { ...body, shiftId: 'bad' }, { ...body, requirementId: 'bad' }, { ...body, reason: 5 }, { ...body, version: -1 }]) {
+        expect((await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, bad)).status).toBe(400)
+      }
+    })
+
+    it('logs validate and override once each, without employees, dates or reasons', async () => {
+      const { unit, roster, requirement } = await setup()
+      const employeeId = await staff(roster.id, unit)
+      const { written, restore } = captureLogs()
+      try {
+        await call('POST', `/v1/rosters/${roster.id}/validate`, validatorToken)
+        await call('POST', `/v1/rosters/${roster.id}/coverage-overrides`, overrideToken, { date: '2099-03-02', shiftId, requirementId: requirement.id, reason: 'Alasan Rahasia' })
+        await vi.waitFor(() => expect(written.filter((entry) => entry.event === 'http_request')).toHaveLength(2))
+
+        expect(written.filter((entry) => entry.event !== 'http_request').map((entry) => entry.event)).toEqual(['roster_validate', 'coverage_override'])
+        expect(written.find((entry) => entry.event === 'roster_validate')).toMatchObject({ violations: 0, coverageGaps: 1, overridden: 0 })
+        for (const text of [employeeId, '2099-03-02', 'Alasan Rahasia']) {
+          expect(JSON.stringify(written)).not.toContain(text)
+        }
+      } finally {
+        restore()
+      }
+    })
   })
 
   it('writes no log entry when data is only read, except the access log of the request', async () => {
