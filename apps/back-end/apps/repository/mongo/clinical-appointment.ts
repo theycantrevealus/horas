@@ -200,6 +200,38 @@ export class ClinicalAppointmentRepositoryMongo
   }
 
   /**
+   * Finds current appointments of every tenant whose last valid day is on or before a date (a
+   * cross-tenant read for the worker's expiry job).
+   *
+   * @param date - Local date.
+   * @param limit - Largest number of records.
+   * @returns The appointments, the soonest end first.
+   */
+  async findCurrentEndedOnOrBefore(
+    date: string,
+    limit: number,
+  ): Promise<ClinicalAppointment[]> {
+    const operation = 'ClinicalAppointmentRepository.findCurrentEndedOnOrBefore'
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            status: { $in: ['active', 'suspended'] },
+            'valid_period.end': { $lte: date },
+            deleted_at: null,
+          }),
+        )
+        .sort({ 'valid_period.end': 1, _id: 1 })
+        .limit(limit)
+        .lean<LeanRecord<ClinicalAppointmentEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Reads one appointment of a tenant. A malformed identifier matches nothing.
    *
    * @param operation - Operation name for errors.

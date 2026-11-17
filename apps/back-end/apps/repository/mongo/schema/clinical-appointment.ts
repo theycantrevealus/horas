@@ -177,3 +177,5 @@ ClinicalAppointmentSchema.index({
   status: 1,
   'valid_period.end': 1,
 })
+// Cross-tenant read of the expiry job (`findCurrentEndedOnOrBefore`).
+ClinicalAppointmentSchema.index({ status: 1, 'valid_period.end': 1 })

@@ -11,6 +11,7 @@ export const WORKFORCE_EVENTS = {
   CONTRACT_ENDED: 'workforce.contract.ended',
   CONTRACT_TERMINATED: 'workforce.contract.terminated',
   LICENSE_EXPIRED: 'workforce.license.expired',
+  APPOINTMENT_EXPIRED: 'workforce.appointment.expired',
 } as const
 
 /**
@@ -62,4 +63,20 @@ export interface LicenseExpiredPayload {
   employee_id: string
   eligibility_role: string | null
   expiry_date: string
+}
+
+/**
+ * Payload of `workforce.appointment.expired`, written by the SPK expiry job. Identifiers and dates
+ * only: never a letter number.
+ *
+ * @property appointment_id - The SPK.
+ * @property employee_id - The practitioner.
+ * @property credentialing_facility_id - The facility that issued it.
+ * @property valid_until - The last day the SPK was valid.
+ */
+export interface AppointmentExpiredPayload {
+  appointment_id: string
+  employee_id: string
+  credentialing_facility_id: string
+  valid_until: string
 }

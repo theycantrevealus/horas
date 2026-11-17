@@ -2434,6 +2434,33 @@ export class InMemoryClinicalAppointments
   implements ClinicalAppointmentRepository
 {
   /**
+   * Finds current appointments of every tenant that end on or before a date, soonest end first.
+   *
+   * @param date - Local date.
+   * @param limit - Largest number of records.
+   * @returns The appointments.
+   */
+  async findCurrentEndedOnOrBefore(
+    date: string,
+    limit: number,
+  ): Promise<ClinicalAppointment[]> {
+    return [...this.items.values()]
+      .filter(
+        (appointment) =>
+          !appointment.deleted_at &&
+          (appointment.status === 'active' ||
+            appointment.status === 'suspended') &&
+          appointment.valid_period.end <= date,
+      )
+      .sort((a, b) =>
+        `${a.valid_period.end}${a.id}`.localeCompare(
+          `${b.valid_period.end}${b.id}`,
+        ),
+      )
+      .slice(0, limit)
+  }
+
+  /**
    * Creates an appointment, refusing a duplicate number or a second current regular one.
    *
    * @param entity - Appointment data.

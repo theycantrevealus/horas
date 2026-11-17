@@ -188,6 +188,19 @@ describe('ClinicalAppointmentRepository on the shared Mongo base', () => {
     appointments = moduleRef.get(REPOSITORY_CLINICAL_APPOINTMENT)
   })
 
+  it('finds current appointments of every tenant that end on or before a date, soonest end first', async () => {
+    const found = await appointments.findCurrentEndedOnOrBefore('2027-03-10', 50)
+
+    expect(found).toHaveLength(1)
+    const filter = model.find.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(filter).toEqual({
+      status: { $in: ['active', 'suspended'] },
+      'valid_period.end': { $lte: '2027-03-10' },
+      deleted_at: null,
+    })
+    expect(filter).not.toHaveProperty('tenant_id')
+  })
+
   it('maps a stored appointment to the model without storage fields', async () => {
     const found = await appointments.findOne(appointmentId.toHexString())
 
