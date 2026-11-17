@@ -1,6 +1,6 @@
 # gateway_hr 7: Worker expiry and eligibility jobs
 
-Status: **Proposed** (2026-11-18). Decisions WJ1 to WJ15 wait for your confirmation; the five that need an answer are WJ2, WJ4, WJ8, WJ9 and WJ10. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 26). No new endpoint: this group is scheduled work in the `worker` application. Business rules: `../../business/administrative-operational-system/human-resource-management.md` 6.4.4 (licence expiry), 7.3 and `HR-CRD-003` (SPK expiry), 8.5.4 (`HR-ROS-030` to `032`, eligibility changes after publication) and the alert tables 6.6, 7.6, 8.6 (not built here). Built references: the worker's relays (`apps/worker/src/change-relay`, `event-relay`), `EligibilityService.general`, licences (3c), SPKs and grants (3g, 3h, `supervisor-links.ts`), roster assignments (3m, the `flag` field that nothing sets yet), the event outbox (`database.md` 7.1).
+Status: **Confirmed** 2026-11-18. Decisions WJ1 to WJ15 and the three code PRs confirmed as proposed, including the five that needed an answer (WJ2, WJ4, WJ8, WJ9, WJ10). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 26). No new endpoint: this group is scheduled work in the `worker` application. Business rules: `../../business/administrative-operational-system/human-resource-management.md` 6.4.4 (licence expiry), 7.3 and `HR-CRD-003` (SPK expiry), 8.5.4 (`HR-ROS-030` to `032`, eligibility changes after publication) and the alert tables 6.6, 7.6, 8.6 (not built here). Built references: the worker's relays (`apps/worker/src/change-relay`, `event-relay`), `EligibilityService.general`, licences (3c), SPKs and grants (3g, 3h, `supervisor-links.ts`), roster assignments (3m, the `flag` field that nothing sets yet), the event outbox (`database.md` 7.1).
 
 Today nothing moves a record on its own. A `valid` licence past its expiry date stays `valid` and an `active` SPK past its end stays `active`; every consumer therefore reads the dates too (3c, 3g). A practitioner who loses a licence or an SPK stays on the published roster with no warning (`HR-ROS-030`). This group adds three daily jobs that make the stored state match the dates and flag the roster.
 
@@ -73,7 +73,9 @@ Tests come first: each job on the date edges (expiry date today and yesterday, a
 4. Dates use the right zone: UTC for licences, the credentialing facility's for SPKs, the unit's for assignments.
 5. Logs and events carry identifiers, counts and codes only.
 
-## 6. Decisions that need your answer
+## 6. Decisions that needed your answer
+
+Confirmed as proposed. These five changed the shape of the work most:
 
 - **WJ2:** passes every hour, or a fixed daily time.
 - **WJ4:** named cross-tenant reads for jobs, or list the tenants first and query per tenant.
