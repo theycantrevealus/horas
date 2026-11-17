@@ -1,6 +1,6 @@
 # gateway_hr 5.6: Imports
 
-Status: **Proposed** (2026-11-18). Decisions IM1 to IM20 are proposals for you to confirm or change (section 8). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 22). Endpoints: `../hr-endpoints.md` 5.6 (moved here from 5.5 by RA2). Collection: `../human-resource-collections.md` 5.9 (`hr_imports`) and its "Rules for the roster CSV". Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.4.1 (the import step), 8.5 (every rule applies to an imported assignment) and the parameters `IMPORT_MAX_ROWS` and `IMPORT_MAX_ERRORS`. Models: `apps/back-end/apps/repository/model/hr-import.ts` (built with 5.2). Built references: holiday calendars (5.2: the CSV reader, the check-then-apply flow, the `hr_imports` repository and the `text/csv` body parser), roster assignments (5.5: every rule an imported row must follow, `RosterAssignmentService`, `RosterValidationService`).
+Status: **Confirmed** (2026-11-18). Decisions IM1 to IM20 and the two code PRs (B1, B2) confirmed as proposed, including the dropped generic apply. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 22). Endpoints: `../hr-endpoints.md` 5.6 (moved here from 5.5 by RA2). Collection: `../human-resource-collections.md` 5.9 (`hr_imports`) and its "Rules for the roster CSV". Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.4.1 (the import step), 8.5 (every rule applies to an imported assignment) and the parameters `IMPORT_MAX_ROWS` and `IMPORT_MAX_ERRORS`. Models: `apps/back-end/apps/repository/model/hr-import.ts` (built with 5.2). Built references: holiday calendars (5.2: the CSV reader, the check-then-apply flow, the `hr_imports` repository and the `text/csv` body parser), roster assignments (5.5: every rule an imported row must follow, `RosterAssignmentService`, `RosterValidationService`).
 
 An import loads many assignments into a draft roster from a CSV file: one row per assignment (`employee_number`, `date`, `shift_code`, optionally `role`). The file is **checked first** as a whole, every rule of HR spec 8.5 is run on it, and nothing is written until the user applies it. A bad file changes nothing. 5.2 built the same flow for holiday calendars; this group builds it for rosters and the two reads every import needs (view and cancel).
 
@@ -93,13 +93,13 @@ Tests come first: the reader (header, cells, roles, consent, row numbers), the r
 4. Apply cannot run on another file than the one checked, on another roster, twice, or after a cancel.
 5. Every assignment of an import has one change record and the source `import`.
 
-## 8. Decisions that need your answer
+## 8. Decisions that needed your answer
 
-All of IM1 to IM20 are proposals. These four change the shape of the work most, so I would like an explicit answer:
+Confirmed as proposed: all of IM1 to IM20 and the two code PRs. These four changed the shape of the work most:
 
 - **IM1** (no generic `POST /hr-imports/:id/apply`: the roster import is check and apply on one route with the file sent again, like holidays; this makes 5.6 three endpoints instead of four).
 - **IM5** (rows are checked against the roster, the employee's other rosters and the earlier rows of the file; the rest-day rule and coverage are reported, not errors).
 - **IM8** (apply checks everything again, writes all or nothing in one transaction, and answers 422 `import_not_valid_anymore` if the file is no longer valid).
 - **The two PRs** (B1 the check, view and cancel with the extracted shared checks; B2 the apply with `createMany`).
 
-Also open, not decided here: whether a Head of Unit may import only into their own unit (needs scoped permissions) and whether a list of imports is wanted (IM20). The others are proposed as stated.
+Open, not decided here: whether a Head of Unit may import only into their own unit (needs scoped permissions) and whether a list of imports is wanted (IM20). The others are as stated.
