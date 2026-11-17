@@ -1,6 +1,6 @@
 # gateway_hr 5.5: Roster assignments
 
-Status: **Proposed** (2026-11-17). Decisions RA1 to RA25 are proposals for you to confirm or change (section 8). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 21). Endpoints: `../hr-endpoints.md` 5.5. Collection: `../human-resource-collections.md` 5.5 (`roster_assignments`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Roster Assignment), 8.4.1 to 8.4.3 (prepare, change after publication), 8.5 (`HR-ROS-001` to `HR-ROS-042`), 5.5 (clinical eligibility, conditions 1 to 4), section 13 (the on-duty question) and the parameters `MIN_REST_HOURS`, `MAX_WEEKLY_HOURS`, `MAX_OVERTIME_HOURS_DAY`, `MAX_OVERTIME_HOURS_WEEK` and `MAX_CONSECUTIVE_NIGHTS`. Model: `apps/back-end/apps/repository/model/roster-assignment.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: rosters (5.4: the status flow and `revision`, and the endpoints moved here by RS1), shift definitions (5.1: the times and the night flag), coverage requirements (5.3: what `validate` counts), contracts and assignments (2.3, 2.4: status and employment), licences and SPKs (3.1, 4.3: what general eligibility reads).
+Status: **Confirmed** (2026-11-17). Decisions RA1 to RA25 and the three code PRs (B1, B2, B3) confirmed as proposed. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 21). Endpoints: `../hr-endpoints.md` 5.5. Collection: `../human-resource-collections.md` 5.5 (`roster_assignments`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Roster Assignment), 8.4.1 to 8.4.3 (prepare, change after publication), 8.5 (`HR-ROS-001` to `HR-ROS-042`), 5.5 (clinical eligibility, conditions 1 to 4), section 13 (the on-duty question) and the parameters `MIN_REST_HOURS`, `MAX_WEEKLY_HOURS`, `MAX_OVERTIME_HOURS_DAY`, `MAX_OVERTIME_HOURS_WEEK` and `MAX_CONSECUTIVE_NIGHTS`. Model: `apps/back-end/apps/repository/model/roster-assignment.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: rosters (5.4: the status flow and `revision`, and the endpoints moved here by RS1), shift definitions (5.1: the times and the night flag), coverage requirements (5.3: what `validate` counts), contracts and assignments (2.3, 2.4: status and employment), licences and SPKs (3.1, 4.3: what general eligibility reads).
 
 An assignment puts one employee on one shift on one date in a roster. Everything the business says about working time, eligibility and coverage (`HR-ROS-001` to `HR-ROS-022`) is checked here, so this is the largest group of the rostering block and the first that reads licences, SPKs, contracts, shifts, requirements and parameters together. It is split in three code PRs (section 6).
 
@@ -114,9 +114,9 @@ Tests come first. The working-time rules are pure functions and are tested case 
 5. `validate` never blocks by itself; the gate on `submit` and `publish` is the only place that refuses a roster.
 6. Logs and answers carry no names; violations are codes with an employee identifier and a date.
 
-## 8. Decisions that need your answer
+## 8. Decisions that needed your answer
 
-All of RA1 to RA25 are proposals. These five change the shape of the work most, so I would like an explicit answer:
+Confirmed as proposed: all of RA1 to RA25 and the three code PRs. These five changed the shape of the work most:
 
 - **RA5** (a roster in `submitted` or `approved` is frozen; a `published` one changes only with a reason and a new revision; a change in the past needs a special permission and a reason).
 - **RA11** (general clinical eligibility is built here as a service, ahead of group 6, so `HR-ROS-002` can be enforced now).
@@ -124,4 +124,4 @@ All of RA1 to RA25 are proposals. These five change the shape of the work most, 
 - **RA17** (the gate: `submit` and `publish` re-validate; violations always block, coverage gaps block unless overridden).
 - **RA2, RA3 and RA4** (the roster CSV import moves to 5.6, the flags and `resolve-flag` move to the worker group, and the pre-fill and rotation patterns are not built). This changes the endpoint counts: 5.5 becomes 8 endpoints, 5.6 becomes 4.
 
-Also open, not decided here: which weekdays "weekends" are in other countries (CR3), how on-call time counts toward weekly hours (Q6) and the definition of a day's regular time for the daily overtime limit. The others are proposed as stated.
+Open, not decided here: which weekdays "weekends" are in other countries (CR3), how on-call time counts toward weekly hours (Q6) and the definition of a day's regular time for the daily overtime limit. The others are as stated.

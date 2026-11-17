@@ -232,22 +232,23 @@ Plan: `plans/gateway-hr-5-4-rosters.md` (built, PR #87). `validate` and `coverag
 
 ### 5.5 Roster assignments
 
-Plan: `plans/gateway-hr-5-5-roster-assignments.md` (proposed).
+Plan: `plans/gateway-hr-5-5-roster-assignments.md` (confirmed). `POST /rosters/:id/imports` moves to 5.6 and `POST /roster-assignments/:id/resolve-flag` to the group that builds the checks that raise the flags (a worker job); the assignment list is new (RA1 to RA3).
+
 | Endpoint | Purpose |
 |---|---|
-| `POST /rosters/:id/validate` | Check all rules and coverage, and list violations. |
-| `POST /rosters/:id/coverage-overrides` | Accept a coverage gap with a reason. |
+| `GET /rosters/:id/assignments` | List a roster's assignments. |
 | `POST /rosters/:id/assignments` | Add one person to one shift on one date. |
 | `PATCH /roster-assignments/:id` | Change an assignment (reason required after publication). |
 | `POST /roster-assignments/:id/cancel` | Cancel an assignment. |
-| `POST /roster-assignments/:id/resolve-flag` | Mark an eligibility flag as handled. |
-| `POST /rosters/:id/imports` | Upload a roster CSV to check before applying. |
+| `POST /rosters/:id/validate` | Check all rules and coverage, and list violations. |
+| `POST /rosters/:id/coverage-overrides` | Accept a coverage gap with a reason. |
 | `GET /units/:id/on-duty` | Who is on duty in a unit at a moment (for clinical modules). |
 | `GET /employees/me/roster` | Self-service: my shifts for a date range. |
 
 ### 5.6 Imports (shared by rosters and holidays)
 | Endpoint | Purpose |
 |---|---|
+| `POST /rosters/:id/imports` | Upload a roster CSV to check before applying (moved from 5.5, RA2). |
 | `GET /hr-imports/:id` | View an import's status, counts and row errors. |
 | `POST /hr-imports/:id/apply` | Apply a checked import. |
 | `POST /hr-imports/:id/cancel` | Discard an import. |
