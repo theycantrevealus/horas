@@ -256,6 +256,9 @@ Plan: `plans/gateway-hr-5-6-imports.md` (built, PR #97 and #99). The generic `PO
 | `POST /hr-imports/:id/cancel` | Discard a checked import. |
 
 ### 5.7 Shift swaps
+
+Plan: `plans/gateway-hr-5-7-shift-swaps.md` (proposed, waiting for confirmation). It adds `GET /employees/me/shift-swaps` (SW1).
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /shift-swaps` | List swap requests (mine, or my unit's for a Head of Unit). |
