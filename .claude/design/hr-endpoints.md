@@ -247,14 +247,13 @@ Plan: `plans/gateway-hr-5-5-roster-assignments.md` (built, PR #91, #93 and #94).
 
 ### 5.6 Imports (shared by rosters and holidays)
 
-Plan: `plans/gateway-hr-5-6-imports.md` (proposed). It proposes to drop `POST /hr-imports/:id/apply`: the roster import checks and applies on one route, like the holiday import (IM1).
+Plan: `plans/gateway-hr-5-6-imports.md` (confirmed). The generic `POST /hr-imports/:id/apply` is not built: the roster import checks and applies on one route, like the holiday import (IM1).
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /rosters/:id/imports` | Upload a roster CSV to check before applying (moved from 5.5, RA2). |
-| `GET /hr-imports/:id` | View an import's status, counts and row errors. |
-| `POST /hr-imports/:id/apply` | Apply a checked import. |
-| `POST /hr-imports/:id/cancel` | Discard an import. |
+| `POST /rosters/:id/imports` | Upload a roster CSV to check; with `apply=true&checkId=` and the same file again, apply it (moved from 5.5, RA2). |
+| `GET /hr-imports/:id` | View an import's status, counts and row errors (roster or holiday). |
+| `POST /hr-imports/:id/cancel` | Discard a checked import. |
 
 ### 5.7 Shift swaps
 | Endpoint | Purpose |

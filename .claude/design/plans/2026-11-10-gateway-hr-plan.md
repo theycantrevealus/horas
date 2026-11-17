@@ -74,7 +74,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 19 | 5.3 Coverage requirements | 4 | Done (`gateway-hr-5-3-coverage-requirements.md`, PR #82) | Built, PR #83 |
 | 20 | 5.4 Rosters | 8 | Done (`gateway-hr-5-4-rosters.md`, PR #86) | Built, PR #87 |
 | 21 | 5.5 Roster assignments | 8 (RA1 to RA4: `GET /rosters/:id/assignments` added; `resolve-flag` and the roster import moved out) | Done (`gateway-hr-5-5-roster-assignments.md`, PR #90) | Built in three PRs, #91, #93 and #94 |
-| 22 | 5.6 Imports | 4 (3 if the plan is confirmed: no generic apply) | Proposed (`gateway-hr-5-6-imports.md`) | — |
+| 22 | 5.6 Imports | 3 (IM1: no generic apply; the roster import checks and applies on one route) | Done (`gateway-hr-5-6-imports.md`, PR #96) | In progress (B1 branch `feat/workforce-roster-import-check`) |
 | 23 | 5.7 Shift swaps | 6 | — | — |
 | 24 | 5.8 Practice schedules | 6 | — | — |
 | 25 | 6 Clinical eligibility | 1 | — | — |
