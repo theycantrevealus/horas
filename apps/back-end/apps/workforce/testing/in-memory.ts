@@ -67,6 +67,10 @@ import {
   type HrImportRepository,
 } from '@repository/interface/hr-import'
 import {
+  type RosterQuery,
+  type RosterRepository,
+} from '@repository/interface/roster'
+import {
   type CoverageQuery,
   type CoverageRequirementRepository,
 } from '@repository/interface/coverage-requirement'
@@ -88,6 +92,7 @@ import { type ClinicalAppointment } from '@repository/model/clinical-appointment
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CoverageRequirement } from '@repository/model/coverage-requirement'
+import { type Roster } from '@repository/model/roster'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type HrImport } from '@repository/model/hr-import'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
@@ -2945,6 +2950,117 @@ export class InMemoryCoverageRequirements
         item.unit_id === unitId &&
         item.shift_definition_id === shiftId &&
         item.status === 'active' &&
+        !item.deleted_at,
+    )
+  }
+}
+
+/**
+ * In-memory `RosterRepository` for tests. It applies the unique index of the Mongo collection:
+ * one roster per unit and start date.
+ */
+export class InMemoryRosters
+  extends InMemoryRepository<Roster>
+  implements RosterRepository
+{
+  /**
+   * Creates a roster, refusing a second one of the unit with the same start date.
+   *
+   * @param entity - Roster data.
+   * @param id - Optional identifier.
+   * @returns The stored roster.
+   */
+  override async create(
+    entity: NewEntity<Roster>,
+    id?: string,
+  ): Promise<Roster> {
+    const duplicate = this.find(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.unit_id === entity.unit_id &&
+        item.period.start === entity.period.start,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate roster', {
+        operation: 'RosterRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds rosters, latest period first, then by unit.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The rosters.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: RosterQuery = {},
+  ): Promise<Roster[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.unitId || item.unit_id === query.unitId) &&
+        (!query.facilityId || item.facility_id === query.facilityId) &&
+        (!query.status || item.status === query.status) &&
+        (!query.to || item.period.start <= query.to) &&
+        (!query.from || item.period.end >= query.from),
+    )
+      .sort(
+        (left, right) =>
+          right.period.start.localeCompare(left.period.start) ||
+          left.unit_id.localeCompare(right.unit_id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the roster of a unit that starts on a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @param start - First day of the period.
+   * @returns The roster, or `null`.
+   */
+  async findByUnitAndStart(
+    tenantId: string,
+    unitId: string,
+    start: string,
+  ): Promise<Roster | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        item.period.start === start &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the rosters of a unit whose period shares a day with a range.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @param start - First day of the range.
+   * @param end - Last day of the range.
+   * @returns The overlapping rosters.
+   */
+  async findOverlapping(
+    tenantId: string,
+    unitId: string,
+    start: string,
+    end: string,
+  ): Promise<Roster[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        item.period.start <= end &&
+        item.period.end >= start &&
         !item.deleted_at,
     )
   }
