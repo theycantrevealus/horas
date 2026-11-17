@@ -8,6 +8,7 @@ import {
   InMemoryEmployees,
   InMemoryFacilities,
   InMemoryOrganizationUnits,
+  InMemoryPracticeScheduleExceptions,
   InMemoryPracticeSchedules,
 } from '../testing/in-memory'
 import { PracticeScheduleService } from './practice-schedule.service'
@@ -22,6 +23,7 @@ describe('PracticeScheduleService', () => {
   const debug = vi.fn()
   const general = vi.fn()
   let schedules: InMemoryPracticeSchedules
+  let exceptions: InMemoryPracticeScheduleExceptions
   let units: InMemoryOrganizationUnits
   let facilities: InMemoryFacilities
   let employees: InMemoryEmployees
@@ -136,11 +138,12 @@ describe('PracticeScheduleService', () => {
     eligible = { value: { eligible: true } }
     general.mockImplementation(async () => eligible.value)
     schedules = new InMemoryPracticeSchedules()
+    exceptions = new InMemoryPracticeScheduleExceptions()
     units = new InMemoryOrganizationUnits()
     facilities = new InMemoryFacilities()
     employees = new InMemoryEmployees()
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new PracticeScheduleService(schedules, units, facilities, employees, { general } as unknown as EligibilityService, logger)
+    service = new PracticeScheduleService(schedules, exceptions, units, facilities, employees, { general } as unknown as EligibilityService, logger)
     facilityId = (
       await asHead(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),

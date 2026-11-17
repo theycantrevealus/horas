@@ -3,6 +3,7 @@ import {
   RepositoryConflictError,
   RepositoryNotFoundError,
 } from '@utility/database/error'
+import { DEFAULT_PAGE_SIZE } from '@utility/database/constant'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
 import { isLocalDate, todayInZone } from '@utility/validation/local-date'
@@ -14,6 +15,7 @@ import {
   type PracticeScheduleQuery,
   type PracticeScheduleRepository,
 } from '@repository/interface/practice-schedule'
+import { type PracticeScheduleExceptionRepository } from '@repository/interface/practice-schedule-exception'
 import { type DatePeriod } from '@repository/model/common/calendar'
 import { type Coding } from '@repository/model/common/coding'
 import { type Employee } from '@repository/model/employee'
@@ -24,6 +26,7 @@ import {
   REPOSITORY_FACILITY,
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_PRACTICE_SCHEDULE,
+  REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION,
 } from '@repository/token'
 import { EligibilityService } from '../eligibility/eligibility.service'
 import { observe } from '../observe'
@@ -139,9 +142,10 @@ export interface SessionsQuery extends PracticeScheduleOnDateQuery {
  * @property startTime - Local start.
  * @property endTime - Local end.
  * @property quota - Most patients, or `null` for no limit.
- * @property state - `scheduled`, or (with exceptions) `cancelled`, `moved` or `moved_in`.
+ * @property state - `scheduled`; `cancelled` (an exception cancels it); `moved` (the regular session of that date was moved elsewhere, see `movedTo`); `moved_in` (a session moved onto this date, at its new time).
  * @property eligible - Whether the doctor is generally clinically eligible for the polyclinic on that date, read from the records now.
  * @property failed - The first condition that failed, or `null`.
+ * @property movedTo - Where the session went, for a `moved` session; otherwise `null`.
  */
 export interface PracticeSession {
   scheduleId: string
@@ -157,17 +161,32 @@ export interface PracticeSession {
   state: 'scheduled' | 'cancelled' | 'moved' | 'moved_in'
   eligible: boolean
   failed: string | null
+  movedTo: { date: string; startTime: string; endTime: string } | null
 }
 
 /**
- * The practice schedules of the outpatient polyclinics (HR plan 5.8, first code PR): list, the
- * sessions of a date for registration, add, edit and end. Only an eligible Tenaga Medis can have a
+ * One session of a date before its doctor is looked up: a regular session, with the exception that
+ * cancels or moves it, or a session moved onto the date.
+ */
+interface SessionEntry {
+  schedule: PracticeSchedule
+  state: PracticeSession['state']
+  startTime: string
+  endTime: string
+  movedTo: PracticeSession['movedTo']
+  sortStart: string
+}
+
+/**
+ * The practice schedules of the outpatient polyclinics (HR plan 5.8): list, the sessions of a date
+ * for registration (with the exceptions that cancel or move them), add, edit and end. Only an eligible Tenaga Medis can have a
  * schedule (`HR-ROS-004`) and a doctor is never in two places at once. Nothing is deleted.
  */
 @Injectable()
 export class PracticeScheduleService {
   /**
    * @param schedules - Practice schedule repository.
+   * @param exceptions - Practice schedule exception repository.
    * @param units - Organization unit repository.
    * @param facilities - Facility repository, for the time zone.
    * @param employees - Employee repository.
@@ -177,6 +196,8 @@ export class PracticeScheduleService {
   constructor(
     @Inject(REPOSITORY_PRACTICE_SCHEDULE)
     private readonly schedules: PracticeScheduleRepository,
+    @Inject(REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION)
+    private readonly exceptions: PracticeScheduleExceptionRepository,
     @Inject(REPOSITORY_ORGANIZATION_UNIT)
     private readonly units: OrganizationUnitRepository,
     @Inject(REPOSITORY_FACILITY)
@@ -222,16 +243,69 @@ export class PracticeScheduleService {
         'The date must be a real day written as YYYY-MM-DD.',
       )
     }
-    const found = await this.schedules.findOnDate(
+    const offset = query.offset ?? 0
+    const limit = query.limit ?? DEFAULT_PAGE_SIZE
+    const cap = offset + limit
+    const regular = await this.schedules.findOnDate(
       tenantId,
       isoWeekday(query.date),
       query.date,
-      query,
+      { unitId: query.unitId, employeeId: query.employeeId, limit: cap },
+    )
+    const entries: SessionEntry[] = []
+    const changes = await this.exceptions.findBySchedulesAndDate(
+      tenantId,
+      regular.map((schedule) => schedule.id),
+      query.date,
+    )
+    for (const schedule of regular) {
+      const exception = changes.find((item) => item.schedule_id === schedule.id)
+      entries.push({
+        schedule,
+        state: exception ? (exception.kind === 'moved' ? 'moved' : 'cancelled') : 'scheduled',
+        startTime: schedule.start_time,
+        endTime: schedule.end_time,
+        movedTo: exception?.moved_to
+          ? {
+              date: exception.moved_to.date,
+              startTime: exception.moved_to.start_time,
+              endTime: exception.moved_to.end_time,
+            }
+          : null,
+        sortStart: schedule.start_time,
+      })
+    }
+    const arrivals = await this.exceptions.findMovedTo(tenantId, query.date, {
+      unitId: query.unitId,
+      employeeId: query.employeeId,
+      limit: cap,
+    })
+    for (const arrival of arrivals) {
+      const schedule = await this.schedules.findOne(arrival.schedule_id)
+      if (!schedule || schedule.tenant_id !== tenantId || !arrival.moved_to) {
+        continue
+      }
+      entries.push({
+        schedule,
+        state: 'moved_in',
+        startTime: arrival.moved_to.start_time,
+        endTime: arrival.moved_to.end_time,
+        movedTo: null,
+        sortStart: arrival.moved_to.start_time,
+      })
+    }
+    entries.sort(
+      (left, right) =>
+        left.schedule.unit_id.localeCompare(right.schedule.unit_id) ||
+        left.sortStart.localeCompare(right.sortStart) ||
+        left.schedule.employee_id.localeCompare(right.schedule.employee_id) ||
+        left.schedule.id.localeCompare(right.schedule.id),
     )
     const employees = new Map<string, Employee | null>()
     const units = new Map<string, OrganizationUnit | null>()
     const sessions: PracticeSession[] = []
-    for (const schedule of found) {
+    for (const entry of entries.slice(offset, offset + limit)) {
+      const { schedule } = entry
       if (!employees.has(schedule.employee_id)) {
         const employee = await this.employees.findOne(schedule.employee_id)
         employees.set(
@@ -265,12 +339,13 @@ export class PracticeScheduleService {
         unitId: schedule.unit_id,
         facilityId: schedule.facility_id,
         date: query.date,
-        startTime: schedule.start_time,
-        endTime: schedule.end_time,
+        startTime: entry.startTime,
+        endTime: entry.endTime,
         quota: schedule.quota,
-        state: 'scheduled',
+        state: entry.state,
         eligible,
         failed,
+        movedTo: entry.movedTo,
       })
     }
     return sessions
