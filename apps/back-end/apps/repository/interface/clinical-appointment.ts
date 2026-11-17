@@ -96,4 +96,19 @@ export interface ClinicalAppointmentRepository extends Repository<ClinicalAppoin
     employeeId: string,
     paging?: AppointmentPaging,
   ): Promise<ClinicalAppointment[]>
+
+  /**
+   * Finds current (`active` or `suspended`) appointments of **every tenant** whose last valid day
+   * is on or before a date, the soonest end first. A cross-tenant read for the worker's expiry job
+   * only (`gateway-hr-7-worker-expiry-jobs.md` WJ4); the job handles each record with its own
+   * `tenant_id`.
+   *
+   * @param date - Local date; appointments ending on or before it are returned.
+   * @param limit - Largest number of records to return.
+   * @returns The appointments, possibly none.
+   */
+  findCurrentEndedOnOrBefore(
+    date: LocalDate,
+    limit: number,
+  ): Promise<ClinicalAppointment[]>
 }

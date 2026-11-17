@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common'
+import { ClinicalAppointmentRepositoryModule } from '@repository/mongo/clinical-appointment.module'
+import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
+import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { ProfessionalLicenseRepositoryModule } from '@repository/mongo/professional-license.module'
+import { AppointmentExpiryJob } from './appointment-expiry.job'
 import { HR_JOBS, type HrJob } from './job'
 import { LicenseExpiryJob } from './license-expiry.job'
 
@@ -10,19 +14,29 @@ import { LicenseExpiryJob } from './license-expiry.job'
  * `HR_JOBS`. The connection module (transactions, event outbox) is global.
  */
 @Module({
-  imports: [ProfessionalLicenseRepositoryModule],
+  imports: [
+    ProfessionalLicenseRepositoryModule,
+    ClinicalAppointmentRepositoryModule,
+    PrivilegeGrantRepositoryModule,
+    FacilityRepositoryModule,
+  ],
   providers: [
     LicenseExpiryJob,
+    AppointmentExpiryJob,
     {
       provide: HR_JOBS,
-      inject: [LicenseExpiryJob],
+      inject: [LicenseExpiryJob, AppointmentExpiryJob],
       /**
        * Lists the jobs in the order a pass runs them.
        *
        * @param licenseExpiry - The licence expiry job.
+       * @param appointmentExpiry - The SPK expiry job.
        * @returns The jobs.
        */
-      useFactory: (licenseExpiry: LicenseExpiryJob): HrJob[] => [licenseExpiry],
+      useFactory: (
+        licenseExpiry: LicenseExpiryJob,
+        appointmentExpiry: AppointmentExpiryJob,
+      ): HrJob[] => [licenseExpiry, appointmentExpiry],
     },
   ],
   exports: [HR_JOBS],
