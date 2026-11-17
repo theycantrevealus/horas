@@ -66,4 +66,21 @@ export interface RosterRepository extends Repository<Roster> {
     start: string,
     end: string,
   ): Promise<Roster[]>
+
+  /**
+   * Finds `published` rosters of **every tenant** whose last day is on or after a date, in
+   * identifier order, after a cursor. A cross-tenant read for the worker's eligibility sweep only
+   * (`gateway-hr-7-worker-expiry-jobs.md` WJ4, WJ7); the job handles each roster with its own
+   * `tenant_id`.
+   *
+   * @param date - Local date; rosters ending on or after it are returned.
+   * @param limit - Largest number of records to return.
+   * @param afterId - Identifier of the last roster of the previous page, or omitted for the first.
+   * @returns The rosters, possibly none.
+   */
+  findPublishedEndingOnOrAfter(
+    date: string,
+    limit: number,
+    afterId?: string,
+  ): Promise<Roster[]>
 }

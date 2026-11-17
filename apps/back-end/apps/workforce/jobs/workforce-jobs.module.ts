@@ -1,9 +1,21 @@
 import { Module } from '@nestjs/common'
 import { ClinicalAppointmentRepositoryModule } from '@repository/mongo/clinical-appointment.module'
+import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
+import { EmployeeRepositoryModule } from '@repository/mongo/employee.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
+import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
+import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
+import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { ProfessionalLicenseRepositoryModule } from '@repository/mongo/professional-license.module'
+import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
+import { RosterRepositoryModule } from '@repository/mongo/roster.module'
+import { LoggerModule } from '@utility/logger/module'
+import { CodeConceptService } from '../concept/code-concept.service'
+import { EligibilityService } from '../eligibility/eligibility.service'
+import { ParameterService } from '../parameter/parameter.service'
 import { AppointmentExpiryJob } from './appointment-expiry.job'
+import { EligibilitySweepJob } from './eligibility-sweep.job'
 import { HR_JOBS, type HrJob } from './job'
 import { LicenseExpiryJob } from './license-expiry.job'
 
@@ -15,7 +27,15 @@ import { LicenseExpiryJob } from './license-expiry.job'
  */
 @Module({
   imports: [
+    LoggerModule,
     ProfessionalLicenseRepositoryModule,
+    CodeConceptRepositoryModule,
+    EmployeeRepositoryModule,
+    HrParameterRepositoryModule,
+    OrganizationRepositoryModule,
+    OrganizationUnitRepositoryModule,
+    RosterRepositoryModule,
+    RosterAssignmentRepositoryModule,
     ClinicalAppointmentRepositoryModule,
     PrivilegeGrantRepositoryModule,
     FacilityRepositoryModule,
@@ -23,20 +43,26 @@ import { LicenseExpiryJob } from './license-expiry.job'
   providers: [
     LicenseExpiryJob,
     AppointmentExpiryJob,
+    CodeConceptService,
+    ParameterService,
+    EligibilityService,
+    EligibilitySweepJob,
     {
       provide: HR_JOBS,
-      inject: [LicenseExpiryJob, AppointmentExpiryJob],
+      inject: [LicenseExpiryJob, AppointmentExpiryJob, EligibilitySweepJob],
       /**
        * Lists the jobs in the order a pass runs them.
        *
        * @param licenseExpiry - The licence expiry job.
        * @param appointmentExpiry - The SPK expiry job.
+       * @param eligibilitySweep - The eligibility sweep job.
        * @returns The jobs.
        */
       useFactory: (
         licenseExpiry: LicenseExpiryJob,
         appointmentExpiry: AppointmentExpiryJob,
-      ): HrJob[] => [licenseExpiry, appointmentExpiry],
+        eligibilitySweep: EligibilitySweepJob,
+      ): HrJob[] => [licenseExpiry, appointmentExpiry, eligibilitySweep],
     },
   ],
   exports: [HR_JOBS],

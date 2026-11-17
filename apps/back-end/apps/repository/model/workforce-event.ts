@@ -12,6 +12,8 @@ export const WORKFORCE_EVENTS = {
   CONTRACT_TERMINATED: 'workforce.contract.terminated',
   LICENSE_EXPIRED: 'workforce.license.expired',
   APPOINTMENT_EXPIRED: 'workforce.appointment.expired',
+  ASSIGNMENT_FLAGGED: 'workforce.assignment.flagged',
+  ASSIGNMENT_FLAG_RESOLVED: 'workforce.assignment.flag_resolved',
 } as const
 
 /**
@@ -79,4 +81,24 @@ export interface AppointmentExpiredPayload {
   employee_id: string
   credentialing_facility_id: string
   valid_until: string
+}
+
+/**
+ * Payload of `workforce.assignment.flagged` and `workforce.assignment.flag_resolved`, written by
+ * the eligibility sweep. Identifiers, codes and dates only.
+ *
+ * @property assignment_id - The roster assignment.
+ * @property roster_id - Its roster.
+ * @property unit_id - Its unit.
+ * @property employee_id - The practitioner.
+ * @property date - The local date of the shift.
+ * @property failed - The failing condition (`employment`, `str`, `sip` or `spk`); only when flagged.
+ */
+export interface AssignmentFlagPayload {
+  assignment_id: string
+  roster_id: string
+  unit_id: string
+  employee_id: string
+  date: string
+  failed?: string
 }

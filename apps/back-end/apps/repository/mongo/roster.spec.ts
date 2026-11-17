@@ -280,6 +280,31 @@ describe('RosterRepository on the shared Mongo base', () => {
     expect(model.find).not.toHaveBeenCalled()
   })
 
+  it('finds published rosters of every tenant that end on or after a date, after a cursor, in identifier order', async () => {
+    const after = new Types.ObjectId()
+
+    const found = await rosters.findPublishedEndingOnOrAfter('2027-03-09', 50, after.toHexString())
+
+    expect(found).toHaveLength(1)
+    const filter = model.find.mock.calls.at(-1)?.[0] as Record<string, unknown>
+    expect(filter).toEqual({
+      status: 'published',
+      'period.end': { $gte: '2027-03-09' },
+      deleted_at: null,
+      _id: { $gt: after },
+    })
+    expect(filter).not.toHaveProperty('tenant_id')
+    await rosters.findPublishedEndingOnOrAfter('2027-03-09', 50)
+    expect(model.find.mock.calls.at(-1)?.[0]).not.toHaveProperty('_id')
+  })
+
+  it('answers an empty list for a malformed cursor without querying', async () => {
+    model.find.mockClear()
+
+    expect(await rosters.findPublishedEndingOnOrAfter('2027-03-09', 50, 'bad')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('stamps a created roster with the actor and records one change entry', async () => {
     await asAdmin(() => rosters.create(input))
 
