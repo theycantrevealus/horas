@@ -396,7 +396,7 @@ Separate from schedules so exceptions do not grow a schedule document without li
 | `reason` | `Coding` | leave, training, emergency, other. |
 | `source` | `{ kind: 'manual' \| 'leave' \| 'training'; ref_id: ObjectId \| null }` | Leave and training create them automatically later (HR spec 8.4.4). |
 
-Index: `{ tenant_id, schedule_id, date }` unique; `{ tenant_id, unit_id, date }`.
+Index: `{ tenant_id, schedule_id, date }` unique, **with a partial filter on `deleted_at` being null** so an exception that was undone (soft-deleted, 5.8 PS11) does not block a new one; `{ tenant_id, unit_id, date }`; `{ tenant_id, employee_id, date }` (the doctor's sessions of a date); `{ tenant_id, 'moved_to.date', unit_id }` (sessions moved onto a date).
 
 ### 5.8 `shift_swap_requests`
 
