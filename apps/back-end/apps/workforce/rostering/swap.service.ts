@@ -3,6 +3,13 @@ import {
   RepositoryConflictError,
   RepositoryNotFoundError,
 } from '@utility/database/error'
+import {
+  TRANSACTION_MANAGER,
+  type TransactionManager,
+} from '@utility/database/transaction'
+import { type ActorRef } from '@utility/history/actor'
+import { withChangeReason } from '@utility/history/reason'
+import { getRequestContext } from '@utility/logger/context'
 import { AppLogger } from '@utility/logger/service'
 import { todayInZone } from '@utility/validation/local-date'
 import { type EmployeeRepository } from '@repository/interface/employee'
@@ -72,6 +79,17 @@ export interface CreateSwapInput {
 }
 
 /**
+ * Data of the Head of Unit's decision.
+ *
+ * @property version - Version the caller read.
+ * @property reason - Why; required to reject, optional to approve (1 to 500 characters).
+ */
+export interface SwapDecisionInput {
+  version?: number
+  reason?: string
+}
+
+/**
  * Optional version of a move.
  *
  * @property version - Version the caller read.
@@ -93,9 +111,8 @@ interface SwapContext {
 }
 
 /**
- * Shift swap requests (HR plan 5.7, first code PR): the requester asks, the counterpart accepts or
- * the requester cancels, and two lists. The Head of Unit's decision is the next PR. Every request
- * is checked against the rules of HR spec 8.5 for the schedules it would leave (`HR-ROS-001`,
+ * Shift swap requests (HR plan 5.7): the requester asks, the counterpart accepts or the requester
+ * cancels, the Head of Unit approves or rejects, and two lists. Every request is checked against the rules of HR spec 8.5 for the schedules it would leave (`HR-ROS-001`,
  * `002`, `010` to `013`, `015`, `016`). Nothing is deleted.
  */
 @Injectable()
@@ -109,6 +126,7 @@ export class SwapService {
    * @param employees - Employee repository.
    * @param eligibility - General clinical eligibility.
    * @param parameters - HR parameters (the working-time limits).
+   * @param transactions - Transaction manager of the main connection.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -125,6 +143,8 @@ export class SwapService {
     @Inject(EligibilityService)
     private readonly eligibility: EligibilityService,
     @Inject(ParameterService) private readonly parameters: ParameterService,
+    @Inject(TRANSACTION_MANAGER)
+    private readonly transactions: TransactionManager,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -307,6 +327,221 @@ export class SwapService {
         return this.move(swap, { status: 'cancelled' })
       },
     )
+  }
+
+  /**
+   * The Head of Unit approves (HR plan 5.7 SW9 to SW11). The result is checked again against the
+   * schedules as they are now. In one transaction the original assignments are cancelled, the new
+   * ones are created with the source `swap`, the roster's revision goes up and the request is
+   * marked approved.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param deciderEmployeeId - The employee linked to the caller's account, or `null`.
+   * @param id - Request identifier.
+   * @param input - Optional version and reason.
+   * @returns The approved request.
+   * @throws NotFoundError `swap_not_found`.
+   * @throws ForbiddenError `decider_is_party` or `actor_required`.
+   * @throws InvalidRequestError `invalid_transition`, `invalid_reason` or any rule of `create`.
+   * @throws ConflictError `stale_version` or `assignment_exists`.
+   */
+  approve(
+    tenantId: string,
+    deciderEmployeeId: string | null,
+    id: string,
+    input: SwapDecisionInput,
+  ): Promise<ShiftSwapRequest> {
+    return observe(
+      this.logger,
+      'swap_approve',
+      `${NAME}.approve`,
+      async () => {
+        const swap = await this.load(tenantId, id)
+        this.assertNotParty(swap, deciderEmployeeId)
+        this.assertMove(swap, ['accepted_by_counterpart'])
+        this.assertVersion(swap, input.version)
+        const reason =
+          input.reason === undefined ? null : cleanReason(input.reason)
+        const actor = this.actor()
+        const context = await this.gather(
+          tenantId,
+          swap.requester.assignment_id ?? '',
+          swap.counterpart?.employee_id ?? '',
+          swap.counterpart?.assignment_id ?? null,
+          undefined,
+        )
+        await this.checkResult(tenantId, context)
+        return this.apply(swap, context, { by: actor, at: new Date(), reason })
+      },
+    )
+  }
+
+  /**
+   * The Head of Unit rejects, with a reason, while the request is open.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param deciderEmployeeId - The employee linked to the caller's account, or `null`.
+   * @param id - Request identifier.
+   * @param input - The reason and an optional version.
+   * @returns The rejected request.
+   * @throws NotFoundError `swap_not_found`.
+   * @throws ForbiddenError `decider_is_party` or `actor_required`.
+   * @throws InvalidRequestError `invalid_transition`, `reason_required` or `invalid_reason`.
+   * @throws ConflictError `stale_version`.
+   */
+  reject(
+    tenantId: string,
+    deciderEmployeeId: string | null,
+    id: string,
+    input: SwapDecisionInput,
+  ): Promise<ShiftSwapRequest> {
+    return observe(
+      this.logger,
+      'swap_reject',
+      `${NAME}.reject`,
+      async () => {
+        const swap = await this.load(tenantId, id)
+        this.assertNotParty(swap, deciderEmployeeId)
+        this.assertMove(swap, OPEN)
+        this.assertVersion(swap, input.version)
+        const reason = cleanReason(input.reason ?? '')
+        const actor = this.actor()
+        return this.move(swap, {
+          status: 'rejected',
+          decision: { by: actor, at: new Date(), reason },
+        })
+      },
+    )
+  }
+
+  /**
+   * Writes an approval in one transaction (HR plan 5.7 SW10): the roster's revision, the
+   * cancelled assignments, the new ones and the request itself.
+   *
+   * @param swap - The request as read.
+   * @param context - The loaded records, already checked.
+   * @param decision - Who approved, when and why.
+   * @returns The approved request.
+   * @throws ConflictError `stale_version`.
+   */
+  private async apply(
+    swap: ShiftSwapRequest,
+    context: SwapContext,
+    decision: NonNullable<ShiftSwapRequest['decision']>,
+  ): Promise<ShiftSwapRequest> {
+    const { roster, requesterAssignment: given, counterpartAssignment: traded } = context
+    const revision = roster.revision + 1
+    const leaving = traded ? [given, traded] : [given]
+    const slots: { employeeId: string; slot: RosterAssignment }[] = [
+      { employeeId: context.counterpart.id, slot: given },
+      ...(traded ? [{ employeeId: context.requester.id, slot: traded }] : []),
+    ]
+    return this.transactions.run(() =>
+      withChangeReason('shift_swap', async () => {
+        try {
+          await this.rosters.update(
+            roster.id,
+            { revision },
+            { expectedVersion: roster.version },
+          )
+          for (const old of leaving) {
+            await this.assignments.update(
+              old.id,
+              { status: 'cancelled', change_reason: 'shift_swap', revision },
+              { expectedVersion: old.version },
+            )
+          }
+        } catch (error: unknown) {
+          throw this.translate(error)
+        }
+        const created: string[] = []
+        for (const { employeeId, slot } of slots) {
+          const next = await this.assignments.create({
+            tenant_id: slot.tenant_id,
+            roster_id: slot.roster_id,
+            unit_id: slot.unit_id,
+            facility_id: slot.facility_id,
+            employee_id: employeeId,
+            date: slot.date,
+            shift: slot.shift,
+            starts_at: slot.starts_at,
+            ends_at: slot.ends_at,
+            role: slot.role,
+            status: 'planned',
+            source: { kind: 'swap', ref_id: swap.id },
+            change_reason: 'shift_swap',
+            revision,
+            overtime: null,
+            flag: null,
+            is_flagged: false,
+          })
+          created.push(next.id)
+        }
+        try {
+          return await this.swaps.update(
+            swap.id,
+            { status: 'approved', decision, resulting_assignment_ids: created },
+            { expectedVersion: swap.version },
+          )
+        } catch (error: unknown) {
+          throw this.translate(error)
+        }
+      }),
+    )
+  }
+
+  /**
+   * Refuses a decision by one of the two people the request is about (HR plan 5.7 SW11).
+   *
+   * @param swap - The request.
+   * @param deciderEmployeeId - The employee linked to the decider's account, or `null`.
+   * @throws ForbiddenError `decider_is_party`.
+   */
+  private assertNotParty(
+    swap: ShiftSwapRequest,
+    deciderEmployeeId: string | null,
+  ): void {
+    if (
+      deciderEmployeeId !== null &&
+      (deciderEmployeeId === swap.requester.employee_id ||
+        deciderEmployeeId === swap.counterpart?.employee_id)
+    ) {
+      throw new ForbiddenError(
+        'decider_is_party',
+        'You cannot decide a request you are part of.',
+      )
+    }
+  }
+
+  /**
+   * @returns The signed-in actor.
+   * @throws ForbiddenError `actor_required`.
+   */
+  private actor(): ActorRef {
+    const actor = getRequestContext()?.actor
+    if (!actor) {
+      throw new ForbiddenError(
+        'actor_required',
+        'A signed-in actor is required.',
+      )
+    }
+    return actor
+  }
+
+  /**
+   * Turns a repository rejection of a write into a workforce error.
+   *
+   * @param error - What the repository threw.
+   * @returns The error to throw instead.
+   */
+  private translate(error: unknown): unknown {
+    if (error instanceof RepositoryConflictError) {
+      return this.stale()
+    }
+    if (error instanceof RepositoryNotFoundError) {
+      return this.notFound()
+    }
+    return error
   }
 
   /**
@@ -542,20 +777,19 @@ export class SwapService {
    */
   private async move(
     swap: ShiftSwapRequest,
-    changes: Partial<Pick<ShiftSwapRequest, 'status' | 'counterpart_accepted_at'>>,
+    changes: Partial<
+      Pick<
+        ShiftSwapRequest,
+        'status' | 'counterpart_accepted_at' | 'decision'
+      >
+    >,
   ): Promise<ShiftSwapRequest> {
     try {
       return await this.swaps.update(swap.id, changes, {
         expectedVersion: swap.version,
       })
     } catch (error: unknown) {
-      if (error instanceof RepositoryConflictError) {
-        throw this.stale()
-      }
-      if (error instanceof RepositoryNotFoundError) {
-        throw this.notFound()
-      }
-      throw error
+      throw this.translate(error)
     }
   }
 
