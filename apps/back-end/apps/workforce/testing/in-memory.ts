@@ -72,6 +72,10 @@ import {
   type RosterAssignmentRepository,
 } from '@repository/interface/roster-assignment'
 import {
+  type ShiftSwapRequestRepository,
+  type SwapQuery,
+} from '@repository/interface/shift-swap-request'
+import {
   type RosterQuery,
   type RosterRepository,
 } from '@repository/interface/roster'
@@ -99,6 +103,7 @@ import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CoverageRequirement } from '@repository/model/coverage-requirement'
 import { type Roster } from '@repository/model/roster'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
+import { type ShiftSwapRequest } from '@repository/model/shift-swap-request'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type HrImport } from '@repository/model/hr-import'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
@@ -3249,5 +3254,70 @@ export class InMemoryRosterAssignments
         item.status === 'planned' &&
         !item.deleted_at,
     ).slice(0, limit)
+  }
+}
+
+/**
+ * In-memory `ShiftSwapRequestRepository` for tests. The Mongo collection has no unique index; the
+ * rule of one open request per assignment is the service's (HR plan 5.7 SW6).
+ */
+export class InMemoryShiftSwapRequests
+  extends InMemoryRepository<ShiftSwapRequest>
+  implements ShiftSwapRequestRepository
+{
+  /**
+   * Finds requests, latest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The requests.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: SwapQuery = {},
+  ): Promise<ShiftSwapRequest[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.unitId || item.unit_id === query.unitId) &&
+        (!query.rosterId || item.roster_id === query.rosterId) &&
+        (!query.status || item.status === query.status) &&
+        (!query.employeeId ||
+          item.requester.employee_id === query.employeeId ||
+          item.counterpart?.employee_id === query.employeeId),
+    )
+      .sort(
+        (left, right) =>
+          (right.created_at?.getTime() ?? 0) -
+            (left.created_at?.getTime() ?? 0) ||
+          right.id.localeCompare(left.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the open requests that name any of the assignments.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param assignmentIds - The assignments.
+   * @returns The open requests.
+   */
+  async findOpenByAssignments(
+    tenantId: string,
+    assignmentIds: string[],
+  ): Promise<ShiftSwapRequest[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (item.status === 'requested' ||
+          item.status === 'accepted_by_counterpart') &&
+        ((item.requester.assignment_id !== null &&
+          assignmentIds.includes(item.requester.assignment_id)) ||
+          (item.counterpart?.assignment_id != null &&
+            assignmentIds.includes(item.counterpart.assignment_id))),
+    )
   }
 }
