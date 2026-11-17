@@ -1,4 +1,4 @@
-import { type Repository } from '@utility/database/interface'
+import { type NewEntity, type Repository } from '@utility/database/interface'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
 
 /**
@@ -102,5 +102,21 @@ export interface RosterAssignmentRepository extends Repository<RosterAssignment>
     shiftId: string,
     rosterIds: string[],
     limit: number,
+  ): Promise<RosterAssignment[]>
+
+  /**
+   * Creates many assignments of one roster (a file import, HR plan 5.6 IM10). It is a write: every
+   * assignment gets its own change record with the reason `roster_import`, all in one transaction
+   * that joins the caller's, so either every assignment exists or none does.
+   *
+   * @param rosterId - The roster every assignment belongs to.
+   * @param assignments - The assignments to store; each must name this roster.
+   * @returns The stored assignments, in the order given.
+   * @throws RepositoryValidationError when an assignment names another roster.
+   * @throws RepositoryError when the request context has no actor.
+   */
+  createMany(
+    rosterId: string,
+    assignments: NewEntity<RosterAssignment>[],
   ): Promise<RosterAssignment[]>
 }

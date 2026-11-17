@@ -10,6 +10,7 @@ import {
  *
  * @property kind - Only imports of this kind.
  * @property calendarCode - Only imports into the calendar with this code.
+ * @property rosterId - Only imports into the roster with this identifier.
  * @property year - Only imports into a calendar of this year.
  * @property status - Only imports in this status.
  * @property sha256 - Only imports of a file with this hash.
@@ -19,6 +20,7 @@ import {
 export interface HrImportQuery {
   kind?: HrImportKind
   calendarCode?: string
+  rosterId?: string
   year?: number
   status?: HrImportStatus
   sha256?: string

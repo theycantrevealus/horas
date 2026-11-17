@@ -5,12 +5,15 @@ import {
   DEFAULT_PAGE_SIZE,
   MONGO_MAIN_CONNECTION,
 } from '@utility/database/constant'
+import { RepositoryValidationError } from '@utility/database/error'
+import { type NewEntity } from '@utility/database/interface'
 import { translateMongoError } from '@utility/database/mongo.error'
 import { toObjectId } from '@utility/database/mongo.query'
 import {
   TRANSACTION_MANAGER,
   type TransactionManager,
 } from '@utility/database/transaction'
+import { withChangeReason } from '@utility/history/reason'
 import { CHANGE_RECORDER, type ChangeRecorder } from '@utility/history/recorder'
 import {
   type AssignmentQuery,
@@ -18,7 +21,12 @@ import {
 } from '@repository/interface/roster-assignment'
 import { RosterAssignment } from '@repository/model/roster-assignment'
 import { RosterAssignmentClassification } from '@repository/model/roster-assignment.classification'
-import { LeanRecord, MongoRepositoryBase } from './base'
+import {
+  CURRENT_SCHEMA_VERSION,
+  LeanRecord,
+  MANAGED_FIELDS,
+  MongoRepositoryBase,
+} from './base'
 import { RosterAssignmentEntity } from './schema/roster-assignment'
 
 /**
@@ -275,6 +283,59 @@ export class RosterAssignmentRepositoryMongo
         .lean<LeanRecord<RosterAssignmentEntity>[]>()
         .exec()
       return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
+   * Creates many assignments of one roster in one transaction, with one change record per
+   * assignment and the reason `roster_import`. Inside the caller's transaction it joins it.
+   *
+   * @param rosterId - The roster every assignment belongs to.
+   * @param assignments - The assignments to store.
+   * @returns The stored assignments, in the order given.
+   */
+  async createMany(
+    rosterId: string,
+    assignments: NewEntity<RosterAssignment>[],
+  ): Promise<RosterAssignment[]> {
+    const operation = 'RosterAssignmentRepository.createMany'
+    const actor = this.requireActor(operation)
+    if (assignments.some((item) => item.roster_id !== rosterId)) {
+      throw new RepositoryValidationError(
+        `${operation}: an assignment belongs to another roster`,
+        { operation },
+      )
+    }
+    if (assignments.length === 0) {
+      return []
+    }
+    const documents = assignments.map((entity) =>
+      this.asDocument({
+        ...Object.fromEntries(
+          Object.entries(entity).filter(
+            ([key]) => !MANAGED_FIELDS.includes(key),
+          ),
+        ),
+        schema_version: CURRENT_SCHEMA_VERSION,
+        created_by: actor,
+      }),
+    )
+    try {
+      return await this.transactions.run(() =>
+        withChangeReason('roster_import', async () => {
+          const created = await this.model.create(documents)
+          const stored: RosterAssignment[] = []
+          // Sequential on purpose: a transaction session does not allow parallel operations.
+          for (const document of created) {
+            const after = this.toModel(document.toObject<LeanRecord<RosterAssignmentEntity>>())
+            await this.record(null, after, operation)
+            stored.push(after)
+          }
+          return stored
+        }),
+      )
     } catch (error: unknown) {
       throw translateMongoError(error, operation)
     }
