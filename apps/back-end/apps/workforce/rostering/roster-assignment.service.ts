@@ -48,15 +48,14 @@ import {
   NotFoundError,
 } from '../workforce.error'
 import {
-  isInPeriod,
-  isRosterRole,
-  shiftInstants,
-} from './roster-assignment-rules'
-import {
-  checkWorkingTime,
-  type WorkingShift,
-  type WorkingTimeViolation,
-} from './working-time'
+  assertAssignable,
+  assertEligible,
+  assertRole,
+  assertShiftUsable,
+  firstWorkingTimeViolation,
+  toWorkingShift,
+} from './assignment-checks'
+import { isInPeriod, shiftInstants } from './roster-assignment-rules'
 import { readWorkingTimeLimits } from './working-time-limits'
 
 const NAME = 'RosterAssignmentService'
@@ -73,18 +72,6 @@ interface ChangePlan {
   published: boolean
   reason: string | undefined
   keep: boolean
-}
-
-/**
- * Fixed messages of the working-time rejections, keyed by the rule that was broken.
- */
-const WORKING_TIME_MESSAGES: Record<WorkingTimeViolation, string> = {
-  overlap: 'The employee already works at that time, in this or another unit.',
-  rest_too_short: 'The rest between two shifts of the employee is too short.',
-  overtime_consent_required:
-    'The shift adds overtime and needs the consent of the employee.',
-  overtime_limit_exceeded: 'The shift would exceed the overtime limit of the week.',
-  too_many_nights: 'The employee would work too many night shifts in a row.',
 }
 
 /**
@@ -240,12 +227,12 @@ export class RosterAssignmentService {
           )
         }
         const role = input.role ?? 'staff'
-        this.assertRole(role)
+        assertRole(role)
         const { unit, timeZone } = await this.context(tenantId, roster)
         const plan = this.plan(roster, input.date, timeZone, input)
         const shift = await this.checkShift(tenantId, roster, unit, input.shiftId)
         const employee = await this.loadEmployee(tenantId, input.employeeId)
-        this.assertAssignable(employee)
+        assertAssignable(employee)
         if (
           await this.assignments.findPlannedByEmployeeAndDate(
             tenantId,
@@ -259,7 +246,13 @@ export class RosterAssignmentService {
             'The employee already has a shift on this date in this roster.',
           )
         }
-        await this.assertEligible(tenantId, employee, unit, input.date)
+        await assertEligible(
+          this.eligibility,
+          tenantId,
+          employee,
+          unit,
+          input.date,
+        )
         const instants = shiftInstants(input.date, shift, timeZone)
         const overtime = await this.checkWorkingTime(
           tenantId,
@@ -341,7 +334,7 @@ export class RosterAssignmentService {
           )
         }
         if (input.role !== undefined) {
-          this.assertRole(input.role)
+          assertRole(input.role)
         }
         const { unit, timeZone } = await this.context(tenantId, roster)
         const plan = this.plan(roster, current.date, timeZone, input)
@@ -459,19 +452,6 @@ export class RosterAssignmentService {
       throw new InvalidRequestError(
         'roster_locked',
         'A roster that was submitted or approved cannot be changed. Return it to draft first.',
-      )
-    }
-  }
-
-  /**
-   * @param role - The role as sent.
-   * @throws InvalidRequestError `invalid_role`.
-   */
-  private assertRole(role: unknown): void {
-    if (!isRosterRole(role)) {
-      throw new InvalidRequestError(
-        'invalid_role',
-        'The role must be staff, team_leader, supervisor or dpjp_on_call.',
       )
     }
   }
@@ -600,21 +580,7 @@ export class RosterAssignmentService {
         'The shift was not found.',
       )
     }
-    if (shift.status !== 'active') {
-      throw new InvalidRequestError('shift_retired', 'The shift is retired.')
-    }
-    if (shift.facility_id !== roster.facility_id) {
-      throw new InvalidRequestError(
-        'shift_outside_facility',
-        'The shift belongs to another facility than the roster.',
-      )
-    }
-    if (shift.unit_ids.length > 0 && !shift.unit_ids.includes(unit.id)) {
-      throw new InvalidRequestError(
-        'shift_unit_not_allowed',
-        'The unit may not use this shift.',
-      )
-    }
+    assertShiftUsable(shift, roster, unit)
     return shift
   }
 
@@ -638,53 +604,6 @@ export class RosterAssignmentService {
       )
     }
     return employee
-  }
-
-  /**
-   * Refuses an employee whose status is not `probation` or `active` (`HR-ROS-001`).
-   *
-   * @param employee - The employee.
-   * @throws InvalidRequestError `employee_not_assignable`.
-   */
-  private assertAssignable(employee: Employee): void {
-    if (
-      employee.employment_status !== 'probation' &&
-      employee.employment_status !== 'active'
-    ) {
-      throw new InvalidRequestError(
-        'employee_not_assignable',
-        'Only an employee on probation or active can be assigned.',
-      )
-    }
-  }
-
-  /**
-   * Checks general clinical eligibility for a clinical employee in a clinical unit
-   * (`HR-ROS-002`, HR plan 5.5 RA11).
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param employee - The employee.
-   * @param unit - The unit of the roster.
-   * @param date - The local date of the shift.
-   * @throws InvalidRequestError `not_eligible_employment`, `not_eligible_str`,
-   * `not_eligible_sip` or `not_eligible_spk`.
-   */
-  private async assertEligible(
-    tenantId: string,
-    employee: Employee,
-    unit: OrganizationUnit,
-    date: string,
-  ): Promise<void> {
-    if (!employee.is_clinical || !unit.is_clinical) {
-      return
-    }
-    const result = await this.eligibility.general(tenantId, employee, unit, date)
-    if (!result.eligible) {
-      throw new InvalidRequestError(
-        `not_eligible_${result.failed}`,
-        'The employee is not clinically eligible to work in this unit on that date.',
-      )
-    }
   }
 
   /**
@@ -717,7 +636,7 @@ export class RosterAssignmentService {
       tenantId,
       unitId,
     )
-    const others: WorkingShift[] = (
+    const others = (
       await this.assignments.findPlannedByEmployeeBetween(
         tenantId,
         employeeId,
@@ -726,14 +645,8 @@ export class RosterAssignmentService {
       )
     )
       .filter((other) => other.id !== ignoreId)
-      .map((other) => ({
-        date: other.date,
-        startsAt: other.starts_at,
-        endsAt: other.ends_at,
-        paidMinutes: other.shift.paid_minutes,
-        isNight: other.shift.is_night,
-      }))
-    const result = checkWorkingTime(
+      .map((other) => toWorkingShift(other))
+    return firstWorkingTimeViolation(
       {
         date,
         startsAt: instants.startsAt,
@@ -745,11 +658,6 @@ export class RosterAssignmentService {
       limits,
       consent,
     )
-    const first = result.violations[0]
-    if (first) {
-      throw new InvalidRequestError(first, WORKING_TIME_MESSAGES[first])
-    }
-    return result.overtimeMinutes
   }
 
   /**
