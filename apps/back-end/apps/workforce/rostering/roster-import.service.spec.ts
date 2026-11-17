@@ -247,7 +247,7 @@ describe('RosterImportService', () => {
     const parameters = { resolve: async (_tenant: string, { key }: { key: string }) => ({ value: limits[key] }) } as unknown as ParameterService
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new RosterImportService(rosters, assignments, units, facilities, shifts, employees, imports, eligibility, parameters, { report } as never, logger)
+    service = new RosterImportService(rosters, assignments, units, facilities, shifts, employees, imports, eligibility, parameters, { report } as never, { run: (work: () => Promise<unknown>) => work() } as never, logger)
     facilityId = (
       await asHead(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -459,14 +459,124 @@ describe('RosterImportService', () => {
       expect(await imports.findByFilter(tenantId)).toEqual([])
     })
 
-    it('answers not found for a missing, malformed or foreign roster, needs an acting account, and does not apply yet', async () => {
+    it('answers not found for a missing, malformed or foreign roster, needs an acting account, and refuses an apply without a valid check', async () => {
       const foreign = await asHead(() => rosters.create(Object.assign({}, roster, { tenant_id: otherTenantId, unit_id: new Types.ObjectId().toHexString() }) as never))
       for (const id of [foreign.id, new Types.ObjectId().toHexString(), 'bad']) {
         expect(await rejection(() => asHead(() => service.importFile(tenantId, id, { content: `${header}\nE001,2099-03-02,P,,\n` })))).toMatchObject({ code: 'roster_not_found' })
       }
       expect(await rejection(() => service.importFile(tenantId, roster.id, { content: `${header}\nE001,2099-03-02,P,,\n` }))).toMatchObject({ code: 'actor_required' })
-      expect(await rejection(() => asHead(() => service.importFile(tenantId, roster.id, { content: `${header}\nE001,2099-03-02,P,,\n`, apply: true, checkId: 'x' })))).toMatchObject({ code: 'apply_not_available' })
+      expect(await rejection(() => asHead(() => service.importFile(tenantId, roster.id, { content: `${header}\nE001,2099-03-02,P,,\n`, apply: true, checkId: 'x' })))).toMatchObject({ code: 'check_not_valid' })
       expect(await imports.findByFilter(tenantId)).toEqual([])
+    })
+  })
+
+  describe('applying a checked file', () => {
+    const rows = ['E001,2099-03-02,P,,', 'E001,2099-03-03,M,team_leader,']
+    const content = `${header}\n${rows.join('\n')}\n`
+
+    /**
+     * Applies a file as the Head of Unit.
+     *
+     * @param checkId - The check to apply.
+     * @param text - The file; the file of the suite by default.
+     * @param extra - More input, such as a version or a reason.
+     * @param on - The roster; the main roster by default.
+     * @returns The answer.
+     */
+    function apply(checkId: string | undefined, text = content, extra: { version?: number; reason?: string } = {}, on: Roster = roster) {
+      return asHead(() => service.importFile(tenantId, on.id, { content: text, apply: true, checkId, ...extra }))
+    }
+
+    it('writes every assignment with the source import, marks the import applied, and logs counts only', async () => {
+      const checked = await check(rows)
+      log.mockClear()
+
+      const answer = await apply(checked.import.id)
+
+      expect(answer.import).toMatchObject({ id: checked.import.id, status: 'applied', counts: { rows: 2, valid: 2, invalid: 0, created: 2 }, applied: { by: { account_id: 'head' } } })
+      const stored = await assignments.findByRoster(tenantId, roster.id)
+      expect(stored).toHaveLength(2)
+      expect(stored[0]).toMatchObject({ employee_id: nurse.id, date: '2099-03-02', status: 'planned', role: 'staff', source: { kind: 'import', ref_id: checked.import.id }, revision: 0, shift: expect.objectContaining({ code: 'P' }), overtime: null })
+      expect(stored[0]?.starts_at).toEqual(new Date('2099-03-02T00:00:00Z'))
+      expect(stored[1]).toMatchObject({ role: 'team_leader', shift: expect.objectContaining({ code: 'M' }) })
+      expect(log).toHaveBeenCalledTimes(1)
+      expect(log.mock.calls[0]?.[0]).toMatchObject({ event: 'roster_import_apply', outcome: 'success', status: 'applied', rows: 2, invalid: 0, created: 2 })
+      const written = JSON.stringify([log.mock.calls, warn.mock.calls, error.mock.calls])
+      for (const text of ['E001', '2099-03-02', 'team_leader']) {
+        expect(written).not.toContain(text)
+      }
+    })
+
+    it('stores the overtime and the consent a row gave', async () => {
+      const long = await addShift('L', { start_time: '07:00', end_time: '23:00', paid_minutes: 960 })
+      const text = `${header}\nE001,2099-03-02,L,,yes\n`
+      const checked = await asHead(() => service.importFile(tenantId, roster.id, { content: text }))
+      expect(checked.import.status).toBe('validated')
+
+      await apply(checked.import.id, text)
+
+      const [stored] = await assignments.findByRoster(tenantId, roster.id)
+      expect(stored?.shift.definition_id).toBe(long.id)
+      expect(stored?.overtime).toMatchObject({ consent: { document: null } })
+    })
+
+    it('needs a check, for this roster, validated, of this same file', async () => {
+      const checked = await check(rows)
+      expect(await rejection(() => apply(undefined))).toMatchObject({ code: 'check_required' })
+      expect(await rejection(() => apply('bad'))).toMatchObject({ code: 'check_not_valid' })
+      expect(await rejection(() => apply(new Types.ObjectId().toHexString()))).toMatchObject({ code: 'check_not_valid' })
+      const other = await addRoster({ unit_id: (await addUnit()).id })
+      expect(await rejection(() => apply(checked.import.id, content, {}, other))).toMatchObject({ code: 'check_not_valid' })
+      const invalid = await check(['NOPE,2099-03-02,P,,'])
+      expect(invalid.import.status).toBe('invalid')
+      expect(await rejection(() => apply(invalid.import.id))).toMatchObject({ code: 'check_not_valid' })
+      expect(await rejection(() => apply(checked.import.id, `${content}E001,2099-03-05,P,,\n`))).toMatchObject({ code: 'check_mismatch' })
+      expect(await assignments.findByRoster(tenantId, roster.id)).toEqual([])
+    })
+
+    it('does not apply a check of another tenant or a cancelled check', async () => {
+      const checked = await check(rows)
+      await asHead(() => imports.update(checked.import.id, { status: 'cancelled' }))
+      expect(await rejection(() => apply(checked.import.id))).toMatchObject({ code: 'check_not_valid' })
+      const foreign = await asHead(() => imports.create(Object.assign({}, checked.import, { tenant_id: otherTenantId, status: 'validated' }) as never))
+      expect(await rejection(() => apply(foreign.id))).toMatchObject({ code: 'check_not_valid' })
+      expect(await assignments.findByRoster(tenantId, roster.id)).toEqual([])
+    })
+
+    it('refuses the same file twice', async () => {
+      const first = await check(rows)
+      await apply(first.import.id)
+      const again = await check(rows)
+      expect(again.import.status).toBe('invalid')
+      const manual = await asHead(() => imports.create(Object.assign({}, first.import, { status: 'validated' }) as never))
+      expect(await rejection(() => apply(manual.id))).toMatchObject({ code: 'import_already_applied' })
+      expect(await assignments.findByRoster(tenantId, roster.id)).toHaveLength(2)
+    })
+
+    it('writes nothing and records the new errors when the file stopped being valid', async () => {
+      const checked = await check(rows)
+      await asHead(() => assignments.create({ tenant_id: tenantId, roster_id: roster.id, unit_id: unitId, facility_id: facilityId, employee_id: nurse.id, date: '2099-03-02', shift: { definition_id: morning.id, code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-02T00:00:00Z'), ends_at: new Date('2099-03-02T08:00:00Z'), role: 'staff', status: 'planned', source: { kind: 'roster', ref_id: null }, change_reason: null, revision: 0, overtime: null, flag: null, is_flagged: false }))
+
+      const failure = await rejection(() => apply(checked.import.id))
+
+      expect(failure).toMatchObject({ code: 'import_not_valid_anymore' })
+      expect(await assignments.findByRoster(tenantId, roster.id)).toHaveLength(1)
+      expect(await imports.findOne(checked.import.id)).toMatchObject({ status: 'invalid', applied: null, counts: { rows: 2, invalid: 1, created: 0 }, errors: [{ row: 2, column: 'date', code: 'assignment_exists' }] })
+      expect(warn.mock.calls.at(-1)?.[0]).toMatchObject({ event: 'roster_import_apply', outcome: 'failure', code: 'import_not_valid_anymore' })
+    })
+
+    it('answers a stale roster version and a roster that is no longer a draft', async () => {
+      const checked = await check(rows)
+      expect(await rejection(() => apply(checked.import.id, content, { version: roster.version + 5 }))).toMatchObject({ code: 'stale_version' })
+      await asHead(() => rosters.update(roster.id, { status: 'submitted' }))
+      expect(await rejection(() => apply(checked.import.id))).toMatchObject({ code: 'roster_locked' })
+      expect(await assignments.findByRoster(tenantId, roster.id)).toEqual([])
+    })
+
+    it('needs an acting account', async () => {
+      const checked = await check(rows)
+      expect(await rejection(() => service.importFile(tenantId, roster.id, { content, apply: true, checkId: checked.import.id }))).toMatchObject({ code: 'actor_required' })
+      expect(await assignments.findByRoster(tenantId, roster.id)).toEqual([])
     })
   })
 })

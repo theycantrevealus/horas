@@ -64,7 +64,10 @@ export class HrImportRepositoryMongo
     query: HrImportQuery = {},
   ): Promise<HrImport[]> {
     const operation = 'HrImportRepository.findByFilter'
-    if (!toObjectId(tenantId)) {
+    if (
+      !toObjectId(tenantId) ||
+      (query.rosterId !== undefined && !toObjectId(query.rosterId))
+    ) {
       return []
     }
     try {
@@ -75,6 +78,7 @@ export class HrImportRepositoryMongo
             deleted_at: null,
             ...(query.kind ? { kind: query.kind } : {}),
             ...(query.status ? { status: query.status } : {}),
+            ...(query.rosterId ? { 'target.roster_id': query.rosterId } : {}),
             ...(query.calendarCode
               ? { 'target.calendar_code': query.calendarCode }
               : {}),

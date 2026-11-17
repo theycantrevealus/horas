@@ -329,6 +329,29 @@ describe('RosterAssignmentRepository on the shared Mongo base', () => {
     expect(appended[0]).toMatchObject({ action: 'create', entity: { type: 'roster_assignment' } })
   })
 
+  it('creates many assignments of a roster with one change record each and the reason roster_import', async () => {
+    const second = { ...input, employee_id: new Types.ObjectId().toHexString(), date: '2027-03-11' }
+
+    const created = await asAdmin(() => assignments.createMany(input.roster_id, [input, second]))
+
+    expect(created).toHaveLength(2)
+    expect(model.create).toHaveBeenCalledTimes(1)
+    expect(model.create.mock.calls[0]?.[0]).toHaveLength(2)
+    expect(model.create.mock.calls[0]?.[0][0]).toMatchObject({ created_by: expect.objectContaining({ account_id: 'a1' }), schema_version: 1 })
+    expect(appended).toHaveLength(2)
+    for (const record of appended) {
+      expect(record).toMatchObject({ action: 'create', entity: { type: 'roster_assignment' }, reason: 'roster_import' })
+    }
+  })
+
+  it('writes nothing for an empty list, an assignment of another roster, or no acting account', async () => {
+    expect(await asAdmin(() => assignments.createMany(input.roster_id, []))).toEqual([])
+    await expect(asAdmin(() => assignments.createMany(input.roster_id, [input, { ...input, roster_id: new Types.ObjectId().toHexString() }]))).rejects.toBeInstanceOf(RepositoryError)
+    await expect(assignments.createMany(input.roster_id, [input])).rejects.toBeInstanceOf(RepositoryError)
+    expect(model.create).not.toHaveBeenCalled()
+    expect(appended).toHaveLength(0)
+  })
+
   it('refuses to write without an acting account', async () => {
     await expect(assignments.create(input)).rejects.toBeInstanceOf(RepositoryError)
     expect(model.create).not.toHaveBeenCalled()

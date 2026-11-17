@@ -1,6 +1,7 @@
 import {
   RepositoryConflictError,
   RepositoryError,
+  RepositoryValidationError,
 } from '@utility/database/error'
 import { type FieldCipher, mask } from '@utility/encryption/field-cipher'
 import {
@@ -2859,6 +2860,9 @@ export class InMemoryHrImports
         (!query.kind || item.kind === query.kind) &&
         (!query.status || item.status === query.status) &&
         (!query.sha256 || item.file.sha256 === query.sha256) &&
+        (query.rosterId === undefined ||
+          ('roster_id' in item.target &&
+            item.target.roster_id === query.rosterId)) &&
         (query.calendarCode === undefined ||
           ('calendar_code' in item.target &&
             item.target.calendar_code === query.calendarCode)) &&
@@ -3111,6 +3115,32 @@ export class InMemoryRosterAssignments
           left.employee_id.localeCompare(right.employee_id),
       )
       .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Creates many assignments of one roster. Like the Mongo one it refuses an assignment of another
+   * roster before writing anything. The fake cannot roll back, so a test of atomicity checks the
+   * refusal, not a failure in the middle.
+   *
+   * @param rosterId - The roster every assignment belongs to.
+   * @param assignments - The assignments to store.
+   * @returns The stored assignments, in the order given.
+   */
+  async createMany(
+    rosterId: string,
+    assignments: NewEntity<RosterAssignment>[],
+  ): Promise<RosterAssignment[]> {
+    if (assignments.some((item) => item.roster_id !== rosterId)) {
+      throw new RepositoryValidationError(
+        'RosterAssignmentRepository.createMany: an assignment belongs to another roster',
+        { operation: 'RosterAssignmentRepository.createMany' },
+      )
+    }
+    const stored: RosterAssignment[] = []
+    for (const assignment of assignments) {
+      stored.push(await this.create(assignment))
+    }
+    return stored
   }
 
   /**

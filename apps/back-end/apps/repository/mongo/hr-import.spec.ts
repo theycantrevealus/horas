@@ -205,6 +205,17 @@ describe('HrImportRepository on the shared Mongo base', () => {
     expect(found?.errors[0]).toEqual({ row: 1, column: null, code: 'x' })
   })
 
+  it('filters imports by roster, and answers an empty list for a malformed roster id', async () => {
+    const tenant = tenantId.toHexString()
+    const roster = new Types.ObjectId().toHexString()
+    await imports.findByFilter(tenant, { kind: 'roster_assignments', rosterId: roster, status: 'applied' })
+
+    expect(model.find).toHaveBeenCalledWith(expect.objectContaining({ tenant_id: tenant, 'target.roster_id': roster, status: 'applied' }))
+    model.find.mockClear()
+    expect(await imports.findByFilter(tenant, { rosterId: 'bad' })).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('lists with its filters, latest first, and answers an empty list for a malformed tenant', async () => {
     const tenant = tenantId.toHexString()
     await imports.findByFilter(tenant, {

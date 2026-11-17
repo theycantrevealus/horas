@@ -81,7 +81,7 @@ export interface MongoRepositoryOptions<M extends StoredModel> {
 /**
  * Fields the repository sets itself, which a caller can never provide on create.
  */
-const MANAGED_FIELDS = [
+export const MANAGED_FIELDS = [
   'id',
   '_id',
   'created_at',
