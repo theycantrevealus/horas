@@ -269,6 +269,9 @@ Plan: `plans/gateway-hr-5-7-shift-swaps.md` (built, PR #103 and #104). It adds `
 | `POST /shift-swaps/:id/cancel` | Requester cancels. |
 
 ### 5.8 Practice schedules (outpatient)
+
+Plan: `plans/gateway-hr-5-8-practice-schedules.md` (proposed, waiting for confirmation). The six endpoints stay; `GET /practice-schedules` with `date` answers the sessions of that date (PS2).
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /practice-schedules` | Which doctors practise in a polyclinic on a date, with quotas (for registration). |
