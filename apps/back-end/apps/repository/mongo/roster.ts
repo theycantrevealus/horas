@@ -35,7 +35,8 @@ function toStamp(stamp: ActorStampEntity | null | undefined): ActorStamp | null 
 
 /**
  * Mongo implementation of `RosterRepository`. Rosters are never deleted. The unit, the facility,
- * the period and the preparer are fixed after creation; only the lifecycle fields change.
+ * the period and the preparer are fixed after creation; only the lifecycle fields, the accepted
+ * coverage gaps and the validation summary change.
  */
 @Injectable()
 export class RosterRepositoryMongo
@@ -68,6 +69,8 @@ export class RosterRepositoryMongo
         'published',
         'closed',
         'return_reason',
+        'coverage_overrides',
+        'validation',
       ],
     })
   }

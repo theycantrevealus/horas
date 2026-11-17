@@ -198,6 +198,45 @@ export class RosterAssignmentRepositoryMongo
   }
 
   /**
+   * Finds the planned assignments of a unit that are on duty at an instant.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @param at - The instant.
+   * @returns The assignments on duty.
+   */
+  async findOnDuty(
+    tenantId: string,
+    unitId: string,
+    at: Date,
+  ): Promise<RosterAssignment[]> {
+    const operation = 'RosterAssignmentRepository.findOnDuty'
+    if (!toObjectId(tenantId) || !toObjectId(unitId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            unit_id: unitId,
+            status: 'planned',
+            is_flagged: false,
+            starts_at: { $lte: at },
+            ends_at: { $gt: at },
+            deleted_at: null,
+          }),
+        )
+        .sort({ starts_at: 1, employee_id: 1 })
+        .lean<LeanRecord<RosterAssignmentEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds planned assignments of a shift in some rosters.
    *
    * @param tenantId - Tenant to search in.

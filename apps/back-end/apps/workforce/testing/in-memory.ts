@@ -3166,6 +3166,37 @@ export class InMemoryRosterAssignments
   }
 
   /**
+   * Finds the planned assignments of a unit that are on duty at an instant.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param unitId - The unit.
+   * @param at - The instant.
+   * @returns The assignments on duty.
+   */
+  async findOnDuty(
+    tenantId: string,
+    unitId: string,
+    at: Date,
+  ): Promise<RosterAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.unit_id === unitId &&
+        item.status === 'planned' &&
+        !item.is_flagged &&
+        item.starts_at !== null &&
+        item.ends_at !== null &&
+        item.starts_at.getTime() <= at.getTime() &&
+        item.ends_at.getTime() > at.getTime() &&
+        !item.deleted_at,
+    ).sort(
+      (left, right) =>
+        (left.starts_at?.getTime() ?? 0) - (right.starts_at?.getTime() ?? 0) ||
+        left.employee_id.localeCompare(right.employee_id),
+    )
+  }
+
+  /**
    * Finds planned assignments of a shift in some rosters.
    *
    * @param tenantId - Tenant to search in.
