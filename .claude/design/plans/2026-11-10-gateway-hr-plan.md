@@ -78,7 +78,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 23 | 5.7 Shift swaps | 7 (SW1: `GET /employees/me/shift-swaps` added) | Done (`gateway-hr-5-7-shift-swaps.md`, PR #101 and #102) | Built in two PRs, #103 (repository, create, accept, cancel, lists) and #104 (approve, reject) |
 | 24 | 5.8 Practice schedules | 6 (PS1: the six listed; the read with `date` answers sessions) | Done (`gateway-hr-5-8-practice-schedules.md`, PR #106 and #107) | Built in two PRs, #108 (schedules, sessions by date) and #109 (exceptions, undo) |
 | 25 | 6 Clinical eligibility | 1 (CE1: the one read, with the full check list) | Done (`gateway-hr-6-clinical-eligibility.md`, PR #111 and #112) | Built in one PR, #113 (no new repository) |
-| 26 | 7 Worker expiry and eligibility jobs | 0 (scheduled jobs in the worker) | Proposed (`gateway-hr-7-worker-expiry-jobs.md`, this PR) | Planned as three code PRs (runner and licences; SPKs; eligibility sweep) |
+| 26 | 7 Worker expiry and eligibility jobs | 0 (scheduled jobs in the worker) | Done (`gateway-hr-7-worker-expiry-jobs.md`, PR #115 and the confirmation) | Planned as three code PRs (runner and licences; SPKs; eligibility sweep) |
 
 Groups 1.1 and 1.2 are small and can be built in one PR if you agree both.
 
