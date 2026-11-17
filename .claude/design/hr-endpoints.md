@@ -270,7 +270,7 @@ Plan: `plans/gateway-hr-5-7-shift-swaps.md` (built, PR #103 and #104). It adds `
 
 ### 5.8 Practice schedules (outpatient)
 
-Plan: `plans/gateway-hr-5-8-practice-schedules.md` (proposed, waiting for confirmation). The six endpoints stay; `GET /practice-schedules` with `date` answers the sessions of that date (PS2).
+Plan: `plans/gateway-hr-5-8-practice-schedules.md` (confirmed). The six endpoints stay; `GET /practice-schedules` with `date` answers the sessions of that date (PS2).
 
 | Endpoint | Purpose |
 |---|---|
