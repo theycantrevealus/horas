@@ -17,6 +17,8 @@ describe('shift swap routes (in-memory repositories)', () => {
   let thirdToken: string
   let unlinkedToken: string
   let readerToken: string
+  let deciderToken: string
+  let partyDeciderToken: string
   let otherTenantToken: string
   let tenantId: string
   let facilityId: string
@@ -167,6 +169,8 @@ describe('shift swap routes (in-memory repositories)', () => {
     sitiToken = await gateway.seedAndLogin(tenantId, 'siti', [], siti)
     budiToken = await gateway.seedAndLogin(tenantId, 'budi', [], budi)
     thirdToken = await gateway.seedAndLogin(tenantId, 'third', [], third)
+    deciderToken = await gateway.seedAndLogin(tenantId, 'decider', [PERMISSIONS.WORKFORCE_SHIFT_SWAP_DECIDE], null)
+    partyDeciderToken = await gateway.seedAndLogin(tenantId, 'party', [PERMISSIONS.WORKFORCE_SHIFT_SWAP_DECIDE], siti)
     unlinkedToken = await gateway.seedAndLogin(tenantId, 'unlinked', [], null)
     readerToken = await gateway.seedAndLogin(tenantId, 'reader', [PERMISSIONS.WORKFORCE_SHIFT_SWAP_READ], null)
     otherTenantToken = await gateway.seedAndLogin(gateway.otherTenantId, 'other', [PERMISSIONS.WORKFORCE_SHIFT_SWAP_READ])
@@ -178,10 +182,14 @@ describe('shift swap routes (in-memory repositories)', () => {
 
   it('refuses every route without a token (401), and the tenant list without its permission (403)', async () => {
     const id = new Types.ObjectId().toHexString()
-    for (const [method, url] of [['GET', '/v1/shift-swaps'], ['GET', '/v1/employees/me/shift-swaps'], ['POST', '/v1/shift-swaps'], ['POST', `/v1/shift-swaps/${id}/accept`], ['POST', `/v1/shift-swaps/${id}/cancel`]] as const) {
+    for (const [method, url] of [['GET', '/v1/shift-swaps'], ['GET', '/v1/employees/me/shift-swaps'], ['POST', '/v1/shift-swaps'], ['POST', `/v1/shift-swaps/${id}/accept`], ['POST', `/v1/shift-swaps/${id}/cancel`], ['POST', `/v1/shift-swaps/${id}/approve`], ['POST', `/v1/shift-swaps/${id}/reject`]] as const) {
       expect((await call(method, url, undefined, method === 'POST' ? {} : undefined)).status).toBe(401)
     }
     expect((await call('GET', '/v1/shift-swaps', sitiToken)).status).toBe(403)
+    for (const move of ['approve', 'reject']) {
+      expect((await call('POST', `/v1/shift-swaps/${id}/${move}`, sitiToken, { reason: 'x' })).status).toBe(403)
+      expect((await call('POST', `/v1/shift-swaps/${id}/${move}`, readerToken, { reason: 'x' })).status).toBe(403)
+    }
   })
 
   it('asks, accepts and cancels over HTTP, and both employees see it in their own list', async () => {
@@ -264,6 +272,74 @@ describe('shift swap routes (in-memory repositories)', () => {
     expect(((await call('GET', '/v1/shift-swaps', otherTenantToken)).body as unknown[])).toEqual([])
   })
 
+  it('approves over HTTP: the assignments change, the roster revision goes up, and the new assignments name the request', async () => {
+    const mine = await addAssignment(siti)
+    const theirs = await addAssignment(budi)
+    const swap = (await call('POST', '/v1/shift-swaps', sitiToken, { assignmentId: mine, counterpartEmployeeId: budi, counterpartAssignmentId: theirs, reason: 'Keperluan keluarga' })).body as Record<string, any>
+    const before = (await workforce.rosters.findOne(rosterId))?.revision ?? 0
+
+    const early = await call('POST', `/v1/shift-swaps/${swap.id}/approve`, deciderToken, {})
+    expect(early.status).toBe(422)
+    expect(early.body).toMatchObject({ code: 'invalid_transition' })
+    await call('POST', `/v1/shift-swaps/${swap.id}/accept`, budiToken, {})
+    const approved = await call('POST', `/v1/shift-swaps/${swap.id}/approve`, deciderToken, { reason: 'Setuju' })
+
+    expect(approved.status).toBe(201)
+    expect(approved.body).toMatchObject({ id: swap.id, status: 'approved', decision: { reason: 'Setuju' } })
+    expect((approved.body as Record<string, any>).resulting_assignment_ids).toHaveLength(2)
+    expect((await workforce.rosterAssignments.findOne(mine))?.status).toBe('cancelled')
+    expect((await workforce.rosters.findOne(rosterId))?.revision).toBe(before + 1)
+    for (const id of (approved.body as Record<string, any>).resulting_assignment_ids as string[]) {
+      expect(await workforce.rosterAssignments.findOne(id)).toMatchObject({ status: 'planned', source: { kind: 'swap', ref_id: swap.id } })
+    }
+    expect(((await call('GET', '/v1/employees/me/shift-swaps?status=approved', sitiToken)).body as Record<string, any>[]).map((item) => item.id)).toContain(swap.id)
+  })
+
+  it('rejects over HTTP with a reason, and refuses a decider who is a party, a missing reason and a final request', async () => {
+    const mine = await addAssignment(siti)
+    const swap = (await call('POST', '/v1/shift-swaps', sitiToken, { assignmentId: mine, counterpartEmployeeId: budi, reason: 'Sakit' })).body as Record<string, any>
+
+    const party = await call('POST', `/v1/shift-swaps/${swap.id}/reject`, partyDeciderToken, { reason: 'Tidak' })
+    expect(party.status).toBe(403)
+    expect(party.body).toMatchObject({ code: 'decider_is_party' })
+    for (const bad of [{}, { reason: '' }, { reason: 'x'.repeat(501) }, { reason: 'x', version: -1 }]) {
+      expect((await call('POST', `/v1/shift-swaps/${swap.id}/reject`, deciderToken, bad)).status).toBe(400)
+    }
+    expect((await call('POST', `/v1/shift-swaps/${swap.id}/approve`, deciderToken, { reason: '' })).status).toBe(400)
+    const stale = await call('POST', `/v1/shift-swaps/${swap.id}/reject`, deciderToken, { reason: 'Tidak', version: swap.version + 5 })
+    expect(stale.status).toBe(409)
+    expect(stale.body).toMatchObject({ code: 'stale_version' })
+
+    const rejected = await call('POST', `/v1/shift-swaps/${swap.id}/reject`, deciderToken, { reason: 'Kurang orang' })
+    expect(rejected.status).toBe(201)
+    expect(rejected.body).toMatchObject({ status: 'rejected', decision: { reason: 'Kurang orang' } })
+    const again = await call('POST', `/v1/shift-swaps/${swap.id}/reject`, deciderToken, { reason: 'Lagi' })
+    expect(again.status).toBe(422)
+    expect(again.body).toMatchObject({ code: 'invalid_transition' })
+    expect((await workforce.rosterAssignments.findOne(mine))?.status).toBe('planned')
+    for (const id of [new Types.ObjectId().toHexString(), 'bad']) {
+      for (const move of ['approve', 'reject']) {
+        expect((await call('POST', `/v1/shift-swaps/${id}/${move}`, deciderToken, { reason: 'x' })).body).toMatchObject({ code: 'swap_not_found' })
+      }
+    }
+    expect((await call('POST', `/v1/shift-swaps/${swap.id}/reject`, otherTenantToken, { reason: 'x' })).status).toBe(403)
+  })
+
+  it('answers 422 and writes nothing when the schedule no longer allows the swap at approval', async () => {
+    const mine = await addAssignment(siti)
+    const swap = (await call('POST', '/v1/shift-swaps', sitiToken, { assignmentId: mine, counterpartEmployeeId: budi, reason: 'Sakit' })).body as Record<string, any>
+    await call('POST', `/v1/shift-swaps/${swap.id}/accept`, budiToken, {})
+    const slot = await workforce.rosterAssignments.findOne(mine)
+    await workforce.rosterAssignments.create({ ...(slot as never as Record<string, any>), employee_id: budi, shift: { ...(slot as any).shift, code: 'S' } } as never)
+
+    const approved = await call('POST', `/v1/shift-swaps/${swap.id}/approve`, deciderToken, {})
+
+    expect(approved.status).toBe(409)
+    expect(approved.body).toMatchObject({ code: 'assignment_exists' })
+    expect((await workforce.rosterAssignments.findOne(mine))?.status).toBe('planned')
+    expect((await workforce.swaps.findOne(swap.id))?.status).toBe('accepted_by_counterpart')
+  })
+
   it('answers 400 for a bad body or query', async () => {
     const mine = await addAssignment(siti)
     const valid = { assignmentId: mine, counterpartEmployeeId: budi, reason: 'Sakit' }
@@ -287,11 +363,13 @@ describe('shift swap routes (in-memory repositories)', () => {
       await call('GET', '/v1/employees/me/shift-swaps', sitiToken)
       const swap = (await call('POST', '/v1/shift-swaps', sitiToken, { assignmentId: mine, counterpartEmployeeId: budi, reason: 'Alasan Rahasia' })).body as Record<string, any>
       await call('POST', `/v1/shift-swaps/${swap.id}/accept`, budiToken, {})
-      await call('POST', `/v1/shift-swaps/${swap.id}/cancel`, sitiToken, {})
-      await vi.waitFor(() => expect(written.filter((entry) => entry.event === 'http_request')).toHaveLength(5))
+      await call('POST', `/v1/shift-swaps/${swap.id}/approve`, deciderToken, { reason: 'Alasan Setuju' })
+      const other = (await call('POST', '/v1/shift-swaps', sitiToken, { assignmentId: await addAssignment(siti), counterpartEmployeeId: budi, reason: 'Alasan Lain' })).body as Record<string, any>
+      await call('POST', `/v1/shift-swaps/${other.id}/reject`, deciderToken, { reason: 'Alasan Tolak' })
+      await vi.waitFor(() => expect(written.filter((entry) => entry.event === 'http_request')).toHaveLength(7))
 
-      expect(written.filter((entry) => entry.event !== 'http_request').map((entry) => entry.event)).toEqual(['swap_create', 'swap_accept', 'swap_cancel'])
-      for (const text of ['Alasan Rahasia', mine, siti, budi]) {
+      expect(written.filter((entry) => entry.event !== 'http_request').map((entry) => entry.event)).toEqual(['swap_create', 'swap_accept', 'swap_approve', 'swap_create', 'swap_reject'])
+      for (const text of ['Alasan Rahasia', 'Alasan Setuju', 'Alasan Lain', 'Alasan Tolak', mine, siti, budi]) {
         expect(JSON.stringify(written)).not.toContain(text)
       }
     } finally {
