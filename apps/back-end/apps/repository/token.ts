@@ -203,3 +203,10 @@ export const REPOSITORY_ROSTER_ASSIGNMENT = Symbol(
 export const REPOSITORY_SHIFT_SWAP_REQUEST = Symbol(
   'REPOSITORY_SHIFT_SWAP_REQUEST',
 )
+
+/**
+ * Injection token for the practice schedule repository (a doctor's recurring weekly outpatient session).
+ */
+export const REPOSITORY_PRACTICE_SCHEDULE = Symbol(
+  'REPOSITORY_PRACTICE_SCHEDULE',
+)

@@ -107,11 +107,13 @@ export interface Reply {
  * @property modules - HTTP modules of the area under test, for example `FacilityManagementModule`.
  * @property entities - Mongoose entity classes whose model tokens are stubbed out, so no Mongo is needed.
  * @property repositories - Repository tokens mapped to in-memory fakes.
+ * @property overrides - Classes of services replaced by a fake, for example `EligibilityService`.
  */
 export interface HrGatewayOptions {
   modules: Type<unknown>[]
   entities: { name: string }[]
   repositories: [symbol, unknown][]
+  overrides?: [Type<unknown>, unknown][]
 }
 
 /**
@@ -243,6 +245,9 @@ export async function createHrGateway(
   ]
   for (const [token, value] of overrides) {
     builder.overrideProvider(token).useValue(value)
+  }
+  for (const [provider, value] of options.overrides ?? []) {
+    builder.overrideProvider(provider).useValue(value)
   }
   const moduleRef = await builder.compile()
   const app = moduleRef.createNestApplication<NestFastifyApplication>(
