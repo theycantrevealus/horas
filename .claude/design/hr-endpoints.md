@@ -283,7 +283,7 @@ Plan: `plans/gateway-hr-5-8-practice-schedules.md` (built, PR #108 and #109). Th
 
 ## 6. Clinical eligibility
 
-Plan: `plans/gateway-hr-6-clinical-eligibility.md` (proposed). The one endpoint stays; it takes `unitId` (required), `date` and `privilegeId` as query and answers every condition checked.
+Plan: `plans/gateway-hr-6-clinical-eligibility.md` (confirmed). The one endpoint stays; it takes `unitId` (required), `date` and `privilegeId` as query and answers every condition checked.
 
 | Endpoint | Purpose |
 |---|---|
