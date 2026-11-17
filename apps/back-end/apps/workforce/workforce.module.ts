@@ -9,6 +9,7 @@ import { CredentialApplicationRepositoryModule } from '@repository/mongo/credent
 import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credential-assessment.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { CoverageRequirementRepositoryModule } from '@repository/mongo/coverage-requirement.module'
+import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
 import { RosterRepositoryModule } from '@repository/mongo/roster.module'
 import { HolidayCalendarRepositoryModule } from '@repository/mongo/holiday-calendar.module'
 import { HrImportRepositoryModule } from '@repository/mongo/hr-import.module'
@@ -32,6 +33,8 @@ import { ApplicationService } from './credentialing/application.service'
 import { AppointmentService } from './appointment/appointment.service'
 import { GrantService } from './appointment/grant.service'
 import { StatusService } from './appointment/status.service'
+import { EligibilityService } from './eligibility/eligibility.service'
+import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
 import { RosterService } from './rostering/roster.service'
 import { HolidayImportService } from './rostering/holiday-import.service'
@@ -85,6 +88,7 @@ import { UnitService } from './structure/unit.service'
     HrImportRepositoryModule,
     CoverageRequirementRepositoryModule,
     RosterRepositoryModule,
+    RosterAssignmentRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -114,6 +118,8 @@ import { UnitService } from './structure/unit.service'
     HolidayImportService,
     CoverageService,
     RosterService,
+    RosterAssignmentService,
+    EligibilityService,
   ],
   exports: [
     OrganizationService,
@@ -143,6 +149,8 @@ import { UnitService } from './structure/unit.service'
     HolidayImportService,
     CoverageService,
     RosterService,
+    RosterAssignmentService,
+    EligibilityService,
   ],
 })
 export class WorkforceModule {}
