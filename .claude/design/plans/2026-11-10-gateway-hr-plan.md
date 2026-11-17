@@ -1,6 +1,6 @@
 # gateway_hr Plan
 
-Status: **In progress** (2026-11-10). Groups 1.1 to 5.5 and the HR events to identity are built (PR #7 to #94, see section 3). Replaces `2026-11-07-workforce-core-implementation.md`.
+Status: **In progress** (2026-11-10). Groups 1.1 to 5.6 and the HR events to identity are built (PR #7 to #99, see section 3). Replaces `2026-11-07-workforce-core-implementation.md`.
 
 **Goal:** a new NestJS application `gateway_hr`, built like `gateway_back_office`, that serves the HR endpoints of `../hr-endpoints.md` on top of the approved collections (`../human-resource-collections.md`, `../account-and-workforce-collections.md`).
 
@@ -42,7 +42,7 @@ Each HR area has a domain folder in `workforce/` (services and rules) and an HTT
 | 0 | Commit the models | Two PRs, documentation and code, never mixed (#5 models, #6 documents). | Done |
 | 1 | Shared foundations | Built inside the first code PR (group 1.1) and then group by group, never in advance: `@workforce` alias, workforce errors, filter and logging helper, shared in-memory test repository and commit scopes arrive with 1.1; field encryption arrives with 2.2 (private profile); local-date validation with the first group that stores dates. | Partly done in PR #7 (alias, errors, filter, logging helper, shared test repository, commit scopes) |
 | 2 | Application skeleton | `gateway_hr` project in `nest-cli.json`, `tsconfig`, `main.ts` (`NODE_PORT=3001`), root module, health endpoint, `package.json` scripts (build, dev, type-check). Built in the group 1.1 PR. | Done (PR #7) |
-| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 to 5.5 and the HR events to identity done, 5.6 next |
+| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 to 5.6 and the HR events to identity done, 5.7 next |
 | 4 | Docs and checks | `workforce.md` rule file, `authentication.md` update, lint, type-check, full test suite on Node 22, each time a group is finished. | `workforce.md` written (docs PR after 1.1); repeated per group |
 
 ## 3. Walkthrough order
@@ -74,7 +74,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 19 | 5.3 Coverage requirements | 4 | Done (`gateway-hr-5-3-coverage-requirements.md`, PR #82) | Built, PR #83 |
 | 20 | 5.4 Rosters | 8 | Done (`gateway-hr-5-4-rosters.md`, PR #86) | Built, PR #87 |
 | 21 | 5.5 Roster assignments | 8 (RA1 to RA4: `GET /rosters/:id/assignments` added; `resolve-flag` and the roster import moved out) | Done (`gateway-hr-5-5-roster-assignments.md`, PR #90) | Built in three PRs, #91, #93 and #94 |
-| 22 | 5.6 Imports | 3 (IM1: no generic apply; the roster import checks and applies on one route) | Done (`gateway-hr-5-6-imports.md`, PR #96) | In progress (B1 branch `feat/workforce-roster-import-check`) |
+| 22 | 5.6 Imports | 3 (IM1: no generic apply; the roster import checks and applies on one route) | Done (`gateway-hr-5-6-imports.md`, PR #96) | Built in two PRs, #97 (check, view, cancel) and #99 (apply) |
 | 23 | 5.7 Shift swaps | 6 | — | — |
 | 24 | 5.8 Practice schedules | 6 | — | — |
 | 25 | 6 Clinical eligibility | 1 | — | — |
