@@ -1,6 +1,6 @@
 # gateway_hr 6: Clinical eligibility
 
-Status: **Proposed** (2026-11-17). Decisions CE1 to CE13 wait for your confirmation; the four that need an answer are CE2, CE3, CE5 and CE7. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 25). Endpoint: `../hr-endpoints.md` section 6. Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 5.5 (`HR-ELG-001`, `HR-ELG-002`), `HR-LIC-001`, `HR-CRD-001`, `HR-CRD-003`, `HR-CRD-006`, and the clinical-module question of section 13 and `HR-INT-001`/`002`. Built references: `EligibilityService.general` (`apps/workforce/eligibility/`, conditions 1 to 4, used by rostering and practice schedules), SPKs and grants (3g, 3h), licences (3c).
+Status: **Confirmed** 2026-11-17. Decisions CE1 to CE13 and the single code PR confirmed as proposed, including the four that needed an answer (CE2, CE3, CE5, CE7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 25). Endpoint: `../hr-endpoints.md` section 6. Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 5.5 (`HR-ELG-001`, `HR-ELG-002`), `HR-LIC-001`, `HR-CRD-001`, `HR-CRD-003`, `HR-CRD-006`, and the clinical-module question of section 13 and `HR-INT-001`/`002`. Built references: `EligibilityService.general` (`apps/workforce/eligibility/`, conditions 1 to 4, used by rostering and practice schedules), SPKs and grants (3g, 3h), licences (3c).
 
 Clinical eligibility is **derived**, never stored: a clinical employee may perform a privilege in a unit on a date when (1) the employment status is `probation` or `active`, (2) the STR of their profession is valid, (3) a SIP at the unit's facility is valid, (4) an active SPK covers the unit and (5) the privilege is granted in an active grant of that SPK. Groups 1 to 5 already use conditions 1 to 4 inside rostering. This group exposes the whole rule as one read for clinical modules, HR and committees, and adds condition 5.
 
@@ -63,7 +63,9 @@ Tests come first: each condition failing alone, all five failing together (`chec
 3. Dates are read in the unit's zone and the records are read on the date, never cached.
 4. No personal data in the answer or in any log entry.
 
-## 6. Decisions that need your answer
+## 6. Decisions that needed your answer
+
+Confirmed as proposed. These four changed the shape of the work most:
 
 - **CE2:** the privilege is selected by `privilegeId` (catalog item id) or by catalog `code`.
 - **CE3:** the answer lists all five checks, plus `failed` as the first one; or only the first failure.
