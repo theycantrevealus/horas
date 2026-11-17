@@ -3041,6 +3041,32 @@ export class InMemoryRosters
   implements RosterRepository
 {
   /**
+   * Finds `published` rosters of every tenant that end on or after a date, in identifier order,
+   * after a cursor.
+   *
+   * @param date - Local date.
+   * @param limit - Largest number of records.
+   * @param afterId - Last roster of the previous page.
+   * @returns The rosters.
+   */
+  async findPublishedEndingOnOrAfter(
+    date: string,
+    limit: number,
+    afterId?: string,
+  ): Promise<Roster[]> {
+    return [...this.items.values()]
+      .filter(
+        (roster) =>
+          !roster.deleted_at &&
+          roster.status === 'published' &&
+          roster.period.end >= date &&
+          (afterId === undefined || roster.id > afterId),
+      )
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .slice(0, limit)
+  }
+
+  /**
    * Creates a roster, refusing a second one of the unit with the same start date.
    *
    * @param entity - Roster data.

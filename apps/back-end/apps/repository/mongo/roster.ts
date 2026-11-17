@@ -195,6 +195,45 @@ export class RosterRepositoryMongo
   }
 
   /**
+   * Finds `published` rosters of every tenant that end on or after a date, after a cursor (a
+   * cross-tenant read for the worker's eligibility sweep).
+   *
+   * @param date - Local date.
+   * @param limit - Largest number of records.
+   * @param afterId - Last roster of the previous page.
+   * @returns The rosters in identifier order.
+   */
+  async findPublishedEndingOnOrAfter(
+    date: string,
+    limit: number,
+    afterId?: string,
+  ): Promise<Roster[]> {
+    const operation = 'RosterRepository.findPublishedEndingOnOrAfter'
+    const cursor = afterId === undefined ? null : toObjectId(afterId)
+    if (afterId !== undefined && !cursor) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            status: 'published',
+            'period.end': { $gte: date },
+            deleted_at: null,
+            ...(cursor ? { _id: { $gt: cursor } } : {}),
+          }),
+        )
+        .sort({ _id: 1 })
+        .limit(limit)
+        .lean<LeanRecord<RosterEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

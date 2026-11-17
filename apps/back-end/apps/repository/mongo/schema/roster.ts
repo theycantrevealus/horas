@@ -175,3 +175,5 @@ export const RosterSchema = SchemaFactory.createForClass(RosterEntity)
 // One roster per unit and start date (HR plan 5.4 RS4).
 RosterSchema.index({ tenant_id: 1, unit_id: 1, 'period.start': 1 }, { unique: true })
 RosterSchema.index({ tenant_id: 1, status: 1, 'period.start': 1 })
+// Cross-tenant read of the eligibility sweep (`findPublishedEndingOnOrAfter`).
+RosterSchema.index({ status: 1, 'period.end': 1 })
