@@ -72,8 +72,8 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 17 | 5.1 Shift definitions | 4 | Done (`gateway-hr-5-1-shift-definitions.md`, PR #73) | Built, PR #74 |
 | 18 | 5.2 Holiday calendars | 5 | Done (`gateway-hr-5-2-holiday-calendars.md`, PR #77) | Built in two PRs, #78 and #80 |
 | 19 | 5.3 Coverage requirements | 4 | Done (`gateway-hr-5-3-coverage-requirements.md`, PR #82) | Built, PR #83 |
-| 20 | 5.4 Rosters | 10 (8 if the split of the plan is confirmed) | Proposed (`gateway-hr-5-4-rosters.md`) | — |
-| 21 | 5.5 Roster assignments | 7 | — | — |
+| 20 | 5.4 Rosters | 8 | Done (`gateway-hr-5-4-rosters.md`, PR #86) | In progress (branch `feat/workforce-rosters`) |
+| 21 | 5.5 Roster assignments | 9 (adds `validate` and `coverage-overrides` from 5.4) | — | — |
 | 22 | 5.6 Imports | 3 | — | — |
 | 23 | 5.7 Shift swaps | 6 | — | — |
 | 24 | 5.8 Practice schedules | 6 | — | — |
