@@ -9,6 +9,7 @@ import {
   REPOSITORY_PRIVILEGE_GRANT,
   REPOSITORY_COVERAGE_REQUIREMENT,
   REPOSITORY_HOLIDAY_CALENDAR,
+  REPOSITORY_ROSTER,
   REPOSITORY_HR_IMPORT,
   REPOSITORY_SHIFT_DEFINITION,
   REPOSITORY_EMPLOYEE,
@@ -32,6 +33,7 @@ import { ClinicalAppointmentEntity } from '@repository/mongo/schema/clinical-app
 import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
 import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
 import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-requirement'
+import { RosterEntity } from '@repository/mongo/schema/roster'
 import { HrImportEntity } from '@repository/mongo/schema/hr-import'
 import { HolidayCalendarEntity } from '@repository/mongo/schema/holiday-calendar'
 import { ShiftDefinitionEntity } from '@repository/mongo/schema/shift-definition'
@@ -57,6 +59,7 @@ import {
   InMemoryPrivilegeGrants,
   InMemoryCoverageRequirements,
   InMemoryHolidayCalendars,
+  InMemoryRosters,
   InMemoryHrImports,
   InMemoryShiftDefinitions,
   InMemoryEmployeePrivateProfiles,
@@ -102,6 +105,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property holidayCalendars - Holiday calendar repository.
  * @property hrImports - HR import repository.
  * @property coverage - Coverage requirement repository.
+ * @property rosters - Roster repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -128,6 +132,7 @@ export interface InMemoryWorkforce {
   holidayCalendars: InMemoryHolidayCalendars
   hrImports: InMemoryHrImports
   coverage: InMemoryCoverageRequirements
+  rosters: InMemoryRosters
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -162,6 +167,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const holidayCalendars = new InMemoryHolidayCalendars()
   const hrImports = new InMemoryHrImports()
   const coverage = new InMemoryCoverageRequirements()
+  const rosters = new InMemoryRosters()
   return {
     organizations,
     facilities,
@@ -186,6 +192,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     holidayCalendars,
     hrImports,
     coverage,
+    rosters,
     options: {
       entities: [
         OrganizationEntity,
@@ -211,6 +218,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         HolidayCalendarEntity,
         HrImportEntity,
         CoverageRequirementEntity,
+        RosterEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -236,6 +244,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_HOLIDAY_CALENDAR, holidayCalendars],
         [REPOSITORY_HR_IMPORT, hrImports],
         [REPOSITORY_COVERAGE_REQUIREMENT, coverage],
+        [REPOSITORY_ROSTER, rosters],
       ],
     },
   }

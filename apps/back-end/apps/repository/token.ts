@@ -184,3 +184,8 @@ export const REPOSITORY_HR_IMPORT = Symbol('REPOSITORY_HR_IMPORT')
 export const REPOSITORY_COVERAGE_REQUIREMENT = Symbol(
   'REPOSITORY_COVERAGE_REQUIREMENT',
 )
+
+/**
+ * Injection token for the roster repository (the plan of one unit for one period).
+ */
+export const REPOSITORY_ROSTER = Symbol('REPOSITORY_ROSTER')
