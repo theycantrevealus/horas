@@ -1849,6 +1849,31 @@ export class InMemoryProfessionalLicenses
   }
 
   /**
+   * Finds `valid` licences of every tenant that expire before a date, oldest expiry first.
+   *
+   * @param date - Local date.
+   * @param limit - Largest number of records.
+   * @returns The licences.
+   */
+  async findValidExpiredBefore(
+    date: string,
+    limit: number,
+  ): Promise<ProfessionalLicense[]> {
+    return [...this.items.values()]
+      .filter(
+        (license) =>
+          !license.deleted_at &&
+          license.status === 'valid' &&
+          license.expiry_date !== null &&
+          license.expiry_date < date,
+      )
+      .sort((a, b) =>
+        `${a.expiry_date}${a.id}`.localeCompare(`${b.expiry_date}${b.id}`),
+      )
+      .slice(0, limit)
+  }
+
+  /**
    * Updates a licence, refusing a change to `valid` while another valid practice permit exists
    * for the same employee, profession and facility.
    *

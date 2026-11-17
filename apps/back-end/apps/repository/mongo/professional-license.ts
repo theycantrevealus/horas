@@ -163,6 +163,27 @@ export class ProfessionalLicenseRepositoryMongo
   }
 
   /**
+   * Finds `valid` licences of every tenant whose expiry date is before a date (a cross-tenant read
+   * for the worker's expiry job).
+   *
+   * @param date - Local date.
+   * @param limit - Largest number of records.
+   * @returns The licences, oldest expiry first.
+   */
+  async findValidExpiredBefore(
+    date: string,
+    limit: number,
+  ): Promise<ProfessionalLicense[]> {
+    return this.findMany(
+      'findValidExpiredBefore',
+      [],
+      { status: 'valid', expiry_date: { $lt: date } },
+      { expiry_date: 1, _id: 1 },
+      limit,
+    )
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

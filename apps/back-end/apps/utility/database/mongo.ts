@@ -8,6 +8,7 @@ import {
 } from '@configuration/change-log'
 import { MongoConfig } from '@configuration/mongo'
 import { EVENT_OUTBOX } from '@utility/events/event'
+import { JOB_LEASE } from '@utility/jobs/lease'
 import { CHANGE_OUTBOX } from '@utility/history/outbox'
 import { MONGO_MAIN_CONNECTION } from './constant'
 import {
@@ -17,6 +18,11 @@ import {
   MongoEventOutbox,
   createEventOutboxSchema,
 } from './mongo.event-outbox'
+import {
+  JobLeaseEntity,
+  JobLeaseSchema,
+  MongoJobLease,
+} from './mongo.job-lease'
 import { TRANSACTION_MANAGER } from './transaction'
 import {
   ChangeOutboxEntity,
@@ -32,7 +38,7 @@ import {
 
 /**
  * Opens the main MongoDB connection from the typed `mongo` configuration and provides its
- * `TRANSACTION_MANAGER`, `CHANGE_OUTBOX` and `EVENT_OUTBOX`. The outboxes belong to the connection
+ * `TRANSACTION_MANAGER`, `CHANGE_OUTBOX`, `EVENT_OUTBOX` and `JOB_LEASE`. The outboxes belong to the connection
  * because a change record or an event must be written in the same transaction as the data it
  * describes.
  * Global, so feature modules can inject both. Import it once in each application's root module.
@@ -90,6 +96,15 @@ import {
           useFactory: () => EventRelayStateSchema,
         },
         {
+          name: JobLeaseEntity.name,
+          /**
+           * Returns the job lease schema.
+           *
+           * @returns The job lease schema.
+           */
+          useFactory: () => JobLeaseSchema,
+        },
+        {
           name: ChangeRelayStateEntity.name,
           /**
            * Returns the relay-state schema.
@@ -105,6 +120,7 @@ import {
   providers: [
     { provide: CHANGE_OUTBOX, useClass: MongoChangeOutbox },
     { provide: EVENT_OUTBOX, useClass: MongoEventOutbox },
+    { provide: JOB_LEASE, useClass: MongoJobLease },
     {
       provide: TRANSACTION_MANAGER,
       inject: [getConnectionToken(MONGO_MAIN_CONNECTION)],
@@ -118,6 +134,6 @@ import {
         new MongoTransactionManager(connection, MONGO_MAIN_CONNECTION),
     },
   ],
-  exports: [TRANSACTION_MANAGER, CHANGE_OUTBOX, EVENT_OUTBOX],
+  exports: [TRANSACTION_MANAGER, CHANGE_OUTBOX, EVENT_OUTBOX, JOB_LEASE],
 })
 export class MongoMainConnectionModule {}
