@@ -73,7 +73,7 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 18 | 5.2 Holiday calendars | 5 | Done (`gateway-hr-5-2-holiday-calendars.md`, PR #77) | Built in two PRs, #78 and #80 |
 | 19 | 5.3 Coverage requirements | 4 | Done (`gateway-hr-5-3-coverage-requirements.md`, PR #82) | Built, PR #83 |
 | 20 | 5.4 Rosters | 8 | Done (`gateway-hr-5-4-rosters.md`, PR #86) | Built, PR #87 |
-| 21 | 5.5 Roster assignments | 9 (adds `validate` and `coverage-overrides` from 5.4) | — | — |
+| 21 | 5.5 Roster assignments | 9 (8 if the scope of the plan is confirmed) | Proposed (`gateway-hr-5-5-roster-assignments.md`) | — |
 | 22 | 5.6 Imports | 3 | — | — |
 | 23 | 5.7 Shift swaps | 6 | — | — |
 | 24 | 5.8 Practice schedules | 6 | — | — |
