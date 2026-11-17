@@ -72,6 +72,11 @@ import {
   type RosterAssignmentRepository,
 } from '@repository/interface/roster-assignment'
 import {
+  type PracticeScheduleOnDateQuery,
+  type PracticeScheduleQuery,
+  type PracticeScheduleRepository,
+} from '@repository/interface/practice-schedule'
+import {
   type ShiftSwapRequestRepository,
   type SwapQuery,
 } from '@repository/interface/shift-swap-request'
@@ -103,6 +108,7 @@ import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CoverageRequirement } from '@repository/model/coverage-requirement'
 import { type Roster } from '@repository/model/roster'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
+import { type PracticeSchedule } from '@repository/model/practice-schedule'
 import { type ShiftSwapRequest } from '@repository/model/shift-swap-request'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type HrImport } from '@repository/model/hr-import'
@@ -3318,6 +3324,103 @@ export class InMemoryShiftSwapRequests
           assignmentIds.includes(item.requester.assignment_id)) ||
           (item.counterpart?.assignment_id != null &&
             assignmentIds.includes(item.counterpart.assignment_id))),
+    )
+  }
+}
+
+/**
+ * In-memory `PracticeScheduleRepository` for tests. The Mongo collection has no unique index; the
+ * rule that a doctor's sessions never overlap is the service's (HR plan 5.8 PS7).
+ */
+export class InMemoryPracticeSchedules
+  extends InMemoryRepository<PracticeSchedule>
+  implements PracticeScheduleRepository
+{
+  /**
+   * Finds schedules, ordered by polyclinic, weekday and start time.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The schedules.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: PracticeScheduleQuery = {},
+  ): Promise<PracticeSchedule[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.unitId || item.unit_id === query.unitId) &&
+        (!query.employeeId || item.employee_id === query.employeeId) &&
+        (!query.status || item.status === query.status),
+    )
+      .sort(
+        (left, right) =>
+          left.unit_id.localeCompare(right.unit_id) ||
+          left.day_of_week - right.day_of_week ||
+          left.start_time.localeCompare(right.start_time) ||
+          left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the schedules of a weekday whose period covers a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param dayOfWeek - ISO weekday of the date.
+   * @param date - The local date.
+   * @param query - Optional filters and paging.
+   * @returns The schedules.
+   */
+  async findOnDate(
+    tenantId: string,
+    dayOfWeek: number,
+    date: string,
+    query: PracticeScheduleOnDateQuery = {},
+  ): Promise<PracticeSchedule[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.day_of_week === dayOfWeek &&
+        item.period.start <= date &&
+        (item.period.end === null || item.period.end >= date) &&
+        (!query.unitId || item.unit_id === query.unitId) &&
+        (!query.employeeId || item.employee_id === query.employeeId),
+    )
+      .sort(
+        (left, right) =>
+          left.unit_id.localeCompare(right.unit_id) ||
+          left.start_time.localeCompare(right.start_time) ||
+          left.employee_id.localeCompare(right.employee_id) ||
+          left.id.localeCompare(right.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds every schedule of a doctor on a weekday.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param dayOfWeek - ISO weekday.
+   * @returns The schedules.
+   */
+  async findByEmployeeAndDay(
+    tenantId: string,
+    employeeId: string,
+    dayOfWeek: number,
+  ): Promise<PracticeSchedule[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.employee_id === employeeId &&
+        item.day_of_week === dayOfWeek,
     )
   }
 }
