@@ -1,7 +1,11 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
 import { type AuthenticatedUser } from '@identity/authenticated-user'
-import { CurrentUser, RequirePermissions } from '@identity/guard/decorators'
+import {
+  CurrentPermissions,
+  CurrentUser,
+  RequirePermissions,
+} from '@identity/guard/decorators'
 import { PERMISSIONS } from '@identity/permission'
 import { RosterAssignmentService } from '@workforce/rostering/roster-assignment.service'
 import {
@@ -53,6 +57,7 @@ export class RosterAssignmentController {
    * @param user - Signed-in user.
    * @param id - Roster identifier.
    * @param body - The assignment.
+   * @param held - The caller's permissions, to know whether the past may be corrected.
    * @returns The created assignment.
    */
   @Post('rosters/:id/assignments')
@@ -61,6 +66,7 @@ export class RosterAssignmentController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: AddAssignmentDto,
+    @CurrentPermissions() held: ReadonlySet<string>,
   ): Promise<RosterAssignment> {
     return this.assignments.add(user.tenant_id, id, {
       employeeId: body.employeeId,
@@ -69,6 +75,7 @@ export class RosterAssignmentController {
       role: body.role,
       overtimeConsent: body.overtimeConsent,
       reason: body.reason,
+      canCorrectPast: held.has(PERMISSIONS.WORKFORCE_ROSTER_CORRECT_PAST),
     })
   }
 
@@ -78,6 +85,7 @@ export class RosterAssignmentController {
    * @param user - Signed-in user.
    * @param id - Assignment identifier.
    * @param body - Fields to change.
+   * @param held - The caller's permissions, to know whether the past may be corrected.
    * @returns The updated assignment.
    */
   @Patch('roster-assignments/:id')
@@ -86,6 +94,7 @@ export class RosterAssignmentController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: ChangeAssignmentDto,
+    @CurrentPermissions() held: ReadonlySet<string>,
   ): Promise<RosterAssignment> {
     return this.assignments.change(user.tenant_id, id, {
       shiftId: body.shiftId,
@@ -93,6 +102,7 @@ export class RosterAssignmentController {
       overtimeConsent: body.overtimeConsent,
       version: body.version,
       reason: body.reason,
+      canCorrectPast: held.has(PERMISSIONS.WORKFORCE_ROSTER_CORRECT_PAST),
     })
   }
 
@@ -102,6 +112,7 @@ export class RosterAssignmentController {
    * @param user - Signed-in user.
    * @param id - Assignment identifier.
    * @param body - Optional version and reason.
+   * @param held - The caller's permissions, to know whether the past may be corrected.
    * @returns The cancelled assignment.
    */
   @Post('roster-assignments/:id/cancel')
@@ -110,7 +121,12 @@ export class RosterAssignmentController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: CancelAssignmentDto,
+    @CurrentPermissions() held: ReadonlySet<string>,
   ): Promise<RosterAssignment> {
-    return this.assignments.cancel(user.tenant_id, id, body)
+    return this.assignments.cancel(user.tenant_id, id, {
+      version: body.version,
+      reason: body.reason,
+      canCorrectPast: held.has(PERMISSIONS.WORKFORCE_ROSTER_CORRECT_PAST),
+    })
   }
 }
