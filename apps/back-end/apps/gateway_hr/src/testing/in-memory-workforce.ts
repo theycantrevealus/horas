@@ -11,6 +11,7 @@ import {
   REPOSITORY_HOLIDAY_CALENDAR,
   REPOSITORY_ROSTER,
   REPOSITORY_ROSTER_ASSIGNMENT,
+  REPOSITORY_SHIFT_SWAP_REQUEST,
   REPOSITORY_HR_IMPORT,
   REPOSITORY_SHIFT_DEFINITION,
   REPOSITORY_EMPLOYEE,
@@ -35,6 +36,7 @@ import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-
 import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
 import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-requirement'
 import { RosterAssignmentEntity } from '@repository/mongo/schema/roster-assignment'
+import { ShiftSwapRequestEntity } from '@repository/mongo/schema/shift-swap-request'
 import { RosterEntity } from '@repository/mongo/schema/roster'
 import { HrImportEntity } from '@repository/mongo/schema/hr-import'
 import { HolidayCalendarEntity } from '@repository/mongo/schema/holiday-calendar'
@@ -62,6 +64,7 @@ import {
   InMemoryCoverageRequirements,
   InMemoryHolidayCalendars,
   InMemoryRosterAssignments,
+  InMemoryShiftSwapRequests,
   InMemoryRosters,
   InMemoryHrImports,
   InMemoryShiftDefinitions,
@@ -110,6 +113,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property coverage - Coverage requirement repository.
  * @property rosters - Roster repository.
  * @property rosterAssignments - Roster assignment repository.
+ * @property swaps - Shift swap request repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -138,6 +142,7 @@ export interface InMemoryWorkforce {
   coverage: InMemoryCoverageRequirements
   rosters: InMemoryRosters
   rosterAssignments: InMemoryRosterAssignments
+  swaps: InMemoryShiftSwapRequests
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -174,6 +179,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const coverage = new InMemoryCoverageRequirements()
   const rosters = new InMemoryRosters()
   const rosterAssignments = new InMemoryRosterAssignments()
+  const swaps = new InMemoryShiftSwapRequests()
   return {
     organizations,
     facilities,
@@ -200,6 +206,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     coverage,
     rosters,
     rosterAssignments,
+    swaps,
     options: {
       entities: [
         OrganizationEntity,
@@ -227,6 +234,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         CoverageRequirementEntity,
         RosterEntity,
         RosterAssignmentEntity,
+        ShiftSwapRequestEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -254,6 +262,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_COVERAGE_REQUIREMENT, coverage],
         [REPOSITORY_ROSTER, rosters],
         [REPOSITORY_ROSTER_ASSIGNMENT, rosterAssignments],
+        [REPOSITORY_SHIFT_SWAP_REQUEST, swaps],
       ],
     },
   }

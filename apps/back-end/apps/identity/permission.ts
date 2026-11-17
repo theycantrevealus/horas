@@ -56,6 +56,8 @@ export const PERMISSIONS = {
   WORKFORCE_ROSTER_VALIDATE: 'workforce.roster:validate',
   WORKFORCE_ROSTER_OVERRIDE: 'workforce.roster:override',
   WORKFORCE_ROSTER_IMPORT: 'workforce.roster:import',
+  WORKFORCE_SHIFT_SWAP_READ: 'workforce.shift-swap:read',
+  WORKFORCE_SHIFT_SWAP_DECIDE: 'workforce.shift-swap:decide',
   WORKFORCE_HR_IMPORT_READ: 'workforce.hr-import:read',
   WORKFORCE_HR_IMPORT_CANCEL: 'workforce.hr-import:cancel',
   WORKFORCE_ROSTER_CORRECT_PAST: 'workforce.roster:correct-past',
