@@ -1,6 +1,13 @@
 import { createHash } from 'node:crypto'
 import { Inject, Injectable } from '@nestjs/common'
+import {
+  TRANSACTION_MANAGER,
+  type TransactionManager,
+} from '@utility/database/transaction'
+import { RepositoryConflictError } from '@utility/database/error'
+import { type NewEntity } from '@utility/database/interface'
 import { type ActorRef } from '@utility/history/actor'
+import { withChangeReason } from '@utility/history/reason'
 import { getRequestContext } from '@utility/logger/context'
 import { AppLogger } from '@utility/logger/service'
 import { todayInZone } from '@utility/validation/local-date'
@@ -31,6 +38,7 @@ import { EligibilityService } from '../eligibility/eligibility.service'
 import { observe } from '../observe'
 import { ParameterService } from '../parameter/parameter.service'
 import {
+  ConflictError,
   ForbiddenError,
   InvalidRequestError,
   NotFoundError,
@@ -44,7 +52,11 @@ import {
 } from './assignment-checks'
 import { readCsvBody } from './read-csv-body'
 import { isInPeriod, shiftInstants } from './roster-assignment-rules'
-import { parseRosterFile, type ParsedRosterRow } from './roster-import'
+import {
+  parseRosterFile,
+  type ParsedRosterFile,
+  type ParsedRosterRow,
+} from './roster-import'
 import { RosterValidationService } from './roster-validation.service'
 import { type WorkingShift } from './working-time'
 import { readWorkingTimeLimits } from './working-time-limits'
@@ -103,6 +115,32 @@ export interface RosterImportAnswer {
 }
 
 /**
+ * A file as read: its hash, the rows of the right form, and the error limit.
+ *
+ * @property sha256 - SHA-256 of the body.
+ * @property parsed - The rows and the cell errors.
+ * @property maxErrors - Most row errors kept in the record.
+ */
+interface RosterFile {
+  sha256: string
+  parsed: ParsedRosterFile
+  maxErrors: number
+}
+
+/**
+ * What checking a file against the roster found.
+ *
+ * @property errors - Every row error, ordered by row.
+ * @property invalidRows - Rows with at least one error.
+ * @property accepted - The rows that passed, in file order.
+ */
+interface Evaluation {
+  errors: HrImportError[]
+  invalidRows: number
+  accepted: AcceptedRow[]
+}
+
+/**
  * A row that passed every check, with what the apply needs to write it.
  */
 interface AcceptedRow {
@@ -131,6 +169,7 @@ export class RosterImportService {
    * @param eligibility - General clinical eligibility.
    * @param parameters - HR parameters (the import and working-time limits).
    * @param validation - Roster validation, to preview coverage and rest days.
+   * @param transactions - Transaction manager of the main connection.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -150,11 +189,14 @@ export class RosterImportService {
     @Inject(ParameterService) private readonly parameters: ParameterService,
     @Inject(RosterValidationService)
     private readonly validation: RosterValidationService,
+    @Inject(TRANSACTION_MANAGER)
+    private readonly transactions: TransactionManager,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
   /**
-   * Checks a roster file, and records the result. The roster is not changed (HR plan 5.6 IM7).
+   * Checks a roster file and records the result, or applies a file that was checked (HR plan 5.6
+   * IM7, IM8). A check changes nothing in the roster; an apply writes every assignment or none.
    *
    * @param tenantId - Tenant of the caller.
    * @param rosterId - Roster identifier.
@@ -162,8 +204,10 @@ export class RosterImportService {
    * @returns The import record and what the file would leave in the roster.
    * @throws NotFoundError `roster_not_found`.
    * @throws InvalidRequestError `roster_locked`, `roster_closed`, `unit_closed`, `csv_required`,
-   * `empty_file`, `invalid_encoding`, `invalid_csv`, `invalid_header`, `no_rows`, `too_many_rows`
-   * or `apply_not_available`.
+   * `empty_file`, `invalid_encoding`, `invalid_csv`, `invalid_header`, `no_rows`, `too_many_rows`;
+   * when applying also `check_required`, `check_not_valid`, `check_mismatch` and
+   * `import_not_valid_anymore`.
+   * @throws ConflictError `import_already_applied` or `stale_version` when applying.
    * @throws ForbiddenError `actor_required`.
    */
   importFile(
@@ -171,80 +215,18 @@ export class RosterImportService {
     rosterId: string,
     input: RosterImportInput,
   ): Promise<RosterImportAnswer> {
+    const apply = input.apply === true
     return observe(
       this.logger,
-      'roster_import_check',
-      `${NAME}.check`,
+      apply ? 'roster_import_apply' : 'roster_import_check',
+      `${NAME}.${apply ? 'apply' : 'check'}`,
       async () => {
-        if (input.apply === true) {
-          throw new InvalidRequestError(
-            'apply_not_available',
-            'Applying a roster file is not available yet. Check the file first.',
-          )
-        }
         const roster = await this.loadRoster(tenantId, rosterId)
         this.assertDraft(roster)
-        const table = readCsvBody(input.content)
-        const maxRows = await this.limit(tenantId, 'IMPORT_MAX_ROWS')
-        const maxErrors = await this.limit(tenantId, 'IMPORT_MAX_ERRORS')
-        if (table.rows.length > maxRows) {
-          throw new InvalidRequestError(
-            'too_many_rows',
-            `The file has more than ${maxRows} rows.`,
-          )
-        }
-        const parsed = parseRosterFile(table)
-        const actor = this.actor()
-        const checked = await this.checkRows(tenantId, roster, parsed)
-        const errors = [...parsed.errors, ...checked.errors].sort(
-          (left, right) =>
-            left.row - right.row ||
-            (left.column ?? '').localeCompare(right.column ?? ''),
-        )
-        const invalidRows = new Set(errors.map((item) => item.row)).size
-        const valid = errors.length === 0
-        let coverageGaps: number | null = null
-        let restDayGaps: number | null = null
-        if (valid) {
-          const preview = await this.validation.report(
-            tenantId,
-            roster,
-            checked.accepted.map((item, index) =>
-              this.toAssignment(tenantId, roster, item, index),
-            ),
-          )
-          coverageGaps = preview.summary.coverageGaps
-          restDayGaps = preview.violations.filter(
-            (item) => item.code === 'no_rest_day',
-          ).length
-        }
-        const sha256 = createHash('sha256')
-          .update(input.content as string, 'utf8')
-          .digest('hex')
-        const record = await this.imports.create({
-          tenant_id: tenantId,
-          kind: 'roster_assignments',
-          target: { roster_id: roster.id },
-          file: {
-            file_id: `inline:${sha256.slice(0, 16)}`,
-            content_type: 'text/csv',
-            sha256,
-          },
-          status: valid ? 'validated' : 'invalid',
-          counts: {
-            rows: parsed.rows,
-            valid: parsed.rows - invalidRows,
-            invalid: invalidRows,
-            created: valid ? checked.accepted.length : 0,
-            updated: 0,
-            skipped: 0,
-          },
-          errors: errors.slice(0, maxErrors),
-          uploaded: { by: actor, at: new Date() },
-          applied: null,
-          failure: null,
-        })
-        return { import: record, coverageGaps, restDayGaps }
+        const file = await this.readFile(tenantId, input.content)
+        return apply
+          ? this.apply(tenantId, roster, file, input)
+          : this.check(tenantId, roster, file)
       },
       'log',
       (answer) => ({
@@ -253,6 +235,294 @@ export class RosterImportService {
         invalid: answer.import.counts.invalid,
         created: answer.import.counts.created,
       }),
+    )
+  }
+
+  /**
+   * Reads the text of the file: the limits, the CSV, the header and the cells of every row.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param content - The body of the request.
+   * @returns The hash of the file, its rows and the error limit.
+   * @throws InvalidRequestError `csv_required`, `empty_file`, `invalid_encoding`, `invalid_csv`,
+   * `invalid_header`, `no_rows` or `too_many_rows`.
+   */
+  private async readFile(
+    tenantId: string,
+    content: unknown,
+  ): Promise<RosterFile> {
+    const table = readCsvBody(content)
+    const maxRows = await this.limit(tenantId, 'IMPORT_MAX_ROWS')
+    const maxErrors = await this.limit(tenantId, 'IMPORT_MAX_ERRORS')
+    if (table.rows.length > maxRows) {
+      throw new InvalidRequestError(
+        'too_many_rows',
+        `The file has more than ${maxRows} rows.`,
+      )
+    }
+    return {
+      sha256: createHash('sha256')
+        .update(content as string, 'utf8')
+        .digest('hex'),
+      parsed: parseRosterFile(table),
+      maxErrors,
+    }
+  }
+
+  /**
+   * Runs every row check on the file against the roster and the records as they are now.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param roster - The roster the file goes into.
+   * @param file - The file as read.
+   * @returns Every row error, sorted, the count of rows with an error and the rows that passed.
+   */
+  private async evaluate(
+    tenantId: string,
+    roster: Roster,
+    file: RosterFile,
+  ): Promise<Evaluation> {
+    const checked = await this.checkRows(tenantId, roster, file.parsed)
+    const errors = [...file.parsed.errors, ...checked.errors].sort(
+      (left, right) =>
+        left.row - right.row ||
+        (left.column ?? '').localeCompare(right.column ?? ''),
+    )
+    return {
+      errors,
+      invalidRows: new Set(errors.map((item) => item.row)).size,
+      accepted: checked.accepted.sort(
+        (left, right) => left.row.row - right.row.row,
+      ),
+    }
+  }
+
+  /**
+   * Records the check of a file. The roster is not changed (HR plan 5.6 IM7).
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param roster - The roster the file goes into.
+   * @param file - The file as read.
+   * @returns The recorded import and what the file would leave in the roster.
+   */
+  private async check(
+    tenantId: string,
+    roster: Roster,
+    file: RosterFile,
+  ): Promise<RosterImportAnswer> {
+    const actor = this.actor()
+    const result = await this.evaluate(tenantId, roster, file)
+    const valid = result.errors.length === 0
+    let coverageGaps: number | null = null
+    let restDayGaps: number | null = null
+    if (valid) {
+      const preview = await this.validation.report(
+        tenantId,
+        roster,
+        result.accepted.map((item, index) =>
+          this.toAssignment(tenantId, roster, item, index),
+        ),
+      )
+      coverageGaps = preview.summary.coverageGaps
+      restDayGaps = preview.violations.filter(
+        (item) => item.code === 'no_rest_day',
+      ).length
+    }
+    const record = await this.imports.create({
+      tenant_id: tenantId,
+      kind: 'roster_assignments',
+      target: { roster_id: roster.id },
+      file: {
+        file_id: `inline:${file.sha256.slice(0, 16)}`,
+        content_type: 'text/csv',
+        sha256: file.sha256,
+      },
+      status: valid ? 'validated' : 'invalid',
+      counts: this.counts(file, result, valid),
+      errors: result.errors.slice(0, file.maxErrors),
+      uploaded: { by: actor, at: new Date() },
+      applied: null,
+      failure: null,
+    })
+    return { import: record, coverageGaps, restDayGaps }
+  }
+
+  /**
+   * Applies a file that was checked (HR plan 5.6 IM7, IM8). The file is read and checked again
+   * against the roster as it is now. If any row fails, nothing is written; otherwise every
+   * assignment and the import record are written in one transaction.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param roster - The roster the file goes into.
+   * @param file - The file as read.
+   * @param input - Check id, version and reason.
+   * @returns The applied import.
+   * @throws InvalidRequestError `check_required`, `check_not_valid`, `check_mismatch` or
+   * `import_not_valid_anymore`.
+   * @throws ConflictError `import_already_applied` or `stale_version`.
+   */
+  private async apply(
+    tenantId: string,
+    roster: Roster,
+    file: RosterFile,
+    input: RosterImportInput,
+  ): Promise<RosterImportAnswer> {
+    const check = await this.findCheck(tenantId, roster, input.checkId)
+    if (check.file.sha256 !== file.sha256) {
+      throw new InvalidRequestError(
+        'check_mismatch',
+        'The file is not the one that was checked.',
+      )
+    }
+    const earlier = await this.imports.findByFilter(tenantId, {
+      kind: 'roster_assignments',
+      rosterId: roster.id,
+      status: 'applied',
+      sha256: file.sha256,
+      limit: 1,
+    })
+    if (earlier.length > 0) {
+      throw this.alreadyApplied()
+    }
+    if (input.version !== undefined && input.version !== roster.version) {
+      throw new ConflictError(
+        'stale_version',
+        'The roster was changed by someone else. Read it again and retry.',
+      )
+    }
+    const actor = this.actor()
+    const result = await this.evaluate(tenantId, roster, file)
+    if (result.errors.length > 0) {
+      await this.markInvalid(check, file, result)
+      throw new InvalidRequestError(
+        'import_not_valid_anymore',
+        'The file no longer passes the checks. Nothing was written.',
+      )
+    }
+    const write = (): Promise<HrImport> =>
+      this.transactions.run(async () => {
+        await this.assignments.createMany(
+          roster.id,
+          result.accepted.map((item) => this.toNewAssignment(tenantId, roster, item, check.id)),
+        )
+        try {
+          return await this.imports.update(
+            check.id,
+            {
+              status: 'applied',
+              counts: this.counts(file, result, true),
+              errors: [],
+              applied: { by: actor, at: new Date() },
+            },
+            { expectedVersion: check.version },
+          )
+        } catch (error: unknown) {
+          throw error instanceof RepositoryConflictError
+            ? this.alreadyApplied()
+            : error
+        }
+      })
+    const applied = await (input.reason
+      ? withChangeReason(input.reason, write)
+      : write())
+    return { import: applied, coverageGaps: null, restDayGaps: null }
+  }
+
+  /**
+   * Finds the check an apply names, and refuses one that cannot be applied to this roster.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param roster - The roster the file goes into.
+   * @param checkId - Identifier of the check, if the caller sent one.
+   * @returns The `validated` check of this roster.
+   * @throws InvalidRequestError `check_required` or `check_not_valid`.
+   */
+  private async findCheck(
+    tenantId: string,
+    roster: Roster,
+    checkId: string | undefined,
+  ): Promise<HrImport> {
+    if (!checkId) {
+      throw new InvalidRequestError(
+        'check_required',
+        'Applying needs the id of the check of this same file.',
+      )
+    }
+    const check = await this.imports.findOne(checkId)
+    if (
+      !check ||
+      check.tenant_id !== tenantId ||
+      check.deleted_at ||
+      check.kind !== 'roster_assignments' ||
+      !('roster_id' in check.target) ||
+      check.target.roster_id !== roster.id ||
+      check.status !== 'validated'
+    ) {
+      throw new InvalidRequestError(
+        'check_not_valid',
+        'The check was not found for this roster, or it was not valid or was already applied.',
+      )
+    }
+    return check
+  }
+
+  /**
+   * Records that a checked file stopped being valid, with the errors found now.
+   *
+   * @param check - The check that was `validated`.
+   * @param file - The file as read.
+   * @param result - What checking the file found.
+   */
+  private async markInvalid(
+    check: HrImport,
+    file: RosterFile,
+    result: Evaluation,
+  ): Promise<void> {
+    try {
+      await this.imports.update(
+        check.id,
+        {
+          status: 'invalid',
+          counts: this.counts(file, result, false),
+          errors: result.errors.slice(0, file.maxErrors),
+        },
+        { expectedVersion: check.version },
+      )
+    } catch (error: unknown) {
+      throw error instanceof RepositoryConflictError
+        ? this.alreadyApplied()
+        : error
+    }
+  }
+
+  /**
+   * @param file - The file as read.
+   * @param result - What checking the file found.
+   * @param valid - Whether the file is valid.
+   * @returns The row counts of the import record.
+   */
+  private counts(
+    file: RosterFile,
+    result: Evaluation,
+    valid: boolean,
+  ): HrImport['counts'] {
+    return {
+      rows: file.parsed.rows,
+      valid: file.parsed.rows - result.invalidRows,
+      invalid: result.invalidRows,
+      created: valid ? result.accepted.length : 0,
+      updated: 0,
+      skipped: 0,
+    }
+  }
+
+  /**
+   * @returns The conflict for a file that was applied before.
+   */
+  private alreadyApplied(): ConflictError {
+    return new ConflictError(
+      'import_already_applied',
+      'This file was already applied to this roster.',
     )
   }
 
@@ -529,6 +799,58 @@ export class RosterImportService {
       is_flagged: false,
       created_by: { account_id: null, display_name: 'import', kind: 'system' },
     } as RosterAssignment
+  }
+
+  /**
+   * Builds the assignment a row becomes when the file is applied (HR plan 5.6 IM10): a snapshot of
+   * its shift, the UTC instants, the roster revision and the source `import`.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param roster - The roster.
+   * @param item - The accepted row.
+   * @param importId - The import that loads it.
+   * @returns The assignment to store.
+   */
+  private toNewAssignment(
+    tenantId: string,
+    roster: Roster,
+    item: AcceptedRow,
+    importId: string,
+  ): NewEntity<RosterAssignment> {
+    const consent = item.row.overtimeConsent
+    return {
+      tenant_id: tenantId,
+      roster_id: roster.id,
+      unit_id: roster.unit_id,
+      facility_id: roster.facility_id,
+      employee_id: item.employee.id,
+      date: item.row.date,
+      shift: {
+        definition_id: item.shift.id,
+        code: item.shift.code,
+        type: item.shift.type,
+        start_time: item.shift.start_time,
+        end_time: item.shift.end_time,
+        paid_minutes: item.shift.paid_minutes,
+        is_night: item.shift.is_night,
+      },
+      starts_at: item.startsAt,
+      ends_at: item.endsAt,
+      role: item.row.role,
+      status: 'planned',
+      source: { kind: 'import', ref_id: importId },
+      change_reason: null,
+      revision: roster.revision,
+      overtime:
+        item.overtimeMinutes > 0 || consent
+          ? {
+              minutes: item.overtimeMinutes,
+              consent: consent ? { at: new Date(), document: null } : null,
+            }
+          : null,
+      flag: null,
+      is_flagged: false,
+    }
   }
 
   /**
