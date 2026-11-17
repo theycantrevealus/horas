@@ -1,6 +1,6 @@
 # gateway_hr 6: Clinical eligibility
 
-Status: **Confirmed** 2026-11-17. Decisions CE1 to CE13 and the single code PR confirmed as proposed, including the four that needed an answer (CE2, CE3, CE5, CE7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 25). Endpoint: `../hr-endpoints.md` section 6. Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 5.5 (`HR-ELG-001`, `HR-ELG-002`), `HR-LIC-001`, `HR-CRD-001`, `HR-CRD-003`, `HR-CRD-006`, and the clinical-module question of section 13 and `HR-INT-001`/`002`. Built references: `EligibilityService.general` (`apps/workforce/eligibility/`, conditions 1 to 4, used by rostering and practice schedules), SPKs and grants (3g, 3h), licences (3c).
+Status: **Built** (PR #113). Confirmed 2026-11-17. Decisions CE1 to CE13 and the single code PR confirmed as proposed, including the four that needed an answer (CE2, CE3, CE5, CE7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 25). Endpoint: `../hr-endpoints.md` section 6. Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 5.5 (`HR-ELG-001`, `HR-ELG-002`), `HR-LIC-001`, `HR-CRD-001`, `HR-CRD-003`, `HR-CRD-006`, and the clinical-module question of section 13 and `HR-INT-001`/`002`. Built references: `EligibilityService.general` (`apps/workforce/eligibility/`, conditions 1 to 4, used by rostering and practice schedules), SPKs and grants (3g, 3h), licences (3c).
 
 Clinical eligibility is **derived**, never stored: a clinical employee may perform a privilege in a unit on a date when (1) the employment status is `probation` or `active`, (2) the STR of their profession is valid, (3) a SIP at the unit's facility is valid, (4) an active SPK covers the unit and (5) the privilege is granted in an active grant of that SPK. Groups 1 to 5 already use conditions 1 to 4 inside rostering. This group exposes the whole rule as one read for clinical modules, HR and committees, and adds condition 5.
 
@@ -73,3 +73,14 @@ Confirmed as proposed. These four changed the shape of the work most:
 - **CE7:** the employment status is the current one for any date (the model keeps no history); or the route waits for a history.
 
 The others are as stated. Open, not decided here: who may check whom once scoped permissions exist, and Q10 (emergency care when HRM is unavailable).
+
+## 7. Build notes
+
+Built as planned (CE1 to CE13) in one code PR. Details worth knowing:
+
+- Services: `EligibilityService.full` (new; `general` now calls it and keeps its signature and result) and `EligibilityQueryService` (loads the employee, unit and privilege, applies CE6). `EligibilityService` gained the privilege grant repository as a third constructor argument; its existing spec changed only by that argument.
+- `general` now reads the licences and SPKs even when the employment condition fails (`full` never stops early). The results are the same; it costs a few reads.
+- Condition 5 reads grants with the existing `findByFilter` (employee, privilege, `active`, unit) and keeps those whose SPK is among the employee's SPKs that are active on the date and cover the unit. No new repository method was needed.
+- The SPK list is read with a page of 20 and the grants with a page of 50, as `general` already did for SPKs; an employee with more current SPKs for one unit would be cut off, which the one-current-SPK rule (3g) makes unlikely.
+- The date is validated in the DTO (400), the unit and the privilege by shape (400) and by existence (422). `employmentAsOf` is always `current` (CE7).
+- Tests: the service with in-memory fakes (each condition alone, all failing, the date edges, each grant status, retired privilege, flagged and permissive grants, every refusal, a failing repository) and the gateway over HTTP (401, 403, 404, 422, 400, `no-store`, reads write no log entry). The Mongo repositories were untouched and not exercised against a real replica set.
