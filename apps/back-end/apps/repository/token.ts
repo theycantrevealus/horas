@@ -210,3 +210,10 @@ export const REPOSITORY_SHIFT_SWAP_REQUEST = Symbol(
 export const REPOSITORY_PRACTICE_SCHEDULE = Symbol(
   'REPOSITORY_PRACTICE_SCHEDULE',
 )
+
+/**
+ * Injection token for the practice schedule exception repository (a cancelled or moved session).
+ */
+export const REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION = Symbol(
+  'REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION',
+)
