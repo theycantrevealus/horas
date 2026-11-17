@@ -22,6 +22,7 @@ import {
 } from '@repository/token'
 import { cleanReason } from '../credentialing/application-support'
 import { observe } from '../observe'
+import { RosterValidationService } from './roster-validation.service'
 import { ParameterService } from '../parameter/parameter.service'
 import {
   ConflictError,
@@ -85,6 +86,7 @@ export class RosterService {
    * @param units - Organization unit repository.
    * @param facilities - Facility repository, for the time zone of "today".
    * @param parameters - HR parameters (`ROSTER_PERIOD`, `ROSTER_APPROVAL_REQUIRED`).
+   * @param validation - Validation of a roster, for the gate on `submit` and `publish`.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -94,6 +96,8 @@ export class RosterService {
     @Inject(REPOSITORY_FACILITY)
     private readonly facilities: FacilityRepository,
     @Inject(ParameterService) private readonly parameters: ParameterService,
+    @Inject(RosterValidationService)
+    private readonly validation: RosterValidationService,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -213,7 +217,8 @@ export class RosterService {
    * @param input - Optional version and reason.
    * @returns The submitted roster.
    * @throws NotFoundError `roster_not_found`.
-   * @throws InvalidRequestError `invalid_transition` or `approval_not_required`.
+   * @throws InvalidRequestError `invalid_transition`, `approval_not_required`, `roster_invalid` or
+   * `coverage_gaps` (the gate, HR plan 5.5 RA17).
    * @throws ConflictError `stale_version`.
    */
   submit(
@@ -235,10 +240,12 @@ export class RosterService {
             'This unit does not need approval: publish the draft directly.',
           )
         }
+        const validation = await this.validation.gate(tenantId, roster)
         return {
           status: 'submitted',
           submitted: this.stamp(),
           return_reason: null,
+          validation,
         }
       },
     )
@@ -329,7 +336,8 @@ export class RosterService {
    * @param input - Optional version and reason.
    * @returns The published roster.
    * @throws NotFoundError `roster_not_found`.
-   * @throws InvalidRequestError `invalid_transition` or `approval_required`.
+   * @throws InvalidRequestError `invalid_transition`, `approval_required`, and for a draft
+   * `roster_invalid` or `coverage_gaps` (the gate, HR plan 5.5 RA17).
    * @throws ConflictError `stale_version`.
    */
   publish(
@@ -354,7 +362,16 @@ export class RosterService {
             'This roster must be submitted and approved before it is published.',
           )
         }
-        return { status: 'published', published: this.stamp(), revision: 1 }
+        const validation =
+          roster.status === 'draft'
+            ? await this.validation.gate(tenantId, roster)
+            : roster.validation
+        return {
+          status: 'published',
+          published: this.stamp(),
+          revision: 1,
+          validation,
+        }
       },
     )
   }
