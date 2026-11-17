@@ -51,6 +51,8 @@ export const PERMISSIONS = {
   WORKFORCE_SHIFT_DEFINITION_WRITE: 'workforce.shift-definition:write',
   WORKFORCE_COVERAGE_REQUIREMENT_READ: 'workforce.coverage-requirement:read',
   WORKFORCE_COVERAGE_REQUIREMENT_WRITE: 'workforce.coverage-requirement:write',
+  WORKFORCE_ROSTER_ASSIGNMENT_READ: 'workforce.roster-assignment:read',
+  WORKFORCE_ROSTER_ASSIGNMENT_WRITE: 'workforce.roster-assignment:write',
   WORKFORCE_ROSTER_READ: 'workforce.roster:read',
   WORKFORCE_ROSTER_WRITE: 'workforce.roster:write',
   WORKFORCE_ROSTER_APPROVE: 'workforce.roster:approve',

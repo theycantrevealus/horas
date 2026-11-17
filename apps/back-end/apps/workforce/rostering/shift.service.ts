@@ -7,6 +7,8 @@ import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
 import { type CoverageRequirementRepository } from '@repository/interface/coverage-requirement'
 import { type FacilityRepository } from '@repository/interface/facility'
+import { type RosterRepository } from '@repository/interface/roster'
+import { type RosterAssignmentRepository } from '@repository/interface/roster-assignment'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import {
   type ShiftDefinitionRepository,
@@ -21,6 +23,8 @@ import {
   REPOSITORY_COVERAGE_REQUIREMENT,
   REPOSITORY_FACILITY,
   REPOSITORY_ORGANIZATION_UNIT,
+  REPOSITORY_ROSTER,
+  REPOSITORY_ROSTER_ASSIGNMENT,
   REPOSITORY_SHIFT_DEFINITION,
 } from '@repository/token'
 import { observe } from '../observe'
@@ -145,6 +149,8 @@ export class ShiftService {
    * @param facilities - Facility repository.
    * @param units - Organization unit repository.
    * @param coverage - Coverage requirement repository, to refuse retiring a shift in use.
+   * @param rosters - Roster repository, to find the rosters that are still open.
+   * @param assignments - Roster assignment repository, to refuse retiring a shift in use.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -156,6 +162,9 @@ export class ShiftService {
     private readonly units: OrganizationUnitRepository,
     @Inject(REPOSITORY_COVERAGE_REQUIREMENT)
     private readonly coverage: CoverageRequirementRepository,
+    @Inject(REPOSITORY_ROSTER) private readonly rosters: RosterRepository,
+    @Inject(REPOSITORY_ROSTER_ASSIGNMENT)
+    private readonly assignments: RosterAssignmentRepository,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -331,10 +340,10 @@ export class ShiftService {
           shift.id,
           1,
         )
-        if (inUse.length > 0) {
+        if (inUse.length > 0 || (await this.usedInOpenRoster(tenantId, shift))) {
           throw new ConflictError(
             'shift_in_use',
-            'An active coverage requirement uses this shift. Retire the requirement first.',
+            'An active coverage requirement or an open roster uses this shift.',
           )
         }
         this.assertVersion(shift, input.version)
@@ -579,6 +588,35 @@ export class ShiftService {
       is_night: fields.isNight,
       unit_ids: fields.unitIds,
     }
+  }
+
+  /**
+   * Tells whether a planned assignment of the shift is in a roster that is not closed (HR plan 5.5
+   * RA25).
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param shift - The shift.
+   * @returns True when an open roster of the shift's facility holds a planned assignment of it.
+   */
+  private async usedInOpenRoster(
+    tenantId: string,
+    shift: ShiftDefinition,
+  ): Promise<boolean> {
+    const open = await this.rosters.findByFilter(tenantId, {
+      facilityId: shift.facility_id,
+      open: true,
+      limit: 5000,
+    })
+    if (open.length === 0) {
+      return false
+    }
+    const found = await this.assignments.findPlannedByShiftInRosters(
+      tenantId,
+      shift.id,
+      open.map((roster) => roster.id),
+      1,
+    )
+    return found.length > 0
   }
 
   /**

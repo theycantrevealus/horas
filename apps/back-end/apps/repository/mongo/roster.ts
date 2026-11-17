@@ -100,6 +100,9 @@ export class RosterRepositoryMongo
             ...(query.unitId ? { unit_id: query.unitId } : {}),
             ...(query.facilityId ? { facility_id: query.facilityId } : {}),
             ...(query.status ? { status: query.status } : {}),
+            ...(query.open
+              ? { status: { $in: ['draft', 'submitted', 'approved', 'published'] } }
+              : {}),
             ...(query.to ? { 'period.start': { $lte: query.to } } : {}),
             ...(query.from ? { 'period.end': { $gte: query.from } } : {}),
           }),

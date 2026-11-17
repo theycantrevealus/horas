@@ -6,6 +6,8 @@ import {
   InMemoryCoverageRequirements,
   InMemoryFacilities,
   InMemoryOrganizationUnits,
+  InMemoryRosterAssignments,
+  InMemoryRosters,
   InMemoryShiftDefinitions,
 } from '../testing/in-memory'
 import { type CreateShiftInput, ShiftService } from './shift.service'
@@ -22,6 +24,8 @@ describe('ShiftService', () => {
   let facilities: InMemoryFacilities
   let units: InMemoryOrganizationUnits
   let coverage: InMemoryCoverageRequirements
+  let rosters: InMemoryRosters
+  let rosterAssignments: InMemoryRosterAssignments
   let service: ShiftService
   let facilityId: string
   let otherFacilityId: string
@@ -146,7 +150,9 @@ describe('ShiftService', () => {
     units = new InMemoryOrganizationUnits()
     const logger = { log, warn, error, debug } as unknown as AppLogger
     coverage = new InMemoryCoverageRequirements()
-    service = new ShiftService(shifts, facilities, units, coverage, logger)
+    rosters = new InMemoryRosters()
+    rosterAssignments = new InMemoryRosterAssignments()
+    service = new ShiftService(shifts, facilities, units, coverage, rosters, rosterAssignments, logger)
     facilityId = await addFacility()
     otherFacilityId = await addFacility()
     unitId = await addUnit(facilityId)
@@ -418,6 +424,91 @@ describe('ShiftService', () => {
 
       expect(retired.status).toBe('retired')
       expect(await rejection(() => asAdmin(() => service.retire(tenantId, other.id, {})))).toMatchObject({ code: 'shift_in_use' })
+    })
+  })
+
+  describe('retire and open rosters', () => {
+    /**
+     * Stores a roster of the facility and a planned assignment of a shift in it.
+     *
+     * @param shiftId - The shift.
+     * @param override - Roster status, tenant and assignment status.
+     */
+    async function addAssignment(
+      shiftId: string,
+      override: { roster?: 'draft' | 'submitted' | 'approved' | 'published' | 'closed'; assignment?: 'planned' | 'cancelled'; facility?: string; tenant?: string } = {},
+    ) {
+      const roster = await asAdmin(() =>
+        rosters.create({
+          tenant_id: override.tenant ?? tenantId,
+          unit_id: unitId,
+          facility_id: override.facility ?? facilityId,
+          period: { start: `2099-0${1 + rosterCount}-01`, end: `2099-0${1 + rosterCount}-28` },
+          status: override.roster ?? 'draft',
+          revision: 0,
+          prepared_by: { account_id: 'a1', display_name: 'Admin', kind: 'account' },
+          submitted: null,
+          approved: null,
+          published: null,
+          closed: null,
+          return_reason: null,
+          coverage_overrides: [],
+          validation: null,
+        }),
+      )
+      rosterCount += 1
+      await asAdmin(() =>
+        rosterAssignments.create({
+          tenant_id: override.tenant ?? tenantId,
+          roster_id: roster.id,
+          unit_id: unitId,
+          facility_id: override.facility ?? facilityId,
+          employee_id: new Types.ObjectId().toHexString(),
+          date: roster.period.start,
+          shift: { definition_id: shiftId, code: 'M', type: 'regular', start_time: '21:00', end_time: '07:00', paid_minutes: 540, is_night: true },
+          starts_at: null,
+          ends_at: null,
+          role: 'staff',
+          status: override.assignment ?? 'planned',
+          source: { kind: 'roster', ref_id: roster.id },
+          change_reason: null,
+          revision: 0,
+          overtime: null,
+          flag: null,
+          is_flagged: false,
+        }),
+      )
+    }
+    let rosterCount = 0
+
+    beforeEach(() => {
+      rosterCount = 0
+    })
+
+    it('refuses to retire a shift a planned assignment of an open roster uses, in any open status', async () => {
+      for (const status of ['draft', 'submitted', 'approved', 'published'] as const) {
+        const created = await create({ code: `O${status.slice(0, 2).toUpperCase()}` })
+        await addAssignment(created.id, { roster: status })
+
+        expect(await rejection(() => asAdmin(() => service.retire(tenantId, created.id, {})))).toMatchObject({ kind: 'conflict', code: 'shift_in_use' })
+        expect((await shifts.findOne(created.id))?.status).toBe('active')
+      }
+    })
+
+    it('retires a shift whose assignments are cancelled or in closed rosters, or that belong to other shifts, facilities or tenants', async () => {
+      const cancelled = await create({ code: 'C1' })
+      await addAssignment(cancelled.id, { assignment: 'cancelled' })
+      const closed = await create({ code: 'C2' })
+      await addAssignment(closed.id, { roster: 'closed' })
+      const unrelated = await create({ code: 'C3' })
+      await addAssignment((await create({ code: 'C4' })).id)
+      const foreign = await create({ code: 'C5' })
+      await addAssignment(foreign.id, { tenant: otherTenantId })
+      await addAssignment(unrelated.id, { facility: otherFacilityId })
+
+      for (const id of [cancelled.id, closed.id, unrelated.id, foreign.id]) {
+        expect((await asAdmin(() => service.retire(tenantId, id, {}))).status).toBe('retired')
+      }
     })
   })
 
