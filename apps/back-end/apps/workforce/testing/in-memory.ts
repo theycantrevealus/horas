@@ -72,6 +72,10 @@ import {
   type RosterAssignmentRepository,
 } from '@repository/interface/roster-assignment'
 import {
+  type MovedToQuery,
+  type PracticeScheduleExceptionRepository,
+} from '@repository/interface/practice-schedule-exception'
+import {
   type PracticeScheduleOnDateQuery,
   type PracticeScheduleQuery,
   type PracticeScheduleRepository,
@@ -109,6 +113,7 @@ import { type CoverageRequirement } from '@repository/model/coverage-requirement
 import { type Roster } from '@repository/model/roster'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
 import { type PracticeSchedule } from '@repository/model/practice-schedule'
+import { type PracticeScheduleException } from '@repository/model/practice-schedule-exception'
 import { type ShiftSwapRequest } from '@repository/model/shift-swap-request'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type HrImport } from '@repository/model/hr-import'
@@ -3421,6 +3426,116 @@ export class InMemoryPracticeSchedules
         !item.deleted_at &&
         item.employee_id === employeeId &&
         item.day_of_week === dayOfWeek,
+    )
+  }
+}
+
+/**
+ * In-memory `PracticeScheduleExceptionRepository` for tests. The Mongo collection has a unique
+ * index per schedule and date that ignores undone (soft-deleted) records; the rule is the
+ * service's here (HR plan 5.8 PS9).
+ */
+export class InMemoryPracticeScheduleExceptions
+  extends InMemoryRepository<PracticeScheduleException>
+  implements PracticeScheduleExceptionRepository
+{
+  /**
+   * Finds the exception of a schedule on a date, if one is in force.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param scheduleId - The schedule.
+   * @param date - The date of the session.
+   * @returns The exception, or `null`.
+   */
+  async findByScheduleAndDate(
+    tenantId: string,
+    scheduleId: string,
+    date: string,
+  ): Promise<PracticeScheduleException | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.schedule_id === scheduleId &&
+        item.date === date &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the exceptions in force on a date for some schedules.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param scheduleIds - The schedules.
+   * @param date - The date of the sessions.
+   * @returns The exceptions.
+   */
+  async findBySchedulesAndDate(
+    tenantId: string,
+    scheduleIds: string[],
+    date: string,
+  ): Promise<PracticeScheduleException[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        scheduleIds.includes(item.schedule_id) &&
+        item.date === date &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the sessions moved onto a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param date - The new date.
+   * @param query - Optional filters and a limit.
+   * @returns The moved exceptions.
+   */
+  async findMovedTo(
+    tenantId: string,
+    date: string,
+    query: MovedToQuery = {},
+  ): Promise<PracticeScheduleException[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.kind === 'moved' &&
+        item.moved_to?.date === date &&
+        !item.deleted_at &&
+        (!query.unitId || item.unit_id === query.unitId) &&
+        (!query.employeeId || item.employee_id === query.employeeId),
+    )
+      .sort(
+        (left, right) =>
+          left.unit_id.localeCompare(right.unit_id) ||
+          (left.moved_to?.start_time ?? '').localeCompare(
+            right.moved_to?.start_time ?? '',
+          ) ||
+          left.employee_id.localeCompare(right.employee_id) ||
+          left.id.localeCompare(right.id),
+      )
+      .slice(0, query.limit ?? 10)
+  }
+
+  /**
+   * Finds the exceptions of a doctor that touch a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param date - The date.
+   * @returns The exceptions.
+   */
+  async findByEmployeeAndDate(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<PracticeScheduleException[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        (item.date === date || item.moved_to?.date === date),
     )
   }
 }

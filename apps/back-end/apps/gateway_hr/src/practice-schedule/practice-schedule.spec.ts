@@ -1,7 +1,9 @@
 import { Logger } from '@nestjs/common'
 import { Types } from 'mongoose'
 import { PERMISSIONS } from '@identity/permission'
+import { CodeConceptService } from '@workforce/concept/code-concept.service'
 import { EligibilityService } from '@workforce/eligibility/eligibility.service'
+import { InvalidRequestError } from '@workforce/workforce.error'
 import { createHrGateway, type HrGateway } from '../testing/hr-gateway'
 import {
   createInMemoryWorkforce,
@@ -23,7 +25,8 @@ describe('practice schedule routes (in-memory repositories)', () => {
   let doctorId: string
   let counter = 0
 
-  // 2099-03-02 is a Monday.
+  // 2099-03-02, 09 and 16 are Mondays; 2099-03-10 is a Tuesday.
+  const leave = { system: 'id.practice-exception-reason', code: 'leave' }
   const body = (override: Record<string, unknown> = {}) => ({ employeeId: doctorId, unitId, dayOfWeek: 1, startTime: '08:00', endTime: '12:00', validFrom: '2099-03-01', ...override })
 
   /**
@@ -105,7 +108,19 @@ describe('practice schedule routes (in-memory repositories)', () => {
   beforeAll(async () => {
     gateway = await createHrGateway({
       modules: [PracticeScheduleManagementModule],
-      overrides: [[EligibilityService, { general: async () => eligible.value }]],
+      overrides: [
+        [EligibilityService, { general: async () => eligible.value }],
+        [
+          CodeConceptService,
+          {
+            assertActive: async (_tenant: string, coding: { code: string }) => {
+              if (coding.code === 'bogus') {
+                throw new InvalidRequestError('unknown_code', 'The code is not known.')
+              }
+            },
+          },
+        ],
+      ],
       ...workforce.options,
     })
     call = gateway.call
@@ -205,6 +220,110 @@ describe('practice schedule routes (in-memory repositories)', () => {
     }
     expect((await call('PATCH', `/v1/practice-schedules/${first.id}`, otherTenantToken, { quota: 5 })).status).toBe(404)
     expect(((await call('GET', '/v1/practice-schedules', otherTenantToken)).body as unknown as unknown[])).toEqual([])
+  })
+
+  it('cancels and moves sessions and undoes an exception over HTTP, and the sessions of the dates follow', async () => {
+    const doctor = await addDoctor()
+    const schedule = (await call('POST', '/v1/practice-schedules', writerToken, body({ employeeId: doctor, quota: 20 }))).body as Record<string, any>
+    const sessions = async (date: string) => (await call('GET', `/v1/practice-schedules?date=${date}&employeeId=${doctor}`, readerToken)).body as unknown as Record<string, any>[]
+
+    const cancelled = await call('POST', `/v1/practice-schedules/${schedule.id}/exceptions`, writerToken, { date: '2099-03-09', kind: 'cancelled', reason: leave })
+    expect(cancelled.status).toBe(201)
+    expect(cancelled.body).toMatchObject({ schedule_id: schedule.id, employee_id: doctor, unit_id: unitId, date: '2099-03-09', kind: 'cancelled', moved_to: null, reason: leave, source: { kind: 'manual', ref_id: null } })
+    expect(cancelled.body).not.toHaveProperty('_id')
+    expect((await sessions('2099-03-09'))[0]).toMatchObject({ scheduleId: schedule.id, state: 'cancelled', startTime: '08:00' })
+
+    const moved = await call('POST', `/v1/practice-schedules/${schedule.id}/exceptions`, writerToken, { date: '2099-03-16', kind: 'moved', reason: leave, movedTo: { date: '2099-03-10', startTime: '14:00', endTime: '16:00' } })
+    expect(moved.status).toBe(201)
+    expect(moved.body).toMatchObject({ kind: 'moved', moved_to: { date: '2099-03-10', start_time: '14:00', end_time: '16:00' } })
+    expect((await sessions('2099-03-16'))[0]).toMatchObject({ state: 'moved', movedTo: { date: '2099-03-10', startTime: '14:00', endTime: '16:00' } })
+    expect((await sessions('2099-03-10'))[0]).toMatchObject({ scheduleId: schedule.id, state: 'moved_in', date: '2099-03-10', startTime: '14:00', endTime: '16:00', quota: 20, eligible: true })
+
+    const undone = await call('POST', `/v1/practice-schedule-exceptions/${(cancelled.body as Record<string, any>).id}/cancel`, writerToken, { reason: 'Salah input' })
+    expect(undone.status).toBe(201)
+    expect(undone.body).toMatchObject({ id: (cancelled.body as Record<string, any>).id, kind: 'cancelled' })
+    expect((await sessions('2099-03-09'))[0]).toMatchObject({ state: 'scheduled' })
+    expect((await call('POST', `/v1/practice-schedules/${schedule.id}/exceptions`, writerToken, { date: '2099-03-09', kind: 'cancelled', reason: leave })).status).toBe(201)
+  })
+
+  it('refuses the exception routes without a token (401) or the write permission (403)', async () => {
+    const id = new Types.ObjectId().toHexString()
+    for (const url of [`/v1/practice-schedules/${id}/exceptions`, `/v1/practice-schedule-exceptions/${id}/cancel`]) {
+      expect((await call('POST', url, undefined, {})).status).toBe(401)
+      expect((await call('POST', url, readerToken, {})).status).toBe(403)
+    }
+  })
+
+  it('answers 422, 409 and 404 for the exception rules', async () => {
+    const doctor = await addDoctor()
+    const schedule = (await call('POST', '/v1/practice-schedules', writerToken, body({ employeeId: doctor }))).body as Record<string, any>
+    const url = `/v1/practice-schedules/${schedule.id}/exceptions`
+    const first = await call('POST', url, writerToken, { date: '2099-03-09', kind: 'cancelled', reason: leave })
+    expect(first.status).toBe(201)
+
+    expect((await call('POST', url, writerToken, { date: '2099-03-09', kind: 'cancelled', reason: leave })).status).toBe(409)
+    for (const [code, payload] of [
+      ['no_session_on_date', { date: '2099-03-10', kind: 'cancelled', reason: leave }],
+      ['date_in_past', { date: '2020-03-02', kind: 'cancelled', reason: leave }],
+      ['invalid_exception_reason', { date: '2099-03-16', kind: 'cancelled', reason: { system: 'id.other', code: 'leave' } }],
+      ['unknown_code', { date: '2099-03-16', kind: 'cancelled', reason: { system: 'id.practice-exception-reason', code: 'bogus' } }],
+      ['moved_to_required', { date: '2099-03-16', kind: 'moved', reason: leave }],
+      ['moved_to_not_allowed', { date: '2099-03-16', kind: 'cancelled', reason: leave, movedTo: { date: '2099-03-16', startTime: '09:00', endTime: '10:00' } }],
+      ['invalid_times', { date: '2099-03-16', kind: 'moved', reason: leave, movedTo: { date: '2099-03-16', startTime: '12:00', endTime: '09:00' } }],
+      ['not_moved', { date: '2099-03-16', kind: 'moved', reason: leave, movedTo: { date: '2099-03-16', startTime: '08:00', endTime: '12:00' } }],
+    ] as const) {
+      const reply = await call('POST', url, writerToken, payload)
+      expect(reply.status).toBe(422)
+      expect(reply.body).toMatchObject({ code })
+    }
+    eligible.value = { eligible: false, failed: 'sip' }
+    try {
+      expect((await call('POST', url, writerToken, { date: '2099-03-16', kind: 'moved', reason: leave, movedTo: { date: '2099-03-18', startTime: '09:00', endTime: '10:00' } })).body).toMatchObject({ code: 'not_eligible_sip' })
+    } finally {
+      eligible.value = { eligible: true }
+    }
+    for (const id of [new Types.ObjectId().toHexString(), 'bad']) {
+      expect((await call('POST', `/v1/practice-schedules/${id}/exceptions`, writerToken, { date: '2099-03-09', kind: 'cancelled', reason: leave })).body).toMatchObject({ code: 'schedule_not_found' })
+      expect((await call('POST', `/v1/practice-schedule-exceptions/${id}/cancel`, writerToken, {})).body).toMatchObject({ code: 'exception_not_found' })
+    }
+    expect((await call('POST', url, otherTenantToken, { date: '2099-03-16', kind: 'cancelled', reason: leave })).status).toBe(404)
+    const exceptionId = (first.body as Record<string, any>).id
+    expect((await call('POST', `/v1/practice-schedule-exceptions/${exceptionId}/cancel`, otherTenantToken, {})).status).toBe(404)
+    const stale = await call('POST', `/v1/practice-schedule-exceptions/${exceptionId}/cancel`, writerToken, { version: 99 })
+    expect(stale.status).toBe(409)
+    expect(stale.body).toMatchObject({ code: 'stale_version' })
+    expect((await call('POST', `/v1/practice-schedule-exceptions/${exceptionId}/cancel`, writerToken, {})).status).toBe(201)
+    expect((await call('POST', `/v1/practice-schedule-exceptions/${exceptionId}/cancel`, writerToken, {})).body).toMatchObject({ code: 'exception_not_found' })
+  })
+
+  it('answers 400 for a bad exception body', async () => {
+    const id = new Types.ObjectId().toHexString()
+    const url = `/v1/practice-schedules/${id}/exceptions`
+    const valid = { date: '2099-03-09', kind: 'cancelled', reason: leave }
+    for (const bad of [{ ...valid, date: '2099-02-30' }, { ...valid, date: undefined }, { ...valid, kind: 'postponed' }, { ...valid, reason: undefined }, { ...valid, reason: { system: '', code: 'leave' } }, { ...valid, kind: 'moved', movedTo: { date: 'soon', startTime: '09:00', endTime: '10:00' } }, { ...valid, kind: 'moved', movedTo: { date: '2099-03-09', startTime: '9am', endTime: '10:00' } }, { ...valid, version: -1 }]) {
+      expect((await call('POST', url, writerToken, bad)).status).toBe(400)
+    }
+    for (const bad of [{ version: -1 }, { reason: '' }, { reason: 'x'.repeat(501) }]) {
+      expect((await call('POST', `/v1/practice-schedule-exceptions/${id}/cancel`, writerToken, bad)).status).toBe(400)
+    }
+  })
+
+  it('writes one entry per exception write, without doctors, dates, codes or reasons', async () => {
+    const doctor = await addDoctor()
+    const schedule = (await call('POST', '/v1/practice-schedules', writerToken, body({ employeeId: doctor, dayOfWeek: 3 }))).body as Record<string, any>
+    const { written, restore } = captureLogs()
+    try {
+      const made = (await call('POST', `/v1/practice-schedules/${schedule.id}/exceptions`, writerToken, { date: '2099-03-04', kind: 'cancelled', reason: leave })).body as Record<string, any>
+      await call('POST', `/v1/practice-schedule-exceptions/${made.id}/cancel`, writerToken, { reason: 'Alasan Rahasia' })
+      await vi.waitFor(() => expect(written.filter((entry) => entry.event === 'http_request')).toHaveLength(2))
+
+      expect(written.filter((entry) => entry.event !== 'http_request').map((entry) => entry.event)).toEqual(['practice_exception_create', 'practice_exception_cancel'])
+      for (const text of ['Alasan Rahasia', doctor, '2099-03-04', 'leave']) {
+        expect(JSON.stringify(written)).not.toContain(text)
+      }
+    } finally {
+      restore()
+    }
   })
 
   it('answers 400 for a bad body or query', async () => {

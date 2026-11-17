@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { WorkforceModule } from '@workforce/workforce.module'
+import { PracticeExceptionController } from './practice-exception.controller'
 import { PracticeScheduleController } from './practice-schedule.controller'
 
 /**
@@ -7,6 +8,6 @@ import { PracticeScheduleController } from './practice-schedule.controller'
  */
 @Module({
   imports: [WorkforceModule],
-  controllers: [PracticeScheduleController],
+  controllers: [PracticeScheduleController, PracticeExceptionController],
 })
 export class PracticeScheduleManagementModule {}
