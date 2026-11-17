@@ -36,6 +36,7 @@ import { ApplicationService } from './credentialing/application.service'
 import { AppointmentService } from './appointment/appointment.service'
 import { GrantService } from './appointment/grant.service'
 import { StatusService } from './appointment/status.service'
+import { EligibilityQueryService } from './eligibility/eligibility-query.service'
 import { EligibilityService } from './eligibility/eligibility.service'
 import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
@@ -140,6 +141,7 @@ import { UnitService } from './structure/unit.service'
     HrImportService,
     DutyService,
     EligibilityService,
+    EligibilityQueryService,
   ],
   exports: [
     OrganizationService,
@@ -178,6 +180,7 @@ import { UnitService } from './structure/unit.service'
     HrImportService,
     DutyService,
     EligibilityService,
+    EligibilityQueryService,
   ],
 })
 export class WorkforceModule {}

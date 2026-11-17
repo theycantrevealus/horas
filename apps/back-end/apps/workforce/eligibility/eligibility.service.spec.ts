@@ -8,6 +8,7 @@ import {
   InMemoryClinicalAppointments,
   InMemoryEmployees,
   InMemoryOrganizationUnits,
+  InMemoryPrivilegeGrants,
   InMemoryProfessionalLicenses,
 } from '../testing/in-memory'
 import { EligibilityService } from './eligibility.service'
@@ -147,7 +148,7 @@ describe('EligibilityService', () => {
     appointments = new InMemoryClinicalAppointments()
     employees = new InMemoryEmployees()
     units = new InMemoryOrganizationUnits()
-    service = new EligibilityService(licenses, appointments)
+    service = new EligibilityService(licenses, appointments, new InMemoryPrivilegeGrants())
     employee = await addEmployee()
     unit = await asAdmin(() =>
       units.create({
