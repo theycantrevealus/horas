@@ -218,23 +218,23 @@ Plan: `plans/gateway-hr-5-3-coverage-requirements.md` (built, PR #83).
 
 ### 5.4 Rosters
 
-Plan: `plans/gateway-hr-5-4-rosters.md` (proposed).
+Plan: `plans/gateway-hr-5-4-rosters.md` (confirmed). `validate` and `coverage-overrides` move to 5.5 with the assignments they check (RS1).
 | Endpoint | Purpose |
 |---|---|
 | `GET /rosters` | List rosters by unit and period. |
 | `POST /rosters` | Create a draft roster, optionally pre-filled from the previous period. |
 | `GET /rosters/:id` | View a roster with its assignments. |
-| `POST /rosters/:id/validate` | Check all rules and coverage, and list violations. |
 | `POST /rosters/:id/submit` | Send for approval. |
 | `POST /rosters/:id/approve` | Approve a submitted roster. |
 | `POST /rosters/:id/return` | Return it to draft with a reason. |
 | `POST /rosters/:id/publish` | Publish to staff and other modules. |
 | `POST /rosters/:id/close` | Close the period after attendance is reconciled. |
-| `POST /rosters/:id/coverage-overrides` | Accept a coverage gap with a reason. |
 
 ### 5.5 Roster assignments
 | Endpoint | Purpose |
 |---|---|
+| `POST /rosters/:id/validate` | Check all rules and coverage, and list violations. |
+| `POST /rosters/:id/coverage-overrides` | Accept a coverage gap with a reason. |
 | `POST /rosters/:id/assignments` | Add one person to one shift on one date. |
 | `PATCH /roster-assignments/:id` | Change an assignment (reason required after publication). |
 | `POST /roster-assignments/:id/cancel` | Cancel an assignment. |

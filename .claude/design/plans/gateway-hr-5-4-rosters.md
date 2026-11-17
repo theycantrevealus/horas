@@ -1,6 +1,6 @@
 # gateway_hr 5.4: Rosters
 
-Status: **Proposed** (2026-11-16). Decisions RS1 to RS17 are proposals for you to confirm or change (section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 20). Endpoints: `../hr-endpoints.md` 5.4. Collection: `../human-resource-collections.md` 5.4 (`rosters`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Roster), 8.3 (Roster status), 8.4.1 (Prepare and publish), 8.5.5 (`HR-ROS-040` to `HR-ROS-042`), the role matrix rows "Roster drafting" and "Roster approval", and the parameters `ROSTER_PERIOD`, `ROSTER_PUBLISH_LEAD_DAYS` and `ROSTER_APPROVAL_REQUIRED`. Model: `apps/back-end/apps/repository/model/roster.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: credential applications (4.2: a status flow with a reason on return, stamps for who and when), SPK decisions (4.3: transitions in one transaction, dated in the facility's zone), shift definitions and coverage requirements (5.1, 5.3: the shift and the unit a roster works with), HR parameters (1.6: `resolve` at a place).
+Status: **Confirmed** (2026-11-17). Decisions RS1 to RS17 and the single code PR confirmed as proposed, including the split of RS1. Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 20). Endpoints: `../hr-endpoints.md` 5.4. Collection: `../human-resource-collections.md` 5.4 (`rosters`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 8.2 (Roster), 8.3 (Roster status), 8.4.1 (Prepare and publish), 8.5.5 (`HR-ROS-040` to `HR-ROS-042`), the role matrix rows "Roster drafting" and "Roster approval", and the parameters `ROSTER_PERIOD`, `ROSTER_PUBLISH_LEAD_DAYS` and `ROSTER_APPROVAL_REQUIRED`. Model: `apps/back-end/apps/repository/model/roster.ts` (exists, with its classification). Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: credential applications (4.2: a status flow with a reason on return, stamps for who and when), SPK decisions (4.3: transitions in one transaction, dated in the facility's zone), shift definitions and coverage requirements (5.1, 5.3: the shift and the unit a roster works with), HR parameters (1.6: `resolve` at a place).
 
 A roster is the plan of one unit for one period, normally a calendar month. The Head of Unit prepares it as a draft, submits it, an approver approves or returns it, and it is published to staff and to the other modules. After the period it is closed. This group builds the roster record and its lifecycle. The assignments inside it (one person, one shift, one date) are group 5.5, so every roster of this group is empty.
 
@@ -83,13 +83,13 @@ Tests come first: repository (indexes, tenant isolation, no `_id`, one change re
 4. A roster can be closed only after its last day in the facility's time zone.
 5. Logs carry no dates or reasons, and responses carry no `_id`.
 
-## 8. Decisions that need your answer
+## 8. Decisions that needed your answer
 
-All of RS1 to RS17 are proposals. These four change the shape of the work most, so I would like an explicit answer:
+Confirmed as proposed: all of RS1 to RS17. These four changed the shape of the work most:
 
 - **RS1** (the split: eight lifecycle endpoints here; `validate`, `coverage-overrides`, the pre-fill and the assignment list move to 5.5 together with the validation gate on `submit` and `publish`).
 - **RS6** (approval is the setting `ROSTER_APPROVAL_REQUIRED`, read at the unit: with it on a roster goes draft, submitted, approved, published; with it off a draft is published directly).
 - **RS3** (the period must match `ROSTER_PERIOD`: a calendar month, or a Monday to Sunday week, or two weeks).
 - **RS7** (the approver cannot be the preparer).
 
-Also open, not decided here: how rotation patterns and the pre-fill work (5.5), and which role may approve for a unit (the HR Manager or the head of the parent unit, "per configuration" in the business spec: today it is whoever the administrator gave `workforce.roster:approve`). The others are proposed as stated.
+Also open, not decided here: how rotation patterns and the pre-fill work (5.5), and which role may approve for a unit (the HR Manager or the head of the parent unit, "per configuration" in the business spec: today it is whoever the administrator gave `workforce.roster:approve`). The others are as stated.
