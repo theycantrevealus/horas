@@ -231,6 +231,8 @@ Plan: `plans/gateway-hr-5-4-rosters.md` (built, PR #87). `validate` and `coverag
 | `POST /rosters/:id/close` | Close the period after attendance is reconciled. |
 
 ### 5.5 Roster assignments
+
+Plan: `plans/gateway-hr-5-5-roster-assignments.md` (proposed).
 | Endpoint | Purpose |
 |---|---|
 | `POST /rosters/:id/validate` | Check all rules and coverage, and list violations. |
