@@ -215,7 +215,7 @@ describe('RosterAssignmentService', () => {
     } as unknown as ParameterService
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new RosterAssignmentService(assignments, rosters, units, facilities, shifts, employees, eligibility, parameters, logger)
+    service = new RosterAssignmentService(assignments, rosters, units, facilities, shifts, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, logger)
     facilityId = (
       await asHead(() =>
         facilities.create({
@@ -280,7 +280,7 @@ describe('RosterAssignmentService', () => {
     })
 
     it('refuses a roster that is not a draft, and answers not found for a missing, malformed or foreign roster', async () => {
-      for (const status of ['submitted', 'approved', 'published'] as const) {
+      for (const status of ['submitted', 'approved'] as const) {
         const locked = await addRoster({ status, unit_id: (await addUnit()).id })
         expect(await rejection(() => add({}, locked))).toMatchObject({ code: 'roster_locked' })
       }
@@ -467,7 +467,7 @@ describe('RosterAssignmentService', () => {
       expect(await rejection(() => asHead(() => service.change(tenantId, created.id, {})))).toMatchObject({ code: 'empty_update' })
       expect(await rejection(() => asHead(() => service.change(tenantId, created.id, { role: 'boss' as never })))).toMatchObject({ code: 'invalid_role' })
       expect(await rejection(() => asHead(() => service.change(tenantId, created.id, { shiftId: new Types.ObjectId().toHexString() })))).toMatchObject({ code: 'shift_not_found' })
-      await asHead(() => rosters.update(roster.id, { status: 'published' }))
+      await asHead(() => rosters.update(roster.id, { status: 'approved' }))
       expect(await rejection(() => asHead(() => service.change(tenantId, created.id, { role: 'staff' })))).toMatchObject({ code: 'roster_locked' })
       await asHead(() => rosters.update(roster.id, { status: 'closed' }))
       expect(await rejection(() => asHead(() => service.change(tenantId, created.id, { role: 'staff' })))).toMatchObject({ code: 'roster_closed' })
@@ -521,6 +521,120 @@ describe('RosterAssignmentService', () => {
       await asHead(() => rosters.update(roster.id, { status: 'submitted' }))
       expect(await rejection(() => asHead(() => service.cancel(tenantId, created.id, {})))).toMatchObject({ code: 'roster_locked' })
       expect(await rejection(() => asHead(() => service.cancel(tenantId, 'bad', {})))).toMatchObject({ code: 'roster_assignment_not_found' })
+    })
+  })
+
+  describe('a published roster', () => {
+    let published: Roster
+
+    beforeEach(async () => {
+      published = await addRoster({ unit_id: (await addUnit()).id, status: 'published', revision: 1 })
+    })
+
+    it('adds an assignment with a reason, marks it as a change request, and raises the roster revision by one', async () => {
+      const created = await add({ reason: 'Pengganti sakit' }, published)
+
+      expect(created).toMatchObject({ source: { kind: 'change_request', ref_id: null }, change_reason: 'Pengganti sakit', revision: 2, status: 'planned' })
+      expect((await rosters.findOne(published.id))?.revision).toBe(2)
+      const second = await add({ employeeId: (await addEmployee()).id, reason: 'Tambahan' }, published)
+      expect(second.revision).toBe(3)
+      expect((await rosters.findOne(published.id))?.revision).toBe(3)
+      expect(log.mock.calls.at(-1)?.[0]).toMatchObject({ event: 'assignment_add', outcome: 'success' })
+      expect(JSON.stringify([log.mock.calls, warn.mock.calls])).not.toContain('Pengganti sakit')
+    })
+
+    it('needs a reason of 1 to 500 characters, and changes nothing without it', async () => {
+      expect(await rejection(() => add({}, published))).toMatchObject({ code: 'reason_required' })
+      expect(await rejection(() => add({ reason: '   ' }, published))).toMatchObject({ code: 'reason_required' })
+      expect(await rejection(() => add({ reason: 'x'.repeat(501) }, published))).toMatchObject({ code: 'invalid_reason' })
+      expect(await assignments.findByRoster(tenantId, published.id)).toEqual([])
+      expect((await rosters.findOne(published.id))?.revision).toBe(1)
+    })
+
+    it('changes an assignment with a reason, stamps the revision and keeps the reason on it', async () => {
+      const created = await add({ reason: 'Awal' }, published)
+
+      const changed = await asHead(() => service.change(tenantId, created.id, { shiftId: night.id, reason: 'Tukar shift' }))
+
+      expect(changed).toMatchObject({ shift: { code: 'M' }, change_reason: 'Tukar shift', revision: 3 })
+      expect((await rosters.findOne(published.id))?.revision).toBe(3)
+      expect(await rejection(() => asHead(() => service.change(tenantId, created.id, { role: 'supervisor' })))).toMatchObject({ code: 'reason_required' })
+      expect((await rosters.findOne(published.id))?.revision).toBe(3)
+    })
+
+    it('cancels an assignment with a reason, raises the revision, and refuses without one', async () => {
+      const created = await add({ reason: 'Awal' }, published)
+
+      expect(await rejection(() => asHead(() => service.cancel(tenantId, created.id, {})))).toMatchObject({ code: 'reason_required' })
+      const cancelled = await asHead(() => service.cancel(tenantId, created.id, { reason: 'Izin' }))
+
+      expect(cancelled).toMatchObject({ status: 'cancelled', change_reason: 'Izin', revision: 3 })
+      expect((await rosters.findOne(published.id))?.revision).toBe(3)
+    })
+
+    it('does not raise the revision of a draft roster, and keeps no reason there', async () => {
+      const created = await add({ reason: 'Catatan' })
+      expect(created).toMatchObject({ revision: 0, change_reason: null, source: { kind: 'roster' } })
+      const changed = await asHead(() => service.change(tenantId, created.id, { role: 'supervisor', reason: 'Catatan' }))
+      expect(changed).toMatchObject({ revision: 0, change_reason: null })
+      expect((await rosters.findOne(roster.id))?.revision).toBe(0)
+    })
+
+    it('checks the working-time rules in a published roster too, and writes nothing when one fails', async () => {
+      await add({ reason: 'Awal' }, published)
+      const elsewhere = await addRoster({ unit_id: (await addUnit()).id, status: 'published', revision: 1 })
+      expect(await rejection(() => add({ reason: 'Lagi', shiftId: morning.id, date: monday }, elsewhere))).toMatchObject({ code: 'overlap' })
+      expect((await rosters.findOne(published.id))?.revision).toBe(2)
+    })
+
+    it('refuses a change when the roster was changed by someone else meanwhile, and rolls the revision back to the stored one', async () => {
+      const spy = vi.spyOn(rosters, 'update').mockRejectedValueOnce(new RepositoryConflictError('race', { operation: 'x' }))
+      expect(await rejection(() => add({ reason: 'Balapan' }, published))).toMatchObject({ code: 'stale_version' })
+      spy.mockRestore()
+    })
+
+    it('keeps a closed roster, and one that was submitted or approved, fixed', async () => {
+      for (const status of ['closed', 'submitted', 'approved'] as const) {
+        const other = await addRoster({ unit_id: (await addUnit()).id, status })
+        expect(await rejection(() => add({ reason: 'x' }, other))).toMatchObject({ code: status === 'closed' ? 'roster_closed' : 'roster_locked' })
+      }
+    })
+  })
+
+  describe('the past', () => {
+    let pastRoster: Roster
+    const jan = '2020-01-10'
+
+    beforeEach(async () => {
+      pastRoster = await addRoster({ unit_id: (await addUnit()).id, period: { start: '2020-01-01', end: '2020-01-31' } })
+    })
+
+    it('lets a caller who may correct the past add, change and cancel with a reason, and refuses everyone else', async () => {
+      expect(await rejection(() => add({ date: jan, reason: 'Koreksi' }, pastRoster))).toMatchObject({ code: 'assignment_in_past' })
+
+      const created = await add({ date: jan, reason: 'Koreksi absensi', canCorrectPast: true }, pastRoster)
+      expect(created).toMatchObject({ date: jan, change_reason: 'Koreksi absensi', source: { kind: 'roster' } })
+      expect(await rejection(() => asHead(() => service.change(tenantId, created.id, { role: 'supervisor' })))).toMatchObject({ code: 'assignment_in_past' })
+      const changed = await asHead(() => service.change(tenantId, created.id, { role: 'supervisor', reason: 'Koreksi peran', canCorrectPast: true }))
+      expect(changed).toMatchObject({ role: 'supervisor', change_reason: 'Koreksi peran' })
+      const cancelled = await asHead(() => service.cancel(tenantId, created.id, { reason: 'Salah isi', canCorrectPast: true }))
+      expect(cancelled.status).toBe('cancelled')
+    })
+
+    it('needs a reason for a correction even in a draft, and the working-time rules still apply', async () => {
+      expect(await rejection(() => add({ date: jan, canCorrectPast: true }, pastRoster))).toMatchObject({ code: 'reason_required' })
+      await add({ date: jan, reason: 'Satu', canCorrectPast: true }, pastRoster)
+      const other = await addRoster({ unit_id: (await addUnit()).id, period: { start: '2020-01-01', end: '2020-01-31' } })
+      expect(await rejection(() => add({ date: jan, reason: 'Dua', canCorrectPast: true }, other))).toMatchObject({ code: 'overlap' })
+    })
+
+    it('corrects the past of a published roster and raises its revision, but never a closed roster', async () => {
+      const published = await addRoster({ unit_id: (await addUnit()).id, period: { start: '2020-02-01', end: '2020-02-29' }, status: 'published', revision: 1 })
+      const created = await add({ date: '2020-02-10', reason: 'Koreksi', canCorrectPast: true }, published)
+      expect(created.revision).toBe(2)
+      expect((await rosters.findOne(published.id))?.revision).toBe(2)
+      const closed = await addRoster({ unit_id: (await addUnit()).id, period: { start: '2020-03-01', end: '2020-03-31' }, status: 'closed' })
+      expect(await rejection(() => add({ date: '2020-03-10', reason: 'Koreksi', canCorrectPast: true }, closed))).toMatchObject({ code: 'roster_closed' })
     })
   })
 

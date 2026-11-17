@@ -27,11 +27,15 @@ export const ALLOW_PASSWORD_CHANGE_KEY = 'identity:allow_password_change'
  * @property headers - Request headers.
  * @property ip - Client address.
  * @property user - The signed-in caller, set by `AuthenticationGuard`.
+ * @property permissions - The caller's permissions, set by `PermissionsGuard` on routes that require
+ * permissions. Only a handler may read it, to decide between two behaviours; the guard has already
+ * decided who may enter.
  */
 export interface GuardedRequest {
   headers: Record<string, string | string[] | undefined>
   ip?: string
   user?: AuthenticatedUser
+  permissions?: ReadonlySet<string>
 }
 
 /**
@@ -72,4 +76,19 @@ export const AllowPasswordChange = (): MethodDecorator & ClassDecorator =>
 export const CurrentUser = createParamDecorator(
   (_data: unknown, context: ExecutionContext): AuthenticatedUser | undefined =>
     context.switchToHttp().getRequest<GuardedRequest>().user,
+)
+
+/**
+ * Injects the permissions of the signed-in caller into a handler parameter, for a route that has
+ * `@RequirePermissions(...)`. It lets a handler offer an extra capability to callers who hold one
+ * more permission (for example correcting the past), without a second route. It is empty on a route
+ * without `@RequirePermissions(...)`, where the guard does not resolve permissions.
+ *
+ * @example
+ * `add(@CurrentPermissions() held: ReadonlySet<string>)`
+ */
+export const CurrentPermissions = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): ReadonlySet<string> =>
+    context.switchToHttp().getRequest<GuardedRequest>().permissions ??
+    new Set<string>(),
 )

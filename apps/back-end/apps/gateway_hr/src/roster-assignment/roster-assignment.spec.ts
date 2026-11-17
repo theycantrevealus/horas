@@ -16,6 +16,7 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
   let writerToken: string
   let readerToken: string
   let shiftToken: string
+  let correctorToken: string
   let otherTenantToken: string
   let tenantId: string
   let otherTenantId: string
@@ -142,6 +143,11 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
     ])
     readerToken = await gateway.seedAndLogin(tenantId, 'reader', [
       PERMISSIONS.WORKFORCE_ROSTER_ASSIGNMENT_READ,
+    ])
+    correctorToken = await gateway.seedAndLogin(tenantId, 'corrector', [
+      PERMISSIONS.WORKFORCE_ROSTER_ASSIGNMENT_READ,
+      PERMISSIONS.WORKFORCE_ROSTER_ASSIGNMENT_WRITE,
+      PERMISSIONS.WORKFORCE_ROSTER_CORRECT_PAST,
     ])
     shiftToken = await gateway.seedAndLogin(tenantId, 'shifts', [
       PERMISSIONS.WORKFORCE_SHIFT_DEFINITION_WRITE,
@@ -286,15 +292,15 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
     expect((await call('PATCH', `/v1/roster-assignments/${first.id}`, writerToken, {})).body).toMatchObject({ code: 'empty_update' })
   })
 
-  it('refuses a roster that is not a draft, and answers 404 for a missing, malformed or foreign roster or assignment', async () => {
+  it('refuses a roster that was submitted or approved, and answers 404 for a missing, malformed or foreign roster or assignment', async () => {
     const employeeId = await addEmployee()
     const roster = await workforce.rosters.create({
       tenant_id: tenantId,
       unit_id: unitId,
       facility_id: facilityId,
       period: { start: '2099-04-01', end: '2099-04-30' },
-      status: 'published',
-      revision: 1,
+      status: 'approved',
+      revision: 0,
       prepared_by: { account_id: 'head', display_name: 'Head', kind: 'account' },
       submitted: null,
       approved: null,
@@ -317,6 +323,76 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
     expect((await call('GET', `/v1/rosters/${rosterId}/assignments`, otherTenantToken)).status).toBe(404)
     expect((await call('PATCH', `/v1/roster-assignments/${mine.id}`, otherTenantToken, { role: 'staff' })).status).toBe(404)
     expect((await call('POST', `/v1/roster-assignments/${mine.id}/cancel`, otherTenantToken, {})).status).toBe(404)
+  })
+
+  it('changes a published roster only with a reason, and raises its revision', async () => {
+    const roster = await workforce.rosters.create({
+      tenant_id: tenantId,
+      unit_id: unitId,
+      facility_id: facilityId,
+      period: { start: '2099-05-01', end: '2099-05-31' },
+      status: 'published',
+      revision: 1,
+      prepared_by: { account_id: 'head', display_name: 'Head', kind: 'account' },
+      submitted: null,
+      approved: null,
+      published: null,
+      closed: null,
+      return_reason: null,
+      coverage_overrides: [],
+      validation: null,
+    })
+    const employeeId = await addEmployee()
+
+    const missing = await add(employeeId, { date: '2099-05-05' }, roster.id)
+    expect(missing.status).toBe(422)
+    expect(missing.body).toMatchObject({ code: 'reason_required' })
+    const created = await add(employeeId, { date: '2099-05-05', reason: 'Pengganti sakit' }, roster.id)
+    expect(created.status).toBe(201)
+    expect(created.body).toMatchObject({ source: { kind: 'change_request', ref_id: null }, change_reason: 'Pengganti sakit', revision: 2 })
+    expect((await workforce.rosters.findOne(roster.id))?.revision).toBe(2)
+    const id = (created.body as Record<string, any>).id
+    expect((await call('PATCH', `/v1/roster-assignments/${id}`, writerToken, { role: 'supervisor' })).body).toMatchObject({ code: 'reason_required' })
+    const changed = await call('PATCH', `/v1/roster-assignments/${id}`, writerToken, { role: 'supervisor', reason: 'Peran baru' })
+    expect(changed.body).toMatchObject({ role: 'supervisor', revision: 3, change_reason: 'Peran baru' })
+    expect((await call('POST', `/v1/roster-assignments/${id}/cancel`, writerToken, {})).body).toMatchObject({ code: 'reason_required' })
+    const cancelled = await call('POST', `/v1/roster-assignments/${id}/cancel`, writerToken, { reason: 'Izin' })
+    expect(cancelled.body).toMatchObject({ status: 'cancelled', revision: 4 })
+    expect((await workforce.rosters.findOne(roster.id))?.revision).toBe(4)
+  })
+
+  it('refuses the past, unless the caller holds the permission to correct it and gives a reason', async () => {
+    const roster = await workforce.rosters.create({
+      tenant_id: tenantId,
+      unit_id: unitId,
+      facility_id: facilityId,
+      period: { start: '2020-01-01', end: '2020-01-31' },
+      status: 'draft',
+      revision: 0,
+      prepared_by: { account_id: 'head', display_name: 'Head', kind: 'account' },
+      submitted: null,
+      approved: null,
+      published: null,
+      closed: null,
+      return_reason: null,
+      coverage_overrides: [],
+      validation: null,
+    })
+    const employeeId = await addEmployee()
+    const body = { employeeId, date: '2020-01-10', shiftId: morningId }
+
+    const refused = await call('POST', `/v1/rosters/${roster.id}/assignments`, writerToken, { ...body, reason: 'Koreksi' })
+    expect(refused.status).toBe(422)
+    expect(refused.body).toMatchObject({ code: 'assignment_in_past' })
+    expect((await call('POST', `/v1/rosters/${roster.id}/assignments`, correctorToken, body)).body).toMatchObject({ code: 'reason_required' })
+    const created = await call('POST', `/v1/rosters/${roster.id}/assignments`, correctorToken, { ...body, reason: 'Koreksi absensi' })
+    expect(created.status).toBe(201)
+    expect(created.body).toMatchObject({ date: '2020-01-10', change_reason: 'Koreksi absensi' })
+    const id = (created.body as Record<string, any>).id
+    expect((await call('PATCH', `/v1/roster-assignments/${id}`, writerToken, { role: 'supervisor', reason: 'x' })).body).toMatchObject({ code: 'assignment_in_past' })
+    expect((await call('PATCH', `/v1/roster-assignments/${id}`, correctorToken, { role: 'supervisor', reason: 'Koreksi peran' })).status).toBe(200)
+    expect((await call('POST', `/v1/roster-assignments/${id}/cancel`, writerToken, { reason: 'x' })).body).toMatchObject({ code: 'assignment_in_past' })
+    expect((await call('POST', `/v1/roster-assignments/${id}/cancel`, correctorToken, { reason: 'Salah isi' })).status).toBe(201)
   })
 
   it('refuses to retire a shift an open roster uses, and allows it once the assignment is cancelled', async () => {

@@ -3,6 +3,10 @@ import {
   RepositoryConflictError,
   RepositoryNotFoundError,
 } from '@utility/database/error'
+import {
+  TRANSACTION_MANAGER,
+  type TransactionManager,
+} from '@utility/database/transaction'
 import { withChangeReason } from '@utility/history/reason'
 import { AppLogger } from '@utility/logger/service'
 import { isLocalDate, todayInZone } from '@utility/validation/local-date'
@@ -33,6 +37,7 @@ import {
   REPOSITORY_ROSTER_ASSIGNMENT,
   REPOSITORY_SHIFT_DEFINITION,
 } from '@repository/token'
+import { cleanReason } from '../credentialing/application-support'
 import { addDays } from '../credentialing/appointment-rules'
 import { EligibilityService } from '../eligibility/eligibility.service'
 import { observe } from '../observe'
@@ -57,6 +62,20 @@ import {
 const NAME = 'RosterAssignmentService'
 
 /**
+ * How a change is made: in a published roster or not, with which reason, and whether the reason is
+ * kept on the assignment.
+ *
+ * @property published - The roster is published, so the change raises its revision.
+ * @property reason - The cleaned reason, when one is needed or was given.
+ * @property keep - The reason is stored as `change_reason` (published roster or past correction).
+ */
+interface ChangePlan {
+  published: boolean
+  reason: string | undefined
+  keep: boolean
+}
+
+/**
  * Fixed messages of the working-time rejections, keyed by the rule that was broken.
  */
 const WORKING_TIME_MESSAGES: Record<WorkingTimeViolation, string> = {
@@ -76,7 +95,9 @@ const WORKING_TIME_MESSAGES: Record<WorkingTimeViolation, string> = {
  * @property shiftId - The shift definition.
  * @property role - Role in the shift; `staff` when missing.
  * @property overtimeConsent - The employee consents to overtime on this shift.
- * @property reason - Why, kept in the change history.
+ * @property reason - Why, kept in the change history; required in a published roster and for a
+ * date in the past.
+ * @property canCorrectPast - The caller may change the past (`workforce.roster:correct-past`).
  */
 export interface AddRosterAssignmentInput {
   employeeId: string
@@ -85,6 +106,7 @@ export interface AddRosterAssignmentInput {
   role?: RosterRole
   overtimeConsent?: boolean
   reason?: string
+  canCorrectPast?: boolean
 }
 
 /**
@@ -94,7 +116,9 @@ export interface AddRosterAssignmentInput {
  * @property role - A different role.
  * @property overtimeConsent - Consent for overtime on the shift.
  * @property version - Version the caller read.
- * @property reason - Why, kept in the change history.
+ * @property reason - Why, kept in the change history; required in a published roster and for a
+ * date in the past.
+ * @property canCorrectPast - The caller may change the past.
  */
 export interface ChangeRosterAssignmentInput {
   shiftId?: string
@@ -102,17 +126,21 @@ export interface ChangeRosterAssignmentInput {
   overtimeConsent?: boolean
   version?: number
   reason?: string
+  canCorrectPast?: boolean
 }
 
 /**
  * Optional version and reason of a cancellation.
  *
  * @property version - Version the caller read.
- * @property reason - Why, kept in the change history.
+ * @property reason - Why, kept in the change history; required in a published roster and for a
+ * date in the past.
+ * @property canCorrectPast - The caller may change the past.
  */
 export interface CancelRosterAssignmentInput {
   version?: number
   reason?: string
+  canCorrectPast?: boolean
 }
 
 /**
@@ -131,6 +159,7 @@ export class RosterAssignmentService {
    * @param employees - Employee repository.
    * @param eligibility - General clinical eligibility.
    * @param parameters - HR parameters (the working-time limits).
+   * @param transactions - Transaction manager of the main connection.
    * @param logger - Logger of this service.
    */
   constructor(
@@ -147,6 +176,8 @@ export class RosterAssignmentService {
     @Inject(EligibilityService)
     private readonly eligibility: EligibilityService,
     @Inject(ParameterService) private readonly parameters: ParameterService,
+    @Inject(TRANSACTION_MANAGER)
+    private readonly transactions: TransactionManager,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -211,7 +242,7 @@ export class RosterAssignmentService {
         const role = input.role ?? 'staff'
         this.assertRole(role)
         const { unit, timeZone } = await this.context(tenantId, roster)
-        this.assertNotPast(input.date, timeZone)
+        const plan = this.plan(roster, input.date, timeZone, input)
         const shift = await this.checkShift(tenantId, roster, unit, input.shiftId)
         const employee = await this.loadEmployee(tenantId, input.employeeId)
         this.assertAssignable(employee)
@@ -240,7 +271,7 @@ export class RosterAssignmentService {
           input.overtimeConsent === true,
           undefined,
         )
-        const write = (): Promise<RosterAssignment> =>
+        return this.commit(roster, plan, (revision) =>
           this.assignments.create({
             tenant_id: tenantId,
             roster_id: roster.id,
@@ -253,14 +284,16 @@ export class RosterAssignmentService {
             ends_at: instants.endsAt,
             role,
             status: 'planned',
-            source: { kind: 'roster', ref_id: roster.id },
-            change_reason: null,
-            revision: roster.revision,
+            source: plan.published
+              ? { kind: 'change_request', ref_id: null }
+              : { kind: 'roster', ref_id: roster.id },
+            change_reason: plan.keep ? (plan.reason ?? null) : null,
+            revision,
             overtime: this.overtime(overtime, input.overtimeConsent === true),
             flag: null,
             is_flagged: false,
-          })
-        return input.reason ? withChangeReason(input.reason, write) : write()
+          }),
+        )
       },
     )
   }
@@ -311,7 +344,7 @@ export class RosterAssignmentService {
           this.assertRole(input.role)
         }
         const { unit, timeZone } = await this.context(tenantId, roster)
-        this.assertNotPast(current.date, timeZone)
+        const plan = this.plan(roster, current.date, timeZone, input)
         this.assertVersion(current, input.version)
         const changes: Partial<RosterAssignment> = {}
         if (input.role !== undefined) {
@@ -344,17 +377,23 @@ export class RosterAssignmentService {
           }
           changes.overtime = this.overtime(overtime, consent === true)
         }
-        return this.write(input.reason, () =>
-          this.assignments.update(current.id, changes, {
-            expectedVersion: input.version ?? current.version,
-          }),
+        return this.commit(roster, plan, (revision) =>
+          this.assignments.update(
+            current.id,
+            {
+              ...changes,
+              ...(plan.keep ? { change_reason: plan.reason } : {}),
+              ...(plan.published ? { revision } : {}),
+            },
+            { expectedVersion: input.version ?? current.version },
+          ),
         )
       },
     )
   }
 
   /**
-   * Cancels a planned assignment in a draft roster. Nothing is deleted (HR plan 5.5 RA20).
+   * Cancels a planned assignment in a draft or published roster. Nothing is deleted (HR plan 5.5 RA20).
    *
    * @param tenantId - Tenant of the caller.
    * @param id - Assignment identifier.
@@ -385,12 +424,16 @@ export class RosterAssignmentService {
           )
         }
         const { timeZone } = await this.context(tenantId, roster)
-        this.assertNotPast(current.date, timeZone)
+        const plan = this.plan(roster, current.date, timeZone, input)
         this.assertVersion(current, input.version)
-        return this.write(input.reason, () =>
+        return this.commit(roster, plan, (revision) =>
           this.assignments.update(
             current.id,
-            { status: 'cancelled' },
+            {
+              status: 'cancelled',
+              ...(plan.keep ? { change_reason: plan.reason } : {}),
+              ...(plan.published ? { revision } : {}),
+            },
             { expectedVersion: input.version ?? current.version },
           ),
         )
@@ -399,9 +442,8 @@ export class RosterAssignmentService {
   }
 
   /**
-   * Refuses to change a roster that is not a draft. A roster that was submitted, approved or
-   * published is locked until the changes after publication are built; a closed one is final
-   * (`HR-ROS-040`).
+   * Refuses to change a roster that is neither a draft nor published. A roster that was submitted
+   * or approved is frozen (HR plan 5.5 RA5); a closed one is final (`HR-ROS-040`).
    *
    * @param roster - The roster.
    * @throws InvalidRequestError `roster_closed` or `roster_locked`.
@@ -413,10 +455,10 @@ export class RosterAssignmentService {
         'A closed roster cannot be changed.',
       )
     }
-    if (roster.status !== 'draft') {
+    if (roster.status !== 'draft' && roster.status !== 'published') {
       throw new InvalidRequestError(
         'roster_locked',
-        'Only a draft roster can be changed.',
+        'A roster that was submitted or approved cannot be changed. Return it to draft first.',
       )
     }
   }
@@ -435,19 +477,79 @@ export class RosterAssignmentService {
   }
 
   /**
-   * Refuses a date before today in the facility's zone (HR plan 5.5 RA21).
+   * Decides how a change is made (HR plan 5.5 RA5, RA19, RA21). A date before today in the
+   * facility's zone is refused unless the caller may correct the past. A change to a published
+   * roster, or to the past, needs a reason of 1 to 500 characters; in a draft the reason is
+   * optional.
    *
+   * @param roster - The roster.
    * @param date - The local date of the shift.
    * @param timeZone - Zone of the facility.
-   * @throws InvalidRequestError `assignment_in_past`.
+   * @param input - The reason and whether the caller may correct the past.
+   * @returns Whether the roster is published, the cleaned reason when one is needed or given, and
+   * whether the reason is kept on the assignment (published roster or past correction).
+   * @throws InvalidRequestError `assignment_in_past`, `reason_required` or `invalid_reason`.
    */
-  private assertNotPast(date: string, timeZone: string): void {
-    if (date < todayInZone(timeZone)) {
+  private plan(
+    roster: Roster,
+    date: string,
+    timeZone: string,
+    input: { reason?: string; canCorrectPast?: boolean },
+  ): ChangePlan {
+    const past = date < todayInZone(timeZone)
+    if (past && input.canCorrectPast !== true) {
       throw new InvalidRequestError(
         'assignment_in_past',
         'An assignment in the past cannot be added, changed or cancelled.',
       )
     }
+    const published = roster.status === 'published'
+    const reason =
+      published || past || input.reason !== undefined
+        ? cleanReason(input.reason ?? '')
+        : undefined
+    return { published, reason, keep: published || past }
+  }
+
+  /**
+   * Runs a change. In a published roster the change and the roster's new `revision` are written in
+   * one transaction, so a change never exists without its revision (HR plan 5.5 RA19); the roster is
+   * written with the version it was read at, so two changes at once cannot both win.
+   *
+   * @param roster - The roster as read.
+   * @param plan - Whether it is published, and the reason.
+   * @param write - Writes the assignment with the revision it must carry.
+   * @returns The written assignment.
+   * @throws ConflictError `stale_version`.
+   */
+  private async commit(
+    roster: Roster,
+    plan: ChangePlan,
+    write: (revision: number) => Promise<RosterAssignment>,
+  ): Promise<RosterAssignment> {
+    const run = async (): Promise<RosterAssignment> => {
+      if (!plan.published) {
+        return this.writeAssignment(() => write(roster.revision))
+      }
+      return this.transactions.run(async () => {
+        const revision = roster.revision + 1
+        const result = await this.writeAssignment(() => write(revision))
+        try {
+          await this.rosters.update(
+            roster.id,
+            { revision },
+            { expectedVersion: roster.version },
+          )
+        } catch (error: unknown) {
+          throw error instanceof RepositoryConflictError ||
+            error instanceof RepositoryNotFoundError
+            ? this.stale()
+            : error
+        }
+        return result
+      })
+    }
+    return plan.reason ? withChangeReason(plan.reason, run) : run()
   }
 
   /**
@@ -778,19 +880,16 @@ export class RosterAssignmentService {
   }
 
   /**
-   * Runs a repository write, with the change reason when given, and turns repository rejections
-   * into workforce errors.
+   * Runs a repository write of an assignment and turns repository rejections into workforce errors.
    *
-   * @param reason - Optional reason for the change history.
    * @param write - The repository call.
    * @returns What the call returns.
    */
-  private async write(
-    reason: string | undefined,
+  private async writeAssignment(
     write: () => Promise<RosterAssignment>,
   ): Promise<RosterAssignment> {
     try {
-      return await (reason ? withChangeReason(reason, write) : write())
+      return await write()
     } catch (error: unknown) {
       if (error instanceof RepositoryConflictError) {
         throw this.stale()

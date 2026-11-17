@@ -44,7 +44,8 @@ export class PermissionsGuard implements CanActivate {
     if (!required || required.length === 0) {
       return true
     }
-    const user = context.switchToHttp().getRequest<GuardedRequest>().user
+    const request = context.switchToHttp().getRequest<GuardedRequest>()
+    const user = request.user
     if (!user) {
       throw new UnauthenticatedError(
         'authentication_required',
@@ -58,6 +59,7 @@ export class PermissionsGuard implements CanActivate {
         'You do not have permission to do this.',
       )
     }
+    request.permissions = held
     return true
   }
 }
