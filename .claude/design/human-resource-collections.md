@@ -404,10 +404,10 @@ Index: `{ tenant_id, schedule_id, date }` unique; `{ tenant_id, unit_id, date }`
 |---|---|---|
 | `unit_id`, `roster_id` | ObjectId | |
 | `requester` | `{ employee_id: ObjectId; assignment_id: ObjectId }` | |
-| `counterpart` | `{ employee_id: ObjectId; assignment_id: ObjectId \| null } \| null` | `null` when the requester gives the shift away. |
+| `counterpart` | `{ employee_id: ObjectId; assignment_id: ObjectId \| null } \| null` | Always named when built (5.7 SW3); `assignment_id` is `null` when the requester only hands the shift over. A request with no counterpart is not built. |
 | `reason` | string | |
 | `status` | `'requested' \| 'accepted_by_counterpart' \| 'approved' \| 'rejected' \| 'cancelled'` | |
-| `counterpart_response` | `{ at: Date } \| null` | |
+| `counterpart_accepted_at` | Date \| null | When the counterpart accepted. |
 | `decision` | `{ by: ActorRef; at: Date; reason: string \| null } \| null` | Head of Unit. |
 | `resulting_assignment_ids` | ObjectId[] | Created on approval (source `swap`). |
 
