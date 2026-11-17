@@ -189,3 +189,10 @@ export const REPOSITORY_COVERAGE_REQUIREMENT = Symbol(
  * Injection token for the roster repository (the plan of one unit for one period).
  */
 export const REPOSITORY_ROSTER = Symbol('REPOSITORY_ROSTER')
+
+/**
+ * Injection token for the roster assignment repository (one person, one shift, one date).
+ */
+export const REPOSITORY_ROSTER_ASSIGNMENT = Symbol(
+  'REPOSITORY_ROSTER_ASSIGNMENT',
+)

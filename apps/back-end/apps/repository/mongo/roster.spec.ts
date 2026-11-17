@@ -254,6 +254,13 @@ describe('RosterRepository on the shared Mongo base', () => {
     expect(model.find.mock.calls[0]?.[0]).not.toHaveProperty('status')
   })
 
+  it('lists only the rosters that are not closed when asked', async () => {
+    await rosters.findByFilter(tenantId.toHexString(), { open: true })
+    expect(model.find).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: { $in: ['draft', 'submitted', 'approved', 'published'] } }),
+    )
+  })
+
   it('finds a roster by unit and start, and the rosters that overlap a range', async () => {
     const tenant = tenantId.toHexString()
     expect(await rosters.findByUnitAndStart(tenant, unitId.toHexString(), '2027-03-01')).toMatchObject({ status: 'approved' })

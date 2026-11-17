@@ -7,6 +7,7 @@ import { type Roster, type RosterStatus } from '@repository/model/roster'
  * @property unitId - Only rosters of this unit.
  * @property facilityId - Only rosters of this facility.
  * @property status - Only rosters in this status.
+ * @property open - Only rosters that are not closed (`draft`, `submitted`, `approved`, `published`).
  * @property from - Only rosters whose period ends on or after this local date.
  * @property to - Only rosters whose period starts on or before this local date.
  * @property limit - Page size.
@@ -16,6 +17,7 @@ export interface RosterQuery {
   unitId?: string
   facilityId?: string
   status?: RosterStatus
+  open?: boolean
   from?: string
   to?: string
   limit?: number

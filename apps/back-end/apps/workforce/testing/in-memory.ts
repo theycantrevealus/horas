@@ -67,6 +67,10 @@ import {
   type HrImportRepository,
 } from '@repository/interface/hr-import'
 import {
+  type AssignmentQuery,
+  type RosterAssignmentRepository,
+} from '@repository/interface/roster-assignment'
+import {
   type RosterQuery,
   type RosterRepository,
 } from '@repository/interface/roster'
@@ -93,6 +97,7 @@ import { type CredentialAssessment } from '@repository/model/credential-assessme
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CoverageRequirement } from '@repository/model/coverage-requirement'
 import { type Roster } from '@repository/model/roster'
+import { type RosterAssignment } from '@repository/model/roster-assignment'
 import { type HolidayCalendar } from '@repository/model/holiday-calendar'
 import { type HrImport } from '@repository/model/hr-import'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
@@ -3007,6 +3012,7 @@ export class InMemoryRosters
         (!query.unitId || item.unit_id === query.unitId) &&
         (!query.facilityId || item.facility_id === query.facilityId) &&
         (!query.status || item.status === query.status) &&
+        (!query.open || item.status !== 'closed') &&
         (!query.to || item.period.start <= query.to) &&
         (!query.from || item.period.end >= query.from),
     )
@@ -3063,5 +3069,124 @@ export class InMemoryRosters
         item.period.end >= start &&
         !item.deleted_at,
     )
+  }
+}
+
+/**
+ * In-memory `RosterAssignmentRepository` for tests. The Mongo collection has no unique index; the
+ * rule of one planned assignment per employee, roster and date is the service's (HR plan 5.5 RA9).
+ */
+export class InMemoryRosterAssignments
+  extends InMemoryRepository<RosterAssignment>
+  implements RosterAssignmentRepository
+{
+  /**
+   * Finds the assignments of a roster, ordered by date, then by employee.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param rosterId - The roster.
+   * @param query - Optional filters and paging.
+   * @returns The assignments.
+   */
+  async findByRoster(
+    tenantId: string,
+    rosterId: string,
+    query: AssignmentQuery = {},
+  ): Promise<RosterAssignment[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.roster_id === rosterId &&
+        !item.deleted_at &&
+        (!query.employeeId || item.employee_id === query.employeeId) &&
+        (!query.status || item.status === query.status) &&
+        (!query.date || item.date === query.date) &&
+        (!query.from || item.date >= query.from) &&
+        (!query.to || item.date <= query.to),
+    )
+      .sort(
+        (left, right) =>
+          left.date.localeCompare(right.date) ||
+          left.employee_id.localeCompare(right.employee_id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the planned assignments of an employee on dates in a range, in every roster and unit.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param from - First date of the range.
+   * @param to - Last date of the range.
+   * @returns The planned assignments.
+   */
+  async findPlannedByEmployeeBetween(
+    tenantId: string,
+    employeeId: string,
+    from: string,
+    to: string,
+  ): Promise<RosterAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.status === 'planned' &&
+        item.date >= from &&
+        item.date <= to &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds the planned assignment of an employee on a date in a roster.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param rosterId - The roster.
+   * @param employeeId - The employee.
+   * @param date - The date.
+   * @returns The assignment, or `null`.
+   */
+  async findPlannedByEmployeeAndDate(
+    tenantId: string,
+    rosterId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<RosterAssignment | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.roster_id === rosterId &&
+        item.employee_id === employeeId &&
+        item.date === date &&
+        item.status === 'planned' &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
+   * Finds planned assignments of a shift in some rosters.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param shiftId - The shift definition.
+   * @param rosterIds - The rosters to look in.
+   * @param limit - Most assignments to return.
+   * @returns The planned assignments of the shift.
+   */
+  async findPlannedByShiftInRosters(
+    tenantId: string,
+    shiftId: string,
+    rosterIds: string[],
+    limit: number,
+  ): Promise<RosterAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.shift.definition_id === shiftId &&
+        rosterIds.includes(item.roster_id) &&
+        item.status === 'planned' &&
+        !item.deleted_at,
+    ).slice(0, limit)
   }
 }
