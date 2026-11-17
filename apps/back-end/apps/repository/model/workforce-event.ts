@@ -10,6 +10,7 @@ export const WORKFORCE_EVENTS = {
   CONTRACT_ACTIVATED: 'workforce.contract.activated',
   CONTRACT_ENDED: 'workforce.contract.ended',
   CONTRACT_TERMINATED: 'workforce.contract.terminated',
+  LICENSE_EXPIRED: 'workforce.license.expired',
 } as const
 
 /**
@@ -45,4 +46,20 @@ export interface ContractEventPayload {
   contract_id: string
   employee_id: string
   organization_id: string
+}
+
+/**
+ * Payload of `workforce.license.expired`, written by the licence expiry job. Identifiers, codes and
+ * dates only: never a document number.
+ *
+ * @property license_id - The licence.
+ * @property employee_id - The holder.
+ * @property eligibility_role - `registration`, `practice_permit` or `null`.
+ * @property expiry_date - The last day the licence was valid.
+ */
+export interface LicenseExpiredPayload {
+  license_id: string
+  employee_id: string
+  eligibility_role: string | null
+  expiry_date: string
 }

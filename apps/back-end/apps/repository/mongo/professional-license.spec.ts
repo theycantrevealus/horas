@@ -322,6 +322,19 @@ describe('ProfessionalLicenseRepository on the shared Mongo base', () => {
     )
   })
 
+  it('finds valid licences of every tenant that expire before a date, oldest expiry first', async () => {
+    const found = await licenses.findValidExpiredBefore('2027-01-01', 50)
+
+    expect(found).toHaveLength(1)
+    const filter = model.find.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(filter).toEqual({
+      status: 'valid',
+      expiry_date: { $lt: '2027-01-01' },
+      deleted_at: null,
+    })
+    expect(filter).not.toHaveProperty('tenant_id')
+  })
+
   it('answers an empty list or null for malformed identifiers without querying', async () => {
     expect(await licenses.findByEmployee('x', 'y')).toEqual([])
     expect(await licenses.findByFilter('x')).toEqual([])

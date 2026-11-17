@@ -302,6 +302,8 @@ ProfessionalLicenseSchema.index({
   status: 1,
 })
 ProfessionalLicenseSchema.index({ tenant_id: 1, status: 1, expiry_date: 1 })
+// Cross-tenant read of the expiry job (`findValidExpiredBefore`).
+ProfessionalLicenseSchema.index({ status: 1, expiry_date: 1 })
 ProfessionalLicenseSchema.index({
   tenant_id: 1,
   'practice_location.facility_id': 1,

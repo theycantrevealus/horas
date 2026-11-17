@@ -70,4 +70,18 @@ export interface ProfessionalLicenseRepository extends Repository<ProfessionalLi
     typeCode: string,
     normalizedNumber: string,
   ): Promise<ProfessionalLicense | null>
+
+  /**
+   * Finds `valid` licences of **every tenant** whose expiry date is before a date, oldest expiry
+   * first. A cross-tenant read for the worker's expiry job only (`gateway-hr-7-worker-expiry-jobs.md`
+   * WJ4); the job handles each record with its own `tenant_id`. Reads are named `find*`.
+   *
+   * @param date - Local date; licences expiring before it are returned.
+   * @param limit - Largest number of records to return.
+   * @returns The licences, possibly none.
+   */
+  findValidExpiredBefore(
+    date: string,
+    limit: number,
+  ): Promise<ProfessionalLicense[]>
 }
