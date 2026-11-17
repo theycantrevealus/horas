@@ -1,6 +1,6 @@
 # gateway_hr 5.8: Practice schedules
 
-Status: **Confirmed** (2026-11-18). Decisions PS1 to PS16 and the two code PRs (B1, B2) confirmed as proposed, including the five that needed an answer (PS2, PS3, PS5, PS8, PS11). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 24). Endpoints: `../hr-endpoints.md` 5.8. Collections: `../human-resource-collections.md` 5.6 (`practice_schedules`) and 5.7 (`practice_schedule_exceptions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 8.2 (Practice Schedule), 8.4.4 (maintenance), `HR-ROS-004` (only an eligible Tenaga Medis), `HR-ROS-030`/`031` (eligibility changes, not built here), the alert table 8.6 (not built) and the registration query of section 13. Models and classifications: `apps/back-end/apps/repository/model/practice-schedule*.ts` and `practice-schedule-exception*.ts` (exist; no token, interface, schema or repository yet). Built references: shift swaps (5.7: own-list and decide patterns), roster assignments (5.5: `assignment-checks.ts`, `EligibilityService.general`, local dates in the facility's zone), coverage requirements (5.3: edit rules, period) and the on-duty read (`DutyService`).
+Status: **Built** (PR #108 schedules and the sessions by date; PR #109 exceptions and undo). Confirmed 2026-11-18. Decisions PS1 to PS16 and the two code PRs (B1, B2) confirmed as proposed, including the five that needed an answer (PS2, PS3, PS5, PS8, PS11). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 24). Endpoints: `../hr-endpoints.md` 5.8. Collections: `../human-resource-collections.md` 5.6 (`practice_schedules`) and 5.7 (`practice_schedule_exceptions`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` section 8.2 (Practice Schedule), 8.4.4 (maintenance), `HR-ROS-004` (only an eligible Tenaga Medis), `HR-ROS-030`/`031` (eligibility changes, not built here), the alert table 8.6 (not built) and the registration query of section 13. Models and classifications: `apps/back-end/apps/repository/model/practice-schedule*.ts` and `practice-schedule-exception*.ts` (exist; no token, interface, schema or repository yet). Built references: shift swaps (5.7: own-list and decide patterns), roster assignments (5.5: `assignment-checks.ts`, `EligibilityService.general`, local dates in the facility's zone), coverage requirements (5.3: edit rules, period) and the on-duty read (`DutyService`).
 
 A practice schedule is the recurring weekly outpatient session of a doctor in a polyclinic: one weekday, a local start and end, an optional quota and a validity period. Patient registration asks "which doctors practise in polyclinic C on date D, with what quota?". An exception cancels or moves one session on one date (leave, training, emergency). This is the last group of the rostering block.
 
@@ -90,3 +90,18 @@ Confirmed as proposed. These five changed the shape of the work most:
 - **PS11** (undoing an exception soft-deletes it, with a partial unique index).
 
 The others are as stated. Open, not decided here: whether a Head of the polyclinic may maintain only their own unit (needs scoped permissions).
+
+## 7. Build notes
+
+Built as planned (PS1 to PS16). Differences and details worth knowing:
+
+- Services are `PracticeScheduleService` (list, sessions, create, update, end) and `PracticeExceptionService` (create, undo), in `workforce/rostering/`, with `practice-schedule-rules.ts`. Two repositories, `PracticeScheduleRepository` and `PracticeScheduleExceptionRepository`.
+- `findByEmployeeAndDay` replaces the planned `findActiveByEmployee`: ended schedules still count for the overlap check until their last date. The planned `findByEmployeeOnDate` of the exceptions is `findByEmployeeAndDate`.
+- Indexes added to the design's: `{ tenant_id, employee_id, date }` and `{ tenant_id, 'moved_to.date', unit_id }` on exceptions. The unique index uses the partial filter `deleted_at: { $type: 'null' }`; it is not exercised against a real MongoDB (the repository specs use a mocked model).
+- The sessions of a date merge the regular and the moved-in lists in memory, reading up to `offset + limit` of each, so a page is correct; a session that was moved away keeps the sort position of its regular time. Eligibility is read per session of the page only.
+- The doctor of a session whose employee or unit cannot be read is shown `eligible: false` with the condition `employment`.
+- An exception's `version` in the body is the **schedule's** version (the exception has none yet); undo takes the exception's.
+- Undo checks that the session coming back does not overlap another session of the doctor (409 `schedule_overlaps`), which the plan did not spell out; the new session of a move may not overlap either (PS10).
+- No starter codes of `id.practice-exception-reason` are shipped: the tenant creates leave, training, emergency and other as code concepts, and the reason is checked with `assertActive`.
+- The gateway test harness gained `overrides` (replace a service class by a fake), used to control eligibility and the code concepts in the practice schedule tests.
+- Tests: the overlap and eligibility rules are tested case by case against in-memory fakes; the Mongo repositories are tested with a mocked Mongoose model, not a real replica set.
