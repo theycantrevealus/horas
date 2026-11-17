@@ -36,7 +36,9 @@ import { StatusService } from './appointment/status.service'
 import { EligibilityService } from './eligibility/eligibility.service'
 import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
+import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
+import { RosterImportService } from './rostering/roster-import.service'
 import { RosterValidationService } from './rostering/roster-validation.service'
 import { RosterService } from './rostering/roster.service'
 import { HolidayImportService } from './rostering/holiday-import.service'
@@ -122,6 +124,8 @@ import { UnitService } from './structure/unit.service'
     RosterService,
     RosterAssignmentService,
     RosterValidationService,
+    RosterImportService,
+    HrImportService,
     DutyService,
     EligibilityService,
   ],
@@ -155,6 +159,8 @@ import { UnitService } from './structure/unit.service'
     RosterService,
     RosterAssignmentService,
     RosterValidationService,
+    RosterImportService,
+    HrImportService,
     DutyService,
     EligibilityService,
   ],
