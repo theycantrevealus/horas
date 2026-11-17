@@ -9,6 +9,7 @@ import { CredentialApplicationRepositoryModule } from '@repository/mongo/credent
 import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credential-assessment.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { CoverageRequirementRepositoryModule } from '@repository/mongo/coverage-requirement.module'
+import { RosterRepositoryModule } from '@repository/mongo/roster.module'
 import { HolidayCalendarRepositoryModule } from '@repository/mongo/holiday-calendar.module'
 import { HrImportRepositoryModule } from '@repository/mongo/hr-import.module'
 import { ShiftDefinitionRepositoryModule } from '@repository/mongo/shift-definition.module'
@@ -32,6 +33,7 @@ import { AppointmentService } from './appointment/appointment.service'
 import { GrantService } from './appointment/grant.service'
 import { StatusService } from './appointment/status.service'
 import { CoverageService } from './rostering/coverage.service'
+import { RosterService } from './rostering/roster.service'
 import { HolidayImportService } from './rostering/holiday-import.service'
 import { HolidayService } from './rostering/holiday.service'
 import { ShiftService } from './rostering/shift.service'
@@ -82,6 +84,7 @@ import { UnitService } from './structure/unit.service'
     HolidayCalendarRepositoryModule,
     HrImportRepositoryModule,
     CoverageRequirementRepositoryModule,
+    RosterRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -110,6 +113,7 @@ import { UnitService } from './structure/unit.service'
     HolidayService,
     HolidayImportService,
     CoverageService,
+    RosterService,
   ],
   exports: [
     OrganizationService,
@@ -138,6 +142,7 @@ import { UnitService } from './structure/unit.service'
     HolidayService,
     HolidayImportService,
     CoverageService,
+    RosterService,
   ],
 })
 export class WorkforceModule {}
