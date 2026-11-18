@@ -217,3 +217,8 @@ export const REPOSITORY_PRACTICE_SCHEDULE = Symbol(
 export const REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION = Symbol(
   'REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION',
 )
+
+/**
+ * Injection token of the leave policy repository.
+ */
+export const REPOSITORY_LEAVE_POLICY = Symbol('REPOSITORY_LEAVE_POLICY')
