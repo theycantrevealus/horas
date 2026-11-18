@@ -307,3 +307,47 @@ export function checkPolicyInput(input: LeavePolicyInput): LeavePolicyFields {
     notes: notes === '' ? null : notes,
   }
 }
+
+/**
+ * Turns stored rules back into the shape a request sends, so an edit can merge the fields that
+ * were sent over the stored ones and check the result as a whole.
+ *
+ * @param fields - Stored rules.
+ * @returns The same rules as a request would send them.
+ */
+export function toPolicyInput(fields: LeavePolicyFields): LeavePolicyInput {
+  const balance = fields.balance
+  return {
+    balance:
+      balance.kind === 'period'
+        ? {
+            kind: 'period',
+            period: balance.period,
+            days: balance.days,
+            minServiceMonths: balance.min_service_months,
+            carryOver: balance.carry_over
+              ? {
+                  maxDays: balance.carry_over.max_days,
+                  expiresAfterMonths: balance.carry_over.expires_after_months,
+                }
+              : null,
+            deductCollectiveLeave: balance.deduct_collective_leave,
+          }
+        : balance.kind === 'per_event'
+          ? { kind: 'per_event', days: balance.days }
+          : { kind: 'none' },
+    counting: fields.counting,
+    halfDays: fields.half_days,
+    paid: fields.paid,
+    employmentTypes: fields.employment_types,
+    approval: {
+      steps: fields.approval.steps,
+      twoStepAboveDays: fields.approval.two_step_above_days,
+    },
+    noticeDays: fields.notice_days,
+    retroactiveDays: fields.retroactive_days,
+    maxDaysPerRequest: fields.max_days_per_request,
+    proof: fields.proof ? { dueDays: fields.proof.due_days } : null,
+    notes: fields.notes,
+  }
+}

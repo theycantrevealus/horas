@@ -1,6 +1,7 @@
 import { InvalidRequestError } from '../workforce.error'
 import {
   checkPolicyInput,
+  toPolicyInput,
   type LeavePolicyInput,
 } from './leave-policy-rules'
 
@@ -178,5 +179,24 @@ describe('checkPolicyInput', () => {
     expect(checkPolicyInput({ ...annual, notes: ' PKB art. 12 ' }).notes).toBe(
       'PKB art. 12',
     )
+  })
+
+  it('turns stored rules back into the shape a request sends, for every balance kind', () => {
+    for (const input of [
+      annual,
+      {
+        ...annual,
+        balance: {
+          ...annual.balance,
+          carryOver: { maxDays: 6, expiresAfterMonths: 6 },
+        },
+        proof: { dueDays: 3 },
+        notes: 'PKB art. 12',
+      },
+      { ...annual, balance: { kind: 'per_event', days: 3 }, maxDaysPerRequest: 3 },
+      { ...annual, balance: { kind: 'none' } },
+    ]) {
+      expect(toPolicyInput(checkPolicyInput(input))).toEqual(input)
+    }
   })
 })
