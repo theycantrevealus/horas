@@ -6,6 +6,7 @@ import {
   InMemoryCodeConcepts,
   InMemoryFacilities,
   InMemoryOrganizationUnits,
+  InMemoryPositionAssignments,
   InMemoryPositions,
 } from '../testing/in-memory'
 import { PositionService, type UpdatePositionInput } from './position.service'
@@ -21,6 +22,7 @@ describe('PositionService', () => {
   let positions: InMemoryPositions
   let units: InMemoryOrganizationUnits
   let facilities: InMemoryFacilities
+  let assignments: InMemoryPositionAssignments
   let concepts: InMemoryCodeConcepts
   let service: PositionService
   let facilityId: string
@@ -122,12 +124,14 @@ describe('PositionService', () => {
     positions = new InMemoryPositions()
     units = new InMemoryOrganizationUnits()
     facilities = new InMemoryFacilities()
+    assignments = new InMemoryPositionAssignments()
     concepts = new InMemoryCodeConcepts()
     const logger = { log, warn, error, debug } as unknown as AppLogger
     service = new PositionService(
       positions,
       units,
       facilities,
+      assignments,
       new CodeConceptService(concepts, logger),
       logger,
     )
@@ -570,6 +574,41 @@ describe('PositionService', () => {
 
       expect(closed.status).toBe('closed')
       expect(closed.period).toEqual({ start: '2026-01-01', end: '2026-03-11' })
+    })
+
+    it('refuses to close a position with an open assignment, and closes it once the assignment ended', async () => {
+      const created = await addPosition('perawat')
+      const held = await asAdmin(() =>
+        assignments.create({
+          tenant_id: tenantId,
+          employee_id: new Types.ObjectId().toHexString(),
+          contract_id: new Types.ObjectId().toHexString(),
+          position_id: created.id,
+          unit_id: unitId,
+          facility_id: facilityId,
+          is_primary: true,
+          is_head_of_unit: false,
+          kind: { system: 'id.assignment-kind', code: 'hire' },
+          period: { start: '2026-01-01', end: null },
+          fte: 1,
+          status: 'active',
+          is_open: true,
+          decision_ref: null,
+        }),
+      )
+
+      await expect(
+        asAdmin(() => service.close(tenantId, created.id, {})),
+      ).rejects.toMatchObject({ code: 'position_in_use' })
+      expect((await positions.findOne(created.id))?.status).toBe('active')
+
+      await asAdmin(() =>
+        assignments.update(held.id, { status: 'ended', is_open: false }),
+      )
+      const closed = await asAdmin(() =>
+        service.close(tenantId, created.id, {}),
+      )
+      expect(closed.status).toBe('closed')
     })
 
     it('takes a given end date, and refuses a bad one or one before the start', async () => {

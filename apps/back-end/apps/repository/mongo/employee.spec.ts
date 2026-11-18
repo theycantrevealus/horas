@@ -389,7 +389,7 @@ describe('EmployeeRepository on the shared Mongo base', () => {
     expect(model.find).not.toHaveBeenCalled()
   })
 
-  it('updates only the editable fields: the contract summary yes, never the number or the assignment summary', async () => {
+  it('updates only the editable fields: the contract and assignment summaries yes, never the number or the photo', async () => {
     await asAdmin(() =>
       employees.update(employeeId.toHexString(), {
         preferred_language: 'en',
@@ -408,11 +408,8 @@ describe('EmployeeRepository on the shared Mongo base', () => {
     expect(update.$set).toHaveProperty('preferred_language', 'en')
     expect(update.$set).toHaveProperty('employment_status', 'suspended')
     expect(update.$set).toHaveProperty('current_employment', null)
-    for (const forbidden of [
-      'employee_number',
-      'primary_assignment',
-      'photo',
-    ]) {
+    expect(update.$set).toHaveProperty('primary_assignment', null)
+    for (const forbidden of ['employee_number', 'photo']) {
       expect(update.$set).not.toHaveProperty(forbidden)
     }
   })

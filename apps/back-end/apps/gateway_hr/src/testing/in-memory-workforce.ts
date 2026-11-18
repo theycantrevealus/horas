@@ -1,5 +1,21 @@
 import {
   REPOSITORY_CODE_CONCEPT,
+  REPOSITORY_COMMITTEE_MEMBERSHIP,
+  REPOSITORY_CPD_RECORD,
+  REPOSITORY_CPD_SUMMARY,
+  REPOSITORY_CREDENTIAL_APPLICATION,
+  REPOSITORY_CLINICAL_APPOINTMENT,
+  REPOSITORY_CREDENTIAL_ASSESSMENT,
+  REPOSITORY_PRIVILEGE_GRANT,
+  REPOSITORY_COVERAGE_REQUIREMENT,
+  REPOSITORY_HOLIDAY_CALENDAR,
+  REPOSITORY_ROSTER,
+  REPOSITORY_ROSTER_ASSIGNMENT,
+  REPOSITORY_SHIFT_SWAP_REQUEST,
+  REPOSITORY_PRACTICE_SCHEDULE,
+  REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION,
+  REPOSITORY_HR_IMPORT,
+  REPOSITORY_SHIFT_DEFINITION,
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYEE_PRIVATE_PROFILE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
@@ -8,8 +24,27 @@ import {
   REPOSITORY_ORGANIZATION,
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_POSITION,
+  REPOSITORY_POSITION_ASSIGNMENT,
+  REPOSITORY_PRIVILEGE_CATALOG,
+  REPOSITORY_PROFESSIONAL_LICENSE,
 } from '@repository/token'
 import { CodeConceptEntity } from '@repository/mongo/schema/code-concept'
+import { CommitteeMembershipEntity } from '@repository/mongo/schema/committee-membership'
+import { CpdRecordEntity } from '@repository/mongo/schema/cpd-record'
+import { CpdSummaryEntity } from '@repository/mongo/schema/cpd-summary'
+import { CredentialApplicationEntity } from '@repository/mongo/schema/credential-application'
+import { ClinicalAppointmentEntity } from '@repository/mongo/schema/clinical-appointment'
+import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
+import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
+import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-requirement'
+import { RosterAssignmentEntity } from '@repository/mongo/schema/roster-assignment'
+import { PracticeScheduleEntity } from '@repository/mongo/schema/practice-schedule'
+import { PracticeScheduleExceptionEntity } from '@repository/mongo/schema/practice-schedule-exception'
+import { ShiftSwapRequestEntity } from '@repository/mongo/schema/shift-swap-request'
+import { RosterEntity } from '@repository/mongo/schema/roster'
+import { HrImportEntity } from '@repository/mongo/schema/hr-import'
+import { HolidayCalendarEntity } from '@repository/mongo/schema/holiday-calendar'
+import { ShiftDefinitionEntity } from '@repository/mongo/schema/shift-definition'
 import { EmployeePrivateProfileEntity } from '@repository/mongo/schema/employee-private-profile'
 import { EmploymentContractEntity } from '@repository/mongo/schema/employment-contract'
 import { EmployeeEntity } from '@repository/mongo/schema/employee'
@@ -18,8 +53,27 @@ import { HrParameterEntity } from '@repository/mongo/schema/hr-parameter'
 import { OrganizationEntity } from '@repository/mongo/schema/organization'
 import { OrganizationUnitEntity } from '@repository/mongo/schema/organization-unit'
 import { PositionEntity } from '@repository/mongo/schema/position'
+import { PositionAssignmentEntity } from '@repository/mongo/schema/position-assignment'
+import { PrivilegeCatalogEntity } from '@repository/mongo/schema/privilege-catalog'
+import { ProfessionalLicenseEntity } from '@repository/mongo/schema/professional-license'
 import {
   InMemoryCodeConcepts,
+  InMemoryCommitteeMemberships,
+  InMemoryCpdRecords,
+  InMemoryCpdSummaries,
+  InMemoryCredentialApplications,
+  InMemoryClinicalAppointments,
+  InMemoryCredentialAssessments,
+  InMemoryPrivilegeGrants,
+  InMemoryCoverageRequirements,
+  InMemoryHolidayCalendars,
+  InMemoryRosterAssignments,
+  InMemoryPracticeScheduleExceptions,
+  InMemoryPracticeSchedules,
+  InMemoryShiftSwapRequests,
+  InMemoryRosters,
+  InMemoryHrImports,
+  InMemoryShiftDefinitions,
   InMemoryEmployeePrivateProfiles,
   InMemoryEmployees,
   InMemoryEmploymentContracts,
@@ -27,6 +81,9 @@ import {
   InMemoryHrParameters,
   InMemoryOrganizations,
   InMemoryOrganizationUnits,
+  InMemoryPositionAssignments,
+  InMemoryPrivilegeCatalog,
+  InMemoryProfessionalLicenses,
   InMemoryPositions,
 } from '@workforce/testing/in-memory'
 import { createTestFieldCipher } from '@utility/testing/test-field-cipher'
@@ -46,6 +103,25 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property employees - Employee repository.
  * @property contracts - Employment contract repository.
  * @property privateProfiles - Employee private profile repository.
+ * @property assignments - Position assignment repository.
+ * @property committeeMemberships - Committee membership repository.
+ * @property licenses - Professional license repository.
+ * @property cpdRecords - CPD record repository.
+ * @property cpdSummaries - CPD summary repository.
+ * @property privileges - Privilege catalog repository.
+ * @property applications - Credential application repository.
+ * @property assessments - Credential assessment repository.
+ * @property appointments - Clinical appointment (SPK) repository.
+ * @property grants - Privilege grant repository.
+ * @property shifts - Shift definition repository.
+ * @property holidayCalendars - Holiday calendar repository.
+ * @property hrImports - HR import repository.
+ * @property coverage - Coverage requirement repository.
+ * @property rosters - Roster repository.
+ * @property rosterAssignments - Roster assignment repository.
+ * @property swaps - Shift swap request repository.
+ * @property practiceSchedules - Practice schedule repository.
+ * @property practiceExceptions - Practice schedule exception repository.
  * @property options - `entities` and `repositories` for `createHrGateway`.
  */
 export interface InMemoryWorkforce {
@@ -58,6 +134,25 @@ export interface InMemoryWorkforce {
   employees: InMemoryEmployees
   contracts: InMemoryEmploymentContracts
   privateProfiles: InMemoryEmployeePrivateProfiles
+  assignments: InMemoryPositionAssignments
+  committeeMemberships: InMemoryCommitteeMemberships
+  licenses: InMemoryProfessionalLicenses
+  cpdRecords: InMemoryCpdRecords
+  cpdSummaries: InMemoryCpdSummaries
+  privileges: InMemoryPrivilegeCatalog
+  applications: InMemoryCredentialApplications
+  assessments: InMemoryCredentialAssessments
+  appointments: InMemoryClinicalAppointments
+  grants: InMemoryPrivilegeGrants
+  shifts: InMemoryShiftDefinitions
+  holidayCalendars: InMemoryHolidayCalendars
+  hrImports: InMemoryHrImports
+  coverage: InMemoryCoverageRequirements
+  rosters: InMemoryRosters
+  rosterAssignments: InMemoryRosterAssignments
+  swaps: InMemoryShiftSwapRequests
+  practiceSchedules: InMemoryPracticeSchedules
+  practiceExceptions: InMemoryPracticeScheduleExceptions
   options: Pick<HrGatewayOptions, 'entities' | 'repositories'>
 }
 
@@ -78,6 +173,25 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const privateProfiles = new InMemoryEmployeePrivateProfiles(
     createTestFieldCipher(),
   )
+  const assignments = new InMemoryPositionAssignments()
+  const committeeMemberships = new InMemoryCommitteeMemberships()
+  const licenses = new InMemoryProfessionalLicenses()
+  const cpdRecords = new InMemoryCpdRecords()
+  const cpdSummaries = new InMemoryCpdSummaries()
+  const privileges = new InMemoryPrivilegeCatalog()
+  const applications = new InMemoryCredentialApplications()
+  const assessments = new InMemoryCredentialAssessments()
+  const appointments = new InMemoryClinicalAppointments()
+  const grants = new InMemoryPrivilegeGrants()
+  const shifts = new InMemoryShiftDefinitions()
+  const holidayCalendars = new InMemoryHolidayCalendars()
+  const hrImports = new InMemoryHrImports()
+  const coverage = new InMemoryCoverageRequirements()
+  const rosters = new InMemoryRosters()
+  const rosterAssignments = new InMemoryRosterAssignments()
+  const swaps = new InMemoryShiftSwapRequests()
+  const practiceSchedules = new InMemoryPracticeSchedules()
+  const practiceExceptions = new InMemoryPracticeScheduleExceptions()
   return {
     organizations,
     facilities,
@@ -88,6 +202,25 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     employees,
     contracts,
     privateProfiles,
+    assignments,
+    committeeMemberships,
+    licenses,
+    cpdRecords,
+    cpdSummaries,
+    privileges,
+    applications,
+    assessments,
+    appointments,
+    grants,
+    shifts,
+    holidayCalendars,
+    hrImports,
+    coverage,
+    rosters,
+    rosterAssignments,
+    swaps,
+    practiceSchedules,
+    practiceExceptions,
     options: {
       entities: [
         OrganizationEntity,
@@ -99,6 +232,25 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         EmployeeEntity,
         EmploymentContractEntity,
         EmployeePrivateProfileEntity,
+        PositionAssignmentEntity,
+        CommitteeMembershipEntity,
+        ProfessionalLicenseEntity,
+        CpdRecordEntity,
+        CpdSummaryEntity,
+        PrivilegeCatalogEntity,
+        CredentialApplicationEntity,
+        CredentialAssessmentEntity,
+        ClinicalAppointmentEntity,
+        PrivilegeGrantEntity,
+        ShiftDefinitionEntity,
+        HolidayCalendarEntity,
+        HrImportEntity,
+        CoverageRequirementEntity,
+        RosterEntity,
+        RosterAssignmentEntity,
+        ShiftSwapRequestEntity,
+        PracticeScheduleEntity,
+        PracticeScheduleExceptionEntity,
       ],
       repositories: [
         [REPOSITORY_ORGANIZATION, organizations],
@@ -110,6 +262,25 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_EMPLOYEE, employees],
         [REPOSITORY_EMPLOYMENT_CONTRACT, contracts],
         [REPOSITORY_EMPLOYEE_PRIVATE_PROFILE, privateProfiles],
+        [REPOSITORY_POSITION_ASSIGNMENT, assignments],
+        [REPOSITORY_COMMITTEE_MEMBERSHIP, committeeMemberships],
+        [REPOSITORY_PROFESSIONAL_LICENSE, licenses],
+        [REPOSITORY_CPD_RECORD, cpdRecords],
+        [REPOSITORY_CPD_SUMMARY, cpdSummaries],
+        [REPOSITORY_PRIVILEGE_CATALOG, privileges],
+        [REPOSITORY_CREDENTIAL_APPLICATION, applications],
+        [REPOSITORY_CREDENTIAL_ASSESSMENT, assessments],
+        [REPOSITORY_CLINICAL_APPOINTMENT, appointments],
+        [REPOSITORY_PRIVILEGE_GRANT, grants],
+        [REPOSITORY_SHIFT_DEFINITION, shifts],
+        [REPOSITORY_HOLIDAY_CALENDAR, holidayCalendars],
+        [REPOSITORY_HR_IMPORT, hrImports],
+        [REPOSITORY_COVERAGE_REQUIREMENT, coverage],
+        [REPOSITORY_ROSTER, rosters],
+        [REPOSITORY_ROSTER_ASSIGNMENT, rosterAssignments],
+        [REPOSITORY_SHIFT_SWAP_REQUEST, swaps],
+        [REPOSITORY_PRACTICE_SCHEDULE, practiceSchedules],
+        [REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION, practiceExceptions],
       ],
     },
   }

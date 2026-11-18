@@ -4,7 +4,7 @@ Status: **Draft for discussion** (2026-11-10). Collections: `human-resource-coll
 
 We walk through the groups in order; each group is agreed before it is built.
 
-Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). Next: the HR events to identity (`plans/gateway-hr-events-to-identity.md`), then 2.4 Position assignments. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
+Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). The HR events to identity are built too (PR #29 and #30, `plans/gateway-hr-events-to-identity.md`), **2.4 Position assignments** (PR #31) and **2.5 Committee memberships** (PR #35) and **3.1 Licences** (PR #38 and #39) and **3.2 Professional credits** (PR #42 and #43) and **4.1 Privilege catalog** (PR #47) and **4.2 Credential applications** (PR #51, #53 and #54) and **4.3 SPK and granted privileges** (PR #60, #62 and #64) and **4.4 Renewals**, a follow-up of 4.2 and 4.3 (PR #68 and #70) and **5.1 Shift definitions** (PR #74) and **5.2 Holiday calendars** (PR #78 and #80) and **5.3 Coverage requirements** (PR #83) and **5.4 Rosters** (PR #87) and **5.5 Roster assignments** (PR #91, #93 and #94) and **5.6 Imports** (PR #97 and #99) and **5.7 Shift swaps** (PR #103 and #104) and **5.8 Practice schedules** (PR #108 and #109), which completes the rostering block, and **6 Clinical eligibility** (PR #113), which completes the endpoint groups of this plan. Group 8 (leave) was added on 2026-11-18 and is not built. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
 
 ## 1. Organization structure and reference data
 
@@ -146,7 +146,7 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | Endpoint | Purpose |
 |---|---|
 | `GET /credential-applications` | Committee work queue: applications by status and age. |
-| `POST /credential-applications` | Start an application (initial, re-credentialing, extension, temporary). |
+| `POST /credential-applications` | Start an application (initial or temporary; re-credentialing and extension wait for 4.3). |
 | `GET /credential-applications/:id` | View an application. |
 | `PATCH /credential-applications/:id` | Edit a draft: privileges, units, documents. |
 | `POST /credential-applications/:id/submit` | Send the application to the committee. |
@@ -156,13 +156,15 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /credential-applications/:id/assessors` | Committee appoints assessors (mitra bestari). |
 | `POST /credential-applications/:id/conflict-declaration` | Assessor declares a conflict of interest, or none. |
 | `POST /credential-applications/:id/assessments` | Assessor records their assessment of each privilege. |
-| `GET /credential-applications/:id/assessments` | Committee reads the assessments (recorded as an access). |
+| `GET /credential-applications/:id/assessments` | Committee reads the assessments (each one read is recorded as an access). |
 | `POST /credential-applications/:id/recommendation` | Committee signs its recommendation to the Director. |
-| `POST /credential-applications/:id/decision` | Director approves (creates the SPK) or rejects. |
 
 ### 4.3 SPK and granted privileges
+
+Plan: `plans/gateway-hr-4-3-spk-and-granted-privileges.md` (built; decision SP10 added a `lift-suspension` route for grants, so 4.3 has 11 endpoints).
 | Endpoint | Purpose |
 |---|---|
+| `POST /credential-applications/:id/decision` | Director approves (creates the SPK) or rejects. Moved here from 4.2 (`plans/gateway-hr-4-2-credential-applications.md` AP2). |
 | `GET /clinical-appointments` | List SPKs by status or expiring soon. |
 | `GET /employees/:id/clinical-appointments` | List one practitioner's SPKs. |
 | `GET /clinical-appointments/:id` | View an SPK with its granted privileges (RKK). |
@@ -173,9 +175,19 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /privilege-grants/:id/suspend` | Suspend one granted privilege. |
 | `POST /privilege-grants/:id/revoke` | Revoke one granted privilege. |
 
+### 4.4 Renewals
+No new routes. Plan: `plans/gateway-hr-4-4-renewals.md` (built). It changes two routes of 4.2 and 4.3:
+
+| Endpoint | Change |
+|---|---|
+| `POST /credential-applications` | Also accepts type `recredentialing` and `privilege_extension`, with `previousAppointmentId` (the applicant's current SPK being renewed). |
+| `POST /credential-applications/:id/decision` | Approving a renewal issues the new SPK, supersedes the old SPK and its grants, and carries privileges over. |
+
 ## 5. Rostering
 
 ### 5.1 Shift definitions
+
+Plan: `plans/gateway-hr-5-1-shift-definitions.md` (built, PR #74).
 | Endpoint | Purpose |
 |---|---|
 | `GET /shift-definitions` | List a facility's shifts (P, S, M, L, ...). |
@@ -184,6 +196,8 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /shift-definitions/:id/retire` | Stop a shift from being assigned. |
 
 ### 5.2 Holiday calendars
+
+Plan: `plans/gateway-hr-5-2-holiday-calendars.md` (built, PR #78 and #80).
 | Endpoint | Purpose |
 |---|---|
 | `GET /holiday-calendars` | View a calendar's holidays for a year. |
@@ -193,6 +207,8 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /holiday-calendars/:id/imports` | Upload a holiday CSV to check before applying. |
 
 ### 5.3 Coverage requirements
+
+Plan: `plans/gateway-hr-5-3-coverage-requirements.md` (built, PR #83).
 | Endpoint | Purpose |
 |---|---|
 | `GET /coverage-requirements` | List minimum staffing rules of a unit. |
@@ -201,38 +217,48 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /coverage-requirements/:id/retire` | Stop checking a rule. |
 
 ### 5.4 Rosters
+
+Plan: `plans/gateway-hr-5-4-rosters.md` (built, PR #87). `validate` and `coverage-overrides` move to 5.5 with the assignments they check (RS1).
 | Endpoint | Purpose |
 |---|---|
 | `GET /rosters` | List rosters by unit and period. |
 | `POST /rosters` | Create a draft roster, optionally pre-filled from the previous period. |
 | `GET /rosters/:id` | View a roster with its assignments. |
-| `POST /rosters/:id/validate` | Check all rules and coverage, and list violations. |
 | `POST /rosters/:id/submit` | Send for approval. |
 | `POST /rosters/:id/approve` | Approve a submitted roster. |
 | `POST /rosters/:id/return` | Return it to draft with a reason. |
 | `POST /rosters/:id/publish` | Publish to staff and other modules. |
 | `POST /rosters/:id/close` | Close the period after attendance is reconciled. |
-| `POST /rosters/:id/coverage-overrides` | Accept a coverage gap with a reason. |
 
 ### 5.5 Roster assignments
+
+Plan: `plans/gateway-hr-5-5-roster-assignments.md` (built, PR #91, #93 and #94). `POST /rosters/:id/imports` moves to 5.6 and `POST /roster-assignments/:id/resolve-flag` to the group that builds the checks that raise the flags (a worker job); the assignment list is new (RA1 to RA3).
+
 | Endpoint | Purpose |
 |---|---|
+| `GET /rosters/:id/assignments` | List a roster's assignments. |
 | `POST /rosters/:id/assignments` | Add one person to one shift on one date. |
 | `PATCH /roster-assignments/:id` | Change an assignment (reason required after publication). |
 | `POST /roster-assignments/:id/cancel` | Cancel an assignment. |
-| `POST /roster-assignments/:id/resolve-flag` | Mark an eligibility flag as handled. |
-| `POST /rosters/:id/imports` | Upload a roster CSV to check before applying. |
+| `POST /rosters/:id/validate` | Check all rules and coverage, and list violations. |
+| `POST /rosters/:id/coverage-overrides` | Accept a coverage gap with a reason. |
 | `GET /units/:id/on-duty` | Who is on duty in a unit at a moment (for clinical modules). |
 | `GET /employees/me/roster` | Self-service: my shifts for a date range. |
 
 ### 5.6 Imports (shared by rosters and holidays)
+
+Plan: `plans/gateway-hr-5-6-imports.md` (built, PR #97 and #99). The generic `POST /hr-imports/:id/apply` is not built: the roster import checks and applies on one route, like the holiday import (IM1).
+
 | Endpoint | Purpose |
 |---|---|
-| `GET /hr-imports/:id` | View an import's status, counts and row errors. |
-| `POST /hr-imports/:id/apply` | Apply a checked import. |
-| `POST /hr-imports/:id/cancel` | Discard an import. |
+| `POST /rosters/:id/imports` | Upload a roster CSV to check; with `apply=true&checkId=` and the same file again, apply it (moved from 5.5, RA2). |
+| `GET /hr-imports/:id` | View an import's status, counts and row errors (roster or holiday). |
+| `POST /hr-imports/:id/cancel` | Discard a checked import. |
 
 ### 5.7 Shift swaps
+
+Plan: `plans/gateway-hr-5-7-shift-swaps.md` (built, PR #103 and #104). It adds `GET /employees/me/shift-swaps` (SW1).
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /shift-swaps` | List swap requests (mine, or my unit's for a Head of Unit). |
@@ -243,6 +269,9 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /shift-swaps/:id/cancel` | Requester cancels. |
 
 ### 5.8 Practice schedules (outpatient)
+
+Plan: `plans/gateway-hr-5-8-practice-schedules.md` (built, PR #108 and #109). The six endpoints stay; `GET /practice-schedules` with `date` answers the sessions of that date (PS2).
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /practice-schedules` | Which doctors practise in a polyclinic on a date, with quotas (for registration). |
@@ -253,6 +282,63 @@ Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 
 | `POST /practice-schedule-exceptions/:id/cancel` | Undo an exception. |
 
 ## 6. Clinical eligibility
+
+Plan: `plans/gateway-hr-6-clinical-eligibility.md` (built, PR #113). The one endpoint stays; it takes `unitId` (required), `date` and `privilegeId` as query and answers every condition checked.
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /employees/:id/eligibility` | Is this practitioner clinically eligible in a unit on a date, optionally for one privilege? Names the failing condition. |
+
+## 8. Leave
+
+Business source: HR spec 9.4 (agreed 2026-11-18). Collections: `human-resource-collections.md` section 9 (draft for review). Four sub-groups, built in this order; each gets its plan in `plans/` before it is built. 8.3 and 8.4 go to production together: an approval without its roster effects would leave people on leave planned to work.
+
+### 8.1 Leave types and policies
+
+Leave types are code concepts (`id.leave-type`), managed through `/code-concepts` (1.3).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /leave-policies` | List the policies of the tenant, by leave type, or the versions in force on a date. |
+| `POST /leave-policies` | Add a policy version for a leave type, from a date. |
+| `PATCH /leave-policies/:id` | Edit a version no request has used yet. |
+| `POST /leave-policies/import` | Load a country bundle, such as the Indonesian starter policies (HR spec 9.4.8). |
+
+### 8.2 Balances
+
+With the worker jobs of `human-resource-collections.md` 9.7 (grants, carry-over and expiry, collective leave).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /employees/:id/leave-balances` | An employee's balance per leave type: granted, used, pending, available, carried over, expiring. |
+| `GET /employees/:id/leave-ledger` | The entries behind a balance. |
+| `POST /employees/:id/leave-adjustments` | HR Manager adds or removes days with a reason. |
+| `GET /employees/me/leave-balances` | Self-service: my balances. |
+
+### 8.3 Requests and approval
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /leave-requests/preview` | Propose the day breakdown and check the balance before requesting. |
+| `POST /employees/me/leave-requests` | Self-service: request leave. |
+| `POST /leave-requests` | HR Admin requests leave on an employee's behalf. |
+| `GET /employees/me/leave-requests` | Self-service: my requests. |
+| `GET /leave-requests` | Queues and lists: by unit, status, employee, period, or waiting for me. |
+| `GET /leave-requests/:id` | View a request with its day breakdown and decisions. |
+| `GET /leave-requests/:id/details` | Read the reason and proof (highly confidential, recorded). |
+| `PUT /leave-requests/:id/proof` | Attach the proof. |
+| `PATCH /leave-requests/:id/days` | The deciding Head adjusts the day breakdown before approving. |
+| `POST /leave-requests/:id/approve` | Approve the current step; the first step names the replacement. |
+| `POST /leave-requests/:id/reject` | Reject the current step with a reason. |
+| `POST /leave-requests/:id/cancel` | Cancel a pending request, or an approved one that has not started. |
+| `POST /leave-requests/:id/change-type` | HR Admin changes the type of an approved request (missing proof). |
+
+### 8.4 Roster and practice-schedule link
+
+Adds the effects of the final approval and of cancelling (HR spec 9.4.4.3 to 9.4.4.6) to the 8.3 routes, and the leave check `HR-ROS-003` (`on_leave`) to adding, importing and swapping assignments (5.5 to 5.7) and to practice sessions (5.8).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /leave-requests/:id/cover` | The cover proposal: each cancelled shift and whether the replacement can take it. |
+| `POST /leave-requests/:id/cover` | The Head confirms the shifts given to the replacement. |
+| `POST /leave-requests/:id/end-early` | HR Admin moves the last date when the employee returns early. |

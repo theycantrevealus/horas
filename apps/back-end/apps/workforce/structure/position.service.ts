@@ -14,6 +14,7 @@ import {
 import { type FacilityRepository } from '@repository/interface/facility'
 import { type OrganizationUnitRepository } from '@repository/interface/organization-unit'
 import { type PositionRepository } from '@repository/interface/position'
+import { type PositionAssignmentRepository } from '@repository/interface/position-assignment'
 import { type Coding } from '@repository/model/common/coding'
 import { type LocalizedText } from '@repository/model/common/localized-text'
 import { type OrganizationUnit } from '@repository/model/organization-unit'
@@ -22,6 +23,7 @@ import {
   REPOSITORY_FACILITY,
   REPOSITORY_ORGANIZATION_UNIT,
   REPOSITORY_POSITION,
+  REPOSITORY_POSITION_ASSIGNMENT,
 } from '@repository/token'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { observe } from '../observe'
@@ -141,6 +143,7 @@ export class PositionService {
    * @param positions - Position repository.
    * @param units - Unit repository, for the unit of a position.
    * @param facilities - Facility repository, for the time zone of the unit's facility.
+   * @param assignments - Assignment repository, to refuse closing a position that someone holds.
    * @param concepts - Code concepts, to check professions and grades.
    * @param logger - Logger of this service.
    */
@@ -151,6 +154,8 @@ export class PositionService {
     private readonly units: OrganizationUnitRepository,
     @Inject(REPOSITORY_FACILITY)
     private readonly facilities: FacilityRepository,
+    @Inject(REPOSITORY_POSITION_ASSIGNMENT)
+    private readonly assignments: PositionAssignmentRepository,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
@@ -369,8 +374,8 @@ export class PositionService {
   }
 
   /**
-   * Closes an open position. A closed position stays for history and is not reopened. The rule
-   * that nobody may hold it arrives with assignments (HR plan P9).
+   * Closes an open position. A closed position stays for history and is not reopened. A position
+   * that someone still holds, or that is planned for someone, is refused (HR plan P9, 2.4 A17).
    *
    * @param tenantId - Tenant of the caller.
    * @param id - Position identifier.
@@ -378,7 +383,7 @@ export class PositionService {
    * @returns The closed position.
    * @throws InvalidRequestError `position_closed` or `invalid_end_date`.
    * @throws NotFoundError `position_not_found`.
-   * @throws ConflictError `stale_version`.
+   * @throws ConflictError `position_in_use` or `stale_version`.
    */
   close(
     tenantId: string,
@@ -398,6 +403,15 @@ export class PositionService {
         : null
       if (!facility) {
         throw this.notFound()
+      }
+      if (
+        (await this.assignments.findOpenByPosition(tenantId, position.id))
+          .length > 0
+      ) {
+        throw new ConflictError(
+          'position_in_use',
+          'The position still has open assignments. End them first.',
+        )
       }
       const endDate = input.endDate ?? todayInZone(facility.timezone)
       const start = position.period?.start

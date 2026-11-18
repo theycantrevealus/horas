@@ -107,11 +107,13 @@ export interface Reply {
  * @property modules - HTTP modules of the area under test, for example `FacilityManagementModule`.
  * @property entities - Mongoose entity classes whose model tokens are stubbed out, so no Mongo is needed.
  * @property repositories - Repository tokens mapped to in-memory fakes.
+ * @property overrides - Classes of services replaced by a fake, for example `EligibilityService`.
  */
 export interface HrGatewayOptions {
   modules: Type<unknown>[]
   entities: { name: string }[]
   repositories: [symbol, unknown][]
+  overrides?: [Type<unknown>, unknown][]
 }
 
 /**
@@ -121,6 +123,7 @@ export interface HrGatewayOptions {
  * @property tenantId - A tenant for the tests.
  * @property otherTenantId - A second tenant, for isolation tests.
  * @property call - Sends a request and parses the answer.
+ * @property callRaw - Sends a text body with the given content type, for example a CSV file.
  * @property seedAndLogin - Seeds an account with a role holding the permissions and signs it in.
  * @property changeRecords - Every change record the application wrote to the outbox, in order.
  * @property eventOutbox - The event outbox; its `events` hold every event the application wrote.
@@ -137,6 +140,13 @@ export interface HrGateway {
     url: string,
     token?: string,
     payload?: object,
+  ) => Promise<Reply>
+  callRaw: (
+    method: 'POST' | 'PUT',
+    url: string,
+    token: string | undefined,
+    body: string,
+    contentType: string,
   ) => Promise<Reply>
   seedAndLogin: (
     tenant: string,
@@ -235,6 +245,9 @@ export async function createHrGateway(
   ]
   for (const [token, value] of overrides) {
     builder.overrideProvider(token).useValue(value)
+  }
+  for (const [provider, value] of options.overrides ?? []) {
+    builder.overrideProvider(provider).useValue(value)
   }
   const moduleRef = await builder.compile()
   const app = moduleRef.createNestApplication<NestFastifyApplication>(
@@ -355,6 +368,24 @@ export async function createHrGateway(
     changeRecords,
     eventOutbox,
     close: () => app.close(),
+    async callRaw(method, url, token, body, contentType) {
+      const response = await app.inject({
+        method,
+        url,
+        headers: {
+          'content-type': contentType,
+          ...(token ? { authorization: `Bearer ${token}` } : {}),
+        },
+        payload: body,
+      })
+      return {
+        status: response.statusCode,
+        body: String(response.headers['content-type']).includes('json')
+          ? JSON.parse(response.body)
+          : null,
+        headers: response.headers,
+      }
+    },
     async call(method, url, token, payload) {
       const response = await app.inject({
         method,

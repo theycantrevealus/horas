@@ -323,3 +323,34 @@ At least one of stdout or file must be enabled; the schema rejects a configurati
 - Test the relay with a fake outbox (`apps/worker/src/change-relay/change-relay.service.spec.ts`): order, lease, failure, rejection, lag.
 - Repository tests against a real replica set (`MongoMemoryReplSet`) assert the outbox content: one record per committed write, none after rollback, one after a retried transaction.
 - Every model has a classification; `apps/repository/model/classification.spec.ts` fails otherwise.
+
+## 14. Event relay log entries
+
+The worker's `EventRelayService` (`apps/worker/src/event-relay/`) publishes the event outbox (`database.md` 7.1) the way `ChangeRelayService` publishes the change outbox, and writes only operational entries through `AppLogger`. Never the events or their payloads.
+
+| Entry | Level | When |
+|---|---|---|
+| `event: 'event_relay'` | `log` | One summary per pass that found events: `outcome` (`success` or `failure`), `count` (delivered), `durationMs`, and `error` (class name) and `retryable` on failure. Never one entry per event. A pass with no registered consumer writes one `debug` entry (`outcome: 'idle'`). |
+| `event: 'event_relay_mark_failed'` | `warn` | Counting a failed attempt on the event (`attempts`, `last_error`) itself failed. The event stays pending and is retried. |
+| `event: 'event_relay_lag'` | `warn` | The oldest pending event is older than `EVENT_RELAY_MAX_LAG_SECONDS`. Alert on it. |
+
+- Events leave in outbox order and a failing event stops the pass, so one event that cannot succeed blocks the ones behind it. The lag entry is the signal.
+- Each event is handled inside a request context with its own `correlation_id` and the system actor `event-relay` (the hold itself is placed by `workforce-events`), so the change record, the security audit entry and the log line of the reaction share the correlation id of the original HR request.
+- A consumer that reacts to an event writes one `event: 'account_lifecycle'` entry per reaction (identity: `AccountLifecycleService`) with the outcome and no values.
+- Configuration is the optional context `events.env` (`stack.md` 3.6): `EVENT_RELAY_INTERVAL_MS` (1000), `EVENT_RELAY_BATCH_SIZE` (100, 1 to 1000), `EVENT_RELAY_MAX_LAG_SECONDS` (300). Read it through `EventsConfig`. Only the worker loads it.
+- Tests: `event-relay.service.spec.ts` (fake outbox and consumers) and `event-relay.identity.spec.ts` (relay, consumer and in-memory identity together).
+
+## 15. HR job log entries
+
+The worker's `HrJobsRunner` (`apps/worker/src/hr-jobs/`) runs the scheduled HR jobs (`workforce.md` 3r) and writes only operational entries through `AppLogger`. Never the records, their identifiers, dates or numbers.
+
+| Entry | Level | When |
+|---|---|---|
+| `event: 'hr_job'` | `log` / `warn` | One summary per job pass that changed or failed something: `operation` (`HrJobsRunner.<job>`), `outcome` (`success` or `failure`), `count` (records changed, summed over the re-runs of the pass), `failed`, `durationMs`, and `error` (class name) and `retryable` on failure (`warn`). An idle pass writes nothing. A job that throws writes one `error` entry with the error class. |
+| `event: 'hr_job'` with `outcome: 'idle'` | `debug` | The job's lease is held by another instance (`reason: 'lease_not_held'`). |
+| `event: 'hr_job_lag'` | `warn` | A job still fills a whole batch after the re-run limit (20): it is behind. Alert on it. |
+
+- A failing record does not stop the pass; it stays due and is retried on the next pass, so a steady `failed` count is the signal.
+- Each record is handled in a request context with its own `correlation_id` and a system actor (`license-expiry-job`, `appointment-expiry-job`, `eligibility-sweep-job`), so the change record and the event of one change share it (`logging.md` 8, 13.2).
+- Configuration is the optional context `jobs.env` (`stack.md` 3.6): `HR_JOBS_ENABLED`, `HR_JOBS_INTERVAL_MS`, `HR_JOBS_BATCH_SIZE`, `HR_JOBS_LEASE_SECONDS`. Read it through `JobsConfig`.
+- Tests: `hr-jobs.runner.spec.ts` (fake jobs and the in-memory lease) asserts the summaries, the lag warning and that no values appear.

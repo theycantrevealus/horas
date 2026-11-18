@@ -140,6 +140,140 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
     },
   ),
 
+  concept(
+    'id.license-verification-method',
+    'manual_registry_check',
+    'Pemeriksaan manual pada registri',
+    'Manual registry check',
+  ),
+  concept(
+    'id.license-verification-method',
+    'document_review',
+    'Pemeriksaan dokumen asli',
+    'Original document review',
+  ),
+
+  concept(
+    'id.license-status-reason',
+    'document_mismatch',
+    'Dokumen tidak sesuai dengan aslinya',
+    'Document does not match the original',
+  ),
+  concept(
+    'id.license-status-reason',
+    'registry_mismatch',
+    'Data tidak sesuai dengan registri',
+    'Data does not match the registry',
+  ),
+  concept(
+    'id.license-status-reason',
+    'wrong_profession',
+    'Profesi tidak sesuai',
+    'Profession does not match',
+  ),
+  concept(
+    'id.license-status-reason',
+    'revoked_by_authority',
+    'Dicabut oleh penerbit',
+    'Revoked by the issuing authority',
+  ),
+  concept(
+    'id.license-status-reason',
+    'suspended_by_authority',
+    'Dibekukan oleh penerbit',
+    'Suspended by the issuing authority',
+  ),
+  concept('id.license-status-reason', 'other', 'Lainnya', 'Other'),
+
+  concept('id.credit-system', 'skp', 'Satuan Kredit Profesi (SKP)', 'Professional credit units (SKP)'),
+
+  concept(
+    'id.cpd-category',
+    'learning',
+    'Pembelajaran',
+    'Learning',
+  ),
+  concept('id.cpd-category', 'service', 'Pelayanan', 'Service'),
+  concept(
+    'id.cpd-category',
+    'community_service',
+    'Pengabdian masyarakat',
+    'Community service',
+  ),
+  concept(
+    'id.cpd-category',
+    'publication',
+    'Publikasi ilmiah',
+    'Scientific publication',
+  ),
+  concept(
+    'id.cpd-category',
+    'development',
+    'Pengembangan ilmu',
+    'Knowledge development',
+  ),
+
+  concept('id.evidence-type', 'certificate', 'Sertifikat', 'Certificate'),
+  concept('id.evidence-type', 'logbook', 'Logbook tindakan', 'Procedure logbook'),
+  concept(
+    'id.evidence-type',
+    'training_record',
+    'Catatan pelatihan',
+    'Training record',
+  ),
+  concept(
+    'id.evidence-type',
+    'recommendation_letter',
+    'Surat rekomendasi',
+    'Recommendation letter',
+  ),
+  concept('id.evidence-type', 'case_list', 'Daftar kasus', 'Case list'),
+
+  concept('id.clinical-level', 'pk1', 'PK I', 'Clinical level I', { rank: 1 }),
+  concept('id.clinical-level', 'pk2', 'PK II', 'Clinical level II', { rank: 2 }),
+  concept('id.clinical-level', 'pk3', 'PK III', 'Clinical level III', { rank: 3 }),
+  concept('id.clinical-level', 'pk4', 'PK IV', 'Clinical level IV', { rank: 4 }),
+  concept('id.clinical-level', 'pk5', 'PK V', 'Clinical level V', { rank: 5 }),
+
+  concept('id.temporary-urgency', 'disaster', 'Bencana', 'Disaster'),
+  concept(
+    'id.temporary-urgency',
+    'absence',
+    'Ketidakhadiran tak terduga',
+    'Unexpected absence',
+  ),
+  concept(
+    'id.temporary-urgency',
+    'visiting_specialist',
+    'Spesialis tamu',
+    'Visiting specialist',
+  ),
+
+  concept(
+    'id.assessment-method',
+    'document_review',
+    'Telaah dokumen',
+    'Document review',
+  ),
+  concept('id.assessment-method', 'interview', 'Wawancara', 'Interview'),
+  concept('id.assessment-method', 'observation', 'Observasi', 'Observation'),
+  concept('id.assessment-method', 'logbook', 'Logbook', 'Logbook'),
+
+  concept('id.conflict-relationship', 'relative', 'Keluarga', 'Relative'),
+  concept(
+    'id.conflict-relationship',
+    'supervisor',
+    'Atasan atau bawahan langsung',
+    'Direct supervisor or subordinate',
+  ),
+  concept(
+    'id.conflict-relationship',
+    'business_interest',
+    'Kepentingan usaha',
+    'Business interest',
+  ),
+  concept('id.conflict-relationship', 'other', 'Lainnya', 'Other'),
+
   concept('id.unit-type', 'directorate', 'Direktorat', 'Directorate', {
     clinical_default: false,
   }),

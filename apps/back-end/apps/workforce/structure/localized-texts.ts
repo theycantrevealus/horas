@@ -3,7 +3,7 @@ import { type LocalizedText } from '@repository/model/common/localized-text'
 /**
  * Format of a BCP 47 language tag as used here, for example `id-ID` or `en`.
  */
-const LOCALE_PATTERN = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/
+export const LOCALE_PATTERN = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/
 
 /**
  * Limits of a list of texts per language.

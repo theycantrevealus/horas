@@ -85,6 +85,56 @@ export function todayInZone(timeZone: string, now: Date = new Date()): string {
 }
 
 /**
+ * Turns a local date and time of day in an IANA time zone into the real UTC instant, so it is
+ * correct across daylight saving changes (`database.md` 4.4). A local time that does not exist
+ * (the hour skipped when the clocks go forward) or that happens twice (when the clocks go back)
+ * answers an instant within an hour of the change; shifts do not start in those hours in the zones
+ * the platform serves today.
+ *
+ * @param date - Local date, `YYYY-MM-DD`.
+ * @param time - Time of day, `HH:mm`.
+ * @param timeZone - IANA time zone name, for example `Asia/Jakarta`.
+ * @returns The UTC instant of that wall time in that zone.
+ * @throws RangeError when the time zone is not a valid IANA name.
+ */
+export function zonedInstant(date: string, time: string, timeZone: string): Date {
+  const [year, month, day] = date.split('-').map(Number) as [number, number, number]
+  const [hour, minute] = time.split(':').map(Number) as [number, number]
+  const wall = new Date(Date.UTC(2000, month - 1, day, hour, minute))
+  wall.setUTCFullYear(year)
+  const format = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  /**
+   * Reads the wall clock of an instant in the zone as if it were UTC.
+   *
+   * @param instant - A UTC instant.
+   * @returns The wall clock of that instant, as a UTC timestamp in milliseconds.
+   */
+  const wallOf = (instant: Date): number => {
+    const parts = format.formatToParts(instant)
+    const pick = (type: string): number =>
+      Number(parts.find((part) => part.type === type)?.value ?? 0)
+    const value = new Date(
+      Date.UTC(2000, pick('month') - 1, pick('day'), pick('hour'), pick('minute')),
+    )
+    value.setUTCFullYear(pick('year'))
+    return value.getTime()
+  }
+  // First guess: the wall time read as UTC, then move it by the zone's offset at that moment.
+  let instant = new Date(wall.getTime() - (wallOf(wall) - wall.getTime()))
+  // A second pass settles the offset when the first guess fell on the other side of a change.
+  instant = new Date(wall.getTime() - (wallOf(instant) - instant.getTime()))
+  return instant
+}
+
+/**
  * Validates that a property is a local date (`YYYY-MM-DD`).
  *
  * @param options - Standard class-validator options.

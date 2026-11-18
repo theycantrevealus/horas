@@ -1,6 +1,6 @@
 # gateway_hr Plan
 
-Status: **In progress** (2026-11-10). Groups 1.1 to 1.3 built (PR #7, #10, #14). Replaces `2026-11-07-workforce-core-implementation.md`.
+Status: **In progress** (2026-11-10). Groups 1.1 to 6, the HR events to identity and the worker jobs are built (PR #7 to #119, see section 3). Group 8 (leave, 8.1 to 8.4) is planned (2026-11-18). Replaces `2026-11-07-workforce-core-implementation.md`.
 
 **Goal:** a new NestJS application `gateway_hr`, built like `gateway_back_office`, that serves the HR endpoints of `../hr-endpoints.md` on top of the approved collections (`../human-resource-collections.md`, `../account-and-workforce-collections.md`).
 
@@ -42,7 +42,7 @@ Each HR area has a domain folder in `workforce/` (services and rules) and an HTT
 | 0 | Commit the models | Two PRs, documentation and code, never mixed (#5 models, #6 documents). | Done |
 | 1 | Shared foundations | Built inside the first code PR (group 1.1) and then group by group, never in advance: `@workforce` alias, workforce errors, filter and logging helper, shared in-memory test repository and commit scopes arrive with 1.1; field encryption arrives with 2.2 (private profile); local-date validation with the first group that stores dates. | Partly done in PR #7 (alias, errors, filter, logging helper, shared test repository, commit scopes) |
 | 2 | Application skeleton | `gateway_hr` project in `nest-cli.json`, `tsconfig`, `main.ts` (`NODE_PORT=3001`), root module, health endpoint, `package.json` scripts (build, dev, type-check). Built in the group 1.1 PR. | Done (PR #7) |
-| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | In progress: 1.1 to 2.3 done, the HR events to identity in discussion, then 2.4 |
+| 3 | Endpoint groups | One group at a time, in the order of section 3: repositories it needs, services, controllers, DTOs, permissions, tests. One branch and PR per group. | Done: 1.1 to 6 and the HR events to identity. Planned: 8.1 to 8.4 (leave) |
 | 4 | Docs and checks | `workforce.md` rule file, `authentication.md` update, lint, type-check, full test suite on Node 22, each time a group is finished. | `workforce.md` written (docs PR after 1.1); repeated per group |
 
 ## 3. Walkthrough order
@@ -60,23 +60,29 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 7 | 2.1 Employee records | 6 | Done (`gateway-hr-2-1-employee-records.md`) | Built, PR #23 |
 | 8 | 2.2 Private profile | 6 | Done (`gateway-hr-2-2-private-profile.md`) | Built, PR #25 |
 | 9 | 2.3 Employment contracts | 7 | Done (`gateway-hr-2-3-employment-contracts.md`) | Built, PR #27 |
-| 9a | HR events to identity (not an endpoint group) | 0 | In discussion (`gateway-hr-events-to-identity.md`) | — |
-| 10 | 2.4 Position assignments | 4 | — | — |
-| 11 | 2.5 Committee memberships | 3 | — | — |
-| 12 | 3.1 Licences | 7 | — | — |
-| 13 | 3.2 Professional credits | 6 | — | — |
-| 14 | 4.1 Privilege catalog | 5 | — | — |
-| 15 | 4.2 Credential applications | 14 | — | — |
-| 16 | 4.3 SPK and granted privileges | 9 | — | — |
-| 17 | 5.1 Shift definitions | 4 | — | — |
-| 18 | 5.2 Holiday calendars | 5 | — | — |
-| 19 | 5.3 Coverage requirements | 4 | — | — |
-| 20 | 5.4 Rosters | 10 | — | — |
-| 21 | 5.5 Roster assignments | 7 | — | — |
-| 22 | 5.6 Imports | 3 | — | — |
-| 23 | 5.7 Shift swaps | 6 | — | — |
-| 24 | 5.8 Practice schedules | 6 | — | — |
-| 25 | 6 Clinical eligibility | 1 | — | — |
+| 9a | HR events to identity (not an endpoint group) | 0 | Done (`gateway-hr-events-to-identity.md`) | Built, PR #29 and #30 |
+| 10 | 2.4 Position assignments | 4 | Done (`gateway-hr-2-4-position-assignments.md`, PR #33) | Built, PR #31 |
+| 11 | 2.5 Committee memberships | 3 | Done (`gateway-hr-2-5-committee-memberships.md`, PR #34) | Built, PR #35 |
+| 12 | 3.1 Licences | 7 | Done (`gateway-hr-3-1-licences.md`, PR #37) | Built in two PRs, #38 and #39 |
+| 13 | 3.2 Professional credits | 6 | Done (`gateway-hr-3-2-professional-credits.md`, PR #41) | Built in two PRs, #42 and #43 |
+| 14 | 4.1 Privilege catalog | 5 | Done (`gateway-hr-4-1-privilege-catalog.md`, PR #45) | Built, PR #47 |
+| 15 | 4.2 Credential applications | 13 | Done (`gateway-hr-4-2-credential-applications.md`, PR #49) | Built in three PRs, #51, #53 and #54 |
+| 16 | 4.3 SPK and granted privileges | 11 | Done (`gateway-hr-4-3-spk-and-granted-privileges.md`, PR #59) | Built in three PRs, #60, #62 and #64 |
+| 16a | 4.4 Renewals (follow-up of 4.2 and 4.3, no new routes) | 0 | Done (`gateway-hr-4-4-renewals.md`, PR #67) | Built in two PRs, #68 and #70 |
+| 17 | 5.1 Shift definitions | 4 | Done (`gateway-hr-5-1-shift-definitions.md`, PR #73) | Built, PR #74 |
+| 18 | 5.2 Holiday calendars | 5 | Done (`gateway-hr-5-2-holiday-calendars.md`, PR #77) | Built in two PRs, #78 and #80 |
+| 19 | 5.3 Coverage requirements | 4 | Done (`gateway-hr-5-3-coverage-requirements.md`, PR #82) | Built, PR #83 |
+| 20 | 5.4 Rosters | 8 | Done (`gateway-hr-5-4-rosters.md`, PR #86) | Built, PR #87 |
+| 21 | 5.5 Roster assignments | 8 (RA1 to RA4: `GET /rosters/:id/assignments` added; `resolve-flag` and the roster import moved out) | Done (`gateway-hr-5-5-roster-assignments.md`, PR #90) | Built in three PRs, #91, #93 and #94 |
+| 22 | 5.6 Imports | 3 (IM1: no generic apply; the roster import checks and applies on one route) | Done (`gateway-hr-5-6-imports.md`, PR #96) | Built in two PRs, #97 (check, view, cancel) and #99 (apply) |
+| 23 | 5.7 Shift swaps | 7 (SW1: `GET /employees/me/shift-swaps` added) | Done (`gateway-hr-5-7-shift-swaps.md`, PR #101 and #102) | Built in two PRs, #103 (repository, create, accept, cancel, lists) and #104 (approve, reject) |
+| 24 | 5.8 Practice schedules | 6 (PS1: the six listed; the read with `date` answers sessions) | Done (`gateway-hr-5-8-practice-schedules.md`, PR #106 and #107) | Built in two PRs, #108 (schedules, sessions by date) and #109 (exceptions, undo) |
+| 25 | 6 Clinical eligibility | 1 (CE1: the one read, with the full check list) | Done (`gateway-hr-6-clinical-eligibility.md`, PR #111 and #112) | Built in one PR, #113 (no new repository) |
+| 26 | 7 Worker expiry and eligibility jobs | 0 (scheduled jobs in the worker) | Done (`gateway-hr-7-worker-expiry-jobs.md`, PR #115 and #116) | Built in three PRs, #117 (runner, lease, licences), #118 (SPKs) and #119 (eligibility sweep) |
+| 27 | 8.1 Leave types and policies | 4 | Done (`gateway-hr-8-1-leave-policies.md`) | Planned |
+| 28 | 8.2 Leave balances (and the three leave jobs) | 4 | Done (`gateway-hr-8-2-leave-balances.md`) | Planned |
+| 29 | 8.3 Leave requests and approval | 13 | Done (`gateway-hr-8-3-leave-requests.md`) | Planned (released with 8.4) |
+| 30 | 8.4 Leave, roster and practice-schedule link | 3 (and `on_leave` on existing routes) | Done (`gateway-hr-8-4-leave-roster-link.md`) | Planned (released with 8.3) |
 
 Groups 1.1 and 1.2 are small and can be built in one PR if you agree both.
 
@@ -88,13 +94,13 @@ Each is settled when we reach the group that first needs it. The proposed defaul
 |---|---|---|---|
 | D1 | Sign-in for `gateway_hr` (decided, built in 1.1) | Reuse identity's guards and the shared JWT secret (same database, same deployment); login stays on `gateway_back_office`. Switching to asymmetric keys (`authentication.md` 3) is a separate task. | Step 2 |
 | D2 | "Own record" and "units I head" access | "Own" through the account's `employee_id` now; Head of Unit access stays tenant-wide until scoped permissions exist. | 2.1 Employee records |
-| D3 | File uploads (licence scans, SPK letters) | Accept file references only; no file service yet. | 3.1 Licences |
+| D3 | File uploads (licence scans, SPK letters) | Accept file references only; no file service yet. Built that way in 3.1 (the file is not checked). | 3.1 Licences |
 | D4 | CSV imports | `text/csv` request body with a size limit; parse with the `csv-parse` package. | 5.2 Holiday calendars |
-| D5 | Scheduled jobs and alerts | Out of scope: expiry jobs, eligibility re-checks and notifications go to the worker in a later task. | 3.1 Licences |
+| D5 | Scheduled jobs and alerts | The worker exists (change relay, event relay). Expiry jobs, eligibility re-checks, the daily expiry of licences, the SIP-renewal shortfall alert (`HR-LIC-010`), the daily activation of planned assignments and notifications are still out of scope and go to the worker in a later task. | 3.1 Licences |
 | D6 | Pull request size and kind | One branch and PR per group (or per two small groups), merged before the next starts. Documentation and code are always separate PRs; documentation about built behaviour is written after the code merged. | Step 0 |
 
 ## 5. Not in this plan
 
-- The outline HR sub-processes (recruitment, attendance, leave, training, performance, payroll, occupational health, discipline, separation details): their specification must be detailed first.
-- HR events to the identity module, account requests and role derivation.
+- The outline HR sub-processes (recruitment, attendance, training, performance, payroll, occupational health, discipline, separation details): their specification must be detailed first.
+- Account requests and role derivation (the HR events to identity are built, see `gateway-hr-events-to-identity.md`).
 - Front-end screens.

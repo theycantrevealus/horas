@@ -19,6 +19,23 @@ import { IdentityExceptionFilter } from '@identity/identity.filter'
 import { IdentityModule } from '@identity/identity.module'
 import { WorkforceExceptionFilter } from '@workforce/workforce.filter'
 import { CodeConceptManagementModule } from './code-concept/code-concept-management.module'
+import { AssignmentManagementModule } from './assignment/assignment-management.module'
+import { AppointmentManagementModule } from './appointment/appointment-management.module'
+import { CoverageManagementModule } from './coverage-requirement/coverage-management.module'
+import { HrImportManagementModule } from './hr-import/hr-import-management.module'
+import { EligibilityManagementModule } from './eligibility/eligibility-management.module'
+import { PracticeScheduleManagementModule } from './practice-schedule/practice-schedule-management.module'
+import { RosterImportManagementModule } from './roster-import/roster-import-management.module'
+import { ShiftSwapManagementModule } from './shift-swap/shift-swap-management.module'
+import { RosterAssignmentManagementModule } from './roster-assignment/roster-assignment-management.module'
+import { RosterManagementModule } from './roster/roster-management.module'
+import { HolidayManagementModule } from './holiday/holiday-management.module'
+import { ShiftManagementModule } from './shift/shift-management.module'
+import { CommitteeMembershipManagementModule } from './committee-membership/committee-membership-management.module'
+import { CredentialingManagementModule } from './credentialing/credentialing-management.module'
+import { PrivilegeManagementModule } from './privilege/privilege-management.module'
+import { CpdManagementModule } from './credit/cpd-management.module'
+import { LicenseManagementModule } from './license/license-management.module'
 import { ContractManagementModule } from './contract/contract-management.module'
 import { EmployeeManagementModule } from './employee/employee-management.module'
 import { FacilityManagementModule } from './facility/facility-management.module'
@@ -66,6 +83,23 @@ import { PositionManagementModule } from './position/position-management.module'
     ParameterManagementModule,
     EmployeeManagementModule,
     ContractManagementModule,
+    AssignmentManagementModule,
+    CommitteeMembershipManagementModule,
+    LicenseManagementModule,
+    CpdManagementModule,
+    PrivilegeManagementModule,
+    CredentialingManagementModule,
+    AppointmentManagementModule,
+    ShiftManagementModule,
+    HolidayManagementModule,
+    RosterManagementModule,
+    RosterAssignmentManagementModule,
+    RosterImportManagementModule,
+    ShiftSwapManagementModule,
+    PracticeScheduleManagementModule,
+    EligibilityManagementModule,
+    HrImportManagementModule,
+    CoverageManagementModule,
     PrivateProfileManagementModule,
     CodeConceptManagementModule,
   ],

@@ -41,6 +41,7 @@
     "argon2": "^0.45.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "csv-parse": "^7.0.3",
     "joi": "^18.3.1",
     "jose": "^6.2.15",
     "moment-timezone": "^0.6.6",
