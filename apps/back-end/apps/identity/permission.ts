@@ -64,6 +64,8 @@ export const PERMISSIONS = {
   WORKFORCE_HR_IMPORT_READ: 'workforce.hr-import:read',
   WORKFORCE_HR_IMPORT_CANCEL: 'workforce.hr-import:cancel',
   WORKFORCE_ROSTER_CORRECT_PAST: 'workforce.roster:correct-past',
+  WORKFORCE_LEAVE_POLICY_READ: 'workforce.leave-policy:read',
+  WORKFORCE_LEAVE_POLICY_WRITE: 'workforce.leave-policy:write',
   WORKFORCE_ROSTER_READ: 'workforce.roster:read',
   WORKFORCE_ROSTER_WRITE: 'workforce.roster:write',
   WORKFORCE_ROSTER_APPROVE: 'workforce.roster:approve',
