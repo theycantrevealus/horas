@@ -4,9 +4,10 @@ Status: **Approved** (2026-11-07). Models: `apps/back-end/apps/repository/model/
 
 - the refinements to the core collections found while planning slice 1 (section 2);
 - the collections of the three fully specified sub-processes: licences (section 3), credentialing (section 4) and rostering (section 5);
-- the configurable parameters (section 6).
+- the configurable parameters (section 6);
+- the collections of leave management (section 9, **draft for review**, 2026-11-18), detailed in HR spec 9.4 after this document was approved.
 
-The outline sub-processes (HR spec 9.1 and 9.3 to 9.10: recruitment, attendance, leave, training, performance, payroll, occupational health, discipline, separation details) get collections only after the spec details them.
+The outline sub-processes (HR spec 9.1, 9.3 and 9.5 to 9.10: recruitment, attendance, training, performance, payroll, occupational health, discipline, separation details) get collections only after the spec details them.
 
 Every collection here follows `account-and-workforce-collections.md` 2.1 (`tenant_id`, `schema_version`, `version`, `created_at`, `updated_at`, `created_by`, no `updated_by`), `database.md` 4.4 (instants in UTC, calendar dates as `YYYY-MM-DD`, times of day as `HH:mm` with the facility's time zone) and `database.md` 6.1 (every write recorded in the change history). Fields in the tables below are in addition to those.
 
@@ -28,6 +29,9 @@ rostering (§5)         ├── shift_definitions · coverage_requirements · 
                        ├── practice_schedules ── practice_schedule_exceptions
                        ├── shift_swap_requests
                        └── hr_imports (CSV: rosters, holidays)
+leave (§9)             ├── leave_policies (per leave type, versioned)
+                       ├── leave_requests ── leave_request_details
+                       └── leave_ledger_entries (balances)
 parameters (§6)     hr_parameters
 ```
 
@@ -461,6 +465,9 @@ Index: `{ tenant_id, key, 'scope.kind', 'scope.id', effective_from }` unique. Lo
 | `professional_licenses`, `cpd_*`, `privilege_catalog_items`, `clinical_appointments`, `privilege_grants`, rostering collections, `hr_parameters` | Internal (HR spec 14). Public where the spec says so: practice schedules. |
 | `credential_applications` | Internal, with highly confidential notes and recommendation text. |
 | `credential_assessments` | Highly confidential; reads are recorded (`HR-AUD-003`). |
+| `leave_policies` | Internal. |
+| `leave_requests`, `leave_ledger_entries` | Confidential (leave type and balances, HR spec 14). |
+| `leave_request_details` | Highly confidential (reason and proof); reads are recorded (`HR-AUD-003`, `HR-LEV-041`). |
 
 New field names that carry sensitive values in logs: none beyond those in `account-and-workforce-collections.md` 8.3.
 
@@ -492,3 +499,133 @@ These follow from the decisions and were applied to `human-resource-management.m
 ### 8.3 Still open
 
 None from this document. The HR specification's own open questions (section 16) still apply.
+
+## 9. Leave management (HR spec 9.4)
+
+Status: **Draft for review** (2026-11-18). Business source: HR spec 9.4 (rules `HR-LEV-*`). Build order: `hr-endpoints.md` group 8 (8.1 to 8.4; the plan number 7 is the worker jobs).
+
+### 9.1 Leave types as concepts
+
+Leave types are `code_concepts` of a jurisdiction system (`id.leave-type`, `us.leave-type`, ...), with no required properties: the rules are in `leave_policies`, because they change with a PKB revision and must be dated. Retiring the concept stops new requests (`HR-LEV-001`); existing requests and balances keep pointing to it.
+
+### 9.2 `leave_policies`
+
+One document per tenant, leave type and version.
+
+| Field | Type | Notes |
+|---|---|---|
+| `leave_type` | `Coding` | `id.leave-type\|tahunan`. Checked with `assertActive`. |
+| `effective_from` | string (date) | Unique with the type per tenant. The version in force on a date is the one with the latest `effective_from` on or before it. |
+| `balance` | `{ kind: 'period'; period: 'calendar_year' \| 'service_year'; days: number; min_service_months: number; carry_over: { max_days: number; expires_after_months: number } \| null; deduct_collective_leave: boolean } \| { kind: 'per_event'; days: number } \| { kind: 'none' }` | HR spec 9.4.2. |
+| `counting` | `'working_days' \| 'calendar_days'` | HR spec 9.4.6. |
+| `half_days` | boolean | |
+| `paid` | boolean | For payroll (HR spec 9.7). |
+| `employment_types` | `Coding[]` | `id.employment-type` codes that may use the type; empty means all. |
+| `approval` | `{ steps: 'one_step' \| 'two_step'; two_step_above_days: number \| null }` | `two_step_above_days` makes a one-step type two-step for longer requests. |
+| `notice_days`, `retroactive_days`, `max_days_per_request` | number | `retroactive_days` 0 means future dates only (HR spec 9.4.4.6). |
+| `proof` | `{ due_days: number } \| null` | Days after the first leave date. |
+| `notes` | string \| null | Legal basis (PKB article). |
+| `source` | `{ kind: 'manual' \| 'bundle'; bundle_id: string \| null }` | Loaded from a country bundle (HR spec 9.4.8) or entered by HR Manager. |
+
+Index: `{ tenant_id, 'leave_type.system', 'leave_type.code', effective_from }` unique. A version is never edited once a request used it; a change is a new version (`effective_from` today or later). An unused version may be edited.
+
+### 9.3 `leave_requests`
+
+| Field | Type | Notes |
+|---|---|---|
+| `employee_id` | ObjectId | The requester. |
+| `unit_id`, `facility_id` | ObjectId \| null, ObjectId | Unit of the requester's open primary assignment when the request was made (null without one: HR Manager decides), and the facility of the requester's contract or unit (zone, calendars, working week). |
+| `leave_type` | `Coding` | Changes only through the type change of HR spec 9.4.4.7. |
+| `policy_id` | ObjectId | The version in force on the first date. |
+| `rules` | `{ balance_kind: 'period' \| 'per_event' \| 'none'; counting: 'working_days' \| 'calendar_days'; steps: 'one_step' \| 'two_step' }` | Snapshot of what the request was decided under, so a new policy version does not change it. |
+| `period` | `{ start: string; end: string }` | Local dates. |
+| `half_days` | `{ first: boolean; last: boolean }` | A half first or last day. |
+| `days` | `{ date: string; count: 0 \| 0.5 \| 1; why: 'working' \| 'rest_day' \| 'holiday' \| 'collective_leave' \| 'calendar_day'; set_by: 'roster' \| 'working_week' \| 'head' \| 'policy' }[]` | Day breakdown (HR spec 9.4.6), at most `max_days_per_request` calendar days, so bounded. Fixed at final approval. |
+| `total_days` | number | Sum of `days`. |
+| `entitlement_period` | `{ start: string; end: string } \| null` | The period the days are charged to; null for `none` and `per_event`. |
+| `deciders` | `{ first: { kind: 'unit_head' \| 'parent_head' \| 'hr_manager'; unit_id: ObjectId \| null; employee_id: ObjectId \| null }; second: boolean }` | The kind and unit are chosen at request time (HR spec 9.4.4.2 step 1); `employee_id` is the Head found when the first step is decided. `second` true for two-step requests. |
+| `replacement` | `{ employee_id: ObjectId \| null; none_reason: string \| null } \| null` | Set at the first-step approval (`HR-LEV-012`). |
+| `decisions` | `{ step: 'first' \| 'second'; outcome: 'approved' \| 'rejected'; by: ActorRef; at: Date; reason: string \| null }[]` | At most two. A rejection reason is shown to the requester. |
+| `status` | `'requested' \| 'head_approved' \| 'approved' \| 'rejected' \| 'cancelled'` | HR spec 9.4.3. |
+| `status_since` | Date | |
+| `proof_due_on` | string (date) \| null | Null when no proof is required. |
+| `proof_received` | boolean | The proof itself is in `leave_request_details`. |
+| `cover` | `{ cancelled_assignment_ids: ObjectId[]; confirmed: { by: ActorRef; at: Date; created_assignment_ids: ObjectId[] } \| null } \| null` | HR spec 9.4.4.3. Bounded by the leave's days. |
+
+Indexes:
+
+| Index | Purpose |
+|---|---|
+| `{ tenant_id, employee_id, 'period.start' }` | Overlap (`HR-LEV-002`), my requests, and the leave check of `HR-ROS-003`. |
+| `{ tenant_id, 'deciders.first.unit_id', status }` | The Head's queue. |
+| `{ tenant_id, status, created_at }` | HR Manager's queue (`head_approved`) and the decision SLA alert. |
+| `{ tenant_id, status, proof_due_on }` partial `proof_received: false` | Proof overdue (HR spec 9.4.4.7). |
+
+Ending early and changing the type are updates of `period`, `days`, `total_days` and `leave_type`; the change history keeps the old values and the reason. Requests are never deleted (`HR-LEV-040`).
+
+### 9.4 `leave_request_details`
+
+The highly confidential part of a request, apart from it because fewer people read it (`database.md` 4.6): the requester, the deciders, HR Admin and HR Manager. Lists, balances and the roster never read it.
+
+| Field | Type | Notes |
+|---|---|---|
+| `request_id` | ObjectId | Unique per tenant. |
+| `employee_id` | ObjectId | |
+| `reason` | string | 1 to 1000 characters. |
+| `proof` | `FileRef \| null` | A file reference only, like licence scans. |
+
+Index: `{ tenant_id, request_id }` unique. Each read records an access entry (`recordAccess`, `HR-AUD-003`), and the change history masks both fields as highly confidential.
+
+### 9.5 `leave_ledger_entries`
+
+The balance as a ledger (HR spec 9.4.2). Entries are only created, never updated or deleted (`HR-LEV-030`); the repository has no update or delete method.
+
+| Field | Type | Notes |
+|---|---|---|
+| `employee_id` | ObjectId | |
+| `leave_type` | `Coding` | |
+| `period` | `{ start: string; end: string }` | The entitlement period. `per_event` and `none` types have no entries. |
+| `kind` | `'grant' \| 'use' \| 'reversal' \| 'adjustment' \| 'carry_over' \| 'expiry'` | |
+| `days` | number | Signed, in steps of 0.5: positive for `grant`, `carry_over`, `reversal` and a positive `adjustment`; negative for `use`, `expiry` and a negative `adjustment`. |
+| `bucket` | `'own' \| 'carry_over'` | Which days a `use`, `reversal` or `expiry` touches; carried-over days are used first (HR spec 9.4.5 step 4). |
+| `expires_on` | string (date) \| null | For `carry_over` entries. |
+| `source` | `{ kind: 'request' \| 'job' \| 'adjustment' \| 'collective_leave'; ref_id: ObjectId \| null; date: string \| null }` | `request` with the request id; `collective_leave` with the date taken. |
+| `dedupe_key` | string \| null | Makes the jobs idempotent: `grant:<period start>`, `carry_over:<period start>`, `expiry:<period end>`, `collective:<date>`, prefixed by employee and type. Null for request and adjustment entries. |
+
+Indexes: `{ tenant_id, employee_id, 'leave_type.code', 'period.start' }` (balance); `{ tenant_id, dedupe_key }` unique, partial `dedupe_key` set. The reason of an adjustment is in the change history (`withChangeReason`).
+
+The balance is computed on read: the sum of the entries of a period, minus the `total_days` of the employee's `requested` and `head_approved` requests of that type and period (available days). No running total is stored, so it cannot drift.
+
+### 9.6 Refinements to the rostering collections
+
+| Collection | Change | Reason |
+|---|---|---|
+| `roster_assignments` | `source.kind` adds `'leave_cover'` with `ref_id` the leave request. Add `cancellation: { kind: 'leave'; ref_id: ObjectId } \| null`, set when a leave approval cancels the assignment. | HR spec 9.4.4.3; the roster shows "leave" and nothing more (`HR-LEV-041`). |
+| `practice_schedule_exceptions` | `reason` becomes `Coding \| null`: null when `source.kind` is `leave` (the source says why, and no tenant code is needed). | Leave exceptions are created by the system (`HR-LEV-021`). |
+| `rosters` | A leave approval clears `validation` of a `submitted` or `approved` roster it changes. | `HR-LEV-020`: the roster is validated again before publication. |
+
+### 9.7 Jobs
+
+Three worker jobs join the HR jobs (`workforce.md` 3r), each idempotent through `dedupe_key`, one record per transaction, with a system actor:
+
+| Job | Does | Reads across tenants (for jobs only) |
+|---|---|---|
+| Leave grant (`leave-grant-job`) | Posts the `grant` of each `period` policy for employees who reach the minimum service or whose next period starts within `LEAVE_GRANT_LEAD_DAYS`. | Employees with an active contract, by tenant. |
+| Leave period end (`leave-period-job`) | At a period's end posts `carry_over` and `expiry`; at a carry-over's `expires_on` posts its `expiry`. | Entries by `period.end` and `expires_on`. |
+| Collective leave (`collective-leave-job`) | The day after each `collective_leave` day, posts a `use` for employees whose policy deducts it and who had no working assignment that date (`HR-LEV-031`). | Holiday calendars with a `collective_leave` day on that date. |
+
+### 9.8 Parameters
+
+`LEAVE_WORKING_WEEK` (ISO weekday list, facility scope, default `[1,2,3,4,5]`), `LEAVE_GRANT_LEAD_DAYS` (60) and `LEAVE_DECISION_SLA_DAYS` (3) join the parameter catalog (section 6).
+
+### 9.9 Decisions (2026-11-18)
+
+| # | Decision |
+|---|---|
+| L1 | One engine; leave types and their rules are tenant policy data, loaded from a country bundle. |
+| L2 | The employee requests, the Head of Unit decides on the reason and names the replacement; at most two steps, the second by HR Manager, per leave type. Nobody decides their own leave; a Head's own leave goes to the parent unit's head, then HR Manager. |
+| L3 | Final approval cancels the requester's shifts and practice sessions; the cover for the replacement is then proposed and confirmed by the Head (option C). |
+| L4 | Some types allow requests after the fact within a limit; past shifts are cancelled as a correction, never reassigned; proof may follow and HR may change the type. |
+| L5 | Working-day counting: weekly rest days, public holidays and collective leave never count; the roster proposes, else the facility's working week; the Head may correct before approving; fixed at final approval. |
+| L6 | Contracted practitioners use types without a balance. |
+| L7 | Balances are a ledger of entries, never a stored number. |
