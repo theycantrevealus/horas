@@ -24,7 +24,7 @@ The module manages the hospital's workforce from hiring to separation. Sub-proce
 | 4 | Recruitment and onboarding | 9.1 | Outline |
 | 5 | Organization and position management | 9.2 | Outline |
 | 6 | Attendance and time | 9.3 | Outline |
-| 7 | Leave management | 9.4 | Outline |
+| 7 | Leave management | 9.4 | Full |
 | 8 | Training and competency | 9.5 | Outline |
 | 9 | Performance management | 9.6 | Outline |
 | 10 | Compensation and payroll | 9.7 | Outline |
@@ -96,6 +96,9 @@ Rules cite these references. The legal summaries below are a starting point and 
 | Roster drafting | V (own) | V | V | C (unit) | - | V |
 | Roster approval | - | V | A (if configured) | - | - | V |
 | Shift swap request | C (own) | V | V | A (unit) | - | - |
+| Leave request | C (own) | C (on behalf), proof, type change, end early | V | V (unit) | - | - |
+| Leave decision | - | - | A (second step; first step when no Head) | A (unit, first step) | - | - |
+| Leave policies and balance adjustments | V (own balance) | V | C | V (unit balances) | - | - |
 
 ---
 
@@ -498,7 +501,7 @@ One person, one shift, one date.
 | Shift | |
 | Role | `staff`, `team_leader`, `supervisor`, `dpjp_on_call` (the responsible doctor on call). |
 | Status | `planned`, `cancelled`. Attendance (9.3) records whether it was worked. |
-| Source | `roster`, `swap`, `change_request`. |
+| Source | `roster`, `swap`, `change_request`, `leave_cover` (9.4.4.3). |
 
 #### Practice Schedule
 
@@ -563,7 +566,7 @@ The Head of Unit may add, cancel or move assignments in a published roster (for 
 #### 8.4.4 Practice schedule maintenance
 
 1. HR Admin or the Head of the polyclinic maintains Practice Schedules.
-2. Approved leave or training of the doctor creates exceptions automatically (9.4).
+2. Approved leave of the doctor creates `cancelled` exceptions automatically (9.4.4.3, HR-LEV-021); approved training will do the same (9.5).
 3. The registration module is notified of every change, so that booked patients can be contacted.
 
 ### 8.5 Business rules
@@ -595,7 +598,7 @@ Defaults follow `REG-PP35`. Values are configurable (section 10) because the hos
 
 #### 8.5.4 Changes in eligibility after publication
 
-- **HR-ROS-030**: When an employee's eligibility changes (license expired or revoked, SPK suspended or revoked, suspension, approved leave), the System checks all their future published assignments and Practice Schedule sessions.
+- **HR-ROS-030**: When an employee's eligibility changes (license expired or revoked, SPK suspended or revoked, suspension), the System checks all their future published assignments and Practice Schedule sessions. Approved leave does not raise flags: its approval cancels the assignments and sessions itself (9.4.4.3).
 - **HR-ROS-031**: Assignments that are no longer valid are **flagged, not cancelled**. The Head of Unit and HR Admin are notified and must resolve them through a change (8.4.3). Until resolved, the clinical modules treat the person as not on duty (section 13).
 - **HR-ROS-032**: The daily check also runs for the coming `ROSTER_LOOKAHEAD_DAYS`, so that licenses about to expire are caught before the shift.
 
@@ -620,7 +623,7 @@ Defaults follow `REG-PP35`. Values are configurable (section 10) because the hos
 
 ## 9. Other Sub-processes (Outline)
 
-These sections must be detailed, in the format of sections 6–8, before implementation.
+These sections must be detailed, in the format of sections 6–8, before implementation. Section 9.4 is detailed in full.
 
 ### 9.1 Recruitment and onboarding
 
@@ -642,9 +645,249 @@ These sections must be detailed, in the format of sections 6–8, before impleme
 
 ### 9.4 Leave management
 
-- **Purpose**: manage leave entitlements and requests.
-- **Entities**: Leave Type, Leave Balance, Leave Request.
-- **Known rules**: annual leave of at least 12 working days after 12 months of continuous service (`REG-UUK`); maternity, sick, and special leave per regulation and PKB; an approved leave blocks rostering (HR-ROS-003) and creates Practice Schedule exceptions (8.4.4); the Head of Unit may require a named replacement before approval.
+Detail level: **Full** (agreed 2026-11-18). This section follows the format of sections 6–8.
+
+#### 9.4.1 Purpose
+
+Let staff take the leave they are entitled to, let the Head of Unit decide with the unit's work in view, and keep the roster and the practice schedules true: a person on approved leave is never planned to work, and every leave day taken can be traced to an entitlement.
+
+The module is one engine for every hospital and country. The engine knows only the mechanics (requests, decisions, balances, the effect on the roster). Which leave types exist, how many days they give and how days are counted is **policy data** per tenant (9.4.2, Leave Policy), loaded from a country bundle and adjusted to the hospital's collective agreement (Perjanjian Kerja Bersama, PKB). Nothing Indonesian is coded in the engine.
+
+#### 9.4.2 Entities
+
+##### Leave Type
+
+A kind of leave, for example annual leave or sick leave. A code of a jurisdiction code system (`id.leave-type`, `us.leave-type`, ...), so reports can compare tenants and countries. The rules of a type live in its policy.
+
+##### Leave Policy
+
+The rules of one leave type in one tenant, valid from a date. A PKB revision is a new policy version with a later `effective from`; a request keeps the rules that applied when it was made.
+
+| Field | Description |
+|---|---|
+| Leave type | The code. |
+| Effective from | First date this version applies. |
+| Balance | `period` (a yearly entitlement), `per_event` (each request is its own entitlement, up to a maximum, for example marriage leave) or `none` (no balance: sick leave with a doctor's note, unpaid leave, "unavailable" for contracted practitioners). |
+| Entitlement period | For `period` only: `calendar_year` or `service_year` (from the anniversary of the service start date, 9.4.5). |
+| Days per period, or per event | For example 12 for annual leave, 3 for marriage leave. |
+| Minimum service | Months of continuous service before the first entitlement, for example 12 for annual leave. |
+| Counting | `working_days` (9.4.6) or `calendar_days` (every day counts, for example maternity leave). |
+| Half days | Whether half days may be requested. |
+| Paid | Whether the leave is paid. Read by payroll (9.7). |
+| Who may use it | Employment types allowed; empty means all. Contracted practitioners (`mitra`) normally get only `none` types. |
+| Approval | `one_step` (Head of Unit) or `two_step` (Head of Unit, then HR Manager), optionally two-step only above a number of days. |
+| Notice | Minimum days between the request and the first leave day; 0 for none. |
+| After the fact | How many days after the leave started it may still be requested (9.4.4.6); 0 means only future dates. |
+| Maximum per request | Days. |
+| Proof | Whether proof is required (for example a doctor's note) and how many days after the leave starts it is due. |
+| Carry-over | For `period` only: days that move to the next period and how many months they stay usable; 0 for none. |
+| Collective leave | For `period` only: whether the facility's collective leave days (*cuti bersama*, holiday calendar kind `collective_leave`) are taken from this balance (HR-LEV-031). Off unless the hospital's regulation says otherwise. |
+| Notes | Legal basis, for example the PKB article. |
+
+##### Leave Balance
+
+A **ledger**, never a number someone overwrites. Each entry belongs to one employee, one leave type and one entitlement period, and the balance is the sum of the entries.
+
+| Entry | Meaning |
+|---|---|
+| `grant` | The entitlement of a period, posted by the System (9.4.5). |
+| `use` | Days of an approved request, or a collective leave day. |
+| `reversal` | Days given back: a cancelled or shortened leave, or a request whose type HR changed. |
+| `adjustment` | HR Manager corrects the balance, up or down, with a reason. |
+| `carry_over` | Unused days moved in from the previous period, with the date they expire. |
+| `expiry` | Unused days that lapse at the end of a period or of a carry-over. |
+
+**Available** days are the balance minus the days of the employee's pending requests of that type, so two requests can never spend the same days.
+
+##### Leave Request
+
+| Field | Description |
+|---|---|
+| Employee | The requester. |
+| Leave type, policy version | |
+| First date, last date | Local dates of the employee's facility. Half days only on the first or the last date, when the policy allows them. |
+| Day breakdown | Each date of the leave with its count (1, 0.5 or 0) and why (`working`, `rest_day`, `holiday`, `collective_leave`). Proposed at the request and fixed at the final approval (9.4.6). |
+| Days | The sum of the breakdown. |
+| Reason | Free text from the requester. Highly confidential (section 14). |
+| Proof | File reference, with the date it is due. Highly confidential. |
+| Deciders | The Head who decides the first step and, for two-step types, HR Manager (9.4.4.2). |
+| Replacement | The employee who covers the work, named by the Head of Unit at the first step, or "no replacement" with a reason. |
+| Decisions | Per step: who, when, outcome, reason. |
+| Status | See 9.4.3. |
+| Cover proposal | After the final approval: the requester's cancelled shifts and whether each can go to the replacement (9.4.4.3). |
+
+#### 9.4.3 Leave request status
+
+```
+requested → head_approved → approved → (ended early)
+    ↓             ↓             ↓
+ rejected      rejected     cancelled
+ cancelled     cancelled
+```
+
+| Status | Meaning |
+|---|---|
+| `requested` | Waiting for the Head of Unit. The days are reserved (not available to other requests). |
+| `head_approved` | Two-step types only: the Head approved and named the replacement; waiting for HR Manager. The days stay reserved. The roster is not touched yet. |
+| `approved` | Final approval. The days are used and the roster and the practice schedule are changed (9.4.4.3). |
+| `rejected` | Refused at either step, with a reason. Terminal. The reservation ends. |
+| `cancelled` | Withdrawn before the leave started (9.4.4.4). Terminal. Days used are given back. |
+
+Ending a leave early (9.4.4.5) keeps the status `approved` and moves the last date.
+
+#### 9.4.4 Workflows
+
+##### 9.4.4.1 Request leave
+
+1. The Employee requests leave through self-service: type, dates, half days, reason. HR Admin may enter a request on the employee's behalf, for example when the employee calls in sick; the employee stays the requester.
+2. The System checks the policy (9.4.7) and proposes the day breakdown (9.4.6). The request is refused when the available days are not enough.
+3. The request enters `requested` and the deciding Head is chosen (9.4.4.2).
+
+##### 9.4.4.2 Decide
+
+1. **Who decides the first step.** The Head of Unit of the requester's unit: the holder of the head-of-unit position of the unit of the requester's open primary assignment (9.2). When the requester is that Head, or the unit has no Head, the head of the parent unit decides; when the parent unit has no Head either, or there is no parent unit, or the requester has no open primary assignment, HR Manager decides. The unit is chosen when the request is made; the Head of that unit is found again when the decision is made, so a newly appointed Head can decide. Nobody decides their own leave (HR-LEV-010).
+2. **The Head of Unit** reviews the reason and the unit's roster and:
+   - adjusts the day breakdown to the unit's shift pattern when needed (9.4.6, step 3);
+   - names the **replacement**, an employee of the tenant on `probation` or `active` who is not the requester, or records "no replacement" with a reason (for example when the requester has no shifts in the period);
+   - approves or rejects with a reason.
+3. **One-step types**: the Head's approval is final (`approved`).
+4. **Two-step types**: the request becomes `head_approved`, and HR Manager approves (`approved`) or rejects (`rejected`). HR Manager confirms the leave itself and does not change the replacement or the day breakdown. The same person never gives both approvals of one request.
+
+##### 9.4.4.3 Effects of the final approval
+
+In one transaction with the approval:
+
+1. The days are posted as `use` entries of the balance (none for `none` types).
+2. The requester's `planned` roster assignments on the leave dates are cancelled with the reason `leave`, in rosters that are not `closed` (HR-LEV-020). A published roster's revision increases (8.4.3). A leave approval never fails because of a roster rule.
+3. The requester's Practice Schedule sessions on the leave dates get a `cancelled` exception with the source `leave` (8.4.4). The replacement does **not** take over polyclinic sessions: patients book a specific doctor, so registration decides what happens to booked patients.
+
+Then the **cover proposal** is offered to the Head of Unit: each cancelled assignment dated today or later, with whether the replacement can take it, checked as an assignment added by hand (8.5: eligibility, overlap, rest, weekly hours, night runs). The Head selects the shifts to give to the replacement, adjusts them if needed, and confirms in one action. Confirmed shifts become new assignments with the source `leave_cover`; a shift that fails a rule is not created. Shifts that nobody takes show as coverage gaps in roster validation (8.5.3). The proposal can be confirmed only into a `draft` or `published` roster (8.4.3).
+
+Half days do not cancel the shift of that date; the cover proposal lists them so that the Head adjusts the shift by hand.
+
+##### 9.4.4.4 Cancel a request
+
+1. The requester cancels a request that is `requested` or `head_approved`. The reservation ends.
+2. An `approved` leave that has not started is cancelled by the requester or HR Admin, with a reason. The `use` entries are reversed and the leave's Practice Schedule exceptions are undone. **Cancelled roster assignments are not restored**, because someone may already cover them; the Head re-plans by hand.
+3. A leave that has started cannot be cancelled; it is ended early (9.4.4.5).
+
+##### 9.4.4.5 End a leave early
+
+When the employee returns before the last date, HR Admin sets a new last date, from the first date to the day before the current last date, with a reason. The days after the new last date are reversed and their Practice Schedule exceptions undone; roster assignments are not restored (9.4.4.4).
+
+##### 9.4.4.6 Leave requested after the fact
+
+Some leave is known only after it starts, for example sick leave or the death of a family member.
+
+1. A policy with "after the fact" set to N days allows a first date up to N days before today in the employee's facility.
+2. On approval, assignments of past dates are cancelled as a past-date correction with the reason `leave` (HR-ROS-041), and are never offered for cover. Today's and later assignments follow 9.4.4.3.
+3. Policies without this setting accept only a first date of today or later, and at least the notice days ahead.
+
+##### 9.4.4.7 Proof
+
+1. When the policy requires proof, the requester or HR Admin attaches it until the due date (the policy's days after the first leave date).
+2. A request whose proof is missing after the due date is listed as **proof overdue** for HR Admin.
+3. HR Admin may then **change the leave type** of an approved request, for example from sick leave to annual or unpaid leave, with a reason. The `use` entries of the old type are reversed and those of the new type posted; when the new type's available days are not enough, the change is refused and HR picks another type. The roster is not touched again.
+
+#### 9.4.5 Entitlements
+
+1. **Service start date.** Continuous service counts from the start of the earliest employment contract in the unbroken run of contracts that reaches the current one: a renewed PKWT continues the service, a gap of one day or more starts a new one. The original hire date (5.1) is not used, because it survives a rehire.
+2. **Grants.** For each `period` policy, the System posts one `grant` per employee and entitlement period once the employee has the minimum service and an employment type the policy allows. For `service_year` the period runs from the service anniversary; for `calendar_year`, from 1 January. The grant of a coming period is posted `LEAVE_GRANT_LEAD_DAYS` before it starts, so requests for the next period can be made. A grant is posted once; a second pass changes nothing.
+3. **No proration.** A period's grant is the full days of the policy. Proration for part-time or partial periods is not built (open question Q13).
+4. **Using days.** A request is charged to the entitlement period that contains its first date and cannot extend past the end of that period; a longer leave is two requests. Carried-over days are used before the period's own days.
+5. **Period end.** Unused days up to the carry-over limit become a `carry_over` entry of the next period with its expiry date; the rest lapse as `expiry`. Carried-over days not used by their expiry date lapse too.
+6. **Separation.** A separated employee gets no further grants. What happens to unused days (payment in the final settlement) belongs to 9.10.
+7. **No negative balance.** Only HR Manager can add days, as an `adjustment` with a reason (for example an advance).
+
+#### 9.4.6 Counting leave days
+
+For `calendar_days` policies every date of the leave counts as 1.
+
+For `working_days` policies each date is counted as follows. Weekly rest days, public holidays and collective leave days never count.
+
+1. **The roster proposes**: when a published or draft roster of the requester's unit covers the date, the date counts only when the requester has a `planned` assignment of a shift that is not of type `off` on it.
+2. **Otherwise the working week proposes**: the date counts when it is a working day of the facility's working week (`LEAVE_WORKING_WEEK`) and not a public holiday or collective leave day of the facility's holiday calendars.
+3. **The Head of Unit decides**: before the first-step approval, the Head may mark any date of the leave as a rest day, or a proposed rest day as a working day, to match the unit's shift pattern (for example the regular days off of a three-shift ward).
+4. The breakdown is **fixed at the final approval**. Later roster or calendar changes do not change it; a correction is an HR Manager `adjustment` with a reason.
+
+Half days count 0.5 on a date that counts.
+
+#### 9.4.7 Business rules
+
+##### Requests
+
+- **HR-LEV-001**: A request needs a leave type whose policy is in force on the first date and allows the employee's employment type. Requests cannot be made for a retired type.
+- **HR-LEV-002**: An employee cannot have two requests that share a date, unless the earlier one is `rejected` or `cancelled`.
+- **HR-LEV-003**: A request needs enough available days (9.4.2, Leave Balance) of its type and period, and at most the policy's days per request; `per_event` types need at most the days per event. The days are checked again at each approval, without the request's own reservation, because the Head's breakdown or an adjustment may change them.
+- **HR-LEV-004**: The first date respects the policy's notice, or its after-the-fact limit (9.4.4.6).
+- **HR-LEV-005**: Only employees on `probation` or `active` can request leave. Suspended and separated employees cannot.
+
+##### Decisions
+
+- **HR-LEV-010**: Nobody decides their own leave. The deciding Head is chosen by 9.4.4.2 step 1, and the same person never gives both approvals of a two-step request.
+- **HR-LEV-011**: A rejection needs a reason.
+- **HR-LEV-012**: The first-step approval names a replacement, or records "no replacement" with a reason. The replacement is an employee of the tenant on `probation` or `active` and is not the requester.
+
+##### Roster and practice schedule
+
+- **HR-LEV-020**: On final approval, the requester's planned assignments on full leave days are cancelled with the reason `leave` in rosters that are not `closed`, including `submitted` and `approved` rosters; such a roster must be validated again before it is published. Assignments of a `closed` roster are never touched (HR-ROS-040).
+- **HR-LEV-021**: On final approval, the requester's Practice Schedule sessions on leave days get a `cancelled` exception with the source `leave`, past dates of a leave requested after the fact included; cancelling or shortening the leave undoes the exceptions of the dates it frees, when those dates are today or later.
+- **HR-LEV-022**: The cover proposal never creates an assignment that breaks a rule of 8.5, and is offered only for dates of today or later.
+- **HR-LEV-023**: Cancelled roster assignments are never restored automatically when a leave is cancelled or shortened.
+
+##### Balances
+
+- **HR-LEV-030**: Balance entries are never edited or deleted. Every change is a new entry; adjustments need a reason.
+- **HR-LEV-031**: When a policy takes collective leave from its balance, each collective leave day of the employee's facility calendar is posted as a `use` entry the day after it, **only when the employee had no working assignment that date**. Employees who worked keep the day.
+- **HR-LEV-032**: A balance cannot go below zero except through an HR Manager adjustment.
+
+##### Integrity and privacy
+
+- **HR-LEV-040**: Leave requests are never deleted. Every status change records the user, date and reason (section 15).
+- **HR-LEV-041**: The leave type, the reason and the proof of a request are not shown to colleagues or in the roster. A cancelled assignment shows only the reason `leave`. Reading the proof is audited (HR-AUD-003).
+
+#### 9.4.8 Indonesian bundle
+
+The starter policies for Indonesian tenants. Every value must be verified against `REG-UUK`, `REG-PP35`, UU No. 4/2024 (Kesejahteraan Ibu dan Anak) and the hospital's PKB before go-live (section 3). Codes are in `id.leave-type`.
+
+| Code | Leave | Balance | Days | Counting | Approval | After the fact | Proof |
+|---|---|---|---|---|---|---|---|
+| `tahunan` | Annual | `period`, `service_year`, after 12 months | 12 | working | one-step | 0 | no |
+| `sakit` | Sick, with a doctor's note | `none` | | working | one-step | 3 | doctor's note, 3 days |
+| `melahirkan` | Maternity | `per_event` | 90 *(verify; UU 4/2024 allows longer)* | calendar | two-step | 0 | yes |
+| `keguguran` | Miscarriage | `per_event` | 45 | calendar | two-step | 3 | yes |
+| `haid` | Menstrual leave | `none` | | working | one-step | 1 | no |
+| `menikah` | Own marriage | `per_event` | 3 | working | one-step | 0 | yes |
+| `menikahkan_anak` | Marriage of a child | `per_event` | 2 | working | one-step | 0 | no |
+| `khitan_baptis_anak` | Circumcision or baptism of a child | `per_event` | 2 | working | one-step | 0 | no |
+| `istri_melahirkan` | Wife gives birth or miscarries | `per_event` | 2 *(verify; UU 4/2024)* | working | one-step | 3 | yes |
+| `duka_keluarga` | Death of a spouse, parent, parent-in-law, child or child-in-law | `per_event` | 2 | working | one-step | 3 | no |
+| `duka_serumah` | Death of another household member | `per_event` | 1 | working | one-step | 3 | no |
+| `tanpa_upah` | Unpaid | `none` | | working | two-step | 0 | no |
+| `tidak_tersedia` | Unavailable (contracted practitioners) | `none` | | working | one-step | 0 | no |
+
+`tidak_tersedia` is allowed only for `mitra`; every other type excludes `mitra`. Annual leave carries over nothing and does not take collective leave unless the PKB says otherwise.
+
+#### 9.4.9 Alerts
+
+| Trigger | Recipients |
+|---|---|
+| Request waiting for a decision | The deciding Head, then HR Manager for two-step types |
+| Request waiting longer than `LEAVE_DECISION_SLA_DAYS` | The decider's superior (section 11) |
+| Request approved, rejected, cancelled or ended early | Requester |
+| Named as replacement | Replacement |
+| Cover proposal waiting to be confirmed | Head of Unit |
+| Proof due in 1 day, and proof overdue | Requester, HR Admin |
+| Carried-over days expiring within 30 days | Employee |
+
+Notifications never name the leave type or the reason (section 11, HR-LEV-041).
+
+#### 9.4.10 Not in this section
+
+- Leave of absence for training (9.5) and suspension (9.9) also block rostering (HR-ROS-003); they are recorded by those sub-processes.
+- Payment of unused days at separation (9.10) and pay of unpaid leave (9.7).
+- Attendance reconciliation of leave days (9.3).
+- Pending and future approved leave of an employee who separates or is suspended (9.10, 9.9).
 
 ### 9.5 Training and competency
 
@@ -710,6 +953,9 @@ Values are owned by HR Manager unless stated otherwise, stored as configuration,
 | `CREDENTIALING_SCOPE` | `facility` (each facility's committee credentials; `group` for central credentialing) | 7, HR-CRD-009 |
 | `IMPORT_MAX_ROWS` | 5,000 | 8.4.1 |
 | `IMPORT_MAX_ERRORS` | 500 | 8.4.1 |
+| `LEAVE_WORKING_WEEK` | Monday to Friday *(verify; per facility)* | 9.4.6 |
+| `LEAVE_GRANT_LEAD_DAYS` | 60 | 9.4.5 |
+| `LEAVE_DECISION_SLA_DAYS` | 3 | 9.4.9 |
 
 ---
 
@@ -717,7 +963,7 @@ Values are owned by HR Manager unless stated otherwise, stored as configuration,
 
 - Notifications are sent in-app. Email or messaging channels are open question Q9.
 - A notification never contains sensitive data (section 14). It names the record and links to it; the recipient opens it with their own permissions.
-- Each sub-process lists its alerts (6.6, 7.6, 8.6). Escalation: an alert unanswered for its SLA is sent to the recipient's superior.
+- Each sub-process lists its alerts (6.6, 7.6, 8.6, 9.4.9). Escalation: an alert unanswered for its SLA is sent to the recipient's superior.
 
 ---
 
@@ -733,6 +979,8 @@ Values are owned by HR Manager unless stated otherwise, stored as configuration,
 | Working-time compliance | HR Manager | Breaches of HR-ROS-011 to HR-ROS-015 per employee. |
 | Accreditation staff file | Accreditation team | Per employee: licenses, credentialing history, orientation, mandatory training, evaluations (`REG-KARS`). |
 | Workforce summary | Director | Headcount by category, profession, unit and employment type. |
+| Leave balances | HR, Heads of Unit (unit), the employee (own) | Balance per employee and leave type: granted, used, pending, carried over, expiring. |
+| Leave taken | HR Manager | Leave days per unit and leave type in a period, without reasons. |
 
 ---
 
@@ -765,9 +1013,9 @@ Employee data is personal data under `REG-PDP`.
 | Class | Examples | Access |
 |---|---|---|
 | Public within the hospital | Name, title, profession, specialty, unit, position, practice schedule. | All staff. |
-| Internal | Employee number, contact, roster, license numbers and expiry, privileges. | HR, Head of Unit (unit), committees (as needed), the employee. |
-| Confidential | NIK, NPWP, date of birth, address, family data, bank account, salary, payroll. | HR, Payroll Officer, the employee. |
-| Highly confidential | Health records, vaccination, occupational incidents, disciplinary and ethics cases, credentialing assessments. | Named roles only (HR Manager, the relevant committee, Director), the employee for their own health records. |
+| Internal | Employee number, contact, roster, license numbers and expiry, privileges, the dates someone is on leave. | HR, Head of Unit (unit), committees (as needed), the employee. |
+| Confidential | NIK, NPWP, date of birth, address, family data, bank account, salary, payroll, leave type and leave balances. | HR, Payroll Officer, the employee. |
+| Highly confidential | Health records, vaccination, occupational incidents, disciplinary and ethics cases, credentialing assessments, leave reasons and leave proof (for example a doctor's note). | Named roles only (HR Manager, the relevant committee, Director), the employee for their own health records. |
 
 - **HR-SEC-001**: Users see only the classes and units their role allows (4.2).
 - **HR-SEC-002**: Confidential and highly confidential fields are never written to logs or notifications. New field names of these classes (for example `npwp`, `bank_account`) are added to the logger's redaction list in the same change (`.claude/rules/back-end/logging.md` section 7).
@@ -802,3 +1050,4 @@ Implementation: change history is not stored as `updated_by` fields in records; 
 | Q10 | When HRM is unavailable, how do clinical modules allow emergency care (break-glass procedure)? | HR-INT-002 |
 | Q11 | What is the retention period for employee records after separation? | HR-SEC-003 |
 | Q12 | Are contracted practitioners (`mitra`) paid through HRM? (Rostered: yes, decided 2026-11-07.) | 9.7 |
+| Q13 | Should leave entitlements be prorated for part-time staff, or for a first or last partial period? | 9.4.5 |

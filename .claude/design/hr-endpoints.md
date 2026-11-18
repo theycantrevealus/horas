@@ -4,7 +4,7 @@ Status: **Draft for discussion** (2026-11-10). Collections: `human-resource-coll
 
 We walk through the groups in order; each group is agreed before it is built.
 
-Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). The HR events to identity are built too (PR #29 and #30, `plans/gateway-hr-events-to-identity.md`), **2.4 Position assignments** (PR #31) and **2.5 Committee memberships** (PR #35) and **3.1 Licences** (PR #38 and #39) and **3.2 Professional credits** (PR #42 and #43) and **4.1 Privilege catalog** (PR #47) and **4.2 Credential applications** (PR #51, #53 and #54) and **4.3 SPK and granted privileges** (PR #60, #62 and #64) and **4.4 Renewals**, a follow-up of 4.2 and 4.3 (PR #68 and #70) and **5.1 Shift definitions** (PR #74) and **5.2 Holiday calendars** (PR #78 and #80) and **5.3 Coverage requirements** (PR #83) and **5.4 Rosters** (PR #87) and **5.5 Roster assignments** (PR #91, #93 and #94) and **5.6 Imports** (PR #97 and #99) and **5.7 Shift swaps** (PR #103 and #104) and **5.8 Practice schedules** (PR #108 and #109), which completes the rostering block, and **6 Clinical eligibility** (PR #113), which completes the endpoint groups of this plan. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
+Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). The HR events to identity are built too (PR #29 and #30, `plans/gateway-hr-events-to-identity.md`), **2.4 Position assignments** (PR #31) and **2.5 Committee memberships** (PR #35) and **3.1 Licences** (PR #38 and #39) and **3.2 Professional credits** (PR #42 and #43) and **4.1 Privilege catalog** (PR #47) and **4.2 Credential applications** (PR #51, #53 and #54) and **4.3 SPK and granted privileges** (PR #60, #62 and #64) and **4.4 Renewals**, a follow-up of 4.2 and 4.3 (PR #68 and #70) and **5.1 Shift definitions** (PR #74) and **5.2 Holiday calendars** (PR #78 and #80) and **5.3 Coverage requirements** (PR #83) and **5.4 Rosters** (PR #87) and **5.5 Roster assignments** (PR #91, #93 and #94) and **5.6 Imports** (PR #97 and #99) and **5.7 Shift swaps** (PR #103 and #104) and **5.8 Practice schedules** (PR #108 and #109), which completes the rostering block, and **6 Clinical eligibility** (PR #113), which completes the endpoint groups of this plan. Group 8 (leave) was added on 2026-11-18 and is not built. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
 
 ## 1. Organization structure and reference data
 
@@ -288,3 +288,57 @@ Plan: `plans/gateway-hr-6-clinical-eligibility.md` (built, PR #113). The one end
 | Endpoint | Purpose |
 |---|---|
 | `GET /employees/:id/eligibility` | Is this practitioner clinically eligible in a unit on a date, optionally for one privilege? Names the failing condition. |
+
+## 8. Leave
+
+Business source: HR spec 9.4 (agreed 2026-11-18). Collections: `human-resource-collections.md` section 9 (draft for review). Four sub-groups, built in this order; each gets its plan in `plans/` before it is built. 8.3 and 8.4 go to production together: an approval without its roster effects would leave people on leave planned to work.
+
+### 8.1 Leave types and policies
+
+Leave types are code concepts (`id.leave-type`), managed through `/code-concepts` (1.3).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /leave-policies` | List the policies of the tenant, by leave type, or the versions in force on a date. |
+| `POST /leave-policies` | Add a policy version for a leave type, from a date. |
+| `PATCH /leave-policies/:id` | Edit a version no request has used yet. |
+| `POST /leave-policies/import` | Load a country bundle, such as the Indonesian starter policies (HR spec 9.4.8). |
+
+### 8.2 Balances
+
+With the worker jobs of `human-resource-collections.md` 9.7 (grants, carry-over and expiry, collective leave).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /employees/:id/leave-balances` | An employee's balance per leave type: granted, used, pending, available, carried over, expiring. |
+| `GET /employees/:id/leave-ledger` | The entries behind a balance. |
+| `POST /employees/:id/leave-adjustments` | HR Manager adds or removes days with a reason. |
+| `GET /employees/me/leave-balances` | Self-service: my balances. |
+
+### 8.3 Requests and approval
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /leave-requests/preview` | Propose the day breakdown and check the balance before requesting. |
+| `POST /employees/me/leave-requests` | Self-service: request leave. |
+| `POST /leave-requests` | HR Admin requests leave on an employee's behalf. |
+| `GET /employees/me/leave-requests` | Self-service: my requests. |
+| `GET /leave-requests` | Queues and lists: by unit, status, employee, period, or waiting for me. |
+| `GET /leave-requests/:id` | View a request with its day breakdown and decisions. |
+| `GET /leave-requests/:id/details` | Read the reason and proof (highly confidential, recorded). |
+| `PUT /leave-requests/:id/proof` | Attach the proof. |
+| `PATCH /leave-requests/:id/days` | The deciding Head adjusts the day breakdown before approving. |
+| `POST /leave-requests/:id/approve` | Approve the current step; the first step names the replacement. |
+| `POST /leave-requests/:id/reject` | Reject the current step with a reason. |
+| `POST /leave-requests/:id/cancel` | Cancel a pending request, or an approved one that has not started. |
+| `POST /leave-requests/:id/change-type` | HR Admin changes the type of an approved request (missing proof). |
+
+### 8.4 Roster and practice-schedule link
+
+Adds the effects of the final approval and of cancelling (HR spec 9.4.4.3 to 9.4.4.6) to the 8.3 routes, and the leave check `HR-ROS-003` (`on_leave`) to adding, importing and swapping assignments (5.5 to 5.7) and to practice sessions (5.8).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /leave-requests/:id/cover` | The cover proposal: each cancelled shift and whether the replacement can take it. |
+| `POST /leave-requests/:id/cover` | The Head confirms the shifts given to the replacement. |
+| `POST /leave-requests/:id/end-early` | HR Admin moves the last date when the employee returns early. |
