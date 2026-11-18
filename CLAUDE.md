@@ -20,6 +20,11 @@ The structure is:
 - Read `.claude/business/glossary.md` and the business specification of the module you work on in `.claude/business/` before designing or changing business behaviour.
 - Read the relevant design documents in `.claude/design/` before adding or changing collections: `account-and-workforce-collections.md` (approved), `data-change-history.md` (approved), `human-resource-collections.md` (approved).
 
+### Task state across chats
+
+- Read `.claude/rules/task-state.md`. Work continues from the state files in `.claude/state/`, never from memory of an earlier chat: one file per branch, plus one series file per plan built over several branches (for example the `gateway_hr` groups).
+- When the developer asks to continue, resume or start the next step of earlier work, or the current branch has a state file, use the `resume` skill before any other action. Before the context fills up, a turn leaves work unfinished, or a series step is finished, use the `handoff` skill.
+
 ### Git workflow
 
 - Read `.claude/rules/git-workflow.md` before committing, pushing or opening a pull request. It is the source of truth for branches, commit messages and PRs.
