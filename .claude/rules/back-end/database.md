@@ -228,6 +228,12 @@ Implementation (`apps/utility/events/`, `apps/utility/database/mongo.event-outbo
 - Published entries expire after 7 days (TTL index on the delivery time). Unpublished entries never expire.
 - Tests use `apps/utility/testing/in-memory-event-outbox.ts`; the gateway harness provides it so tests can assert the events.
 
+### 7.2 Scheduled jobs
+
+The worker's HR jobs (`workforce.md` 3r) run through `JobLease` (`@utility/jobs/lease`, token `JOB_LEASE`, Mongo implementation `mongo.job-lease.ts`, in-memory `apps/utility/testing/in-memory-job-lease.ts`), provided by the connection module like the outboxes. `acquire(job, owner, leaseMs)` upserts one document per job in `job_leases` and answers whether `owner` holds it. It is not business data and is not recorded in the change history.
+
+A job reads across tenants only through a **named repository read documented as "for jobs only"** (`findValidExpiredBefore` on licences, `findCurrentEndedOnOrBefore` on SPKs, `findPublishedEndingOnOrAfter` on rosters), each with its own index that does not start with `tenant_id`. Every other repository read keeps filtering by tenant (4.5). A job then handles each record with that record's `tenant_id`, in its own `TransactionManager.run`, and never mixes tenants in one transaction.
+
 ## 8. Registering a repository
 
 Use `RepositoryModule.forFeature`. It imports the engine modules and binds each token with `useClass`:

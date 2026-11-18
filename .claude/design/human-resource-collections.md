@@ -96,7 +96,8 @@ Indexes:
 |---|---|
 | `{ tenant_id, license_type.system, license_type.code, document_number_normalized }` unique, partial `is_live: true` | One live record per document number and type. A rejected record does not block its correction. |
 | `{ tenant_id, employee_id, eligibility_role, status }` | Eligibility check. |
-| `{ tenant_id, status, expiry_date }` | Daily expiry job and the licence-expiry report (`LICENSE_ALERT_DAYS`). |
+| `{ tenant_id, status, expiry_date }` | The licence-expiry report (`LICENSE_ALERT_DAYS`). |
+| `{ status, expiry_date }` | The licence expiry job, which reads across tenants (`findValidExpiredBefore`, `workforce.md` 3r). |
 | `{ tenant_id, 'practice_location.facility_id', status }` | Facility report. |
 | `{ tenant_id, employee_id, profession.system, profession.code, 'practice_location.facility_id' }` unique, partial `{ status: 'valid', eligibility_role: 'practice_permit', 'practice_location.facility_id': { $type: 'objectId' } }` | At most one valid practice permit per employee, profession and facility of this tenant (`HR-LIC-006`, decision C1). |
 
@@ -229,7 +230,7 @@ Index: `{ tenant_id, application_id, assessor_employee_id, catalog_item_id }` un
 
 An SPK spanning facilities does not replace the per-facility SIP: eligibility in a unit still needs a valid SIP for that unit's facility (HR spec 5.5 condition 3, decision C1). Issuing an SPK checks `HR-CRD-002` for every facility in `facility_ids`.
 
-Indexes: `{ tenant_id, appointment_number }` unique; `{ tenant_id, employee_id, credentialing_facility_id, is_temporary }` unique, partial `is_current: true, is_temporary: false`; `{ tenant_id, unit_ids, status }` (eligibility for a unit); `{ tenant_id, employee_id, status }` (eligibility); `{ tenant_id, status, 'valid_period.end' }` (expiry job, `RECREDENTIAL_LEAD_DAYS`).
+Indexes: `{ tenant_id, appointment_number }` unique; `{ tenant_id, employee_id, credentialing_facility_id, is_temporary }` unique, partial `is_current: true, is_temporary: false`; `{ tenant_id, unit_ids, status }` (eligibility for a unit); `{ tenant_id, employee_id, status }` (eligibility); `{ tenant_id, status, 'valid_period.end' }` (the expiring-soon list, `RECREDENTIAL_LEAD_DAYS`); `{ status, 'valid_period.end' }` (the SPK expiry job, which reads across tenants, `findCurrentEndedOnOrBefore`).
 
 ### 4.6 `privilege_grants` (lines of the RKK)
 
@@ -331,7 +332,7 @@ Index: `{ tenant_id, unit_id, status }`.
 | `coverage_overrides` | `{ date: string; shift_definition_id: ObjectId; requirement_id: ObjectId; reason: string; by: ActorRef; at: Date }[]` | `HR-ROS-021`; listed in the coverage report. Bounded by days × shifts of one period. |
 | `validation` | `{ checked_at: Date; violations: number; coverage_gaps: number } \| null` | Summary of the last full validation, for the list screen. Details are recomputed, not stored. |
 
-Index: `{ tenant_id, unit_id, 'period.start' }` unique; `{ tenant_id, status, 'period.start' }` (`ROSTER_PUBLISH_LEAD_DAYS` alert).
+Index: `{ tenant_id, unit_id, 'period.start' }` unique; `{ tenant_id, status, 'period.start' }` (`ROSTER_PUBLISH_LEAD_DAYS` alert); `{ status, 'period.end' }` (the eligibility sweep, which reads published rosters across tenants, `findPublishedEndingOnOrAfter`).
 
 `HR-ROS-042` (keep each previous version) is met by the change history: every assignment change is a change record with the roster `revision`. No snapshot collection.
 
