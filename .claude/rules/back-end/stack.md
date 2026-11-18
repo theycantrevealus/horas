@@ -50,6 +50,7 @@ Group variables by purpose, one file per context, with the same file names in ev
 - `application.env`: general application settings (`APP_NAME`, `APP_DB`).
 - `mongo.env`: MongoDB connection settings (`MONGO_URL`, `MONGO_USER`, `MONGO_PASSWORD`, `MONGO_DB_NAME`).
 - `encryption.env`: field encryption secrets (`ENCRYPTION_MASTER_KEY`, `ENCRYPTION_HASH_KEY`), only for applications that store encrypted fields (the HR gateway). It is validated by `EncryptedConfigSchema`, not by the shared `ConfigSchema`, so other applications need none.
+- `jobs.env`: optional settings of the worker's scheduled HR jobs (`HR_JOBS_ENABLED`, `HR_JOBS_INTERVAL_MS`, `HR_JOBS_BATCH_SIZE`, `HR_JOBS_LEASE_SECONDS`), every variable with a default; only the worker loads it (`logging.md` 15). `events.env` is optional in the same way.
 - Further contexts follow the same pattern, for example `postgre.env` for PostgreSQL connection settings.
 
 Do not put variables of one context in another context's file. Do not commit real secrets for `preproduction` or `production`.
