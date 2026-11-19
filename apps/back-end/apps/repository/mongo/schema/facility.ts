@@ -95,3 +95,5 @@ export const FacilitySchema = SchemaFactory.createForClass(FacilityEntity)
 
 FacilitySchema.index({ tenant_id: 1, code: 1 }, { unique: true })
 FacilitySchema.index({ tenant_id: 1, organization_id: 1, status: 1 })
+// The facilities that use a holiday calendar (the collective leave job).
+FacilitySchema.index({ tenant_id: 1, holiday_calendar_codes: 1 })

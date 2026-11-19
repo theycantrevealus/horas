@@ -88,6 +88,42 @@ export class FacilityRepositoryMongo
   }
 
   /**
+   * Finds the facilities of a tenant that use a holiday calendar code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param calendarCode - A holiday calendar code.
+   * @param limit - Largest number of records.
+   * @returns The facilities, ordered by code.
+   */
+  async findByCalendarCode(
+    tenantId: string,
+    calendarCode: string,
+    limit: number,
+  ): Promise<Facility[]> {
+    const operation = 'FacilityRepository.findByCalendarCode'
+    if (!toObjectId(tenantId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            holiday_calendar_codes: calendarCode,
+            deleted_at: null,
+          }),
+        )
+        .sort({ code: 1 })
+        .limit(limit)
+        .lean<LeanRecord<FacilityEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds a facility by its code.
    *
    * @param tenantId - Tenant to search in.

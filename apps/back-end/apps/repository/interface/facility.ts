@@ -25,4 +25,19 @@ export interface FacilityRepository extends Repository<Facility> {
     tenantId: string,
     organizationId: string,
   ): Promise<Facility[]>
+
+  /**
+   * Finds the facilities of a tenant whose holiday calendar codes include a code, ordered by facility
+   * code. Used by the worker's collective leave job (`gateway-hr-8-2-leave-balances.md` Task 5).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param calendarCode - A holiday calendar code.
+   * @param limit - Largest number of records to return.
+   * @returns The facilities, possibly none.
+   */
+  findByCalendarCode(
+    tenantId: string,
+    calendarCode: string,
+    limit: number,
+  ): Promise<Facility[]>
 }

@@ -325,4 +325,25 @@ describe('PositionAssignmentRepository on the shared Mongo base', () => {
       asAdmin(() => assignments.delete(assignmentId.toHexString())),
     ).rejects.toBeInstanceOf(RepositoryError)
   })
+
+  it('reads the open primary assignments of a facility after a cursor, in identifier order, for the jobs', async () => {
+    const tenant = tenantId.toHexString()
+
+    await assignments.findOpenPrimaryByFacility(tenant, facilityId.toHexString(), assignmentId.toHexString(), 25)
+
+    expect(model.find).toHaveBeenCalledWith({
+      tenant_id: tenant,
+      facility_id: facilityId.toHexString(),
+      is_primary: true,
+      is_open: true,
+      deleted_at: null,
+      _id: { $gt: assignmentId },
+    })
+    await assignments.findOpenPrimaryByFacility(tenant, facilityId.toHexString(), null, 25)
+    expect(model.find.mock.calls.at(-1)?.[0]).not.toHaveProperty('_id')
+    model.find.mockClear()
+    expect(await assignments.findOpenPrimaryByFacility(tenant, facilityId.toHexString(), 'bad', 25)).toEqual([])
+    expect(await assignments.findOpenPrimaryByFacility('x', facilityId.toHexString(), null, 25)).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
 })

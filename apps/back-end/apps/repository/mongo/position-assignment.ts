@@ -90,6 +90,37 @@ export class PositionAssignmentRepositoryMongo
   }
 
   /**
+   * Finds the open primary assignments of a facility after a cursor.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - The facility.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The assignments.
+   */
+  async findOpenPrimaryByFacility(
+    tenantId: string,
+    facilityId: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<PositionAssignment[]> {
+    const cursor = afterId === null ? null : toObjectId(afterId)
+    return this.findMany(
+      'findOpenPrimaryByFacility',
+      [tenantId, facilityId, ...(afterId === null ? [] : [afterId])],
+      {
+        tenant_id: tenantId,
+        facility_id: facilityId,
+        is_primary: true,
+        is_open: true,
+        ...(cursor ? { _id: { $gt: cursor } } : {}),
+      },
+      { _id: 1 },
+      limit,
+    )
+  }
+
+  /**
    * Finds the open assignments of a position.
    *
    * @param tenantId - Tenant to search in.

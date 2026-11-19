@@ -1,5 +1,8 @@
 import { type Repository } from '@utility/database/interface'
-import { type HolidayCalendar } from '@repository/model/holiday-calendar'
+import {
+  type HolidayCalendar,
+  type HolidayEntry,
+} from '@repository/model/holiday-calendar'
 
 /**
  * Filters and paging of the calendar list.
@@ -46,5 +49,19 @@ export interface HolidayCalendarRepository extends Repository<HolidayCalendar> {
   findByFilter(
     tenantId: string,
     query?: HolidayCalendarQuery,
+  ): Promise<HolidayCalendar[]>
+
+  /**
+   * Finds the calendars of **every tenant** that have an `active` day of one kind on a date. A
+   * cross-tenant read for the worker's collective leave job only
+   * (`gateway-hr-8-2-leave-balances.md` Task 5); the job handles each calendar with its own tenant.
+   *
+   * @param kind - The kind of day, for example `collective_leave`.
+   * @param date - Local date.
+   * @returns The calendars, possibly none.
+   */
+  findWithKindOnDate(
+    kind: HolidayEntry['kind'],
+    date: string,
   ): Promise<HolidayCalendar[]>
 }

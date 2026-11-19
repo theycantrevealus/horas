@@ -81,4 +81,22 @@ export interface PositionAssignmentRepository extends Repository<PositionAssignm
    * @returns True when an open assignment exists.
    */
   findAnyOpenInUnit(tenantId: string, unitId: string): Promise<boolean>
+
+  /**
+   * Finds the open **primary** assignments of a facility, in identifier order, after a cursor. Used
+   * by the worker's collective leave job (`gateway-hr-8-2-leave-balances.md` Task 5), which pages
+   * through a facility's staff.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - The facility.
+   * @param afterId - Identifier of the last assignment of the previous page, or `null` for the first.
+   * @param limit - Largest number of records to return.
+   * @returns The assignments, possibly none; empty for a malformed identifier.
+   */
+  findOpenPrimaryByFacility(
+    tenantId: string,
+    facilityId: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<PositionAssignment[]>
 }
