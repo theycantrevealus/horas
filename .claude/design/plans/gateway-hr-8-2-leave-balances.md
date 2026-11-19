@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-Status: **Planned** (2026-11-18). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 28), after 8.1. Endpoints: `../hr-endpoints.md` 8.2. Collection: `../human-resource-collections.md` 9.5, 9.7, 9.8 (`leave_ledger_entries`, the jobs, the parameters). Business rules: HR spec 9.4.2 (Leave Balance), 9.4.5 (entitlements), `HR-LEV-030` to `HR-LEV-032`. Built references: the HR jobs (`gateway-hr-7-worker-expiry-jobs.md`: `HrJob`, lease, system actors, named reads for jobs only), employment contracts (2.3), position assignments (2.4), holiday calendars (5.2).
+Status: **Built** (2026-11-19, PR #124 and #125 merged; as-built notes in section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 28), after 8.1. Endpoints: `../hr-endpoints.md` 8.2. Collection: `../human-resource-collections.md` 9.5, 9.7, 9.8 (`leave_ledger_entries`, the jobs, the parameters). Business rules: HR spec 9.4.2 (Leave Balance), 9.4.5 (entitlements), `HR-LEV-030` to `HR-LEV-032`. Built references: the HR jobs (`gateway-hr-7-worker-expiry-jobs.md`: `HrJob`, lease, system actors, named reads for jobs only), employment contracts (2.3), position assignments (2.4), holiday calendars (5.2).
 
 **Goal:** every employee has a traceable leave balance per type, granted, carried over and expired by the worker, and HR Manager can correct it.
 
@@ -153,3 +153,21 @@ apps/back-end/apps/
 - [ ] **Step 3: Implement** the jobs and the named reads.
 - [ ] **Step 4: Run** the full checks plus `npx nest build worker` — PASS.
 - [ ] **Step 5: Commit** `feat(worker): grant, carry over and expire leave entitlements`.
+
+## 7. As built
+
+- Built in two code PRs as planned: **#124** (Tasks 1 to 4: ledger, pure rules, services, endpoints) and **#125** (Task 5: the three jobs).
+- **Moved to #125.** The two job-only ledger reads (`findGrantsEndedBetween`, `findCarryOversExpiringBetween`) and the `LEAVE_GRANT_LEAD_DAYS` catalog entry (tenant scope, 0 to 180, default 60) ship with the jobs that use them.
+- **Names.** `entitlementPeriod(period, serviceStart, date)` takes the period name (`calendar_year` or `service_year`), not the whole rule. The ledger listing of the service is `ledgerOf` (`ledger` is the repository property). `LeavePlaceService.of` also returns `today`. `ownBalances(tenantId, employeeId | null, onDate?)` carries the 403 `employee_required` of `me`. `dates.ts` (`addMonths`, `wholeMonthsBetween`) holds the month arithmetic; the existing `addYears` turns 29 February into 1 March, which LB2 does not allow.
+- **Service start (LB1).** Every non-draft contract counts (`active`, `ended`, `terminated`, `superseded`), using the termination date when set; contracts that run in parallel count from the earliest start.
+- **Balances.** `balances` answers `[]` without a contract in force today; a type whose minimum service is not met is listed with zeros; `invalid_date` for a bad `onDate`. `pending` is 0 until 8.3.
+- **Minimum service (LB3).** Checked on the first day of the period: for `calendar_year`, the whole months served on 1 January; for `service_year`, on the anniversary.
+- **Adjustment codes (LB7).** `invalid_days`, `reason_required`, `invalid_reason` (over 500 characters), `invalid_leave_type`, `period_not_found`.
+- **Jobs** (rules as built: `workforce.md` 3r):
+  - Today is read in UTC. The grant job scans every `active` contract in force (`EmploymentContractRepository.findActiveForJobs`, index `{ status, _id }`), grants the current period and, within the lead days, the next one; the days come from the version in force today (current) or on the first day of the coming period; no backfill of past periods; a separated employee gets nothing.
+  - The period job looks back 7 days (`findGrantsEndedBetween`, `findCarryOversExpiringBetween`, indexes `{ kind, period.end }` and `{ kind, expires_on }`), uses the version in force on the period's last day, posts the carry-over and the expiry in one transaction, and skips an employee with no contract in force (the days stay for the final settlement). The old period keeps the carried days as its own balance.
+  - The collective leave job reads tenant calendars only (`HolidayCalendarRepository.findWithKindOnDate`, index on `holidays.date` and `holidays.kind`), the facilities that list the calendar code (`FacilityRepository.findByCalendarCode`, index `{ tenant_id, holiday_calendar_codes }`, not in the plan) and their open primary assignments (`PositionAssignmentRepository.findOpenPrimaryByFacility`, index `{ tenant_id, facility_id, is_open }`, not in the plan). A day is not taken when the employee had a planned working shift or has less than a day left.
+  - Each record is its own write with its own correlation id, the actors `leave-grant-job`, `leave-period-job` and `collective-leave-job` and the reasons `leave_granted`, `leave_carried_over`, `leave_expired` and `collective_leave`. No events. Each pass rescans from the start, so a first run over a large tenant takes several reruns of the runner.
+- **Open.** A collective leave day is not taken when less than a day is left (no negative balance). Whether it should be taken anyway, as a negative or unpaid day, is a decision for the hospital and HR; nothing is built for it.
+- Not built: pending days (8.3), the alerts of HR spec 9.4.9, proration (Q13) and platform holiday calendars for collective leave.
+- Not tested: the jobs against a real MongoDB replica set (unique keys, one-transaction posts), the new indexes, and the runner end to end. The in-memory transaction fake cannot roll back, so tests check results, not a failure inside a transaction.

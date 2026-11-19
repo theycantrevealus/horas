@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-Status: **Planned** (2026-11-18). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 27). Endpoints: `../hr-endpoints.md` 8.1. Collection: `../human-resource-collections.md` 9.1 and 9.2 (`leave_policies`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 9.4.2 (Leave Type, Leave Policy), 9.4.8 (Indonesian bundle), `HR-LEV-001`. Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: code concepts (1.3: bundles, `assertActive`), HR parameters (1.6: dated values), shift definitions (5.1).
+Status: **Built** (2026-11-19, PR #123 merged; as-built notes in section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 27). Endpoints: `../hr-endpoints.md` 8.1. Collection: `../human-resource-collections.md` 9.1 and 9.2 (`leave_policies`). Business rules: `../../business/administrative-operational-system/human-resource-management.md` 9.4.2 (Leave Type, Leave Policy), 9.4.8 (Indonesian bundle), `HR-LEV-001`. Rules every endpoint follows: `../../rules/back-end/workforce.md` 3. Built references: code concepts (1.3: bundles, `assertActive`), HR parameters (1.6: dated values), shift definitions (5.1).
 
 **Goal:** HR Manager can define, version and import the leave policies that every later leave group reads.
 
@@ -147,3 +147,15 @@ apps/back-end/apps/
 - [ ] **Step 3: Implement** the DTOs (shape and length only), the controller and the module; import it in `GatewayHrModule`.
 - [ ] **Step 4: Run** the full checks of Global Constraints — expected all PASS.
 - [ ] **Step 5: Commit** `feat(gateway-hr): add the leave policy endpoints`.
+
+## 7. As built
+
+- Built in one code PR, **#123**, four signed commits (repository, codes and rules, service, endpoints), as planned. `versionsInForce` (`policy-in-force.ts`) was added by the jobs PR #125 and the policy list now uses it.
+- **`maxDaysPerRequest` is 0.5 to 366 in half steps** (LP4 said 1 to 366), so a per-event policy of 2.5 days can equal its limit (422 `invalid_max_days` otherwise).
+- **A setting that does not belong to the balance kind is refused** with `invalid_balance` (LP3), not dropped: a per-event or balance-free policy with `carryOver`, `period`, `minServiceMonths` or `deductCollectiveLeave`, or a balance-free one with `days`.
+- **Notes** are trimmed, a blank value is stored as `null`, and more than 500 characters answer 422 `invalid_notes` (the DTO limit is 500 too).
+- `system-rules.ts` needed no change: leave types have no required property (LP9). `toPolicyInput` (in `leave-policy-rules.ts`) turns stored rules back into the request shape so an edit merges and checks as a whole.
+- With `onDate` the list reads at most 1000 versions of the tenant and keeps the version in force of each type; `limit` and `offset` then page that result.
+- **Bundle values.** The HR spec 9.4.8 table gives the days, counting, approval, after-the-fact days and proof of each Indonesian leave type. The values it does not give are **starter values to verify** with the hospital's legal team: no notice for any type, half days only for annual leave, proof due 30 days after the start for the leaves that need proof (3 days for sick leave, as the table says), `maxDaysPerRequest` 366 for balance-free types and annual leave (the days of the event for per-event types, 2 for menstrual leave), and `tidak_tersedia` unpaid. `melahirkan` (90 days) and `istri_melahirkan` (2 days) are marked to verify against UU 4/2024.
+- Not built: `policy_in_use` (422 for editing a version a request used) comes with 8.3 (LR14 there); policy bundles of other countries; retiring a policy (a leave type is retired through its concept).
+- Tests as planned, with the checks of Task 4: 401, 403, 404, 409, 422, 400 and list limits, reads write only the access log and writes log no codes, dates, notes or reasons. Not tested: the unique index and the import transaction against a real MongoDB replica set.
