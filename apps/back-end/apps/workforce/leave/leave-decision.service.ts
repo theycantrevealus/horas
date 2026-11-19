@@ -33,7 +33,6 @@ import {
   ForbiddenError,
   InvalidRequestError,
 } from '../workforce.error'
-import { planUse } from './balance'
 import { totalOf } from './day-count'
 import { LeaveDeciderService } from './decider'
 import { isRequester, leaveRequestNotFound } from './leave-access'
@@ -41,8 +40,8 @@ import { LeaveBalanceService } from './leave-balance.service'
 import { type LeaveCaller } from './leave-caller'
 import { LEAVE_EFFECTS, type LeaveEffects } from './leave-effects'
 import { LeavePlaceService } from './leave-place'
-import { heldDays } from './leave-posting'
-import { assertTransition } from './leave-request-rules'
+import { postUses, reverseUses } from './leave-posting'
+import { assertTransition, maxDaysOf } from './leave-request-rules'
 
 const NAME = 'LeaveDecisionService'
 
@@ -252,7 +251,7 @@ export class LeaveDecisionService {
               { expectedVersion: request.version },
             )
             if (last) {
-              await this.postUses(tenantId, updated)
+              await postUses(this.ledger, this.balances, tenantId, updated)
               await this.effects.onApproved(updated)
             }
             return updated
@@ -369,7 +368,7 @@ export class LeaveDecisionService {
               { expectedVersion: request.version },
             )
             if (approved) {
-              await this.reverseUses(tenantId, updated)
+              await reverseUses(this.ledger, tenantId, updated)
               await this.effects.onCancelled(updated)
             }
             return updated
@@ -379,71 +378,6 @@ export class LeaveDecisionService {
         )
       },
     )
-  }
-
-  /**
-   * Posts the `use` entries of an approved request, carried-over days first (HR plan 8.2 LB6). A
-   * request without a yearly entitlement posts nothing.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param request - The request, already approved.
-   */
-  private async postUses(tenantId: string, request: LeaveRequest): Promise<void> {
-    if (request.rules.balance_kind !== 'period' || !request.entitlement_period) {
-      return
-    }
-    const period = request.entitlement_period
-    const summary = await this.balances.summary(
-      tenantId,
-      request.employee_id,
-      request.leave_type,
-      period.start,
-      request.id,
-    )
-    for (const part of planUse(summary, request.total_days)) {
-      await this.ledger.append({
-        tenant_id: tenantId,
-        employee_id: request.employee_id,
-        leave_type: {
-          system: request.leave_type.system,
-          code: request.leave_type.code,
-        },
-        period: { start: period.start, end: period.end },
-        kind: 'use',
-        days: 0 - part.days,
-        bucket: part.bucket,
-        expires_on: null,
-        source: { kind: 'request', ref_id: request.id, date: null },
-        dedupe_key: null,
-      })
-    }
-  }
-
-  /**
-   * Reverses what a request still uses, bucket by bucket.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param request - The request.
-   */
-  private async reverseUses(
-    tenantId: string,
-    request: LeaveRequest,
-  ): Promise<void> {
-    const entries = await this.ledger.findByRequest(tenantId, request.id)
-    for (const held of heldDays(entries)) {
-      await this.ledger.append({
-        tenant_id: tenantId,
-        employee_id: request.employee_id,
-        leave_type: held.leave_type,
-        period: held.period,
-        kind: 'reversal',
-        days: held.days,
-        bucket: held.bucket,
-        expires_on: null,
-        source: { kind: 'request', ref_id: request.id, date: null },
-        dedupe_key: null,
-      })
-    }
   }
 
   /**
@@ -463,11 +397,7 @@ export class LeaveDecisionService {
   ): Promise<void> {
     const policy = await this.policies.findOne(request.policy_id)
     if (policy && policy.tenant_id === tenantId) {
-      const limit =
-        policy.balance.kind === 'per_event'
-          ? Math.min(policy.max_days_per_request, policy.balance.days)
-          : policy.max_days_per_request
-      if (totalDays > limit) {
+      if (totalDays > maxDaysOf(policy)) {
         throw new InvalidRequestError(
           'too_many_days',
           'The request counts more days than this leave type allows.',

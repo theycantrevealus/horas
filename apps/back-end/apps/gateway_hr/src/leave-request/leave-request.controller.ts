@@ -17,6 +17,7 @@ import {
 } from '@identity/guard/decorators'
 import { PERMISSIONS } from '@identity/permission'
 import { LeaveDecisionService } from '@workforce/leave/leave-decision.service'
+import { LeaveTypeChangeService } from '@workforce/leave/leave-type-change.service'
 import { LeaveDetailService } from '@workforce/leave/leave-detail.service'
 import { type LeaveCaller } from '@workforce/leave/leave-caller'
 import {
@@ -28,6 +29,7 @@ import {
   AdjustDaysDto,
   ApproveLeaveDto,
   CancelLeaveDto,
+  ChangeLeaveTypeDto,
   RejectLeaveDto,
   HrLeaveRequestDto,
   LeaveDatesDto,
@@ -88,11 +90,13 @@ export class LeaveRequestController {
    * @param requests - Leave request service.
    * @param details - Leave detail service, for the reason and the proof.
    * @param decisions - Leave decision service: days, approve, reject and cancel.
+   * @param typeChanges - Leave type change service.
    */
   constructor(
     private readonly requests: LeaveRequestService,
     private readonly details: LeaveDetailService,
     private readonly decisions: LeaveDecisionService,
+    private readonly typeChanges: LeaveTypeChangeService,
   ) {}
 
   /**
@@ -341,5 +345,28 @@ export class LeaveRequestController {
     @Body() body: CancelLeaveDto,
   ): Promise<LeaveRequest> {
     return this.decisions.cancel(user.tenant_id, id, body, toCaller(user, held))
+  }
+
+  /**
+   * Handles `POST /v1/leave-requests/:id/change-type`: HR changes the leave type of an approved
+   * leave.
+   *
+   * @param user - Signed-in user.
+   * @param id - Request identifier.
+   * @param body - The new type and the reason.
+   * @returns The updated request.
+   */
+  @Post('leave-requests/:id/change-type')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_LEAVE_REQUEST_CHANGE_TYPE)
+  changeType(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: ChangeLeaveTypeDto,
+  ): Promise<LeaveRequest> {
+    return this.typeChanges.change(user.tenant_id, id, {
+      leaveType: { system: body.leaveType.system, code: body.leaveType.code },
+      reason: body.reason,
+      version: body.version,
+    })
   }
 }

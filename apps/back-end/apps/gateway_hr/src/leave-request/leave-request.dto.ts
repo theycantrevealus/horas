@@ -273,3 +273,19 @@ export class AdjustDaysDto extends VersionedDto {
   @Type(() => DayChangeDto)
   days!: DayChangeDto[]
 }
+
+/**
+ * Body of `POST /v1/leave-requests/:id/change-type`.
+ *
+ * @property leaveType - The new leave type.
+ * @property reason - Why, 1 to 500 characters.
+ */
+export class ChangeLeaveTypeDto extends VersionedDto {
+  @ValidateNested()
+  @Type(() => CodingDto)
+  leaveType!: CodingDto
+
+  @IsString()
+  @MaxLength(2000)
+  reason!: string
+}

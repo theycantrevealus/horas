@@ -59,6 +59,7 @@ import {
   OPEN_STATUSES,
   checkPeriod,
   checkRequestDates,
+  maxDaysOf,
   needsSecondStep,
 } from './leave-request-rules'
 import { serviceStart } from './service-start'
@@ -604,11 +605,7 @@ export class LeaveRequestService {
     partial.days = days
     const totalDays = totalOf(days)
     partial.totalDays = totalDays
-    const limit =
-      policy.balance.kind === 'per_event'
-        ? Math.min(policy.max_days_per_request, policy.balance.days)
-        : policy.max_days_per_request
-    if (totalDays > limit) {
+    if (totalDays > maxDaysOf(policy)) {
       throw new InvalidRequestError(
         'too_many_days',
         'The request counts more days than this leave type allows.',
@@ -649,7 +646,7 @@ export class LeaveRequestService {
    * @param policy - The policy in force.
    * @throws InvalidRequestError `employment_type_not_allowed`.
    */
-  private async checkEmploymentType(
+  async checkEmploymentType(
     tenantId: string,
     employeeId: string,
     policy: LeavePolicy,
@@ -683,17 +680,20 @@ export class LeaveRequestService {
    * @param totalDays - The counted days.
    * @param today - Today in the employee's zone.
    * @param partial - Receives the entitlement and the days available.
+   * @param excludeRequestId - A request whose reservation is not counted: the one being decided or
+   * changed.
    * @returns The entitlement period, or `null` for a policy without a yearly balance.
    * @throws InvalidRequestError `no_service`, `crosses_period` or `insufficient_balance`.
    */
-  private async checkEntitlement(
+  async checkEntitlement(
     tenantId: string,
     employeeId: string,
     policy: LeavePolicy,
     input: LeaveRequestInput,
     totalDays: number,
     today: string,
-    partial: Partial<Evaluation>,
+    partial: Partial<Evaluation> = {},
+    excludeRequestId?: string,
   ): Promise<ClosedDatePeriod | null> {
     const rule = policy.balance
     if (rule.kind !== 'period') {
@@ -722,6 +722,7 @@ export class LeaveRequestService {
       employeeId,
       input.leaveType,
       period.start,
+      excludeRequestId,
     )
     partial.available = summary.available
     if (totalDays > summary.available) {

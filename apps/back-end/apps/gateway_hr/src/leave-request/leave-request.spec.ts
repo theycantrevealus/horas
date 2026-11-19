@@ -24,6 +24,7 @@ describe('leave request endpoints (in-memory repositories)', () => {
   let readerToken: string
   let detailsToken: string
   let approverToken: string
+  let changerToken: string
   let unlinkedToken: string
   let otherTenantToken: string
   const sick = { system: 'id.leave-type', code: 'sakit' }
@@ -124,6 +125,7 @@ describe('leave request endpoints (in-memory repositories)', () => {
     ])
     readerToken = await gateway.seedAndLogin(tenantId, 'reader', [PERMISSIONS.WORKFORCE_LEAVE_REQUEST_READ])
     approverToken = await gateway.seedAndLogin(tenantId, 'approver', [PERMISSIONS.WORKFORCE_LEAVE_REQUEST_APPROVE_HR], await addEmployee(tenantId))
+    changerToken = await gateway.seedAndLogin(tenantId, 'changer', [PERMISSIONS.WORKFORCE_LEAVE_REQUEST_CHANGE_TYPE])
     detailsToken = await gateway.seedAndLogin(tenantId, 'details', [PERMISSIONS.WORKFORCE_LEAVE_REQUEST_READ_DETAILS])
     otherTenantToken = await gateway.seedAndLogin(otherTenantId, 'other', [
       PERMISSIONS.WORKFORCE_LEAVE_REQUEST_READ,
@@ -137,6 +139,32 @@ describe('leave request endpoints (in-memory repositories)', () => {
       mappings: [],
       period: null,
       status: 'active',
+    })
+    await workforce.codeConcepts.create({
+      system: 'id.leave-type',
+      code: 'izin',
+      display: [{ locale: 'en', text: 'Permit' }],
+      properties: {},
+      mappings: [],
+      period: null,
+      status: 'active',
+    })
+    await workforce.leavePolicies.create({
+      tenant_id: tenantId,
+      leave_type: { system: 'id.leave-type', code: 'izin' },
+      effective_from: '2020-01-01',
+      balance: { kind: 'none' },
+      counting: 'calendar_days',
+      half_days: false,
+      paid: false,
+      employment_types: [],
+      approval: { steps: 'one_step', two_step_above_days: null },
+      notice_days: 0,
+      retroactive_days: 0,
+      max_days_per_request: 14,
+      proof: null,
+      notes: null,
+      source: { kind: 'manual', bundle_id: null },
     })
     await workforce.leavePolicies.create({
       tenant_id: tenantId,
@@ -393,5 +421,31 @@ describe('leave request endpoints (in-memory repositories)', () => {
     expect(noReason.body).toMatchObject({ code: 'reason_required' })
     expect(byHr.body).toMatchObject({ status: 'cancelled' })
     expect((await call('POST', `/v1/leave-requests/${waiting.id}/cancel`, nurseToken, {})).body).toMatchObject({ code: 'invalid_transition' })
+  })
+
+  it('changes the type of an approved leave with the permission, and refuses without it, for a waiting request and a bad body', async () => {
+    const waiting = await nurseRequest(70)
+    const approved = await nurseRequest(75)
+    await call('POST', `/v1/leave-requests/${approved.id}/approve`, approverToken, { noReplacementReason: 'x' })
+    const permit = { system: 'id.leave-type', code: 'izin' }
+
+    const denied = await call('POST', `/v1/leave-requests/${approved.id}/change-type`, hrToken, { leaveType: permit, reason: 'x' })
+    const early = await call('POST', `/v1/leave-requests/${waiting.id}/change-type`, changerToken, { leaveType: permit, reason: 'x' })
+    const invalid = await call('POST', `/v1/leave-requests/${approved.id}/change-type`, changerToken, { leaveType: permit })
+    const unknown = await call('POST', `/v1/leave-requests/${new Types.ObjectId().toHexString()}/change-type`, changerToken, { leaveType: permit, reason: 'x' })
+    const logs = captureLogs()
+    const ok = await call('POST', `/v1/leave-requests/${approved.id}/change-type`, changerToken, { leaveType: permit, reason: 'Salah jenis' })
+    logs.restore()
+
+    expect(denied.status).toBe(403)
+    expect(early.status).toBe(422)
+    expect(early.body).toMatchObject({ code: 'invalid_transition' })
+    expect(invalid.status).toBe(400)
+    expect(unknown.status).toBe(404)
+    expect(ok.status).toBe(201)
+    expect(ok.body).toMatchObject({ leave_type: permit, status: 'approved', rules: { counting: 'calendar_days' } })
+    expect(JSON.stringify(logs.written)).toContain('leave_type_change')
+    expect(JSON.stringify(logs.written)).not.toContain('Salah jenis')
+    expect(JSON.stringify(logs.written)).not.toContain('izin')
   })
 })
