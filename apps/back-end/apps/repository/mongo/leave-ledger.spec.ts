@@ -332,6 +332,28 @@ describe('LeaveLedgerRepository on the shared Mongo base', () => {
     expect(model.find).not.toHaveBeenCalled()
   })
 
+  it('finds the entries a request posted, and nothing for a malformed identifier', async () => {
+    const tenant = tenantId.toHexString()
+    const request = new Types.ObjectId().toHexString()
+    model.find.mockReturnValueOnce(chain([stored]))
+
+    expect(await ledger.findByRequest(tenant, request)).toHaveLength(1)
+
+    expect(model.find).toHaveBeenCalledWith({
+      tenant_id: tenant,
+      'source.kind': 'request',
+      'source.ref_id': request,
+      deleted_at: null,
+    })
+    model.find.mockClear()
+    expect(await ledger.findByRequest(tenant, 'bad')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+    expect(LeaveLedgerEntrySchema.indexes()).toContainEqual([
+      { tenant_id: 1, 'source.ref_id': 1 },
+      expect.objectContaining({ partialFilterExpression: { 'source.kind': 'request' } }),
+    ])
+  })
+
   it('reads the grants of every tenant whose period ended in a window, after a cursor, for the jobs', async () => {
     const query = chain([stored])
     model.find.mockReturnValueOnce(query)

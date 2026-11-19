@@ -329,6 +329,8 @@ export const LeaveRequestSchema = SchemaFactory.createForClass(LeaveRequestEntit
 
 // Overlap (`HR-LEV-002`), the employee's own list and the leave check of rostering.
 LeaveRequestSchema.index({ tenant_id: 1, employee_id: 1, 'period.start': 1 })
+// Whether a request was made under a policy version (HR plan 8.3 LR14).
+LeaveRequestSchema.index({ tenant_id: 1, policy_id: 1 })
 // The Head's queue.
 LeaveRequestSchema.index({ tenant_id: 1, 'deciders.first.unit_id': 1, status: 1 })
 // HR Manager's queue and the decision SLA alert.

@@ -65,6 +65,19 @@ export interface LeaveLedgerRepository extends Repository<LeaveLedgerEntry> {
   ): Promise<LeaveLedgerEntry[]>
 
   /**
+   * Finds the entries a leave request posted, oldest first (its `use` entries, to reverse them when
+   * the leave is cancelled or changed).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param requestId - The leave request.
+   * @returns The entries, possibly none; empty for a malformed identifier.
+   */
+  findByRequest(
+    tenantId: string,
+    requestId: string,
+  ): Promise<LeaveLedgerEntry[]>
+
+  /**
    * Finds `grant` entries of **every tenant** whose period ended in a window, in identifier order,
    * after a cursor. A cross-tenant read for the worker's leave period job only
    * (`gateway-hr-8-2-leave-balances.md` Task 5); the job handles each entry with its own

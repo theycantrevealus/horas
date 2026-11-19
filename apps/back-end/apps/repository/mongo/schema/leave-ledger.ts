@@ -164,6 +164,11 @@ LeaveLedgerEntrySchema.index(
   { tenant_id: 1, dedupe_key: 1 },
   { unique: true, partialFilterExpression: { dedupe_key: { $type: 'string' } } },
 )
+// The entries a leave request posted, read to reverse them on cancel or change.
+LeaveLedgerEntrySchema.index(
+  { tenant_id: 1, 'source.ref_id': 1 },
+  { partialFilterExpression: { 'source.kind': 'request' } },
+)
 // The leave period job reads across tenants, so these indexes do not start with `tenant_id`
 // (`database.md` 7.2): the grants whose period ended in a window, and the carry-overs that expire
 // in a window.
