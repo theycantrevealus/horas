@@ -92,7 +92,7 @@ const MAX_EMPLOYMENT_TYPES = 20
  * @param max - Largest allowed value.
  * @returns True for a finite multiple of 0.5 inside the range.
  */
-function isHalfSteps(value: unknown, min: number, max: number): value is number {
+export function isHalfSteps(value: unknown, min: number, max: number): value is number {
   return (
     typeof value === 'number' &&
     Number.isFinite(value) &&
@@ -110,7 +110,7 @@ function isHalfSteps(value: unknown, min: number, max: number): value is number 
  * @param max - Largest allowed value.
  * @returns True for an integer inside the range.
  */
-function isWhole(value: unknown, min: number, max: number): value is number {
+export function isWhole(value: unknown, min: number, max: number): value is number {
   return Number.isInteger(value) && (value as number) >= min && (value as number) <= max
 }
 

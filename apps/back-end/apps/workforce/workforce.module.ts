@@ -9,6 +9,7 @@ import { CredentialApplicationRepositoryModule } from '@repository/mongo/credent
 import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credential-assessment.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { CoverageRequirementRepositoryModule } from '@repository/mongo/coverage-requirement.module'
+import { LeaveLedgerRepositoryModule } from '@repository/mongo/leave-ledger.module'
 import { LeavePolicyRepositoryModule } from '@repository/mongo/leave-policy.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
 import { PracticeScheduleRepositoryModule } from '@repository/mongo/practice-schedule.module'
@@ -41,6 +42,8 @@ import { EligibilityQueryService } from './eligibility/eligibility-query.service
 import { EligibilityService } from './eligibility/eligibility.service'
 import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
+import { LeaveBalanceService } from './leave/leave-balance.service'
+import { LeavePlaceService } from './leave/leave-place'
 import { LeavePolicyService } from './leave/leave-policy.service'
 import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
@@ -106,6 +109,7 @@ import { UnitService } from './structure/unit.service'
     PracticeScheduleRepositoryModule,
     PracticeScheduleExceptionRepositoryModule,
     LeavePolicyRepositoryModule,
+    LeaveLedgerRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -146,6 +150,8 @@ import { UnitService } from './structure/unit.service'
     EligibilityService,
     EligibilityQueryService,
     LeavePolicyService,
+    LeavePlaceService,
+    LeaveBalanceService,
   ],
   exports: [
     OrganizationService,
@@ -186,6 +192,8 @@ import { UnitService } from './structure/unit.service'
     EligibilityService,
     EligibilityQueryService,
     LeavePolicyService,
+    LeavePlaceService,
+    LeaveBalanceService,
   ],
 })
 export class WorkforceModule {}
