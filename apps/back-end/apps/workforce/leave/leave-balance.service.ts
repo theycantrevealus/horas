@@ -8,6 +8,7 @@ import {
   type LeaveLedgerQuery,
   type LeaveLedgerRepository,
 } from '@repository/interface/leave-ledger'
+import { type LeaveRequestRepository } from '@repository/interface/leave-request'
 import { type ClosedDatePeriod } from '@repository/model/common/calendar'
 import { type Coding } from '@repository/model/common/coding'
 import { type LeaveLedgerEntry } from '@repository/model/leave-ledger-entry'
@@ -15,6 +16,7 @@ import {
   REPOSITORY_EMPLOYEE,
   REPOSITORY_EMPLOYMENT_CONTRACT,
   REPOSITORY_LEAVE_LEDGER,
+  REPOSITORY_LEAVE_REQUEST,
 } from '@repository/token'
 import { systemSuffix } from '../concept/system-rules'
 import { observe } from '../observe'
@@ -83,6 +85,7 @@ export class LeaveBalanceService {
    * @param employees - Employee repository.
    * @param contracts - Employment contract repository, for the start of continuous service.
    * @param ledger - Leave ledger repository.
+   * @param requests - Leave request repository, for the days that requests hold while they wait.
    * @param policies - Leave policies, for the types with a balance.
    * @param place - Finds today in the employee's time zone.
    * @param logger - Logger of this service.
@@ -93,6 +96,8 @@ export class LeaveBalanceService {
     private readonly contracts: EmploymentContractRepository,
     @Inject(REPOSITORY_LEAVE_LEDGER)
     private readonly ledger: LeaveLedgerRepository,
+    @Inject(REPOSITORY_LEAVE_REQUEST)
+    private readonly requests: LeaveRequestRepository,
     @Inject(LeavePolicyService) private readonly policies: LeavePolicyService,
     @Inject(LeavePlaceService) private readonly place: LeavePlaceService,
     @Inject(AppLogger) private readonly logger: AppLogger,
@@ -149,7 +154,10 @@ export class LeaveBalanceService {
       views.push({
         leaveType: { ...policy.leave_type },
         period,
-        ...summarizeBalance(entries, 0),
+        ...summarizeBalance(
+          entries,
+          await this.pendingDays(tenantId, employeeId, policy.leave_type, period.start),
+        ),
       })
     }
     return views
@@ -187,13 +195,15 @@ export class LeaveBalanceService {
    * @param employeeId - The employee.
    * @param leaveType - The leave type.
    * @param periodStart - First day of the entitlement period.
-   * @returns The balance; `pending` is 0 until requests exist (8.3).
+   * @param excludeRequestId - A request to leave out of the pending days, the one being decided.
+   * @returns The balance, with the days of requests that wait for a decision as `pending`.
    */
   async summary(
     tenantId: string,
     employeeId: string,
     leaveType: Coding,
     periodStart: string,
+    excludeRequestId?: string,
   ): Promise<LeaveBalanceSummary> {
     const entries = await this.ledger.findByEmployeeTypeAndPeriod(
       tenantId,
@@ -201,7 +211,48 @@ export class LeaveBalanceService {
       leaveType,
       periodStart,
     )
-    return summarizeBalance(entries, 0)
+    return summarizeBalance(
+      entries,
+      await this.pendingDays(
+        tenantId,
+        employeeId,
+        leaveType,
+        periodStart,
+        excludeRequestId,
+      ),
+    )
+  }
+
+  /**
+   * Sums the days of the requests that wait for a decision (`requested` and `head_approved`) for an
+   * employee, leave type and entitlement period. Those days are reserved, so two requests can never
+   * spend the same days (HR plan 8.3 LR13).
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param employeeId - The employee.
+   * @param leaveType - The leave type.
+   * @param periodStart - First day of the entitlement period.
+   * @param excludeRequestId - A request to leave out.
+   * @returns The reserved days.
+   */
+  private async pendingDays(
+    tenantId: string,
+    employeeId: string,
+    leaveType: Coding,
+    periodStart: string,
+    excludeRequestId?: string,
+  ): Promise<number> {
+    const pending = await this.requests.findPendingByEmployeeTypeAndPeriod(
+      tenantId,
+      employeeId,
+      leaveType,
+      periodStart,
+    )
+    return (
+      pending
+        .filter((request) => request.id !== excludeRequestId)
+        .reduce((total, request) => total + Math.round(request.total_days * 2), 0) / 2
+    )
   }
 
   /**
