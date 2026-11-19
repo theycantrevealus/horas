@@ -282,4 +282,14 @@ describe('HolidayCalendarRepository on the shared Mongo base', () => {
   it('has no delete', async () => {
     await expect(asAdmin(() => calendars.delete(calendarId.toHexString()))).rejects.toBeInstanceOf(RepositoryError)
   })
+
+  it('finds the calendars of every tenant that have an active day of one kind on a date, for the jobs', async () => {
+    const found = await calendars.findWithKindOnDate('collective_leave', '2027-03-01')
+
+    expect(found).toHaveLength(1)
+    expect(model.find).toHaveBeenCalledWith({
+      holidays: { $elemMatch: { date: '2027-03-01', kind: 'collective_leave', status: 'active' } },
+      deleted_at: null,
+    })
+  })
 })

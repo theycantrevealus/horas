@@ -322,6 +322,35 @@ describe('EmploymentContractRepository on the shared Mongo base', () => {
     expect(await contracts.findByEmployee('x', 'y')).toEqual([])
   })
 
+  it('reads the active contracts of every tenant after a cursor, in identifier order, for the jobs', async () => {
+    const query = {
+      sort: vi.fn(() => query),
+      limit: vi.fn(() => query),
+      lean: () => query,
+      exec: async () => [stored],
+    }
+    model.find.mockReturnValueOnce(query as never)
+
+    const found = await contracts.findActiveForJobs(contractId.toHexString(), 25)
+
+    expect(found).toHaveLength(1)
+    expect(model.find).toHaveBeenCalledWith({
+      status: 'active',
+      deleted_at: null,
+      _id: { $gt: contractId },
+    })
+    expect(query.sort).toHaveBeenCalledWith({ _id: 1 })
+    expect(query.limit).toHaveBeenCalledWith(25)
+
+    model.find.mockReturnValueOnce(chain([stored]) as never)
+    await contracts.findActiveForJobs(null, 25)
+    expect(model.find).toHaveBeenLastCalledWith({ status: 'active', deleted_at: null })
+
+    model.find.mockClear()
+    expect(await contracts.findActiveForJobs('bad', 25)).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('updates only the editable fields, never the employee, employer or number', async () => {
     await asAdmin(() =>
       contracts.update(contractId.toHexString(), {

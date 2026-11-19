@@ -136,3 +136,5 @@ PositionAssignmentSchema.index({
 })
 PositionAssignmentSchema.index({ tenant_id: 1, employee_id: 1, is_open: 1 })
 PositionAssignmentSchema.index({ tenant_id: 1, position_id: 1, is_open: 1 })
+// The staff of a facility (the collective leave job pages through them).
+PositionAssignmentSchema.index({ tenant_id: 1, facility_id: 1, is_open: 1 })

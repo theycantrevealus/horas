@@ -51,7 +51,13 @@ class FakeConnectionModule {}
  * @returns The fake query.
  */
 function query(value: unknown) {
-  return { lean: () => ({ exec: async () => value }), exec: async () => value }
+  const self = {
+    sort: () => self,
+    limit: () => self,
+    lean: () => ({ exec: async () => value }),
+    exec: async () => value,
+  }
+  return self
 }
 
 /**
@@ -309,5 +315,20 @@ describe('FacilityRepository on the shared Mongo base', () => {
     await expect(
       asAdmin(() => facilities.deleteSoft(facilityId.toHexString())),
     ).rejects.toBeInstanceOf(RepositoryError)
+  })
+
+  it('finds the facilities of a tenant that use a holiday calendar code, ordered by code', async () => {
+    const tenant = tenantId.toHexString()
+
+    expect(await facilities.findByCalendarCode(tenant, 'id-national', 50)).toHaveLength(1)
+
+    expect(model.find).toHaveBeenCalledWith({
+      tenant_id: tenant,
+      holiday_calendar_codes: 'id-national',
+      deleted_at: null,
+    })
+    model.find.mockClear()
+    expect(await facilities.findByCalendarCode('not-an-id', 'id-national', 50)).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
   })
 })

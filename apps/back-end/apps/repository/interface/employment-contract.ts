@@ -54,4 +54,18 @@ export interface EmploymentContractRepository extends Repository<EmploymentContr
     tenantId: string,
     previousContractId: string,
   ): Promise<EmploymentContract | null>
+
+  /**
+   * Finds `active` contracts of **every tenant**, in identifier order, after a cursor. A cross-tenant
+   * read for the worker's leave grant job only (`gateway-hr-8-2-leave-balances.md` Task 5); the job
+   * handles each contract with its own `tenant_id`. An employee has at most one active contract.
+   *
+   * @param afterId - Identifier of the last contract of the previous page, or `null` for the first.
+   * @param limit - Largest number of records to return.
+   * @returns The contracts, possibly none; empty for a malformed cursor.
+   */
+  findActiveForJobs(
+    afterId: string | null,
+    limit: number,
+  ): Promise<EmploymentContract[]>
 }

@@ -126,7 +126,10 @@ import { type RosterAssignment } from '@repository/model/roster-assignment'
 import { type PracticeSchedule } from '@repository/model/practice-schedule'
 import { type PracticeScheduleException } from '@repository/model/practice-schedule-exception'
 import { type ShiftSwapRequest } from '@repository/model/shift-swap-request'
-import { type HolidayCalendar } from '@repository/model/holiday-calendar'
+import {
+  type HolidayCalendar,
+  type HolidayEntry,
+} from '@repository/model/holiday-calendar'
 import { type HrImport } from '@repository/model/hr-import'
 import { type ShiftDefinition } from '@repository/model/shift-definition'
 import { type CpdSummary } from '@repository/model/cpd-summary'
@@ -237,6 +240,29 @@ export class InMemoryFacilities
       (item) => item.tenant_id === tenantId && item.code === code,
     )
     return found ? structuredClone(found) : null
+  }
+
+  /**
+   * Finds the facilities of a tenant that use a holiday calendar code, ordered by code.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param calendarCode - A holiday calendar code.
+   * @param limit - Largest number of records.
+   * @returns The facilities.
+   */
+  async findByCalendarCode(
+    tenantId: string,
+    calendarCode: string,
+    limit: number,
+  ): Promise<Facility[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.holiday_calendar_codes.includes(calendarCode) &&
+        !item.deleted_at,
+    )
+      .sort((left, right) => left.code.localeCompare(right.code))
+      .slice(0, limit)
   }
 
   /**
@@ -1358,6 +1384,27 @@ export class InMemoryEmploymentContracts
   implements EmploymentContractRepository
 {
   /**
+   * Finds `active` contracts of every tenant after a cursor, in identifier order.
+   *
+   * @param afterId - Identifier of the last contract of the previous page, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The contracts.
+   */
+  async findActiveForJobs(
+    afterId: string | null,
+    limit: number,
+  ): Promise<EmploymentContract[]> {
+    return this.filter(
+      (item) =>
+        item.status === 'active' &&
+        !item.deleted_at &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
+  }
+
+  /**
    * Creates a contract, refusing a second one with the same tenant, employer and number, or a
    * second active one for an employee.
    *
@@ -1577,6 +1624,34 @@ export class InMemoryPositionAssignments
         item.is_open &&
         !item.deleted_at,
     )
+  }
+
+  /**
+   * Finds the open primary assignments of a facility after a cursor, in identifier order.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param facilityId - The facility.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The assignments.
+   */
+  async findOpenPrimaryByFacility(
+    tenantId: string,
+    facilityId: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<PositionAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.facility_id === facilityId &&
+        item.is_primary &&
+        item.is_open &&
+        !item.deleted_at &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
   }
 
   /**
@@ -2864,6 +2939,29 @@ export class InMemoryHolidayCalendars
   }
 
   /**
+   * Finds the calendars of every tenant with an active day of one kind on a date.
+   *
+   * @param kind - The kind of day.
+   * @param date - Local date.
+   * @returns The calendars.
+   */
+  async findWithKindOnDate(
+    kind: HolidayEntry['kind'],
+    date: string,
+  ): Promise<HolidayCalendar[]> {
+    return this.filter(
+      (item) =>
+        !item.deleted_at &&
+        item.holidays.some(
+          (holiday) =>
+            holiday.date === date &&
+            holiday.kind === kind &&
+            holiday.status === 'active',
+        ),
+    )
+  }
+
+  /**
    * Finds the calendar of a code in a year.
    *
    * @param tenantId - Tenant to search in.
@@ -3819,6 +3917,61 @@ export class InMemoryLeaveLedger
     throw new RepositoryError('The leave ledger is append-only.', {
       operation: 'LeaveLedgerRepository.deleteSoft',
     })
+  }
+
+  /**
+   * Finds grants whose period ended in a window, in identifier order, after a cursor.
+   *
+   * @param from - First day of the window.
+   * @param to - Last day of the window.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The entries.
+   */
+  async findGrantsEndedBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.filter(
+      (item) =>
+        item.kind === 'grant' &&
+        !item.deleted_at &&
+        item.period.end >= from &&
+        item.period.end <= to &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
+  }
+
+  /**
+   * Finds carry-over entries that expire in a window, in identifier order, after a cursor.
+   *
+   * @param from - First day of the window.
+   * @param to - Last day of the window.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The entries.
+   */
+  async findCarryOversExpiringBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.filter(
+      (item) =>
+        item.kind === 'carry_over' &&
+        !item.deleted_at &&
+        item.expires_on !== null &&
+        item.expires_on >= from &&
+        item.expires_on <= to &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
   }
 
   /**

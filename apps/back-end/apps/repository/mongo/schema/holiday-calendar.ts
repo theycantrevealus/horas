@@ -127,3 +127,6 @@ export const HolidayCalendarSchema =
 // One calendar per code and year in a tenant (HR plan 5.2 HC1).
 HolidayCalendarSchema.index({ tenant_id: 1, code: 1, year: 1 }, { unique: true })
 HolidayCalendarSchema.index({ tenant_id: 1, country: 1, subdivision: 1 })
+// Calendars with a day of a kind on a date, across tenants (the collective leave job), so this index
+// does not start with `tenant_id` (`database.md` 7.2).
+HolidayCalendarSchema.index({ 'holidays.date': 1, 'holidays.kind': 1 })

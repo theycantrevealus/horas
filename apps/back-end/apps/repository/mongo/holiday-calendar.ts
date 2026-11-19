@@ -16,7 +16,10 @@ import {
   type HolidayCalendarQuery,
   type HolidayCalendarRepository,
 } from '@repository/interface/holiday-calendar'
-import { HolidayCalendar } from '@repository/model/holiday-calendar'
+import {
+  HolidayCalendar,
+  type HolidayEntry,
+} from '@repository/model/holiday-calendar'
 import { HolidayCalendarClassification } from '@repository/model/holiday-calendar.classification'
 import { LeanRecord, MongoRepositoryBase } from './base'
 import { HolidayCalendarEntity } from './schema/holiday-calendar'
@@ -112,6 +115,35 @@ export class HolidayCalendarRepositoryMongo
         .sort({ code: 1, year: -1 })
         .skip(query.offset ?? 0)
         .limit(query.limit ?? DEFAULT_PAGE_SIZE)
+        .lean<LeanRecord<HolidayCalendarEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
+   * Finds the calendars of every tenant with an active day of one kind on a date (a cross-tenant
+   * read for the collective leave job).
+   *
+   * @param kind - The kind of day.
+   * @param date - Local date.
+   * @returns The calendars.
+   */
+  async findWithKindOnDate(
+    kind: HolidayEntry['kind'],
+    date: string,
+  ): Promise<HolidayCalendar[]> {
+    const operation = 'HolidayCalendarRepository.findWithKindOnDate'
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            holidays: { $elemMatch: { date, kind, status: 'active' } },
+            deleted_at: null,
+          }),
+        )
         .lean<LeanRecord<HolidayCalendarEntity>[]>()
         .exec()
       return records.map((record) => this.toModel(record))

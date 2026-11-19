@@ -28,6 +28,7 @@ import {
   type LeavePolicyInput,
 } from './leave-policy-rules'
 import { findPolicyBundle } from './policy-bundles'
+import { versionsInForce } from './policy-in-force'
 
 const NAME = 'LeavePolicyService'
 
@@ -149,16 +150,8 @@ export class LeavePolicyService {
       ...filter,
       limit: ON_DATE_SCAN_LIMIT,
     })
-    const inForce = new Map<string, LeavePolicy>()
-    // Latest first, so the first version of a type that has started is the one in force.
-    for (const version of versions) {
-      const key = `${version.leave_type.system}|${version.leave_type.code}`
-      if (version.effective_from <= onDate && !inForce.has(key)) {
-        inForce.set(key, version)
-      }
-    }
     const start = offset ?? 0
-    return [...inForce.values()].slice(start, start + (limit ?? 10))
+    return versionsInForce(versions, onDate).slice(start, start + (limit ?? 10))
   }
 
   /**

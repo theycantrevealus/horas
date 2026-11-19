@@ -148,3 +148,6 @@ EmploymentContractSchema.index(
   { unique: true, partialFilterExpression: { status: 'active' } },
 )
 EmploymentContractSchema.index({ tenant_id: 1, previous_contract_id: 1 })
+// Every tenant's active contracts in identifier order, for the leave grant job (it reads across
+// tenants, so the index does not start with `tenant_id`).
+EmploymentContractSchema.index({ status: 1, _id: 1 })

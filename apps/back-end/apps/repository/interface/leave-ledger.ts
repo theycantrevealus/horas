@@ -63,4 +63,40 @@ export interface LeaveLedgerRepository extends Repository<LeaveLedgerEntry> {
     leaveType: Coding,
     periodStart: string,
   ): Promise<LeaveLedgerEntry[]>
+
+  /**
+   * Finds `grant` entries of **every tenant** whose period ended in a window, in identifier order,
+   * after a cursor. A cross-tenant read for the worker's leave period job only
+   * (`gateway-hr-8-2-leave-balances.md` Task 5); the job handles each entry with its own
+   * `tenant_id`.
+   *
+   * @param from - First day of the window (the day a period ended), inclusive.
+   * @param to - Last day of the window, inclusive.
+   * @param afterId - Identifier of the last entry of the previous page, or `null` for the first.
+   * @param limit - Largest number of records to return.
+   * @returns The entries, possibly none; empty for a malformed cursor.
+   */
+  findGrantsEndedBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]>
+
+  /**
+   * Finds `carry_over` entries of **every tenant** whose last usable day falls in a window, in
+   * identifier order, after a cursor. A cross-tenant read for the leave period job only.
+   *
+   * @param from - First day of the window, inclusive.
+   * @param to - Last day of the window, inclusive.
+   * @param afterId - Identifier of the last entry of the previous page, or `null` for the first.
+   * @param limit - Largest number of records to return.
+   * @returns The entries, possibly none; empty for a malformed cursor.
+   */
+  findCarryOversExpiringBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]>
 }

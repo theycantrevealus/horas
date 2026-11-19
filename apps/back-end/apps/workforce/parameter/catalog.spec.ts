@@ -54,6 +54,16 @@ describe('parameter catalog', () => {
     expect(findParameter('MIN_ASSESSORS')?.scopes).toEqual(['committee'])
   })
 
+  it('defines LEAVE_GRANT_LEAD_DAYS as a tenant setting of 0 to 180 days with the default of 60', () => {
+    const definition = findParameter('LEAVE_GRANT_LEAD_DAYS')
+
+    expect(definition).toMatchObject({ default: 60, scopes: ['tenant'], type: { kind: 'integer', min: 0, max: 180 } })
+    expect(checkValue(definition!.type, 0)).toBe(0)
+    expect(checkValue(definition!.type, 180)).toBe(180)
+    expect(checkValue(definition!.type, 181)).toBeUndefined()
+    expect(checkValue(definition!.type, 1.5)).toBeUndefined()
+  })
+
   it('finds a key and answers undefined for an unknown one', () => {
     expect(findParameter('MAX_WEEKLY_HOURS')?.key).toBe('MAX_WEEKLY_HOURS')
     expect(findParameter('NOPE')).toBeUndefined()
