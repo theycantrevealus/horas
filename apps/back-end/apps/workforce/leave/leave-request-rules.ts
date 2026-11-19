@@ -100,16 +100,14 @@ export interface RequestDatesInput {
 }
 
 /**
- * Checks the dates of a request (HR plan 8.3 LR2): real dates in order, at most 366 calendar days,
- * the notice or the after-the-fact limit, and half days only where the policy allows them. The
- * policy's limit per request is checked on the counted days, not here.
+ * Checks that a period is made of real dates in order and spans at most 366 calendar days (HR plan
+ * 8.3 LR2).
  *
- * @param input - The dates and the policy.
- * @throws InvalidRequestError `invalid_period`, `period_too_long`, `notice_too_short`, `too_late`,
- * `half_day_not_allowed` or `invalid_half_days`.
+ * @param start - First date.
+ * @param end - Last date.
+ * @throws InvalidRequestError `invalid_period` or `period_too_long`.
  */
-export function checkRequestDates(input: RequestDatesInput): void {
-  const { start, end, halfDays, policy, today } = input
+export function checkPeriod(start: string, end: string): void {
   if (!isLocalDate(start) || !isLocalDate(end) || start > end) {
     throw new InvalidRequestError(
       'invalid_period',
@@ -123,6 +121,20 @@ export function checkRequestDates(input: RequestDatesInput): void {
       'A request can span at most 366 days.',
     )
   }
+}
+
+/**
+ * Checks the dates of a request (HR plan 8.3 LR2): real dates in order, at most 366 calendar days,
+ * the notice or the after-the-fact limit, and half days only where the policy allows them. The
+ * policy's limit per request is checked on the counted days, not here.
+ *
+ * @param input - The dates and the policy.
+ * @throws InvalidRequestError `invalid_period`, `period_too_long`, `notice_too_short`, `too_late`,
+ * `half_day_not_allowed` or `invalid_half_days`.
+ */
+export function checkRequestDates(input: RequestDatesInput): void {
+  const { start, end, halfDays, policy, today } = input
+  checkPeriod(start, end)
   if (policy.retroactiveDays === 0) {
     if (start < addDays(today, policy.noticeDays)) {
       throw new InvalidRequestError(
