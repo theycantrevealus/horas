@@ -46,6 +46,8 @@ import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
 import { LeaveBalanceService } from './leave/leave-balance.service'
 import { LeaveDeciderService } from './leave/decider'
+import { LeaveDecisionService } from './leave/leave-decision.service'
+import { LEAVE_EFFECTS, NoLeaveEffects } from './leave/leave-effects'
 import { LeaveDetailService } from './leave/leave-detail.service'
 import { LeavePlaceService } from './leave/leave-place'
 import { LeavePolicyService } from './leave/leave-policy.service'
@@ -162,6 +164,8 @@ import { UnitService } from './structure/unit.service'
     LeaveDeciderService,
     LeaveRequestService,
     LeaveDetailService,
+    LeaveDecisionService,
+    { provide: LEAVE_EFFECTS, useClass: NoLeaveEffects },
   ],
   exports: [
     OrganizationService,
@@ -207,6 +211,7 @@ import { UnitService } from './structure/unit.service'
     LeaveDeciderService,
     LeaveRequestService,
     LeaveDetailService,
+    LeaveDecisionService,
   ],
 })
 export class WorkforceModule {}

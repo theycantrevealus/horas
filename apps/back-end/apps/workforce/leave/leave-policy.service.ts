@@ -13,7 +13,8 @@ import { isLocalDate, todayUtc } from '@utility/validation/local-date'
 import { type LeavePolicyRepository } from '@repository/interface/leave-policy'
 import { type Coding } from '@repository/model/common/coding'
 import { type LeavePolicy } from '@repository/model/leave-policy'
-import { REPOSITORY_LEAVE_POLICY } from '@repository/token'
+import { REPOSITORY_LEAVE_POLICY, REPOSITORY_LEAVE_REQUEST } from '@repository/token'
+import { type LeaveRequestRepository } from '@repository/interface/leave-request'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { systemSuffix } from '../concept/system-rules'
 import { observe } from '../observe'
@@ -118,6 +119,7 @@ export class LeavePolicyService {
   /**
    * @param policies - Leave policy repository.
    * @param concepts - Code concepts, for the leave type and the employment types.
+   * @param requests - Leave request repository, to see whether a version is in use.
    * @param transactions - Transaction manager, so an import writes all or nothing.
    * @param logger - Logger of this service.
    */
@@ -125,6 +127,8 @@ export class LeavePolicyService {
     @Inject(REPOSITORY_LEAVE_POLICY)
     private readonly policies: LeavePolicyRepository,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
+    @Inject(REPOSITORY_LEAVE_REQUEST)
+    private readonly requests: LeaveRequestRepository,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
     @Inject(AppLogger) private readonly logger: AppLogger,
@@ -239,7 +243,7 @@ export class LeavePolicyService {
    * @param input - Fields to change, optional version and reason.
    * @returns The updated policy.
    * @throws NotFoundError `leave_policy_not_found`.
-   * @throws InvalidRequestError `policy_in_force`, `empty_update` and the codes of `create` for
+   * @throws InvalidRequestError `policy_in_force`, `policy_in_use`, `empty_update` and the codes of `create` for
    * the fields that are sent.
    * @throws ConflictError `stale_version`.
    */
@@ -268,6 +272,12 @@ export class LeavePolicyService {
           throw new InvalidRequestError(
             'policy_in_force',
             'A version that is in force cannot be changed. Add a version that starts later.',
+          )
+        }
+        if (await this.requests.findAnyByPolicy(tenantId, policy.id)) {
+          throw new InvalidRequestError(
+            'policy_in_use',
+            'A leave request was made under this version. Add a version that starts later.',
           )
         }
         const fields = checkPolicyInput({ ...toPolicyInput(policy), ...changes })

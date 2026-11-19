@@ -3931,6 +3931,26 @@ export class InMemoryLeaveLedger
   }
 
   /**
+   * Finds the entries a leave request posted.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param requestId - The leave request.
+   * @returns The entries, oldest first.
+   */
+  async findByRequest(
+    tenantId: string,
+    requestId: string,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.source.kind === 'request' &&
+        item.source.ref_id === requestId,
+    )
+  }
+
+  /**
    * Finds grants whose period ended in a window, in identifier order, after a cursor.
    *
    * @param from - First day of the window.
@@ -4177,6 +4197,22 @@ export class InMemoryLeaveRequests
           item.period.end >= start,
       ),
     )
+  }
+
+  /**
+   * Tells whether any request was made under a policy version.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param policyId - The policy version.
+   * @returns True when a request has this `policy_id`.
+   */
+  async findAnyByPolicy(tenantId: string, policyId: string): Promise<boolean> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.policy_id === policyId,
+    ).length > 0
   }
 
   /**

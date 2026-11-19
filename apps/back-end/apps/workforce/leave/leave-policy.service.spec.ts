@@ -3,7 +3,7 @@ import { runWithRequestContext } from '@utility/logger/context'
 import { type AppLogger } from '@utility/logger/service'
 import { type LeavePolicy } from '@repository/model/leave-policy'
 import { CodeConceptService } from '../concept/code-concept.service'
-import { InMemoryCodeConcepts, InMemoryLeavePolicies } from '../testing/in-memory'
+import { InMemoryCodeConcepts, InMemoryLeavePolicies, InMemoryLeaveRequests } from '../testing/in-memory'
 import { ConflictError, InvalidRequestError, NotFoundError } from '../workforce.error'
 import {
   LeavePolicyService,
@@ -19,6 +19,7 @@ describe('LeavePolicyService', () => {
   const debug = vi.fn()
   let policies: InMemoryLeavePolicies
   let concepts: InMemoryCodeConcepts
+  let leaveRequests: InMemoryLeaveRequests
   let conceptService: CodeConceptService
   let service: LeavePolicyService
 
@@ -162,11 +163,13 @@ describe('LeavePolicyService', () => {
     vi.resetAllMocks()
     policies = new InMemoryLeavePolicies()
     concepts = new InMemoryCodeConcepts()
+    leaveRequests = new InMemoryLeaveRequests()
     const logger = { log, warn, error, debug } as unknown as AppLogger
     conceptService = new CodeConceptService(concepts, logger)
     service = new LeavePolicyService(
       policies,
       conceptService,
+      leaveRequests,
       { run: (work: () => Promise<unknown>) => work() } as never,
       logger,
     )
@@ -265,6 +268,17 @@ describe('LeavePolicyService', () => {
       expect((thrown as InvalidRequestError).code).toBe('policy_in_force')
     })
 
+    it('refuses to edit a version a leave request was made under (policy_in_use)', async () => {
+      const created = await create()
+      await leaveRequests.create({ tenant_id: tenantId, policy_id: created.id } as never)
+
+      const thrown = await rejection(() =>
+        asAdmin(() => service.update(tenantId, created.id, { paid: false })),
+      )
+
+      expect((thrown as InvalidRequestError).code).toBe('policy_in_use')
+    })
+
     it('refuses an empty update, a stale version and an unknown employment type', async () => {
       const created = await create()
 
@@ -314,7 +328,7 @@ describe('LeavePolicyService', () => {
     it('refuses with concepts_missing before writing anything when a concept is missing or retired', async () => {
       const bare = new InMemoryCodeConcepts()
       const logger = { log, warn, error, debug } as unknown as AppLogger
-      const lonely = new LeavePolicyService(policies, new CodeConceptService(bare, logger), { run: (work: () => Promise<unknown>) => work() } as never, logger)
+      const lonely = new LeavePolicyService(policies, new CodeConceptService(bare, logger), new InMemoryLeaveRequests(), { run: (work: () => Promise<unknown>) => work() } as never, logger)
 
       const thrown = await rejection(() => asAdmin(() => lonely.import(tenantId, { bundle: 'id', effectiveFrom: '2099-01-01' })))
 

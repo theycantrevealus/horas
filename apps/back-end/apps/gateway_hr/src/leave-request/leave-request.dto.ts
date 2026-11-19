@@ -1,6 +1,10 @@
 import { Transform, Type } from 'class-transformer'
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
   IsBoolean,
+  IsNumber,
   IsIn,
   IsInt,
   IsOptional,
@@ -185,4 +189,87 @@ export class LeaveRequestsQueryDto extends OwnLeaveRequestsQueryDto {
   @Transform(toBoolean)
   @IsBoolean()
   proofOverdue?: boolean
+}
+
+/**
+ * Optional version of the request the caller read, shared by the decision bodies.
+ *
+ * @property version - Version of the request the caller read, for the concurrency check.
+ */
+export class VersionedDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  version?: number
+}
+
+/**
+ * Body of `POST /v1/leave-requests/:id/approve`.
+ *
+ * @property replacementEmployeeId - The replacement, at the first step.
+ * @property noReplacementReason - Why there is none, at the first step.
+ */
+export class ApproveLeaveDto extends VersionedDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(64)
+  replacementEmployeeId?: string
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  noReplacementReason?: string
+}
+
+/**
+ * Body of `POST /v1/leave-requests/:id/reject`.
+ *
+ * @property reason - Why, 1 to 500 characters.
+ */
+export class RejectLeaveDto extends VersionedDto {
+  @IsString()
+  @MaxLength(2000)
+  reason!: string
+}
+
+/**
+ * Body of `POST /v1/leave-requests/:id/cancel`.
+ *
+ * @property reason - Why; required for an approved leave.
+ */
+export class CancelLeaveDto extends VersionedDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  reason?: string
+}
+
+/**
+ * One day of a correction.
+ *
+ * @property date - The date.
+ * @property count - The new count: 0, 0.5 or 1.
+ */
+export class DayChangeDto {
+  @IsLocalDate()
+  date!: string
+
+  @IsNumber()
+  count!: number
+}
+
+/**
+ * Body of `PATCH /v1/leave-requests/:id/days`.
+ *
+ * @property days - The dates to change.
+ */
+export class AdjustDaysDto extends VersionedDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(366)
+  @ValidateNested({ each: true })
+  @Type(() => DayChangeDto)
+  days!: DayChangeDto[]
 }

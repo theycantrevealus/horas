@@ -23,6 +23,7 @@ describe('leave request endpoints (in-memory repositories)', () => {
   let hrToken: string
   let readerToken: string
   let detailsToken: string
+  let approverToken: string
   let unlinkedToken: string
   let otherTenantToken: string
   const sick = { system: 'id.leave-type', code: 'sakit' }
@@ -122,6 +123,7 @@ describe('leave request endpoints (in-memory repositories)', () => {
       PERMISSIONS.WORKFORCE_LEAVE_REQUEST_APPROVE_HR,
     ])
     readerToken = await gateway.seedAndLogin(tenantId, 'reader', [PERMISSIONS.WORKFORCE_LEAVE_REQUEST_READ])
+    approverToken = await gateway.seedAndLogin(tenantId, 'approver', [PERMISSIONS.WORKFORCE_LEAVE_REQUEST_APPROVE_HR], await addEmployee(tenantId))
     detailsToken = await gateway.seedAndLogin(tenantId, 'details', [PERMISSIONS.WORKFORCE_LEAVE_REQUEST_READ_DETAILS])
     otherTenantToken = await gateway.seedAndLogin(otherTenantId, 'other', [
       PERMISSIONS.WORKFORCE_LEAVE_REQUEST_READ,
@@ -291,5 +293,105 @@ describe('leave request endpoints (in-memory repositories)', () => {
     expect(JSON.stringify(ok.body)).not.toContain('file-1')
     expect(JSON.stringify(logs.written)).not.toContain('file-1')
     expect((await call('GET', `/v1/leave-requests/${id}/details`, nurseToken)).body).toMatchObject({ proof: { file_id: 'file-1' } })
+  })
+
+  /**
+   * Makes a request of the nurse on two dates, counted from today.
+   *
+   * @param offset - Days from today to the first date.
+   * @returns The request.
+   */
+  async function nurseRequest(offset: number): Promise<{ id: string; version: number }> {
+    const reply = await call('POST', '/v1/employees/me/leave-requests', nurseToken, body({ start: addDays(todayUtc(), offset), end: addDays(todayUtc(), offset + 1) }))
+    expect(reply.status).toBe(201)
+    return reply.body as { id: string; version: number }
+  }
+
+  it('refuses the decision routes without a token (401)', async () => {
+    const id = new Types.ObjectId().toHexString()
+    for (const [method, url] of [['PATCH', `/v1/leave-requests/${id}/days`], ['POST', `/v1/leave-requests/${id}/approve`], ['POST', `/v1/leave-requests/${id}/reject`], ['POST', `/v1/leave-requests/${id}/cancel`]] as const) {
+      expect((await call(method, url, undefined, {})).status).toBe(401)
+    }
+  })
+
+  it('approves for HR Manager when no Head decides, stores the replacement choice, and refuses the requester, a colleague and a bad body', async () => {
+    const request = await nurseRequest(40)
+    const logs = captureLogs()
+
+    const nobody = await call('POST', `/v1/leave-requests/${request.id}/approve`, approverToken, {})
+    const own = await call('POST', `/v1/leave-requests/${request.id}/approve`, nurseToken, { noReplacementReason: 'x' })
+    const other = await call('POST', `/v1/leave-requests/${request.id}/approve`, colleagueToken, { noReplacementReason: 'x' })
+    const ok = await call('POST', `/v1/leave-requests/${request.id}/approve`, approverToken, { noReplacementReason: 'Unit kecil' })
+    logs.restore()
+
+    expect(nobody.status).toBe(422)
+    expect(nobody.body).toMatchObject({ code: 'replacement_required' })
+    expect(own.status).toBe(403)
+    expect(own.body).toMatchObject({ code: 'decider_is_requester' })
+    expect(other.status).toBe(403)
+    expect(other.body).toMatchObject({ code: 'not_the_decider' })
+    expect(ok.status).toBe(201)
+    expect(ok.body).toMatchObject({ status: 'approved', replacement: { employee_id: null, none_reason: 'Unit kecil' } })
+    expect(JSON.stringify(logs.written)).toContain('leave_request_approve')
+    expect(JSON.stringify(logs.written)).not.toContain('Unit kecil')
+    expect((await call('POST', `/v1/leave-requests/${request.id}/approve`, approverToken, { noReplacementReason: 'x' })).body).toMatchObject({ code: 'invalid_transition' })
+    expect((await call('POST', `/v1/leave-requests/${request.id}/approve`, approverToken, { version: 'old' })).status).toBe(400)
+  })
+
+  it('rejects with a reason and answers 404 for a missing, malformed or foreign request', async () => {
+    const request = await nurseRequest(45)
+
+    const noReason = await call('POST', `/v1/leave-requests/${request.id}/reject`, approverToken, {})
+    const blank = await call('POST', `/v1/leave-requests/${request.id}/reject`, approverToken, { reason: ' ' })
+    const ok = await call('POST', `/v1/leave-requests/${request.id}/reject`, approverToken, { reason: 'Kuota unit penuh' })
+
+    expect(noReason.status).toBe(400)
+    expect(blank.status).toBe(422)
+    expect(blank.body).toMatchObject({ code: 'reason_required' })
+    expect(ok.status).toBe(201)
+    expect(ok.body).toMatchObject({ status: 'rejected', decisions: [{ outcome: 'rejected', reason: 'Kuota unit penuh' }] })
+    for (const [token, id] of [[approverToken, new Types.ObjectId().toHexString()], [approverToken, 'bad'], [otherTenantToken, request.id]] as const) {
+      for (const [method, path, payload] of [['POST', 'approve', { noReplacementReason: 'x' }], ['POST', 'reject', { reason: 'x' }], ['POST', 'cancel', {}], ['PATCH', 'days', { days: [{ date: first, count: 0 }] }]] as const) {
+        const reply = await call(method, `/v1/leave-requests/${id}/${path}`, token, payload)
+        expect(reply.status).toBe(404)
+        expect(reply.body).toMatchObject({ code: 'leave_request_not_found' })
+      }
+    }
+  })
+
+  it('lets the decider correct the counted days, and refuses the requester and a bad count', async () => {
+    const request = await nurseRequest(50)
+    const date = addDays(todayUtc(), 50)
+
+    const own = await call('PATCH', `/v1/leave-requests/${request.id}/days`, nurseToken, { days: [{ date, count: 0 }] })
+    const bad = await call('PATCH', `/v1/leave-requests/${request.id}/days`, approverToken, { days: [{ date, count: 0.5 }] })
+    const empty = await call('PATCH', `/v1/leave-requests/${request.id}/days`, approverToken, { days: [] })
+    const ok = await call('PATCH', `/v1/leave-requests/${request.id}/days`, approverToken, { days: [{ date, count: 0 }] })
+
+    expect(own.status).toBe(403)
+    expect(own.body).toMatchObject({ code: 'decider_is_requester' })
+    expect(bad.body).toMatchObject({ code: 'invalid_count' })
+    expect(empty.status).toBe(400)
+    expect(ok.status).toBe(200)
+    expect(ok.body).toMatchObject({ total_days: 1, days: [{ date, count: 0, set_by: 'head' }, { count: 1 }] })
+  })
+
+  it('lets the requester cancel, needs a reason for an approved leave, and hides the request from a colleague', async () => {
+    const waiting = await nurseRequest(55)
+    const approved = await nurseRequest(60)
+    await call('POST', `/v1/leave-requests/${approved.id}/approve`, approverToken, { noReplacementReason: 'x' })
+
+    const stranger = await call('POST', `/v1/leave-requests/${waiting.id}/cancel`, colleagueToken, {})
+    const cancelled = await call('POST', `/v1/leave-requests/${waiting.id}/cancel`, nurseToken, {})
+    const noReason = await call('POST', `/v1/leave-requests/${approved.id}/cancel`, nurseToken, {})
+    const byHr = await call('POST', `/v1/leave-requests/${approved.id}/cancel`, hrToken, { reason: 'Dibatalkan HR' })
+
+    expect(stranger.status).toBe(404)
+    expect(cancelled.status).toBe(201)
+    expect(cancelled.body).toMatchObject({ status: 'cancelled' })
+    expect(noReason.status).toBe(422)
+    expect(noReason.body).toMatchObject({ code: 'reason_required' })
+    expect(byHr.body).toMatchObject({ status: 'cancelled' })
+    expect((await call('POST', `/v1/leave-requests/${waiting.id}/cancel`, nurseToken, {})).body).toMatchObject({ code: 'invalid_transition' })
   })
 })
