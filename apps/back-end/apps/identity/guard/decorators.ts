@@ -27,9 +27,9 @@ export const ALLOW_PASSWORD_CHANGE_KEY = 'identity:allow_password_change'
  * @property headers - Request headers.
  * @property ip - Client address.
  * @property user - The signed-in caller, set by `AuthenticationGuard`.
- * @property permissions - The caller's permissions, set by `PermissionsGuard` on routes that require
- * permissions. Only a handler may read it, to decide between two behaviours; the guard has already
- * decided who may enter.
+ * @property permissions - The caller's permissions, set by `PermissionsGuard` on routes that have
+ * `@RequirePermissions(...)`, with or without arguments. Only a handler may read it, to decide
+ * between two behaviours; the guard has already decided who may enter.
  */
 export interface GuardedRequest {
   headers: Record<string, string | string[] | undefined>
@@ -49,7 +49,9 @@ export const Public = (): MethodDecorator & ClassDecorator =>
 
 /**
  * Requires the caller to hold every listed permission (tenant-wide). Without this decorator a
- * route only requires a signed-in caller.
+ * route only requires a signed-in caller. With no arguments it requires nothing more than a
+ * signed-in caller but makes the guard keep the caller's permissions on the request, so the
+ * handler can read them with `@CurrentPermissions()`.
  *
  * @param permissions - Permissions from the catalog in `permission.ts`.
  * @returns A method or class decorator.
@@ -80,8 +82,9 @@ export const CurrentUser = createParamDecorator(
 
 /**
  * Injects the permissions of the signed-in caller into a handler parameter, for a route that has
- * `@RequirePermissions(...)`. It lets a handler offer an extra capability to callers who hold one
- * more permission (for example correcting the past), without a second route. It is empty on a route
+ * `@RequirePermissions(...)`, with or without arguments. It lets a handler offer an extra capability
+ * to callers who hold one more permission (for example correcting the past), or decide between the
+ * owner of a record and a holder of a permission, without a second route. It is empty on a route
  * without `@RequirePermissions(...)`, where the guard does not resolve permissions.
  *
  * @example
