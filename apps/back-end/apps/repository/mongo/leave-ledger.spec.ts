@@ -331,4 +331,41 @@ describe('LeaveLedgerRepository on the shared Mongo base', () => {
     expect(await ledger.findByEmployeeTypeAndPeriod('x', employee, annual, '2027-01-01')).toEqual([])
     expect(model.find).not.toHaveBeenCalled()
   })
+
+  it('reads the grants of every tenant whose period ended in a window, after a cursor, for the jobs', async () => {
+    const query = chain([stored])
+    model.find.mockReturnValueOnce(query)
+
+    const found = await ledger.findGrantsEndedBetween('2026-11-12', '2026-11-18', entryId.toHexString(), 25)
+
+    expect(found).toHaveLength(1)
+    expect(model.find).toHaveBeenCalledWith({
+      kind: 'grant',
+      'period.end': { $gte: '2026-11-12', $lte: '2026-11-18' },
+      deleted_at: null,
+      _id: { $gt: entryId },
+    })
+    expect(query.sort).toHaveBeenCalledWith({ _id: 1 })
+    expect(query.limit).toHaveBeenCalledWith(25)
+    model.find.mockClear()
+    expect(await ledger.findGrantsEndedBetween('2026-11-12', '2026-11-18', 'bad', 25)).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+    await ledger.findGrantsEndedBetween('2026-11-12', '2026-11-18', null, 25)
+    expect(model.find.mock.calls[0]?.[0]).not.toHaveProperty('_id')
+  })
+
+  it('reads the carry-over entries of every tenant that expire in a window, after a cursor, for the jobs', async () => {
+    const query = chain([stored])
+    model.find.mockReturnValueOnce(query)
+
+    await ledger.findCarryOversExpiringBetween('2026-11-12', '2026-11-18', null, 10)
+
+    expect(model.find).toHaveBeenCalledWith({
+      kind: 'carry_over',
+      expires_on: { $gte: '2026-11-12', $lte: '2026-11-18' },
+      deleted_at: null,
+    })
+    expect(query.sort).toHaveBeenCalledWith({ _id: 1 })
+    expect(await ledger.findCarryOversExpiringBetween('2026-11-12', '2026-11-18', 'bad', 10)).toEqual([])
+  })
 })

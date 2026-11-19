@@ -3843,6 +3843,61 @@ export class InMemoryLeaveLedger
   }
 
   /**
+   * Finds grants whose period ended in a window, in identifier order, after a cursor.
+   *
+   * @param from - First day of the window.
+   * @param to - Last day of the window.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The entries.
+   */
+  async findGrantsEndedBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.filter(
+      (item) =>
+        item.kind === 'grant' &&
+        !item.deleted_at &&
+        item.period.end >= from &&
+        item.period.end <= to &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
+  }
+
+  /**
+   * Finds carry-over entries that expire in a window, in identifier order, after a cursor.
+   *
+   * @param from - First day of the window.
+   * @param to - Last day of the window.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The entries.
+   */
+  async findCarryOversExpiringBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.filter(
+      (item) =>
+        item.kind === 'carry_over' &&
+        !item.deleted_at &&
+        item.expires_on !== null &&
+        item.expires_on >= from &&
+        item.expires_on <= to &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
+  }
+
+  /**
    * Finds an employee's entries, oldest first.
    *
    * @param tenantId - Tenant to search in.

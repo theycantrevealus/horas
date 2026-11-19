@@ -21,6 +21,7 @@ import { AppointmentExpiryJob } from './appointment-expiry.job'
 import { EligibilitySweepJob } from './eligibility-sweep.job'
 import { HR_JOBS, type HrJob } from './job'
 import { LeaveGrantJob } from './leave-grant.job'
+import { LeavePeriodJob } from './leave-period.job'
 import { LicenseExpiryJob } from './license-expiry.job'
 
 /**
@@ -55,6 +56,7 @@ import { LicenseExpiryJob } from './license-expiry.job'
     EligibilityService,
     EligibilitySweepJob,
     LeaveGrantJob,
+    LeavePeriodJob,
     {
       provide: HR_JOBS,
       inject: [
@@ -62,6 +64,7 @@ import { LicenseExpiryJob } from './license-expiry.job'
         AppointmentExpiryJob,
         EligibilitySweepJob,
         LeaveGrantJob,
+        LeavePeriodJob,
       ],
       /**
        * Lists the jobs in the order a pass runs them.
@@ -70,6 +73,7 @@ import { LicenseExpiryJob } from './license-expiry.job'
        * @param appointmentExpiry - The SPK expiry job.
        * @param eligibilitySweep - The eligibility sweep job.
        * @param leaveGrant - The leave grant job.
+       * @param leavePeriod - The leave period job.
        * @returns The jobs.
        */
       useFactory: (
@@ -77,11 +81,13 @@ import { LicenseExpiryJob } from './license-expiry.job'
         appointmentExpiry: AppointmentExpiryJob,
         eligibilitySweep: EligibilitySweepJob,
         leaveGrant: LeaveGrantJob,
+        leavePeriod: LeavePeriodJob,
       ): HrJob[] => [
         licenseExpiry,
         appointmentExpiry,
         eligibilitySweep,
         leaveGrant,
+        leavePeriod,
       ],
     },
   ],

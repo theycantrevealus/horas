@@ -151,6 +151,91 @@ export class LeaveLedgerRepositoryMongo
   }
 
   /**
+   * Finds grants whose period ended in a window (a cross-tenant read for the leave period job).
+   *
+   * @param from - First day of the window.
+   * @param to - Last day of the window.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The entries.
+   */
+  findGrantsEndedBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.findForJobs(
+      'findGrantsEndedBetween',
+      { kind: 'grant', 'period.end': { $gte: from, $lte: to } },
+      afterId,
+      limit,
+    )
+  }
+
+  /**
+   * Finds carry-over entries that expire in a window (a cross-tenant read for the leave period job).
+   *
+   * @param from - First day of the window.
+   * @param to - Last day of the window.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The entries.
+   */
+  findCarryOversExpiringBetween(
+    from: string,
+    to: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.findForJobs(
+      'findCarryOversExpiringBetween',
+      { kind: 'carry_over', expires_on: { $gte: from, $lte: to } },
+      afterId,
+      limit,
+    )
+  }
+
+  /**
+   * Runs a cross-tenant read in identifier order after a cursor.
+   *
+   * @param name - Method name for the operation label.
+   * @param filter - Filter on model fields.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The entries; empty for a malformed cursor.
+   */
+  private async findForJobs(
+    name: string,
+    filter: Record<string, unknown>,
+    afterId: string | null,
+    limit: number,
+  ): Promise<LeaveLedgerEntry[]> {
+    const operation = `LeaveLedgerRepository.${name}`
+    const cursor = afterId === null ? null : toObjectId(afterId)
+    if (afterId !== null && !cursor) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            ...filter,
+            deleted_at: null,
+            ...(cursor ? { _id: { $gt: cursor } } : {}),
+          }),
+        )
+        .sort({ _id: 1 })
+        .limit(limit)
+        .lean<LeanRecord<LeaveLedgerEntryEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

@@ -164,3 +164,8 @@ LeaveLedgerEntrySchema.index(
   { tenant_id: 1, dedupe_key: 1 },
   { unique: true, partialFilterExpression: { dedupe_key: { $type: 'string' } } },
 )
+// The leave period job reads across tenants, so these indexes do not start with `tenant_id`
+// (`database.md` 7.2): the grants whose period ended in a window, and the carry-overs that expire
+// in a window.
+LeaveLedgerEntrySchema.index({ kind: 1, 'period.end': 1 })
+LeaveLedgerEntrySchema.index({ kind: 1, expires_on: 1 })
