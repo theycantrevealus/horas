@@ -97,6 +97,12 @@ import {
   type LeaveLedgerRepository,
 } from '@repository/interface/leave-ledger'
 import {
+  type LeaveRequestQuery,
+  type LeaveRequestRepository,
+  type WaitingFor,
+} from '@repository/interface/leave-request'
+import { type LeaveRequestDetailRepository } from '@repository/interface/leave-request-detail'
+import {
   type LeavePolicyQuery,
   type LeavePolicyRepository,
 } from '@repository/interface/leave-policy'
@@ -120,6 +126,11 @@ import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CoverageRequirement } from '@repository/model/coverage-requirement'
 import { type Coding } from '@repository/model/common/coding'
 import { type LeaveLedgerEntry } from '@repository/model/leave-ledger-entry'
+import {
+  type LeaveRequest,
+  type LeaveRequestStatus,
+} from '@repository/model/leave-request'
+import { type LeaveRequestDetail } from '@repository/model/leave-request-detail'
 import { type LeavePolicy } from '@repository/model/leave-policy'
 import { type Roster } from '@repository/model/roster'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
@@ -4031,6 +4042,309 @@ export class InMemoryLeaveLedger
     ).sort(
       (left, right) =>
         (left.created_at?.getTime() ?? 0) - (right.created_at?.getTime() ?? 0),
+    )
+  }
+}
+
+/**
+ * Fields of a leave request the services may change; the Mongo repository ignores the rest, and so
+ * does this fake.
+ */
+const LEAVE_REQUEST_UPDATABLE = [
+  'status',
+  'status_since',
+  'days',
+  'total_days',
+  'period',
+  'leave_type',
+  'policy_id',
+  'rules',
+  'entitlement_period',
+  'replacement',
+  'decisions',
+  'deciders',
+  'proof_due_on',
+  'proof_received',
+  'cover',
+] as const
+
+/**
+ * In-memory `LeaveRequestRepository` for tests. Like the Mongo collection, nothing is deleted and
+ * only the updatable fields change.
+ */
+export class InMemoryLeaveRequests
+  extends InMemoryRepository<LeaveRequest>
+  implements LeaveRequestRepository
+{
+  /**
+   * Updates the updatable fields of a request.
+   *
+   * @param id - Request identifier.
+   * @param changes - Fields to change; fields that are not updatable are ignored.
+   * @param options - Optional concurrency check.
+   * @returns The updated request.
+   */
+  override async update(
+    id: string,
+    changes: EntityChanges<LeaveRequest>,
+    options?: UpdateOptions,
+  ): Promise<LeaveRequest> {
+    const allowed = Object.fromEntries(
+      Object.entries(changes).filter(([field]) =>
+        (LEAVE_REQUEST_UPDATABLE as readonly string[]).includes(field),
+      ),
+    ) as EntityChanges<LeaveRequest>
+    return super.update(id, allowed, options)
+  }
+
+  /**
+   * Rejects: requests are never deleted (`HR-LEV-040`).
+   *
+   * @returns Never resolves.
+   */
+  override async delete(): Promise<void> {
+    throw new RepositoryError('Leave requests are never deleted.', {
+      operation: 'LeaveRequestRepository.delete',
+    })
+  }
+
+  /**
+   * Rejects: requests are never deleted (`HR-LEV-040`).
+   *
+   * @returns Never resolves.
+   */
+  override async deleteSoft(): Promise<void> {
+    throw new RepositoryError('Leave requests are never deleted.', {
+      operation: 'LeaveRequestRepository.deleteSoft',
+    })
+  }
+
+  /**
+   * Finds requests, latest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The requests.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: LeaveRequestQuery = {},
+  ): Promise<LeaveRequest[]> {
+    const offset = query.offset ?? 0
+    return this.latestFirst(
+      this.filter(
+        (item) =>
+          item.tenant_id === tenantId &&
+          !item.deleted_at &&
+          (!query.employeeId || item.employee_id === query.employeeId) &&
+          (!query.unitId || item.unit_id === query.unitId) &&
+          (!query.status || item.status === query.status) &&
+          (!query.to || item.period.start <= query.to) &&
+          (!query.from || item.period.end >= query.from) &&
+          (!query.proofOverdueBefore ||
+            (!item.proof_received &&
+              item.proof_due_on !== null &&
+              item.proof_due_on < query.proofOverdueBefore)),
+      ),
+    ).slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the requests of an employee that share a date with a range.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param start - First date of the range.
+   * @param end - Last date of the range.
+   * @param statuses - Only requests in these statuses.
+   * @returns The requests.
+   */
+  async findOverlapping(
+    tenantId: string,
+    employeeId: string,
+    start: string,
+    end: string,
+    statuses: LeaveRequestStatus[],
+  ): Promise<LeaveRequest[]> {
+    return this.latestFirst(
+      this.filter(
+        (item) =>
+          item.tenant_id === tenantId &&
+          item.employee_id === employeeId &&
+          !item.deleted_at &&
+          statuses.includes(item.status) &&
+          item.period.start <= end &&
+          item.period.end >= start,
+      ),
+    )
+  }
+
+  /**
+   * Finds the requests that wait for a decision for an employee, leave type and entitlement period.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param leaveType - The leave type.
+   * @param periodStart - First day of the entitlement period.
+   * @returns The requests.
+   */
+  async findPendingByEmployeeTypeAndPeriod(
+    tenantId: string,
+    employeeId: string,
+    leaveType: Coding,
+    periodStart: string,
+  ): Promise<LeaveRequest[]> {
+    return this.latestFirst(
+      this.filter(
+        (item) =>
+          item.tenant_id === tenantId &&
+          item.employee_id === employeeId &&
+          !item.deleted_at &&
+          item.leave_type.system === leaveType.system &&
+          item.leave_type.code === leaveType.code &&
+          item.entitlement_period?.start === periodStart &&
+          (item.status === 'requested' || item.status === 'head_approved'),
+      ),
+    )
+  }
+
+  /**
+   * Finds the requests that wait for a decision of the given people, latest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param waiting - The units whose Head is asking and whether HR Manager is.
+   * @param limit - Page size.
+   * @param offset - Items to skip.
+   * @returns The requests.
+   */
+  async findWaiting(
+    tenantId: string,
+    waiting: WaitingFor,
+    limit: number,
+    offset: number,
+  ): Promise<LeaveRequest[]> {
+    return this.latestFirst(
+      this.filter((item) => {
+        if (item.tenant_id !== tenantId || item.deleted_at) {
+          return false
+        }
+        const first = item.deciders.first
+        const forHead =
+          item.status === 'requested' &&
+          (first.kind === 'unit_head' || first.kind === 'parent_head') &&
+          first.unit_id !== null &&
+          waiting.unitIds.includes(first.unit_id)
+        const forHr =
+          waiting.hr &&
+          ((item.status === 'requested' && first.kind === 'hr_manager') ||
+            item.status === 'head_approved')
+        return forHead || forHr
+      }),
+    ).slice(offset, offset + limit)
+  }
+
+  /**
+   * Sorts requests latest first, by creation time and then identifier.
+   *
+   * @param items - The requests.
+   * @returns The same requests, sorted.
+   */
+  private latestFirst(items: LeaveRequest[]): LeaveRequest[] {
+    return items.sort(
+      (left, right) =>
+        (right.created_at?.getTime() ?? 0) - (left.created_at?.getTime() ?? 0) ||
+        right.id.localeCompare(left.id),
+    )
+  }
+}
+
+/**
+ * In-memory `LeaveRequestDetailRepository` for tests. Like the Mongo collection, there is one
+ * detail per request, nothing is deleted and only the proof can change.
+ */
+export class InMemoryLeaveRequestDetails
+  extends InMemoryRepository<LeaveRequestDetail>
+  implements LeaveRequestDetailRepository
+{
+  /**
+   * Creates a detail, refusing a second one for the same request.
+   *
+   * @param entity - Detail data.
+   * @param id - Optional identifier.
+   * @returns The stored detail.
+   */
+  override async create(
+    entity: NewEntity<LeaveRequestDetail>,
+    id?: string,
+  ): Promise<LeaveRequestDetail> {
+    if (
+      this.find(
+        (item) =>
+          item.tenant_id === entity.tenant_id &&
+          item.request_id === entity.request_id,
+      )
+    ) {
+      throw new RepositoryConflictError('duplicate leave request detail', {
+        operation: 'LeaveRequestDetailRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Updates the proof of a detail; other fields are ignored.
+   *
+   * @param id - Detail identifier.
+   * @param changes - Fields to change.
+   * @param options - Optional concurrency check.
+   * @returns The updated detail.
+   */
+  override async update(
+    id: string,
+    changes: EntityChanges<LeaveRequestDetail>,
+    options?: UpdateOptions,
+  ): Promise<LeaveRequestDetail> {
+    return super.update(id, { proof: changes.proof }, options)
+  }
+
+  /**
+   * Rejects: details are never deleted.
+   *
+   * @returns Never resolves.
+   */
+  override async delete(): Promise<void> {
+    throw new RepositoryError('Leave request details are never deleted.', {
+      operation: 'LeaveRequestDetailRepository.delete',
+    })
+  }
+
+  /**
+   * Rejects: details are never deleted.
+   *
+   * @returns Never resolves.
+   */
+  override async deleteSoft(): Promise<void> {
+    throw new RepositoryError('Leave request details are never deleted.', {
+      operation: 'LeaveRequestDetailRepository.deleteSoft',
+    })
+  }
+
+  /**
+   * Finds the detail of a request.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param requestId - The request.
+   * @returns The detail, or `null`.
+   */
+  async findByRequest(
+    tenantId: string,
+    requestId: string,
+  ): Promise<LeaveRequestDetail | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.request_id === requestId &&
+        !item.deleted_at,
     )
   }
 }
