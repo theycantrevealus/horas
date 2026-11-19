@@ -11,6 +11,7 @@ export type ParameterType =
   | { kind: 'integer'; min: number; max: number }
   | { kind: 'decimal'; min: number; max: number }
   | { kind: 'integer_list' }
+  | { kind: 'weekday_list' }
   | { kind: 'boolean' }
   | { kind: 'choice'; choices: readonly string[] }
   | { kind: 'profession_points' }
@@ -208,6 +209,14 @@ export const PARAMETER_CATALOG: readonly ParameterDefinition[] = [
     scopes: ['tenant'],
     description:
       'Days before an entitlement period starts that its leave days are granted, so requests for the next period can be made (9.4.5).',
+  },
+  {
+    key: 'LEAVE_WORKING_WEEK',
+    type: { kind: 'weekday_list' },
+    default: [1, 2, 3, 4, 5],
+    scopes: TENANT_ORG_FACILITY,
+    description:
+      'ISO weekdays (1 Monday to 7 Sunday) that count as working days for leave when no roster covers a date (9.4.6).',
   },
 ]
 

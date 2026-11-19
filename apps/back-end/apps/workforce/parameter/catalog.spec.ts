@@ -64,6 +64,17 @@ describe('parameter catalog', () => {
     expect(checkValue(definition!.type, 1.5)).toBeUndefined()
   })
 
+  it('defines LEAVE_WORKING_WEEK as a list of ISO weekdays, Monday to Friday by default, settable down to a facility', () => {
+    const definition = findParameter('LEAVE_WORKING_WEEK')
+
+    expect(definition).toMatchObject({ default: [1, 2, 3, 4, 5], type: { kind: 'weekday_list' }, scopes: ['tenant', 'organization', 'facility'] })
+    expect(checkValue(definition!.type, [6, 1, 3])).toEqual([1, 3, 6])
+    expect(checkValue(definition!.type, [1, 2, 3, 4, 5, 6, 7])).toEqual([1, 2, 3, 4, 5, 6, 7])
+    for (const bad of [[], [0], [8], [1, 1], [1.5], ['1'], 'mon', null, [1, 2, 3, 4, 5, 6, 7, 1]]) {
+      expect(checkValue(definition!.type, bad)).toBeUndefined()
+    }
+  })
+
   it('finds a key and answers undefined for an unknown one', () => {
     expect(findParameter('MAX_WEEKLY_HOURS')?.key).toBe('MAX_WEEKLY_HOURS')
     expect(findParameter('NOPE')).toBeUndefined()

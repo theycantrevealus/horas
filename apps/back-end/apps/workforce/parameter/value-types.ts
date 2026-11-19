@@ -39,7 +39,7 @@ function isInteger(value: unknown): value is number {
 
 /**
  * Checks a value against a parameter type and returns it in its stored form: integer lists from
- * largest to smallest, profession entries reduced to their known fields. The system of a
+ * largest to smallest, weekday lists from Monday to Sunday, profession entries reduced to their known fields. The system of a
  * profession code is only checked as text here; the service checks the codes against the code
  * concepts.
  *
@@ -77,6 +77,18 @@ export function checkValue(type: ParameterType, value: unknown): unknown {
         return undefined
       }
       return [...(value as number[])].sort((left, right) => right - left)
+    }
+    case 'weekday_list': {
+      if (
+        !Array.isArray(value) ||
+        value.length === 0 ||
+        value.length > 7 ||
+        !value.every((item) => isInteger(item) && item >= 1 && item <= 7) ||
+        new Set(value).size !== value.length
+      ) {
+        return undefined
+      }
+      return [...(value as number[])].sort((left, right) => left - right)
     }
     case 'profession_points':
       return checkProfessionPoints(value)
