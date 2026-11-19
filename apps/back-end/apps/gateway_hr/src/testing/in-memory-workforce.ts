@@ -9,6 +9,8 @@ import {
   REPOSITORY_PRIVILEGE_GRANT,
   REPOSITORY_COVERAGE_REQUIREMENT,
   REPOSITORY_LEAVE_LEDGER,
+  REPOSITORY_LEAVE_REQUEST,
+  REPOSITORY_LEAVE_REQUEST_DETAIL,
   REPOSITORY_LEAVE_POLICY,
   REPOSITORY_HOLIDAY_CALENDAR,
   REPOSITORY_ROSTER,
@@ -40,6 +42,8 @@ import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-
 import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
 import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-requirement'
 import { LeaveLedgerEntryEntity } from '@repository/mongo/schema/leave-ledger'
+import { LeaveRequestEntity } from '@repository/mongo/schema/leave-request'
+import { LeaveRequestDetailEntity } from '@repository/mongo/schema/leave-request-detail'
 import { LeavePolicyEntity } from '@repository/mongo/schema/leave-policy'
 import { RosterAssignmentEntity } from '@repository/mongo/schema/roster-assignment'
 import { PracticeScheduleEntity } from '@repository/mongo/schema/practice-schedule'
@@ -71,6 +75,8 @@ import {
   InMemoryPrivilegeGrants,
   InMemoryCoverageRequirements,
   InMemoryLeaveLedger,
+  InMemoryLeaveRequestDetails,
+  InMemoryLeaveRequests,
   InMemoryLeavePolicies,
   InMemoryHolidayCalendars,
   InMemoryRosterAssignments,
@@ -125,6 +131,8 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property coverage - Coverage requirement repository.
  * @property leavePolicies - Leave policy repository.
  * @property leaveLedger - Leave ledger repository.
+ * @property leaveRequests - Leave request repository.
+ * @property leaveRequestDetails - Leave request detail repository.
  * @property rosters - Roster repository.
  * @property rosterAssignments - Roster assignment repository.
  * @property swaps - Shift swap request repository.
@@ -158,6 +166,8 @@ export interface InMemoryWorkforce {
   coverage: InMemoryCoverageRequirements
   leavePolicies: InMemoryLeavePolicies
   leaveLedger: InMemoryLeaveLedger
+  leaveRequests: InMemoryLeaveRequests
+  leaveRequestDetails: InMemoryLeaveRequestDetails
   rosters: InMemoryRosters
   rosterAssignments: InMemoryRosterAssignments
   swaps: InMemoryShiftSwapRequests
@@ -199,6 +209,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const coverage = new InMemoryCoverageRequirements()
   const leavePolicies = new InMemoryLeavePolicies()
   const leaveLedger = new InMemoryLeaveLedger()
+  const leaveRequests = new InMemoryLeaveRequests()
+  const leaveRequestDetails = new InMemoryLeaveRequestDetails()
   const rosters = new InMemoryRosters()
   const rosterAssignments = new InMemoryRosterAssignments()
   const swaps = new InMemoryShiftSwapRequests()
@@ -230,6 +242,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     coverage,
     leavePolicies,
     leaveLedger,
+    leaveRequests,
+    leaveRequestDetails,
     rosters,
     rosterAssignments,
     swaps,
@@ -262,6 +276,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         CoverageRequirementEntity,
         LeavePolicyEntity,
         LeaveLedgerEntryEntity,
+        LeaveRequestEntity,
+        LeaveRequestDetailEntity,
         RosterEntity,
         RosterAssignmentEntity,
         ShiftSwapRequestEntity,
@@ -294,6 +310,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_COVERAGE_REQUIREMENT, coverage],
         [REPOSITORY_LEAVE_POLICY, leavePolicies],
         [REPOSITORY_LEAVE_LEDGER, leaveLedger],
+        [REPOSITORY_LEAVE_REQUEST, leaveRequests],
+        [REPOSITORY_LEAVE_REQUEST_DETAIL, leaveRequestDetails],
         [REPOSITORY_ROSTER, rosters],
         [REPOSITORY_ROSTER_ASSIGNMENT, rosterAssignments],
         [REPOSITORY_SHIFT_SWAP_REQUEST, swaps],

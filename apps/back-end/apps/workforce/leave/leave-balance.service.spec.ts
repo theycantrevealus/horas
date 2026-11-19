@@ -5,6 +5,7 @@ import { type Employee } from '@repository/model/employee'
 import { type EmploymentContract } from '@repository/model/employment-contract'
 import { type LeaveLedgerEntry } from '@repository/model/leave-ledger-entry'
 import { type LeavePolicy } from '@repository/model/leave-policy'
+import { type LeaveRequest } from '@repository/model/leave-request'
 import { CodeConceptService } from '../concept/code-concept.service'
 import {
   InMemoryCodeConcepts,
@@ -13,6 +14,7 @@ import {
   InMemoryFacilities,
   InMemoryLeaveLedger,
   InMemoryLeavePolicies,
+  InMemoryLeaveRequests,
   InMemoryOrganizationUnits,
   InMemoryPositionAssignments,
 } from '../testing/in-memory'
@@ -35,6 +37,7 @@ describe('LeavePlaceService and LeaveBalanceService', () => {
   let units: InMemoryOrganizationUnits
   let facilities: InMemoryFacilities
   let ledger: InMemoryLeaveLedger
+  let requests: InMemoryLeaveRequests
   let policies: InMemoryLeavePolicies
   let place: LeavePlaceService
   let service: LeaveBalanceService
@@ -193,6 +196,27 @@ describe('LeavePlaceService and LeaveBalanceService', () => {
   }
 
   /**
+   * Stores a leave request that holds days.
+   *
+   * @param who - The employee.
+   * @param status - Request status.
+   * @param totalDays - Days of the request.
+   * @param override - Other fields.
+   * @returns The request.
+   */
+  function addRequest(who: Employee, status: LeaveRequest['status'], totalDays: number, override: Partial<LeaveRequest> = {}) {
+    return asAdmin(() =>
+      requests.create({
+        tenant_id: who.tenant_id, employee_id: who.id, unit_id: null, facility_id: null, leave_type: annual, policy_id: new Types.ObjectId().toHexString(),
+        rules: { balance_kind: 'period', counting: 'working_days', steps: 'one_step' }, period: { start: '2026-12-01', end: '2026-12-03' },
+        half_days: { first: false, last: false }, days: [], total_days: totalDays, entitlement_period: { start: '2026-03-15', end: '2027-03-14' },
+        deciders: { first: { kind: 'hr_manager', unit_id: null, employee_id: null }, second: false }, replacement: null, decisions: [], status,
+        status_since: new Date(), proof_due_on: null, proof_received: false, cover: null, ...override,
+      }),
+    )
+  }
+
+  /**
    * @returns Everything the logger received, as text.
    */
   function written(): string {
@@ -211,6 +235,7 @@ describe('LeavePlaceService and LeaveBalanceService', () => {
     units = new InMemoryOrganizationUnits()
     facilities = new InMemoryFacilities()
     ledger = new InMemoryLeaveLedger()
+    requests = new InMemoryLeaveRequests()
     policies = new InMemoryLeavePolicies()
     const logger = { log, warn, error, debug } as unknown as AppLogger
     const policyService = new LeavePolicyService(
@@ -220,7 +245,7 @@ describe('LeavePlaceService and LeaveBalanceService', () => {
       logger,
     )
     place = new LeavePlaceService(assignments, units, facilities)
-    service = new LeaveBalanceService(employees, contracts, ledger, policyService, place, logger)
+    service = new LeaveBalanceService(employees, contracts, ledger, requests, policyService, place, logger)
     employee = await addEmployee()
     await addContract(employee, '2024-03-15')
     await addPolicy('tahunan', { kind: 'period', period: 'service_year', days: 12, min_service_months: 12, carry_over: null, deduct_collective_leave: false })
@@ -347,6 +372,45 @@ describe('LeavePlaceService and LeaveBalanceService', () => {
       expect(thrown).toBeInstanceOf(ForbiddenError)
       expect((thrown as ForbiddenError).code).toBe('employee_required')
       expect(written()).toBe('[[],[],[],[]]')
+    })
+  })
+
+  describe('pending days', () => {
+    it('subtracts the days of requests that wait for a decision, in the balances and in the summary', async () => {
+      await post(employee, 'grant', 12)
+      await addRequest(employee, 'requested', 2)
+      await addRequest(employee, 'head_approved', 1.5)
+
+      const [view] = await service.balances(tenantId, employee.id)
+      const summary = await service.summary(tenantId, employee.id, annual, '2026-03-15')
+
+      expect(view).toMatchObject({ pending: 3.5, available: 8.5, ownLeft: 12 })
+      expect(summary).toMatchObject({ pending: 3.5, available: 8.5 })
+    })
+
+    it('does not count approved, rejected or cancelled requests, other types, periods, employees or tenants', async () => {
+      await post(employee, 'grant', 12)
+      const other = await addEmployee()
+      const foreign = await addEmployee(otherTenantId)
+      await addRequest(employee, 'approved', 2)
+      await addRequest(employee, 'rejected', 2)
+      await addRequest(employee, 'cancelled', 2)
+      await addRequest(employee, 'requested', 2, { leave_type: sick })
+      await addRequest(employee, 'requested', 2, { entitlement_period: { start: '2025-03-15', end: '2026-03-14' } })
+      await addRequest(employee, 'requested', 2, { entitlement_period: null })
+      await addRequest(other, 'requested', 2)
+      await addRequest(foreign, 'requested', 2)
+
+      expect(await service.summary(tenantId, employee.id, annual, '2026-03-15')).toMatchObject({ pending: 0, available: 12 })
+    })
+
+    it('leaves out the request being decided', async () => {
+      await post(employee, 'grant', 12)
+      const deciding = await addRequest(employee, 'requested', 4)
+      await addRequest(employee, 'requested', 1)
+
+      expect(await service.summary(tenantId, employee.id, annual, '2026-03-15')).toMatchObject({ pending: 5, available: 7 })
+      expect(await service.summary(tenantId, employee.id, annual, '2026-03-15', deciding.id)).toMatchObject({ pending: 1, available: 11 })
     })
   })
 

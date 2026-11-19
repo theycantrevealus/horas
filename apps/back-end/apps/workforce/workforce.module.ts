@@ -11,6 +11,8 @@ import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-gran
 import { CoverageRequirementRepositoryModule } from '@repository/mongo/coverage-requirement.module'
 import { LeaveLedgerRepositoryModule } from '@repository/mongo/leave-ledger.module'
 import { LeavePolicyRepositoryModule } from '@repository/mongo/leave-policy.module'
+import { LeaveRequestDetailRepositoryModule } from '@repository/mongo/leave-request-detail.module'
+import { LeaveRequestRepositoryModule } from '@repository/mongo/leave-request.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
 import { PracticeScheduleRepositoryModule } from '@repository/mongo/practice-schedule.module'
 import { PracticeScheduleExceptionRepositoryModule } from '@repository/mongo/practice-schedule-exception.module'
@@ -43,8 +45,11 @@ import { EligibilityService } from './eligibility/eligibility.service'
 import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
 import { LeaveBalanceService } from './leave/leave-balance.service'
+import { LeaveDeciderService } from './leave/decider'
+import { LeaveDetailService } from './leave/leave-detail.service'
 import { LeavePlaceService } from './leave/leave-place'
 import { LeavePolicyService } from './leave/leave-policy.service'
+import { LeaveRequestService } from './leave/leave-request.service'
 import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
 import { PracticeExceptionService } from './rostering/practice-exception.service'
@@ -110,6 +115,8 @@ import { UnitService } from './structure/unit.service'
     PracticeScheduleExceptionRepositoryModule,
     LeavePolicyRepositoryModule,
     LeaveLedgerRepositoryModule,
+    LeaveRequestRepositoryModule,
+    LeaveRequestDetailRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -152,6 +159,9 @@ import { UnitService } from './structure/unit.service'
     LeavePolicyService,
     LeavePlaceService,
     LeaveBalanceService,
+    LeaveDeciderService,
+    LeaveRequestService,
+    LeaveDetailService,
   ],
   exports: [
     OrganizationService,
@@ -194,6 +204,9 @@ import { UnitService } from './structure/unit.service'
     LeavePolicyService,
     LeavePlaceService,
     LeaveBalanceService,
+    LeaveDeciderService,
+    LeaveRequestService,
+    LeaveDetailService,
   ],
 })
 export class WorkforceModule {}

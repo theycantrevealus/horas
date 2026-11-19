@@ -227,3 +227,15 @@ export const REPOSITORY_LEAVE_POLICY = Symbol('REPOSITORY_LEAVE_POLICY')
  * Injection token of the leave ledger repository.
  */
 export const REPOSITORY_LEAVE_LEDGER = Symbol('REPOSITORY_LEAVE_LEDGER')
+
+/**
+ * Injection token of the leave request repository.
+ */
+export const REPOSITORY_LEAVE_REQUEST = Symbol('REPOSITORY_LEAVE_REQUEST')
+
+/**
+ * Injection token of the leave request detail repository.
+ */
+export const REPOSITORY_LEAVE_REQUEST_DETAIL = Symbol(
+  'REPOSITORY_LEAVE_REQUEST_DETAIL',
+)
