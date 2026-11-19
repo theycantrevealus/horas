@@ -8,6 +8,7 @@ import {
   REPOSITORY_CREDENTIAL_ASSESSMENT,
   REPOSITORY_PRIVILEGE_GRANT,
   REPOSITORY_COVERAGE_REQUIREMENT,
+  REPOSITORY_LEAVE_POLICY,
   REPOSITORY_HOLIDAY_CALENDAR,
   REPOSITORY_ROSTER,
   REPOSITORY_ROSTER_ASSIGNMENT,
@@ -37,6 +38,7 @@ import { ClinicalAppointmentEntity } from '@repository/mongo/schema/clinical-app
 import { CredentialAssessmentEntity } from '@repository/mongo/schema/credential-assessment'
 import { PrivilegeGrantEntity } from '@repository/mongo/schema/privilege-grant'
 import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-requirement'
+import { LeavePolicyEntity } from '@repository/mongo/schema/leave-policy'
 import { RosterAssignmentEntity } from '@repository/mongo/schema/roster-assignment'
 import { PracticeScheduleEntity } from '@repository/mongo/schema/practice-schedule'
 import { PracticeScheduleExceptionEntity } from '@repository/mongo/schema/practice-schedule-exception'
@@ -66,6 +68,7 @@ import {
   InMemoryCredentialAssessments,
   InMemoryPrivilegeGrants,
   InMemoryCoverageRequirements,
+  InMemoryLeavePolicies,
   InMemoryHolidayCalendars,
   InMemoryRosterAssignments,
   InMemoryPracticeScheduleExceptions,
@@ -117,6 +120,7 @@ import { type HrGatewayOptions } from './hr-gateway'
  * @property holidayCalendars - Holiday calendar repository.
  * @property hrImports - HR import repository.
  * @property coverage - Coverage requirement repository.
+ * @property leavePolicies - Leave policy repository.
  * @property rosters - Roster repository.
  * @property rosterAssignments - Roster assignment repository.
  * @property swaps - Shift swap request repository.
@@ -148,6 +152,7 @@ export interface InMemoryWorkforce {
   holidayCalendars: InMemoryHolidayCalendars
   hrImports: InMemoryHrImports
   coverage: InMemoryCoverageRequirements
+  leavePolicies: InMemoryLeavePolicies
   rosters: InMemoryRosters
   rosterAssignments: InMemoryRosterAssignments
   swaps: InMemoryShiftSwapRequests
@@ -187,6 +192,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const holidayCalendars = new InMemoryHolidayCalendars()
   const hrImports = new InMemoryHrImports()
   const coverage = new InMemoryCoverageRequirements()
+  const leavePolicies = new InMemoryLeavePolicies()
   const rosters = new InMemoryRosters()
   const rosterAssignments = new InMemoryRosterAssignments()
   const swaps = new InMemoryShiftSwapRequests()
@@ -216,6 +222,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     holidayCalendars,
     hrImports,
     coverage,
+    leavePolicies,
     rosters,
     rosterAssignments,
     swaps,
@@ -246,6 +253,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         HolidayCalendarEntity,
         HrImportEntity,
         CoverageRequirementEntity,
+        LeavePolicyEntity,
         RosterEntity,
         RosterAssignmentEntity,
         ShiftSwapRequestEntity,
@@ -276,6 +284,7 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_HOLIDAY_CALENDAR, holidayCalendars],
         [REPOSITORY_HR_IMPORT, hrImports],
         [REPOSITORY_COVERAGE_REQUIREMENT, coverage],
+        [REPOSITORY_LEAVE_POLICY, leavePolicies],
         [REPOSITORY_ROSTER, rosters],
         [REPOSITORY_ROSTER_ASSIGNMENT, rosterAssignments],
         [REPOSITORY_SHIFT_SWAP_REQUEST, swaps],

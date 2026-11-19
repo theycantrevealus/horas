@@ -9,6 +9,7 @@ import { CredentialApplicationRepositoryModule } from '@repository/mongo/credent
 import { CredentialAssessmentRepositoryModule } from '@repository/mongo/credential-assessment.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { CoverageRequirementRepositoryModule } from '@repository/mongo/coverage-requirement.module'
+import { LeavePolicyRepositoryModule } from '@repository/mongo/leave-policy.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
 import { PracticeScheduleRepositoryModule } from '@repository/mongo/practice-schedule.module'
 import { PracticeScheduleExceptionRepositoryModule } from '@repository/mongo/practice-schedule-exception.module'
@@ -40,6 +41,7 @@ import { EligibilityQueryService } from './eligibility/eligibility-query.service
 import { EligibilityService } from './eligibility/eligibility.service'
 import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
+import { LeavePolicyService } from './leave/leave-policy.service'
 import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
 import { PracticeExceptionService } from './rostering/practice-exception.service'
@@ -103,6 +105,7 @@ import { UnitService } from './structure/unit.service'
     ShiftSwapRequestRepositoryModule,
     PracticeScheduleRepositoryModule,
     PracticeScheduleExceptionRepositoryModule,
+    LeavePolicyRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -142,6 +145,7 @@ import { UnitService } from './structure/unit.service'
     DutyService,
     EligibilityService,
     EligibilityQueryService,
+    LeavePolicyService,
   ],
   exports: [
     OrganizationService,
@@ -181,6 +185,7 @@ import { UnitService } from './structure/unit.service'
     DutyService,
     EligibilityService,
     EligibilityQueryService,
+    LeavePolicyService,
   ],
 })
 export class WorkforceModule {}

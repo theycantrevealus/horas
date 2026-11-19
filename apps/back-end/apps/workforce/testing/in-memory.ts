@@ -93,6 +93,10 @@ import {
   type CoverageRequirementRepository,
 } from '@repository/interface/coverage-requirement'
 import {
+  type LeavePolicyQuery,
+  type LeavePolicyRepository,
+} from '@repository/interface/leave-policy'
+import {
   type HolidayCalendarQuery,
   type HolidayCalendarRepository,
 } from '@repository/interface/holiday-calendar'
@@ -110,6 +114,8 @@ import { type ClinicalAppointment } from '@repository/model/clinical-appointment
 import { type CredentialAssessment } from '@repository/model/credential-assessment'
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CoverageRequirement } from '@repository/model/coverage-requirement'
+import { type Coding } from '@repository/model/common/coding'
+import { type LeavePolicy } from '@repository/model/leave-policy'
 import { type Roster } from '@repository/model/roster'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
 import { type PracticeSchedule } from '@repository/model/practice-schedule'
@@ -3614,6 +3620,121 @@ export class InMemoryPracticeScheduleExceptions
         item.employee_id === employeeId &&
         !item.deleted_at &&
         (item.date === date || item.moved_to?.date === date),
+    )
+  }
+}
+
+/**
+ * In-memory `LeavePolicyRepository` for tests. It applies the unique index of the Mongo collection:
+ * one version of a leave type per start date.
+ */
+export class InMemoryLeavePolicies
+  extends InMemoryRepository<LeavePolicy>
+  implements LeavePolicyRepository
+{
+  /**
+   * Creates a policy version, refusing a second one with the same leave type and start date.
+   *
+   * @param entity - Policy data.
+   * @param id - Optional identifier.
+   * @returns The stored policy.
+   */
+  override async create(
+    entity: NewEntity<LeavePolicy>,
+    id?: string,
+  ): Promise<LeavePolicy> {
+    const duplicate = this.find(
+      (item) =>
+        item.tenant_id === entity.tenant_id &&
+        item.leave_type.system === entity.leave_type.system &&
+        item.leave_type.code === entity.leave_type.code &&
+        item.effective_from === entity.effective_from,
+    )
+    if (duplicate) {
+      throw new RepositoryConflictError('duplicate leave policy version', {
+        operation: 'LeavePolicyRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Finds policy versions, ordered by leave type code and then `effective_from`, latest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The policy versions.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: LeavePolicyQuery = {},
+  ): Promise<LeavePolicy[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.leaveTypeSystem ||
+          item.leave_type.system === query.leaveTypeSystem) &&
+        (!query.leaveTypeCode || item.leave_type.code === query.leaveTypeCode),
+    )
+      .sort(
+        (left, right) =>
+          left.leave_type.code.localeCompare(right.leave_type.code) ||
+          right.effective_from.localeCompare(left.effective_from),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the version of a leave type in force on a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param leaveType - The leave type.
+   * @param date - Local date.
+   * @returns The version, or `null`.
+   */
+  async findInForce(
+    tenantId: string,
+    leaveType: Coding,
+    date: string,
+  ): Promise<LeavePolicy | null> {
+    return (
+      this.filter(
+        (item) =>
+          item.tenant_id === tenantId &&
+          !item.deleted_at &&
+          item.leave_type.system === leaveType.system &&
+          item.leave_type.code === leaveType.code &&
+          item.effective_from <= date,
+      ).sort((left, right) =>
+        right.effective_from.localeCompare(left.effective_from),
+      )[0] ?? null
+    )
+  }
+
+  /**
+   * Finds the version of a leave type that starts on a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param leaveType - The leave type.
+   * @param effectiveFrom - Local date the version starts.
+   * @returns The version, or `null`.
+   */
+  async findByTypeAndDate(
+    tenantId: string,
+    leaveType: Coding,
+    effectiveFrom: string,
+  ): Promise<LeavePolicy | null> {
+    return (
+      this.filter(
+        (item) =>
+          item.tenant_id === tenantId &&
+          !item.deleted_at &&
+          item.leave_type.system === leaveType.system &&
+          item.leave_type.code === leaveType.code &&
+          item.effective_from === effectiveFrom,
+      )[0] ?? null
     )
   }
 }

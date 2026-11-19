@@ -38,7 +38,8 @@ function concept(
  * Indonesian defaults (bundle `id`): the code systems the HR specification names, with the
  * properties later rules read. The profession list is a starter list and its ISCO-08 mappings
  * come from memory of the standard; HR and legal must verify both before go-live
- * (`gateway-hr-1-3-code-concepts.md` C11).
+ * (`gateway-hr-1-3-code-concepts.md` C11). The `id.leave-type` codes are those of HR spec 9.4.8;
+ * their rules are the policies of `workforce/leave/policy-bundles.ts`.
  */
 export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
   concept(
@@ -400,4 +401,18 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
     { workforce_category: 'tenaga_kesehatan_lain' },
     [['isco-08', '3211']],
   ),
+
+  concept('id.leave-type', 'tahunan', 'Cuti Tahunan', 'Annual leave'),
+  concept('id.leave-type', 'sakit', 'Cuti Sakit', 'Sick leave'),
+  concept('id.leave-type', 'melahirkan', 'Cuti Melahirkan', 'Maternity leave'),
+  concept('id.leave-type', 'keguguran', 'Cuti Keguguran', 'Miscarriage leave'),
+  concept('id.leave-type', 'haid', 'Cuti Haid', 'Menstrual leave'),
+  concept('id.leave-type', 'menikah', 'Cuti Menikah', 'Marriage leave'),
+  concept('id.leave-type', 'menikahkan_anak', 'Cuti Menikahkan Anak', 'Marriage of a child'),
+  concept('id.leave-type', 'khitan_baptis_anak', 'Cuti Khitanan atau Pembaptisan Anak', 'Circumcision or baptism of a child'),
+  concept('id.leave-type', 'istri_melahirkan', 'Cuti Istri Melahirkan atau Keguguran', 'Wife gives birth or miscarries'),
+  concept('id.leave-type', 'duka_keluarga', 'Cuti Duka Keluarga Inti', 'Death of a spouse, parent, parent-in-law, child or child-in-law'),
+  concept('id.leave-type', 'duka_serumah', 'Cuti Duka Anggota Rumah Tangga', 'Death of another household member'),
+  concept('id.leave-type', 'tanpa_upah', 'Cuti di Luar Tanggungan', 'Unpaid leave'),
+  concept('id.leave-type', 'tidak_tersedia', 'Tidak Tersedia', 'Unavailable (contracted practitioners)'),
 ]

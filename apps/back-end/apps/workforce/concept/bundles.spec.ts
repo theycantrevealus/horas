@@ -15,6 +15,27 @@ describe('bundles', () => {
     expect(findBundle('__proto__')).toBeUndefined()
   })
 
+  it('holds the 13 leave type codes of HR spec 9.4.8', () => {
+    const codes = (findBundle('id') ?? [])
+      .filter((concept) => concept.system === 'id.leave-type')
+      .map((concept) => concept.code)
+    expect(codes.sort()).toEqual([
+      'duka_keluarga',
+      'duka_serumah',
+      'haid',
+      'istri_melahirkan',
+      'keguguran',
+      'khitan_baptis_anak',
+      'melahirkan',
+      'menikah',
+      'menikahkan_anak',
+      'sakit',
+      'tahunan',
+      'tanpa_upah',
+      'tidak_tersedia',
+    ])
+  })
+
   describe.each(Object.entries(BUNDLES))('bundle %s', (_name, concepts) => {
     it('has valid systems and codes, and no code twice', () => {
       const seen = new Set<string>()
@@ -95,6 +116,7 @@ describe('bundles', () => {
         'id.credit-system',
         'id.employment-type',
         'id.evidence-type',
+        'id.leave-type',
         'id.license-status-reason',
         'id.license-type',
         'id.license-verification-method',
