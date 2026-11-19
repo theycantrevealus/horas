@@ -16,7 +16,7 @@ import {
   InMemoryOrganizationUnits,
   InMemoryPositionAssignments,
 } from '../testing/in-memory'
-import { InvalidRequestError, NotFoundError } from '../workforce.error'
+import { ForbiddenError, InvalidRequestError, NotFoundError } from '../workforce.error'
 import { LeaveBalanceService } from './leave-balance.service'
 import { LeavePlaceService } from './leave-place'
 import { LeavePolicyService } from './leave-policy.service'
@@ -335,6 +335,18 @@ describe('LeavePlaceService and LeaveBalanceService', () => {
       const [view] = await service.balances(tenantId, employee.id)
 
       expect(view?.granted).toBe(0)
+    })
+  })
+
+  describe('ownBalances', () => {
+    it('answers the balances of the signed-in employee, and refuses an account with no linked employee', async () => {
+      await post(employee, 'grant', 12)
+
+      expect(await service.ownBalances(tenantId, employee.id)).toEqual(await service.balances(tenantId, employee.id))
+      const thrown = await rejection(() => service.ownBalances(tenantId, null))
+      expect(thrown).toBeInstanceOf(ForbiddenError)
+      expect((thrown as ForbiddenError).code).toBe('employee_required')
+      expect(written()).toBe('[[],[],[],[]]')
     })
   })
 

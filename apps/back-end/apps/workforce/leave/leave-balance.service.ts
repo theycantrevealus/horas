@@ -18,7 +18,11 @@ import {
 } from '@repository/token'
 import { systemSuffix } from '../concept/system-rules'
 import { observe } from '../observe'
-import { InvalidRequestError, NotFoundError } from '../workforce.error'
+import {
+  ForbiddenError,
+  InvalidRequestError,
+  NotFoundError,
+} from '../workforce.error'
 import { summarizeBalance, type LeaveBalanceSummary } from './balance'
 import { entitlementPeriod } from './entitlement-period'
 import { isHalfSteps } from './leave-policy-rules'
@@ -149,6 +153,30 @@ export class LeaveBalanceService {
       })
     }
     return views
+  }
+
+  /**
+   * Answers the balances of the signed-in employee. Needs an account linked to an employee. Writes no
+   * log entry (a read).
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param employeeId - The employee linked to the account, or `null`.
+   * @param onDate - A local date; today in the employee's zone when omitted.
+   * @returns The balances.
+   * @throws ForbiddenError `employee_required`.
+   */
+  ownBalances(
+    tenantId: string,
+    employeeId: string | null,
+    onDate?: string,
+  ): Promise<LeaveBalanceView[]> {
+    if (employeeId === null) {
+      throw new ForbiddenError(
+        'employee_required',
+        'This needs an account linked to an employee.',
+      )
+    }
+    return this.balances(tenantId, employeeId, onDate)
   }
 
   /**
