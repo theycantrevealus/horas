@@ -351,6 +351,6 @@ The worker's `HrJobsRunner` (`apps/worker/src/hr-jobs/`) runs the scheduled HR j
 | `event: 'hr_job_lag'` | `warn` | A job still fills a whole batch after the re-run limit (20): it is behind. Alert on it. |
 
 - A failing record does not stop the pass; it stays due and is retried on the next pass, so a steady `failed` count is the signal.
-- Each record is handled in a request context with its own `correlation_id` and a system actor (`license-expiry-job`, `appointment-expiry-job`, `eligibility-sweep-job`), so the change record and the event of one change share it (`logging.md` 8, 13.2).
+- Each record is handled in a request context with its own `correlation_id` and a system actor (`license-expiry-job`, `appointment-expiry-job`, `eligibility-sweep-job`, `leave-grant-job`, `leave-period-job`, `collective-leave-job`), so the change record and the event of one change share it (`logging.md` 8, 13.2). The leave jobs write no events; their change records carry the reasons `leave_granted`, `leave_carried_over`, `leave_expired` and `collective_leave`.
 - Configuration is the optional context `jobs.env` (`stack.md` 3.6): `HR_JOBS_ENABLED`, `HR_JOBS_INTERVAL_MS`, `HR_JOBS_BATCH_SIZE`, `HR_JOBS_LEASE_SECONDS`. Read it through `JobsConfig`.
 - Tests: `hr-jobs.runner.spec.ts` (fake jobs and the in-memory lease) asserts the summaries, the lag warning and that no values appear.

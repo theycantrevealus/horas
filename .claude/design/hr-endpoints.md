@@ -4,7 +4,7 @@ Status: **Draft for discussion** (2026-11-10). Collections: `human-resource-coll
 
 We walk through the groups in order; each group is agreed before it is built.
 
-Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). The HR events to identity are built too (PR #29 and #30, `plans/gateway-hr-events-to-identity.md`), **2.4 Position assignments** (PR #31) and **2.5 Committee memberships** (PR #35) and **3.1 Licences** (PR #38 and #39) and **3.2 Professional credits** (PR #42 and #43) and **4.1 Privilege catalog** (PR #47) and **4.2 Credential applications** (PR #51, #53 and #54) and **4.3 SPK and granted privileges** (PR #60, #62 and #64) and **4.4 Renewals**, a follow-up of 4.2 and 4.3 (PR #68 and #70) and **5.1 Shift definitions** (PR #74) and **5.2 Holiday calendars** (PR #78 and #80) and **5.3 Coverage requirements** (PR #83) and **5.4 Rosters** (PR #87) and **5.5 Roster assignments** (PR #91, #93 and #94) and **5.6 Imports** (PR #97 and #99) and **5.7 Shift swaps** (PR #103 and #104) and **5.8 Practice schedules** (PR #108 and #109), which completes the rostering block, and **6 Clinical eligibility** (PR #113), which completes the endpoint groups of this plan. Group 8 (leave) was added on 2026-11-18 and is not built. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
+Built so far: **1.1 Organizations** (PR #7), **1.2 Facilities** (PR #10), **1.3 Code concepts** (PR #14), **1.4 Organization units** (PR #17), **1.5 Positions** (PR #19), **1.6 HR parameters** (PR #21) **2.1 Employee records** (PR #23) **2.2 Private profile** (PR #25) and **2.3 Employment contracts** (PR #27). The HR events to identity are built too (PR #29 and #30, `plans/gateway-hr-events-to-identity.md`), **2.4 Position assignments** (PR #31) and **2.5 Committee memberships** (PR #35) and **3.1 Licences** (PR #38 and #39) and **3.2 Professional credits** (PR #42 and #43) and **4.1 Privilege catalog** (PR #47) and **4.2 Credential applications** (PR #51, #53 and #54) and **4.3 SPK and granted privileges** (PR #60, #62 and #64) and **4.4 Renewals**, a follow-up of 4.2 and 4.3 (PR #68 and #70) and **5.1 Shift definitions** (PR #74) and **5.2 Holiday calendars** (PR #78 and #80) and **5.3 Coverage requirements** (PR #83) and **5.4 Rosters** (PR #87) and **5.5 Roster assignments** (PR #91, #93 and #94) and **5.6 Imports** (PR #97 and #99) and **5.7 Shift swaps** (PR #103 and #104) and **5.8 Practice schedules** (PR #108 and #109), which completes the rostering block, and **6 Clinical eligibility** (PR #113), which completes the endpoint groups of this plan. Group 8 (leave) was added on 2026-11-18: **8.1 Leave types and policies** (PR #123) and **8.2 Balances** (PR #124 and #125, with the worker jobs) are built; 8.3 and 8.4 are not. The build order and status of every group is in `plans/2026-11-10-gateway-hr-plan.md` section 3; the rules each endpoint follows are in `../rules/back-end/workforce.md`.
 
 ## 1. Organization structure and reference data
 
@@ -291,11 +291,11 @@ Plan: `plans/gateway-hr-6-clinical-eligibility.md` (built, PR #113). The one end
 
 ## 8. Leave
 
-Business source: HR spec 9.4 (agreed 2026-11-18). Collections: `human-resource-collections.md` section 9 (draft for review). Four sub-groups, built in this order; each gets its plan in `plans/` before it is built. 8.3 and 8.4 go to production together: an approval without its roster effects would leave people on leave planned to work.
+Business source: HR spec 9.4 (agreed 2026-11-18). Collections: `human-resource-collections.md` section 9 (`leave_policies` and `leave_ledger_entries` built; the request collections are still a draft). Four sub-groups, built in this order; the plans are in `plans/`. 8.3 and 8.4 go to production together: an approval without its roster effects would leave people on leave planned to work.
 
 ### 8.1 Leave types and policies
 
-Leave types are code concepts (`id.leave-type`), managed through `/code-concepts` (1.3).
+Plan: `plans/gateway-hr-8-1-leave-policies.md` (built, PR #123). The four endpoints are built as listed. Leave types are code concepts (`id.leave-type`), managed through `/code-concepts` (1.3).
 
 | Endpoint | Purpose |
 |---|---|
@@ -306,7 +306,7 @@ Leave types are code concepts (`id.leave-type`), managed through `/code-concepts
 
 ### 8.2 Balances
 
-With the worker jobs of `human-resource-collections.md` 9.7 (grants, carry-over and expiry, collective leave).
+Plan: `plans/gateway-hr-8-2-leave-balances.md` (built, PR #124 for the ledger, balances and endpoints and PR #125 for the worker jobs: grants, carry-over and expiry, collective leave; `human-resource-collections.md` 9.7). The four endpoints are built as listed.
 
 | Endpoint | Purpose |
 |---|---|

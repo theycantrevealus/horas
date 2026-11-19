@@ -502,7 +502,7 @@ None from this document. The HR specification's own open questions (section 16) 
 
 ## 9. Leave management (HR spec 9.4)
 
-Status: **Draft for review** (2026-11-18). Business source: HR spec 9.4 (rules `HR-LEV-*`). Build order: `hr-endpoints.md` group 8 (8.1 to 8.4; the plan number 7 is the worker jobs).
+Status: `leave_policies` (9.2) and `leave_ledger_entries` (9.5), the jobs (9.7) and `LEAVE_GRANT_LEAD_DAYS` (9.8) are **built** (2026-11-19, PR #123, #124 and #125, as-built notes in sections 9.2, 9.5, 9.7, 9.8 and 9.10). `leave_requests`, `leave_request_details` and the refinements of the rostering collections (9.3, 9.4, 9.6) are still **draft for review**. Business source: HR spec 9.4 (rules `HR-LEV-*`). Build order: `hr-endpoints.md` group 8 (8.1 to 8.4; the plan number 7 is the worker jobs).
 
 ### 9.1 Leave types as concepts
 
@@ -522,7 +522,7 @@ One document per tenant, leave type and version.
 | `paid` | boolean | For payroll (HR spec 9.7). |
 | `employment_types` | `Coding[]` | `id.employment-type` codes that may use the type; empty means all. |
 | `approval` | `{ steps: 'one_step' \| 'two_step'; two_step_above_days: number \| null }` | `two_step_above_days` makes a one-step type two-step for longer requests. |
-| `notice_days`, `retroactive_days`, `max_days_per_request` | number | `retroactive_days` 0 means future dates only (HR spec 9.4.4.6). |
+| `notice_days`, `retroactive_days`, `max_days_per_request` | number | `retroactive_days` 0 means future dates only (HR spec 9.4.4.6). As built: `max_days_per_request` is 0.5 to 366 in half steps and equal to `days` for `per_event` (it limits the counted days of a request, not the calendar span); `notice_days` 0 to 365; `retroactive_days` 0 to 30. |
 | `proof` | `{ due_days: number } \| null` | Days after the first leave date. |
 | `notes` | string \| null | Legal basis (PKB article). |
 | `source` | `{ kind: 'manual' \| 'bundle'; bundle_id: string \| null }` | Loaded from a country bundle (HR spec 9.4.8) or entered by HR Manager. |
@@ -592,7 +592,7 @@ The balance as a ledger (HR spec 9.4.2). Entries are only created, never updated
 | `source` | `{ kind: 'request' \| 'job' \| 'adjustment' \| 'collective_leave'; ref_id: ObjectId \| null; date: string \| null }` | `request` with the request id; `collective_leave` with the date taken. |
 | `dedupe_key` | string \| null | Makes the jobs idempotent: `grant:<period start>`, `carry_over:<period start>`, `expiry:<period end>`, `collective:<date>`, prefixed by employee and type. Null for request and adjustment entries. |
 
-Indexes: `{ tenant_id, employee_id, 'leave_type.code', 'period.start' }` (balance); `{ tenant_id, dedupe_key }` unique, partial `dedupe_key` set. The reason of an adjustment is in the change history (`withChangeReason`).
+Indexes: `{ tenant_id, employee_id, 'leave_type.code', 'period.start' }` (balance); `{ tenant_id, dedupe_key }` unique, partial `dedupe_key` set; and, for the leave period job, which reads across tenants, `{ kind, 'period.end' }` and `{ kind, expires_on }`. The reason of an adjustment is in the change history (`withChangeReason`). As built the repository has no update, delete or soft delete (`append` is the only write), and the model's classification is `confidential` with `employee_id` and `dedupe_key` `internal`.
 
 The balance is computed on read: the sum of the entries of a period, minus the `total_days` of the employee's `requested` and `head_approved` requests of that type and period (available days). No running total is stored, so it cannot drift.
 
@@ -606,17 +606,17 @@ The balance is computed on read: the sum of the entries of a period, minus the `
 
 ### 9.7 Jobs
 
-Three worker jobs join the HR jobs (`workforce.md` 3r), each idempotent through `dedupe_key`, one record per transaction, with a system actor:
+Three worker jobs join the HR jobs (**built**, PR #125; the rules as built are in `workforce.md` 3r), each idempotent through `dedupe_key`, one record per write or transaction, with a system actor:
 
 | Job | Does | Reads across tenants (for jobs only) |
 |---|---|---|
-| Leave grant (`leave-grant-job`) | Posts the `grant` of each `period` policy for employees who reach the minimum service or whose next period starts within `LEAVE_GRANT_LEAD_DAYS`. | Employees with an active contract, by tenant. |
-| Leave period end (`leave-period-job`) | At a period's end posts `carry_over` and `expiry`; at a carry-over's `expires_on` posts its `expiry`. | Entries by `period.end` and `expires_on`. |
-| Collective leave (`collective-leave-job`) | The day after each `collective_leave` day, posts a `use` for employees whose policy deducts it and who had no working assignment that date (`HR-LEV-031`). | Holiday calendars with a `collective_leave` day on that date. |
+| Leave grant (`leave-grant-job`) | Posts the `grant` of each `period` policy for employees who reach the minimum service or whose next period starts within `LEAVE_GRANT_LEAD_DAYS`. | Active contracts of every tenant (`findActiveForJobs`, index `{ status, _id }`). |
+| Leave period end (`leave-period-job`) | At a period's end posts `carry_over` and `expiry`; at a carry-over's `expires_on` posts its `expiry`. | Grants by `period.end` (`findGrantsEndedBetween`) and carry-overs by `expires_on` (`findCarryOversExpiringBetween`). |
+| Collective leave (`collective-leave-job`) | The day after each `collective_leave` day, posts a `use` for employees whose policy deducts it and who had no working assignment that date (`HR-LEV-031`). | Holiday calendars with a `collective_leave` day on a date (`findWithKindOnDate`, index on `holidays.date` and `holidays.kind`). Only tenant calendars; the facilities and staff are then read per tenant (`findByCalendarCode`, `findOpenPrimaryByFacility`). |
 
 ### 9.8 Parameters
 
-`LEAVE_WORKING_WEEK` (ISO weekday list, facility scope, default `[1,2,3,4,5]`), `LEAVE_GRANT_LEAD_DAYS` (60) and `LEAVE_DECISION_SLA_DAYS` (3) join the parameter catalog (section 6).
+`LEAVE_GRANT_LEAD_DAYS` is **built**: tenant scope, integer 0 to 180, default 60. `LEAVE_WORKING_WEEK` (ISO weekday list, facility scope, default `[1,2,3,4,5]`) and `LEAVE_DECISION_SLA_DAYS` (3) join the parameter catalog (section 6) with 8.3.
 
 ### 9.9 Decisions (2026-11-18)
 
@@ -629,3 +629,14 @@ Three worker jobs join the HR jobs (`workforce.md` 3r), each idempotent through 
 | L5 | Working-day counting: weekly rest days, public holidays and collective leave never count; the roster proposes, else the facility's working week; the Head may correct before approving; fixed at final approval. |
 | L6 | Contracted practitioners use types without a balance. |
 | L7 | Balances are a ledger of entries, never a stored number. |
+
+### 9.10 Reads and indexes added for the jobs (as built, PR #125)
+
+The jobs read across tenants through named reads that are documented "for jobs only" (`database.md` 7.2), with indexes that do not start with `tenant_id`. The reads on other collections:
+
+| Collection | Read | Index |
+|---|---|---|
+| `employment_contracts` | `findActiveForJobs(afterId, limit)`: `active` contracts of every tenant in identifier order | `{ status, _id }` |
+| `holiday_calendars` | `findWithKindOnDate(kind, date)`: calendars with an active day of a kind on a date | `{ 'holidays.date', 'holidays.kind' }` |
+| `facilities` | `findByCalendarCode(tenantId, code, limit)`: a tenant's facilities that list a calendar code (tenant-scoped) | `{ tenant_id, holiday_calendar_codes }` |
+| `position_assignments` | `findOpenPrimaryByFacility(tenantId, facilityId, afterId, limit)`: a facility's open primary assignments (tenant-scoped) | `{ tenant_id, facility_id, is_open }` |
