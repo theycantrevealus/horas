@@ -93,6 +93,10 @@ import {
   type CoverageRequirementRepository,
 } from '@repository/interface/coverage-requirement'
 import {
+  type LeaveLedgerQuery,
+  type LeaveLedgerRepository,
+} from '@repository/interface/leave-ledger'
+import {
   type LeavePolicyQuery,
   type LeavePolicyRepository,
 } from '@repository/interface/leave-policy'
@@ -115,6 +119,7 @@ import { type CredentialAssessment } from '@repository/model/credential-assessme
 import { type PrivilegeGrant } from '@repository/model/privilege-grant'
 import { type CoverageRequirement } from '@repository/model/coverage-requirement'
 import { type Coding } from '@repository/model/common/coding'
+import { type LeaveLedgerEntry } from '@repository/model/leave-ledger-entry'
 import { type LeavePolicy } from '@repository/model/leave-policy'
 import { type Roster } from '@repository/model/roster'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
@@ -3735,6 +3740,144 @@ export class InMemoryLeavePolicies
           item.leave_type.code === leaveType.code &&
           item.effective_from === effectiveFrom,
       )[0] ?? null
+    )
+  }
+}
+
+/**
+ * In-memory `LeaveLedgerRepository` for tests. It follows the Mongo collection: append-only
+ * (update, delete and soft delete reject) and a `dedupe_key` is unique per tenant.
+ */
+export class InMemoryLeaveLedger
+  extends InMemoryRepository<LeaveLedgerEntry>
+  implements LeaveLedgerRepository
+{
+  /**
+   * Appends an entry, refusing a `dedupe_key` that the tenant already used.
+   *
+   * @param entry - Entry data.
+   * @returns The stored entry.
+   */
+  async append(entry: NewEntity<LeaveLedgerEntry>): Promise<LeaveLedgerEntry> {
+    return this.create(entry)
+  }
+
+  /**
+   * Creates an entry, refusing a `dedupe_key` that the tenant already used.
+   *
+   * @param entity - Entry data.
+   * @param id - Optional identifier.
+   * @returns The stored entry.
+   */
+  override async create(
+    entity: NewEntity<LeaveLedgerEntry>,
+    id?: string,
+  ): Promise<LeaveLedgerEntry> {
+    if (
+      entity.dedupe_key !== null &&
+      this.find(
+        (item) =>
+          item.tenant_id === entity.tenant_id &&
+          item.dedupe_key === entity.dedupe_key,
+      )
+    ) {
+      throw new RepositoryConflictError('duplicate ledger key', {
+        operation: 'LeaveLedgerRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Rejects: ledger entries are never edited (`HR-LEV-030`).
+   *
+   * @returns Never resolves.
+   */
+  override async update(): Promise<LeaveLedgerEntry> {
+    throw new RepositoryError('The leave ledger is append-only.', {
+      operation: 'LeaveLedgerRepository.update',
+    })
+  }
+
+  /**
+   * Rejects: ledger entries are never deleted (`HR-LEV-030`).
+   *
+   * @returns Never resolves.
+   */
+  override async delete(): Promise<void> {
+    throw new RepositoryError('The leave ledger is append-only.', {
+      operation: 'LeaveLedgerRepository.delete',
+    })
+  }
+
+  /**
+   * Rejects: ledger entries are never deleted (`HR-LEV-030`).
+   *
+   * @returns Never resolves.
+   */
+  override async deleteSoft(): Promise<void> {
+    throw new RepositoryError('The leave ledger is append-only.', {
+      operation: 'LeaveLedgerRepository.deleteSoft',
+    })
+  }
+
+  /**
+   * Finds an employee's entries, oldest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param query - Optional filters and paging.
+   * @returns The entries.
+   */
+  async findByEmployee(
+    tenantId: string,
+    employeeId: string,
+    query: LeaveLedgerQuery = {},
+  ): Promise<LeaveLedgerEntry[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        (!query.leaveTypeSystem ||
+          item.leave_type.system === query.leaveTypeSystem) &&
+        (!query.leaveTypeCode || item.leave_type.code === query.leaveTypeCode) &&
+        (!query.periodStart || item.period.start === query.periodStart),
+    )
+      .sort(
+        (left, right) =>
+          (left.created_at?.getTime() ?? 0) - (right.created_at?.getTime() ?? 0),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds every entry of one employee, leave type and entitlement period.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param leaveType - The leave type.
+   * @param periodStart - First day of the entitlement period.
+   * @returns The entries.
+   */
+  async findByEmployeeTypeAndPeriod(
+    tenantId: string,
+    employeeId: string,
+    leaveType: Coding,
+    periodStart: string,
+  ): Promise<LeaveLedgerEntry[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        item.leave_type.system === leaveType.system &&
+        item.leave_type.code === leaveType.code &&
+        item.period.start === periodStart,
+    ).sort(
+      (left, right) =>
+        (left.created_at?.getTime() ?? 0) - (right.created_at?.getTime() ?? 0),
     )
   }
 }

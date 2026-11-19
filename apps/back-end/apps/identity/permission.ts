@@ -66,6 +66,8 @@ export const PERMISSIONS = {
   WORKFORCE_ROSTER_CORRECT_PAST: 'workforce.roster:correct-past',
   WORKFORCE_LEAVE_POLICY_READ: 'workforce.leave-policy:read',
   WORKFORCE_LEAVE_POLICY_WRITE: 'workforce.leave-policy:write',
+  WORKFORCE_LEAVE_BALANCE_READ: 'workforce.leave-balance:read',
+  WORKFORCE_LEAVE_BALANCE_ADJUST: 'workforce.leave-balance:adjust',
   WORKFORCE_ROSTER_READ: 'workforce.roster:read',
   WORKFORCE_ROSTER_WRITE: 'workforce.roster:write',
   WORKFORCE_ROSTER_APPROVE: 'workforce.roster:approve',

@@ -222,3 +222,8 @@ export const REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION = Symbol(
  * Injection token of the leave policy repository.
  */
 export const REPOSITORY_LEAVE_POLICY = Symbol('REPOSITORY_LEAVE_POLICY')
+
+/**
+ * Injection token of the leave ledger repository.
+ */
+export const REPOSITORY_LEAVE_LEDGER = Symbol('REPOSITORY_LEAVE_LEDGER')
