@@ -201,6 +201,14 @@ export const PARAMETER_CATALOG: readonly ParameterDefinition[] = [
     scopes: ['tenant'],
     description: 'Most row errors kept by one file import: a roster or a holiday calendar (8.4.1).',
   },
+  {
+    key: 'LEAVE_GRANT_LEAD_DAYS',
+    type: { kind: 'integer', min: 0, max: 180 },
+    default: 60,
+    scopes: ['tenant'],
+    description:
+      'Days before an entitlement period starts that its leave days are granted, so requests for the next period can be made (9.4.5).',
+  },
 ]
 
 /**

@@ -130,6 +130,42 @@ export class EmploymentContractRepositoryMongo
   }
 
   /**
+   * Finds `active` contracts of every tenant after a cursor (a cross-tenant read for the leave
+   * grant job).
+   *
+   * @param afterId - Identifier of the last contract of the previous page, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The contracts.
+   */
+  async findActiveForJobs(
+    afterId: string | null,
+    limit: number,
+  ): Promise<EmploymentContract[]> {
+    const operation = 'EmploymentContractRepository.findActiveForJobs'
+    const cursor = afterId === null ? null : toObjectId(afterId)
+    if (afterId !== null && !cursor) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            status: 'active',
+            deleted_at: null,
+            ...(cursor ? { _id: { $gt: cursor } } : {}),
+          }),
+        )
+        .sort({ _id: 1 })
+        .limit(limit)
+        .lean<LeanRecord<EmploymentContractEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds the contract that renews another one.
    *
    * @param tenantId - Tenant to search in.

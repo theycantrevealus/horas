@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common'
 import { ClinicalAppointmentRepositoryModule } from '@repository/mongo/clinical-appointment.module'
 import { CodeConceptRepositoryModule } from '@repository/mongo/code-concept.module'
 import { EmployeeRepositoryModule } from '@repository/mongo/employee.module'
+import { EmploymentContractRepositoryModule } from '@repository/mongo/employment-contract.module'
 import { FacilityRepositoryModule } from '@repository/mongo/facility.module'
 import { HrParameterRepositoryModule } from '@repository/mongo/hr-parameter.module'
+import { LeaveLedgerRepositoryModule } from '@repository/mongo/leave-ledger.module'
+import { LeavePolicyRepositoryModule } from '@repository/mongo/leave-policy.module'
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
@@ -17,6 +20,7 @@ import { ParameterService } from '../parameter/parameter.service'
 import { AppointmentExpiryJob } from './appointment-expiry.job'
 import { EligibilitySweepJob } from './eligibility-sweep.job'
 import { HR_JOBS, type HrJob } from './job'
+import { LeaveGrantJob } from './leave-grant.job'
 import { LicenseExpiryJob } from './license-expiry.job'
 
 /**
@@ -39,6 +43,9 @@ import { LicenseExpiryJob } from './license-expiry.job'
     ClinicalAppointmentRepositoryModule,
     PrivilegeGrantRepositoryModule,
     FacilityRepositoryModule,
+    EmploymentContractRepositoryModule,
+    LeavePolicyRepositoryModule,
+    LeaveLedgerRepositoryModule,
   ],
   providers: [
     LicenseExpiryJob,
@@ -47,22 +54,35 @@ import { LicenseExpiryJob } from './license-expiry.job'
     ParameterService,
     EligibilityService,
     EligibilitySweepJob,
+    LeaveGrantJob,
     {
       provide: HR_JOBS,
-      inject: [LicenseExpiryJob, AppointmentExpiryJob, EligibilitySweepJob],
+      inject: [
+        LicenseExpiryJob,
+        AppointmentExpiryJob,
+        EligibilitySweepJob,
+        LeaveGrantJob,
+      ],
       /**
        * Lists the jobs in the order a pass runs them.
        *
        * @param licenseExpiry - The licence expiry job.
        * @param appointmentExpiry - The SPK expiry job.
        * @param eligibilitySweep - The eligibility sweep job.
+       * @param leaveGrant - The leave grant job.
        * @returns The jobs.
        */
       useFactory: (
         licenseExpiry: LicenseExpiryJob,
         appointmentExpiry: AppointmentExpiryJob,
         eligibilitySweep: EligibilitySweepJob,
-      ): HrJob[] => [licenseExpiry, appointmentExpiry, eligibilitySweep],
+        leaveGrant: LeaveGrantJob,
+      ): HrJob[] => [
+        licenseExpiry,
+        appointmentExpiry,
+        eligibilitySweep,
+        leaveGrant,
+      ],
     },
   ],
   exports: [HR_JOBS],

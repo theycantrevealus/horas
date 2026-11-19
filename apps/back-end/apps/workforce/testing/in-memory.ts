@@ -1358,6 +1358,27 @@ export class InMemoryEmploymentContracts
   implements EmploymentContractRepository
 {
   /**
+   * Finds `active` contracts of every tenant after a cursor, in identifier order.
+   *
+   * @param afterId - Identifier of the last contract of the previous page, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The contracts.
+   */
+  async findActiveForJobs(
+    afterId: string | null,
+    limit: number,
+  ): Promise<EmploymentContract[]> {
+    return this.filter(
+      (item) =>
+        item.status === 'active' &&
+        !item.deleted_at &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
+  }
+
+  /**
    * Creates a contract, refusing a second one with the same tenant, employer and number, or a
    * second active one for an employee.
    *
