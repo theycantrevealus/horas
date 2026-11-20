@@ -41,6 +41,7 @@ import { cleanReason } from '../credentialing/application-support'
 import { addDays } from '../credentialing/appointment-rules'
 import { EligibilityService } from '../eligibility/eligibility.service'
 import { observe } from '../observe'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { ParameterService } from '../parameter/parameter.service'
 import {
   ConflictError,
@@ -145,6 +146,7 @@ export class SwapService {
     @Inject(ParameterService) private readonly parameters: ParameterService,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
+    @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -730,6 +732,12 @@ export class SwapService {
     leaving: string[],
   ): Promise<void> {
     assertAssignable(employee)
+    if (await this.leave.isOnLeave(tenantId, employee.id, slot.date)) {
+      throw new InvalidRequestError(
+        'on_leave',
+        'The employee is on approved leave on that date.',
+      )
+    }
     await assertEligible(
       this.eligibility,
       tenantId,

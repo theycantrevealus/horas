@@ -397,6 +397,24 @@ describe('LeaveRequestRepository on the shared Mongo base', () => {
     expect(LeaveRequestSchema.indexes()).toContainEqual([{ tenant_id: 1, policy_id: 1 }, expect.anything()])
   })
 
+  it('finds the approved requests of an employee that hold a date, and nothing for malformed identifiers', async () => {
+    const tenant = tenantId.toHexString()
+
+    await requests.findApprovedCovering(tenant, employeeId.toHexString(), '2026-12-01')
+
+    expect(model.find).toHaveBeenCalledWith({
+      tenant_id: tenant,
+      employee_id: employeeId.toHexString(),
+      status: 'approved',
+      'period.start': { $lte: '2026-12-01' },
+      'period.end': { $gte: '2026-12-01' },
+      deleted_at: null,
+    })
+    model.find.mockClear()
+    expect(await requests.findApprovedCovering('x', employeeId.toHexString(), '2026-12-01')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('finds the requests waiting for a Head of some units and for HR Manager, and nothing for neither', async () => {
     const tenant = tenantId.toHexString()
     const query = chain([stored])

@@ -14,7 +14,9 @@ import {
   InMemoryRosterAssignments,
   InMemoryRosters,
   InMemoryShiftDefinitions,
+  InMemoryLeaveRequests,
 } from '../testing/in-memory'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { RosterAssignmentService, type AddRosterAssignmentInput } from './roster-assignment.service'
 
 describe('RosterAssignmentService', () => {
@@ -32,6 +34,7 @@ describe('RosterAssignmentService', () => {
   let shifts: InMemoryShiftDefinitions
   let employees: InMemoryEmployees
   let service: RosterAssignmentService
+  let leaveRequests: InMemoryLeaveRequests
   let limits: Record<string, number>
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
   let facilityId: string
@@ -200,6 +203,21 @@ describe('RosterAssignmentService', () => {
     )
   }
 
+  /**
+   * Stores a leave request of an employee on one date.
+   *
+   * @param employeeId - The employee.
+   * @param date - The date.
+   * @param status - Request status.
+   * @param count - What the day counts.
+   * @returns The request.
+   */
+  function onLeave(employeeId: string, date: string, status: 'approved' | 'requested' = 'approved', count: 0.5 | 1 = 1) {
+    return asHead(() =>
+      leaveRequests.create({ tenant_id: tenantId, employee_id: employeeId, status, period: { start: date, end: date }, days: [{ date, count, why: 'working', set_by: 'working_week' }] } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     limits = { MIN_REST_HOURS: 8, MAX_WEEKLY_HOURS: 40, MAX_OVERTIME_HOURS_WEEK: 18, MAX_CONSECUTIVE_NIGHTS: 3 }
@@ -215,7 +233,8 @@ describe('RosterAssignmentService', () => {
     } as unknown as ParameterService
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new RosterAssignmentService(assignments, rosters, units, facilities, shifts, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, logger)
+    leaveRequests = new InMemoryLeaveRequests()
+    service = new RosterAssignmentService(assignments, rosters, units, facilities, shifts, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), logger)
     facilityId = (
       await asHead(() =>
         facilities.create({
@@ -349,6 +368,18 @@ describe('RosterAssignmentService', () => {
       expect(await rejection(() => add({ shiftId: night.id }))).toMatchObject({ kind: 'conflict', code: 'assignment_exists' })
       await asHead(() => service.cancel(tenantId, first.id, {}))
       expect((await add({ shiftId: night.id })).shift.code).toBe('M')
+    })
+
+    it('refuses a date on which the employee is on approved leave, but not a half day or a pending request (HR-ROS-003)', async () => {
+      const half = await addEmployee()
+      const pending = await addEmployee()
+      await onLeave(nurse.id, monday)
+      await onLeave(half.id, monday, 'approved', 0.5)
+      await onLeave(pending.id, monday, 'requested')
+
+      expect(await rejection(() => add())).toMatchObject({ kind: 'invalid', code: 'on_leave' })
+      expect((await add({ employeeId: half.id })).employee_id).toBe(half.id)
+      expect((await add({ employeeId: pending.id })).employee_id).toBe(pending.id)
     })
 
     it('checks general eligibility for a clinical employee in a clinical unit only, and names the failing condition (HR-ROS-002)', async () => {

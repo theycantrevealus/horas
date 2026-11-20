@@ -203,6 +203,32 @@ export class LeaveRequestRepositoryMongo
   }
 
   /**
+   * Finds the approved requests of an employee whose period holds a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The local date.
+   * @returns The requests.
+   */
+  async findApprovedCovering(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<LeaveRequest[]> {
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    return this.run('findApprovedCovering', {
+      tenant_id: tenantId,
+      employee_id: employeeId,
+      status: 'approved',
+      'period.start': { $lte: date },
+      'period.end': { $gte: date },
+      deleted_at: null,
+    })
+  }
+
+  /**
    * Finds the requests that wait for a decision of the given people, latest first.
    *
    * @param tenantId - Tenant to search in.

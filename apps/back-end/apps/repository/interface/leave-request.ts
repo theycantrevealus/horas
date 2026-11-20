@@ -101,6 +101,21 @@ export interface LeaveRequestRepository extends Repository<LeaveRequest> {
   findAnyByPolicy(tenantId: string, policyId: string): Promise<boolean>
 
   /**
+   * Finds the `approved` requests of an employee whose period holds a date. It tells whether the
+   * employee is on leave that day.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The local date.
+   * @returns The requests, possibly none; empty for a malformed identifier.
+   */
+  findApprovedCovering(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<LeaveRequest[]>
+
+  /**
    * Finds the requests that wait for a decision of the given people, latest first.
    *
    * @param tenantId - Tenant to search in.

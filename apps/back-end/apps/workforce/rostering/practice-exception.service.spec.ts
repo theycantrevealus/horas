@@ -11,7 +11,9 @@ import {
   InMemoryOrganizationUnits,
   InMemoryPracticeScheduleExceptions,
   InMemoryPracticeSchedules,
+  InMemoryLeaveRequests,
 } from '../testing/in-memory'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { InvalidRequestError } from '../workforce.error'
 import { PracticeExceptionService } from './practice-exception.service'
 import { PracticeScheduleService } from './practice-schedule.service'
@@ -32,6 +34,7 @@ describe('PracticeExceptionService', () => {
   let facilities: InMemoryFacilities
   let employees: InMemoryEmployees
   let service: PracticeExceptionService
+  let leaveRequests: InMemoryLeaveRequests
   let sessionsService: PracticeScheduleService
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
   let facilityId: string
@@ -148,6 +151,21 @@ describe('PracticeExceptionService', () => {
     return asHead(() => service.create(tenantId, on.id, { date: '2099-03-09', kind: 'cancelled', reason: leave, ...input } as never))
   }
 
+  /**
+   * Stores a leave request of an employee on one date.
+   *
+   * @param employeeId - The employee.
+   * @param date - The date.
+   * @param status - Request status.
+   * @param count - What the day counts.
+   * @returns The request.
+   */
+  function onLeave(employeeId: string, date: string, status: 'approved' | 'requested' = 'approved', count: 0.5 | 1 = 1) {
+    return asHead(() =>
+      leaveRequests.create({ tenant_id: tenantId, employee_id: employeeId, status, period: { start: date, end: date }, days: [{ date, count, why: 'working', set_by: 'working_week' }] } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     eligible = { value: { eligible: true } }
@@ -160,7 +178,8 @@ describe('PracticeExceptionService', () => {
     employees = new InMemoryEmployees()
     const logger = { log, warn, error, debug } as unknown as AppLogger
     const eligibility = { general } as unknown as EligibilityService
-    service = new PracticeExceptionService(exceptions, schedules, units, facilities, employees, eligibility, { assertActive } as unknown as CodeConceptService, logger)
+    leaveRequests = new InMemoryLeaveRequests()
+    service = new PracticeExceptionService(exceptions, schedules, units, facilities, employees, eligibility, { assertActive } as unknown as CodeConceptService, new LeaveCalendar(leaveRequests), logger)
     sessionsService = new PracticeScheduleService(schedules, exceptions, units, facilities, employees, eligibility, logger)
     facilityId = (
       await asHead(() =>
@@ -253,6 +272,14 @@ describe('PracticeExceptionService', () => {
 
       expect(await rejection(() => make({ kind: 'moved', movedTo }))).toMatchObject({ code: 'not_eligible_sip' })
       expect((await make({ kind: 'cancelled' })).kind).toBe('cancelled')
+    })
+
+    it('refuses to move a session onto a day on which the doctor is on approved leave, but not onto a half day, and still cancels', async () => {
+      await onLeave(doctor.id, '2099-03-11')
+      await onLeave(doctor.id, '2099-03-12', 'approved', 0.5)
+
+      expect(await rejection(() => make({ kind: 'moved', movedTo: { date: '2099-03-11', startTime: '09:00', endTime: '10:00' } }))).toMatchObject({ kind: 'invalid', code: 'on_leave' })
+      expect((await make({ kind: 'moved', movedTo: { date: '2099-03-12', startTime: '09:00', endTime: '10:00' } })).kind).toBe('moved')
     })
 
     it('never puts the doctor in two places: a moved session must not overlap another of theirs that day', async () => {

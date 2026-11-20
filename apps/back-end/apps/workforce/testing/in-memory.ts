@@ -4279,6 +4279,30 @@ export class InMemoryLeaveRequests
   }
 
   /**
+   * Finds the approved requests of an employee whose period holds a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The local date.
+   * @returns The requests.
+   */
+  async findApprovedCovering(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<LeaveRequest[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        item.status === 'approved' &&
+        item.period.start <= date &&
+        item.period.end >= date,
+    )
+  }
+
+  /**
    * Tells whether any request was made under a policy version.
    *
    * @param tenantId - Tenant to search in.
