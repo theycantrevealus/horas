@@ -41,6 +41,7 @@ import { cleanReason } from '../credentialing/application-support'
 import { addDays } from '../credentialing/appointment-rules'
 import { EligibilityService } from '../eligibility/eligibility.service'
 import { observe } from '../observe'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { ParameterService } from '../parameter/parameter.service'
 import {
   ConflictError,
@@ -165,6 +166,7 @@ export class RosterAssignmentService {
     @Inject(ParameterService) private readonly parameters: ParameterService,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
+    @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -233,6 +235,7 @@ export class RosterAssignmentService {
         const shift = await this.checkShift(tenantId, roster, unit, input.shiftId)
         const employee = await this.loadEmployee(tenantId, input.employeeId)
         assertAssignable(employee)
+        await this.assertNotOnLeave(tenantId, employee.id, input.date)
         if (
           await this.assignments.findPlannedByEmployeeAndDate(
             tenantId,
@@ -280,6 +283,7 @@ export class RosterAssignmentService {
             source: plan.published
               ? { kind: 'change_request', ref_id: null }
               : { kind: 'roster', ref_id: roster.id },
+            cancellation: null,
             change_reason: plan.keep ? (plan.reason ?? null) : null,
             revision,
             overtime: this.overtime(overtime, input.overtimeConsent === true),
@@ -810,5 +814,27 @@ export class RosterAssignmentService {
       'stale_version',
       'The assignment was changed by someone else. Reload it and try again.',
     )
+  }
+
+  /**
+   * Refuses a date on which the employee is on approved leave (`HR-ROS-003`). A pending request and
+   * a half day do not block.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param employeeId - The employee.
+   * @param date - The local date of the shift.
+   * @throws InvalidRequestError `on_leave`.
+   */
+  private async assertNotOnLeave(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<void> {
+    if (await this.leave.isOnLeave(tenantId, employeeId, date)) {
+      throw new InvalidRequestError(
+        'on_leave',
+        'The employee is on approved leave on that date.',
+      )
+    }
   }
 }

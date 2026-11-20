@@ -14,7 +14,9 @@ import {
   InMemoryRosterAssignments,
   InMemoryRosters,
   InMemoryShiftDefinitions,
+  InMemoryLeaveRequests,
 } from '../testing/in-memory'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { RosterImportService } from './roster-import.service'
 
 describe('RosterImportService', () => {
@@ -34,6 +36,7 @@ describe('RosterImportService', () => {
   let employees: InMemoryEmployees
   let imports: InMemoryHrImports
   let service: RosterImportService
+  let leaveRequests: InMemoryLeaveRequests
   let limits: Record<string, number>
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
   let facilityId: string
@@ -223,12 +226,28 @@ describe('RosterImportService', () => {
         role: 'staff',
         status: 'planned',
         source: { kind: 'roster', ref_id: null },
+        cancellation: null,
         change_reason: null,
         revision: 0,
         overtime: null,
         flag: null,
         is_flagged: false,
       }),
+    )
+  }
+
+  /**
+   * Stores a leave request of an employee on one date.
+   *
+   * @param employeeId - The employee.
+   * @param date - The date.
+   * @param status - Request status.
+   * @param count - What the day counts.
+   * @returns The request.
+   */
+  function onLeave(employeeId: string, date: string, status: 'approved' | 'requested' = 'approved', count: 0.5 | 1 = 1) {
+    return asHead(() =>
+      leaveRequests.create({ tenant_id: tenantId, employee_id: employeeId, status, period: { start: date, end: date }, days: [{ date, count, why: 'working', set_by: 'working_week' }] } as never),
     )
   }
 
@@ -247,7 +266,8 @@ describe('RosterImportService', () => {
     const parameters = { resolve: async (_tenant: string, { key }: { key: string }) => ({ value: limits[key] }) } as unknown as ParameterService
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new RosterImportService(rosters, assignments, units, facilities, shifts, employees, imports, eligibility, parameters, { report } as never, { run: (work: () => Promise<unknown>) => work() } as never, logger)
+    leaveRequests = new InMemoryLeaveRequests()
+    service = new RosterImportService(rosters, assignments, units, facilities, shifts, employees, imports, eligibility, parameters, { report } as never, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), logger)
     facilityId = (
       await asHead(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -372,6 +392,15 @@ describe('RosterImportService', () => {
       const answer = await check(['C001,2099-04-06,P,,', 'E001,2099-04-06,P,,'], clinicalRoster)
 
       expect(answer.import.errors).toEqual([{ row: 2, column: 'employee_number', code: 'not_eligible_sip' }])
+    })
+
+    it('flags a row for a day on which the employee is on approved leave, and accepts a half day', async () => {
+      await onLeave(nurse.id, '2099-03-02')
+      await onLeave(nurse.id, '2099-03-03', 'approved', 0.5)
+
+      const answer = await check(['E001,2099-03-02,P,,', 'E001,2099-03-03,P,,'])
+
+      expect(answer.import.errors).toEqual([{ row: 2, column: 'date', code: 'on_leave' }])
     })
 
     it('refuses a row for a day the employee already has a planned assignment in this roster', async () => {
@@ -555,7 +584,7 @@ describe('RosterImportService', () => {
 
     it('writes nothing and records the new errors when the file stopped being valid', async () => {
       const checked = await check(rows)
-      await asHead(() => assignments.create({ tenant_id: tenantId, roster_id: roster.id, unit_id: unitId, facility_id: facilityId, employee_id: nurse.id, date: '2099-03-02', shift: { definition_id: morning.id, code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-02T00:00:00Z'), ends_at: new Date('2099-03-02T08:00:00Z'), role: 'staff', status: 'planned', source: { kind: 'roster', ref_id: null }, change_reason: null, revision: 0, overtime: null, flag: null, is_flagged: false }))
+      await asHead(() => assignments.create({ tenant_id: tenantId, roster_id: roster.id, unit_id: unitId, facility_id: facilityId, employee_id: nurse.id, date: '2099-03-02', shift: { definition_id: morning.id, code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-02T00:00:00Z'), ends_at: new Date('2099-03-02T08:00:00Z'), role: 'staff', status: 'planned', source: { kind: 'roster', ref_id: null }, cancellation: null, change_reason: null, revision: 0, overtime: null, flag: null, is_flagged: false }))
 
       const failure = await rejection(() => apply(checked.import.id))
 

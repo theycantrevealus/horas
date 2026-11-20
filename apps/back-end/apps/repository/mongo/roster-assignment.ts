@@ -64,6 +64,7 @@ export class RosterAssignmentRepositoryMongo
         'role',
         'status',
         'change_reason',
+        'cancellation',
         'revision',
         'overtime',
         'flag',
@@ -342,6 +343,51 @@ export class RosterAssignmentRepositoryMongo
   }
 
   /**
+   * Cancels assignments because an approved leave takes their days.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param leaveRequestId - The leave request.
+   * @returns The cancelled assignments, in the order given.
+   */
+  async cancelForLeave(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    leaveRequestId: string,
+  ): Promise<RosterAssignment[]> {
+    const operation = 'RosterAssignmentRepository.cancelForLeave'
+    this.requireActor(operation)
+    if (items.length === 0) {
+      return []
+    }
+    try {
+      return await this.transactions.run(() =>
+        withChangeReason('leave', async () => {
+          const cancelled: RosterAssignment[] = []
+          // Sequential on purpose: a transaction session does not allow parallel operations.
+          for (const item of items) {
+            const current = await this.findOne(item.id)
+            if (!current || current.tenant_id !== tenantId) {
+              throw this.notFound(item.id, operation)
+            }
+            cancelled.push(
+              await this.update(item.id, {
+                status: 'cancelled',
+                cancellation: { kind: 'leave', ref_id: leaveRequestId },
+                change_reason: 'leave',
+                revision: item.revision,
+              }),
+            )
+          }
+          return cancelled
+        }),
+      )
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.
@@ -377,6 +423,12 @@ export class RosterAssignmentRepositoryMongo
         kind: record.source.kind,
         ref_id: record.source.ref_id ? record.source.ref_id.toHexString() : null,
       },
+      cancellation: record.cancellation
+        ? {
+            kind: record.cancellation.kind,
+            ref_id: record.cancellation.ref_id.toHexString(),
+          }
+        : null,
       change_reason: record.change_reason ?? null,
       revision: record.revision,
       overtime: record.overtime

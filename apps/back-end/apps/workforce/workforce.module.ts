@@ -46,8 +46,10 @@ import { RosterAssignmentService } from './rostering/roster-assignment.service'
 import { CoverageService } from './rostering/coverage.service'
 import { LeaveBalanceService } from './leave/leave-balance.service'
 import { LeaveDeciderService } from './leave/decider'
+import { LeaveCalendar } from './leave/leave-calendar'
 import { LeaveDecisionService } from './leave/leave-decision.service'
-import { LEAVE_EFFECTS, NoLeaveEffects } from './leave/leave-effects'
+import { LEAVE_EFFECTS } from './leave/leave-effects'
+import { RosterLeaveEffects } from './leave/roster-leave-effects'
 import { LeaveDetailService } from './leave/leave-detail.service'
 import { LeavePlaceService } from './leave/leave-place'
 import { LeavePolicyService } from './leave/leave-policy.service'
@@ -163,11 +165,12 @@ import { UnitService } from './structure/unit.service'
     LeavePlaceService,
     LeaveBalanceService,
     LeaveDeciderService,
+    LeaveCalendar,
     LeaveRequestService,
     LeaveDetailService,
     LeaveDecisionService,
     LeaveTypeChangeService,
-    { provide: LEAVE_EFFECTS, useClass: NoLeaveEffects },
+    { provide: LEAVE_EFFECTS, useClass: RosterLeaveEffects },
   ],
   exports: [
     OrganizationService,
@@ -211,6 +214,7 @@ import { UnitService } from './structure/unit.service'
     LeavePlaceService,
     LeaveBalanceService,
     LeaveDeciderService,
+    LeaveCalendar,
     LeaveRequestService,
     LeaveDetailService,
     LeaveDecisionService,

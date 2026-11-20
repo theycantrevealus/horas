@@ -91,6 +91,40 @@ export class PracticeScheduleExceptionRepositoryMongo
   }
 
   /**
+   * Finds the exceptions an approved leave made.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param leaveRequestId - The leave request.
+   * @returns The exceptions in force.
+   */
+  async findByLeave(
+    tenantId: string,
+    leaveRequestId: string,
+  ): Promise<PracticeScheduleException[]> {
+    const operation = 'PracticeScheduleExceptionRepository.findByLeave'
+    if (!toObjectId(tenantId) || !toObjectId(leaveRequestId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            'source.kind': 'leave',
+            'source.ref_id': leaveRequestId,
+            deleted_at: null,
+          }),
+        )
+        .sort({ date: 1, _id: 1 })
+        .lean<LeanRecord<PracticeScheduleExceptionEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds the exceptions in force on a date for some schedules.
    *
    * @param tenantId - Tenant to search in.
@@ -233,11 +267,13 @@ export class PracticeScheduleExceptionRepositoryMongo
             end_time: record.moved_to.end_time,
           }
         : null,
-      reason: {
-        system: record.reason.system,
-        code: record.reason.code,
-        ...(record.reason.display ? { display: record.reason.display } : {}),
-      },
+      reason: record.reason
+        ? {
+            system: record.reason.system,
+            code: record.reason.code,
+            ...(record.reason.display ? { display: record.reason.display } : {}),
+          }
+        : null,
       source: {
         kind: record.source.kind,
         ref_id: record.source.ref_id ? record.source.ref_id.toHexString() : null,

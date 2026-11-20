@@ -362,6 +362,12 @@ export class RosterService {
             'This roster must be submitted and approved before it is published.',
           )
         }
+        if (roster.status === 'approved' && roster.validation === null) {
+          throw new InvalidRequestError(
+            'validation_required',
+            'The roster changed after it was validated. Validate it again before it is published.',
+          )
+        }
         const validation =
           roster.status === 'draft'
             ? await this.validation.gate(tenantId, roster)

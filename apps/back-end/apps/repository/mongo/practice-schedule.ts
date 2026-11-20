@@ -178,6 +178,45 @@ export class PracticeScheduleRepositoryMongo
   }
 
   /**
+   * Finds the schedules of a doctor whose validity overlaps a range.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param start - First date of the range.
+   * @param end - Last date of the range.
+   * @returns The schedules.
+   */
+  async findByEmployeeCovering(
+    tenantId: string,
+    employeeId: string,
+    start: string,
+    end: string,
+  ): Promise<PracticeSchedule[]> {
+    const operation = 'PracticeScheduleRepository.findByEmployeeCovering'
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            employee_id: employeeId,
+            'period.start': { $lte: end },
+            $or: [{ 'period.end': null }, { 'period.end': { $gte: start } }],
+            deleted_at: null,
+          }),
+        )
+        .sort({ day_of_week: 1, start_time: 1, _id: 1 })
+        .lean<LeanRecord<PracticeScheduleEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

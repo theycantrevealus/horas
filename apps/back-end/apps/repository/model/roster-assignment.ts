@@ -34,12 +34,25 @@ export interface AssignedShift {
 /**
  * How an assignment came to exist.
  *
- * @property kind - Roster entry, CSV import, swap, or change after publication.
- * @property ref_id - Import or swap request, or `null`.
+ * @property kind - Roster entry, CSV import, swap, change after publication, or the cover of a
+ * colleague's leave.
+ * @property ref_id - Import, swap request or leave request, or `null`.
  */
 export interface AssignmentSource {
-  kind: 'roster' | 'import' | 'swap' | 'change_request'
+  kind: 'roster' | 'import' | 'swap' | 'change_request' | 'leave_cover'
   ref_id: string | null
+}
+
+/**
+ * Why an assignment was cancelled by something other than a roster change: an approved leave. It
+ * names the request only; the leave type is never copied onto a roster (`HR-LEV-041`).
+ *
+ * @property kind - What cancelled it.
+ * @property ref_id - The leave request.
+ */
+export interface AssignmentCancellation {
+  kind: 'leave'
+  ref_id: string
 }
 
 /**
@@ -86,6 +99,8 @@ export interface AssignmentFlag {
  * @property role - Role in the shift.
  * @property status - Planned or cancelled; whether it was worked belongs to attendance.
  * @property source - How it was created.
+ * @property cancellation - What cancelled it, when something other than a roster change did; otherwise
+ * `null`.
  * @property change_reason - Required for changes after publication, otherwise `null`.
  * @property revision - Roster revision that created or last changed it.
  * @property overtime - Overtime, or `null`.
@@ -109,6 +124,7 @@ export class RosterAssignment extends Timestamp implements Entity {
   role!: RosterRole
   status!: 'planned' | 'cancelled'
   source!: AssignmentSource
+  cancellation!: AssignmentCancellation | null
   change_reason!: string | null
   revision!: number
   overtime!: AssignmentOvertime | null

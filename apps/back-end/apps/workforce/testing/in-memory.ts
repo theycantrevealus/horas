@@ -1,6 +1,7 @@
 import {
   RepositoryConflictError,
   RepositoryError,
+  RepositoryNotFoundError,
   RepositoryValidationError,
 } from '@utility/database/error'
 import { type FieldCipher, mask } from '@utility/encryption/field-cipher'
@@ -3358,6 +3359,39 @@ export class InMemoryRosterAssignments
   }
 
   /**
+   * Cancels assignments because an approved leave takes their days.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param leaveRequestId - The leave request.
+   * @returns The cancelled assignments.
+   */
+  async cancelForLeave(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    leaveRequestId: string,
+  ): Promise<RosterAssignment[]> {
+    const cancelled: RosterAssignment[] = []
+    for (const item of items) {
+      const current = await this.findOne(item.id)
+      if (!current || current.tenant_id !== tenantId) {
+        throw new RepositoryNotFoundError(`assignment ${item.id} not found`, {
+          operation: 'RosterAssignmentRepository.cancelForLeave',
+        })
+      }
+      cancelled.push(
+        await this.update(item.id, {
+          status: 'cancelled',
+          cancellation: { kind: 'leave', ref_id: leaveRequestId },
+          change_reason: 'leave',
+          revision: item.revision,
+        }),
+      )
+    }
+    return cancelled
+  }
+
+  /**
    * Finds the planned assignments of an employee on dates in a range, in every roster and unit.
    *
    * @param tenantId - Tenant to search in.
@@ -3626,6 +3660,31 @@ export class InMemoryPracticeSchedules
         item.day_of_week === dayOfWeek,
     )
   }
+
+  /**
+   * Finds the schedules of a doctor whose validity overlaps a range.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param start - First date of the range.
+   * @param end - Last date of the range.
+   * @returns The schedules.
+   */
+  async findByEmployeeCovering(
+    tenantId: string,
+    employeeId: string,
+    start: string,
+    end: string,
+  ): Promise<PracticeSchedule[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.employee_id === employeeId &&
+        item.period.start <= end &&
+        (item.period.end === null || item.period.end >= start),
+    )
+  }
 }
 
 /**
@@ -3637,6 +3696,26 @@ export class InMemoryPracticeScheduleExceptions
   extends InMemoryRepository<PracticeScheduleException>
   implements PracticeScheduleExceptionRepository
 {
+  /**
+   * Finds the exceptions an approved leave made.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param leaveRequestId - The leave request.
+   * @returns The exceptions in force.
+   */
+  async findByLeave(
+    tenantId: string,
+    leaveRequestId: string,
+  ): Promise<PracticeScheduleException[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.source.kind === 'leave' &&
+        item.source.ref_id === leaveRequestId,
+    )
+  }
+
   /**
    * Finds the exception of a schedule on a date, if one is in force.
    *
@@ -4196,6 +4275,30 @@ export class InMemoryLeaveRequests
           item.period.start <= end &&
           item.period.end >= start,
       ),
+    )
+  }
+
+  /**
+   * Finds the approved requests of an employee whose period holds a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The local date.
+   * @returns The requests.
+   */
+  async findApprovedCovering(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<LeaveRequest[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        item.status === 'approved' &&
+        item.period.start <= date &&
+        item.period.end >= date,
     )
   }
 

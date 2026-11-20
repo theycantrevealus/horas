@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common'
 import { type LeaveRequest } from '@repository/model/leave-request'
 
 /**
@@ -25,20 +24,4 @@ export interface LeaveEffects {
    * @param request - The cancelled request.
    */
   onCancelled(request: LeaveRequest): Promise<void>
-}
-
-/**
- * The effects until group 8.4 is built: none.
- */
-@Injectable()
-export class NoLeaveEffects implements LeaveEffects {
-  /**
-   * Does nothing.
-   */
-  async onApproved(): Promise<void> {}
-
-  /**
-   * Does nothing.
-   */
-  async onCancelled(): Promise<void> {}
 }

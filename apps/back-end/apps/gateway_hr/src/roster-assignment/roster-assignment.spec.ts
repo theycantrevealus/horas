@@ -292,6 +292,21 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
     expect((await call('PATCH', `/v1/roster-assignments/${first.id}`, writerToken, {})).body).toMatchObject({ code: 'empty_update' })
   })
 
+  it('refuses a day on which the employee is on approved leave (422 on_leave), but not a day of a pending leave', async () => {
+    const onLeave = await addEmployee()
+    const pending = await addEmployee()
+    for (const [employee, status] of [[onLeave, 'approved'], [pending, 'requested']] as const) {
+      await workforce.leaveRequests.create({ tenant_id: tenantId, employee_id: employee, status, period: { start: '2099-03-12', end: '2099-03-12' }, days: [{ date: '2099-03-12', count: 1, why: 'working', set_by: 'working_week' }] } as never)
+    }
+
+    const refused = await add(onLeave, { date: '2099-03-12' })
+    const allowed = await add(pending, { date: '2099-03-12' })
+
+    expect(refused.status).toBe(422)
+    expect(refused.body).toMatchObject({ code: 'on_leave' })
+    expect(allowed.status).toBe(201)
+  })
+
   it('refuses a roster that was submitted or approved, and answers 404 for a missing, malformed or foreign roster or assignment', async () => {
     const employeeId = await addEmployee()
     const roster = await workforce.rosters.create({
@@ -427,6 +442,7 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
           role,
           status: 'planned',
           source: { kind: 'roster', ref_id: publishedId },
+          cancellation: null,
           change_reason: null,
           revision: 1,
           overtime: null,

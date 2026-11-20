@@ -13,7 +13,9 @@ import {
   InMemoryRosterAssignments,
   InMemoryRosters,
   InMemoryShiftSwapRequests,
+  InMemoryLeaveRequests,
 } from '../testing/in-memory'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { SwapService } from './swap.service'
 
 describe('SwapService', () => {
@@ -31,6 +33,7 @@ describe('SwapService', () => {
   let facilities: InMemoryFacilities
   let employees: InMemoryEmployees
   let service: SwapService
+  let leaveRequests: InMemoryLeaveRequests
   let limits: Record<string, number>
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
   let facilityId: string
@@ -180,6 +183,7 @@ describe('SwapService', () => {
         role: 'staff',
         status: 'planned',
         source: { kind: 'roster', ref_id: null },
+        cancellation: null,
         change_reason: null,
         revision: 1,
         overtime: null,
@@ -201,6 +205,21 @@ describe('SwapService', () => {
     return asUser(() => service.create(tenantId, as?.id ?? null, { reason: 'Keperluan keluarga', ...input }))
   }
 
+  /**
+   * Stores a leave request of an employee on one date.
+   *
+   * @param employeeId - The employee.
+   * @param date - The date.
+   * @param status - Request status.
+   * @param count - What the day counts.
+   * @returns The request.
+   */
+  function onLeave(employeeId: string, date: string, status: 'approved' | 'requested' = 'approved', count: 0.5 | 1 = 1) {
+    return asUser(() =>
+      leaveRequests.create({ tenant_id: tenantId, employee_id: employeeId, status, period: { start: date, end: date }, days: [{ date, count, why: 'working', set_by: 'working_week' }] } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     limits = { MIN_REST_HOURS: 8, MAX_WEEKLY_HOURS: 40, MAX_OVERTIME_HOURS_WEEK: 18, MAX_CONSECUTIVE_NIGHTS: 3 }
@@ -214,7 +233,8 @@ describe('SwapService', () => {
     const parameters = { resolve: async (_tenant: string, { key }: { key: string }) => ({ value: limits[key] }) } as unknown as ParameterService
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new SwapService(swaps, assignments, rosters, units, facilities, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, logger)
+    leaveRequests = new InMemoryLeaveRequests()
+    service = new SwapService(swaps, assignments, rosters, units, facilities, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), logger)
     facilityId = (
       await asUser(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -360,6 +380,17 @@ describe('SwapService', () => {
       expect(await swaps.findByFilter(tenantId)).toEqual([])
     })
 
+    it('refuses a result that puts either person on a day of approved leave, at create', async () => {
+      const mine = await addAssignment(siti, '2099-03-10')
+      const theirs = await addAssignment(budi, '2099-03-11')
+      await onLeave(budi.id, '2099-03-10')
+      await onLeave(siti.id, '2099-03-11')
+
+      expect(await rejection(() => ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id }))).toMatchObject({ code: 'on_leave' })
+      expect(await rejection(() => ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id, counterpartAssignmentId: theirs.id }))).toMatchObject({ code: 'on_leave' })
+      expect(await swaps.findByFilter(tenantId)).toEqual([])
+    })
+
     it('refuses a counterpart who is not clinically eligible for a clinical unit', async () => {
       const ward = await addUnit({ is_clinical: true })
       const clinical = await addRoster({ unit_id: ward.id })
@@ -401,6 +432,14 @@ describe('SwapService', () => {
       expect(accepted).toMatchObject({ id: swap.id, status: 'accepted_by_counterpart' })
       expect(accepted.counterpart_accepted_at).toBeInstanceOf(Date)
       expect(log.mock.calls[0]?.[0]).toMatchObject({ event: 'swap_accept', outcome: 'success' })
+    })
+
+    it('refuses to accept when a leave was approved on the day in the meantime, and leaves the request waiting', async () => {
+      const { swap } = await trade()
+      await onLeave(budi.id, '2099-03-10')
+
+      expect(await rejection(() => asUser(() => service.accept(tenantId, budi.id, swap.id, {})))).toMatchObject({ code: 'on_leave' })
+      expect((await swaps.findOne(swap.id))?.status).toBe('requested')
     })
 
     it('refuses anyone but the counterpart, a missing employee link, and a second accept', async () => {
@@ -524,6 +563,14 @@ describe('SwapService', () => {
     function approve(id: string, input: { version?: number; reason?: string } = {}) {
       return asUser(() => service.approve(tenantId, null, id, input))
     }
+
+    it('refuses to approve when a leave was approved on the day in the meantime, and leaves the request accepted', async () => {
+      const { swap } = await accepted()
+      await onLeave(siti.id, '2099-03-11')
+
+      expect(await rejection(() => approve(swap.id))).toMatchObject({ code: 'on_leave' })
+      expect((await swaps.findOne(swap.id))?.status).toBe('accepted_by_counterpart')
+    })
 
     it('approves a trade in one move: the old assignments are cancelled, the new ones exist with the source swap, the roster revision goes up', async () => {
       const { swap, mine, theirs } = await accepted()

@@ -310,7 +310,7 @@ describe('roster import and import endpoints (in-memory repositories)', () => {
     const checked = (await upload(id, text)).body as Record<string, any>
     const employee = await workforce.employees.findByNumber(tenantId, 'E001')
     const roster = await workforce.rosters.findOne(id)
-    await workforce.rosterAssignments.create({ tenant_id: tenantId, roster_id: id, unit_id: roster?.unit_id ?? '', facility_id: facilityId, employee_id: employee?.id ?? '', date: '2099-03-23', shift: { definition_id: new Types.ObjectId().toHexString(), code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-23T00:00:00Z'), ends_at: new Date('2099-03-23T08:00:00Z'), role: 'staff', status: 'planned', source: { kind: 'roster', ref_id: id }, change_reason: null, revision: 0, overtime: null, flag: null, is_flagged: false })
+    await workforce.rosterAssignments.create({ tenant_id: tenantId, roster_id: id, unit_id: roster?.unit_id ?? '', facility_id: facilityId, employee_id: employee?.id ?? '', date: '2099-03-23', shift: { definition_id: new Types.ObjectId().toHexString(), code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-23T00:00:00Z'), ends_at: new Date('2099-03-23T08:00:00Z'), role: 'staff', status: 'planned', source: { kind: 'roster', ref_id: id }, cancellation: null, change_reason: null, revision: 0, overtime: null, flag: null, is_flagged: false })
 
     const applied = await upload(id, text, `apply=true&checkId=${checked.id}`)
 

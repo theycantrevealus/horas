@@ -471,6 +471,7 @@ describe('ShiftService', () => {
           role: 'staff',
           status: override.assignment ?? 'planned',
           source: { kind: 'roster', ref_id: roster.id },
+          cancellation: null,
           change_reason: null,
           revision: 0,
           overtime: null,

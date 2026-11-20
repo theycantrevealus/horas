@@ -12,7 +12,7 @@ import { runWithRequestContext } from '@utility/logger/context'
 import { type PracticeScheduleExceptionRepository } from '@repository/interface/practice-schedule-exception'
 import { REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION } from '@repository/token'
 import { PracticeScheduleExceptionRepositoryModule } from './practice-schedule-exception.module'
-import { PracticeScheduleExceptionEntity } from './schema/practice-schedule-exception'
+import { PracticeScheduleExceptionEntity, PracticeScheduleExceptionSchema } from './schema/practice-schedule-exception'
 
 /**
  * Records appended to the fake outbox.
@@ -164,6 +164,29 @@ describe('PracticeScheduleExceptionRepository on the shared Mongo base', () => {
     model.findOne.mockReturnValueOnce(chain({ ...stored, kind: 'cancelled', moved_to: null, source: { kind: 'leave', ref_id: leaveId } }))
 
     expect(await exceptions.findOne(exceptionId.toHexString())).toMatchObject({ kind: 'cancelled', moved_to: null, source: { kind: 'leave', ref_id: leaveId.toHexString() } })
+  })
+
+  it('maps an exception made by leave, which has no reason, to a null reason', async () => {
+    model.findOne.mockReturnValueOnce(chain({ ...stored, reason: null, source: { kind: 'leave', ref_id: new Types.ObjectId() } }))
+    model.findOne.mockReturnValueOnce(chain({ ...stored, reason: undefined }))
+
+    expect((await exceptions.findOne(exceptionId.toHexString()))?.reason).toBeNull()
+    expect((await exceptions.findOne(exceptionId.toHexString()))?.reason).toBeNull()
+  })
+
+  it('finds the exceptions a leave made, and nothing for malformed ids', async () => {
+    const tenant = tenantId.toHexString()
+    const leave = new Types.ObjectId().toHexString()
+    model.find.mockReturnValueOnce(chain([stored]))
+
+    expect(await exceptions.findByLeave(tenant, leave)).toHaveLength(1)
+
+    expect(model.find).toHaveBeenCalledWith({ tenant_id: tenant, 'source.kind': 'leave', 'source.ref_id': leave, deleted_at: null })
+    model.find.mockClear()
+    expect(await exceptions.findByLeave(tenant, 'bad')).toEqual([])
+    expect(await exceptions.findByLeave('x', leave)).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+    expect(PracticeScheduleExceptionSchema.indexes()).toContainEqual([{ tenant_id: 1, 'source.ref_id': 1 }, expect.objectContaining({ partialFilterExpression: { 'source.kind': 'leave' } })])
   })
 
   it('finds the exception in force of a schedule on a date, and nothing for malformed ids', async () => {

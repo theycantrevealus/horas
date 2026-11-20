@@ -80,4 +80,22 @@ export interface PracticeScheduleRepository extends Repository<PracticeSchedule>
     employeeId: string,
     dayOfWeek: number,
   ): Promise<PracticeSchedule[]>
+
+  /**
+   * Finds every schedule of a doctor whose validity overlaps a range, active or ended (an ended
+   * schedule still serves its sessions up to its last date), in every polyclinic. It is what an
+   * approved leave cancels the sessions of.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param start - First date of the range.
+   * @param end - Last date of the range.
+   * @returns The schedules, possibly none.
+   */
+  findByEmployeeCovering(
+    tenantId: string,
+    employeeId: string,
+    start: string,
+    end: string,
+  ): Promise<PracticeSchedule[]>
 }

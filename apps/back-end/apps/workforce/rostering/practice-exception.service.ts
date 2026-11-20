@@ -19,6 +19,7 @@ import {
 } from '@repository/token'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { EligibilityService } from '../eligibility/eligibility.service'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { observe } from '../observe'
 import {
   ConflictError,
@@ -109,6 +110,7 @@ export class PracticeExceptionService {
     @Inject(EligibilityService)
     private readonly eligibility: EligibilityService,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
+    @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -371,7 +373,7 @@ export class PracticeExceptionService {
    * @param schedule - The schedule.
    * @param date - The date of the session that moves.
    * @param moved - Where it goes.
-   * @throws InvalidRequestError `employee_not_found`, `unit_not_found` or `not_eligible_*`.
+   * @throws InvalidRequestError `employee_not_found`, `unit_not_found`, `on_leave` or `not_eligible_*`.
    * @throws ConflictError `schedule_overlaps`.
    */
   private async checkMove(
@@ -390,6 +392,12 @@ export class PracticeExceptionService {
     const unit = await this.units.findOne(schedule.unit_id)
     if (!unit || unit.tenant_id !== tenantId) {
       throw new InvalidRequestError('unit_not_found', 'The unit was not found.')
+    }
+    if (await this.leave.isOnLeave(tenantId, doctor.id, moved.date)) {
+      throw new InvalidRequestError(
+        'on_leave',
+        'The doctor is on approved leave on that date.',
+      )
     }
     const result = await this.eligibility.general(
       tenantId,

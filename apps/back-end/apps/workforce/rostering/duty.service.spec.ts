@@ -94,6 +94,7 @@ describe('DutyService', () => {
         role: override.role ?? 'staff',
         status: override.status ?? 'planned',
         source: { kind: 'roster', ref_id: null },
+        cancellation: null,
         change_reason: null,
         revision: 0,
         overtime: null,

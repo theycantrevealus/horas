@@ -36,6 +36,7 @@ import {
 import { addDays } from '../credentialing/appointment-rules'
 import { EligibilityService } from '../eligibility/eligibility.service'
 import { observe } from '../observe'
+import { LeaveCalendar } from '../leave/leave-calendar'
 import { ParameterService } from '../parameter/parameter.service'
 import {
   ConflictError,
@@ -81,6 +82,7 @@ const COLUMNS: Record<string, string> = {
   date_outside_period: 'date',
   assignment_in_past: 'date',
   assignment_exists: 'date',
+  on_leave: 'date',
 }
 
 /**
@@ -191,6 +193,7 @@ export class RosterImportService {
     private readonly validation: RosterValidationService,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
+    @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -720,6 +723,11 @@ export class RosterImportService {
   ): Promise<string | null> {
     try {
       assertAssignable(item.employee)
+      if (
+        await this.leave.isOnLeave(tenantId, item.employee.id, item.row.date)
+      ) {
+        return 'on_leave'
+      }
       await assertEligible(
         this.eligibility,
         tenantId,
@@ -839,6 +847,7 @@ export class RosterImportService {
       role: item.row.role,
       status: 'planned',
       source: { kind: 'import', ref_id: importId },
+      cancellation: null,
       change_reason: null,
       revision: roster.revision,
       overtime:

@@ -297,6 +297,17 @@ describe('RosterService', () => {
       expect(await rejection(() => asBoss(() => service.approve(tenantId, draft.id, {})))).toMatchObject({ code: 'invalid_transition' })
     })
 
+    it('refuses to publish an approved roster whose validation was cleared, until it is validated again', async () => {
+      const draft = await asHead(() => service.create(tenantId, { unitId, period: march }))
+      await asHead(() => service.submit(tenantId, draft.id, {}))
+      await asBoss(() => service.approve(tenantId, draft.id, {}))
+      await asHead(() => rosters.update(draft.id, { validation: null }))
+
+      expect(await rejection(() => asHead(() => service.publish(tenantId, draft.id, {})))).toMatchObject({ kind: 'invalid', code: 'validation_required' })
+      await asHead(() => rosters.update(draft.id, { validation: { checked_at: new Date(), violations: 0, coverage_gaps: 0 } }))
+      expect((await asHead(() => service.publish(tenantId, draft.id, {}))).status).toBe('published')
+    })
+
     it('does not block the approval of a roster prepared by a system actor', async () => {
       const draft = await as(null, () => service.create(tenantId, { unitId, period: march }))
       await asHead(() => service.submit(tenantId, draft.id, {}))

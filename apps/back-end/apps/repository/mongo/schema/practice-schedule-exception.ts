@@ -68,7 +68,7 @@ export const ExceptionSourceSchema = SchemaFactory.createForClass(ExceptionSourc
  * @property date - Date of the affected session.
  * @property kind - Cancelled or moved.
  * @property moved_to - New time when moved, otherwise `null`.
- * @property reason - Leave, training, emergency, other.
+ * @property reason - Leave, training, emergency, other; `null` for an exception made by leave.
  * @property source - Entered by hand, or created from leave or training.
  * @property created_by - Who created the record.
  */
@@ -104,8 +104,8 @@ export class PracticeScheduleExceptionEntity {
   @Prop({ type: MovedSessionSchema, default: null })
   moved_to!: MovedSessionEntity | null
 
-  @Prop({ type: CodingSchema, required: true })
-  reason!: Coding
+  @Prop({ type: CodingSchema, default: null })
+  reason!: Coding | null
 
   @Prop({ type: ExceptionSourceSchema, required: true })
   source!: ExceptionSourceEntity
@@ -136,6 +136,11 @@ PracticeScheduleExceptionSchema.index(
   { unique: true, partialFilterExpression: { deleted_at: { $type: 'null' } } },
 )
 // The exceptions of a polyclinic on a date.
+// The exceptions an approved leave made, read when the leave is cancelled or ended early.
+PracticeScheduleExceptionSchema.index(
+  { tenant_id: 1, 'source.ref_id': 1 },
+  { partialFilterExpression: { 'source.kind': 'leave' } },
+)
 PracticeScheduleExceptionSchema.index({ tenant_id: 1, unit_id: 1, date: 1 })
 // A doctor's exceptions on a date, and the sessions moved onto a date.
 PracticeScheduleExceptionSchema.index({ tenant_id: 1, employee_id: 1, date: 1 })
