@@ -379,6 +379,24 @@ describe('LeaveRequestRepository on the shared Mongo base', () => {
     expect(model.find).not.toHaveBeenCalled()
   })
 
+  it('tells whether a request was made under a policy version, without reading for a malformed identifier', async () => {
+    const tenant = tenantId.toHexString()
+    const policy = new Types.ObjectId().toHexString()
+    const query = chain([stored])
+    model.find.mockReturnValueOnce(query)
+
+    expect(await requests.findAnyByPolicy(tenant, policy)).toBe(true)
+
+    expect(model.find).toHaveBeenCalledWith({ tenant_id: tenant, policy_id: policy, deleted_at: null })
+    expect(query.limit).toHaveBeenCalledWith(1)
+    model.find.mockReturnValueOnce(chain([]))
+    expect(await requests.findAnyByPolicy(tenant, policy)).toBe(false)
+    model.find.mockClear()
+    expect(await requests.findAnyByPolicy(tenant, 'bad')).toBe(false)
+    expect(model.find).not.toHaveBeenCalled()
+    expect(LeaveRequestSchema.indexes()).toContainEqual([{ tenant_id: 1, policy_id: 1 }, expect.anything()])
+  })
+
   it('finds the requests waiting for a Head of some units and for HR Manager, and nothing for neither', async () => {
     const tenant = tenantId.toHexString()
     const query = chain([stored])

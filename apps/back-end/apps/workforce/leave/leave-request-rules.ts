@@ -1,4 +1,5 @@
 import { isLocalDate } from '@utility/validation/local-date'
+import { type LeavePolicy } from '@repository/model/leave-policy'
 import { type LeaveRequestStatus } from '@repository/model/leave-request'
 import { addDays } from '../assignment/assignment-rules'
 import { InvalidRequestError } from '../workforce.error'
@@ -160,4 +161,19 @@ export function checkRequestDates(input: RequestDatesInput): void {
       'A one-day leave cannot be two half days.',
     )
   }
+}
+
+/**
+ * The most days one request of a leave type may count: the policy's limit per request, and for a
+ * per-event policy no more than the days of the event (HR plan 8.3 LR5).
+ *
+ * @param policy - The policy in force.
+ * @returns The limit.
+ */
+export function maxDaysOf(
+  policy: Pick<LeavePolicy, 'balance' | 'max_days_per_request'>,
+): number {
+  return policy.balance.kind === 'per_event'
+    ? Math.min(policy.max_days_per_request, policy.balance.days)
+    : policy.max_days_per_request
 }

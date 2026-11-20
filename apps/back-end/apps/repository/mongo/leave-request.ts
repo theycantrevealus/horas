@@ -184,6 +184,25 @@ export class LeaveRequestRepositoryMongo
   }
 
   /**
+   * Tells whether any request was made under a policy version.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param policyId - The policy version.
+   * @returns True when a request has this `policy_id`.
+   */
+  async findAnyByPolicy(tenantId: string, policyId: string): Promise<boolean> {
+    if (!toObjectId(tenantId) || !toObjectId(policyId)) {
+      return false
+    }
+    const found = await this.run(
+      'findAnyByPolicy',
+      { tenant_id: tenantId, policy_id: policyId, deleted_at: null },
+      1,
+    )
+    return found.length > 0
+  }
+
+  /**
    * Finds the requests that wait for a decision of the given people, latest first.
    *
    * @param tenantId - Tenant to search in.

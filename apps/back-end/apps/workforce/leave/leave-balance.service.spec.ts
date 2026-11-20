@@ -241,6 +241,7 @@ describe('LeavePlaceService and LeaveBalanceService', () => {
     const policyService = new LeavePolicyService(
       policies,
       new CodeConceptService(new InMemoryCodeConcepts(), logger),
+      requests,
       { run: (work: () => Promise<unknown>) => work() } as never,
       logger,
     )

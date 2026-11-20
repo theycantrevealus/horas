@@ -91,6 +91,16 @@ export interface LeaveRequestRepository extends Repository<LeaveRequest> {
   ): Promise<LeaveRequest[]>
 
   /**
+   * Tells whether any request was made under a policy version, so the version can no longer be
+   * edited.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param policyId - The policy version.
+   * @returns True when a request has this `policy_id`.
+   */
+  findAnyByPolicy(tenantId: string, policyId: string): Promise<boolean>
+
+  /**
    * Finds the requests that wait for a decision of the given people, latest first.
    *
    * @param tenantId - Tenant to search in.

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -15,6 +16,8 @@ import {
   RequirePermissions,
 } from '@identity/guard/decorators'
 import { PERMISSIONS } from '@identity/permission'
+import { LeaveDecisionService } from '@workforce/leave/leave-decision.service'
+import { LeaveTypeChangeService } from '@workforce/leave/leave-type-change.service'
 import { LeaveDetailService } from '@workforce/leave/leave-detail.service'
 import { type LeaveCaller } from '@workforce/leave/leave-caller'
 import {
@@ -23,6 +26,11 @@ import {
   type LeaveRequestInput,
 } from '@workforce/leave/leave-request.service'
 import {
+  AdjustDaysDto,
+  ApproveLeaveDto,
+  CancelLeaveDto,
+  ChangeLeaveTypeDto,
+  RejectLeaveDto,
   HrLeaveRequestDto,
   LeaveDatesDto,
   LeaveRequestsQueryDto,
@@ -81,10 +89,14 @@ export class LeaveRequestController {
   /**
    * @param requests - Leave request service.
    * @param details - Leave detail service, for the reason and the proof.
+   * @param decisions - Leave decision service: days, approve, reject and cancel.
+   * @param typeChanges - Leave type change service.
    */
   constructor(
     private readonly requests: LeaveRequestService,
     private readonly details: LeaveDetailService,
+    private readonly decisions: LeaveDecisionService,
+    private readonly typeChanges: LeaveTypeChangeService,
   ) {}
 
   /**
@@ -253,5 +265,108 @@ export class LeaveRequestController {
       toCaller(user, held),
       body.version,
     )
+  }
+
+  /**
+   * Handles `PATCH /v1/leave-requests/:id/days`: the Head corrects the counted days.
+   *
+   * @param user - Signed-in user.
+   * @param held - The caller's permissions.
+   * @param id - Request identifier.
+   * @param body - The dates to change.
+   * @returns The updated request.
+   */
+  @Patch('leave-requests/:id/days')
+  @RequirePermissions()
+  adjustDays(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentPermissions() held: ReadonlySet<string>,
+    @Param('id') id: string,
+    @Body() body: AdjustDaysDto,
+  ): Promise<LeaveRequest> {
+    return this.decisions.adjustDays(user.tenant_id, id, body, toCaller(user, held))
+  }
+
+  /**
+   * Handles `POST /v1/leave-requests/:id/approve`: approves the step the request waits for.
+   *
+   * @param user - Signed-in user.
+   * @param held - The caller's permissions.
+   * @param id - Request identifier.
+   * @param body - The replacement of the first step.
+   * @returns The updated request.
+   */
+  @Post('leave-requests/:id/approve')
+  @RequirePermissions()
+  approve(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentPermissions() held: ReadonlySet<string>,
+    @Param('id') id: string,
+    @Body() body: ApproveLeaveDto,
+  ): Promise<LeaveRequest> {
+    return this.decisions.approve(user.tenant_id, id, body, toCaller(user, held))
+  }
+
+  /**
+   * Handles `POST /v1/leave-requests/:id/reject`: rejects the step the request waits for.
+   *
+   * @param user - Signed-in user.
+   * @param held - The caller's permissions.
+   * @param id - Request identifier.
+   * @param body - The reason.
+   * @returns The updated request.
+   */
+  @Post('leave-requests/:id/reject')
+  @RequirePermissions()
+  reject(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentPermissions() held: ReadonlySet<string>,
+    @Param('id') id: string,
+    @Body() body: RejectLeaveDto,
+  ): Promise<LeaveRequest> {
+    return this.decisions.reject(user.tenant_id, id, body, toCaller(user, held))
+  }
+
+  /**
+   * Handles `POST /v1/leave-requests/:id/cancel`: the requester, or HR, cancels a request.
+   *
+   * @param user - Signed-in user.
+   * @param held - The caller's permissions.
+   * @param id - Request identifier.
+   * @param body - The reason, required for an approved leave.
+   * @returns The updated request.
+   */
+  @Post('leave-requests/:id/cancel')
+  @RequirePermissions()
+  cancel(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentPermissions() held: ReadonlySet<string>,
+    @Param('id') id: string,
+    @Body() body: CancelLeaveDto,
+  ): Promise<LeaveRequest> {
+    return this.decisions.cancel(user.tenant_id, id, body, toCaller(user, held))
+  }
+
+  /**
+   * Handles `POST /v1/leave-requests/:id/change-type`: HR changes the leave type of an approved
+   * leave.
+   *
+   * @param user - Signed-in user.
+   * @param id - Request identifier.
+   * @param body - The new type and the reason.
+   * @returns The updated request.
+   */
+  @Post('leave-requests/:id/change-type')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_LEAVE_REQUEST_CHANGE_TYPE)
+  changeType(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: ChangeLeaveTypeDto,
+  ): Promise<LeaveRequest> {
+    return this.typeChanges.change(user.tenant_id, id, {
+      leaveType: { system: body.leaveType.system, code: body.leaveType.code },
+      reason: body.reason,
+      version: body.version,
+    })
   }
 }

@@ -151,6 +151,40 @@ export class LeaveLedgerRepositoryMongo
   }
 
   /**
+   * Finds the entries a leave request posted.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param requestId - The leave request.
+   * @returns The entries, oldest first.
+   */
+  async findByRequest(
+    tenantId: string,
+    requestId: string,
+  ): Promise<LeaveLedgerEntry[]> {
+    const operation = 'LeaveLedgerRepository.findByRequest'
+    if (!toObjectId(tenantId) || !toObjectId(requestId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            'source.kind': 'request',
+            'source.ref_id': requestId,
+            deleted_at: null,
+          }),
+        )
+        .sort({ created_at: 1, _id: 1 })
+        .lean<LeanRecord<LeaveLedgerEntryEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds grants whose period ended in a window (a cross-tenant read for the leave period job).
    *
    * @param from - First day of the window.
