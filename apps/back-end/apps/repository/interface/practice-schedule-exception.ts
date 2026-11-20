@@ -76,4 +76,16 @@ export interface PracticeScheduleExceptionRepository extends Repository<Practice
     employeeId: string,
     date: string,
   ): Promise<PracticeScheduleException[]>
+
+  /**
+   * Finds the exceptions an approved leave made, in force only (undone ones are not returned).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param leaveRequestId - The leave request.
+   * @returns The exceptions, possibly none; empty for a malformed identifier.
+   */
+  findByLeave(
+    tenantId: string,
+    leaveRequestId: string,
+  ): Promise<PracticeScheduleException[]>
 }

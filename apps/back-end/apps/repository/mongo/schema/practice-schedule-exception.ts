@@ -136,6 +136,11 @@ PracticeScheduleExceptionSchema.index(
   { unique: true, partialFilterExpression: { deleted_at: { $type: 'null' } } },
 )
 // The exceptions of a polyclinic on a date.
+// The exceptions an approved leave made, read when the leave is cancelled or ended early.
+PracticeScheduleExceptionSchema.index(
+  { tenant_id: 1, 'source.ref_id': 1 },
+  { partialFilterExpression: { 'source.kind': 'leave' } },
+)
 PracticeScheduleExceptionSchema.index({ tenant_id: 1, unit_id: 1, date: 1 })
 // A doctor's exceptions on a date, and the sessions moved onto a date.
 PracticeScheduleExceptionSchema.index({ tenant_id: 1, employee_id: 1, date: 1 })

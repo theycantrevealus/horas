@@ -204,6 +204,22 @@ describe('PracticeScheduleRepository on the shared Mongo base', () => {
     expect(model.find).not.toHaveBeenCalled()
   })
 
+  it('finds the schedules of a doctor whose validity overlaps a range, ended ones included, and nothing for a malformed id', async () => {
+    const tenant = tenantId.toHexString()
+    await schedules.findByEmployeeCovering(tenant, employeeId.toHexString(), '2026-11-16', '2026-11-30')
+
+    expect(model.find).toHaveBeenCalledWith({
+      tenant_id: tenant,
+      employee_id: employeeId.toHexString(),
+      'period.start': { $lte: '2026-11-30' },
+      $or: [{ 'period.end': null }, { 'period.end': { $gte: '2026-11-16' } }],
+      deleted_at: null,
+    })
+    model.find.mockClear()
+    expect(await schedules.findByEmployeeCovering(tenant, 'bad', '2026-11-16', '2026-11-30')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('stamps a created schedule with the actor and records one change entry', async () => {
     await asAdmin(() => schedules.create(input))
 

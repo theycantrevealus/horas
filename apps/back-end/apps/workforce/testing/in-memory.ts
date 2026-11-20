@@ -3660,6 +3660,31 @@ export class InMemoryPracticeSchedules
         item.day_of_week === dayOfWeek,
     )
   }
+
+  /**
+   * Finds the schedules of a doctor whose validity overlaps a range.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param start - First date of the range.
+   * @param end - Last date of the range.
+   * @returns The schedules.
+   */
+  async findByEmployeeCovering(
+    tenantId: string,
+    employeeId: string,
+    start: string,
+    end: string,
+  ): Promise<PracticeSchedule[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.employee_id === employeeId &&
+        item.period.start <= end &&
+        (item.period.end === null || item.period.end >= start),
+    )
+  }
 }
 
 /**
@@ -3671,6 +3696,26 @@ export class InMemoryPracticeScheduleExceptions
   extends InMemoryRepository<PracticeScheduleException>
   implements PracticeScheduleExceptionRepository
 {
+  /**
+   * Finds the exceptions an approved leave made.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param leaveRequestId - The leave request.
+   * @returns The exceptions in force.
+   */
+  async findByLeave(
+    tenantId: string,
+    leaveRequestId: string,
+  ): Promise<PracticeScheduleException[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.source.kind === 'leave' &&
+        item.source.ref_id === leaveRequestId,
+    )
+  }
+
   /**
    * Finds the exception of a schedule on a date, if one is in force.
    *

@@ -253,6 +253,8 @@ export class LeaveDecisionService {
             if (last) {
               await postUses(this.ledger, this.balances, tenantId, updated)
               await this.effects.onApproved(updated)
+              // The effects keep the cover on the request, so read it again.
+              return (await this.requests.findOne(updated.id)) ?? updated
             }
             return updated
           }),

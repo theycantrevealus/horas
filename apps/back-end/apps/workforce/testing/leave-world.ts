@@ -235,7 +235,7 @@ export async function createLeaveWorld() {
    * @param status - Roster status.
    * @param worked - Employee and the dates they work (`P`) or have a day off (`L`).
    */
-  async function addRoster(unit: OrganizationUnit, period: { start: string; end: string }, status: 'draft' | 'published' | 'closed' = 'published', worked?: { employee: Employee; dates: string[]; off?: string[] }) {
+  async function addRoster(unit: OrganizationUnit, period: { start: string; end: string }, status: 'draft' | 'submitted' | 'approved' | 'published' | 'closed' = 'published', worked?: { employee: Employee; dates: string[]; off?: string[] }) {
     const roster = await seed(() =>
       rosters.create({
         tenant_id: tenantId, unit_id: unit.id, facility_id: facilityId, period, status, revision: 1, prepared_by: { account_id: 'head', display_name: 'Head', kind: 'account' },
