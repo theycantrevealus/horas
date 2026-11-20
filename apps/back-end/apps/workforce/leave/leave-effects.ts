@@ -24,4 +24,12 @@ export interface LeaveEffects {
    * @param request - The cancelled request.
    */
   onCancelled(request: LeaveRequest): Promise<void>
+
+  /**
+   * Called once when an `approved` request that has started is ended early.
+   *
+   * @param request - The request, with its new last date.
+   * @param lastDate - The last day of the leave now.
+   */
+  onShortened(request: LeaveRequest, lastDate: string): Promise<void>
 }

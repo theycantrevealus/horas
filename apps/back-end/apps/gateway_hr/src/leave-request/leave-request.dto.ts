@@ -320,3 +320,18 @@ export class ConfirmCoverDto extends VersionedDto {
   @Type(() => CoverItemDto)
   items!: CoverItemDto[]
 }
+
+/**
+ * Body of `POST /v1/leave-requests/:id/end-early`.
+ *
+ * @property lastDate - The last day of the leave now.
+ * @property reason - Why, 1 to 500 characters.
+ */
+export class EndEarlyDto extends VersionedDto {
+  @IsLocalDate()
+  lastDate!: string
+
+  @IsString()
+  @MaxLength(2000)
+  reason!: string
+}

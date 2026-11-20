@@ -225,4 +225,28 @@ describe('RosterLeaveEffects', () => {
       await expect(world.seed(() => effects.onCancelled(request))).resolves.toBeUndefined()
     })
   })
+
+  describe('onShortened', () => {
+    it('undoes only this leave\'s exceptions after the new last date that are dated today or later, and restores no assignment', async () => {
+      await addSchedule(1)
+      const roster = await world.addRoster(world.ward, { start: '2026-12-07', end: '2026-12-07' }, 'draft', { employee: world.nurse, dates: ['2026-12-07'] })
+      const request = await approved(['2026-11-16', '2026-11-23', '2026-11-30', '2026-12-07'])
+      await approve(request)
+
+      await world.seed(() => effects.onShortened(request, '2026-11-23'))
+
+      expect((await exceptions.findByLeave(world.tenantId, request.id)).map((item) => item.date)).toEqual(['2026-11-16', '2026-11-23'])
+      expect((await assignmentsOf(roster.id))[0]?.status).toBe('cancelled')
+    })
+
+    it('keeps a past exception after the new last date, because it is not dated today or later', async () => {
+      await addSchedule(1)
+      const request = await approved(['2026-11-09', '2026-11-16', '2026-11-23'])
+      await approve(request)
+
+      await world.seed(() => effects.onShortened(request, '2026-11-09'))
+
+      expect((await exceptions.findByLeave(world.tenantId, request.id)).map((item) => item.date)).toEqual(['2026-11-09', '2026-11-16'])
+    })
+  })
 })

@@ -4155,6 +4155,7 @@ const LEAVE_REQUEST_UPDATABLE = [
   'days',
   'total_days',
   'period',
+  'half_days',
   'leave_type',
   'policy_id',
   'rules',

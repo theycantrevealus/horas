@@ -14,6 +14,7 @@ import { LeaveBalanceService } from '../leave/leave-balance.service'
 import { type LeaveCaller } from '../leave/leave-caller'
 import { LeaveDeciderService } from '../leave/decider'
 import { LeaveDecisionService } from '../leave/leave-decision.service'
+import { LeaveEndEarlyService } from '../leave/leave-end-early.service'
 import { LeaveDetailService } from '../leave/leave-detail.service'
 import { LeavePlaceService } from '../leave/leave-place'
 import { LeavePolicyService } from '../leave/leave-policy.service'
@@ -84,7 +85,8 @@ export async function createLeaveWorld() {
   )
   const detail = new LeaveDetailService(requests, details, decider, changes, transactions, logger)
   const typeChange = new LeaveTypeChangeService(requests, ledger, conceptService, policyService, balances, request, place, transactions, logger)
-  const effects = { onApproved: vi.fn(async () => {}), onCancelled: vi.fn(async () => {}) }
+  const effects = { onApproved: vi.fn(async () => {}), onCancelled: vi.fn(async () => {}), onShortened: vi.fn(async () => {}) }
+  const endEarly = new LeaveEndEarlyService(requests, ledger, place, effects, transactions, logger)
   const decision = new LeaveDecisionService(requests, employees, ledger, policies, balances, place, decider, effects, transactions, logger)
 
   /**
@@ -319,7 +321,7 @@ export async function createLeaveWorld() {
   return {
     tenantId, otherTenantId, organizationId, facilityId, facility, parent, ward, headP, headU, nurse, annualPolicy,
     repos: { employees, contracts, assignments, positions, units, facilities, calendars, rosters, rosterAssignments, ledger, requests, details, policies, concepts },
-    services: { request, detail, decision, typeChange, balances, policies: policyService, decider },
+    services: { request, detail, decision, typeChange, endEarly, balances, policies: policyService, decider },
     logs: { log, warn, error, debug, written: () => JSON.stringify([log.mock.calls, warn.mock.calls, error.mock.calls, debug.mock.calls]) },
     recordAccess,
     effects,

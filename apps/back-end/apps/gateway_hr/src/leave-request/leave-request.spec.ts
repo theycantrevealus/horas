@@ -479,4 +479,22 @@ describe('leave request endpoints (in-memory repositories)', () => {
       expect((await call(method, `/v1/leave-requests/${approved.id}/${path}`, undefined, {})).status).toBe(401)
     }
   })
+
+  it('ends a leave early with the write permission, and refuses without it, for a leave that has not started and a bad body', async () => {
+    const future = await nurseRequest(90)
+    await call('POST', `/v1/leave-requests/${future.id}/approve`, approverToken, { noReplacementReason: 'x' })
+    const date = addDays(todayUtc(), 90)
+
+    const denied = await call('POST', `/v1/leave-requests/${future.id}/end-early`, nurseToken, { lastDate: date, reason: 'x' })
+    const early = await call('POST', `/v1/leave-requests/${future.id}/end-early`, hrToken, { lastDate: date, reason: 'x' })
+    const invalid = await call('POST', `/v1/leave-requests/${future.id}/end-early`, hrToken, { lastDate: 'soon', reason: 'x' })
+    const missing = await call('POST', `/v1/leave-requests/${new Types.ObjectId().toHexString()}/end-early`, hrToken, { lastDate: date, reason: 'x' })
+
+    expect(denied.status).toBe(403)
+    expect(early.status).toBe(422)
+    expect(early.body).toMatchObject({ code: 'leave_not_started' })
+    expect(invalid.status).toBe(400)
+    expect(missing.status).toBe(404)
+    expect((await call('POST', `/v1/leave-requests/${future.id}/end-early`, undefined, {})).status).toBe(401)
+  })
 })
