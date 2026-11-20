@@ -39,6 +39,32 @@ export async function isFirstDecider(
 }
 
 /**
+ * Tells whether the caller decides the first step of the request now: the current Head of the stored
+ * unit with `workforce.leave-request:decide`, or, when HR Manager decides that step,
+ * `workforce.leave-request:approve-hr`. The requester never decides their own leave.
+ *
+ * @param decider - The decider service.
+ * @param tenantId - Tenant of the caller.
+ * @param caller - The caller.
+ * @param request - The request.
+ * @returns True when the caller decides the first step.
+ */
+export async function decidesFirstStep(
+  decider: LeaveDeciderService,
+  tenantId: string,
+  caller: LeaveCaller,
+  request: LeaveRequest,
+): Promise<boolean> {
+  if (caller.employeeId === null || isRequester(caller, request)) {
+    return false
+  }
+  const first = await decider.resolve(tenantId, request.deciders.first)
+  return first.kind === 'hr_manager'
+    ? caller.canApproveHr
+    : caller.canDecide && first.employeeId === caller.employeeId
+}
+
+/**
  * The answer for a request that is missing, malformed, of another tenant, or that the caller may
  * not see: one answer, so nothing leaks about leave (a confidential record).
  *

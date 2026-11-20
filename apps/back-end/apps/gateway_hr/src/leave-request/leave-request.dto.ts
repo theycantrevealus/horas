@@ -289,3 +289,34 @@ export class ChangeLeaveTypeDto extends VersionedDto {
   @MaxLength(2000)
   reason!: string
 }
+
+/**
+ * One shift to give to the replacement.
+ *
+ * @property assignmentId - A shift the leave cancelled.
+ * @property role - The role the replacement takes; the old one when missing.
+ */
+export class CoverItemDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(64)
+  assignmentId!: string
+
+  @IsOptional()
+  @IsIn(['staff', 'team_leader', 'supervisor', 'dpjp_on_call'])
+  role?: 'staff' | 'team_leader' | 'supervisor' | 'dpjp_on_call'
+}
+
+/**
+ * Body of `POST /v1/leave-requests/:id/cover`.
+ *
+ * @property items - The shifts to cover, 1 to 200.
+ */
+export class ConfirmCoverDto extends VersionedDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(200)
+  @ValidateNested({ each: true })
+  @Type(() => CoverItemDto)
+  items!: CoverItemDto[]
+}
