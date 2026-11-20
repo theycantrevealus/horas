@@ -68,7 +68,7 @@ export const ExceptionSourceSchema = SchemaFactory.createForClass(ExceptionSourc
  * @property date - Date of the affected session.
  * @property kind - Cancelled or moved.
  * @property moved_to - New time when moved, otherwise `null`.
- * @property reason - Leave, training, emergency, other.
+ * @property reason - Leave, training, emergency, other; `null` for an exception made by leave.
  * @property source - Entered by hand, or created from leave or training.
  * @property created_by - Who created the record.
  */
@@ -104,8 +104,8 @@ export class PracticeScheduleExceptionEntity {
   @Prop({ type: MovedSessionSchema, default: null })
   moved_to!: MovedSessionEntity | null
 
-  @Prop({ type: CodingSchema, required: true })
-  reason!: Coding
+  @Prop({ type: CodingSchema, default: null })
+  reason!: Coding | null
 
   @Prop({ type: ExceptionSourceSchema, required: true })
   source!: ExceptionSourceEntity

@@ -427,6 +427,7 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
           role,
           status: 'planned',
           source: { kind: 'roster', ref_id: publishedId },
+          cancellation: null,
           change_reason: null,
           revision: 1,
           overtime: null,

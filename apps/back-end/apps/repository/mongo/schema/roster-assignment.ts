@@ -67,10 +67,10 @@ export const AssignedShiftSchema = SchemaFactory.createForClass(AssignedShiftEnt
 export class AssignmentSourceEntity {
   @Prop({
     type: SchemaTypes.String,
-    enum: ['roster', 'import', 'swap', 'change_request'],
+    enum: ['roster', 'import', 'swap', 'change_request', 'leave_cover'],
     required: true,
   })
-  kind!: 'roster' | 'import' | 'swap' | 'change_request'
+  kind!: 'roster' | 'import' | 'swap' | 'change_request' | 'leave_cover'
 
   @Prop({ type: SchemaTypes.ObjectId, default: null })
   ref_id!: Types.ObjectId | null
@@ -81,6 +81,28 @@ export class AssignmentSourceEntity {
  */
 export const AssignmentSourceSchema = SchemaFactory.createForClass(
   AssignmentSourceEntity,
+)
+
+/**
+ * Storage shape of what cancelled an assignment.
+ *
+ * @property kind - What cancelled it.
+ * @property ref_id - The leave request.
+ */
+@Schema({ _id: false })
+export class AssignmentCancellationEntity {
+  @Prop({ type: SchemaTypes.String, enum: ['leave'], required: true })
+  kind!: 'leave'
+
+  @Prop({ type: SchemaTypes.ObjectId, required: true })
+  ref_id!: Types.ObjectId
+}
+
+/**
+ * Mongoose schema of the assignment cancellation.
+ */
+export const AssignmentCancellationSchema = SchemaFactory.createForClass(
+  AssignmentCancellationEntity,
 )
 
 /**
@@ -177,6 +199,7 @@ export const AssignmentFlagSchema = SchemaFactory.createForClass(AssignmentFlagE
  * @property role - Role in the shift.
  * @property status - `planned` or `cancelled`.
  * @property source - Where it came from.
+ * @property cancellation - What cancelled it, or `null`.
  * @property change_reason - Why it was last changed after publication, or `null`.
  * @property revision - Roster revision that created or last changed it.
  * @property overtime - Overtime it adds, or `null`.
@@ -234,6 +257,9 @@ export class RosterAssignmentEntity {
 
   @Prop({ type: AssignmentSourceSchema, required: true })
   source!: AssignmentSourceEntity
+
+  @Prop({ type: AssignmentCancellationSchema, default: null })
+  cancellation!: AssignmentCancellationEntity | null
 
   @Prop({ type: SchemaTypes.String, default: null })
   change_reason!: string | null

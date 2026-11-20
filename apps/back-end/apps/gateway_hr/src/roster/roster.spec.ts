@@ -379,6 +379,7 @@ describe('roster endpoints (in-memory repositories)', () => {
         role: 'staff',
         status: 'planned',
         source: { kind: 'roster', ref_id: rosterId },
+        cancellation: null,
         change_reason: null,
         revision: 0,
         overtime: null,

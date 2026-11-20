@@ -180,6 +180,7 @@ describe('SwapService', () => {
         role: 'staff',
         status: 'planned',
         source: { kind: 'roster', ref_id: null },
+        cancellation: null,
         change_reason: null,
         revision: 1,
         overtime: null,

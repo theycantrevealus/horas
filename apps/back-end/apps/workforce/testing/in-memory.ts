@@ -1,6 +1,7 @@
 import {
   RepositoryConflictError,
   RepositoryError,
+  RepositoryNotFoundError,
   RepositoryValidationError,
 } from '@utility/database/error'
 import { type FieldCipher, mask } from '@utility/encryption/field-cipher'
@@ -3355,6 +3356,39 @@ export class InMemoryRosterAssignments
       stored.push(await this.create(assignment))
     }
     return stored
+  }
+
+  /**
+   * Cancels assignments because an approved leave takes their days.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param leaveRequestId - The leave request.
+   * @returns The cancelled assignments.
+   */
+  async cancelForLeave(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    leaveRequestId: string,
+  ): Promise<RosterAssignment[]> {
+    const cancelled: RosterAssignment[] = []
+    for (const item of items) {
+      const current = await this.findOne(item.id)
+      if (!current || current.tenant_id !== tenantId) {
+        throw new RepositoryNotFoundError(`assignment ${item.id} not found`, {
+          operation: 'RosterAssignmentRepository.cancelForLeave',
+        })
+      }
+      cancelled.push(
+        await this.update(item.id, {
+          status: 'cancelled',
+          cancellation: { kind: 'leave', ref_id: leaveRequestId },
+          change_reason: 'leave',
+          revision: item.revision,
+        }),
+      )
+    }
+    return cancelled
   }
 
   /**

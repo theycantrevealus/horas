@@ -469,6 +469,7 @@ export class SwapService {
             role: slot.role,
             status: 'planned',
             source: { kind: 'swap', ref_id: swap.id },
+            cancellation: null,
             change_reason: 'shift_swap',
             revision,
             overtime: null,

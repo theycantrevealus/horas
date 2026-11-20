@@ -119,4 +119,24 @@ export interface RosterAssignmentRepository extends Repository<RosterAssignment>
     rosterId: string,
     assignments: NewEntity<RosterAssignment>[],
   ): Promise<RosterAssignment[]>
+
+  /**
+   * Cancels assignments because an approved leave takes their days: `status` `cancelled`,
+   * `cancellation` naming the leave request, `change_reason` `leave`, and the roster revision each
+   * one carries. One change record per assignment, written sequentially inside the caller's
+   * transaction. A named write: it is not a read.
+   *
+   * @param tenantId - Tenant of the caller; an assignment of another tenant answers not found.
+   * @param items - The assignments and the revision each carries (the roster's, raised when the
+   * roster is published).
+   * @param leaveRequestId - The leave request.
+   * @returns The cancelled assignments, in the order given.
+   * @throws RepositoryNotFoundError when an assignment is missing or of another tenant.
+   * @throws RepositoryError when the request context has no actor.
+   */
+  cancelForLeave(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    leaveRequestId: string,
+  ): Promise<RosterAssignment[]>
 }

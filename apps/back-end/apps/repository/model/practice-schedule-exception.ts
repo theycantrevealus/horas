@@ -29,7 +29,8 @@ export interface MovedSession {
  * @property date - Date of the affected session.
  * @property kind - Cancelled or moved.
  * @property moved_to - New time when moved, otherwise `null`.
- * @property reason - Leave, training, emergency, other.
+ * @property reason - Leave, training, emergency, other; `null` when the exception comes from an approved
+ * leave, which never copies its type (`HR-LEV-041`). An exception entered by hand always has one.
  * @property source - Entered by hand, or created from leave or training.
  * @property created_by - Who created the record.
  */
@@ -44,7 +45,7 @@ export class PracticeScheduleException extends Timestamp implements Entity {
   date!: LocalDate
   kind!: 'cancelled' | 'moved'
   moved_to!: MovedSession | null
-  reason!: Coding
+  reason!: Coding | null
   source!: { kind: 'manual' | 'leave' | 'training'; ref_id: string | null }
   created_by!: ActorRef
 }

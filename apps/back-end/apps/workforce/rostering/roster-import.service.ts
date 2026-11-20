@@ -839,6 +839,7 @@ export class RosterImportService {
       role: item.row.role,
       status: 'planned',
       source: { kind: 'import', ref_id: importId },
+      cancellation: null,
       change_reason: null,
       revision: roster.revision,
       overtime:

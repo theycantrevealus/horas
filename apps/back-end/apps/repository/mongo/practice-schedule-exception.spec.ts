@@ -166,6 +166,14 @@ describe('PracticeScheduleExceptionRepository on the shared Mongo base', () => {
     expect(await exceptions.findOne(exceptionId.toHexString())).toMatchObject({ kind: 'cancelled', moved_to: null, source: { kind: 'leave', ref_id: leaveId.toHexString() } })
   })
 
+  it('maps an exception made by leave, which has no reason, to a null reason', async () => {
+    model.findOne.mockReturnValueOnce(chain({ ...stored, reason: null, source: { kind: 'leave', ref_id: new Types.ObjectId() } }))
+    model.findOne.mockReturnValueOnce(chain({ ...stored, reason: undefined }))
+
+    expect((await exceptions.findOne(exceptionId.toHexString()))?.reason).toBeNull()
+    expect((await exceptions.findOne(exceptionId.toHexString()))?.reason).toBeNull()
+  })
+
   it('finds the exception in force of a schedule on a date, and nothing for malformed ids', async () => {
     const tenant = tenantId.toHexString()
     await exceptions.findByScheduleAndDate(tenant, scheduleId.toHexString(), '2099-03-09')

@@ -223,6 +223,7 @@ describe('RosterImportService', () => {
         role: 'staff',
         status: 'planned',
         source: { kind: 'roster', ref_id: null },
+        cancellation: null,
         change_reason: null,
         revision: 0,
         overtime: null,
@@ -555,7 +556,7 @@ describe('RosterImportService', () => {
 
     it('writes nothing and records the new errors when the file stopped being valid', async () => {
       const checked = await check(rows)
-      await asHead(() => assignments.create({ tenant_id: tenantId, roster_id: roster.id, unit_id: unitId, facility_id: facilityId, employee_id: nurse.id, date: '2099-03-02', shift: { definition_id: morning.id, code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-02T00:00:00Z'), ends_at: new Date('2099-03-02T08:00:00Z'), role: 'staff', status: 'planned', source: { kind: 'roster', ref_id: null }, change_reason: null, revision: 0, overtime: null, flag: null, is_flagged: false }))
+      await asHead(() => assignments.create({ tenant_id: tenantId, roster_id: roster.id, unit_id: unitId, facility_id: facilityId, employee_id: nurse.id, date: '2099-03-02', shift: { definition_id: morning.id, code: 'P', type: 'regular', start_time: '07:00', end_time: '15:00', paid_minutes: 480, is_night: false }, starts_at: new Date('2099-03-02T00:00:00Z'), ends_at: new Date('2099-03-02T08:00:00Z'), role: 'staff', status: 'planned', source: { kind: 'roster', ref_id: null }, cancellation: null, change_reason: null, revision: 0, overtime: null, flag: null, is_flagged: false }))
 
       const failure = await rejection(() => apply(checked.import.id))
 

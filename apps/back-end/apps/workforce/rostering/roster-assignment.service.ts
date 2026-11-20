@@ -280,6 +280,7 @@ export class RosterAssignmentService {
             source: plan.published
               ? { kind: 'change_request', ref_id: null }
               : { kind: 'roster', ref_id: roster.id },
+            cancellation: null,
             change_reason: plan.keep ? (plan.reason ?? null) : null,
             revision,
             overtime: this.overtime(overtime, input.overtimeConsent === true),

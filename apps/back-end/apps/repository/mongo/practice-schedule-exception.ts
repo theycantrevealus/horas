@@ -233,11 +233,13 @@ export class PracticeScheduleExceptionRepositoryMongo
             end_time: record.moved_to.end_time,
           }
         : null,
-      reason: {
-        system: record.reason.system,
-        code: record.reason.code,
-        ...(record.reason.display ? { display: record.reason.display } : {}),
-      },
+      reason: record.reason
+        ? {
+            system: record.reason.system,
+            code: record.reason.code,
+            ...(record.reason.display ? { display: record.reason.display } : {}),
+          }
+        : null,
       source: {
         kind: record.source.kind,
         ref_id: record.source.ref_id ? record.source.ref_id.toHexString() : null,

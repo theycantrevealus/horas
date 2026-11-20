@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing'
 import { Types } from 'mongoose'
 import { ChangeLogConfig } from '@configuration/change-log'
 import { MONGO_MAIN_CONNECTION } from '@utility/database/constant'
-import { RepositoryError } from '@utility/database/error'
+import { RepositoryError, RepositoryNotFoundError } from '@utility/database/error'
 import { TRANSACTION_MANAGER } from '@utility/database/transaction'
 import { CHANGE_OUTBOX } from '@utility/history/outbox'
 import { type ChangeRecord } from '@utility/history/record'
@@ -121,6 +121,7 @@ const stored = {
   role: 'staff',
   status: 'planned',
   source: { kind: 'roster', ref_id: rosterId },
+  cancellation: null,
   change_reason: null,
   revision: 0,
   overtime: { minutes: 60, consent: { at: new Date('2027-03-01T00:00:00Z'), document: null } },
@@ -158,6 +159,7 @@ describe('RosterAssignmentRepository on the shared Mongo base', () => {
     role: 'staff' as const,
     status: 'planned' as const,
     source: { kind: 'roster' as const, ref_id: rosterId.toHexString() },
+    cancellation: null,
     change_reason: null,
     revision: 0,
     overtime: null,
@@ -203,6 +205,7 @@ describe('RosterAssignmentRepository on the shared Mongo base', () => {
       role: 'staff',
       status: 'planned',
       source: { kind: 'roster', ref_id: rosterId.toHexString() },
+      cancellation: null,
       change_reason: null,
       revision: 0,
       overtime: { minutes: 60, consent: { at: new Date('2027-03-01T00:00:00Z'), document: null } },
@@ -342,6 +345,43 @@ describe('RosterAssignmentRepository on the shared Mongo base', () => {
     for (const record of appended) {
       expect(record).toMatchObject({ action: 'create', entity: { type: 'roster_assignment' }, reason: 'roster_import' })
     }
+  })
+
+  it('maps a missing cancellation to null, and a cancellation by leave to its request', async () => {
+    const leaveId = new Types.ObjectId()
+    model.findOne.mockReturnValueOnce(chain({ ...stored, cancellation: undefined }))
+    model.findOne.mockReturnValueOnce(chain({ ...stored, status: 'cancelled', cancellation: { kind: 'leave', ref_id: leaveId } }))
+
+    expect((await assignments.findOne(assignmentId.toHexString()))?.cancellation).toBeNull()
+    expect(await assignments.findOne(assignmentId.toHexString())).toMatchObject({ status: 'cancelled', cancellation: { kind: 'leave', ref_id: leaveId.toHexString() } })
+  })
+
+  it('cancels assignments for a leave with one change record each and the reason leave', async () => {
+    const leaveId = new Types.ObjectId().toHexString()
+    const items = [{ id: assignmentId.toHexString(), revision: 3 }, { id: assignmentId.toHexString(), revision: 3 }]
+    model.findOneAndUpdate.mockImplementation(() => chain({ ...stored, status: 'cancelled', change_reason: 'leave', revision: 3, cancellation: { kind: 'leave', ref_id: new Types.ObjectId(leaveId) } }))
+
+    const cancelled = await asAdmin(() => assignments.cancelForLeave(tenantId.toHexString(), items, leaveId))
+
+    expect(cancelled).toHaveLength(2)
+    const update = model.findOneAndUpdate.mock.calls[0]?.[1] as { $set: Record<string, unknown> }
+    expect(update.$set).toMatchObject({ status: 'cancelled', change_reason: 'leave', revision: 3 })
+    expect(JSON.stringify(update.$set.cancellation)).toContain(leaveId)
+    expect(appended).toHaveLength(2)
+    for (const record of appended) {
+      expect(record).toMatchObject({ action: 'update', entity: { type: 'roster_assignment' }, reason: 'leave' })
+    }
+  })
+
+  it('refuses to cancel an assignment of another tenant, writes nothing for an empty list, and needs an acting account', async () => {
+    const other = new Types.ObjectId().toHexString()
+    const item = [{ id: assignmentId.toHexString(), revision: 1 }]
+
+    await expect(asAdmin(() => assignments.cancelForLeave(other, item, other))).rejects.toBeInstanceOf(RepositoryNotFoundError)
+    expect(await asAdmin(() => assignments.cancelForLeave(other, [], other))).toEqual([])
+    await expect(assignments.cancelForLeave(tenantId.toHexString(), item, other)).rejects.toBeInstanceOf(RepositoryError)
+    expect(model.findOneAndUpdate).not.toHaveBeenCalled()
+    expect(appended).toHaveLength(0)
   })
 
   it('writes nothing for an empty list, an assignment of another roster, or no acting account', async () => {
