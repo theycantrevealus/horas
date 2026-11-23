@@ -149,6 +149,45 @@ export class SeparationRepositoryMongo
   }
 
   /**
+   * Finds planned separations of every tenant whose last working day is before a date (for jobs
+   * only).
+   *
+   * @param date - Local date.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The separations.
+   */
+  async findPlannedEndedBefore(
+    date: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<Separation[]> {
+    const operation = 'SeparationRepository.findPlannedEndedBefore'
+    const cursor = afterId === null ? null : toObjectId(afterId)
+    if (afterId !== null && !cursor) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            status: 'planned',
+            last_working_day: { $lt: date },
+            deleted_at: null,
+            ...(cursor ? { _id: { $gt: cursor } } : {}),
+          }),
+        )
+        .sort({ _id: 1 })
+        .limit(limit)
+        .lean<LeanRecord<SeparationEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

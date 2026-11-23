@@ -2392,6 +2392,26 @@ export class InMemoryCredentialApplications
   implements CredentialApplicationRepository
 {
   /**
+   * Finds the open applications of an applicant.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The applicant.
+   * @returns The applications.
+   */
+  async findOpenByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<CredentialApplication[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        !['approved', 'rejected', 'withdrawn'].includes(item.status),
+    )
+  }
+
+  /**
    * Finds the open renewal application of an SPK.
    *
    * @param tenantId - Tenant to search in.
@@ -3386,39 +3406,6 @@ export class InMemoryRosterAssignments
   }
 
   /**
-   * Cancels assignments because an approved leave takes their days.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param items - The assignments and the revision each carries.
-   * @param leaveRequestId - The leave request.
-   * @returns The cancelled assignments.
-   */
-  async cancelForLeave(
-    tenantId: string,
-    items: { id: string; revision: number }[],
-    leaveRequestId: string,
-  ): Promise<RosterAssignment[]> {
-    const cancelled: RosterAssignment[] = []
-    for (const item of items) {
-      const current = await this.findOne(item.id)
-      if (!current || current.tenant_id !== tenantId) {
-        throw new RepositoryNotFoundError(`assignment ${item.id} not found`, {
-          operation: 'RosterAssignmentRepository.cancelForLeave',
-        })
-      }
-      cancelled.push(
-        await this.update(item.id, {
-          status: 'cancelled',
-          cancellation: { kind: 'leave', ref_id: leaveRequestId },
-          change_reason: 'leave',
-          revision: item.revision,
-        }),
-      )
-    }
-    return cancelled
-  }
-
-  /**
    * Finds the planned assignments of an employee dated after a date.
    *
    * @param tenantId - Tenant to search in.
@@ -3439,6 +3426,73 @@ export class InMemoryRosterAssignments
         item.date > date &&
         !item.deleted_at,
     ).sort((left, right) => left.date.localeCompare(right.date))
+  }
+
+  /**
+   * Cancels assignments because an approved leave takes their days.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param leaveRequestId - The leave request.
+   * @returns The cancelled assignments.
+   */
+  cancelForLeave(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    leaveRequestId: string,
+  ): Promise<RosterAssignment[]> {
+    return this.cancelAll(tenantId, items, 'leave', leaveRequestId)
+  }
+
+  /**
+   * Cancels assignments because a separation closes the days after the last working day.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param separationId - The separation.
+   * @returns The cancelled assignments.
+   */
+  cancelForSeparation(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    separationId: string,
+  ): Promise<RosterAssignment[]> {
+    return this.cancelAll(tenantId, items, 'separation', separationId)
+  }
+
+  /**
+   * Cancels assignments, one by one.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param kind - What cancels them; also the change reason.
+   * @param refId - The leave request or separation.
+   * @returns The cancelled assignments.
+   */
+  private async cancelAll(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    kind: 'leave' | 'separation',
+    refId: string,
+  ): Promise<RosterAssignment[]> {
+    const cancelled: RosterAssignment[] = []
+    for (const item of items) {
+      const current = await this.findOne(item.id)
+      if (!current || current.tenant_id !== tenantId) {
+        throw new RepositoryNotFoundError(`assignment ${item.id} not found`, {
+          operation: `RosterAssignmentRepository.cancelFor${kind === 'leave' ? 'Leave' : 'Separation'}`,
+        })
+      }
+      cancelled.push(
+        await this.update(item.id, {
+          status: 'cancelled',
+          cancellation: { kind, ref_id: refId },
+          change_reason: kind,
+          revision: item.revision,
+        }),
+      )
+    }
+    return cancelled
   }
 
   /**
@@ -3768,6 +3822,30 @@ export class InMemoryPracticeScheduleExceptions
   extends InMemoryRepository<PracticeScheduleException>
   implements PracticeScheduleExceptionRepository
 {
+  /**
+   * Finds the exceptions of a doctor that move a session onto a date after a given one.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param date - The last day that is kept.
+   * @returns The exceptions in force.
+   */
+  async findMovedAfterByEmployee(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<PracticeScheduleException[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        item.kind === 'moved' &&
+        item.moved_to !== null &&
+        item.moved_to.date > date,
+    )
+  }
+
   /**
    * Finds the exceptions an approved leave made.
    *
@@ -4671,6 +4749,30 @@ export class InMemorySeparations
           right.id.localeCompare(left.id),
       )
       .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds planned separations of every tenant whose last working day is before a date.
+   *
+   * @param date - Local date.
+   * @param afterId - Cursor, or `null`.
+   * @param limit - Largest number of records.
+   * @returns The separations.
+   */
+  async findPlannedEndedBefore(
+    date: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<Separation[]> {
+    return this.filter(
+      (item) =>
+        item.status === 'planned' &&
+        !item.deleted_at &&
+        item.last_working_day < date &&
+        (afterId === null || item.id > afterId),
+    )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .slice(0, limit)
   }
 
   /**

@@ -339,6 +339,18 @@ describe('CredentialApplicationRepository on the shared Mongo base', () => {
     expect(model.findOne).not.toHaveBeenCalled()
   })
 
+  it('finds the open applications of an applicant, and nothing for malformed identifiers', async () => {
+    const tenant = tenantId.toHexString()
+
+    await applications.findOpenByEmployee(tenant, employeeId.toHexString())
+
+    expect(model.find).toHaveBeenLastCalledWith({ tenant_id: tenant, employee_id: employeeId.toHexString(), deleted_at: null, status: { $nin: ['approved', 'rejected', 'withdrawn'] } })
+    model.find.mockClear()
+    expect(await applications.findOpenByEmployee('x', employeeId.toHexString())).toEqual([])
+    expect(await applications.findOpenByEmployee(tenant, 'bad')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('updates the process fields, never the applicant, the facility, the committee, the scope or the type', async () => {
     await asAdmin(() =>
       applications.update(applicationId.toHexString(), {

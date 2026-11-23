@@ -343,51 +343,6 @@ export class RosterAssignmentRepositoryMongo
   }
 
   /**
-   * Cancels assignments because an approved leave takes their days.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param items - The assignments and the revision each carries.
-   * @param leaveRequestId - The leave request.
-   * @returns The cancelled assignments, in the order given.
-   */
-  async cancelForLeave(
-    tenantId: string,
-    items: { id: string; revision: number }[],
-    leaveRequestId: string,
-  ): Promise<RosterAssignment[]> {
-    const operation = 'RosterAssignmentRepository.cancelForLeave'
-    this.requireActor(operation)
-    if (items.length === 0) {
-      return []
-    }
-    try {
-      return await this.transactions.run(() =>
-        withChangeReason('leave', async () => {
-          const cancelled: RosterAssignment[] = []
-          // Sequential on purpose: a transaction session does not allow parallel operations.
-          for (const item of items) {
-            const current = await this.findOne(item.id)
-            if (!current || current.tenant_id !== tenantId) {
-              throw this.notFound(item.id, operation)
-            }
-            cancelled.push(
-              await this.update(item.id, {
-                status: 'cancelled',
-                cancellation: { kind: 'leave', ref_id: leaveRequestId },
-                change_reason: 'leave',
-                revision: item.revision,
-              }),
-            )
-          }
-          return cancelled
-        }),
-      )
-    } catch (error: unknown) {
-      throw translateMongoError(error, operation)
-    }
-  }
-
-  /**
    * Finds the planned assignments of an employee dated after a date.
    *
    * @param tenantId - Tenant to search in.
@@ -419,6 +374,98 @@ export class RosterAssignmentRepositoryMongo
         .lean<LeanRecord<RosterAssignmentEntity>[]>()
         .exec()
       return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
+   * Cancels assignments because an approved leave takes their days.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param leaveRequestId - The leave request.
+   * @returns The cancelled assignments, in the order given.
+   */
+  cancelForLeave(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    leaveRequestId: string,
+  ): Promise<RosterAssignment[]> {
+    return this.cancelAll(
+      'RosterAssignmentRepository.cancelForLeave',
+      'leave',
+      tenantId,
+      items,
+      leaveRequestId,
+    )
+  }
+
+  /**
+   * Cancels assignments because a separation closes the days after the last working day.
+   *
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param separationId - The separation.
+   * @returns The cancelled assignments, in the order given.
+   */
+  cancelForSeparation(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    separationId: string,
+  ): Promise<RosterAssignment[]> {
+    return this.cancelAll(
+      'RosterAssignmentRepository.cancelForSeparation',
+      'separation',
+      tenantId,
+      items,
+      separationId,
+    )
+  }
+
+  /**
+   * Cancels assignments one by one inside one transaction, with one change record each.
+   *
+   * @param operation - Operation name for errors.
+   * @param kind - What cancels them; also the change reason.
+   * @param tenantId - Tenant of the caller.
+   * @param items - The assignments and the revision each carries.
+   * @param refId - The leave request or separation.
+   * @returns The cancelled assignments, in the order given.
+   */
+  private async cancelAll(
+    operation: string,
+    kind: 'leave' | 'separation',
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    refId: string,
+  ): Promise<RosterAssignment[]> {
+    this.requireActor(operation)
+    if (items.length === 0) {
+      return []
+    }
+    try {
+      return await this.transactions.run(() =>
+        withChangeReason(kind, async () => {
+          const cancelled: RosterAssignment[] = []
+          // Sequential on purpose: a transaction session does not allow parallel operations.
+          for (const item of items) {
+            const current = await this.findOne(item.id)
+            if (!current || current.tenant_id !== tenantId) {
+              throw this.notFound(item.id, operation)
+            }
+            cancelled.push(
+              await this.update(item.id, {
+                status: 'cancelled',
+                cancellation: { kind, ref_id: refId },
+                change_reason: kind,
+                revision: item.revision,
+              }),
+            )
+          }
+          return cancelled
+        }),
+      )
     } catch (error: unknown) {
       throw translateMongoError(error, operation)
     }

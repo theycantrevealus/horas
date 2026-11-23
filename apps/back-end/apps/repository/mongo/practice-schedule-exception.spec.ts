@@ -174,6 +174,18 @@ describe('PracticeScheduleExceptionRepository on the shared Mongo base', () => {
     expect((await exceptions.findOne(exceptionId.toHexString()))?.reason).toBeNull()
   })
 
+  it('finds the exceptions of a doctor that move a session after a date, and nothing for malformed identifiers', async () => {
+    const tenant = tenantId.toHexString()
+
+    await exceptions.findMovedAfterByEmployee(tenant, employeeId.toHexString(), '2026-12-31')
+
+    expect(model.find).toHaveBeenCalledWith({ tenant_id: tenant, employee_id: employeeId.toHexString(), kind: 'moved', 'moved_to.date': { $gt: '2026-12-31' }, deleted_at: null })
+    model.find.mockClear()
+    expect(await exceptions.findMovedAfterByEmployee('x', employeeId.toHexString(), 'd')).toEqual([])
+    expect(await exceptions.findMovedAfterByEmployee(tenant, 'bad', 'd')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('finds the exceptions a leave made, and nothing for malformed ids', async () => {
     const tenant = tenantId.toHexString()
     const leave = new Types.ObjectId().toHexString()
