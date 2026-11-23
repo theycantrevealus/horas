@@ -346,3 +346,54 @@ Adds the effects of the final approval and of cancelling (HR spec 9.4.4.3 to 9.4
 | `GET /leave-requests/:id/cover` | The cover proposal: each cancelled shift and whether the replacement can take it. |
 | `POST /leave-requests/:id/cover` | The Head confirms the shifts given to the replacement. |
 | `POST /leave-requests/:id/end-early` | HR Admin moves the last date when the employee returns early. |
+
+## 9. Separation
+
+Business source: HR spec 9.10 (agreed 2026-11-23). Collections: `human-resource-collections.md` section 10 (draft). Plan: `plans/gateway-hr-9-separation.md` (planned).
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /employees/:id/separations` | HR Admin records a separation: type, last working day, notice date, reason; immediate for a dismissal or death. |
+| `GET /separations` | List by status, type, unit, facility and last working day. |
+| `GET /separations/:id` | One separation with its checklist and settlement (no reason). |
+| `GET /separations/:id/details` | The reason (highly confidential, recorded). |
+| `GET /separations/:id/impact` | What completion will close: shifts, sessions, leave, SPKs and grants, committee seats, assignments, the contract (counts and identifiers). |
+| `PATCH /separations/:id` | Change the last working day, the type, the notice date or the reason while planned. |
+| `POST /separations/:id/cancel` | Cancel a planned separation with a reason. |
+| `POST /separations/:id/complete` | HR Manager completes an immediate separation now. |
+| `PUT /separations/:id/checklist/:item` | Mark an exit checklist item done or not done. |
+
+## 10. Attendance
+
+Business source: HR spec 9.3 (agreed 2026-11-23). Collections: `human-resource-collections.md` section 11 (draft). Plan: `plans/gateway-hr-10-attendance.md` (planned). Three sub-groups, built in this order.
+
+### 10.1 Devices, enrolments and clock events
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /attendance-devices`, `POST /attendance-devices`, `PATCH /attendance-devices/:id`, `POST /attendance-devices/:id/retire` | Manage the clocks of a facility. |
+| `GET /attendance-enrolments`, `POST /attendance-enrolments`, `POST /attendance-enrolments/:id/end` | Link employees to the user numbers of a facility. |
+| `POST /attendance/events` | The device gateway sends clock events in batches (up to 500), idempotent per device event. |
+| `POST /attendance/imports` | CSV of clock events: check, then apply (as 5.6). |
+| `GET /attendance/unmatched-events`, `POST /attendance/unmatched-events/:id/resolve` | HR Admin assigns an unmatched event to an employee. |
+
+### 10.2 Records
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /attendance-records` | By unit, date range, employee, status and flag. |
+| `GET /attendance-records/:id` | One record with its events. |
+| `GET /employees/me/attendance` | Self-service: my records and events in a range. |
+| `POST /attendance-records/:id/overtime` | The Head approves overtime minutes. |
+
+### 10.3 Corrections and roster close
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /employees/me/attendance-corrections` | Self-service: ask to fix one of my records. |
+| `POST /attendance-corrections` | The Head corrects on an employee's behalf (decided at once). |
+| `GET /attendance-corrections` | Queue by unit and status; `waitingForMe`. |
+| `POST /attendance-corrections/:id/approve`, `.../reject`, `.../cancel` | The Head decides; the requester cancels. |
+
+Changed: `POST /rosters/:id/close` answers 422 `attendance_not_reconciled` while a record of the period is `open` or a correction or overtime decision is pending (HR-ATT-013).
+
