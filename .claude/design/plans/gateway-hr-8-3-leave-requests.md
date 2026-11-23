@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-Status: **Planned** (2026-11-18). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 29), after 8.2. **Released together with 8.4**: without 8.4 an approved leave leaves the person planned to work. Endpoints: `../hr-endpoints.md` 8.3. Collections: `../human-resource-collections.md` 9.3, 9.4. Business rules: HR spec 9.4.3, 9.4.4.1, 9.4.4.2, 9.4.4.4 (balance part), 9.4.4.6 (dates), 9.4.4.7, 9.4.6, `HR-LEV-001` to `HR-LEV-012`, `HR-LEV-040`, `HR-LEV-041`. Built references: shift swaps (5.7: personal routes, decider checks, `decider_is_party`), credential assessments (4.2: highly confidential reads with `recordAccess`), positions (1.5: `findActiveHead`).
+Status: **Built** (2026-11-20, PR #127 and #128 merged; as-built notes in section 7). Part of `2026-11-10-gateway-hr-plan.md` (walkthrough order 29), after 8.2. **Released together with 8.4**: without 8.4 an approved leave leaves the person planned to work. Endpoints: `../hr-endpoints.md` 8.3. Collections: `../human-resource-collections.md` 9.3, 9.4. Business rules: HR spec 9.4.3, 9.4.4.1, 9.4.4.2, 9.4.4.4 (balance part), 9.4.4.6 (dates), 9.4.4.7, 9.4.6, `HR-LEV-001` to `HR-LEV-012`, `HR-LEV-040`, `HR-LEV-041`. Built references: shift swaps (5.7: personal routes, decider checks, `decider_is_party`), credential assessments (4.2: highly confidential reads with `recordAccess`), positions (1.5: `findActiveHead`).
 
 **Goal:** an employee requests leave, the right Head decides (and HR Manager for two-step types), and the balance follows every move.
 
@@ -151,3 +151,15 @@ apps/back-end/apps/
 - [ ] **Step 1: Write the failing spec:** sick to annual posts a reversal of nothing (`none` type) and a use of the annual days; annual to unpaid reverses the annual uses; `insufficient_balance` writes nothing; only `approved`; a `calendar_days` target recounts; `leave_type_change` logs no type.
 - [ ] **Step 2: Run** — FAIL. **Step 3: Implement.** **Step 4: Run** the full checks — PASS.
 - [ ] **Step 5: Commit** `feat(workforce): change the type of an approved leave`.
+
+## 7. As built
+
+- Built in two code PRs as planned: **#127** (Tasks 1 to 3: repositories, day count and deciders, preview, create, lists, read, details, proof, pending days) and **#128** (Tasks 4 and 5: the Head's day correction, approve, reject, cancel, change type, `policy_in_use`). Rules as built: `workforce.md` 3t.
+- **Guard extension (not in the plan).** The routes need either a role-dependent answer or no permission, so an empty `@RequirePermissions()` now means "any signed-in caller, with permissions loaded for `@CurrentPermissions()`" (`PermissionsGuard`, `authentication.md` 2). The controller builds a `LeaveCaller` from the account and its permissions; the services take it and never import identity types.
+- **Moved to #127.** LR13 (pending days in balances) was built with the requests, as `LeaveBalanceService.summary(..., excludeRequestId)`, so the reservation exists from the first request.
+- **Names.** `LeaveDeciderService` (`chooseFirst`, `resolve`, `headedUnits`), `decidesFirstStep` and `isRequester` in `leave-access.ts`, `checkPeriod` and `checkRequestDates` and `maxDaysOf` in `leave-request-rules.ts`, `heldDays`, `postUses` and `reverseUses` in `leave-posting.ts`. The `LeaveEffects` port is `LEAVE_EFFECTS` in `leave-effects.ts`.
+- **Departures.** Cancel is in `LeaveDecisionService`, not `LeaveRequestService` (that class already has 15 dependencies). `LeavePolicyService` takes the request repository (LR14). `LeaveRequestService.checkEmploymentType` and `checkEntitlement` are public, for the type change. The first decider's `employee_id` is never stored. The preview answers 201. The day count reads rosters in any status but `closed` (the plan said draft or published). The last approval answers the request as stored, with its `cover`. `half_days` became updatable in 8.4 (ending early).
+- **Extra codes.** `replacement_not_allowed`, `invalid_count`, `invalid_days`, `date_outside_period`, `duplicate_date`, `same_type`.
+- **Not built.** The alerts and `LEAVE_DECISION_SLA_DAYS` (no notification service), the "leave taken" report, proration (Q13), the effect of separation or suspension on leave, the own-unit limit for a Head (scoped permissions).
+- **Known limits.** Overlap and balance checks read then write. A reversal goes back to the bucket the days came from, so a carry-over that expired meanwhile receives them in a lapsed bucket.
+- Not tested: the repositories and transactions against a real MongoDB replica set (fakes and mocked models only).

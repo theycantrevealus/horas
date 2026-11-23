@@ -5,7 +5,7 @@ Status: **Approved** (2026-11-07). Models: `apps/back-end/apps/repository/model/
 - the refinements to the core collections found while planning slice 1 (section 2);
 - the collections of the three fully specified sub-processes: licences (section 3), credentialing (section 4) and rostering (section 5);
 - the configurable parameters (section 6);
-- the collections of leave management (section 9, **draft for review**, 2026-11-18), detailed in HR spec 9.4 after this document was approved.
+- the collections of leave management (section 9, **built** 2026-11-20, agreed 2026-11-18), detailed in HR spec 9.4 after this document was approved.
 
 The outline sub-processes (HR spec 9.1, 9.3 and 9.5 to 9.10: recruitment, attendance, training, performance, payroll, occupational health, discipline, separation details) get collections only after the spec details them.
 
@@ -502,7 +502,7 @@ None from this document. The HR specification's own open questions (section 16) 
 
 ## 9. Leave management (HR spec 9.4)
 
-Status: `leave_policies` (9.2) and `leave_ledger_entries` (9.5), the jobs (9.7) and `LEAVE_GRANT_LEAD_DAYS` (9.8) are **built** (2026-11-19, PR #123, #124 and #125, as-built notes in sections 9.2, 9.5, 9.7, 9.8 and 9.10). `leave_requests`, `leave_request_details` and the refinements of the rostering collections (9.3, 9.4, 9.6) are still **draft for review**. Business source: HR spec 9.4 (rules `HR-LEV-*`). Build order: `hr-endpoints.md` group 8 (8.1 to 8.4; the plan number 7 is the worker jobs).
+Status: `leave_policies` (9.2) and `leave_ledger_entries` (9.5), the jobs (9.7) and `LEAVE_GRANT_LEAD_DAYS` (9.8) are **built** (2026-11-19, PR #123, #124 and #125, as-built notes in sections 9.2, 9.5, 9.7, 9.8 and 9.10). `leave_requests`, `leave_request_details` and the refinements of the rostering collections (9.3, 9.4, 9.6) and `LEAVE_WORKING_WEEK` are **built** too (2026-11-20, PR #127 to #130; the rules as built are in `workforce.md` 3t). Business source: HR spec 9.4 (rules `HR-LEV-*`). Build order: `hr-endpoints.md` group 8 (8.1 to 8.4; the plan number 7 is the worker jobs).
 
 ### 9.1 Leave types as concepts
 
@@ -543,7 +543,7 @@ Index: `{ tenant_id, 'leave_type.system', 'leave_type.code', effective_from }` u
 | `days` | `{ date: string; count: 0 \| 0.5 \| 1; why: 'working' \| 'rest_day' \| 'holiday' \| 'collective_leave' \| 'calendar_day'; set_by: 'roster' \| 'working_week' \| 'head' \| 'policy' }[]` | Day breakdown (HR spec 9.4.6), at most `max_days_per_request` calendar days, so bounded. Fixed at final approval. |
 | `total_days` | number | Sum of `days`. |
 | `entitlement_period` | `{ start: string; end: string } \| null` | The period the days are charged to; null for `none` and `per_event`. |
-| `deciders` | `{ first: { kind: 'unit_head' \| 'parent_head' \| 'hr_manager'; unit_id: ObjectId \| null; employee_id: ObjectId \| null }; second: boolean }` | The kind and unit are chosen at request time (HR spec 9.4.4.2 step 1); `employee_id` is the Head found when the first step is decided. `second` true for two-step requests. |
+| `deciders` | `{ first: { kind: 'unit_head' \| 'parent_head' \| 'hr_manager'; unit_id: ObjectId \| null; employee_id: ObjectId \| null }; second: boolean }` | The kind and unit are chosen at request time (HR spec 9.4.4.2 step 1); `employee_id` is the Head found when the first step is decided. `second` true for two-step requests. | **As built:** `employee_id` is never stored (always null); the current Head of the stored unit is found at each decision.
 | `replacement` | `{ employee_id: ObjectId \| null; none_reason: string \| null } \| null` | Set at the first-step approval (`HR-LEV-012`). |
 | `decisions` | `{ step: 'first' \| 'second'; outcome: 'approved' \| 'rejected'; by: ActorRef; at: Date; reason: string \| null }[]` | At most two. A rejection reason is shown to the requester. |
 | `status` | `'requested' \| 'head_approved' \| 'approved' \| 'rejected' \| 'cancelled'` | HR spec 9.4.3. |
@@ -560,8 +560,9 @@ Indexes:
 | `{ tenant_id, 'deciders.first.unit_id', status }` | The Head's queue. |
 | `{ tenant_id, status, created_at }` | HR Manager's queue (`head_approved`) and the decision SLA alert. |
 | `{ tenant_id, status, proof_due_on }` partial `proof_received: false` | Proof overdue (HR spec 9.4.4.7). |
+| `{ tenant_id, policy_id }` (added as built) | Whether a request was made under a policy version (`policy_in_use`, 8.3 LR14). |
 
-Ending early and changing the type are updates of `period`, `days`, `total_days` and `leave_type`; the change history keeps the old values and the reason. Requests are never deleted (`HR-LEV-040`).
+Ending early and changing the type are updates of `period`, `half_days`, `days`, `total_days`, `leave_type`, `policy_id`, `rules` and `entitlement_period`; the change history keeps the old values and the reason. Requests are never deleted (`HR-LEV-040`).
 
 ### 9.4 `leave_request_details`
 
@@ -592,17 +593,19 @@ The balance as a ledger (HR spec 9.4.2). Entries are only created, never updated
 | `source` | `{ kind: 'request' \| 'job' \| 'adjustment' \| 'collective_leave'; ref_id: ObjectId \| null; date: string \| null }` | `request` with the request id; `collective_leave` with the date taken. |
 | `dedupe_key` | string \| null | Makes the jobs idempotent: `grant:<period start>`, `carry_over:<period start>`, `expiry:<period end>`, `collective:<date>`, prefixed by employee and type. Null for request and adjustment entries. |
 
-Indexes: `{ tenant_id, employee_id, 'leave_type.code', 'period.start' }` (balance); `{ tenant_id, dedupe_key }` unique, partial `dedupe_key` set; and, for the leave period job, which reads across tenants, `{ kind, 'period.end' }` and `{ kind, expires_on }`. The reason of an adjustment is in the change history (`withChangeReason`). As built the repository has no update, delete or soft delete (`append` is the only write), and the model's classification is `confidential` with `employee_id` and `dedupe_key` `internal`.
+Indexes: `{ tenant_id, employee_id, 'leave_type.code', 'period.start' }` (balance); `{ tenant_id, 'source.ref_id' }` partial `source.kind: 'request'` (the entries a request posted, read to reverse them, added as built with 8.3); `{ tenant_id, dedupe_key }` unique, partial `dedupe_key` set; and, for the leave period job, which reads across tenants, `{ kind, 'period.end' }` and `{ kind, expires_on }`. The reason of an adjustment is in the change history (`withChangeReason`). As built the repository has no update, delete or soft delete (`append` is the only write), and the model's classification is `confidential` with `employee_id` and `dedupe_key` `internal`.
 
 The balance is computed on read: the sum of the entries of a period, minus the `total_days` of the employee's `requested` and `head_approved` requests of that type and period (available days). No running total is stored, so it cannot drift.
 
-### 9.6 Refinements to the rostering collections
+### 9.6 Refinements to the rostering collections (built, PR #129 and #130)
 
 | Collection | Change | Reason |
 |---|---|---|
 | `roster_assignments` | `source.kind` adds `'leave_cover'` with `ref_id` the leave request. Add `cancellation: { kind: 'leave'; ref_id: ObjectId } \| null`, set when a leave approval cancels the assignment. | HR spec 9.4.4.3; the roster shows "leave" and nothing more (`HR-LEV-041`). |
 | `practice_schedule_exceptions` | `reason` becomes `Coding \| null`: null when `source.kind` is `leave` (the source says why, and no tenant code is needed). | Leave exceptions are created by the system (`HR-LEV-021`). |
-| `rosters` | A leave approval clears `validation` of a `submitted` or `approved` roster it changes. | `HR-LEV-020`: the roster is validated again before publication. |
+| `rosters` | A leave approval clears `validation` of a `submitted` or `approved` roster it changes. | `HR-LEV-020`: the roster is validated again before publication (`validation_required` on publish). |
+
+As built: a `published` roster also takes one new `revision` per approval and per cover confirmation; `RosterAssignmentRepository.cancelForLeave` is a named write (one change record per assignment, reason `leave`); the exception index `{ tenant_id, 'source.ref_id' }` partial `source.kind: 'leave'` serves `findByLeave`; stored assignments without `cancellation` map to null.
 
 ### 9.7 Jobs
 
@@ -616,7 +619,7 @@ Three worker jobs join the HR jobs (**built**, PR #125; the rules as built are i
 
 ### 9.8 Parameters
 
-`LEAVE_GRANT_LEAD_DAYS` is **built**: tenant scope, integer 0 to 180, default 60. `LEAVE_WORKING_WEEK` (ISO weekday list, facility scope, default `[1,2,3,4,5]`) and `LEAVE_DECISION_SLA_DAYS` (3) join the parameter catalog (section 6) with 8.3.
+`LEAVE_GRANT_LEAD_DAYS` is **built**: tenant scope, integer 0 to 180, default 60. `LEAVE_WORKING_WEEK` is **built** (a `weekday_list` value: ISO weekdays 1 to 7, no repeats, tenant, organization and facility scope, default `[1,2,3,4,5]`). `LEAVE_DECISION_SLA_DAYS` (3) is **not built**: it waits for the notification service.
 
 ### 9.9 Decisions (2026-11-18)
 
