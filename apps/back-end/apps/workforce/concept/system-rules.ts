@@ -39,6 +39,14 @@ export const SYSTEM_RULES: Readonly<Record<string, readonly PropertyRule[]>> = {
     { name: 'max_locations_parameter', kind: 'text_or_null', required: false },
   ],
   'unit-type': [{ name: 'clinical_default', kind: 'boolean', required: true }],
+  'separation-type': [
+    {
+      name: 'contract_action',
+      kind: 'text',
+      values: ['end', 'terminate'],
+      required: true,
+    },
+  ],
   profession: [{ name: 'workforce_category', kind: 'text', required: true }],
 }
 

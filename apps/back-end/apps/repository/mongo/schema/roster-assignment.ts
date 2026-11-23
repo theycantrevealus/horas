@@ -91,8 +91,8 @@ export const AssignmentSourceSchema = SchemaFactory.createForClass(
  */
 @Schema({ _id: false })
 export class AssignmentCancellationEntity {
-  @Prop({ type: SchemaTypes.String, enum: ['leave'], required: true })
-  kind!: 'leave'
+  @Prop({ type: SchemaTypes.String, enum: ['leave', 'separation'], required: true })
+  kind!: 'leave' | 'separation'
 
   @Prop({ type: SchemaTypes.ObjectId, required: true })
   ref_id!: Types.ObjectId

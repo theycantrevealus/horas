@@ -217,6 +217,42 @@ export class PracticeScheduleRepositoryMongo
   }
 
   /**
+   * Finds the schedules of a doctor whose validity runs past a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param date - The last day that is kept.
+   * @returns The schedules.
+   */
+  async findByEmployeeRunningAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<PracticeSchedule[]> {
+    const operation = 'PracticeScheduleRepository.findByEmployeeRunningAfter'
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            employee_id: employeeId,
+            $or: [{ 'period.end': null }, { 'period.end': { $gt: date } }],
+            deleted_at: null,
+          }),
+        )
+        .sort({ day_of_week: 1, start_time: 1, _id: 1 })
+        .lean<LeanRecord<PracticeScheduleEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

@@ -43,8 +43,8 @@ export const MovedSessionSchema = SchemaFactory.createForClass(MovedSessionEntit
  */
 @Schema({ _id: false })
 export class ExceptionSourceEntity {
-  @Prop({ type: SchemaTypes.String, enum: ['manual', 'leave', 'training'], required: true })
-  kind!: 'manual' | 'leave' | 'training'
+  @Prop({ type: SchemaTypes.String, enum: ['manual', 'leave', 'training', 'separation'], required: true })
+  kind!: 'manual' | 'leave' | 'training' | 'separation'
 
   @Prop({ type: SchemaTypes.ObjectId, default: null })
   ref_id!: Types.ObjectId | null

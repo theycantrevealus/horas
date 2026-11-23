@@ -14,7 +14,9 @@ import {
   InMemoryRosters,
   InMemoryShiftSwapRequests,
   InMemoryLeaveRequests,
+  InMemorySeparations,
 } from '../testing/in-memory'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { LeaveCalendar } from '../leave/leave-calendar'
 import { SwapService } from './swap.service'
 
@@ -33,6 +35,7 @@ describe('SwapService', () => {
   let facilities: InMemoryFacilities
   let employees: InMemoryEmployees
   let service: SwapService
+  let separations: InMemorySeparations
   let leaveRequests: InMemoryLeaveRequests
   let limits: Record<string, number>
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
@@ -220,6 +223,20 @@ describe('SwapService', () => {
     )
   }
 
+  /**
+   * Stores a separation of an employee.
+   *
+   * @param employeeId - The employee.
+   * @param lastDay - The last working day.
+   * @param status - Separation status.
+   * @returns The separation.
+   */
+  function leaving(employeeId: string, lastDay: string, status: 'planned' | 'completed' | 'cancelled' = 'planned') {
+    return asUser(() =>
+      separations.create({ tenant_id: tenantId, employee_id: employeeId, last_working_day: lastDay, status } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     limits = { MIN_REST_HOURS: 8, MAX_WEEKLY_HOURS: 40, MAX_OVERTIME_HOURS_WEEK: 18, MAX_CONSECUTIVE_NIGHTS: 3 }
@@ -234,7 +251,8 @@ describe('SwapService', () => {
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
     leaveRequests = new InMemoryLeaveRequests()
-    service = new SwapService(swaps, assignments, rosters, units, facilities, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), logger)
+    separations = new InMemorySeparations()
+    service = new SwapService(swaps, assignments, rosters, units, facilities, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), new SeparationCalendar(separations), logger)
     facilityId = (
       await asUser(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -389,6 +407,20 @@ describe('SwapService', () => {
       expect(await rejection(() => ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id }))).toMatchObject({ code: 'on_leave' })
       expect(await rejection(() => ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id, counterpartAssignmentId: theirs.id }))).toMatchObject({ code: 'on_leave' })
       expect(await swaps.findByFilter(tenantId)).toEqual([])
+    })
+
+    it('refuses a result that puts either person after their last working day, and allows the last day itself', async () => {
+      const mine = await addAssignment(siti, '2099-03-10')
+      await leaving(budi.id, '2099-03-09')
+
+      expect(await rejection(() => ask(siti, { assignmentId: mine.id, counterpartEmployeeId: budi.id }))).toMatchObject({ code: 'employee_leaving' })
+      const other = await addEmployee('E007')
+      const otherShift = await addAssignment(other, '2099-03-11')
+      await leaving(other.id, '2099-03-11')
+      await leaving(siti.id, '2099-03-10')
+
+      expect(await rejection(() => ask(siti, { assignmentId: mine.id, counterpartEmployeeId: other.id, counterpartAssignmentId: otherShift.id }))).toMatchObject({ code: 'employee_leaving' })
+      expect((await ask(siti, { assignmentId: mine.id, counterpartEmployeeId: other.id })).status).toBe('requested')
     })
 
     it('refuses a counterpart who is not clinically eligible for a clinical unit', async () => {

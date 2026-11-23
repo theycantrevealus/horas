@@ -69,4 +69,16 @@ export interface CommitteeMembershipRepository extends Repository<CommitteeMembe
     committeeCode: string,
     roleCode: string,
   ): Promise<CommitteeMembership | null>
+
+  /**
+   * Finds every active membership of an employee, in any committee and facility.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The memberships, possibly none; empty for a malformed identifier.
+   */
+  findActiveByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<CommitteeMembership[]>
 }

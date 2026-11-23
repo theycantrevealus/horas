@@ -98,4 +98,19 @@ export interface PracticeScheduleRepository extends Repository<PracticeSchedule>
     start: string,
     end: string,
   ): Promise<PracticeSchedule[]>
+
+  /**
+   * Finds the schedules of a doctor whose validity runs past a date, active or ended: no end date,
+   * or an end after it (what a separation ends on the last working day).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param date - The last day that is kept.
+   * @returns The schedules, possibly none; empty for a malformed identifier.
+   */
+  findByEmployeeRunningAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<PracticeSchedule[]>
 }

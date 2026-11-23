@@ -10,7 +10,9 @@ import {
   InMemoryOrganizationUnits,
   InMemoryPracticeScheduleExceptions,
   InMemoryPracticeSchedules,
+  InMemorySeparations,
 } from '../testing/in-memory'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { PracticeScheduleService } from './practice-schedule.service'
 
 describe('PracticeScheduleService', () => {
@@ -28,6 +30,7 @@ describe('PracticeScheduleService', () => {
   let facilities: InMemoryFacilities
   let employees: InMemoryEmployees
   let service: PracticeScheduleService
+  let separations: InMemorySeparations
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
   let facilityId: string
   let unitId: string
@@ -133,6 +136,20 @@ describe('PracticeScheduleService', () => {
     return asHead(() => service.create(tenantId, { employeeId: doctor.id, unitId, ...valid, ...override }))
   }
 
+  /**
+   * Stores a separation of an employee.
+   *
+   * @param employeeId - The employee.
+   * @param lastDay - The last working day.
+   * @param status - Separation status.
+   * @returns The separation.
+   */
+  function leaving(employeeId: string, lastDay: string, status: 'planned' | 'completed' | 'cancelled' = 'planned') {
+    return asHead(() =>
+      separations.create({ tenant_id: tenantId, employee_id: employeeId, last_working_day: lastDay, status } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     eligible = { value: { eligible: true } }
@@ -143,7 +160,8 @@ describe('PracticeScheduleService', () => {
     facilities = new InMemoryFacilities()
     employees = new InMemoryEmployees()
     const logger = { log, warn, error, debug } as unknown as AppLogger
-    service = new PracticeScheduleService(schedules, exceptions, units, facilities, employees, { general } as unknown as EligibilityService, logger)
+    separations = new InMemorySeparations()
+    service = new PracticeScheduleService(schedules, exceptions, units, facilities, employees, { general } as unknown as EligibilityService, new SeparationCalendar(separations), logger)
     facilityId = (
       await asHead(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -163,6 +181,15 @@ describe('PracticeScheduleService', () => {
       for (const text of [doctor.id, '08:00', '2099-03-01']) {
         expect(JSON.stringify([log.mock.calls, warn.mock.calls])).not.toContain(text)
       }
+    })
+
+    it('refuses a schedule that starts after the last working day of a doctor who is leaving, and accepts one that runs past it', async () => {
+      await leaving(doctor.id, '2099-02-28')
+      expect(await rejection(() => add())).toMatchObject({ kind: 'invalid', code: 'employee_leaving' })
+      const other = await addEmployee('D002')
+      await leaving(other.id, '2099-03-15')
+
+      expect((await asHead(() => service.create(tenantId, { employeeId: other.id, unitId, ...valid }))).employee_id).toBe(other.id)
     })
 
     it('stores the quota and the end of the validity', async () => {

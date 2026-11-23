@@ -35,6 +35,7 @@ import {
 import { addDays } from '../assignment/assignment-rules'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { systemSuffix } from '../concept/system-rules'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import { ParameterService } from '../parameter/parameter.service'
 import {
@@ -225,6 +226,7 @@ export class LeaveRequestService {
     @Inject(ParameterService) private readonly parameters: ParameterService,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -550,6 +552,7 @@ export class LeaveRequestService {
         'Only an employee on probation or active can request leave.',
       )
     }
+    await this.separation.assertCanPlan(tenantId, requesterId, input.end)
     if (systemSuffix(input.leaveType.system) !== 'leave-type') {
       throw new InvalidRequestError(
         'invalid_leave_type',

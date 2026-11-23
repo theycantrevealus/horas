@@ -122,6 +122,40 @@ export class CommitteeMembershipRepositoryMongo
   }
 
   /**
+   * Finds every active membership of an employee.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The memberships.
+   */
+  async findActiveByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<CommitteeMembership[]> {
+    const operation = 'CommitteeMembershipRepository.findActiveByEmployee'
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            employee_id: employeeId,
+            status: 'active',
+            deleted_at: null,
+          }),
+        )
+        .sort({ _id: 1 })
+        .lean<LeanRecord<CommitteeMembershipEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds the active membership with a given role in one committee of a facility.
    *
    * @param tenantId - Tenant to search in.

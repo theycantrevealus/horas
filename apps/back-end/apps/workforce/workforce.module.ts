@@ -13,6 +13,8 @@ import { LeaveLedgerRepositoryModule } from '@repository/mongo/leave-ledger.modu
 import { LeavePolicyRepositoryModule } from '@repository/mongo/leave-policy.module'
 import { LeaveRequestDetailRepositoryModule } from '@repository/mongo/leave-request-detail.module'
 import { LeaveRequestRepositoryModule } from '@repository/mongo/leave-request.module'
+import { SeparationDetailRepositoryModule } from '@repository/mongo/separation-detail.module'
+import { SeparationRepositoryModule } from '@repository/mongo/separation.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
 import { PracticeScheduleRepositoryModule } from '@repository/mongo/practice-schedule.module'
 import { PracticeScheduleExceptionRepositoryModule } from '@repository/mongo/practice-schedule-exception.module'
@@ -57,6 +59,9 @@ import { LeavePlaceService } from './leave/leave-place'
 import { LeavePolicyService } from './leave/leave-policy.service'
 import { LeaveRequestService } from './leave/leave-request.service'
 import { LeaveTypeChangeService } from './leave/leave-type-change.service'
+import { SeparationCalendar } from './separation/separation-calendar'
+import { SeparationImpactService } from './separation/separation-impact.service'
+import { SeparationService } from './separation/separation.service'
 import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
 import { PracticeExceptionService } from './rostering/practice-exception.service'
@@ -124,6 +129,8 @@ import { UnitService } from './structure/unit.service'
     LeaveLedgerRepositoryModule,
     LeaveRequestRepositoryModule,
     LeaveRequestDetailRepositoryModule,
+    SeparationRepositoryModule,
+    SeparationDetailRepositoryModule,
   ],
   providers: [
     OrganizationService,
@@ -174,6 +181,9 @@ import { UnitService } from './structure/unit.service'
     LeaveDetailService,
     LeaveDecisionService,
     LeaveTypeChangeService,
+    SeparationService,
+    SeparationImpactService,
+    SeparationCalendar,
     { provide: LEAVE_EFFECTS, useClass: RosterLeaveEffects },
   ],
   exports: [
@@ -225,6 +235,9 @@ import { UnitService } from './structure/unit.service'
     LeaveDetailService,
     LeaveDecisionService,
     LeaveTypeChangeService,
+    SeparationService,
+    SeparationImpactService,
+    SeparationCalendar,
   ],
 })
 export class WorkforceModule {}

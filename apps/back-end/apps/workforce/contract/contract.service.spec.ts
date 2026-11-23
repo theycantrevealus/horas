@@ -8,7 +8,9 @@ import {
   InMemoryEmployees,
   InMemoryEmploymentContracts,
   InMemoryOrganizations,
+  InMemorySeparations,
 } from '../testing/in-memory'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import {
   ContractService,
   type CreateContractInput,
@@ -36,6 +38,7 @@ describe('ContractService', () => {
   let organizations: InMemoryOrganizations
   let concepts: InMemoryCodeConcepts
   let service: ContractService
+  let separations: InMemorySeparations
   let eventOutbox: InMemoryEventOutbox
   let transactionDepth = 0
   const depthAtAppend: number[] = []
@@ -202,6 +205,20 @@ describe('ContractService', () => {
     return asAdmin(() => service.activate(tenantId, draft.id, {}))
   }
 
+  /**
+   * Stores a separation of an employee.
+   *
+   * @param employeeId - The employee.
+   * @param lastDay - The last working day.
+   * @param status - Separation status.
+   * @returns The separation.
+   */
+  function leaving(employeeId: string, lastDay: string, status: 'planned' | 'completed' | 'cancelled' = 'planned') {
+    return asAdmin(() =>
+      separations.create({ tenant_id: tenantId, employee_id: employeeId, last_working_day: lastDay, status } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     run.mockImplementation(runWork)
@@ -219,6 +236,7 @@ describe('ContractService', () => {
       depthAtAppend.push(transactionDepth)
       return append(event)
     }
+    separations = new InMemorySeparations()
     service = new ContractService(
       contracts,
       employees,
@@ -226,6 +244,7 @@ describe('ContractService', () => {
       new CodeConceptService(concepts, logger),
       { run } as never,
       eventOutbox,
+      new SeparationCalendar(separations),
       logger,
     )
     await addConcept('id.employment-type', 'pkwtt', {
@@ -247,6 +266,21 @@ describe('ContractService', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+  })
+
+  describe('a leaving employee', () => {
+    it('cannot activate a contract that runs past the last working day, but can activate one that ends on it (HR-SEP-003)', async () => {
+      await leaving(employeeId, '2026-12-31')
+      const open = await create()
+      const past = await create({ contractNumber: 'pkwt/9', period: { start: '2026-01-05', end: '2027-01-31' } })
+      const fits = await create({ contractNumber: 'pkwt/10', period: { start: '2026-01-05', end: '2026-12-31' } })
+
+      for (const draft of [open, past]) {
+        const thrown = await asAdmin(() => service.activate(tenantId, draft.id, {})).catch((error: unknown) => error)
+        expect((thrown as { code: string }).code).toBe('employee_leaving')
+      }
+      expect((await asAdmin(() => service.activate(tenantId, fits.id, {}))).status).toBe('active')
+    })
   })
 
   describe('create', () => {

@@ -46,6 +46,6 @@ export class PracticeScheduleException extends Timestamp implements Entity {
   kind!: 'cancelled' | 'moved'
   moved_to!: MovedSession | null
   reason!: Coding | null
-  source!: { kind: 'manual' | 'leave' | 'training'; ref_id: string | null }
+  source!: { kind: 'manual' | 'leave' | 'training' | 'separation'; ref_id: string | null }
   created_by!: ActorRef
 }

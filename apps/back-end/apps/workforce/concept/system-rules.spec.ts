@@ -120,3 +120,13 @@ describe('satisfiesSystemRules', () => {
     expect(satisfiesSystemRules('id.unit-type', {})).toBe(false)
   })
 })
+
+describe('separation types', () => {
+  it('need a contract action of end or terminate', () => {
+    expect(satisfiesSystemRules('id.separation-type', { contract_action: 'end' })).toBe(true)
+    expect(satisfiesSystemRules('us.separation-type', { contract_action: 'terminate' })).toBe(true)
+    expect(satisfiesSystemRules('id.separation-type', {})).toBe(false)
+    expect(satisfiesSystemRules('id.separation-type', { contract_action: 'fire' })).toBe(false)
+  })
+})
+

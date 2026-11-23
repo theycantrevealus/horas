@@ -204,6 +204,31 @@ export class LeaveRequestRepositoryMongo
   }
 
   /**
+   * Finds the open requests of an employee whose period ends after a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The last day that is kept.
+   * @returns The requests.
+   */
+  async findOpenByEmployeeEndingAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<LeaveRequest[]> {
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    return this.run('findOpenByEmployeeEndingAfter', {
+      tenant_id: tenantId,
+      employee_id: employeeId,
+      status: { $in: ['requested', 'head_approved', 'approved'] },
+      'period.end': { $gt: date },
+      deleted_at: null,
+    })
+  }
+
+  /**
    * Finds the approved requests of an employee whose period holds a date.
    *
    * @param tenantId - Tenant to search in.

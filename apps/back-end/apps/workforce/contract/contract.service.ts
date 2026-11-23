@@ -29,6 +29,7 @@ import {
 } from '@repository/token'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { latestEffectiveDate } from '../employee/status'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import {
   ConflictError,
@@ -169,6 +170,7 @@ export class ContractService {
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
     @Inject(EVENT_OUTBOX) private readonly events: EventOutbox,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -424,6 +426,11 @@ export class ContractService {
         }
         const employee = await this.employee(tenantId, contract.employee_id)
         this.assertNotSeparated(employee)
+        await this.separation.assertCanPlan(
+          tenantId,
+          employee.id,
+          contract.period.end ?? '9999-12-31',
+        )
         if (
           compareLocalDates(contract.period.start, latestEffectiveDate()) > 0
         ) {

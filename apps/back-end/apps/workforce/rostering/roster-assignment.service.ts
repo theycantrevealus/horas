@@ -40,6 +40,7 @@ import {
 import { cleanReason } from '../credentialing/application-support'
 import { addDays } from '../credentialing/appointment-rules'
 import { EligibilityService } from '../eligibility/eligibility.service'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import { LeaveCalendar } from '../leave/leave-calendar'
 import { ParameterService } from '../parameter/parameter.service'
@@ -167,6 +168,7 @@ export class RosterAssignmentService {
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
     @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -236,6 +238,7 @@ export class RosterAssignmentService {
         const employee = await this.loadEmployee(tenantId, input.employeeId)
         assertAssignable(employee)
         await this.assertNotOnLeave(tenantId, employee.id, input.date)
+        await this.separation.assertCanPlan(tenantId, employee.id, input.date)
         if (
           await this.assignments.findPlannedByEmployeeAndDate(
             tenantId,

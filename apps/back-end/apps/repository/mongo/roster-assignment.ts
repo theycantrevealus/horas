@@ -388,6 +388,43 @@ export class RosterAssignmentRepositoryMongo
   }
 
   /**
+   * Finds the planned assignments of an employee dated after a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The last day that is kept.
+   * @returns The planned assignments.
+   */
+  async findPlannedByEmployeeAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<RosterAssignment[]> {
+    const operation = 'RosterAssignmentRepository.findPlannedByEmployeeAfter'
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            employee_id: employeeId,
+            status: 'planned',
+            date: { $gt: date },
+            deleted_at: null,
+          }),
+        )
+        .sort({ date: 1, _id: 1 })
+        .lean<LeanRecord<RosterAssignmentEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

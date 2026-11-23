@@ -130,4 +130,19 @@ export interface LeaveRequestRepository extends Repository<LeaveRequest> {
     limit: number,
     offset: number,
   ): Promise<LeaveRequest[]>
+
+  /**
+   * Finds the open requests of an employee (`requested`, `head_approved`, `approved`) whose period
+   * ends after a date (what a separation cancels or ends on the last working day).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The last day that is kept.
+   * @returns The requests, possibly none; empty for a malformed identifier.
+   */
+  findOpenByEmployeeEndingAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<LeaveRequest[]>
 }

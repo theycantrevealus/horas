@@ -415,4 +415,13 @@ export const INDONESIA_CONCEPTS: readonly BundleConcept[] = [
   concept('id.leave-type', 'duka_serumah', 'Cuti Duka Anggota Rumah Tangga', 'Death of another household member'),
   concept('id.leave-type', 'tanpa_upah', 'Cuti di Luar Tanggungan', 'Unpaid leave'),
   concept('id.leave-type', 'tidak_tersedia', 'Tidak Tersedia', 'Unavailable (contracted practitioners)'),
+  concept('id.separation-type', 'resignation', 'Pengunduran Diri', 'Resignation', { contract_action: 'end' }),
+  concept('id.separation-type', 'end_of_contract', 'Berakhirnya Kontrak', 'End of contract', { contract_action: 'end' }),
+  concept('id.separation-type', 'retirement', 'Pensiun', 'Retirement', { contract_action: 'end' }),
+  concept('id.separation-type', 'dismissal', 'Pemutusan Hubungan Kerja', 'Dismissal', { contract_action: 'terminate' }),
+  concept('id.separation-type', 'death', 'Meninggal Dunia', 'Death', { contract_action: 'terminate' }),
+  concept('id.exit-checklist-item', 'badge_uniform', 'Pengembalian Tanda Pengenal dan Seragam', 'Return of badge and uniform'),
+  concept('id.exit-checklist-item', 'keys', 'Pengembalian Kunci', 'Return of keys'),
+  concept('id.exit-checklist-item', 'it_equipment', 'Pengembalian Perangkat TI', 'Return of IT equipment'),
+  concept('id.exit-checklist-item', 'patient_handover', 'Serah Terima Pasien dan Tugas', 'Handover of patients and duties'),
 ]
