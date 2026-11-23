@@ -1,7 +1,8 @@
 import { type LeaveLedgerRepository } from '@repository/interface/leave-ledger'
 import { type Coding } from '@repository/model/common/coding'
-import { type LeaveRequest } from '@repository/model/leave-request'
+import { type LeaveDay, type LeaveRequest } from '@repository/model/leave-request'
 import { planUse } from './balance'
+import { totalOf } from './day-count'
 import { type LeaveBalanceService } from './leave-balance.service'
 import { type LeaveLedgerEntry } from '@repository/model/leave-ledger-entry'
 import { type ClosedDatePeriod } from '@repository/model/common/calendar'
@@ -126,3 +127,64 @@ export async function reverseUses(
     })
   }
 }
+
+/**
+ * Cuts the day breakdown of a leave after a date: the days after it are removed and the total is
+ * recounted. Used when a leave is ended early and when a separation ends it on the last working day.
+ *
+ * @param request - The request.
+ * @param lastDate - The last day that is kept.
+ * @returns The kept days, their total and the days no longer taken.
+ */
+export function cutLeaveAfter(
+  request: Pick<LeaveRequest, 'days' | 'total_days'>,
+  lastDate: string,
+): { days: LeaveDay[]; total: number; removed: number } {
+  const days = request.days.filter((day) => day.date <= lastDate)
+  const total = totalOf(days)
+  return { days, total, removed: request.total_days - total }
+}
+
+/**
+ * Gives days back to the ledger, own days first and then carried-over days. A request without a
+ * yearly entitlement posted nothing, so nothing is reversed.
+ *
+ * @param ledger - Leave ledger repository.
+ * @param tenantId - Tenant of the caller.
+ * @param request - The request whose entries are reversed.
+ * @param removed - The days no longer taken.
+ */
+export async function reverseDays(
+  ledger: LeaveLedgerRepository,
+  tenantId: string,
+  request: Pick<LeaveRequest, 'id' | 'employee_id'>,
+  removed: number,
+): Promise<void> {
+  if (removed <= 0) {
+    return
+  }
+  const held = heldDays(await ledger.findByRequest(tenantId, request.id))
+  let left = Math.round(removed * 2)
+  for (const bucket of ['own', 'carry_over'] as const) {
+    for (const item of held.filter((entry) => entry.bucket === bucket)) {
+      const give = Math.min(left, Math.round(item.days * 2))
+      if (give <= 0) {
+        continue
+      }
+      left -= give
+      await ledger.append({
+        tenant_id: tenantId,
+        employee_id: request.employee_id,
+        leave_type: item.leave_type,
+        period: item.period,
+        kind: 'reversal',
+        days: give / 2,
+        bucket: item.bucket,
+        expires_on: null,
+        source: { kind: 'request', ref_id: request.id, date: null },
+        dedupe_key: null,
+      })
+    }
+  }
+}
+
