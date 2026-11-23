@@ -307,6 +307,20 @@ describe('roster assignment endpoints (in-memory repositories)', () => {
     expect(allowed.status).toBe(201)
   })
 
+  it('refuses a day after the last working day of an employee who is leaving (422 employee_leaving), but not the last day', async () => {
+    const leaver = await addEmployee()
+    const fits = await addEmployee()
+    await workforce.separations.create({ tenant_id: tenantId, employee_id: leaver, last_working_day: '2099-03-11', status: 'planned' } as never)
+    await workforce.separations.create({ tenant_id: tenantId, employee_id: fits, last_working_day: '2099-03-12', status: 'planned' } as never)
+
+    const refused = await add(leaver, { date: '2099-03-12' })
+    const allowed = await add(fits, { date: '2099-03-12' })
+
+    expect(refused.status).toBe(422)
+    expect(refused.body).toMatchObject({ code: 'employee_leaving' })
+    expect(allowed.status).toBe(201)
+  })
+
   it('refuses a roster that was submitted or approved, and answers 404 for a missing, malformed or foreign roster or assignment', async () => {
     const employeeId = await addEmployee()
     const roster = await workforce.rosters.create({

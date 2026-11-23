@@ -12,7 +12,9 @@ import {
   InMemoryPracticeScheduleExceptions,
   InMemoryPracticeSchedules,
   InMemoryLeaveRequests,
+  InMemorySeparations,
 } from '../testing/in-memory'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { LeaveCalendar } from '../leave/leave-calendar'
 import { InvalidRequestError } from '../workforce.error'
 import { PracticeExceptionService } from './practice-exception.service'
@@ -34,6 +36,7 @@ describe('PracticeExceptionService', () => {
   let facilities: InMemoryFacilities
   let employees: InMemoryEmployees
   let service: PracticeExceptionService
+  let separations: InMemorySeparations
   let leaveRequests: InMemoryLeaveRequests
   let sessionsService: PracticeScheduleService
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
@@ -166,6 +169,20 @@ describe('PracticeExceptionService', () => {
     )
   }
 
+  /**
+   * Stores a separation of an employee.
+   *
+   * @param employeeId - The employee.
+   * @param lastDay - The last working day.
+   * @param status - Separation status.
+   * @returns The separation.
+   */
+  function leaving(employeeId: string, lastDay: string, status: 'planned' | 'completed' | 'cancelled' = 'planned') {
+    return asHead(() =>
+      separations.create({ tenant_id: tenantId, employee_id: employeeId, last_working_day: lastDay, status } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     eligible = { value: { eligible: true } }
@@ -179,8 +196,9 @@ describe('PracticeExceptionService', () => {
     const logger = { log, warn, error, debug } as unknown as AppLogger
     const eligibility = { general } as unknown as EligibilityService
     leaveRequests = new InMemoryLeaveRequests()
-    service = new PracticeExceptionService(exceptions, schedules, units, facilities, employees, eligibility, { assertActive } as unknown as CodeConceptService, new LeaveCalendar(leaveRequests), logger)
-    sessionsService = new PracticeScheduleService(schedules, exceptions, units, facilities, employees, eligibility, logger)
+    separations = new InMemorySeparations()
+    service = new PracticeExceptionService(exceptions, schedules, units, facilities, employees, eligibility, { assertActive } as unknown as CodeConceptService, new LeaveCalendar(leaveRequests), new SeparationCalendar(separations), logger)
+    sessionsService = new PracticeScheduleService(schedules, exceptions, units, facilities, employees, eligibility, new SeparationCalendar(separations), logger)
     facilityId = (
       await asHead(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -280,6 +298,13 @@ describe('PracticeExceptionService', () => {
 
       expect(await rejection(() => make({ kind: 'moved', movedTo: { date: '2099-03-11', startTime: '09:00', endTime: '10:00' } }))).toMatchObject({ kind: 'invalid', code: 'on_leave' })
       expect((await make({ kind: 'moved', movedTo: { date: '2099-03-12', startTime: '09:00', endTime: '10:00' } })).kind).toBe('moved')
+    })
+
+    it('refuses to move a session after the last working day of a doctor who is leaving, but not onto the last day', async () => {
+      await leaving(doctor.id, '2099-03-10')
+
+      expect(await rejection(() => make({ kind: 'moved', movedTo: { date: '2099-03-11', startTime: '09:00', endTime: '10:00' } }))).toMatchObject({ kind: 'invalid', code: 'employee_leaving' })
+      expect((await make({ kind: 'moved', movedTo: { date: '2099-03-10', startTime: '09:00', endTime: '10:00' } })).kind).toBe('moved')
     })
 
     it('never puts the doctor in two places: a moved session must not overlap another of theirs that day', async () => {

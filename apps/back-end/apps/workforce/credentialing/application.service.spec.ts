@@ -14,7 +14,9 @@ import {
   InMemoryPrivilegeCatalog,
   InMemoryPrivilegeGrants,
   InMemoryProfessionalLicenses,
+  InMemorySeparations,
 } from '../testing/in-memory'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import {
   ApplicationService,
   type CreateApplicationInput,
@@ -46,6 +48,7 @@ describe('ApplicationService', () => {
   let grants: InMemoryPrivilegeGrants
   let concepts: InMemoryCodeConcepts
   let service: ApplicationService
+  let separations: InMemorySeparations
   let facilityId: string
   let otherFacilityId: string
   let unitId: string
@@ -350,6 +353,7 @@ describe('ApplicationService', () => {
     grants = new InMemoryPrivilegeGrants()
     concepts = new InMemoryCodeConcepts()
     const logger = { log, warn, error, debug } as unknown as AppLogger
+    separations = new InMemorySeparations()
     service = new ApplicationService(
       applications,
       employees,
@@ -361,6 +365,7 @@ describe('ApplicationService', () => {
       grants,
       new CodeConceptService(concepts, logger),
       { resolve } as unknown as ParameterService,
+      new SeparationCalendar(separations),
       logger,
     )
     await addConcept('id.workforce-category', 'tenaga_medis', { is_clinical: true, credentialing_committee: 'komite_medik' })
@@ -382,6 +387,18 @@ describe('ApplicationService', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+  })
+
+  describe('a leaving applicant', () => {
+    it('cannot start an application while a separation is planned or completed, but can after it was cancelled', async () => {
+      await asAdmin(() => separations.create({ tenant_id: tenantId, employee_id: employeeId, last_working_day: '2026-12-31', status: 'planned' } as never))
+
+      const thrown = await create().catch((error: unknown) => error)
+      expect((thrown as { code: string }).code).toBe('employee_leaving')
+      const [separation] = await separations.findByFilter(tenantId)
+      await asAdmin(() => separations.update(separation!.id, { status: 'cancelled' }))
+      expect((await create()).status).toBe('draft')
+    })
   })
 
   describe('create', () => {

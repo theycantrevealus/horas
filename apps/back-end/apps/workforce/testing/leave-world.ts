@@ -19,6 +19,7 @@ import { LeaveDetailService } from '../leave/leave-detail.service'
 import { LeavePlaceService } from '../leave/leave-place'
 import { LeavePolicyService } from '../leave/leave-policy.service'
 import { LeaveTypeChangeService } from '../leave/leave-type-change.service'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { LeaveRequestService } from '../leave/leave-request.service'
 import {
   InMemoryCodeConcepts,
@@ -29,6 +30,7 @@ import {
   InMemoryLeaveLedger,
   InMemoryLeavePolicies,
   InMemoryLeaveRequestDetails,
+  InMemorySeparations,
   InMemoryLeaveRequests,
   InMemoryOrganizationUnits,
   InMemoryPositionAssignments,
@@ -71,6 +73,7 @@ export async function createLeaveWorld() {
   const ledger = new InMemoryLeaveLedger()
   const requests = new InMemoryLeaveRequests()
   const details = new InMemoryLeaveRequestDetails()
+  const separations = new InMemorySeparations()
   const policies = new InMemoryLeavePolicies()
   const concepts = new InMemoryCodeConcepts()
 
@@ -81,7 +84,7 @@ export async function createLeaveWorld() {
   const balances = new LeaveBalanceService(employees, contracts, ledger, requests, policyService, place, logger)
   const request = new LeaveRequestService(
     requests, details, employees, contracts, rosters, rosterAssignments, calendars,
-    conceptService, policyService, balances, place, decider, parameters as never, transactions, logger,
+    conceptService, policyService, balances, place, decider, parameters as never, transactions, new SeparationCalendar(separations), logger,
   )
   const detail = new LeaveDetailService(requests, details, decider, changes, transactions, logger)
   const typeChange = new LeaveTypeChangeService(requests, ledger, conceptService, policyService, balances, request, place, transactions, logger)
@@ -320,7 +323,7 @@ export async function createLeaveWorld() {
 
   return {
     tenantId, otherTenantId, organizationId, facilityId, facility, parent, ward, headP, headU, nurse, annualPolicy,
-    repos: { employees, contracts, assignments, positions, units, facilities, calendars, rosters, rosterAssignments, ledger, requests, details, policies, concepts },
+    repos: { employees, contracts, assignments, positions, units, facilities, calendars, rosters, rosterAssignments, ledger, requests, details, separations, policies, concepts },
     services: { request, detail, decision, typeChange, endEarly, balances, policies: policyService, decider },
     logs: { log, warn, error, debug, written: () => JSON.stringify([log.mock.calls, warn.mock.calls, error.mock.calls, debug.mock.calls]) },
     recordAccess,

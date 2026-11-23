@@ -263,6 +263,18 @@ describe('LeaveRequestService', () => {
     })
   })
 
+  describe('a leaving employee', () => {
+    it('cannot request leave that ends after the last working day, but can request leave ending on it', async () => {
+      await world.seed(() => world.repos.separations.create({ tenant_id: world.tenantId, employee_id: world.nurse.id, last_working_day: '2026-12-02', status: 'planned' } as never))
+
+      const refused = await rejection(() => create({ end: '2026-12-03' }))
+      const fits = await create({ end: '2026-12-02' })
+
+      expect((refused as InvalidRequestError).code).toBe('employee_leaving')
+      expect(fits.status).toBe('requested')
+    })
+  })
+
   describe('preview', () => {
     it('answers the day breakdown, the entitlement, the available days and the deciders without writing anything', async () => {
       const preview = await world.services.request.preview(world.tenantId, world.caller({ employeeId: world.nurse.id }), input())

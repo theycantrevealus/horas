@@ -20,6 +20,7 @@ import {
 import { CodeConceptService } from '../concept/code-concept.service'
 import { EligibilityService } from '../eligibility/eligibility.service'
 import { LeaveCalendar } from '../leave/leave-calendar'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import {
   ConflictError,
@@ -111,6 +112,7 @@ export class PracticeExceptionService {
     private readonly eligibility: EligibilityService,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
     @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -393,6 +395,7 @@ export class PracticeExceptionService {
     if (!unit || unit.tenant_id !== tenantId) {
       throw new InvalidRequestError('unit_not_found', 'The unit was not found.')
     }
+    await this.separation.assertCanPlan(tenantId, doctor.id, moved.date)
     if (await this.leave.isOnLeave(tenantId, doctor.id, moved.date)) {
       throw new InvalidRequestError(
         'on_leave',

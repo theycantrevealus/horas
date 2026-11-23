@@ -40,6 +40,7 @@ import {
 import { cleanReason } from '../credentialing/application-support'
 import { addDays } from '../credentialing/appointment-rules'
 import { EligibilityService } from '../eligibility/eligibility.service'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import { LeaveCalendar } from '../leave/leave-calendar'
 import { ParameterService } from '../parameter/parameter.service'
@@ -147,6 +148,7 @@ export class SwapService {
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
     @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -738,6 +740,7 @@ export class SwapService {
         'The employee is on approved leave on that date.',
       )
     }
+    await this.separation.assertCanPlan(tenantId, employee.id, slot.date)
     await assertEligible(
       this.eligibility,
       tenantId,

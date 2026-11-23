@@ -29,6 +29,7 @@ import {
   REPOSITORY_PRACTICE_SCHEDULE_EXCEPTION,
 } from '@repository/token'
 import { EligibilityService } from '../eligibility/eligibility.service'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import {
   ConflictError,
@@ -205,6 +206,7 @@ export class PracticeScheduleService {
     @Inject(REPOSITORY_EMPLOYEE) private readonly employees: EmployeeRepository,
     @Inject(EligibilityService)
     private readonly eligibility: EligibilityService,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -381,6 +383,7 @@ export class PracticeScheduleService {
         this.checkPeriod(period)
         const { unit, timeZone } = await this.loadPolyclinic(tenantId, input.unitId)
         const doctor = await this.loadDoctor(tenantId, input.employeeId)
+        await this.separation.assertCanPlan(tenantId, doctor.id, period.start)
         await this.checkEligible(
           tenantId,
           doctor,

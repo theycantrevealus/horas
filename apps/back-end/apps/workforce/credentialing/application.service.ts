@@ -37,6 +37,7 @@ import {
 } from '@repository/token'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { isValidDocumentRef } from '../license/license-rules'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import { ParameterService } from '../parameter/parameter.service'
 import { ConflictError, InvalidRequestError } from '../workforce.error'
@@ -222,6 +223,7 @@ export class ApplicationService {
     private readonly grants: PrivilegeGrantRepository,
     @Inject(CodeConceptService) private readonly concepts: CodeConceptService,
     @Inject(ParameterService) private readonly parameters: ParameterService,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -286,6 +288,7 @@ export class ApplicationService {
         }
         const previousId = this.previousOf(input.type, input.previousAppointmentId)
         const employee = await this.applicant(tenantId, input.employeeId)
+        await this.separation.assertNotLeaving(tenantId, employee.id)
         const facility = await this.facility(tenantId, input.credentialingFacilityId)
         const committee = await this.committeeOf(tenantId, employee)
         const scope = await this.scopeOf(tenantId, facility.id)

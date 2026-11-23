@@ -15,7 +15,9 @@ import {
   InMemoryRosters,
   InMemoryShiftDefinitions,
   InMemoryLeaveRequests,
+  InMemorySeparations,
 } from '../testing/in-memory'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { LeaveCalendar } from '../leave/leave-calendar'
 import { RosterImportService } from './roster-import.service'
 
@@ -36,6 +38,7 @@ describe('RosterImportService', () => {
   let employees: InMemoryEmployees
   let imports: InMemoryHrImports
   let service: RosterImportService
+  let separations: InMemorySeparations
   let leaveRequests: InMemoryLeaveRequests
   let limits: Record<string, number>
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
@@ -251,6 +254,20 @@ describe('RosterImportService', () => {
     )
   }
 
+  /**
+   * Stores a separation of an employee.
+   *
+   * @param employeeId - The employee.
+   * @param lastDay - The last working day.
+   * @param status - Separation status.
+   * @returns The separation.
+   */
+  function leaving(employeeId: string, lastDay: string, status: 'planned' | 'completed' | 'cancelled' = 'planned') {
+    return asHead(() =>
+      separations.create({ tenant_id: tenantId, employee_id: employeeId, last_working_day: lastDay, status } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     limits = { MIN_REST_HOURS: 8, MAX_WEEKLY_HOURS: 40, MAX_OVERTIME_HOURS_WEEK: 18, MAX_CONSECUTIVE_NIGHTS: 3, IMPORT_MAX_ROWS: 5000, IMPORT_MAX_ERRORS: 500 }
@@ -267,7 +284,8 @@ describe('RosterImportService', () => {
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
     leaveRequests = new InMemoryLeaveRequests()
-    service = new RosterImportService(rosters, assignments, units, facilities, shifts, employees, imports, eligibility, parameters, { report } as never, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), logger)
+    separations = new InMemorySeparations()
+    service = new RosterImportService(rosters, assignments, units, facilities, shifts, employees, imports, eligibility, parameters, { report } as never, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), new SeparationCalendar(separations), logger)
     facilityId = (
       await asHead(() =>
         facilities.create({ tenant_id: tenantId, organization_id: organizationId, code: 'rs-sehat', name: [{ locale: 'en', text: 'RS' }], address: null, timezone: 'Asia/Jakarta', holiday_calendar_codes: [], external_ids: [], status: 'active' }),
@@ -401,6 +419,14 @@ describe('RosterImportService', () => {
       const answer = await check(['E001,2099-03-02,P,,', 'E001,2099-03-03,P,,'])
 
       expect(answer.import.errors).toEqual([{ row: 2, column: 'date', code: 'on_leave' }])
+    })
+
+    it('flags a row after the last working day of an employee who is leaving, and accepts the last day itself', async () => {
+      await leaving(nurse.id, '2099-03-02')
+
+      const answer = await check(['E001,2099-03-02,P,,', 'E001,2099-03-03,P,,'])
+
+      expect(answer.import.errors).toEqual([{ row: 3, column: 'date', code: 'employee_leaving' }])
     })
 
     it('refuses a row for a day the employee already has a planned assignment in this roster', async () => {

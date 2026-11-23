@@ -15,7 +15,9 @@ import {
   InMemoryRosters,
   InMemoryShiftDefinitions,
   InMemoryLeaveRequests,
+  InMemorySeparations,
 } from '../testing/in-memory'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { LeaveCalendar } from '../leave/leave-calendar'
 import { RosterAssignmentService, type AddRosterAssignmentInput } from './roster-assignment.service'
 
@@ -34,6 +36,7 @@ describe('RosterAssignmentService', () => {
   let shifts: InMemoryShiftDefinitions
   let employees: InMemoryEmployees
   let service: RosterAssignmentService
+  let separations: InMemorySeparations
   let leaveRequests: InMemoryLeaveRequests
   let limits: Record<string, number>
   let eligible: { value: { eligible: true } | { eligible: false; failed: string } }
@@ -218,6 +221,20 @@ describe('RosterAssignmentService', () => {
     )
   }
 
+  /**
+   * Stores a separation of an employee.
+   *
+   * @param employeeId - The employee.
+   * @param lastDay - The last working day.
+   * @param status - Separation status.
+   * @returns The separation.
+   */
+  function leaving(employeeId: string, lastDay: string, status: 'planned' | 'completed' | 'cancelled' = 'planned') {
+    return asHead(() =>
+      separations.create({ tenant_id: tenantId, employee_id: employeeId, last_working_day: lastDay, status } as never),
+    )
+  }
+
   beforeEach(async () => {
     vi.resetAllMocks()
     limits = { MIN_REST_HOURS: 8, MAX_WEEKLY_HOURS: 40, MAX_OVERTIME_HOURS_WEEK: 18, MAX_CONSECUTIVE_NIGHTS: 3 }
@@ -234,7 +251,8 @@ describe('RosterAssignmentService', () => {
     const eligibility = { general: async () => eligible.value } as unknown as EligibilityService
     const logger = { log, warn, error, debug } as unknown as AppLogger
     leaveRequests = new InMemoryLeaveRequests()
-    service = new RosterAssignmentService(assignments, rosters, units, facilities, shifts, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), logger)
+    separations = new InMemorySeparations()
+    service = new RosterAssignmentService(assignments, rosters, units, facilities, shifts, employees, eligibility, parameters, { run: (work: () => Promise<unknown>) => work() } as never, new LeaveCalendar(leaveRequests), new SeparationCalendar(separations), logger)
     facilityId = (
       await asHead(() =>
         facilities.create({
@@ -380,6 +398,18 @@ describe('RosterAssignmentService', () => {
       expect(await rejection(() => add())).toMatchObject({ kind: 'invalid', code: 'on_leave' })
       expect((await add({ employeeId: half.id })).employee_id).toBe(half.id)
       expect((await add({ employeeId: pending.id })).employee_id).toBe(pending.id)
+    })
+
+    it('refuses a date after the last working day of an employee who is leaving, but not the last day itself (HR-SEP-003)', async () => {
+      const other = await addEmployee()
+      const cancelled = await addEmployee()
+      await leaving(nurse.id, '2099-03-01')
+      await leaving(other.id, monday)
+      await leaving(cancelled.id, '2099-03-01', 'cancelled')
+
+      expect(await rejection(() => add())).toMatchObject({ kind: 'invalid', code: 'employee_leaving' })
+      expect((await add({ employeeId: other.id })).employee_id).toBe(other.id)
+      expect((await add({ employeeId: cancelled.id })).employee_id).toBe(cancelled.id)
     })
 
     it('checks general eligibility for a clinical employee in a clinical unit only, and names the failing condition (HR-ROS-002)', async () => {

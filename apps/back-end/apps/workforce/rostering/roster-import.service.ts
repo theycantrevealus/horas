@@ -35,6 +35,7 @@ import {
 } from '@repository/token'
 import { addDays } from '../credentialing/appointment-rules'
 import { EligibilityService } from '../eligibility/eligibility.service'
+import { SeparationCalendar } from '../separation/separation-calendar'
 import { observe } from '../observe'
 import { LeaveCalendar } from '../leave/leave-calendar'
 import { ParameterService } from '../parameter/parameter.service'
@@ -83,6 +84,7 @@ const COLUMNS: Record<string, string> = {
   assignment_in_past: 'date',
   assignment_exists: 'date',
   on_leave: 'date',
+  employee_leaving: 'date',
 }
 
 /**
@@ -194,6 +196,7 @@ export class RosterImportService {
     @Inject(TRANSACTION_MANAGER)
     private readonly transactions: TransactionManager,
     @Inject(LeaveCalendar) private readonly leave: LeaveCalendar,
+    @Inject(SeparationCalendar) private readonly separation: SeparationCalendar,
     @Inject(AppLogger) private readonly logger: AppLogger,
   ) {}
 
@@ -727,6 +730,15 @@ export class RosterImportService {
         await this.leave.isOnLeave(tenantId, item.employee.id, item.row.date)
       ) {
         return 'on_leave'
+      }
+      if (
+        await this.separation.isLeavingBefore(
+          tenantId,
+          item.employee.id,
+          item.row.date,
+        )
+      ) {
+        return 'employee_leaving'
       }
       await assertEligible(
         this.eligibility,
