@@ -7,7 +7,9 @@ Status: **Approved** (2026-11-07). Models: `apps/back-end/apps/repository/model/
 - the configurable parameters (section 6);
 - the collections of leave management (section 9, **built** 2026-11-20, agreed 2026-11-18), detailed in HR spec 9.4 after this document was approved.
 
-The outline sub-processes (HR spec 9.1, 9.3 and 9.5 to 9.10: recruitment, attendance, training, performance, payroll, occupational health, discipline, separation details) get collections only after the spec details them.
+- the collections of separation (section 10) and attendance (section 11), **draft for review** (2026-11-23), detailed in HR spec 9.10 and 9.3.
+
+The outline sub-processes that remain (HR spec 9.1 and 9.5 to 9.9: recruitment, training, performance, payroll, occupational health, discipline) get collections only after the spec details them.
 
 Every collection here follows `account-and-workforce-collections.md` 2.1 (`tenant_id`, `schema_version`, `version`, `created_at`, `updated_at`, `created_by`, no `updated_by`), `database.md` 4.4 (instants in UTC, calendar dates as `YYYY-MM-DD`, times of day as `HH:mm` with the facility's time zone) and `database.md` 6.1 (every write recorded in the change history). Fields in the tables below are in addition to those.
 
@@ -643,3 +645,129 @@ The jobs read across tenants through named reads that are documented "for jobs o
 | `holiday_calendars` | `findWithKindOnDate(kind, date)`: calendars with an active day of a kind on a date | `{ 'holidays.date', 'holidays.kind' }` |
 | `facilities` | `findByCalendarCode(tenantId, code, limit)`: a tenant's facilities that list a calendar code (tenant-scoped) | `{ tenant_id, holiday_calendar_codes }` |
 | `position_assignments` | `findOpenPrimaryByFacility(tenantId, facilityId, afterId, limit)`: a facility's open primary assignments (tenant-scoped) | `{ tenant_id, facility_id, is_open }` |
+
+## 10. Separation (HR spec 9.10)
+
+Status: **draft for review** (2026-11-23). Build: `hr-endpoints.md` group 9, plan `plans/gateway-hr-9-separation.md`.
+
+### 10.1 `separations`
+
+| Field | Type | Notes |
+|---|---|---|
+| `employee_id` | ObjectId | At most one separation per employee whose status is not `cancelled` (partial unique index). |
+| `facility_id` | ObjectId | The facility of the employee's open primary assignment when recorded, or of the contract's organization; its zone decides when the last working day has ended. |
+| `type` | `Coding` | `…separation-type`, checked with `assertActive`. The concept property `contract_action` (`end` or `terminate`) is copied into `contract_action` at recording. |
+| `contract_action` | `'end' \| 'terminate'` | Copied, so a later change of the concept does not change a planned separation. |
+| `last_working_day` | string (date) | Local date of `facility_id`. |
+| `notice_received_on` | string (date) \| null | |
+| `immediate` | boolean | Completed when recorded. |
+| `status` | `'planned' \| 'completed' \| 'cancelled'` | HR spec 9.10.3. |
+| `status_since` | Date | |
+| `completion` | `{ at: Date; by: ActorRef; counts: { assignments: number; sessions: number; leave_requests: number; appointments: number; memberships: number; position_assignments: number } } \| null` | What completion closed; counts only. |
+| `checklist` | `{ item: Coding; done: { by: ActorRef; at: Date } \| null }[]` | One per active `…exit-checklist-item` concept at recording; at most 50. |
+| `settlement` | `{ leave: { leave_type: Coding; period: { start: string; end: string }; days_left: number }[]; notes: string \| null } \| null` | Set at completion from the ledger (9.5 of this document); `notes` at most 1000 characters. |
+
+The reason is not here: it is in `separation_details` (10.2), like the reason of a leave request.
+
+Indexes:
+
+| Index | Purpose |
+|---|---|
+| `{ tenant_id, employee_id }` unique, partial `status` in `planned`, `completed` | HR-SEP-001. |
+| `{ tenant_id, status, last_working_day }` | Lists and the planning guard. |
+| `{ status, last_working_day }` | The completion job, which reads across tenants (`database.md` 7.2, a named read "for jobs only"). |
+
+Never deleted. Classification: `internal`; `settlement` `confidential`.
+
+### 10.2 `separation_details`
+
+`{ separation_id (unique per tenant), employee_id, reason: string (1 to 1000) }`. Classification `highly_confidential`; reads record an access entry (`recordAccess`), as `leave_request_details` do (9.4).
+
+### 10.3 Changes to existing collections
+
+| Collection | Change |
+|---|---|
+| `roster_assignments` | `cancellation.kind` adds `'separation'` (`ref_id` the separation). |
+| `practice_schedule_exceptions` | `source.kind` adds `'separation'`, for sessions moved onto a date after the last working day that completion undoes. |
+| `practice_schedules` | Completion sets `period.end` to the last working day and `status` to `ended`. |
+| `leave_requests` | Completion cancels pending requests and ends or cancels approved ones as the leave services do; the change reason is `separation`. |
+| `clinical_appointments`, `privilege_grants` | Completion revokes with a system decision: `decision_ref` `separation`, the reason code `separation`. |
+| `credential_applications` | Open applications are withdrawn with the reason `separation`. |
+
+### 10.4 Codes and parameters
+
+Two tenant code systems, created by the tenant as code concepts (with a starter bundle for Indonesia in `concept/bundles.ts`): `id.separation-type` (`resignation`, `end_of_contract`, `dismissal`, `retirement`, `death`, each with the property `contract_action`) and `id.exit-checklist-item`. Parameter `SEPARATION_CHECKLIST_ALERT_DAYS` (tenant, 1 to 90, default 7), read only when alerts exist.
+
+## 11. Attendance (HR spec 9.3)
+
+Status: **draft for review** (2026-11-23). Build: `hr-endpoints.md` group 10, plan `plans/gateway-hr-10-attendance.md`.
+
+### 11.1 `attendance_devices`
+
+| Field | Type | Notes |
+|---|---|---|
+| `facility_id` | ObjectId | |
+| `code` | string | 1 to 32 upper-case letters, digits or hyphens; unique per facility, never reused. |
+| `kind` | `'fingerprint' \| 'face' \| 'card' \| 'other'` | |
+| `name` | `LocalizedText[]` | |
+| `status` | `'active' \| 'retired'` | A retired device's events are refused. |
+
+Index `{ tenant_id, facility_id, code }` unique. Classification `internal`.
+
+### 11.2 `attendance_enrolments`
+
+`{ employee_id, facility_id, user_number (1 to 32 characters), status: 'active' | 'ended', ended_on: string | null }`. Indexes: `{ tenant_id, facility_id, user_number }` unique, partial `status: 'active'`; `{ tenant_id, employee_id, facility_id }` unique, partial `status: 'active'`. Classification `internal`.
+
+### 11.3 `clock_events`
+
+| Field | Type | Notes |
+|---|---|---|
+| `facility_id` | ObjectId | |
+| `employee_id` | ObjectId \| null | Null while unmatched. |
+| `user_number` | string | As the device sent it. |
+| `at` | Date | UTC instant. |
+| `direction` | `'in' \| 'out' \| 'unknown'` | |
+| `source` | `{ kind: 'device'; device_id: ObjectId; device_event_id: string } \| { kind: 'import'; import_id: ObjectId } \| { kind: 'correction'; correction_id: ObjectId }` | |
+| `received_at` | Date | |
+
+Indexes: `{ tenant_id, 'source.device_id', 'source.device_event_id' }` unique, partial `source.kind: 'device'` (HR-ATT-002); `{ tenant_id, employee_id, at }` (reconciliation); `{ tenant_id, facility_id, employee_id, received_at }` partial `employee_id: null` (unmatched). Append-only like the leave ledger: no update or delete, except setting `employee_id` on an unmatched event when HR resolves it. High volume: **not recorded in the change history** (like `security_events`), and the repository comment says so; the access to them is through the attendance permissions only. Published entries are kept for the retention period (Q11).
+
+### 11.4 `attendance_records`
+
+| Field | Type | Notes |
+|---|---|---|
+| `assignment_id` | ObjectId \| null | Unique per tenant when set; null for unplanned work. |
+| `employee_id`, `unit_id`, `facility_id`, `roster_id` | ObjectId | `roster_id` null for unplanned work. |
+| `date` | string (date) | The shift's date (local). |
+| `planned` | `{ starts_at: Date; ends_at: Date; paid_minutes: number; overtime_minutes: number } \| null` | Copied from the assignment; null for unplanned work. |
+| `status` | `'open' \| 'worked' \| 'absent'` | HR spec 9.3.3. |
+| `kind` | `'planned' \| 'unplanned'` | |
+| `first_in`, `last_out` | Date \| null | |
+| `worked_minutes`, `late_minutes`, `early_minutes` | number | |
+| `overtime` | `{ minutes: number; approved_minutes: number; decided: { by: ActorRef; at: Date } \| null }` | |
+| `flags` | `('missing_in' \| 'missing_out' \| 'late' \| 'early_leave' \| 'overtime_pending')[]` | |
+| `excused` | boolean | Set by an approved correction of an absence. |
+| `event_ids` | ObjectId[] | The events used, at most 50. |
+| `reconciled_at` | Date \| null | |
+| `final` | boolean | Set when the roster closes (HR-ATT-012). |
+
+Indexes: `{ tenant_id, assignment_id }` unique partial `assignment_id` set; `{ tenant_id, unit_id, date }`; `{ tenant_id, employee_id, date }`; `{ tenant_id, roster_id, status }` (the close check); `{ status, 'planned.ends_at' }` (the reconciliation job, across tenants). Classification `internal`; recorded in the change history (one record per reconciliation that changes something).
+
+### 11.5 `attendance_corrections`
+
+`{ record_id, employee_id, unit_id, kind: 'add_in' | 'add_out' | 'replace_in' | 'replace_out' | 'excuse_absence', at: Date | null, status: 'requested' | 'approved' | 'rejected' | 'cancelled', requested_by: ActorRef, decision: { by: ActorRef; at: Date } | null }` and a detail collection `attendance_correction_details` (`{ correction_id, reason, decision_reason }`, `confidential`). Indexes `{ tenant_id, unit_id, status }`, `{ tenant_id, employee_id, created_at }`, `{ tenant_id, record_id, status }`.
+
+### 11.6 Parameters
+
+`ATTENDANCE_LATE_GRACE_MINUTES` (0 to 60, default 5), `ATTENDANCE_MATCH_BEFORE_MINUTES` (0 to 480, 120), `ATTENDANCE_MATCH_AFTER_MINUTES` (0 to 720, 240), `ATTENDANCE_CLOSE_AFTER_MINUTES` (0 to 1440, 240), `ATTENDANCE_CORRECTION_DAYS` (0 to 62, 7), `OVERTIME_MIN_MINUTES` (0 to 240, 30), all at unit, facility or tenant scope; `ATTENDANCE_DECISION_SLA_DAYS` (3) waits for alerts.
+
+### 11.7 Decisions (2026-11-23)
+
+| # | Decision |
+|---|---|
+| T1 | Devices push clock events to an integration route through a service account; CSV import is the fallback. No biometric data and no location. |
+| T2 | One record per planned shift, derived by a worker job and repeatable; unplanned work is a record of its own for the Head. |
+| T3 | Corrections are asked by the employee and decided by the Head of Unit; they add events and never edit one. |
+| T4 | Overtime beyond the plan is paid only when the Head approves it; planned overtime with consent is approved up to its plan. |
+| T5 | A roster closes only when its records are reconciled and nothing is pending. |
+

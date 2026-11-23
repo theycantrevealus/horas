@@ -1,6 +1,6 @@
 # gateway_hr Plan
 
-Status: **In progress** (2026-11-10). Groups 1.1 to 6, the HR events to identity and the worker jobs are built (PR #7 to #119, see section 3). Group 8 (leave) is built: 8.1 and 8.2 (PR #123, #124 and #125) and 8.3 and 8.4 (PR #127 to #130, 2026-11-20). Replaces `2026-11-07-workforce-core-implementation.md`.
+Status: **In progress** (2026-11-10). Groups 1.1 to 6, the HR events to identity and the worker jobs are built (PR #7 to #119, see section 3). Group 8 (leave) is built: 8.1 and 8.2 (PR #123, #124 and #125) and 8.3 and 8.4 (PR #127 to #130, 2026-11-20). Group 9 (separation) and group 10 (attendance) are specified and planned (2026-11-23). Replaces `2026-11-07-workforce-core-implementation.md`.
 
 **Goal:** a new NestJS application `gateway_hr`, built like `gateway_back_office`, that serves the HR endpoints of `../hr-endpoints.md` on top of the approved collections (`../human-resource-collections.md`, `../account-and-workforce-collections.md`).
 
@@ -83,6 +83,10 @@ Groups follow their dependencies: units need facilities and codes, employees nee
 | 28 | 8.2 Leave balances (and the three leave jobs) | 4 | Done (`gateway-hr-8-2-leave-balances.md`, PR #121) | Built in two PRs, #124 (ledger, balances, endpoints) and #125 (the three worker jobs) |
 | 29 | 8.3 Leave requests and approval | 13 | Done (`gateway-hr-8-3-leave-requests.md`, PR #121; LR2 corrected in the docs PR of 8.1 and 8.2) | Built in two PRs, #127 (requests, details, proof, pending days) and #128 (decisions, cancel, change type) |
 | 30 | 8.4 Leave, roster and practice-schedule link | 3 (and `on_leave` on existing routes) | Done (`gateway-hr-8-4-leave-roster-link.md`, PR #121) | Built in two PRs, #129 (effects on the roster, `on_leave`) and #130 (cover, end early) |
+| 31 | 9 Separation | 9 (and `employee_leaving` on the planning routes) | Done (`gateway-hr-9-separation.md`, docs PR of 2026-11-23) | Planned, two code PRs |
+| 32 | 10.1 Attendance devices, enrolments and clock events | 10 | Done (`gateway-hr-10-attendance.md`, same docs PR) | Planned |
+| 33 | 10.2 Attendance records and overtime | 4 | Done (`gateway-hr-10-attendance.md`) | Planned |
+| 34 | 10.3 Attendance corrections and roster close | 4 (and `attendance_not_reconciled` on close) | Done (`gateway-hr-10-attendance.md`) | Planned |
 
 Groups 1.1 and 1.2 are small and can be built in one PR if you agree both.
 

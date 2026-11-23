@@ -623,7 +623,7 @@ Defaults follow `REG-PP35`. Values are configurable (section 10) because the hos
 
 ## 9. Other Sub-processes (Outline)
 
-These sections must be detailed, in the format of sections 6–8, before implementation. Section 9.4 is detailed in full.
+These sections must be detailed, in the format of sections 6–8, before implementation. Sections 9.3, 9.4 and 9.10 are detailed in full.
 
 ### 9.1 Recruitment and onboarding
 
@@ -639,9 +639,105 @@ These sections must be detailed, in the format of sections 6–8, before impleme
 
 ### 9.3 Attendance and time
 
-- **Purpose**: record actual working time against the roster.
-- **Entities**: Attendance Record (from fingerprint or face-recognition devices), Attendance Correction, Overtime Record.
-- **Known rules**: attendance is reconciled against Roster Assignments; overtime requires prior approval; corrections need Head of Unit approval.
+Detail level: **Full** (agreed 2026-11-23). This section follows the format of sections 6–8.
+
+#### 9.3.1 Purpose
+
+Record when people actually worked, against the roster, so the Head of Unit sees who came, who was late and who was missing, overtime is paid only when approved, and a roster period can be closed with a true record. The engine knows only the mechanics: clock events in, one attendance record per planned shift out. Tolerances are tenant parameters (section 10).
+
+#### 9.3.2 Entities
+
+##### Attendance Device
+
+A clock (fingerprint, face recognition, card or other) at a facility, identified by a code unique in the facility. Devices send clock events through the attendance integration (9.3.4.1). The hospital owns the device and the biometric templates it holds; **HRM never receives or stores biometric data**, only the user number the device reports.
+
+##### Enrolment
+
+The link between an employee and the user number a facility's devices use for them (for example a badge number). One active enrolment per employee and facility; a user number is unique among the active enrolments of a facility.
+
+##### Clock Event
+
+One instant at which an employee was seen by a device, imported from a file, or entered by hand through an approved correction. It holds the instant (UTC), the direction when the device reports it (`in`, `out`, or `unknown`), the source (`device`, `import`, `correction`) and, for device events, the device and the device's own event identifier, so a resent event is stored once. Events whose user number has no enrolment are kept as **unmatched** for HR to resolve. Clock events are never edited or deleted; a wrong one is superseded by a correction.
+
+##### Attendance Record
+
+What happened to one planned shift (a roster assignment of a shift that is not `off`), derived from the clock events by reconciliation (9.3.4.2):
+
+| Field | Description |
+|---|---|
+| Assignment | The roster assignment, with its employee, unit, date and planned start and end. |
+| Status | `open` (not reconciled yet), `worked` or `absent`. |
+| First in, last out | The instants used, or empty. |
+| Worked minutes | From first in to last out, capped to nothing beyond what the events show. |
+| Late, early leave minutes | Beyond the grace minutes. |
+| Overtime | Minutes worked after the planned end (and before the planned start when the Head asked for it), the minutes **approved** by the Head, and who approved them. Planned overtime with consent (`HR-ROS-013`) counts as approved up to its planned minutes. |
+| Flags | `missing_in`, `missing_out`, `late`, `early_leave`, `overtime_pending`. |
+
+A day with clock events and no planned shift gives an **unplanned work** record for the Head to review.
+
+##### Attendance Correction
+
+A request to fix a record: a missing or wrong clock in or out, or "I was absent for a reason". The employee (or the Head on their behalf) asks with a reason; the Head of Unit approves or rejects. An approved correction adds `correction` clock events (or marks the absence excused) and the record is reconciled again.
+
+#### 9.3.3 Attendance record status
+
+| Status | Meaning |
+|---|---|
+| `open` | The shift has not ended plus `ATTENDANCE_CLOSE_AFTER_MINUTES`, or it is being reconciled again. |
+| `worked` | At least one clock event matched the shift. Flags say what was missing or late. |
+| `absent` | No clock event matched. An approved correction may mark it `excused`, which keeps the status and says why in the change history. |
+
+Records stay changeable through corrections until their roster is closed; after that they are final (`HR-ATT-012`).
+
+#### 9.3.4 Workflows
+
+##### 9.3.4.1 Clock events in
+
+1. The facility's device gateway (a service account with the ingest permission) sends events in batches: device code, device event identifier, user number, instant, direction.
+2. HRM stores each new event once (device and device event identifier), maps the user number to the employee through the active enrolment, and keeps the rest as unmatched.
+3. Where no gateway exists, HR imports a CSV of clock events (check, then apply, as the roster import does, 5.6).
+
+##### 9.3.4.2 Reconciliation
+
+1. The System picks each planned shift that ended `ATTENDANCE_CLOSE_AFTER_MINUTES` ago, or whose events changed.
+2. It matches the employee's clock events from `ATTENDANCE_MATCH_BEFORE_MINUTES` before the planned start to `ATTENDANCE_MATCH_AFTER_MINUTES` after the planned end. Shifts that cross midnight use their instants, so nothing special happens at midnight. An event inside two shifts' windows belongs to the nearer one.
+3. First in is the earliest matched event, last out the latest; a single event is `missing_out` (or `missing_in` when the device says `out`).
+4. Late, early leave and overtime are computed against the planned start and end with `ATTENDANCE_LATE_GRACE_MINUTES` and `OVERTIME_MIN_MINUTES`.
+5. Events that match no shift on a day form an unplanned work record.
+
+##### 9.3.4.3 Corrections and overtime
+
+1. The employee asks for a correction of their own record within `ATTENDANCE_CORRECTION_DAYS` of the shift date, with a reason.
+2. The Head of the unit of the shift approves or rejects with a reason. The Head may also correct a record directly with a reason. Nobody approves their own correction.
+3. The Head approves overtime minutes on a record, at most the minutes worked over the plan.
+
+##### 9.3.4.4 Closing a roster
+
+Closing a roster (8.3) needs every attendance record of its period out of `open` and no pending correction or overtime decision.
+
+#### 9.3.5 Business rules
+
+- **HR-ATT-001**: HRM stores no biometric data and no location; a clock event holds the user number, the device and the instant only.
+- **HR-ATT-002**: A device event is stored once, identified by the device and its event identifier; a resent batch changes nothing.
+- **HR-ATT-003**: An event whose user number has no active enrolment is kept unmatched and never guessed onto an employee.
+- **HR-ATT-004**: Each planned shift that is not `off` has exactly one attendance record; cancelled shifts have none.
+- **HR-ATT-005**: Reconciliation is derived from the clock events and the planned shift only, and can be repeated with the same result.
+- **HR-ATT-006**: Instants are UTC; dates and the shift window are those of the facility's zone (`database.md` 4.4).
+- **HR-ATT-007**: Late and early leave count only beyond `ATTENDANCE_LATE_GRACE_MINUTES`.
+- **HR-ATT-008**: Overtime counts only from `OVERTIME_MIN_MINUTES`, and is paid only when approved; planned overtime with consent is approved up to its planned minutes.
+- **HR-ATT-009**: A correction needs a reason and the Head of Unit's approval; the requester never approves it.
+- **HR-ATT-010**: A correction adds events or marks an absence excused; it never edits or deletes an event.
+- **HR-ATT-011**: An employee sees only their own records and events; the Head sees those of the units they head.
+- **HR-ATT-012**: After its roster is closed a record is final.
+- **HR-ATT-013**: A roster can be closed only when its records are reconciled and no correction or overtime decision is pending.
+
+#### 9.3.6 Alerts
+
+Sent when the notification service exists (section 11): a missing clock out to the employee the day after; absences and late arrivals of the day to the Head of Unit; corrections waiting longer than `ATTENDANCE_DECISION_SLA_DAYS` to the Head's superior; unmatched events to HR Admin.
+
+#### 9.3.7 Not in this section
+
+Payroll amounts (9.7, open question Q8), shift allowances, attendance of staff without a roster (for example office staff on a fixed schedule: a later extension that plans them a weekly roster), geofenced mobile clocking, and exporting attendance to an external payroll system.
 
 ### 9.4 Leave management
 
@@ -921,9 +1017,82 @@ Notifications never name the leave type or the reason (section 11, HR-LEV-041).
 
 ### 9.10 Separation
 
-- **Purpose**: end employment cleanly.
-- **Entities**: Separation Request, Exit Checklist, Final Settlement.
-- **Known rules**: on the separation date, the employee's SPK is revoked, future Roster Assignments and Practice Schedule sessions are flagged (HR-ROS-030), and the identity module disables the account; records are kept for the retention period (section 14).
+Detail level: **Full** (agreed 2026-11-23). This section follows the format of sections 6–8.
+
+#### 9.10.1 Purpose
+
+End employment cleanly: once HR records that someone is leaving, nobody plans them after their last day, and when that day is over every place that still names them is closed the same way, at the same time: shifts, polyclinic sessions, leave, clinical privileges, committee seats, positions, the contract and the account. What is left to settle (unused leave days, items to return) is listed for HR and payroll.
+
+#### 9.10.2 Entities
+
+##### Separation
+
+| Field | Description |
+|---|---|
+| Employee | Who is leaving. At most one separation that is not cancelled per employee. |
+| Type | A tenant code (`id.separation-type`: for example resignation, end of contract, dismissal, retirement, death). The code's property `contract_action` says whether the contract is ended (`end`) or terminated (`terminate`) at completion. |
+| Last working day | The last day the employee works, a local date of the facility. Today or later when recorded; earlier only with immediate effect. |
+| Notice received on | The date the resignation or notice was given, for reports. |
+| Immediate | For a dismissal or a death: completed when recorded, not after the last working day. |
+| Reason | Free text, confidential: never in lists or logs. |
+| Status | `planned`, `completed` or `cancelled` (9.10.3). |
+| Exit checklist | One item per active code of the tenant's `id.exit-checklist-item` system (for example return of badge and uniform, handover of patients, return of keys), each with who marked it done and when. |
+| Settlement | Filled at completion: per yearly leave type, the days left on the last working day (negative when more was taken than earned); other items HR notes. No amounts: pay is 9.7. |
+
+#### 9.10.3 Separation status
+
+| From | To | By | When |
+|---|---|---|---|
+| — | `planned` | HR Admin | The separation is recorded. |
+| `planned` | `completed` | System | The day after the last working day, in the facility's zone. |
+| `planned` | `completed` | HR Manager | At once, for an immediate separation. |
+| `planned` | `cancelled` | HR Admin | Before completion, with a reason (a resignation withdrawn). |
+
+`completed` and `cancelled` are final. A completed separation sets the employee to `separated` (5.4); someone who returns is a new hire (rehire is not in this section).
+
+#### 9.10.4 Workflows
+
+##### 9.10.4.1 Recording a separation
+
+1. HR Admin records the type, the last working day, the notice date and the reason.
+2. HRM shows the **impact**: the shifts, polyclinic sessions, leave requests, SPKs and grants, committee seats, position assignments and the contract that completion will close.
+3. From then on, nobody can plan the employee after the last working day (HR-SEP-003). Shifts and sessions already planned after it stay visible until completion, so the Head can arrange cover.
+
+##### 9.10.4.2 Changing or cancelling
+
+While `planned`, HR Admin can move the last working day, change the type or the reason, or cancel the separation with a reason. Nothing that the planning guard refused is planned again automatically.
+
+##### 9.10.4.3 Completion
+
+On the day after the last working day (or at once when immediate), in one step for the employee:
+
+1. Roster assignments after the last working day are cancelled with the reason `separation`; a published roster takes a new revision, a submitted or approved one is validated again (as for leave, 9.4.4.3).
+2. Practice schedules end on the last working day; sessions moved onto a later date are undone.
+3. Pending leave requests are cancelled; approved leave after the last working day is cancelled, and leave that runs past it is ended on it, with the days given back (9.4).
+4. Current SPKs are revoked from the day after the last working day, which revokes their grants and flags the supervised grants that named them (7.4.5); open credential applications are withdrawn.
+5. Committee memberships and position assignments end on the last working day.
+6. The contract in force is ended, or terminated when the type says so, on the last working day.
+7. The employee becomes `separated` with the last working day as separation date; identity disables the account (`authentication.md` 5).
+8. The settlement is computed and the exit checklist stays open until HR marks every item done.
+
+#### 9.10.5 Business rules
+
+- **HR-SEP-001**: An employee has at most one separation that is not cancelled.
+- **HR-SEP-002**: A separation is recorded only for an employee who has not separated, with a last working day today or later in the facility's zone, unless it is immediate.
+- **HR-SEP-003**: While a separation is planned, nothing can be planned for the employee after the last working day: roster assignments (added, imported or swapped), practice sessions, leave, new contracts and credential applications are refused (`employee_leaving`).
+- **HR-SEP-004**: Completion closes everything in 9.10.4.3 for the employee in one transaction, or nothing; a failure is retried and never leaves the employee half separated.
+- **HR-SEP-005**: Completion happens after the last working day has ended in the facility's zone, so the account works through the last day; an immediate separation completes when recorded.
+- **HR-SEP-006**: Completed shifts, sessions and leave before the last working day are never changed.
+- **HR-SEP-007**: Licences, professional credits and the change history stay; they belong to the person's record (retention: open question Q11).
+- **HR-SEP-008**: The reason is confidential; lists, notifications and logs carry the type only.
+
+#### 9.10.6 Alerts
+
+Sent when the notification service exists (section 11): a recorded separation to the Heads of the units the employee works in (to arrange cover); open checklist items `SEPARATION_CHECKLIST_ALERT_DAYS` after completion to HR Admin.
+
+#### 9.10.7 Not in this section
+
+Rehire, a resignation submitted by the employee in self-service, the exit interview, pay and severance amounts (9.7), and the retention and anonymisation of records (Q11).
 
 ---
 
@@ -939,6 +1108,14 @@ Values are owned by HR Manager unless stated otherwise, stored as configuration,
 | `SPK_VALIDITY_YEARS` | 3 *(verify)* | HR-CRD-004 |
 | `RECREDENTIAL_LEAD_DAYS` | 90 | 7.4.2 |
 | `MIN_ASSESSORS` | 1 (owned by each committee) | 7.4.1 |
+| `ATTENDANCE_LATE_GRACE_MINUTES` | 5 | HR-ATT-007 |
+| `ATTENDANCE_MATCH_BEFORE_MINUTES` | 120 | 9.3.4.2 |
+| `ATTENDANCE_MATCH_AFTER_MINUTES` | 240 | 9.3.4.2 |
+| `ATTENDANCE_CLOSE_AFTER_MINUTES` | 240 | 9.3.3 |
+| `ATTENDANCE_CORRECTION_DAYS` | 7 | 9.3.4.3 |
+| `ATTENDANCE_DECISION_SLA_DAYS` | 3 | 9.3.6 |
+| `OVERTIME_MIN_MINUTES` | 30 *(verify against the PKB)* | HR-ATT-008 |
+| `SEPARATION_CHECKLIST_ALERT_DAYS` | 7 | 9.10.6 |
 | `CREDENTIAL_SLA_DAYS` | 14 | 7.6 |
 | `TEMPORARY_PRIVILEGE_MAX_DAYS` | 60 | 7.4.4 |
 | `ROSTER_PERIOD` | Calendar month | 8.2 |
@@ -981,6 +1158,8 @@ Values are owned by HR Manager unless stated otherwise, stored as configuration,
 | Workforce summary | Director | Headcount by category, profession, unit and employment type. |
 | Leave balances | HR, Heads of Unit (unit), the employee (own) | Balance per employee and leave type: granted, used, pending, carried over, expiring. |
 | Leave taken | HR Manager | Leave days per unit and leave type in a period, without reasons. |
+| Attendance summary | Heads of Unit (unit), HR Manager | Per unit and period: shifts worked, absences, late arrivals, missing clock events, approved overtime. |
+| Separations | HR Manager, Director | Separations by type and unit in a period, with notice given; no reasons. |
 
 ---
 
