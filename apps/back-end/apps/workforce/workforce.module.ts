@@ -13,6 +13,8 @@ import { LeaveLedgerRepositoryModule } from '@repository/mongo/leave-ledger.modu
 import { LeavePolicyRepositoryModule } from '@repository/mongo/leave-policy.module'
 import { LeaveRequestDetailRepositoryModule } from '@repository/mongo/leave-request-detail.module'
 import { LeaveRequestRepositoryModule } from '@repository/mongo/leave-request.module'
+import { SeparationDetailRepositoryModule } from '@repository/mongo/separation-detail.module'
+import { SeparationRepositoryModule } from '@repository/mongo/separation.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
 import { PracticeScheduleRepositoryModule } from '@repository/mongo/practice-schedule.module'
 import { PracticeScheduleExceptionRepositoryModule } from '@repository/mongo/practice-schedule-exception.module'
@@ -124,6 +126,8 @@ import { UnitService } from './structure/unit.service'
     LeaveLedgerRepositoryModule,
     LeaveRequestRepositoryModule,
     LeaveRequestDetailRepositoryModule,
+    SeparationRepositoryModule,
+    SeparationDetailRepositoryModule,
   ],
   providers: [
     OrganizationService,

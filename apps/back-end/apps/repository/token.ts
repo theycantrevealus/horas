@@ -239,3 +239,16 @@ export const REPOSITORY_LEAVE_REQUEST = Symbol('REPOSITORY_LEAVE_REQUEST')
 export const REPOSITORY_LEAVE_REQUEST_DETAIL = Symbol(
   'REPOSITORY_LEAVE_REQUEST_DETAIL',
 )
+
+/**
+ * Injection token of the separation repository.
+ */
+export const REPOSITORY_SEPARATION = Symbol('REPOSITORY_SEPARATION')
+
+/**
+ * Injection token of the separation detail repository.
+ */
+export const REPOSITORY_SEPARATION_DETAIL = Symbol(
+  'REPOSITORY_SEPARATION_DETAIL',
+)
+

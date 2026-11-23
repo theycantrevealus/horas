@@ -269,6 +269,18 @@ describe('CommitteeMembershipRepository on the shared Mongo base', () => {
     )
   })
 
+  it('finds every active membership of an employee, in any committee', async () => {
+    const tenant = tenantId.toHexString()
+
+    await memberships.findActiveByEmployee(tenant, employeeId.toHexString())
+
+    expect(model.find).toHaveBeenCalledWith({ tenant_id: tenant, employee_id: employeeId.toHexString(), status: 'active', deleted_at: null })
+    model.find.mockClear()
+    expect(await memberships.findActiveByEmployee('x', employeeId.toHexString())).toEqual([])
+    expect(await memberships.findActiveByEmployee(tenant, 'bad')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('answers an empty list or null for malformed identifiers without querying', async () => {
     expect(await memberships.findByFacility('x', 'y')).toEqual([])
     expect(await memberships.findActiveForEmployee('x', 'y', 'z', 'c')).toBeNull()

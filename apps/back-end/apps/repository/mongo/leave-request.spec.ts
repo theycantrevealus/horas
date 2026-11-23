@@ -415,6 +415,24 @@ describe('LeaveRequestRepository on the shared Mongo base', () => {
     expect(model.find).not.toHaveBeenCalled()
   })
 
+  it('finds the open requests of an employee that end after a date, and nothing for malformed identifiers', async () => {
+    const tenant = tenantId.toHexString()
+
+    await requests.findOpenByEmployeeEndingAfter(tenant, employeeId.toHexString(), '2026-12-31')
+
+    expect(model.find).toHaveBeenCalledWith({
+      tenant_id: tenant,
+      employee_id: employeeId.toHexString(),
+      status: { $in: ['requested', 'head_approved', 'approved'] },
+      'period.end': { $gt: '2026-12-31' },
+      deleted_at: null,
+    })
+    model.find.mockClear()
+    expect(await requests.findOpenByEmployeeEndingAfter('x', employeeId.toHexString(), 'd')).toEqual([])
+    expect(await requests.findOpenByEmployeeEndingAfter(tenant, 'bad', 'd')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('finds the requests waiting for a Head of some units and for HR Manager, and nothing for neither', async () => {
     const tenant = tenantId.toHexString()
     const query = chain([stored])

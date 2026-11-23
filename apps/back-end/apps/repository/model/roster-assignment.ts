@@ -51,7 +51,7 @@ export interface AssignmentSource {
  * @property ref_id - The leave request.
  */
 export interface AssignmentCancellation {
-  kind: 'leave'
+  kind: 'leave' | 'separation'
   ref_id: string
 }
 

@@ -104,6 +104,11 @@ import {
 } from '@repository/interface/leave-request'
 import { type LeaveRequestDetailRepository } from '@repository/interface/leave-request-detail'
 import {
+  type SeparationQuery,
+  type SeparationRepository,
+} from '@repository/interface/separation'
+import { type SeparationDetailRepository } from '@repository/interface/separation-detail'
+import {
   type LeavePolicyQuery,
   type LeavePolicyRepository,
 } from '@repository/interface/leave-policy'
@@ -132,6 +137,8 @@ import {
   type LeaveRequestStatus,
 } from '@repository/model/leave-request'
 import { type LeaveRequestDetail } from '@repository/model/leave-request-detail'
+import { type Separation } from '@repository/model/separation'
+import { type SeparationDetail } from '@repository/model/separation-detail'
 import { type LeavePolicy } from '@repository/model/leave-policy'
 import { type Roster } from '@repository/model/roster'
 import { type RosterAssignment } from '@repository/model/roster-assignment'
@@ -1834,6 +1841,26 @@ export class InMemoryCommitteeMemberships
   }
 
   /**
+   * Finds every active membership of an employee.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The memberships.
+   */
+  async findActiveByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<CommitteeMembership[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.status === 'active' &&
+        !item.deleted_at,
+    )
+  }
+
+  /**
    * Finds the active membership of an employee in one committee of a facility.
    *
    * @param tenantId - Tenant to search in.
@@ -3392,6 +3419,29 @@ export class InMemoryRosterAssignments
   }
 
   /**
+   * Finds the planned assignments of an employee dated after a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The last day that is kept.
+   * @returns The planned assignments.
+   */
+  async findPlannedByEmployeeAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<RosterAssignment[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.status === 'planned' &&
+        item.date > date &&
+        !item.deleted_at,
+    ).sort((left, right) => left.date.localeCompare(right.date))
+  }
+
+  /**
    * Finds the planned assignments of an employee on dates in a range, in every roster and unit.
    *
    * @param tenantId - Tenant to search in.
@@ -3658,6 +3708,28 @@ export class InMemoryPracticeSchedules
         !item.deleted_at &&
         item.employee_id === employeeId &&
         item.day_of_week === dayOfWeek,
+    )
+  }
+
+  /**
+   * Finds the schedules of a doctor whose validity runs past a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param date - The last day that is kept.
+   * @returns The schedules.
+   */
+  async findByEmployeeRunningAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<PracticeSchedule[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        item.employee_id === employeeId &&
+        (item.period.end === null || item.period.end > date),
     )
   }
 
@@ -4280,6 +4352,29 @@ export class InMemoryLeaveRequests
   }
 
   /**
+   * Finds the open requests of an employee whose period ends after a date.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The last day that is kept.
+   * @returns The requests.
+   */
+  async findOpenByEmployeeEndingAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<LeaveRequest[]> {
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        !item.deleted_at &&
+        ['requested', 'head_approved', 'approved'].includes(item.status) &&
+        item.period.end > date,
+    )
+  }
+
+  /**
    * Finds the approved requests of an employee whose period holds a date.
    *
    * @param tenantId - Tenant to search in.
@@ -4488,3 +4583,205 @@ export class InMemoryLeaveRequestDetails
     )
   }
 }
+
+/**
+ * In-memory `SeparationRepository` for tests. Like the Mongo collection, one separation that is not
+ * cancelled per employee (`HR-SEP-001`) and nothing is deleted.
+ */
+export class InMemorySeparations
+  extends InMemoryRepository<Separation>
+  implements SeparationRepository
+{
+  /**
+   * Creates a separation, refusing a second one that is not cancelled for the employee.
+   *
+   * @param entity - Separation data.
+   * @param id - Optional identifier.
+   * @returns The stored separation.
+   */
+  override async create(
+    entity: NewEntity<Separation>,
+    id?: string,
+  ): Promise<Separation> {
+    if (
+      entity.status !== 'cancelled' &&
+      this.find(
+        (item) =>
+          item.tenant_id === entity.tenant_id &&
+          item.employee_id === entity.employee_id &&
+          item.status !== 'cancelled' &&
+          !item.deleted_at,
+      )
+    ) {
+      throw new RepositoryConflictError('duplicate separation', {
+        operation: 'SeparationRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Rejects: separations are never deleted.
+   *
+   * @returns Never resolves.
+   */
+  override async delete(): Promise<void> {
+    throw new RepositoryError('Separations are never deleted.', {
+      operation: 'SeparationRepository.delete',
+    })
+  }
+
+  /**
+   * Rejects: separations are never deleted.
+   *
+   * @returns Never resolves.
+   */
+  override async deleteSoft(): Promise<void> {
+    throw new RepositoryError('Separations are never deleted.', {
+      operation: 'SeparationRepository.deleteSoft',
+    })
+  }
+
+  /**
+   * Finds separations, by last working day, latest first.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param query - Optional filters and paging.
+   * @returns The separations.
+   */
+  async findByFilter(
+    tenantId: string,
+    query: SeparationQuery = {},
+  ): Promise<Separation[]> {
+    const offset = query.offset ?? 0
+    return this.filter(
+      (item) =>
+        item.tenant_id === tenantId &&
+        !item.deleted_at &&
+        (!query.status || item.status === query.status) &&
+        (!query.typeCode || item.type.code === query.typeCode) &&
+        (!query.facilityId || item.facility_id === query.facilityId) &&
+        (!query.employeeIds || query.employeeIds.includes(item.employee_id)) &&
+        (!query.from || item.last_working_day >= query.from) &&
+        (!query.to || item.last_working_day <= query.to),
+    )
+      .sort(
+        (left, right) =>
+          right.last_working_day.localeCompare(left.last_working_day) ||
+          right.id.localeCompare(left.id),
+      )
+      .slice(offset, offset + (query.limit ?? 10))
+  }
+
+  /**
+   * Finds the separation of an employee that is not cancelled.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @returns The separation, or `null`.
+   */
+  async findOpenByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<Separation | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.employee_id === employeeId &&
+        item.status !== 'cancelled' &&
+        !item.deleted_at,
+    )
+  }
+}
+
+/**
+ * In-memory `SeparationDetailRepository` for tests: one detail per separation, nothing deleted,
+ * only the reason can change.
+ */
+export class InMemorySeparationDetails
+  extends InMemoryRepository<SeparationDetail>
+  implements SeparationDetailRepository
+{
+  /**
+   * Creates a detail, refusing a second one for the same separation.
+   *
+   * @param entity - Detail data.
+   * @param id - Optional identifier.
+   * @returns The stored detail.
+   */
+  override async create(
+    entity: NewEntity<SeparationDetail>,
+    id?: string,
+  ): Promise<SeparationDetail> {
+    if (
+      this.find(
+        (item) =>
+          item.tenant_id === entity.tenant_id &&
+          item.separation_id === entity.separation_id,
+      )
+    ) {
+      throw new RepositoryConflictError('duplicate separation detail', {
+        operation: 'SeparationDetailRepository.write',
+      })
+    }
+    return super.create(entity, id)
+  }
+
+  /**
+   * Updates the reason of a detail; other fields are ignored.
+   *
+   * @param id - Detail identifier.
+   * @param changes - Fields to change.
+   * @param options - Optional concurrency check.
+   * @returns The updated detail.
+   */
+  override async update(
+    id: string,
+    changes: EntityChanges<SeparationDetail>,
+    options?: UpdateOptions,
+  ): Promise<SeparationDetail> {
+    return super.update(id, { reason: changes.reason }, options)
+  }
+
+  /**
+   * Rejects: details are never deleted.
+   *
+   * @returns Never resolves.
+   */
+  override async delete(): Promise<void> {
+    throw new RepositoryError('Separation details are never deleted.', {
+      operation: 'SeparationDetailRepository.delete',
+    })
+  }
+
+  /**
+   * Rejects: details are never deleted.
+   *
+   * @returns Never resolves.
+   */
+  override async deleteSoft(): Promise<void> {
+    throw new RepositoryError('Separation details are never deleted.', {
+      operation: 'SeparationDetailRepository.deleteSoft',
+    })
+  }
+
+  /**
+   * Finds the detail of a separation.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param separationId - The separation.
+   * @returns The detail, or `null`.
+   */
+  async findBySeparation(
+    tenantId: string,
+    separationId: string,
+  ): Promise<SeparationDetail | null> {
+    return this.find(
+      (item) =>
+        item.tenant_id === tenantId &&
+        item.separation_id === separationId &&
+        !item.deleted_at,
+    )
+  }
+}
+

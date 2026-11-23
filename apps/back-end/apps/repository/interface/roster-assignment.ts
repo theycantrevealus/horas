@@ -139,4 +139,19 @@ export interface RosterAssignmentRepository extends Repository<RosterAssignment>
     items: { id: string; revision: number }[],
     leaveRequestId: string,
   ): Promise<RosterAssignment[]>
+
+  /**
+   * Finds the planned assignments of an employee dated after a date, in every roster and unit
+   * (what a separation closes after the last working day).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The employee.
+   * @param date - The last day that is kept; later dates are returned.
+   * @returns The planned assignments, possibly none; empty for a malformed identifier.
+   */
+  findPlannedByEmployeeAfter(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<RosterAssignment[]>
 }

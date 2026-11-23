@@ -11,6 +11,8 @@ import {
   REPOSITORY_LEAVE_LEDGER,
   REPOSITORY_LEAVE_REQUEST,
   REPOSITORY_LEAVE_REQUEST_DETAIL,
+  REPOSITORY_SEPARATION,
+  REPOSITORY_SEPARATION_DETAIL,
   REPOSITORY_LEAVE_POLICY,
   REPOSITORY_HOLIDAY_CALENDAR,
   REPOSITORY_ROSTER,
@@ -44,6 +46,8 @@ import { CoverageRequirementEntity } from '@repository/mongo/schema/coverage-req
 import { LeaveLedgerEntryEntity } from '@repository/mongo/schema/leave-ledger'
 import { LeaveRequestEntity } from '@repository/mongo/schema/leave-request'
 import { LeaveRequestDetailEntity } from '@repository/mongo/schema/leave-request-detail'
+import { SeparationEntity } from '@repository/mongo/schema/separation'
+import { SeparationDetailEntity } from '@repository/mongo/schema/separation-detail'
 import { LeavePolicyEntity } from '@repository/mongo/schema/leave-policy'
 import { RosterAssignmentEntity } from '@repository/mongo/schema/roster-assignment'
 import { PracticeScheduleEntity } from '@repository/mongo/schema/practice-schedule'
@@ -76,6 +80,8 @@ import {
   InMemoryCoverageRequirements,
   InMemoryLeaveLedger,
   InMemoryLeaveRequestDetails,
+  InMemorySeparationDetails,
+  InMemorySeparations,
   InMemoryLeaveRequests,
   InMemoryLeavePolicies,
   InMemoryHolidayCalendars,
@@ -168,6 +174,8 @@ export interface InMemoryWorkforce {
   leaveLedger: InMemoryLeaveLedger
   leaveRequests: InMemoryLeaveRequests
   leaveRequestDetails: InMemoryLeaveRequestDetails
+  separations: InMemorySeparations
+  separationDetails: InMemorySeparationDetails
   rosters: InMemoryRosters
   rosterAssignments: InMemoryRosterAssignments
   swaps: InMemoryShiftSwapRequests
@@ -211,6 +219,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
   const leaveLedger = new InMemoryLeaveLedger()
   const leaveRequests = new InMemoryLeaveRequests()
   const leaveRequestDetails = new InMemoryLeaveRequestDetails()
+  const separations = new InMemorySeparations()
+  const separationDetails = new InMemorySeparationDetails()
   const rosters = new InMemoryRosters()
   const rosterAssignments = new InMemoryRosterAssignments()
   const swaps = new InMemoryShiftSwapRequests()
@@ -244,6 +254,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
     leaveLedger,
     leaveRequests,
     leaveRequestDetails,
+    separations,
+    separationDetails,
     rosters,
     rosterAssignments,
     swaps,
@@ -278,6 +290,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         LeaveLedgerEntryEntity,
         LeaveRequestEntity,
         LeaveRequestDetailEntity,
+        SeparationEntity,
+        SeparationDetailEntity,
         RosterEntity,
         RosterAssignmentEntity,
         ShiftSwapRequestEntity,
@@ -312,6 +326,8 @@ export function createInMemoryWorkforce(): InMemoryWorkforce {
         [REPOSITORY_LEAVE_LEDGER, leaveLedger],
         [REPOSITORY_LEAVE_REQUEST, leaveRequests],
         [REPOSITORY_LEAVE_REQUEST_DETAIL, leaveRequestDetails],
+        [REPOSITORY_SEPARATION, separations],
+        [REPOSITORY_SEPARATION_DETAIL, separationDetails],
         [REPOSITORY_ROSTER, rosters],
         [REPOSITORY_ROSTER_ASSIGNMENT, rosterAssignments],
         [REPOSITORY_SHIFT_SWAP_REQUEST, swaps],

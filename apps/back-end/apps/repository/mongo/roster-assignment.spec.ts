@@ -276,6 +276,18 @@ describe('RosterAssignmentRepository on the shared Mongo base', () => {
     expect(model.find).not.toHaveBeenCalled()
   })
 
+  it('finds the planned assignments of an employee after a date, and nothing for malformed identifiers', async () => {
+    const tenant = tenantId.toHexString()
+
+    await assignments.findPlannedByEmployeeAfter(tenant, employeeId.toHexString(), '2026-12-31')
+
+    expect(model.find).toHaveBeenLastCalledWith({ tenant_id: tenant, employee_id: employeeId.toHexString(), status: 'planned', date: { $gt: '2026-12-31' }, deleted_at: null })
+    model.find.mockClear()
+    expect(await assignments.findPlannedByEmployeeAfter('x', employeeId.toHexString(), 'd')).toEqual([])
+    expect(await assignments.findPlannedByEmployeeAfter(tenant, 'bad', 'd')).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+  })
+
   it('finds the planned assignment of an employee on a date in a roster', async () => {
     const tenant = tenantId.toHexString()
     expect(await assignments.findPlannedByEmployeeAndDate(tenant, rosterId.toHexString(), employeeId.toHexString(), '2027-03-10')).toMatchObject({ date: '2027-03-10' })
