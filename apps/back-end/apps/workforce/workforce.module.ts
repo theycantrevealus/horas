@@ -59,6 +59,8 @@ import { LeavePlaceService } from './leave/leave-place'
 import { LeavePolicyService } from './leave/leave-policy.service'
 import { LeaveRequestService } from './leave/leave-request.service'
 import { LeaveTypeChangeService } from './leave/leave-type-change.service'
+import { SeparationImpactService } from './separation/separation-impact.service'
+import { SeparationService } from './separation/separation.service'
 import { HrImportService } from './import/hr-import.service'
 import { DutyService } from './rostering/duty.service'
 import { PracticeExceptionService } from './rostering/practice-exception.service'
@@ -178,6 +180,8 @@ import { UnitService } from './structure/unit.service'
     LeaveDetailService,
     LeaveDecisionService,
     LeaveTypeChangeService,
+    SeparationService,
+    SeparationImpactService,
     { provide: LEAVE_EFFECTS, useClass: RosterLeaveEffects },
   ],
   exports: [
@@ -229,6 +233,8 @@ import { UnitService } from './structure/unit.service'
     LeaveDetailService,
     LeaveDecisionService,
     LeaveTypeChangeService,
+    SeparationService,
+    SeparationImpactService,
   ],
 })
 export class WorkforceModule {}
