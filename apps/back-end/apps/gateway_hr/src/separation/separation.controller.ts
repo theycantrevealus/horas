@@ -20,6 +20,7 @@ import {
   SeparationImpactService,
   type SeparationImpact,
 } from '@workforce/separation/separation-impact.service'
+import { SeparationCompletionService } from '@workforce/separation/separation-completion.service'
 import { SeparationService } from '@workforce/separation/separation.service'
 import { ForbiddenError } from '@workforce/workforce.error'
 import {
@@ -39,10 +40,12 @@ export class SeparationController {
   /**
    * @param separations - Separation service.
    * @param impacts - Separation impact service.
+   * @param completion - Completes an immediate separation.
    */
   constructor(
     private readonly separations: SeparationService,
     private readonly impacts: SeparationImpactService,
+    private readonly completion: SeparationCompletionService,
   ) {}
 
   /**
@@ -53,11 +56,11 @@ export class SeparationController {
    * @param held - The caller's permissions.
    * @param id - Employee identifier.
    * @param body - The separation.
-   * @returns The separation, without its reason.
+   * @returns The separation, without its reason; completed when it is immediate.
    */
   @Post('employees/:id/separations')
   @RequirePermissions(PERMISSIONS.WORKFORCE_SEPARATION_WRITE)
-  create(
+  async create(
     @CurrentUser() user: AuthenticatedUser,
     @CurrentPermissions() held: ReadonlySet<string>,
     @Param('id') id: string,
@@ -72,13 +75,18 @@ export class SeparationController {
         'An immediate separation needs the permission to complete it.',
       )
     }
-    return this.separations.create(user.tenant_id, id, {
+    const separation = await this.separations.create(user.tenant_id, id, {
       type: { system: body.type.system, code: body.type.code },
       lastWorkingDay: body.lastWorkingDay,
       noticeReceivedOn: body.noticeReceivedOn ?? null,
       immediate: body.immediate,
       reason: body.reason,
     })
+    // An immediate separation takes effect when it is recorded. If completing it fails, it stays
+    // planned and `POST /v1/separations/:id/complete` completes it.
+    return body.immediate === true
+      ? this.completion.completeImmediate(user.tenant_id, separation.id)
+      : separation
   }
 
   /**
@@ -214,5 +222,22 @@ export class SeparationController {
       { system, code, done: body.done },
       body.version,
     )
+  }
+
+  /**
+   * Handles `POST /v1/separations/:id/complete`: completes an immediate separation that is still
+   * planned. The others complete by themselves the day after the last working day.
+   *
+   * @param user - Signed-in user.
+   * @param id - Separation identifier.
+   * @returns The completed separation.
+   */
+  @Post('separations/:id/complete')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_SEPARATION_COMPLETE)
+  complete(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<Separation> {
+    return this.completion.completeImmediate(user.tenant_id, id)
   }
 }

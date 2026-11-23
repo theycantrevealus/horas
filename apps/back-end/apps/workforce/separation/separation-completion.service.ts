@@ -191,6 +191,30 @@ export class SeparationCompletionService {
   }
 
   /**
+   * Completes an immediate separation that is still planned, for example after the completion in the
+   * request that recorded it failed (a dismissal or a death takes effect when it is recorded).
+   *
+   * @param tenantId - Tenant of the separation.
+   * @param separationId - Separation identifier.
+   * @returns The completed separation.
+   * @throws NotFoundError `separation_not_found`.
+   * @throws InvalidRequestError `separation_not_immediate` or `separation_not_planned`.
+   */
+  async completeImmediate(
+    tenantId: string,
+    separationId: string,
+  ): Promise<Separation> {
+    const separation = await this.load(tenantId, separationId)
+    if (!separation.immediate) {
+      throw new InvalidRequestError(
+        'separation_not_immediate',
+        'Only an immediate separation is completed by hand; the others complete the day after the last working day.',
+      )
+    }
+    return this.complete(tenantId, separationId)
+  }
+
+  /**
    * Closes everything that names the employee after the last working day, then the employee and the
    * separation. Runs inside the transaction of `complete`; every repository call is sequential.
    *

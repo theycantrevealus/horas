@@ -309,6 +309,22 @@ describe('SeparationCompletionService', () => {
     })
   })
 
+  describe('completeImmediate', () => {
+    it('completes an immediate separation that is still planned, and refuses one that is not immediate', async () => {
+      const immediate = await addSeparation({ immediate: true, type: dismissal, contract_action: 'terminate' }, (await world.addEmployee()).id)
+      const planned = await addSeparation()
+
+      const done = await asJob(() => service.completeImmediate(world.tenantId, immediate.id))
+      const refused = await rejection(() => asJob(() => service.completeImmediate(world.tenantId, planned.id)))
+      const missing = await rejection(() => asJob(() => service.completeImmediate(world.tenantId, 'bad')))
+
+      expect(done.status).toBe('completed')
+      expect((refused as { code: string }).code).toBe('separation_not_immediate')
+      expect((missing as { code: string }).code).toBe('separation_not_found')
+      expect((await world.repos.separations.findOne(planned.id))?.status).toBe('planned')
+    })
+  })
+
   it('leaves the separation planned when a step fails, so the next pass completes it (the in-memory fakes cannot roll back, so earlier steps are not checked)', async () => {
     const separation = await addSeparation()
     const original = world.repos.employees.update.bind(world.repos.employees)

@@ -133,12 +133,13 @@ describe('separation endpoints (in-memory repositories)', () => {
       ['PATCH', `/v1/separations/${id}`, 'write'],
       ['POST', `/v1/separations/${id}/cancel`, 'write'],
       ['PUT', `/v1/separations/${id}/checklist/id.exit-checklist-item/keys`, 'write'],
+      ['POST', `/v1/separations/${id}/complete`, 'complete'],
     ]
     for (const [method, url] of routes) {
       expect((await call(method, url, undefined, {})).status).toBe(401)
     }
     for (const [method, url, need] of routes) {
-      const token = need === 'write' ? readerToken : need === 'details' ? readerToken : detailsToken
+      const token = need === 'write' || need === 'details' || need === 'complete' ? readerToken : detailsToken
       expect((await call(method, url, token, {})).status).toBe(403)
     }
   })
@@ -189,7 +190,8 @@ describe('separation endpoints (in-memory repositories)', () => {
     expect(denied.status).toBe(403)
     expect(denied.body).toMatchObject({ code: 'permission_required' })
     expect(allowed.status).toBe(201)
-    expect(allowed.body).toMatchObject({ immediate: true, contract_action: 'terminate' })
+    expect(allowed.body).toMatchObject({ immediate: true, contract_action: 'terminate', status: 'completed', completion: { counts: { assignments: 0 } } })
+    expect((await workforce.employees.findOne(employee))?.employment_status).toBe('separated')
   })
 
   it('lists and reads separations for a reader, with filters and limits, and hides them from another tenant', async () => {
@@ -267,5 +269,31 @@ describe('separation endpoints (in-memory repositories)', () => {
     expect(unknown.status).toBe(422)
     expect(unknown.body).toMatchObject({ code: 'checklist_item_not_found' })
     expect(invalid.status).toBe(400)
+  })
+
+  it('completes by hand only an immediate separation, and answers 404 for a missing or malformed one and 403 for a caller without the permission', async () => {
+    const planned = await record()
+
+    const notImmediate = await call('POST', `/v1/separations/${planned.id}/complete`, completerToken, {})
+    const missing = await call('POST', `/v1/separations/${new Types.ObjectId().toHexString()}/complete`, completerToken, {})
+    const malformed = await call('POST', '/v1/separations/bad/complete', completerToken, {})
+    const foreign = await call('POST', `/v1/separations/${planned.id}/complete`, otherTenantToken, {})
+
+    expect(notImmediate.status).toBe(422)
+    expect(notImmediate.body).toMatchObject({ code: 'separation_not_immediate' })
+    expect(missing.status).toBe(404)
+    expect(malformed.status).toBe(404)
+    expect(foreign.status).toBe(403)
+    expect((await call('GET', `/v1/separations/${planned.id}`, readerToken)).body).toMatchObject({ status: 'planned' })
+  })
+
+  it('refuses an immediate separation dated in the future (422)', async () => {
+    const employee = await addEmployee(tenantId)
+
+    const reply = await call('POST', `/v1/employees/${employee}/separations`, completerToken, body({ type: dismissal, immediate: true, lastWorkingDay: addDays(todayUtc(), 5) }))
+
+    expect(reply.status).toBe(422)
+    expect(reply.body).toMatchObject({ code: 'invalid_last_working_day' })
+    expect((await workforce.employees.findOne(employee))?.employment_status).toBe('active')
   })
 })
