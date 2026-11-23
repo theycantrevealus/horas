@@ -18,6 +18,12 @@ import {
 import { PERMISSIONS } from '@identity/permission'
 import { LeaveDecisionService } from '@workforce/leave/leave-decision.service'
 import { LeaveTypeChangeService } from '@workforce/leave/leave-type-change.service'
+import {
+  LeaveCoverService,
+  type ConfirmCoverResult,
+  type LeaveCoverProposal,
+} from '@workforce/leave/leave-cover.service'
+import { LeaveEndEarlyService } from '@workforce/leave/leave-end-early.service'
 import { LeaveDetailService } from '@workforce/leave/leave-detail.service'
 import { type LeaveCaller } from '@workforce/leave/leave-caller'
 import {
@@ -30,6 +36,8 @@ import {
   ApproveLeaveDto,
   CancelLeaveDto,
   ChangeLeaveTypeDto,
+  ConfirmCoverDto,
+  EndEarlyDto,
   RejectLeaveDto,
   HrLeaveRequestDto,
   LeaveDatesDto,
@@ -91,12 +99,16 @@ export class LeaveRequestController {
    * @param details - Leave detail service, for the reason and the proof.
    * @param decisions - Leave decision service: days, approve, reject and cancel.
    * @param typeChanges - Leave type change service.
+   * @param covers - Cover of an approved leave by the replacement.
+   * @param endings - Ending an approved leave early.
    */
   constructor(
     private readonly requests: LeaveRequestService,
     private readonly details: LeaveDetailService,
     private readonly decisions: LeaveDecisionService,
     private readonly typeChanges: LeaveTypeChangeService,
+    private readonly covers: LeaveCoverService,
+    private readonly endings: LeaveEndEarlyService,
   ) {}
 
   /**
@@ -368,5 +380,64 @@ export class LeaveRequestController {
       reason: body.reason,
       version: body.version,
     })
+  }
+
+  /**
+   * Handles `GET /v1/leave-requests/:id/cover`: the cancelled shifts checked against the
+   * replacement now. Writes no log.
+   *
+   * @param user - Signed-in user.
+   * @param held - The caller's permissions.
+   * @param id - Request identifier.
+   * @returns The proposal.
+   */
+  @Get('leave-requests/:id/cover')
+  @RequirePermissions()
+  proposal(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentPermissions() held: ReadonlySet<string>,
+    @Param('id') id: string,
+  ): Promise<LeaveCoverProposal> {
+    return this.covers.proposal(user.tenant_id, id, toCaller(user, held))
+  }
+
+  /**
+   * Handles `POST /v1/leave-requests/:id/cover`: the first-step decider gives the chosen shifts to
+   * the replacement. Once per request.
+   *
+   * @param user - Signed-in user.
+   * @param held - The caller's permissions.
+   * @param id - Request identifier.
+   * @param body - The shifts to cover.
+   * @returns The created assignments and the refused items.
+   */
+  @Post('leave-requests/:id/cover')
+  @RequirePermissions()
+  confirmCover(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentPermissions() held: ReadonlySet<string>,
+    @Param('id') id: string,
+    @Body() body: ConfirmCoverDto,
+  ): Promise<ConfirmCoverResult> {
+    return this.covers.confirm(user.tenant_id, id, body, toCaller(user, held))
+  }
+
+  /**
+   * Handles `POST /v1/leave-requests/:id/end-early`: HR ends a leave that has started before its
+   * last day.
+   *
+   * @param user - Signed-in user.
+   * @param id - Request identifier.
+   * @param body - The last date and the reason.
+   * @returns The updated request.
+   */
+  @Post('leave-requests/:id/end-early')
+  @RequirePermissions(PERMISSIONS.WORKFORCE_LEAVE_REQUEST_WRITE)
+  endEarly(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: EndEarlyDto,
+  ): Promise<LeaveRequest> {
+    return this.endings.endEarly(user.tenant_id, id, body)
   }
 }

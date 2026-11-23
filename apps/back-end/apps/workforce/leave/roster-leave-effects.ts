@@ -74,10 +74,35 @@ export class RosterLeaveEffects implements LeaveEffects {
    * @param request - The cancelled request.
    */
   async onCancelled(request: LeaveRequest): Promise<void> {
+    await this.undoExceptions(request, () => true)
+  }
+
+  /**
+   * Undoes the exceptions of a leave that was ended early for the days after its new last date, if
+   * they are dated today or later. Shifts are not restored (`HR-LEV-023`).
+   *
+   * @param request - The shortened request.
+   * @param lastDate - The last day of the leave now.
+   */
+  async onShortened(request: LeaveRequest, lastDate: string): Promise<void> {
+    await this.undoExceptions(request, (date) => date > lastDate)
+  }
+
+  /**
+   * Soft-deletes the exceptions this request made that are dated today or later and that match a
+   * test; exceptions of other requests and of other tenants are never read.
+   *
+   * @param request - The leave request.
+   * @param matches - Tells whether the date of an exception is to be undone.
+   */
+  private async undoExceptions(
+    request: LeaveRequest,
+    matches: (date: string) => boolean,
+  ): Promise<void> {
     const { today } = await this.place.of(request.tenant_id, request.employee_id)
     const made = await this.exceptions.findByLeave(request.tenant_id, request.id)
     for (const exception of made) {
-      if (exception.date >= today) {
+      if (exception.date >= today && matches(exception.date)) {
         await this.exceptions.deleteSoft(exception.id)
       }
     }
