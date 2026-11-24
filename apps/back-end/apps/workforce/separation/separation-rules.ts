@@ -40,8 +40,9 @@ export function checkReason(reason: unknown, max: number): string {
 
 /**
  * Checks the last working day (HR plan 9 SP1, `HR-SEP-002`): a real date, today or later in the
- * facility's zone, unless the separation is immediate, which may name a date in the past but not
- * one before the employee was hired.
+ * facility's zone, unless the separation is immediate, which takes effect when it is recorded and so
+ * may name today or a date in the past, but not a date in the future or one before the employee was
+ * hired.
  *
  * @param lastWorkingDay - The date as sent.
  * @param today - Today in the facility's zone.
@@ -59,6 +60,7 @@ export function checkLastWorkingDay(
     typeof lastWorkingDay !== 'string' ||
     !isLocalDate(lastWorkingDay) ||
     (!immediate && lastWorkingDay < today) ||
+    (immediate && lastWorkingDay > today) ||
     lastWorkingDay < hiredOn
   ) {
     throw new InvalidRequestError(

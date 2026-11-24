@@ -266,6 +266,22 @@ describe('SeparationRepository on the shared Mongo base', () => {
     expect(await separations.findOpenByEmployee(tenant, 'bad')).toBeNull()
   })
 
+  it('reads the planned separations of every tenant whose last working day passed, after a cursor, for the job', async () => {
+    const query = chain([stored])
+    model.find.mockReturnValueOnce(query)
+
+    expect(await separations.findPlannedEndedBefore('2027-01-01', separationId.toHexString(), 25)).toHaveLength(1)
+
+    expect(model.find).toHaveBeenCalledWith({ status: 'planned', last_working_day: { $lt: '2027-01-01' }, deleted_at: null, _id: { $gt: separationId } })
+    expect(query.sort).toHaveBeenCalledWith({ _id: 1 })
+    expect(query.limit).toHaveBeenCalledWith(25)
+    model.find.mockClear()
+    expect(await separations.findPlannedEndedBefore('2027-01-01', 'bad', 25)).toEqual([])
+    expect(model.find).not.toHaveBeenCalled()
+    await separations.findPlannedEndedBefore('2027-01-01', null, 25)
+    expect(model.find).toHaveBeenCalledWith({ status: 'planned', last_working_day: { $lt: '2027-01-01' }, deleted_at: null })
+  })
+
   it('updates only the fields a separation may change', async () => {
     await asAdmin(() =>
       separations.update(separationId.toHexString(), { status: 'cancelled', employee_id: new Types.ObjectId().toHexString(), immediate: true }),

@@ -385,6 +385,21 @@ describe('RosterAssignmentRepository on the shared Mongo base', () => {
     }
   })
 
+  it('cancels assignments for a separation with one change record each and the reason separation', async () => {
+    const separation = new Types.ObjectId().toHexString()
+    model.findOneAndUpdate.mockImplementation(() => chain({ ...stored, status: 'cancelled', change_reason: 'separation', revision: 4, cancellation: { kind: 'separation', ref_id: new Types.ObjectId(separation) } }))
+
+    const cancelled = await asAdmin(() => assignments.cancelForSeparation(tenantId.toHexString(), [{ id: assignmentId.toHexString(), revision: 4 }], separation))
+
+    expect(cancelled).toHaveLength(1)
+    const update = model.findOneAndUpdate.mock.calls[0]?.[1] as { $set: Record<string, unknown> }
+    expect(update.$set).toMatchObject({ status: 'cancelled', change_reason: 'separation', revision: 4 })
+    expect(JSON.stringify(update.$set.cancellation)).toContain('separation')
+    expect(appended).toHaveLength(1)
+    expect(appended[0]).toMatchObject({ action: 'update', reason: 'separation' })
+    await expect(asAdmin(() => assignments.cancelForSeparation(new Types.ObjectId().toHexString(), [{ id: assignmentId.toHexString(), revision: 1 }], separation))).rejects.toBeInstanceOf(RepositoryNotFoundError)
+  })
+
   it('refuses to cancel an assignment of another tenant, writes nothing for an empty list, and needs an acting account', async () => {
     const other = new Types.ObjectId().toHexString()
     const item = [{ id: assignmentId.toHexString(), revision: 1 }]

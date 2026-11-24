@@ -51,4 +51,20 @@ export interface SeparationRepository extends Repository<Separation> {
     tenantId: string,
     employeeId: string,
   ): Promise<Separation | null>
+
+  /**
+   * Finds `planned` separations of **every tenant** whose last working day is before a date, in
+   * identifier order, after a cursor. A cross-tenant read for the worker's separation job only
+   * (`gateway-hr-9-separation.md` SP5); the job handles each separation with its own `tenant_id`.
+   *
+   * @param date - Local date; separations whose last working day is before it are returned.
+   * @param afterId - Identifier of the last separation of the previous page, or `null`.
+   * @param limit - Largest number of records to return.
+   * @returns The separations, possibly none; empty for a malformed cursor.
+   */
+  findPlannedEndedBefore(
+    date: string,
+    afterId: string | null,
+    limit: number,
+  ): Promise<Separation[]>
 }

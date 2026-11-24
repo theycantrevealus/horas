@@ -148,6 +148,40 @@ export class CredentialApplicationRepositoryMongo
   }
 
   /**
+   * Finds the open applications of an applicant.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The applicant.
+   * @returns The applications.
+   */
+  async findOpenByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<CredentialApplication[]> {
+    const operation = 'CredentialApplicationRepository.findOpenByEmployee'
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            employee_id: employeeId,
+            deleted_at: null,
+            status: { $nin: ['approved', 'rejected', 'withdrawn'] },
+          }),
+        )
+        .sort({ _id: 1 })
+        .lean<LeanRecord<CredentialApplicationEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Maps a stored record to the model, copying only model fields.
    *
    * @param record - Stored record.

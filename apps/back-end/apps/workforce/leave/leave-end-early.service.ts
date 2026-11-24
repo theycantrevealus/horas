@@ -19,11 +19,10 @@ import {
 } from '@repository/token'
 import { observe } from '../observe'
 import { ConflictError, InvalidRequestError } from '../workforce.error'
-import { totalOf } from './day-count'
 import { leaveRequestNotFound } from './leave-access'
 import { LEAVE_EFFECTS, type LeaveEffects } from './leave-effects'
 import { LeavePlaceService } from './leave-place'
-import { heldDays } from './leave-posting'
+import { cutLeaveAfter, reverseDays } from './leave-posting'
 
 const NAME = 'LeaveEndEarlyService'
 
@@ -126,9 +125,7 @@ export class LeaveEndEarlyService {
         if (input.version !== undefined && input.version !== request.version) {
           throw this.stale()
         }
-        const days = request.days.filter((day) => day.date <= lastDate)
-        const total = totalOf(days)
-        const removed = request.total_days - total
+        const { days, total, removed } = cutLeaveAfter(request, lastDate)
         try {
           return await withChangeReason(reason, () =>
             this.transactions.run(async () => {
@@ -142,7 +139,7 @@ export class LeaveEndEarlyService {
                 },
                 { expectedVersion: request.version },
               )
-              await this.giveBack(tenantId, updated, removed)
+              await reverseDays(this.ledger, tenantId, updated, removed)
               await this.effects.onShortened(updated, lastDate)
               return updated
             }),
@@ -158,47 +155,6 @@ export class LeaveEndEarlyService {
         }
       },
     )
-  }
-
-  /**
-   * Reverses days in the ledger, own days first and then carried-over days. A request without a
-   * yearly entitlement posted nothing, so nothing is reversed.
-   *
-   * @param tenantId - Tenant of the caller.
-   * @param request - The shortened request.
-   * @param removed - The days no longer taken.
-   */
-  private async giveBack(
-    tenantId: string,
-    request: LeaveRequest,
-    removed: number,
-  ): Promise<void> {
-    if (removed <= 0) {
-      return
-    }
-    const held = heldDays(await this.ledger.findByRequest(tenantId, request.id))
-    let left = Math.round(removed * 2)
-    for (const bucket of ['own', 'carry_over'] as const) {
-      for (const item of held.filter((entry) => entry.bucket === bucket)) {
-        const give = Math.min(left, Math.round(item.days * 2))
-        if (give <= 0) {
-          continue
-        }
-        left -= give
-        await this.ledger.append({
-          tenant_id: tenantId,
-          employee_id: request.employee_id,
-          leave_type: item.leave_type,
-          period: item.period,
-          kind: 'reversal',
-          days: give / 2,
-          bucket: item.bucket,
-          expires_on: null,
-          source: { kind: 'request', ref_id: request.id, date: null },
-          dedupe_key: null,
-        })
-      }
-    }
   }
 
   /**

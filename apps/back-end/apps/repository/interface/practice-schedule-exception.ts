@@ -88,4 +88,19 @@ export interface PracticeScheduleExceptionRepository extends Repository<Practice
     tenantId: string,
     leaveRequestId: string,
   ): Promise<PracticeScheduleException[]>
+
+  /**
+   * Finds the exceptions of a doctor that move a session onto a date after a given one, in force
+   * only (what a separation undoes after the last working day).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param date - The last day that is kept.
+   * @returns The exceptions, possibly none; empty for a malformed identifier.
+   */
+  findMovedAfterByEmployee(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<PracticeScheduleException[]>
 }

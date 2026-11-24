@@ -13,6 +13,7 @@ import {
   REPOSITORY_ROSTER_ASSIGNMENT,
 } from '@repository/token'
 import { isoWeekday } from '../rostering/practice-schedule-rules'
+import { cancelPlannedAssignments } from '../rostering/roster-cancellation'
 import { type LeaveEffects } from './leave-effects'
 import { LeavePlaceService } from './leave-place'
 
@@ -134,49 +135,16 @@ export class RosterLeaveEffects implements LeaveEffects {
         request.period.end,
       )
     ).filter((assignment) => days.has(assignment.date))
-    const byRoster = new Map<string, typeof planned>()
-    for (const assignment of planned) {
-      byRoster.set(assignment.roster_id, [
-        ...(byRoster.get(assignment.roster_id) ?? []),
-        assignment,
-      ])
-    }
-    const items: { id: string; revision: number }[] = []
-    for (const [rosterId, assignments] of byRoster) {
-      const roster = await this.rosters.findOne(rosterId)
-      if (
-        !roster ||
-        roster.tenant_id !== request.tenant_id ||
-        roster.status === 'closed'
-      ) {
-        continue
-      }
-      let revision: number | null = null
-      if (roster.status === 'published') {
-        revision = roster.revision + 1
-        await this.rosters.update(
-          roster.id,
-          { revision },
-          { expectedVersion: roster.version },
-        )
-      } else if (
-        (roster.status === 'submitted' || roster.status === 'approved') &&
-        roster.validation !== null
-      ) {
-        await this.rosters.update(
-          roster.id,
-          { validation: null },
-          { expectedVersion: roster.version },
-        )
-      }
-      for (const assignment of assignments) {
-        items.push({ id: assignment.id, revision: revision ?? assignment.revision })
-      }
-    }
-    const cancelled = await this.rosterAssignments.cancelForLeave(
+    const cancelled = await cancelPlannedAssignments(
+      this.rosters,
       request.tenant_id,
-      items,
-      request.id,
+      planned,
+      (items) =>
+        this.rosterAssignments.cancelForLeave(
+          request.tenant_id,
+          items,
+          request.id,
+        ),
     )
     return cancelled.map((assignment) => assignment.id)
   }

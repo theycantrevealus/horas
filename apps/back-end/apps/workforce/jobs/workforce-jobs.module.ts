@@ -11,6 +11,12 @@ import { LeavePolicyRepositoryModule } from '@repository/mongo/leave-policy.modu
 import { OrganizationRepositoryModule } from '@repository/mongo/organization.module'
 import { OrganizationUnitRepositoryModule } from '@repository/mongo/organization-unit.module'
 import { PositionAssignmentRepositoryModule } from '@repository/mongo/position-assignment.module'
+import { CommitteeMembershipRepositoryModule } from '@repository/mongo/committee-membership.module'
+import { CredentialApplicationRepositoryModule } from '@repository/mongo/credential-application.module'
+import { LeaveRequestRepositoryModule } from '@repository/mongo/leave-request.module'
+import { PracticeScheduleExceptionRepositoryModule } from '@repository/mongo/practice-schedule-exception.module'
+import { PracticeScheduleRepositoryModule } from '@repository/mongo/practice-schedule.module'
+import { SeparationRepositoryModule } from '@repository/mongo/separation.module'
 import { PrivilegeGrantRepositoryModule } from '@repository/mongo/privilege-grant.module'
 import { ProfessionalLicenseRepositoryModule } from '@repository/mongo/professional-license.module'
 import { RosterAssignmentRepositoryModule } from '@repository/mongo/roster-assignment.module'
@@ -18,7 +24,11 @@ import { RosterRepositoryModule } from '@repository/mongo/roster.module'
 import { LoggerModule } from '@utility/logger/module'
 import { CodeConceptService } from '../concept/code-concept.service'
 import { EligibilityService } from '../eligibility/eligibility.service'
+import { LeaveBalanceService } from '../leave/leave-balance.service'
+import { LeavePlaceService } from '../leave/leave-place'
+import { LeavePolicyService } from '../leave/leave-policy.service'
 import { ParameterService } from '../parameter/parameter.service'
+import { SeparationCompletionService } from '../separation/separation-completion.service'
 import { AppointmentExpiryJob } from './appointment-expiry.job'
 import { CollectiveLeaveJob } from './collective-leave.job'
 import { EligibilitySweepJob } from './eligibility-sweep.job'
@@ -26,6 +36,7 @@ import { HR_JOBS, type HrJob } from './job'
 import { LeaveGrantJob } from './leave-grant.job'
 import { LeavePeriodJob } from './leave-period.job'
 import { LicenseExpiryJob } from './license-expiry.job'
+import { SeparationJob } from './separation.job'
 
 /**
  * The scheduled HR jobs (`.claude/design/plans/gateway-hr-7-worker-expiry-jobs.md`). It imports only
@@ -52,6 +63,12 @@ import { LicenseExpiryJob } from './license-expiry.job'
     LeaveLedgerRepositoryModule,
     HolidayCalendarRepositoryModule,
     PositionAssignmentRepositoryModule,
+    SeparationRepositoryModule,
+    PracticeScheduleRepositoryModule,
+    PracticeScheduleExceptionRepositoryModule,
+    LeaveRequestRepositoryModule,
+    CredentialApplicationRepositoryModule,
+    CommitteeMembershipRepositoryModule,
   ],
   providers: [
     LicenseExpiryJob,
@@ -63,6 +80,11 @@ import { LicenseExpiryJob } from './license-expiry.job'
     LeaveGrantJob,
     LeavePeriodJob,
     CollectiveLeaveJob,
+    LeavePolicyService,
+    LeavePlaceService,
+    LeaveBalanceService,
+    SeparationCompletionService,
+    SeparationJob,
     {
       provide: HR_JOBS,
       inject: [
@@ -72,6 +94,7 @@ import { LicenseExpiryJob } from './license-expiry.job'
         LeaveGrantJob,
         LeavePeriodJob,
         CollectiveLeaveJob,
+        SeparationJob,
       ],
       /**
        * Lists the jobs in the order a pass runs them.
@@ -82,6 +105,7 @@ import { LicenseExpiryJob } from './license-expiry.job'
        * @param leaveGrant - The leave grant job.
        * @param leavePeriod - The leave period job.
        * @param collectiveLeave - The collective leave job.
+       * @param separation - The separation job.
        * @returns The jobs.
        */
       useFactory: (
@@ -91,6 +115,7 @@ import { LicenseExpiryJob } from './license-expiry.job'
         leaveGrant: LeaveGrantJob,
         leavePeriod: LeavePeriodJob,
         collectiveLeave: CollectiveLeaveJob,
+        separation: SeparationJob,
       ): HrJob[] => [
         licenseExpiry,
         appointmentExpiry,
@@ -98,6 +123,7 @@ import { LicenseExpiryJob } from './license-expiry.job'
         leaveGrant,
         leavePeriod,
         collectiveLeave,
+        separation,
       ],
     },
   ],

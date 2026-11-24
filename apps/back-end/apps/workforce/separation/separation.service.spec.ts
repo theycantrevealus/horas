@@ -132,6 +132,7 @@ describe('SeparationService', () => {
       expect(await code({ type: { system: 'id.separation-type', code: 'nope' } })).toBe('unknown_code')
       expect(await code({ type: { system: 'id.separation-type', code: 'old' } })).toBe('code_retired')
       expect(await code({ lastWorkingDay: '2026-11-22' })).toBe('invalid_last_working_day')
+      expect(await code({ immediate: true, type: dismissal, lastWorkingDay: '2026-11-24' })).toBe('invalid_last_working_day')
       expect(await code({ lastWorkingDay: '2026-02-30' })).toBe('invalid_last_working_day')
       expect(await code({ noticeReceivedOn: '2027-01-01' })).toBe('invalid_notice_date')
       expect(await code({ reason: '  ' })).toBe('reason_required')

@@ -33,8 +33,10 @@ describe('separation rules', () => {
     expect(codeOf(() => checkLastWorkingDay('2019-12-31', '2026-11-23', true, '2020-01-01'))).toBe('invalid_last_working_day')
   })
 
-  it('lets an immediate separation name a past date', () => {
+  it('lets an immediate separation name today or a past date, and refuses a future one', () => {
     expect(codeOf(() => checkLastWorkingDay('2026-11-01', '2026-11-23', true, '2020-01-01'))).toBeNull()
+    expect(codeOf(() => checkLastWorkingDay('2026-11-23', '2026-11-23', true, '2020-01-01'))).toBeNull()
+    expect(codeOf(() => checkLastWorkingDay('2026-11-24', '2026-11-23', true, '2020-01-01'))).toBe('invalid_last_working_day')
   })
 
   it('accepts a missing notice date and one not after the last working day, and refuses the others', () => {

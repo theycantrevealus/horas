@@ -125,6 +125,43 @@ export class PracticeScheduleExceptionRepositoryMongo
   }
 
   /**
+   * Finds the exceptions of a doctor that move a session onto a date after a given one.
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The doctor.
+   * @param date - The last day that is kept.
+   * @returns The exceptions in force.
+   */
+  async findMovedAfterByEmployee(
+    tenantId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<PracticeScheduleException[]> {
+    const operation = 'PracticeScheduleExceptionRepository.findMovedAfterByEmployee'
+    if (!toObjectId(tenantId) || !toObjectId(employeeId)) {
+      return []
+    }
+    try {
+      const records = await this.model
+        .find(
+          this.toFilter({
+            tenant_id: tenantId,
+            employee_id: employeeId,
+            kind: 'moved',
+            'moved_to.date': { $gt: date },
+            deleted_at: null,
+          }),
+        )
+        .sort({ date: 1, _id: 1 })
+        .lean<LeanRecord<PracticeScheduleExceptionEntity>[]>()
+        .exec()
+      return records.map((record) => this.toModel(record))
+    } catch (error: unknown) {
+      throw translateMongoError(error, operation)
+    }
+  }
+
+  /**
    * Finds the exceptions in force on a date for some schedules.
    *
    * @param tenantId - Tenant to search in.

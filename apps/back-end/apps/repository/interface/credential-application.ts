@@ -54,4 +54,17 @@ export interface CredentialApplicationRepository extends Repository<CredentialAp
     tenantId: string,
     previousAppointmentId: string,
   ): Promise<CredentialApplication | null>
+
+  /**
+   * Finds the open applications of an applicant: not `approved`, `rejected` or `withdrawn` (what a
+   * separation withdraws).
+   *
+   * @param tenantId - Tenant to search in.
+   * @param employeeId - The applicant.
+   * @returns The applications, possibly none; empty for a malformed identifier.
+   */
+  findOpenByEmployee(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<CredentialApplication[]>
 }

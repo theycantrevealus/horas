@@ -154,4 +154,23 @@ export interface RosterAssignmentRepository extends Repository<RosterAssignment>
     employeeId: string,
     date: string,
   ): Promise<RosterAssignment[]>
+
+  /**
+   * Cancels assignments because a separation closes the days after the last working day:
+   * `status` `cancelled`, `cancellation` naming the separation, `change_reason` `separation`, and
+   * the roster revision each one carries. One change record per assignment, written sequentially
+   * inside the caller's transaction. A named write: it is not a read.
+   *
+   * @param tenantId - Tenant of the caller; an assignment of another tenant answers not found.
+   * @param items - The assignments and the revision each carries.
+   * @param separationId - The separation.
+   * @returns The cancelled assignments, in the order given.
+   * @throws RepositoryNotFoundError when an assignment is missing or of another tenant.
+   * @throws RepositoryError when the request context has no actor.
+   */
+  cancelForSeparation(
+    tenantId: string,
+    items: { id: string; revision: number }[],
+    separationId: string,
+  ): Promise<RosterAssignment[]>
 }
